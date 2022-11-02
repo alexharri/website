@@ -1,0 +1,154 @@
+---
+title: "Build your own schema language with TypeScript's infer keyword"
+alt_title_1: "TypeScript's infer let me create my own language compiled"
+alt_title_2: "Pushing the infer keyword to its limits"
+alt_title_3: "How I Abused Template Literal Types to create a Schema Language in TypeScript"
+description: "TODO"
+---
+
+A few years ago when I was learning Go, I learned about "Struct Tags".
+
+```go
+type Payload struct {
+    Email string `json:"email,omitempty"`
+}
+```
+
+Struct Tags allow you to attach "meta information" to fields. This can then be read by other parts of your program to modify its behavior.
+
+In other languages that do not have this feature, metadata can be attached to fields by wrapping the field in some type.
+
+```tsx
+interface FieldWithMetadata<T> {
+  field: T;
+  metadata: string;
+}
+```
+
+It's not as elegant, and requires boilerplate code.
+
+Schema builders need to solve this problem. To create useful schemas you will want to add constraints to fields, such as requiring that an input string is a valid email address. Using Yup, a JavaScript schema builder, you might write code like this:
+
+```tsx
+import { object, string } from "yup";
+
+const schema = object({
+  email: string().email(),
+});
+```
+
+This syntax is nice. However, there are some aspects of the syntax that are more verbose than I would like. To describe whether a field is required, we add.required().
+
+```tsx
+const schema = object({
+  email: string().email().required(),
+});
+```
+
+To specify a default value, we add `.default()`.
+
+```tsx
+const schema = object({
+  email: string().email().default("example.com"),
+});
+```
+
+To describe a list of values, we wrap the type in `array()`.
+
+```tsx
+const schema = object({
+  emails: array(string().email()).required(),
+});
+```
+
+This is all fine, but I would love to be able to use a more terse syntax to describe the schema. I want to describe the optionality of a field in the same way as TypeScript does for interfaces:
+
+```tsx
+const schema = object({
+  email: string().email(),
+});
+```
+
+Then, let's use the same syntax for default values as in JavaScript destructuring assignments:
+
+```ts
+const schema = object({
+  email: (string().email() = "example.com"),
+});
+```
+
+Then to top it off, let's add some custom syntax around constraints. I think `<>` looks nice:
+
+```tsx
+const schema = object({
+  email: (string<email> = "example.com"),
+});
+```
+
+I like this, but it won't compile. This is just not valid JavaScript (or TypeScript) syntax.
+
+But why should JavaScript limit what we can and cannot do? CSS-in-JS is a thing, and they use template literals to embed CSS in JavaScript.
+
+```tsx
+const Button = styled.button`
+  display: inline-block;
+  border-radius: 50%;
+`;
+```
+
+Well, we can do the same thing.
+
+```tsx
+const schema = schema(`{
+  email?: string <email> = "example.com";
+}`);
+```
+
+## Type information
+
+Right now, our schema builder's interface can be described like so.
+
+```tsx
+function schema<T extends string>(template: T): Schema<???>;
+```
+
+We need to fill in the blanks. We somehow want to take the string template T and convert that to the type that it represents.
+
+TypeScript has features that enable us to do that. Let's start off with the basics and build from there.
+
+### Conditional types
+
+Conditional types enable us to model conditional behavior using the extends keyword.
+
+```tsx
+type Test<T> = T extends "yes" ? 0 : 1;
+
+type T1 = Test<"yes">; // 0
+type T2 = Test<"no">; // 1
+```
+
+We can use that to find the primitive behind a given string:
+
+```tsx
+type ParsePrimitive<T> = T extends "string"
+  ? string
+  : T extends "number"
+  ? number
+  : T extends "boolean"
+  ? boolean
+  : never;
+
+type T1 = ParsePrimitive<"boolean">; // boolean
+```
+
+### Type inference
+
+That `ParsePrimitive` example above is useful, but it's insufficient to tackle a more complex string such as `{value:number}`.
+
+Type inference allows us to match a pattern:
+
+```tsx
+type ParseKeyValue<T> = T extends `{${infer K extends string}:${infer V}}`
+  ? { [key in K]: V }
+  : never;
+```
