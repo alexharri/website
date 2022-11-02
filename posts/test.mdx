@@ -1,0 +1,26 @@
+---
+title: Hello, world
+description: This is my fantastic post.
+---
+
+Here is a code sample:
+
+```tsx
+interface FieldWithMetadata<T> {
+  field: T;
+  metadata: string;
+}
+
+function doThing(a: string, b: number): string | number {
+  if (a === "str") throw new Error("'a' should not be 'str'");
+  b = 50.5;
+}
+```
+
+Here is another code sample:
+
+```tsx
+const Component: React.FC<Props> = (props) => {
+  return <div>Hello, {props.name}</div>;
+};
+```
