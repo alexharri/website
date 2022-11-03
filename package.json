@@ -5,13 +5,14 @@
   "scripts": {
     "dev": "next dev -p 8080",
     "build": "next build",
-    "start": "next start",
+    "start": "next start -p 8080",
     "lint": "next lint"
   },
   "dependencies": {
     "@types/node": "18.11.9",
     "@types/react": "18.0.24",
     "@types/react-dom": "18.0.8",
+    "emotion": "^11.0.0",
     "gray-matter": "^4.0.3",
     "next": "13.0.1",
     "next-mdx-remote": "^4.1.0",
