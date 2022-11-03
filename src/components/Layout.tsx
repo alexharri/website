@@ -1,5 +1,5 @@
 import React from "react";
-import { toggleColorMode } from "../utils/colorMode";
+import { ToggleDarkMode } from "./ToggleDarkMode/ToggleDarkMode";
 
 interface Props {
   children: React.ReactNode;
@@ -8,7 +8,7 @@ interface Props {
 export const Layout = (props: Props) => {
   return (
     <div style={{ padding: 64 }}>
-      <button onClick={toggleColorMode}>Toggle color mode</button>
+      <ToggleDarkMode />
       {props.children}
     </div>
   );
