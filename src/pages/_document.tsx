@@ -1,26 +1,12 @@
-import Document, {
-  Html,
-  Head,
-  Main,
-  NextScript,
-  DocumentContext,
-} from "next/document";
-import fs from "fs";
-import { initColorsScript } from "../utils/initColors";
+import Document, { Html, Head, Main, NextScript } from "next/document";
+import { initColorsScript, defaultColorsStyles } from "../utils/initColors";
 
 class MyDocument extends Document {
-  static async getInitialProps(ctx: DocumentContext) {
-    const originalRenderPage = ctx.renderPage;
-
-    // Run the parent `getInitialProps`, it now includes the custom `renderPage`
-    const initialProps = await Document.getInitialProps(ctx);
-
-    return initialProps;
-  }
-
   render() {
     return (
       <Html>
+        {/* The style tag provides default colors to browser that do not support JS */}
+        <style dangerouslySetInnerHTML={{ __html: defaultColorsStyles }} />
         <script dangerouslySetInnerHTML={{ __html: initColorsScript }} />
         <Head />
         <body>
