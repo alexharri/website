@@ -19,7 +19,7 @@ export const StaticCodeBlock = (props: Props) => {
       theme={prismTheme}
     >
       {({ className, style, tokens, getLineProps, getTokenProps }) => (
-        <pre className={className} style={style}>
+        <div className={className} style={style}>
           {tokens.map((line, i) => (
             <div {...getLineProps({ line, key: i })}>
               {line.map((token, key) => (
@@ -27,7 +27,7 @@ export const StaticCodeBlock = (props: Props) => {
               ))}
             </div>
           ))}
-        </pre>
+        </div>
       )}
     </Highlight>
   );

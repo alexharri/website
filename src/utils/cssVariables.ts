@@ -16,7 +16,7 @@ export const colorValues: Record<
   light: {
     text: "#141d2c",
     blue: "#399ef4",
-    background: "#f3f3f3",
+    background: "#f9f9f9",
   },
 };
 

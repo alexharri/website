@@ -7,7 +7,7 @@ const green = "#4eb071";
 const offWhite = "#9fcff9";
 const cyan = "#21c5c7";
 const darkGray = "#676f83";
-const black = "#080d14";
+const black = "#17222F";
 
 export const prismTheme: PrismTheme = {
   plain: {

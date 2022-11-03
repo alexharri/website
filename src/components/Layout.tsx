@@ -1,5 +1,6 @@
 import React from "react";
 import { ToggleDarkMode } from "./ToggleDarkMode/ToggleDarkMode";
+import styles from "./Layout.module.scss";
 
 interface Props {
   children: React.ReactNode;
@@ -7,9 +8,11 @@ interface Props {
 
 export const Layout = (props: Props) => {
   return (
-    <div style={{ padding: 64 }}>
-      <ToggleDarkMode />
-      {props.children}
-    </div>
+    <>
+      <div className={styles.header}>
+        <ToggleDarkMode />
+      </div>
+      <div className={styles.content}>{props.children}</div>
+    </>
   );
 };
