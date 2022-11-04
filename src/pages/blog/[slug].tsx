@@ -6,9 +6,11 @@ import { serialize } from "next-mdx-remote/serialize";
 import Head from "next/head";
 import Link from "next/link";
 import path from "path";
+import { useEffect, useRef, useState } from "react";
 import { Layout } from "../../components/Layout";
 import { StaticCodeBlock } from "../../components/StaticCodeBlock/StaticCodeBlock";
 import { FrontMatter } from "../../types/FrontMatter";
+import { usePostWatcher } from "../../utils/hooks/usePostWatcher";
 import { postFilePaths, POSTS_PATH } from "../../utils/mdxUtils";
 
 // Custom components/renderers to pass to MDX.
@@ -24,9 +26,12 @@ const components = {
 
 interface Props {
   source: MDXRemoteSerializeResult;
+  version: string;
+  slug: string;
 }
 
-export default function PostPage({ source }: Props) {
+export default function PostPage(props: Props) {
+  const source = usePostWatcher(props);
   const scope = source.scope! as unknown as FrontMatter;
 
   return (
@@ -76,7 +81,15 @@ export const getStaticProps: GetStaticProps<Props, Params> = async (ctx) => {
     },
   });
 
-  return { props: { source } };
+  let version = "0";
+
+  const versionFilePath = path.resolve(POSTS_PATH, "./.version", params.slug);
+
+  if (fs.existsSync(versionFilePath)) {
+    version = fs.readFileSync(versionFilePath, "utf-8");
+  }
+
+  return { props: { source, slug: params.slug, version } };
 };
 
 export const getStaticPaths: GetStaticPaths<Params> = async () => {

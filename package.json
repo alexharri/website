@@ -6,7 +6,8 @@
     "dev": "next dev -p 8080",
     "build": "next build",
     "start": "next start -p 8080",
-    "lint": "next lint"
+    "lint": "next lint",
+    "watcher": "ts-node -T -O '{\"module\":\"commonjs\"}' ./watcher/postWatcher.ts"
   },
   "dependencies": {
     "@types/node": "18.11.9",
@@ -20,5 +21,8 @@
     "react-dom": "18.2.0",
     "sass": "^1.55.0",
     "typescript": "4.8.4"
+  },
+  "devDependencies": {
+    "ts-node": "^10.9.1"
   }
 }
