@@ -9,7 +9,7 @@ export const colorValues: Record<
   Record<ColorName, string>
 > = {
   dark: {
-    text: "#9fcff9",
+    text: "#B9DBFA",
     blue: "#399ef4",
     background: "#090D13",
   },

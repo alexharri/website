@@ -62,15 +62,25 @@ h6 {
   margin: 24px 0 8px;
 }
 
-h1 + p, h2 + p, h3 + p, h4 + p, h5 + p, h6 + p {
-  margin-top: 8px;
+.prism-code, pre, code {
+  font-family: 'League Mono', monospace;
+  font-weight: 400;
+}
+
+code {
+  color: var(--color-blue);
+  font-size: 0.925em;
+  line-height: 1;
+  background: #212e3f;
+  border-radius: 4px;
+  display: inline-block;
+  padding: 0.3em 0.4em 0.35em;
+  
 }
 
 .prism-code {
-  font-family: 'League Mono', monospace;
   font-size: 16px;
   line-height: 1.5;
-  font-weight: 400;
   padding: 24px;
   padding-bottom: 0;
   border-radius: 4px;
