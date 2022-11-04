@@ -12,7 +12,7 @@ const black = "#17222F";
 export const prismTheme: PrismTheme = {
   plain: {
     color: offWhite,
-    backgroundColor: black,
+    // backgroundColor: black,
   },
   styles: [
     {

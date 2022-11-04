@@ -6,7 +6,6 @@ import { serialize } from "next-mdx-remote/serialize";
 import Head from "next/head";
 import Link from "next/link";
 import path from "path";
-import { Code } from "../../components/Code";
 import { Layout } from "../../components/Layout";
 import { StaticCodeBlock } from "../../components/StaticCodeBlock/StaticCodeBlock";
 import { FrontMatter } from "../../types/FrontMatter";
@@ -18,7 +17,7 @@ import { postFilePaths, POSTS_PATH } from "../../utils/mdxUtils";
 // here.
 const components = {
   a: Link,
-  code: Code,
+  pre: StaticCodeBlock,
   // ExampleComponent: dynamic(() => import("../../src/components/ExampleComponent")),
   Head,
 };
