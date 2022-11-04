@@ -6,6 +6,10 @@
   src: url(/fonts/league-mono/LeagueMono-Regular.woff2) format('woff2');
 }
 
+:root {
+  color-scheme: var(--color-scheme);
+}
+
 * {
   box-sizing: border-box;
 }
@@ -62,7 +66,7 @@ h6 {
   margin: 24px 0 8px;
 }
 
-.prism-code, pre, code {
+ pre, code {
   font-family: 'League Mono', monospace;
   font-weight: 400;
 }
@@ -75,17 +79,23 @@ code {
   border-radius: 4px;
   display: inline-block;
   padding: 0.3em 0.4em 0.35em;
-  
+}
+
+pre {
+  font-size: 16px;
+  line-height: 1.5;
+  margin: 32px 0;
+  min-width: 100%;
+  display: flex;
+  overflow-x: auto;
+  border-radius: 4px;
 }
 
 .prism-code {
-  font-size: 16px;
-  line-height: 1.5;
   padding: 24px;
   padding-bottom: 0;
   border-radius: 4px;
   border: 1px solid #273746;
-  margin: 32px 0;
 }
 
 a {
