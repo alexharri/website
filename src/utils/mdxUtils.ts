@@ -6,7 +6,7 @@ export const POSTS_PATH = path.resolve(process.cwd(), "./posts");
 export const postFilePaths = fs.readdirSync(POSTS_PATH);
 
 for (const path of postFilePaths) {
-  if (!/\.mdx$/.test(path)) {
-    throw new Error(`Unexpected '.mdx' extension for file '${path}'`);
+  if (!/\.mdx?$/.test(path)) {
+    throw new Error(`Expected '.mdx' or '.md' extension for file '${path}'`);
   }
 }

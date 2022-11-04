@@ -60,7 +60,10 @@ type Params = {
 export const getStaticProps: GetStaticProps<Props, Params> = async (ctx) => {
   const params = ctx.params!;
 
-  const filePath = path.join(POSTS_PATH, `${params.slug}.mdx`);
+  let filePath = path.join(POSTS_PATH, `${params.slug}.mdx`);
+  if (!fs.existsSync(filePath)) {
+    filePath = path.join(POSTS_PATH, `${params.slug}.md`);
+  }
   const fileContent = fs.readFileSync(filePath);
 
   const { content, data } = matter(fileContent);

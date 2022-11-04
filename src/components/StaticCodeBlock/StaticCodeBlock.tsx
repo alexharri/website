@@ -28,14 +28,14 @@ interface PreProps {
 }
 
 interface CodeProps {
-  className: string;
+  className?: string;
   children: string;
 }
 
 export const StaticCodeBlock = (props: PreProps) => {
   const { className, children } = props.children.props;
 
-  const language = className.split("-")[1] as "tsx" | "go";
+  const language = className?.split("-")[1] as "tsx" | "go";
 
   return (
     <div className={styles.wrapper}>
