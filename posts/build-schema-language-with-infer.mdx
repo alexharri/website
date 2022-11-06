@@ -134,7 +134,7 @@ We need to fill in the blanks. We somehow want to take the string template `T` a
 TypeScript has features that enable us to do that. Let's start off with the basics and build from there.
 
 
-### Conditional types
+### Parsing primitives
 
 The `extends` keyword enables conditional types in TypeScript.
 
@@ -162,9 +162,9 @@ ParsePrimitive<"boolean">; // boolean
 The repetitive `? : ? :` is somewhat unwieldy and hard to read, but it allows us to create a chain of conditionals.
 
 
-### The `infer` keyword
+### Parsing objects
 
-The `ParsePrimitive` type is useful, but it's insufficient to tackle a more complex string such as `{value:number}`. We can't create an infinite number of cases to match every possible key-value combination.
+The `ParsePrimitive` type is useful, but it's insufficient to tackle a more complex string such as `"{value:number}"`. We can't create an infinite number of cases to match every possible key-value combination.
 
 To convert an object string `T` into a real type we need to
 
@@ -173,29 +173,35 @@ To convert an object string `T` into a real type we need to
  3. extract the value from `T`,
  4. create an object using the key-value pair
 
-TypeScript supports pattern matching for types. We can test whether `T` matches this object pattern using [Template Literal Types](https://www.typescriptlang.org/docs/handbook/2/template-literal-types.html).
+We can test whether a string `T` matches the key-value object pattern using [Template Literal Types](https://www.typescriptlang.org/docs/handbook/2/template-literal-types.html).
 
 ```tsx
-T extends `{${string}:${string}}`
+type IsObjectString<T> = T extends `{${string}:${string}}`
+  ? true
+  : false;
 ```
 
-With this we can create a conditional type that takes a potential object string `T` as input and returns some type when `T` matches the object pattern:
+This alone is not very useful. If we want to transform the string `T` into the actual object type it represents, we need to extract information about the key and value from `T`.
 
 ```tsx
 type ParseObject<T> = T extends `{${string}:${string}}`
-  ? some type
+  ? something // We need to extract information from 'T'
   : never;
 ```
-
-But what do we return when `T` matches the object string pattern? We need access to the key and the value to be able to do anything useful.
 
 The `infer` keyword allows us to create variables during pattern matching.
 
 ```tsx
 type ParseObject<T> = T extends `{${infer K}:${infer V}}`
-  ? // We have access to 'K' and 'V' here
-  : never;
+  ?
+    // We have access to 'K' and 'V' here
+    something
+  :
+    // 'K' and 'V' are not accessible here
+    never;
 ```
+
+The variables `K` and `V` variables are **only** created if `T` matches the pattern.
 
 With access to `K` and `V`, we can create an object type.
 
@@ -207,11 +213,10 @@ type ParseObject<T> = T extends `{${infer K}:${infer V}}`
 ParseObject<`{value:number}`>; // { value: number }
 ```
 
-This, on at least a basic level, demonstrates that we can convert strings to real types.
 
 ## Objects with multiple properties
 
-The first hurdle we encounter are objects with multiple properties.
+The first big hurdle we encounter are objects with multiple properties.
 
 ```tsx
 ParseObject<`{a:string;b:number}`>; // { a: never }
@@ -288,7 +293,9 @@ Equals<
 >;
 ```
 
-This is our first example of a recursive type. We're going to be using recursive types __a lot__ so make sure that you have a strong grasp of what is happening here.
+This is our first example of recursive types.
+
+We're going to be using recursive types __a lot__ so take a moment to deeply understand what is going on. Things will only get more complex from here.
 
 
 ### Parsing and merging the list of properties
@@ -329,31 +336,40 @@ Equals<
 >;
 ```
 
-It may seem overkill to create multiple types to do this. We could have split and parsed the input string in one pass.
+We're using recursive types again. Let's break this down a bit.
+
+`T extends [infer R, ...infer Rest]` will only match if `T` is an array with **at least** one element.
+
+On a successful match, a variable `R` will be created that contains the first element in the array. The rest of the elements will be placed into an array `Rest`.
+
+The `...` in `...Rest` indicates that we want the rest of the elements, from zero to infinity.
 
 ```tsx
-type ParsePropertyString<T extends string> =
-  T extends `${infer R};${infer Rest}`
-    ? ParseProperty<R> & ParsePropertyString<Rest>
-    : ParseProperty<T>;
+type Example<T> = T extends [infer R, ...infer Rest]
+  ? { R: R, Rest: Rest }
+  : never;
 
-type T1 = Equals<
-  ParsePropertyString<`a:string;b:number;c:boolean`>,
-  { a: string } & { b: number } & { c: boolean }
->;
+Example<[1, 2, 3]> // { R: 1, Rest: [2, 3] }
+Example<[2, 3]>    // { R: 2, Rest: [3] }
+Example<[3]>       // { R: 3, Rest: [] }
+Example<[]>        // never -- there are no elements for 'R' to match
 ```
 
-But shortening the code by merging responsibilities will lead to problem down the line when we start to deal with edge cases. I also believe that the code becomes much more readable and understandable with multiple types:
+Let's break down the `MergeArrayOfObjects` in the same way:
 
 ```tsx
-type T1 = MergeArrayOfObjects<ParseProperties<SplitProperties<T>>>;
+// Shortened to 'Merge' for brevity
+type Merge<T> = T extends [infer R, ...infer Rest]
+  ? R & Merge<Rest>
+  : {};
 
-// vs
-
-type T2 = ParsePropertyString<T>;
+Merge<[{ a: 1 }, { b: 2 }, { c: 3 }]> // { a: 1 } & Merge<[{ b: 2 }, { c: 3 }]>
+Merge<[{ b: 2 }, { c: 3 }]>           // { b: 2 } & Merge<[{ c: 3 }]>
+Merge<[{ c: 3 }]>                     // { c: 3 } & Merge<[]>
+Merge<[]>                             // {}
 ```
 
-`T2` may be more terse, but its behavior feels much more opaque than `T1`.
+We keep recursing until we reach a base case. For `SplitProperties`, the base case was a string `T` without a `;`. For `MergeArrayOfObjects`, the base case is an empty array.
 
 
 ## Object properties
@@ -397,7 +413,7 @@ Equal<
 >;
 ```
 
-The pattern matching in `${infer A};${infer B}` is greedy, so it matches the first instance of `;` that it encounters. This splits object properties with multiple sub-properties.
+The pattern matching in `${infer A};${infer B}` is greedy so it matches the first instance of `;` that it encounters. This splits object properties with multiple sub-properties.
 
 We could try to amend this by splitting by objects before splitting by `;`.
 
