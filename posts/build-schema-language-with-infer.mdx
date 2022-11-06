@@ -772,3 +772,18 @@ We can apply this by wrapping the input string to the top-level parsing type wit
 ```tsx
 type Parse<T extends string> = ParseObject<RemoveWhitespace<T>>;
 ```
+
+
+## Take this further!
+
+There is still lots left to design and implement:
+
+ * Hash maps
+ * Rules (such as `<email>`)
+ * Default values
+ * More custom data types
+ * Syntax error handling (how do you show syntax errors to users?)
+ * Add tests for the types
+ * An actual runtime schema template parser and data validator
+
+Feel free to take a look at the source code and take a stab at implementing some of the above
