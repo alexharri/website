@@ -65,7 +65,7 @@ This is all fine, but I would love to be able to use a more terse syntax to desc
 
 ```tsx
 const schema = object({
-  email: string().email(),
+  email?: string().email(),
 });
 ```
 
@@ -73,7 +73,7 @@ Then, let's use the same syntax for default values as in JavaScript destructurin
 
 ```tsx
 const schema = object({
-  email: string().email() = "example.com",
+  email?: string().email() = "example.com",
 });
 ```
 
@@ -81,7 +81,15 @@ Then to top it off, let's add some custom syntax around constraints. I think `<>
 
 ```tsx
 const schema = object({
-  email: string<email> = "example.com",
+  email?: string <email> = "example.com",
+});
+```
+
+And if we were to accept a list of values, then I would like to be able to use a `[]` syntax like so:
+
+```tsx
+const schema = object({
+  contacts: string[] <email>,
 });
 ```
 
@@ -119,16 +127,16 @@ TypeScript has features that enable us to do that. Let's start off with the basi
 
 ### Conditional types
 
-Conditional types enable us to model conditional behavior using the extends keyword.
+The `extends` keyword enables conditional types in TypeScript.
 
 ```tsx
 type Test<T> = T extends "yes" ? 0 : 1;
 
-type T1 = Test<"yes">; // 0
-type T2 = Test<"no">; // 1
+Test<"yes">; // 0
+Test<"no">; // 1
 ```
 
-We can use that to find the primitive behind a given string:
+We can use that to get the primitive represented by an input string:
 
 ```tsx
 type ParsePrimitive<T> = T extends "string"
@@ -139,10 +147,10 @@ type ParsePrimitive<T> = T extends "string"
   ? boolean
   : never;
 
-type T1 = ParsePrimitive<"boolean">; // boolean
+ParsePrimitive<"boolean">; // boolean
 ```
 
-The repetitive `? : ? :` is unwieldy and unreadble, but it allows us to create a chain of conditionals.
+The repetitive `? : ? :` is somewhat unwieldy and hard to read, but it allows us to create a chain of conditionals.
 
 
 ### The `infer` keyword
@@ -151,33 +159,26 @@ The `ParsePrimitive` type is useful, but it's insufficient to tackle a more comp
 
 To convert an object string `T` into a real type we need to
 
- 1. parse that the `T` represents an object,
- 2. extract a key from the `T`,
- 3. extract the value from the `T`,
- 4. parse the value,
- 5. create an object with with
+ 1. parse that `T` represents an object,
+ 2. extract the key from `T`,
+ 3. extract the value from `T`,
+ 4. create an object using the key-value pair
 
-TypeScript enables pattern matching for types. The pattern we want to match is:
-
-```
-{Key:Value}
-```
-
-We can test whether `T` matches this object pattern using [Template Literal Types](https://www.typescriptlang.org/docs/handbook/2/template-literal-types.html).
+TypeScript supports pattern matching for types. We can test whether `T` matches this object pattern using [Template Literal Types](https://www.typescriptlang.org/docs/handbook/2/template-literal-types.html).
 
 ```tsx
 T extends `{${string}:${string}}`
 ```
 
-With this we can create a conditional type that takes a potential object string `T` as input and returns some type when matches the object pattern:
+With this we can create a conditional type that takes a potential object string `T` as input and returns some type when `T` matches the object pattern:
 
 ```tsx
 type ParseObject<T> = T extends `{${string}:${string}}`
-  ? // What do we do here?
+  ? some type
   : never;
 ```
 
-We can know whether `T` is an object string, but we need access to the key and the value to be able to do anything useful when we match the object pattern.
+But what do we return when `T` matches the object string pattern? We need access to the key and the value to be able to do anything useful.
 
 The `infer` keyword allows us to create variables during pattern matching.
 
@@ -187,30 +188,31 @@ type ParseObject<T> = T extends `{${infer K}:${infer V}}`
   : never;
 ```
 
-We now have access to `K` and `V` when the pattern is matched. We can use them to create an object type.
+With access to `K` and `V`, we can create an object type.
 
 ```tsx
 type ParseObject<T> = T extends `{${infer K}:${infer V}}`
   ? { [key in K]: ParsePrimitive<V> }
   : never;
 
-type T1 = ParseObject<`{value:number}`>; // { value: number }
+ParseObject<`{value:number}`>; // { value: number }
 ```
 
 This, on at least a basic level, demonstrates that we can convert strings to real types.
 
 ## Objects with multiple properties
 
-The first hurdle we encounter is objects with multiple properties.
+The first hurdle we encounter are objects with multiple properties.
 
 ```tsx
-type T1 = ParseObject<`{a:string;b:number}`>; // never
+ParseObject<`{a:string;b:number}`>; // { a: never }
 ```
 
 A naive approach would be match create multiple conditionals for each number of properties:
 
 ```tsx
-type ParseObject<T> = T extends `{${infer K0}:${infer V0}}`
+type ParseObject<T> =
+  T extends `{${infer K0}:${infer V0}}`
   ? { [key in K0]: ParsePrimitive<V0> }
   : T extends `{${infer K0}:${infer V0};${infer K1}:${infer V1}}`
   ? { [key in K0]: ParsePrimitive<V0> } & { [key in K1]: ParsePrimitive<V1> }
@@ -219,9 +221,9 @@ type ParseObject<T> = T extends `{${infer K0}:${infer V0}}`
   : never;
 ```
 
-But this is obviously terrible and does not scale. We can instead, divide and conquer.
+This is obviously terrible and does not scale. We can divide and conquer instead.
 
-Given that we have the content of an object string `T` that contains N properties, we can split the content of `T` into N many properties and then parse each one individually.
+Given that we have the content of an object string `T` that contains N properties, we can split the content of `T` into N many strings that contain one property. We can then parse each property string individually.
 
 ```tsx
 type ParseObject<T> = T extends `{${infer Content}}`
@@ -247,16 +249,22 @@ We want the output of `SplitProperties<T>` to be:
 
 We can somewhat trivially create a type that splits the string by `;`.
 
-```tsx
-type SplitProperties<T> = T extends `${infer A};${infer B}`
+<StaticCodeBlock language="tsx" marginBottom={16}>
+  {`\
+type SplitProperties<T> = T extends \`\${infer A};\${infer B}\`
   ? [A, B]
   : [T];
 
-type T1 = Equal<
-  SplitProperties<`a:string;b:number;c:boolean`>,
+Equals<
+  SplitProperties<\`a:string;b:number;c:boolean\`>,
   ["a:string", "b:number;c:boolean"],
 >;
-```
+`}
+</StaticCodeBlock>
+
+<SmallNote>`Equals` as used above asserts that the two arguments are equal.</SmallNote>
+
+But this only splits at the first instance of `;`.
 
 We can recursively split the latter part of the string until we reach the base case of a string that contains no `;`.
 
@@ -265,7 +273,7 @@ type SplitProperties<T> = T extends `${infer A};${infer B}`
   ? [A, ...SplitProperties<B>]
   : [T];
 
-type T1 = Equal<
+Equals<
   SplitProperties<`a:string;b:number;c:boolean`>,
   ["a:string", "b:number", "c:boolean"],
 >;
@@ -276,7 +284,7 @@ This is our first example of a recursive type. We're going to be using recursive
 
 ### Parsing and merging the list of properties
 
-Once we have the array of strings, we need to parse each element in `SplitProperties<T>` as a property.
+Once we have the array (technically, tuple) of strings, we need to parse each element emitted by `SplitProperties<T>`.
 
 ```tsx
 type ParseProperties<T extends string[]> = {
@@ -293,7 +301,7 @@ We'll implement `ParseProperty` later. For now we'll assume that `ParseProperty<
 So for our example string, we have an output of:
 
 ```tsx
-type T1 = Equals<
+Equals<
   ParseProperties<SplitProperties<`a:string;b:number;c:boolean`>>,
   [{ a: string }, { b: number }, { c: boolean }],
 >;
@@ -306,7 +314,7 @@ type MergeArrayOfObjects<T> = T extends [infer R, ...infer Rest]
   ? R & MergeArrayOfObjects<Rest>
   : {};
 
-type T1 = Equals<
+Equals<
   MergeArrayOfObjects<[{ a: string }, { b: number }, { c: boolean }]>,
   { a: string } & { b: number } & { c: boolean },
 >;
@@ -315,10 +323,10 @@ type T1 = Equals<
 It may seem overkill to create multiple types to do this. We could have split and parsed the input string in one pass.
 
 ```tsx
-
-type ParsePropertyString<T extends string> = T extends `${infer R};${infer Rest}`
-  ? ParseProperty<R> & ParsePropertyString<Rest>
-  : ParseProperty<T>;
+type ParsePropertyString<T extends string> =
+  T extends `${infer R};${infer Rest}`
+    ? ParseProperty<R> & ParsePropertyString<Rest>
+    : ParseProperty<T>;
 
 type T1 = Equals<
   ParsePropertyString<`a:string;b:number;c:boolean`>,
@@ -330,10 +338,13 @@ But shortening the code by merging responsibilities will lead to problem down th
 
 ```tsx
 type T1 = MergeArrayOfObjects<ParseProperties<SplitProperties<T>>>;
+
+// vs
+
 type T2 = ParsePropertyString<T>;
 ```
 
-`T1` may be more verbose, but its behavior feels significantly more transparent than `T2`.
+`T2` may be more terse, but its behavior feels much more opaque than `T1`.
 
 
 ## Object properties
@@ -371,7 +382,7 @@ type SplitProperties<T> = T extends `${infer A};${infer B}`
   ? [A, ...SplitProperties<B>]
   : [T];
 
-type T1 = Equal<
+Equal<
   SplitProperties<`a:{b:string;c:number};d:boolean`>,
   ["a:{b:string", "c:number}", "d:boolean"],
 >;
@@ -379,7 +390,7 @@ type T1 = Equal<
 
 The pattern matching in `${infer A};${infer B}` is greedy, so it matches the first instance of `;` that it encounters. This splits object properties with multiple sub-properties.
 
-We could try to split by objects before splitting by `;`.
+We could try to amend this by splitting by objects before splitting by `;`.
 
 ```tsx
 type SplitProperties<T> =
@@ -389,7 +400,7 @@ type SplitProperties<T> =
   ? [A, ...SplitProperties<B>]
   : [T];
 
-type T1 = Equals<
+Equals<
   SplitProperties<`a:{b:string;c:number};d:boolean`>,
   ["a:{b:string;c:number}", "d:boolean"],
 >;
@@ -398,7 +409,7 @@ type T1 = Equals<
 And, well, this seems to produce the correct result. However, this is easily broken by introducing one more level of nesting.
 
 ```tsx
-type T1 = Equals<
+Equals<
   SplitProperties<`a:{b:{c:string};d:number};e:boolean`>,
   ["a:{b:{c:string}", "d:number}", "e:boolean"],
 >;
@@ -428,15 +439,15 @@ We need a more robust way to deal with object properties.
 
 The solutions we've used to split the list of properties all have the same problem. They split up object properties.
 
-If we take a look at an incorrectly split up property, such as `a:{b:string` or `a:{b:{c:string}`, we can observe that the number of `{` and number of `}` are unequal. In a well formed property, the number of `{` and `}` would always be equal.
+If we take a look at an incorrectly split up property, such as `a:{b:string` or `a:{b:{c:string}`, we can observe that the number of `{` and number of `}` are unequal. In a well formed object property, the number of `{` and `}` would always be equal.
 
 This observation leads to a different solution. Instead of preventing object properties from being split in the first place, we can fix them after the fact by balancing brackets.
 
-Balancing brackets can be done with a relatively simple loop, starting at the first element
+Balancing brackets can be done with a relatively simple loop, starting at the first element.
 
-  1. If the number of `{` and the number of `}` in the current item are not equal, then the string is unbalanced.
-  2. If the string is unbalanced, merge the current item with the next item and repeat step 1 again.
-  3. If the string is balanced, move to the next item.
+  1. If the number of `{` and the number of `}` in the current element are not equal, then the string is unbalanced.
+  2. If the string is unbalanced, merge the current element with the next element and repeat step 1 again.
+  3. If the string is balanced, move to the next element.
 
 In JavaScript, this algorithm looks like so.
 
@@ -460,10 +471,10 @@ function balanceBrackets(originalItems: string[]) {
 }
 ```
 
-We can reduce a tuple (array) of types into a single type using `infer` in recursive types. We observed this when implementing `MergeArrayOfObjects`.
+We can reduce an array of types into a single type using `infer` and recursive types. We observed this when implementing `MergeArrayOfObjects`.
 
 ```tsx
-type MergeArrayOfObjects<T extends unknown[]> = T extends [infer R, ...infer Rest]
+type MergeArrayOfObjects<T> = T extends [infer R, ...infer Rest]
   ? R & MergeArrayOfObjects<Rest>
   : {};
 ```
@@ -480,8 +491,8 @@ type BalanceBrackets<T extends string[]> =
     ? AreBracketsBalanced<Curr> extends true
       ? // Process next item
         [Curr, ...BalanceBrackets<[Next, ...Rest]>]
-      : // Merge the next item with the current item and recursively
-        // process the merged item
+      : // Merge the next item with the current item
+        // and recursively process the merged item
         BalanceBrackets<[`${Curr};${Next}`, ...Rest]>
     : T;
 ```
@@ -497,13 +508,13 @@ To be able to check if a string contains an equal number of `{` and `}`, we firs
 We can access the number of elements in a tuple by reading its `length` property:
 
 ```tsx
-type T1 = [string, string, string]["length"]; // 3
+[string, string, string]["length"]; // 3
 ```
 
 However, TypeScript just returns `number` for the length of string constants.
 
 ```tsx
-type T1 = "abc"["length"]; // number
+"abc"["length"]; // number
 ```
 
 So what this problem boils down to is:
@@ -512,36 +523,38 @@ So what this problem boils down to is:
  2. filtering the tuple to only contain the character we're counting
  3. reading the `length` of the tuple
 
-We can convert a string into a tuple by recursively inferring one character at a time.
+We can convert a string into a tuple by inferring one character at a time.
 
 ```tsx
-type StringToTuple<T extends string> = T extends `${infer Char}${infer Rest}`
-  ? [Char, ...StringToTuple<Rest>]
-  : [];
+type StringToTuple<T extends string> =
+  T extends `${infer Char}${infer Rest}`
+    ? [Char, ...StringToTuple<Rest>]
+    : [];
 
-type T1 = StringToTuple<"abc">; // ["a", "b", "c"]
+StringToTuple<"abc">; // ["a", "b", "c"]
 ```
 
-We can filter a tuple using more recursive inference.
+We can filter a tuple with some more recursive inference.
 
 ```tsx
-type FilterTuple<T extends any[], U> = T extends [infer Item, ...infer Rest]
-  ? Item extends U
-    ? [Item, ...FilterTuple<Rest, U>]
-    : FilterTuple<Rest, U>
-  : []
+type FilterTuple<T extends any[], U> =
+  T extends [infer Item, ...infer Rest]
+    ? Item extends U
+      ? [Item, ...FilterTuple<Rest, U>]
+      : FilterTuple<Rest, U>
+    : [];
 
-type T1 = FilterTuple<[3, 2, 3, 3, 4, 5], 3>; // [3, 3, 3]
+FilterTuple<[3, 2, 3, 3, 4, 5], 3>; // [3, 3, 3]
 ```
 
-With this, we can count the instances of a character in a string.
+Combining these, we can count the instances of a character in a string.
 
 ```tsx
 type InstancesInString<T extends string, Char> =
   FilterTuple<StringToTuple<T>, Char>["length"];
 
-type T1 = InstancesInString<`a:{b:{c:string}`, "{">; //=> 2
-type T2 = InstancesInString<`a:{b:{c:string}`, "}">; //=> 1
+InstancesInString<`a:{b:{c:string}`, "{">; // 2
+InstancesInString<`a:{b:{c:string}`, "}">; // 1
 ```
 
 With that, we can create a type that checks whether the brackets are balanced.
@@ -552,8 +565,8 @@ type AreBracketsBalanced<T extends string> =
     ? true
     : false;
 
-type T1 = AreBracketsBalanced<`a:{b:{c:string}`>; // false
-type T2 = AreBracketsBalanced<`a:{b:{c:string}}`>; // true
+AreBracketsBalanced<`a:{b:{c:string}`>; // false
+AreBracketsBalanced<`a:{b:{c:string}}`>; // true
 ```
 
 Putting all of this together, we can now split properties correctly:
@@ -564,42 +577,6 @@ type SplitProperties<T extends string> = BalanceBrackets<SplitString<T, ";">>;
 Equals<
   SplitProperties<`a:{b:string;c:number};d:boolean`>,
   ["a:{b:string;c:number}", "d:boolean"],
->;
-```
-
-
-## Quick note on whitespace
-
-You may have noticed the lack of whitespace in the examples above. However, that doesn't seem to square with how we intend for templates to be written:
-
-```tsx
-const schema = schema(`{
-  name: string;
-  email: string;
-}`);
-```
-
-Since TypeScript template literals are sensitive to whitespace, we can strip out all whitespace from the input string.
-
-```tsx
-type RemoveSpaces<T extends string> = T extends `${infer L} ${infer R}`
-  ? RemoveSpaces<`${L}${R}`>
-  : T;
-
-type RemoveTabs<T extends string> = T extends `${infer L}\t${infer R}`
-  ? RemoveTabs<`${L}${R}`>
-  : T;
-
-type RemoveNewlines<T extends string> = T extends `${infer L}\n${infer R}`
-  ? RemoveNewlines<`${L}${R}`>
-  : T;
-
-type RemoveWhitespace<T extends string> =
-  RemoveSpaces<RemoveTabs<RemoveNewlines<T>>>;
-
-Equals<
-  RemoveWhitespace<`{\n  hello: { world: string;\n}`>,
-  `{hello:{world:string;}`,
 >;
 ```
 
@@ -659,3 +636,44 @@ Equals<
 >
 ```
 
+
+## Quick note on whitespace
+
+You may have noticed the lack of whitespace in the examples above. However, that doesn't seem to square with how we intend for templates to be written by users.
+
+```tsx
+const schema = schema(`{
+  name: string;
+  email: string;
+}`);
+```
+
+TypeScript template literals are whitespace sensitive, which we can sidestep by stripping out all whitespace from the input string before processing it.
+
+```tsx
+type RemoveSpaces<T extends string> = T extends `${infer L} ${infer R}`
+  ? RemoveSpaces<`${L}${R}`>
+  : T;
+
+type RemoveTabs<T extends string> = T extends `${infer L}\t${infer R}`
+  ? RemoveTabs<`${L}${R}`>
+  : T;
+
+type RemoveNewlines<T extends string> = T extends `${infer L}\n${infer R}`
+  ? RemoveNewlines<`${L}${R}`>
+  : T;
+
+type RemoveWhitespace<T extends string> =
+  RemoveSpaces<RemoveTabs<RemoveNewlines<T>>>;
+
+Equals<
+  RemoveWhitespace<`{\n  hello: { world: string;\n}`>,
+  `{hello:{world:string;}`,
+>;
+```
+
+We can apply this by wrapping the input string to the top-level parsing type with `RemoveWhitespace`.
+
+```tsx
+type Parse<T extends string> = ParseObject<RemoveWhitespace<T>>;
+```

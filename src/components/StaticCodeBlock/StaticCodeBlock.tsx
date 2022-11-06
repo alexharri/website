@@ -32,13 +32,17 @@ interface CodeProps {
   children: string;
 }
 
-export const StaticCodeBlock = (props: PreProps) => {
-  const { className, children } = props.children.props;
+interface Props {
+  language: "tsx" | "go";
+  children: string;
+  marginBottom?: number;
+}
 
-  const language = className?.split("-")[1] as "tsx" | "go";
+export const StaticCodeBlock = (props: Props) => {
+  const { language, children, marginBottom } = props;
 
   return (
-    <div className={styles.wrapper}>
+    <div className={styles.wrapper} style={{ marginBottom }}>
       <Highlight
         {...defaultProps}
         code={children}
@@ -59,4 +63,10 @@ export const StaticCodeBlock = (props: PreProps) => {
       </Highlight>
     </div>
   );
+};
+
+export const Pre = (props: PreProps) => {
+  const { children, className } = props.children.props;
+  const language = className?.split("-")[1] as "tsx" | "go";
+  return <StaticCodeBlock children={children} language={language} />;
 };

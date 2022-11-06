@@ -83,13 +83,28 @@ code {
 }
 
 a {
-  color: inherit;
+  color: var(--color-blue);
   text-decoration: none;
+
+  &:hover {
+    text-decoration: underline;
+  }
 }
 
-p {
-  margin: 8px 0 24px;
+p, li {
   font-size: 18px;
+}
+
+ul, ol, p {
+  margin: 8px 0 24px;
+}
+
+li {
+  margin-bottom: 8px;
+  
+  &:last-of-type {
+    margin-bottom: 0;
+  }
 }
 
 button {

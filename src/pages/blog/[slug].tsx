@@ -8,7 +8,11 @@ import Link from "next/link";
 import path from "path";
 import { useEffect, useRef, useState } from "react";
 import { Layout } from "../../components/Layout";
-import { StaticCodeBlock } from "../../components/StaticCodeBlock/StaticCodeBlock";
+import { SmallNote } from "../../components/SmallNote/SmallNote";
+import {
+  Pre,
+  StaticCodeBlock,
+} from "../../components/StaticCodeBlock/StaticCodeBlock";
 import { FrontMatter } from "../../types/FrontMatter";
 import { usePostWatcher } from "../../utils/hooks/usePostWatcher";
 import { postFilePaths, POSTS_PATH } from "../../utils/mdxUtils";
@@ -19,7 +23,9 @@ import { postFilePaths, POSTS_PATH } from "../../utils/mdxUtils";
 // here.
 const components = {
   a: Link,
-  pre: StaticCodeBlock,
+  pre: Pre,
+  StaticCodeBlock,
+  SmallNote,
   // ExampleComponent: dynamic(() => import("../../src/components/ExampleComponent")),
   Head,
 };
