@@ -6,7 +6,16 @@ alt_title_3: "How I Abused Template Literal Types to create a Schema Language in
 description: "TODO"
 ---
 
-A few years ago when I was learning Go, I learned about "Struct Tags".
+The `infer` keyword in TypeScript, especially when combined with recursive types, is incredibly powerful. It enables you to transform types in complex and intricate ways that, honestly, you shouldn't be able to.
+
+In this article, we'll solve the problems I encountered in building a [real schema builder library](https://github.com/alexharri/strema) that makes extensive use of `infer` and recursive types.
+
+By reading this article, I offer you an understanding of the `infer` keyword which will make you better suited to tackling new and harder TypeScript problems.
+
+
+## Introduction
+
+A few years ago when I was learning Go, I learned about struct tags.
 
 ```go
 type Payload struct {
@@ -14,7 +23,7 @@ type Payload struct {
 }
 ```
 
-Struct Tags allow you to attach "meta information" to fields. This can then be read by other parts of your program to modify its behavior.
+Struct tags allow you to attach "meta information" to fields. They can then be read by other parts of your program to modify its behavior.
 
 In other languages that do not have this feature, metadata can be attached to fields by wrapping the field in some type.
 
@@ -24,8 +33,6 @@ interface FieldWithMetadata<T> {
   metadata: string;
 }
 ```
-
-It's not as elegant, and requires boilerplate code.
 
 Schema builders need to solve this problem. To create useful schemas you will want to add constraints to fields, such as requiring that an input string is a valid email address. Using Yup, a JavaScript schema builder, you might write code like this:
 
@@ -49,7 +56,7 @@ To specify a default value, we add `.default()`.
 
 ```tsx
 const schema = object({
-  email: string().email().default("example.com"),
+  email: string().email().default("user@example.com"),
 });
 ```
 
@@ -73,7 +80,7 @@ Then, let's use the same syntax for default values as in JavaScript destructurin
 
 ```tsx
 const schema = object({
-  email?: string().email() = "example.com",
+  email?: string().email() = "user@example.com",
 });
 ```
 
@@ -81,7 +88,7 @@ Then to top it off, let's add some custom syntax around constraints. I think `<>
 
 ```tsx
 const schema = object({
-  email?: string <email> = "example.com",
+  email?: string <email> = "user@example.com",
 });
 ```
 
@@ -108,7 +115,7 @@ Well, we can do the same thing.
 
 ```tsx
 const schema = compileSchema(`{
-  email?: string <email> = "example.com";
+  email?: string <email> = "user@example.com";
 }`);
 ```
 
@@ -773,17 +780,23 @@ We can apply this by wrapping the input string to the top-level parsing type wit
 type Parse<T extends string> = ParseObject<RemoveWhitespace<T>>;
 ```
 
+## Outro
 
-## Take this further!
+I hope I was successful in showing how powerful `infer` and recursive types are in TypeScript.
 
-There is still lots left to design and implement:
+The [source code][source-code] for this article is available for you to take a look at. Feel free to tinker, extend it to support new features, or change up the syntax entirely.
+
+[source-code]:https://github.com/alexharri/website/blob/e5784d727348dfe4e597fc3973ca44c9e199b2cd/code-samples/Parse.ts
+
+If you would like to take a look at the real open source library, check out [`strema` on GitHub](https://github.com/alexharri/strema). It's more mature and implements the following:
 
  * Hash maps
  * Rules (such as `<email>`)
  * Default values
- * More custom data types
- * Syntax error handling (how do you show syntax errors to users?)
- * Add tests for the types
- * An actual runtime schema template parser and data validator
+ * Syntax error handling
+ * Tests for the types
+ * A runtime template parser and data validator
 
-Feel free to take a look at the source code and take a stab at implementing some of the above
+Thanks for reading!
+
+@TODO: Better outro
