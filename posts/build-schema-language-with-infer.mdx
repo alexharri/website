@@ -534,7 +534,7 @@ type StringToTuple<T extends string> =
 StringToTuple<"abc">; // ["a", "b", "c"]
 ```
 
-We can filter a tuple with some more recursive inference.
+We can filter that tuple with some more recursive inference.
 
 ```tsx
 type FilterTuple<T extends any[], U> =
@@ -572,7 +572,8 @@ AreBracketsBalanced<`a:{b:{c:string}}`>; // true
 Putting all of this together, we can now split properties correctly:
 
 ```tsx
-type SplitProperties<T extends string> = BalanceBrackets<SplitString<T, ";">>;
+type SplitProperties<T extends string> =
+  BalanceBrackets<SplitString<T, ";">>;
 
 Equals<
   SplitProperties<`a:{b:string;c:number};d:boolean`>,
@@ -583,14 +584,14 @@ Equals<
 
 ## Parsing a property
 
-`SplitProperties` is now producing a list of strings reprepsenting properties for us to process. Lets now get implementing `ParseProperty`, which I promised earlier.
+`SplitProperties` is now producing an array of strings representing properties for us to process. Let's now get implementing `ParseProperty`, which I promised earlier.
 
 Currently, properties take the form of
 
- * a primitive property such as `a:string`
- * an object prorperty with sub-properties such as `a:{b:string}`
+ * a primitive property, such as `a:string`
+ * an object property containing sub-properties, such as `a:{b:string}`
 
-The commonality between these is that both start with a key and a colon.
+The commonality between these is that both start with a key and a colon, allowing us to create a common `KeyValue` type.
 
 ```tsx
 type KeyValue<T extends string> = T extends `${infer K}:${infer V}`
@@ -609,7 +610,7 @@ type ParseValue<T> = T extends `{${infer Content}}`
   : ParsePrimitive<T>;
 ```
 
-We can use `KeyValue` to create a `ParseProperty` type like so:
+With these, we can create a `ParseProperty` type.
 
 ```tsx
 type ParseProperty<T extends string> = KeyValue<T> extends {
