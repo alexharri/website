@@ -68,7 +68,9 @@ const schema = object({
 });
 ```
 
-This is all fine, but I would love to be able to use a more terse syntax to describe the schema. I want to describe the optionality of a field in the same way as TypeScript does for interfaces:
+This is all fine, but I would love to be able to use a more terse syntax to describe the schema.
+
+To start, I want to describe the optionality of a field in the same way as TypeScript does for interfaces:
 
 ```tsx
 const schema = object({
@@ -84,19 +86,19 @@ const schema = object({
 });
 ```
 
+If we were to accept a list of values, I would like to use an array literal syntax like so:
+
+```tsx
+const schema = object({
+  contacts: string[],
+});
+```
+
 Then to top it off, let's add some custom syntax around constraints. I think `<>` looks nice:
 
 ```tsx
 const schema = object({
   email?: string <email> = "user@example.com",
-});
-```
-
-And if we were to accept a list of values, then I would like to be able to use a `[]` syntax like so:
-
-```tsx
-const schema = object({
-  contacts: string[] <email>,
 });
 ```
 
