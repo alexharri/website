@@ -784,17 +784,17 @@ type Parse<T extends string> = ParseObject<RemoveWhitespace<T>>;
 
 I hope I was successful in showing how powerful `infer` and recursive types are in TypeScript.
 
-The [source code][source-code] for this article is available for you to take a look at. Feel free to tinker, extend it to support new features, or change up the syntax entirely.
+The [source code][source-code] for this article is available for you to take a look at. Feel free to tinker, extend the code to support new features, or change up the syntax entirely!
 
 [source-code]:https://github.com/alexharri/website/blob/e5784d727348dfe4e597fc3973ca44c9e199b2cd/code-samples/Parse.ts
 
-If you would like to take a look at the real open source library, check out [`strema` on GitHub](https://github.com/alexharri/strema). It's more mature and implements the following:
+If you would like to take a look at the open source library I built, check out [`strema` on GitHub](https://github.com/alexharri/strema). It's more mature and implements the following:
 
  * Hash maps
  * Rules (such as `<email>`)
  * Default values
- * Syntax error handling
  * Tests for the types
+ * Custom type errors at compile-time
  * A runtime template parser and data validator
 
 Thanks for reading!
