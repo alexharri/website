@@ -82,18 +82,29 @@ type ParseProperty<T extends string> = KeyValue<T> extends {
   : never;
 
 type KeyValue<T extends string> = T extends `${infer K}:${infer V}`
-  ? {
-      key: K;
-      value: ParseValue<V>;
-    }
+  ? K extends `${infer KeyWithoutQuestionmark}?`
+    ? {
+        key: KeyWithoutQuestionmark;
+        value: ParseValue<V> | null;
+      }
+    : {
+        key: K;
+        value: ParseValue<V>;
+      }
   : never;
 
-type ParseValue<T> = T extends `{${infer Content}}`
-  ? ParseObject<`{${Content}}`>
-  : ParsePrimitive<T>;
+type ParseValue<T> =
+  // Match array notation
+  T extends `${infer Before}[]`
+    ? ParseValue<Before>[]
+    : // Match object
+    T extends `{${infer Content}}`
+    ? ParseObject<`{${Content}}`>
+    : // Default to primitives if neither array nor object
+      ParsePrimitive<T>;
 
 type ParseObject<T> = T extends `{${infer Content}}`
   ? MergeArrayOfObjects<ParseProperties<SplitProperties<Content>>>
   : never;
 
-type T1 = ParseObject<`{a:{b:string;c:number};d:boolean}`>;
+type T1 = ParseObject<`{a?:number}`>;

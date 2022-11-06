@@ -107,7 +107,7 @@ const Button = styled.button`
 Well, we can do the same thing.
 
 ```tsx
-const schema = schema(`{
+const schema = compileSchema(`{
   email?: string <email> = "example.com";
 }`);
 ```
@@ -117,7 +117,7 @@ const schema = schema(`{
 Right now, our schema builder's interface can be described like so.
 
 ```tsx
-function schema<T extends string>(template: T): Schema<???>;
+function compileSchema<T extends string>(template: T): Schema<???>;
 ```
 
 We need to fill in the blanks. We somehow want to take the string template `T` and convert that to the type that it represents.
@@ -638,12 +638,106 @@ Equals<
 ```
 
 
-## Quick note on whitespace
+## Array properties
+
+As mentioned earlier, I would like to support array properties using an array literal syntax.
+
+```tsx
+const schema = compileSchema(`{
+  values: number[];
+}`);
+```
+
+Arrays of objects should be supported, and arrays should be able to be multidimensional.
+
+```tsx
+const schema = compileSchema(`{
+  matrix: { value: number }[][];
+}`);
+```
+
+To support this, we can augment `FindValue` to check for array notation.
+
+```tsx
+type ParseValue<T> =
+  // Match array notation
+  T extends `${infer Before}[]`
+  ? ParseValue<Before>[]
+  :
+  // Match object
+  T extends `{${infer Content}}`
+  ? ParseObject<`{${Content}}`>
+  :
+  // Default to primitives if neither array nor object
+  ParsePrimitive<T>;
+
+ParseValue<`{a:string[]}[][]`>; // { a: string[]; }[][]
+```
+
+
+## Optional values
+
+I would like to be able to denote optional properties using `?:` like in TypeScript:
+
+```tsx
+const schema = compileSchema(`{
+  value?: number;
+}`);
+```
+
+We can update `KeyValue` to check for the presence of `?:`.
+
+```tsx
+type KeyValue<T extends string> = T extends `${infer K}?:${infer V}`
+  ? {
+      key: K;
+      value: ParseValue<V> | null;
+    }
+  : T extends `${infer K}:${infer V}`
+  ? {
+      key: K;
+      value: ParseValue<V>;
+    }
+  : never;
+
+ParseValue<`{a?:number}`>; // { a: number | null }
+```
+
+This looks sensible, but there's a subtle bug.
+
+If a non-optional object property contains an optional property, then the `?:` in `${infer K}?:${infer V}` matches the property inside of the object.
+
+```tsx
+type KeyValue<T extends string> = T extends `${infer K}?:${infer V}`
+  ? [K, V]
+  : // ...
+
+KeyValue<`a:{b?:string}`>; // ["a:{b", "string}"]
+```
+
+We can resolve this by always matching the first `:` and then checking whether `K` ends with a `?`.
+
+```tsx
+type KeyValue<T extends string> = T extends `${infer K}:${infer V}`
+  ? K extends `${infer KeyWithoutQuestionmark}?`
+    ? {
+        key: KeyWithoutQuestionmark;
+        value: ParseValue<V> | null;
+      }
+    : {
+        key: K;
+        value: ParseValue<V>;
+      }
+  : never;
+```
+
+
+## Whitespace
 
 You may have noticed the lack of whitespace in the examples above. However, that doesn't seem to square with how we intend for templates to be written by users.
 
 ```tsx
-const schema = schema(`{
+const schema = compileSchema(`{
   name: string;
   email: string;
 }`);
