@@ -1,30 +1,21 @@
 import { PrismTheme } from "prism-react-renderer";
-
-const darkBlue = "#399ef4";
-const lightRed = "#e5949b";
-const darkRed = "#da6771";
-const green = "#4eb071";
-const offWhite = "#9fcff9";
-const cyan = "#21c5c7";
-const darkGray = "#676f83";
-const black = "#17222F";
+import { colors } from "../../utils/cssVariables";
 
 export const prismTheme: PrismTheme = {
   plain: {
-    color: offWhite,
-    // backgroundColor: black,
+    color: colors["text-300"],
   },
   styles: [
     {
       types: ["function"],
       style: {
-        color: cyan,
+        color: colors["token-function"],
       },
     },
     {
       types: ["string"],
       style: {
-        color: darkRed,
+        color: colors["token-string"],
       },
     },
     {
@@ -37,26 +28,26 @@ export const prismTheme: PrismTheme = {
         "keyword",
       ],
       style: {
-        color: darkBlue,
+        color: colors.blue,
       },
     },
     {
       types: ["number", "inserted"],
       style: {
-        color: lightRed,
+        color: colors["token-number"],
       },
     },
     {
       types: ["comment"],
       style: {
-        color: darkGray,
+        color: colors["token-comment"],
         fontStyle: "italic",
       },
     },
     {
       types: ["builtin", "constant"],
       style: {
-        color: green,
+        color: colors.green,
       },
     },
   ],

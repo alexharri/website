@@ -198,9 +198,9 @@ type ParseObject<T> = T extends `{${infer K}:${infer V}}`
     never;
 ```
 
-The variables `K` and `V` variables are **only** created if `T` matches the pattern.
+The variables `K` and `V` are **only** created if `T` matches the pattern.
 
-With access to `K` and `V`, we can create an object type.
+With them, we can create an object type.
 
 ```tsx
 type ParseObject<T> = T extends `{${infer K}:${infer V}}`
