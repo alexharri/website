@@ -293,7 +293,21 @@ Equals<
 >;
 ```
 
-This is our first example of recursive types.
+This is our first example of recursive types. To better visualize what is going on, we can break down what is happening step by step:
+
+```tsx
+// Shortened to 'Split' for brevity
+type Split<T> = T extends `${infer A};${infer B}`
+  ? [A, ...Split<B>]
+  : [T];
+
+Split<`1;2;3;4`>; // [`1`, ...Split<`2;3;4`>]
+Split<`2;3;4`>;   // [`2`, ...Split<`3;4`>]
+Split<`3;4`>;     // [`3`, ...Split<`4`>]
+Split<`4`>;       // [`4`]
+```
+
+At each iteration, we find a single substring and delegate the responsibility of finding the rest of the substrings by recursing. Once we reach the base case of a string with no `;`, we return the string and stop recursing.
 
 We're going to be using recursive types __a lot__ so take a moment to deeply understand what is going on. Things will only get more complex from here.
 
@@ -464,47 +478,39 @@ We need a more robust way to deal with object properties.
 
 The solutions we've used to split the list of properties all have the same problem. They split up object properties.
 
-If we take a look at an incorrectly split up property, such as `a:{b:string` or `a:{b:{c:string}`, we can observe that the number of `{` and number of `}` are unequal. In a well formed object property, the number of `{` and `}` would always be equal.
+If we take a look at an incorrectly split up property, such as `a:{b:string` or `a:{b:{c:string}`, we can observe that the number of opening and closing brackets (`{` and `}`) are unequal. In a well formed object property, the number of opening and closing brackets will always be equal.
 
 This observation leads to a different solution. Instead of preventing object properties from being split in the first place, we can fix them after the fact by balancing brackets.
 
-Balancing brackets can be done with a relatively simple loop, starting at the first element.
+Balancing brackets can be done with a relatively simple algorithm. Starting at the first element.
 
   1. If the number of `{` and the number of `}` in the current element are not equal, then the string is unbalanced.
   2. If the string is unbalanced, merge the current element with the next element and repeat step 1 again.
   3. If the string is balanced, move to the next element.
 
-In JavaScript, this algorithm looks like so.
+In JavaScript, a recursive version of this algorithm looks like so:
+
 
 ```tsx
-function balanceBrackets(originalItems: string[]) {
-  const items = [...originalItems];
+function areBracketsBalanced(s: string) {
+  return numberOf("{").in(s) === numberOf("}").in(s);
+}
 
-  let i = 0;
-  while (i < items.length - 1) {
-    const s = items[i];
-    if (numberOf("{").in(s) === numberOf("}").in(s)) {
-      i++;
-      continue;
-    }
+function balanceBrackets(items: string[]) {
+  if (items.length < 2) return items;
 
-    items[i] = items[i] + items[i + 1];
-    items.splice(i + 1, 1); // Removes element at i + 1
+  if (areBracketsBalanced(items[0])) {
+    return [items[0], ...balanceBrackets(items.slice(1))];
   }
 
-  return items;
+  const merged = items[0] + items[1];
+  return balanceBrackets([merged, ...items.slice(2)]);
 }
 ```
 
-We can reduce an array of types into a single type using `infer` and recursive types. We observed this when implementing `MergeArrayOfObjects`.
+<SmallNote>This recursive solution is terrible for memory usage. We're constructing a new array in every iteration. An iterative approach with a while loop would be optimal.</SmallNote>
 
-```tsx
-type MergeArrayOfObjects<T> = T extends [infer R, ...infer Rest]
-  ? R & MergeArrayOfObjects<Rest>
-  : {};
-```
-
-We can apply the same recursive pattern to balance brackets.
+We can apply the same recursive pattern to balance brackets using types:
 
 ```tsx
 type BalanceBrackets<T extends string[]> =
@@ -523,6 +529,22 @@ type BalanceBrackets<T extends string[]> =
 ```
 
 This implements the same algorithm as the JavaScript example above, just for types.
+
+The base case occurs when there are less than two elements in the array (we can't merge 0 or 1 elements), which we implement in JavaScript with:
+
+```tsx
+if (items.length < 2) return items;
+```
+
+In TypeScript, we do that with:
+
+```tsx
+T extends [infer Curr, infer Next, ...infer Rest[]]
+```
+
+This pattern requires that both `Curr` and `Next` match a specific element in the array. If there are not at least two elements in the array `Curr` and `Next` can't be assigned, so that pattern is not matched. This implements the base case for our recursion.
+
+<SmallNote>Remember that `...Rest` can be assigned zero to infinite elements.</SmallNote>
 
 However, we need to define `AreBracketsBalanced`. We want that type to return `true` if the string `T` contains the same number of `{` and `}`, and false otherwise.
 
@@ -548,7 +570,7 @@ So what this problem boils down to is:
  2. filtering the tuple to only contain the character we're counting
  3. reading the `length` of the tuple
 
-We can convert a string into a tuple by inferring one character at a time.
+We can convert a string into a tuple by recursively inferring one character at a time.
 
 ```tsx
 type StringToTuple<T extends string> =
@@ -557,16 +579,16 @@ type StringToTuple<T extends string> =
     : [];
 
 StringToTuple<"abc">; // ["a", "b", "c"]
-```
+``` 
 
 We can filter that tuple with some more recursive inference.
 
 ```tsx
-type FilterTuple<T extends any[], U> =
+type FilterTuple<T extends any[], Include> =
   T extends [infer Item, ...infer Rest]
-    ? Item extends U
-      ? [Item, ...FilterTuple<Rest, U>]
-      : FilterTuple<Rest, U>
+    ? Item extends Include
+      ? [Item, ...FilterTuple<Rest, Include>]
+      : FilterTuple<Rest, Include>
     : [];
 
 FilterTuple<[3, 2, 3, 3, 4, 5], 3>; // [3, 3, 3]
@@ -630,8 +652,8 @@ type KeyValue<T extends string> = T extends `${infer K}:${infer V}`
 When parsing the value, we can somewhat trivially distinguish between an object property and a primitive property.
 
 ```tsx
-type ParseValue<T> = T extends `{${infer Content}}`
-  ? ParseObject<`{${Content}}`>
+type ParseValue<T> = T extends `{${string}}`
+  ? ParseObject<T>
   : ParsePrimitive<T>;
 ```
 
@@ -690,8 +712,8 @@ type ParseValue<T> =
   ? ParseValue<Before>[]
   :
   // Match object
-  T extends `{${infer Content}}`
-  ? ParseObject<`{${Content}}`>
+  T extends `{${string}}`
+  ? ParseObject<T>
   :
   // Default to primitives if neither array nor object
   ParsePrimitive<T>;
@@ -713,12 +735,16 @@ const schema = compileSchema(`{
 We can update `KeyValue` to check for the presence of `?:`.
 
 ```tsx
-type KeyValue<T extends string> = T extends `${infer K}?:${infer V}`
+type KeyValue<T extends string> =
+  // Optional property
+  T extends `${infer K}?:${infer V}`
   ? {
       key: K;
       value: ParseValue<V> | null;
     }
-  : T extends `${infer K}:${infer V}`
+  :
+  // Required property
+  T extends `${infer K}:${infer V}`
   ? {
       key: K;
       value: ParseValue<V>;
@@ -733,9 +759,10 @@ This looks sensible, but there's a subtle bug.
 If a non-optional object property contains an optional property, then the `?:` in `${infer K}?:${infer V}` matches the property inside of the object.
 
 ```tsx
-type KeyValue<T extends string> = T extends `${infer K}?:${infer V}`
-  ? [K, V]
-  : // ...
+type KeyValue<T extends string> =
+  T extends `${infer K}?:${infer V}`
+    ? [K, V]
+    : never;
 
 KeyValue<`a:{b?:string}`>; // ["a:{b", "string}"]
 ```
@@ -743,17 +770,18 @@ KeyValue<`a:{b?:string}`>; // ["a:{b", "string}"]
 We can resolve this by always matching the first `:` and then checking whether `K` ends with a `?`.
 
 ```tsx
-type KeyValue<T extends string> = T extends `${infer K}:${infer V}`
-  ? K extends `${infer KeyWithoutQuestionmark}?`
-    ? {
-        key: KeyWithoutQuestionmark;
-        value: ParseValue<V> | null;
-      }
-    : {
-        key: K;
-        value: ParseValue<V>;
-      }
-  : never;
+type KeyValue<T extends string> =
+  T extends `${infer K}:${infer V}`
+    ? K extends `${infer KeyWithoutQuestionmark}?`
+      ? {
+          key: KeyWithoutQuestionmark;
+          value: ParseValue<V> | null;
+        }
+      : {
+          key: K;
+          value: ParseValue<V>;
+        }
+    : never;
 ```
 
 
@@ -769,6 +797,8 @@ const schema = compileSchema(`{
 ```
 
 TypeScript template literals are whitespace sensitive, which we can sidestep by stripping out all whitespace from the input string before processing it.
+
+We do that, of course, using `infer` and recursion.
 
 ```tsx
 type RemoveSpaces<T extends string> = T extends `${infer L} ${infer R}`

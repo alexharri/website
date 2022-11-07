@@ -108,8 +108,8 @@ type ParseValue<T> =
   T extends `${infer Before}[]`
     ? ParseValue<Before>[]
     : // Match object
-    T extends `{${infer Content}}`
-    ? ParseObject<`{${Content}}`>
+    T extends `{${string}}`
+    ? ParseObject<T>
     : // Default to primitives if neither array nor object
       ParsePrimitive<T>;
 
