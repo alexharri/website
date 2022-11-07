@@ -41,7 +41,9 @@ const schema = object({
 });
 ```
 
-This syntax is nice. However, there are some aspects of the syntax that are more verbose than I would like. To describe whether a field is required, we add `.required()`.
+This syntax is nice. However, there are some aspects of the syntax that are more verbose than I would like.
+
+Let's take some examples. To mark a field as required, we add `.required()`.
 
 ```tsx
 const schema = object({
@@ -49,7 +51,7 @@ const schema = object({
 });
 ```
 
-To specify a default value, we add `.default()`.
+To add a default value, we add `.default()`.
 
 ```tsx
 const schema = object({
@@ -57,7 +59,7 @@ const schema = object({
 });
 ```
 
-To describe a list of values, we wrap the type in `array()`.
+And for list of values, we wrap the type in `array()`.
 
 ```tsx
 const schema = object({
@@ -65,9 +67,9 @@ const schema = object({
 });
 ```
 
-This is all fine, but I would love to be able to use a more terse syntax to describe the schema.
+This is all fine, but I would love to be able to use a more terse, "native-feeling", syntax to describe the schema.
 
-To start, I want to describe the optionality of a field in the same way as TypeScript does for interfaces:
+Here's what I would like. To start, I want to denote the optionality of a field using the same syntax as TypeScript:
 
 ```tsx
 const schema = object({
@@ -75,7 +77,7 @@ const schema = object({
 });
 ```
 
-Then, let's use the same syntax for default values as in JavaScript destructuring assignments:
+Then, we would use the same syntax for default values as in JavaScript destructuring assignments:
 
 ```tsx
 const schema = object({
@@ -83,7 +85,7 @@ const schema = object({
 });
 ```
 
-If we were to accept a list of values, I would like to use an array literal syntax like so:
+For lists of values, I would like to use an array literal syntax like so:
 
 ```tsx
 const schema = object({
@@ -91,7 +93,7 @@ const schema = object({
 });
 ```
 
-Then to top it off, let's add some custom syntax around constraints. I think `<>` looks nice:
+Finally, let's invent some custom syntax around constraints such as `.email()`.
 
 ```tsx
 const schema = object({
@@ -101,7 +103,7 @@ const schema = object({
 
 I like this, but it won't compile. This is just not valid JavaScript (or TypeScript) syntax.
 
-But why should JavaScript limit what we can and cannot do? CSS-in-JS is a thing, and they use template literals to embed CSS in JavaScript.
+But why should we let JavaScript dictate what we can and cannot do? CSS-in-JS is a thing, and they use template literals to embed CSS in JavaScript.
 
 ```tsx
 const Button = styled.button`
@@ -120,13 +122,15 @@ const schema = compileSchema(`{
 
 ## Don't we lose all type information?
 
+It certainly feels like we should, but no!
+
 Right now, our schema builder's interface can be described like so.
 
 ```tsx
 function compileSchema<T extends string>(template: T): Schema<???>;
 ```
 
-We need to fill in the blanks. We somehow want to take the string template `T` and convert that to the type that it represents.
+We need to fill in the blanks. We somehow want to take the string template `T` and convert it to the type that it represents.
 
 TypeScript has features that enable us to do that. Let's start off with the basics and build from there.
 
@@ -827,13 +831,15 @@ type Parse<T extends string> = ParseObject<RemoveWhitespace<T>>;
 
 ## Outro
 
-I hope I was successful in showing how powerful `infer` and recursive types are in TypeScript.
+I hope I was successful in showing how powerful and versatile the `infer` keyword and recursive types are in TypeScript.
 
 The [source code][source-code] for this article is available for you to take a look at. Feel free to tinker, extend the code to support new features, or change up the syntax entirely!
 
 [source-code]:https://github.com/alexharri/website/blob/e5784d727348dfe4e597fc3973ca44c9e199b2cd/code-samples/Parse.ts
 
-If you would like to take a look at the open source library I built, check out [`strema` on GitHub](https://github.com/alexharri/strema). It's more mature and implements the following:
+If you would like to take a look at the open source library I built, check out [`strema` on GitHub](https://github.com/alexharri/strema). It's a more mature version of what we implemented in this article.
+
+It implements:
 
  * Hash maps
  * Rules (such as `<email>`)
@@ -842,6 +848,4 @@ If you would like to take a look at the open source library I built, check out [
  * Custom type errors at compile-time
  * A runtime template parser and data validator
 
-Thanks for reading!
-
-@TODO: Better outro
+Anyways, thanks for reading!
