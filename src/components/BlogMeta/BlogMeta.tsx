@@ -18,11 +18,6 @@ export const BlogMeta = (props: Props) => {
       {props.description && (
         <meta name="og:description" content={props.description} />
       )}
-
-      <link
-        rel="canonical"
-        href={`${process.env.SITE_URL}/blog/${props.slug}/`}
-      />
     </Head>
   );
 };
