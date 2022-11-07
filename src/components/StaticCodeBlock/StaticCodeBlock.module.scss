@@ -6,6 +6,7 @@
   overflow: auto;
   padding: 24px;
   padding-bottom: 0;
+  transition: background var(--color-transition-duration);
 
   @media (max-width: 800px) {
     border-radius: 0;

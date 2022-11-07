@@ -12,6 +12,8 @@ export const colors = {
   "token-number": "var(--color-token-number)",
   "token-string": "var(--color-token-string)",
   "token-comment": "var(--color-token-comment)",
+  "header-background": "var(--color-header-background)",
+  "header-border-background": "var(--color-header-border-background)",
   scheme: "var(--color-scheme)",
 };
 
@@ -32,6 +34,8 @@ export const colorValues: Record<
     "token-number": "#e5949b",
     "token-string": "#da6771",
     "token-comment": "#676f83",
+    "header-background": "rgba(9, 13, 19, 0.65)",
+    "header-border-background": "rgba(9, 13, 19, 0.8)",
     scheme: "dark",
   },
   light: {
@@ -47,6 +51,8 @@ export const colorValues: Record<
     "token-number": "#ab5e07",
     "token-string": "#ba391a",
     "token-comment": "#7998a7",
+    "header-background": "rgba(255, 255, 255, 0.65)",
+    "header-border-background": "rgba(255, 255, 255, 0.8)",
     scheme: "light",
   },
 };
