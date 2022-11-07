@@ -49,9 +49,10 @@
   width: 750px;
   max-width: 100%;
   margin: 0 auto;
-  padding: 64px 24px 75vh;
+  padding: 128px 24px 75vh;
 
   @media (max-width: 800px) {
+    padding-top: 80px;
     width: auto;
   }
 }

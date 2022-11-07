@@ -7,6 +7,7 @@ import Head from "next/head";
 import Link from "next/link";
 import path from "path";
 import { useEffect, useRef, useState } from "react";
+import { BlogMeta } from "../../components/BlogMeta/BlogMeta";
 import { Layout } from "../../components/Layout";
 import { SmallNote } from "../../components/SmallNote/SmallNote";
 import {
@@ -41,26 +42,19 @@ export default function PostPage(props: Props) {
   const scope = source.scope! as unknown as FrontMatter;
 
   return (
-    <Layout>
-      <div className="post-header">
-        <h1>{scope.title}</h1>
-      </div>
-      <main>
-        <MDXRemote {...(source as any)} components={components} />
-      </main>
-
-      <style jsx>{`
-        .post-header h1 {
-          margin-bottom: 0;
-        }
-        .post-header {
-          margin-bottom: 2rem;
-        }
-        .description {
-          opacity: 0.6;
-        }
-      `}</style>
-    </Layout>
+    <>
+      <BlogMeta
+        title={scope.title}
+        description={scope.description}
+        slug={props.slug}
+      />
+      <Layout>
+        <main>
+          <h1>{scope.title}</h1>
+          <MDXRemote {...(source as any)} components={components} />
+        </main>
+      </Layout>
+    </>
   );
 }
 
