@@ -98,6 +98,10 @@ a {
 
   &:hover {
     text-decoration: underline;
+
+    code {
+      text-decoration: underline;
+    }
   }
 }
 
