@@ -16,7 +16,7 @@ import {
 } from "../../components/StaticCodeBlock/StaticCodeBlock";
 import { FrontMatter } from "../../types/FrontMatter";
 import { usePostWatcher } from "../../utils/hooks/usePostWatcher";
-import { postFilePaths, POSTS_PATH } from "../../utils/mdxUtils";
+import { postFileNames, POSTS_PATH } from "../../utils/mdxUtils";
 
 // Custom components/renderers to pass to MDX.
 // Since the MDX files aren't loaded by webpack, they have no knowledge of how
@@ -93,7 +93,7 @@ export const getStaticProps: GetStaticProps<Props, Params> = async (ctx) => {
 };
 
 export const getStaticPaths: GetStaticPaths<Params> = async () => {
-  const paths = postFilePaths
+  const paths = postFileNames
     .map((path) => path.replace(/\.mdx?$/, ""))
     .map((slug) => ({ params: { slug } }));
 

@@ -34,7 +34,7 @@ export const colorValues: Record<
     "token-number": "#e5949b",
     "token-string": "#da6771",
     "token-comment": "#676f83",
-    "header-background": "rgba(9, 13, 19, 0.65)",
+    "header-background": "rgba(9, 13, 19, 0.6)",
     "header-border-background": "rgba(9, 13, 19, 0.8)",
     scheme: "dark",
   },
