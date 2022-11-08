@@ -1,4 +1,5 @@
 import NextLink, { LinkProps } from "next/link";
+import React from "react";
 
 /**
  * Returns '_blank' for URLs pointing to external websites.
@@ -21,7 +22,11 @@ function getTarget(href: LinkProps["href"]) {
   return "_blank";
 }
 
-export const Link = (props: LinkProps) => {
+interface Props extends LinkProps {
+  children: React.ReactNode;
+}
+
+export const Link = (props: Props) => {
   if (typeof props.href === "string") {
     // Links starting with '//' may be "schemaless" URLs like:
     //

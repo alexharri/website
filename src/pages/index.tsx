@@ -7,6 +7,7 @@ import matter from "gray-matter";
 import Link from "next/link";
 import { Post } from "../types/Post";
 import { BlogPost } from "../components/BlogPost/BlogPost";
+import { AboutMe } from "../components/AboutMe/AboutMe";
 
 interface Props {
   posts: Post[];
@@ -19,6 +20,10 @@ export default function Page(props: Props) {
       {props.posts.map((post) => (
         <BlogPost post={post} key={post.slug} />
       ))}
+
+      <hr style={{ margin: "80px 0" }} />
+
+      <AboutMe />
     </Layout>
   );
 }

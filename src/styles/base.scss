@@ -127,3 +127,10 @@ button {
   background: transparent;
   border: none;
 }
+
+hr {
+  margin: 32px 0;
+  background: var(--color-medium-500);
+  border: none;
+  height: 1px;
+}
