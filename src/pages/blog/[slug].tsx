@@ -4,11 +4,10 @@ import { GetStaticPaths, GetStaticProps } from "next";
 import { MDXRemote, MDXRemoteSerializeResult } from "next-mdx-remote";
 import { serialize } from "next-mdx-remote/serialize";
 import Head from "next/head";
-import Link from "next/link";
 import path from "path";
-import { useEffect, useRef, useState } from "react";
 import { BlogMeta } from "../../components/BlogMeta/BlogMeta";
 import { Layout } from "../../components/Layout";
+import { Link } from "../../components/Link";
 import { SmallNote } from "../../components/SmallNote/SmallNote";
 import {
   Pre,
