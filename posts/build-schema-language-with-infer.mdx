@@ -132,7 +132,7 @@ function compileSchema<T extends string>(template: T): Schema<???>;
 
 We need to fill in the blanks. We somehow want to take the string template `T` and convert it to the type that it represents.
 
-TypeScript has features that enable us to do that. Let's start off with the basics and build from there.
+TypeScript has features that enable us to do that. Let's start with the basics and build from there.
 
 
 ### Parsing primitives
@@ -217,13 +217,13 @@ ParseObject<`{value:number}`>; // { value: number }
 
 ## Objects with multiple properties
 
-The first big hurdle we encounter are objects with multiple properties.
+The first big hurdle we encounter is objects with multiple properties.
 
 ```tsx
 ParseObject<`{a:string;b:number}`>; // { a: never }
 ```
 
-A naive approach would be match create multiple conditionals for each number of properties:
+The naive approach would be to match create multiple conditionals for each number of properties:
 
 ```tsx
 type ParseObject<T> =
@@ -236,7 +236,7 @@ type ParseObject<T> =
   : never;
 ```
 
-This is obviously terrible and does not scale. We can divide and conquer instead.
+This is terrible and does not scale. We can divide and conquer instead.
 
 Given that we have the content of an object string `T` that contains N properties, we can split the content of `T` into N many strings that contain one property. We can then parse each property string individually.
 
@@ -315,7 +315,7 @@ We're going to be using recursive types __a lot__ so take a moment to deeply und
 
 ### Parsing and merging the list of properties
 
-Once we have the array (technically, tuple) of strings, we need to parse each element emitted by `SplitProperties<T>`.
+Once we have the array (technically, a tuple) of strings, we need to parse each element emitted by `SplitProperties<T>`.
 
 ```tsx
 type ParseProperties<T extends string[]> = {
@@ -323,7 +323,7 @@ type ParseProperties<T extends string[]> = {
 };
 ```
 
-We'll implement `ParseProperty` later. For now we'll assume that `ParseProperty<T>` returns an object type that looks like so:
+We'll implement `ParseProperty` later. For now, we'll assume that `ParseProperty<T>` returns an object type that looks like so:
 
 ```tsx
 { [key in K]: V };
@@ -479,7 +479,7 @@ We need a more robust way to deal with object properties.
 
 The solutions we've used to split the list of properties all have the same problem. They split up object properties.
 
-If we take a look at an incorrectly split up property, such as `a:{b:string` or `a:{b:{c:string}`, we can observe that the number of opening and closing brackets (`{` and `}`) are unequal. In a well formed object property, the number of opening and closing brackets will always be equal.
+If we take a look at an incorrectly split-up property, such as `a:{b:string` or `a:{b:{c:string}`, we can observe that the number of opening and closing brackets (`{` and `}`) are unequal. In a well-formed object property, the number of opening and closing brackets will always be equal.
 
 This observation leads to a different solution. Instead of preventing object properties from being split in the first place, we can fix them after the fact by balancing brackets.
 
@@ -549,7 +549,7 @@ This pattern requires that both `Curr` and `Next` match a specific element in th
 
 However, we need to define `AreBracketsBalanced`. We want that type to return `true` if the string `T` contains the same number of `{` and `}`, and false otherwise.
 
-#### Counting number of characters in string type
+#### Counting the number of characters in string type
 
 To be able to check if a string contains an equal number of `{` and `}`, we first need to be able to count the number of those characters in the string.
 
@@ -632,7 +632,7 @@ Equals<
 
 ## Parsing a property
 
-`SplitProperties` is now producing an array of strings representing properties for us to process. Let's now get implementing `ParseProperty`, which I promised earlier.
+`SplitProperties` is now producing an array of strings representing properties for us to process. Let's now get to implementing `ParseProperty`, which I promised earlier.
 
 Currently, properties take the form of
 
@@ -696,7 +696,7 @@ const schema = compileSchema(`{
 }`);
 ```
 
-Arrays of objects should be supported, and arrays should be able to be multidimensional.
+Arrays of objects should be supported, and arrays should be able to be multi-dimensional.
 
 ```tsx
 const schema = compileSchema(`{
@@ -837,7 +837,7 @@ The [source code][source-code] for this article is available for you to take a l
 
 [source-code]:https://github.com/alexharri/website/blob/e5784d727348dfe4e597fc3973ca44c9e199b2cd/code-samples/Parse.ts
 
-If you would like to take a look at the open source library I built, check out [`strema` on GitHub](https://github.com/alexharri/strema). It's a more mature version of what we implemented in this article.
+If you would like to take a look at the open-source library I wrote, check out [`strema` on GitHub](https://github.com/alexharri/strema). It's a more mature version of what we implemented in this article.
 
 It implements:
 
