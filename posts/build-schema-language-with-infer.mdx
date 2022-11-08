@@ -264,20 +264,19 @@ We want the output of `SplitProperties<T>` to be:
 
 We can somewhat trivially create a type that splits the string by `;`.
 
-<StaticCodeBlock language="tsx" marginBottom={16}>
-  {`\
-type SplitProperties<T> = T extends \`\${infer A};\${infer B}\`
+
+```tsx
+type SplitProperties<T> = T extends `${infer A};${infer B}`
   ? [A, B]
   : [T];
 
 Equals<
-  SplitProperties<\`a:string;b:number;c:boolean\`>,
+  SplitProperties<`a:string;b:number;c:boolean`>,
   ["a:string", "b:number;c:boolean"],
 >;
-`}
-</StaticCodeBlock>
+```
 
-<SmallNote>`Equals` as used above asserts that the two arguments are equal.</SmallNote>
+<SmallNote moveCloserUpBy={16}>`Equals` as used above asserts that the two arguments are equal.</SmallNote>
 
 But this only splits at the first instance of `;`.
 
@@ -509,7 +508,7 @@ function balanceBrackets(items: string[]) {
 }
 ```
 
-<SmallNote>This recursive solution is terrible for memory usage. We're constructing a new array in every iteration. An iterative approach with a while loop would be optimal.</SmallNote>
+<SmallNote moveCloserUpBy={16}>This recursive solution is terrible for memory usage. We're constructing a new array in every iteration. An iterative approach with a while loop would be optimal.</SmallNote>
 
 We can apply the same recursive pattern to balance brackets using types:
 
