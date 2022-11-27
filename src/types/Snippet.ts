@@ -1,6 +1,6 @@
 export interface Snippet {
   title: string;
-  description?: string;
+  description: string;
   slug: string;
   snippet: {
     language: string;

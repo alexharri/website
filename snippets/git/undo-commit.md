@@ -1,6 +1,5 @@
 ---
 title: "Undo Git Commit"
-description: "How to undo a local Git commit."
 showPreview: true
 ---
 

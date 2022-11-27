@@ -8,6 +8,7 @@ import { SnippetList } from "../../components/SnippetList/SnippetList";
 import { Snippet } from "../../types/Snippet";
 import { snippetFileNames, SNIPPETS_PATH } from "../../utils/mdxUtils";
 
+
 interface Props {
   snippets: Snippet[];
 }
@@ -34,7 +35,11 @@ export const getStaticProps: GetStaticProps<Props> = async (ctx) => {
 
     const { data } = matter(fileContent);
 
-    const { title, description, showPreview } = data as {
+    const {
+      title,
+      description = "",
+      showPreview,
+    } = data as {
       title: string;
       description?: string;
       showPreview?: boolean;

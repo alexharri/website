@@ -37,7 +37,7 @@ export const getStaticProps: GetStaticProps<Props> = async (ctx) => {
 
     const { data } = matter(fileContent);
 
-    const { title, description } = data as {
+    const { title, description = "" } = data as {
       title: string;
       description?: string;
     };

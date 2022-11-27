@@ -16,13 +16,14 @@ import { usePostWatcher } from "../../../utils/hooks/usePostWatcher";
 import { snippetFileNames, SNIPPETS_PATH } from "../../../utils/mdxUtils";
 import { withMargin } from "../../../utils/withMargin";
 
+
 // Custom components/renderers to pass to MDX.
 // Since the MDX files aren't loaded by webpack, they have no knowledge of how
 // to handle import statements. Instead, you must include components in scope
 // here.
 const components = {
   a: Link,
-  pre: Pre,
+  pre: withMargin([32, -24], Pre),
   StaticCodeBlock: withMargin([32, -24], StaticCodeBlock),
   SmallNote,
   // ExampleComponent: dynamic(() => import("../../src/components/ExampleComponent")),
