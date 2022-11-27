@@ -1,5 +1,11 @@
 .container {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  display: flex;
   gap: 24px;
+  flex-wrap: wrap;
+
+  & > * {
+    flex-basis: 0;
+    flex-grow: 1;
+    max-width: calc(50% - 12px);
+  }
 }
