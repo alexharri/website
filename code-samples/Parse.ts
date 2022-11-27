@@ -117,4 +117,5 @@ type ParseObject<T> = T extends `{${infer Content}}`
   ? MergeArrayOfObjects<ParseProperties<SplitProperties<Content>>>
   : never;
 
+// @ts-ignore
 type Parse<T extends string> = ParseObject<RemoveWhitespace<T>>;
