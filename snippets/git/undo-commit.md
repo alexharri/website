@@ -1,6 +1,7 @@
 ---
 title: "Undo Git Commit"
-description: "A case study on using TypeScript's infer keyword, combined with recursive types, to create a custom schema language using template literal types."
+description: "How to undo a local Git commit."
+showPreview: true
 ---
 
 To undo a recent local commit, run the following:

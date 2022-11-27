@@ -1,13 +1,13 @@
 import fs from "fs";
-import path from "path";
-import { GetStaticProps } from "next";
-import { Layout } from "../components/Layout";
-import { postFileNames, POSTS_PATH } from "../utils/mdxUtils";
 import matter from "gray-matter";
-import Link from "next/link";
-import { Post } from "../types/Post";
-import { BlogPost } from "../components/BlogPost/BlogPost";
+import { GetStaticProps } from "next";
+import path from "path";
 import { AboutMe } from "../components/AboutMe/AboutMe";
+import { BlogPost } from "../components/BlogPost/BlogPost";
+import { Layout } from "../components/Layout";
+import { Post } from "../types/Post";
+import { postFileNames, POSTS_PATH } from "../utils/mdxUtils";
+
 
 interface Props {
   posts: Post[];
