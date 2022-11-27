@@ -2,6 +2,7 @@ import Highlight, { defaultProps } from "prism-react-renderer";
 import styles from "./StaticCodeBlock.module.scss";
 import { prismTheme } from "./prismTheme";
 
+
 /**
  * A markdown code block like so:
  *
@@ -35,24 +36,36 @@ interface CodeProps {
 interface Props {
   language: string;
   children: string;
+  small?: boolean;
   marginBottom?: number;
 }
 
 export const StaticCodeBlock = (props: Props) => {
-  const { language, children, marginBottom } = props;
+  const { language, children, marginBottom, small } = props;
+
+  const padding = small ? 16 : 24;
+  const fontSize = small ? 14 : 16;
 
   return (
-    <div className={styles.wrapper} style={{ marginBottom }}>
+    <div className={styles.wrapper} style={{ marginBottom, padding }}>
       <Highlight {...defaultProps} code={children} language={language as any} theme={prismTheme}>
         {({ className, style, tokens, getLineProps, getTokenProps }) => (
-          <pre className={[className, styles.pre].join(" ")} style={style}>
-            {tokens.map((line, i) => (
-              <div {...getLineProps({ line, key: i })}>
-                {line.map((token, key) => (
-                  <span {...getTokenProps({ token, key })} />
-                ))}
-              </div>
-            ))}
+          <pre
+            className={[className, styles.pre].join(" ")}
+            style={{ ...style, fontSize }}
+          >
+            {tokens.map((line, i) => {
+              const lastLine = i === tokens.length - 1;
+              const isEmpty = () => line.map((token) => token.content).join("") === "\n";
+              if (lastLine && isEmpty()) return null;
+              return (
+                <div {...getLineProps({ line, key: i })}>
+                  {line.map((token, key) => (
+                    <span {...getTokenProps({ token, key })} />
+                  ))}
+                </div>
+              );
+            })}
           </pre>
         )}
       </Highlight>

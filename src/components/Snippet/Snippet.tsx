@@ -10,21 +10,21 @@ interface Props {
 export const SnippetLink = (props: Props) => {
   const { snippet } = props;
 
-  console.log(snippet);
-
   return (
-    <article>
-      <Link href={`/snippets/${snippet.slug}`} className={styles.link}>
-        <h2>{snippet.title}</h2>
-        {snippet.description && <p>{snippet.description}</p>}
+    <article className={styles.container}>
+      <div className={styles.linkWrapper}>
+        <Link href={`/snippets/${snippet.slug}`} className={styles.link}>
+          <h2 className={styles.title}>{snippet.title}</h2>
+          {snippet.description && <p>{snippet.description}</p>}
+        </Link>
         {snippet.snippet && (
-          <StaticCodeBlock language={snippet.snippet.language}>
-            {snippet.snippet.text}
-          </StaticCodeBlock>
+          <div className={styles.codeBlockWrapper}>
+            <StaticCodeBlock language={snippet.snippet.language} small>
+              {snippet.snippet.text}
+            </StaticCodeBlock>
+          </div>
         )}
-
-        <div className={styles.read}>Read</div>
-      </Link>
+      </div>
     </article>
   );
 };

@@ -13,6 +13,7 @@ import { Pre, StaticCodeBlock } from "../../components/StaticCodeBlock/StaticCod
 import { FrontMatter } from "../../types/FrontMatter";
 import { usePostWatcher } from "../../utils/hooks/usePostWatcher";
 import { postFileNames, POSTS_PATH } from "../../utils/mdxUtils";
+import { withMargin } from "../../utils/withMargin";
 
 // Custom components/renderers to pass to MDX.
 // Since the MDX files aren't loaded by webpack, they have no knowledge of how
@@ -20,8 +21,8 @@ import { postFileNames, POSTS_PATH } from "../../utils/mdxUtils";
 // here.
 const components = {
   a: Link,
-  pre: Pre,
-  StaticCodeBlock,
+  pre: withMargin([32, -24], Pre),
+  StaticCodeBlock: withMargin([32, -24], StaticCodeBlock),
   SmallNote,
   // ExampleComponent: dynamic(() => import("../../src/components/ExampleComponent")),
   Head,

@@ -4,9 +4,9 @@ import { GetStaticProps } from "next";
 import path from "path";
 import { Layout } from "../../components/Layout";
 import { SnippetLink } from "../../components/Snippet/Snippet";
+import { SnippetList } from "../../components/SnippetList/SnippetList";
 import { Snippet } from "../../types/Snippet";
 import { snippetFileNames, SNIPPETS_PATH } from "../../utils/mdxUtils";
-
 
 interface Props {
   snippets: Snippet[];
@@ -16,9 +16,11 @@ export default function Page(props: Props) {
   return (
     <Layout>
       <h1>Snippets</h1>
-      {props.snippets.map((snippet) => (
-        <SnippetLink snippet={snippet} key={snippet.slug} />
-      ))}
+      <SnippetList>
+        {props.snippets.map((snippet) => (
+          <SnippetLink snippet={snippet} key={snippet.slug} />
+        ))}
+      </SnippetList>
     </Layout>
   );
 }
@@ -49,7 +51,7 @@ export const getStaticProps: GetStaticProps<Props> = async (ctx) => {
         0,
         after.findIndex((line) => line.startsWith("```")),
       );
-      snippet = { text: content.join("\n"), language };
+      snippet = { text: content.join("\n") + "\n", language };
     }
 
     const slug = fileName.replace(/\.mdx?$/, "");

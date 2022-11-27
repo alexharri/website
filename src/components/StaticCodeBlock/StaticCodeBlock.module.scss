@@ -1,11 +1,8 @@
 .wrapper {
   background: var(--color-background-500);
   border-radius: 4px;
-  margin: 32px -24px;
   display: flex;
   overflow: auto;
-  padding: 24px;
-  padding-bottom: 0;
   transition: background var(--color-transition-duration);
 
   @media (max-width: 800px) {
@@ -15,7 +12,6 @@
 
 .pre {
   white-space: pre;
-  font-size: 16px;
   line-height: 1.5;
   margin: 0px;
 }
