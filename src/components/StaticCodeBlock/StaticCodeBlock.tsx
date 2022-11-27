@@ -1,7 +1,9 @@
 import Highlight, { defaultProps } from "prism-react-renderer";
+import { CopyIcon18 } from "../Icon/CopyIcon18";
 import styles from "./StaticCodeBlock.module.scss";
 import { prismTheme } from "./prismTheme";
-
+import { copyTextToClipboard } from "../../utils/clipboard";
+import { useEffect, useState } from "react";
 
 /**
  * A markdown code block like so:
@@ -40,6 +42,29 @@ interface Props {
   marginBottom?: number;
 }
 
+const CopyButton = (props: { text: string }) => {
+  const [copied, setCopied] = useState(false);
+
+  useEffect(() => {
+    if (!copied) return;
+    const timeout = setTimeout(() => setCopied(false), 3000);
+    return () => clearTimeout(timeout);
+  }, [copied]);
+
+  return (
+    <button
+      className={styles.copyButton}
+      onClick={async () => {
+        const copied = await copyTextToClipboard(props.text);
+        setCopied(copied);
+      }}
+      data-copied={copied}
+    >
+      {copied ? "Copied" : <CopyIcon18 />}
+    </button>
+  );
+};
+
 export const StaticCodeBlock = (props: Props) => {
   const { language, children, marginBottom, small } = props;
 
@@ -49,13 +74,10 @@ export const StaticCodeBlock = (props: Props) => {
   return (
     <div className={styles.wrapper} style={{ marginBottom, padding }}>
       <Highlight {...defaultProps} code={children} language={language as any} theme={prismTheme}>
-        {({ className, style, tokens, getLineProps, getTokenProps }) => (
-          <pre
-            className={[className, styles.pre].join(" ")}
-            style={{ ...style, fontSize }}
-          >
-            {tokens.map((line, i) => {
-              const lastLine = i === tokens.length - 1;
+        {({ className, style, tokens: lines, getLineProps, getTokenProps }) => (
+          <pre className={[className, styles.pre].join(" ")} style={{ ...style, fontSize }}>
+            {lines.map((line, i) => {
+              const lastLine = i === lines.length - 1;
               const isEmpty = () => line.map((token) => token.content).join("") === "\n";
               if (lastLine && isEmpty()) return null;
               return (
@@ -69,6 +91,7 @@ export const StaticCodeBlock = (props: Props) => {
           </pre>
         )}
       </Highlight>
+      <CopyButton text={children} />
     </div>
   );
 };

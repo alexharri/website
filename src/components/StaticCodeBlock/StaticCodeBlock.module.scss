@@ -3,15 +3,42 @@
   border-radius: 4px;
   display: flex;
   overflow: auto;
+  position: relative;
   transition: background var(--color-transition-duration);
 
   @media (max-width: 800px) {
     border-radius: 0;
   }
+
+  button[data-copied] {
+    opacity: 0;
+  }
+  &:hover button[data-copied],
+  button[data-copied="true"] {
+    opacity: 1;
+  }
+  
 }
 
 .pre {
   white-space: pre;
   line-height: 1.5;
   margin: 0px;
+}
+
+.copyButton {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  min-width: 32px;
+  padding: 6px;
+  height: 32px;
+  color: var(--color-text);
+  background: rgba(var(--color-light-rgb), 0.05);
+  border: 1px solid rgba(var(--color-light-rgb), 0.1);
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: opacity .3s;
 }

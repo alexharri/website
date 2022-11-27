@@ -15,13 +15,11 @@ export const colors = {
   "token-comment": "var(--color-token-comment)",
   "header-background": "var(--color-header-background)",
   "header-border-background": "var(--color-header-border-background)",
+  "light-rgb": "var(--color-light-rgb)",
   scheme: "var(--color-scheme)",
 };
 
-export const colorValues: Record<
-  "dark" | "light",
-  Record<ColorName, string>
-> = {
+export const colorValues: Record<"dark" | "light", Record<ColorName, string>> = {
   dark: {
     text: "#B9DBFA",
     "text-300": "#9fcff9",
@@ -38,6 +36,7 @@ export const colorValues: Record<
     "token-comment": "#676f83",
     "header-background": "rgba(9, 13, 19, 0.6)",
     "header-border-background": "rgba(9, 13, 19, 0.8)",
+    "light-rgb": "255, 255, 255",
     scheme: "dark",
   },
   light: {
@@ -56,6 +55,7 @@ export const colorValues: Record<
     "token-comment": "#7998a7",
     "header-background": "rgba(255, 255, 255, 0.65)",
     "header-border-background": "rgba(255, 255, 255, 0.8)",
+    "light-rgb": "0, 0, 0",
     scheme: "light",
   },
 };
