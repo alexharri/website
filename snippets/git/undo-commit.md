@@ -1,6 +1,7 @@
 ---
 title: "Undo Git Commit"
 showPreview: true
+publishedAt: "27-11-2022"
 ---
 
 To undo a recent local commit, run the following:
