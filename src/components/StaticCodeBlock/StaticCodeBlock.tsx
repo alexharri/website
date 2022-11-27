@@ -1,6 +1,6 @@
 import Highlight, { defaultProps } from "prism-react-renderer";
-import { prismTheme } from "./prismTheme";
 import styles from "./StaticCodeBlock.module.scss";
+import { prismTheme } from "./prismTheme";
 
 /**
  * A markdown code block like so:
@@ -33,7 +33,7 @@ interface CodeProps {
 }
 
 interface Props {
-  language: "tsx" | "go";
+  language: string;
   children: string;
   marginBottom?: number;
 }
@@ -43,12 +43,7 @@ export const StaticCodeBlock = (props: Props) => {
 
   return (
     <div className={styles.wrapper} style={{ marginBottom }}>
-      <Highlight
-        {...defaultProps}
-        code={children}
-        language={language}
-        theme={prismTheme}
-      >
+      <Highlight {...defaultProps} code={children} language={language as any} theme={prismTheme}>
         {({ className, style, tokens, getLineProps, getTokenProps }) => (
           <pre className={[className, styles.pre].join(" ")} style={style}>
             {tokens.map((line, i) => (
