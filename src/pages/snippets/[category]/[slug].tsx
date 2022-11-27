@@ -5,14 +5,15 @@ import { MDXRemote, MDXRemoteSerializeResult } from "next-mdx-remote";
 import { serialize } from "next-mdx-remote/serialize";
 import Head from "next/head";
 import path from "path";
-import { Layout } from "../../components/Layout";
-import { Link } from "../../components/Link";
-import { Meta } from "../../components/Meta/Meta";
-import { SmallNote } from "../../components/SmallNote/SmallNote";
-import { Pre, StaticCodeBlock } from "../../components/StaticCodeBlock/StaticCodeBlock";
-import { FrontMatter } from "../../types/FrontMatter";
-import { usePostWatcher } from "../../utils/hooks/usePostWatcher";
-import { postFileNames, POSTS_PATH } from "../../utils/mdxUtils";
+import { Layout } from "../../../components/Layout";
+import { Link } from "../../../components/Link";
+import { Meta } from "../../../components/Meta/Meta";
+import { SmallNote } from "../../../components/SmallNote/SmallNote";
+import { SnippetTitle } from "../../../components/SnippetTitle/SnippetTitle";
+import { Pre, StaticCodeBlock } from "../../../components/StaticCodeBlock/StaticCodeBlock";
+import { FrontMatter } from "../../../types/FrontMatter";
+import { usePostWatcher } from "../../../utils/hooks/usePostWatcher";
+import { snippetFileNames, SNIPPETS_PATH } from "../../../utils/mdxUtils";
 
 // Custom components/renderers to pass to MDX.
 // Since the MDX files aren't loaded by webpack, they have no knowledge of how
@@ -42,7 +43,7 @@ export default function PostPage(props: Props) {
       <Meta title={scope.title} description={scope.description} />
       <Layout>
         <main>
-          <h1>{scope.title}</h1>
+          <SnippetTitle title={scope.title} />
           <MDXRemote {...(source as any)} components={components} />
         </main>
       </Layout>
@@ -52,14 +53,15 @@ export default function PostPage(props: Props) {
 
 type Params = {
   slug: string;
+  category: string;
 };
 
 export const getStaticProps: GetStaticProps<Props, Params> = async (ctx) => {
   const params = ctx.params!;
 
-  let filePath = path.join(POSTS_PATH, `${params.slug}.mdx`);
+  let filePath = path.join(SNIPPETS_PATH, params.category, `${params.slug}.mdx`);
   if (!fs.existsSync(filePath)) {
-    filePath = path.join(POSTS_PATH, `${params.slug}.md`);
+    filePath = path.join(SNIPPETS_PATH, params.category, `${params.slug}.md`);
   }
   const fileContent = fs.readFileSync(filePath);
 
@@ -75,7 +77,7 @@ export const getStaticProps: GetStaticProps<Props, Params> = async (ctx) => {
 
   let version = "0";
 
-  const versionFilePath = path.resolve(POSTS_PATH, "./.version", params.slug);
+  const versionFilePath = path.resolve(SNIPPETS_PATH, "./.version", params.slug);
 
   if (fs.existsSync(versionFilePath)) {
     version = fs.readFileSync(versionFilePath, "utf-8");
@@ -85,9 +87,10 @@ export const getStaticProps: GetStaticProps<Props, Params> = async (ctx) => {
 };
 
 export const getStaticPaths: GetStaticPaths<Params> = async () => {
-  const paths = postFileNames
+  const paths = snippetFileNames
     .map((path) => path.replace(/\.mdx?$/, ""))
-    .map((slug) => ({ params: { slug } }));
+    .map((path) => path.split("/"))
+    .map(([category, slug]) => ({ params: { category, slug } }));
 
   return {
     paths,

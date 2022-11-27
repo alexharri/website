@@ -1,0 +1,5 @@
+{
+  "printWidth": 100,
+  "trailingComma": "all",
+  "importOrder": ["<THIRD_PARTY_MODULES>", "^[./]"]
+}

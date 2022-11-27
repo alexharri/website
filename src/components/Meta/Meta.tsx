@@ -2,11 +2,10 @@ import Head from "next/head";
 
 interface Props {
   title: string;
-  slug: string;
   description?: string;
 }
 
-export const BlogMeta = (props: Props) => {
+export const Meta = (props: Props) => {
   return (
     <Head>
       <title>{props.title}</title>
