@@ -8,6 +8,7 @@ import path from "path";
 import { Layout } from "../../components/Layout";
 import { Link } from "../../components/Link";
 import { Meta } from "../../components/Meta/Meta";
+import { ScriptedEditor } from "../../components/ScriptedEditor/ScriptedEditor";
 import { SmallNote } from "../../components/SmallNote/SmallNote";
 import { Pre, StaticCodeBlock } from "../../components/StaticCodeBlock/StaticCodeBlock";
 import { FrontMatter } from "../../types/FrontMatter";
@@ -24,6 +25,7 @@ const components = {
   pre: withMargin([32, -24], Pre),
   StaticCodeBlock: withMargin([32, -24], StaticCodeBlock),
   SmallNote,
+  ScriptedEditor,
   // ExampleComponent: dynamic(() => import("../../src/components/ExampleComponent")),
   Head,
 };

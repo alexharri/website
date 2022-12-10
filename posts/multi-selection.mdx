@@ -1,0 +1,20 @@
+---
+title: "Multi-selection"
+description: ""
+publishedAt: ""
+---
+
+<ScriptedEditor
+  initialCode={`
+function doStuff() {
+  const x = 1;
+  const y = 2;
+  const z = 3;
+}
+  `}
+  script={[
+    { type: "select", line: "1", word: "const" },
+    { type: "select_next" },
+    { type: "select_next" },
+  ]}
+/>
