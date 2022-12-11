@@ -33,25 +33,17 @@ export const ScriptedEditor = (props: Props) => {
   const runContextRef = useRef(runContext);
   runContextRef.current = runContext;
 
-  const scriptIdRef = useRef(0);
-
   const startScript = useCallback(
-    async (index: number, delay: number, _isCanceled?: () => boolean) => {
+    async (index: number, delay: number) => {
       if (!runContext) return;
+      runContext.startNewRun();
 
       const { editor } = runContext;
       if (editor.getValue() !== initialCode) {
         editor.setValue(initialCode);
       }
 
-      const localScriptId = ++scriptIdRef.current;
-
-      function isCanceled() {
-        return _isCanceled?.() || scriptIdRef.current !== localScriptId;
-      }
-
-      console.log("start", index);
-      runScript(index, delay, runContext, isCanceled);
+      runScript(index, delay, runContext);
     },
     [runContext],
   );
@@ -59,11 +51,8 @@ export const ScriptedEditor = (props: Props) => {
   // Run script on mount
   useEffect(() => {
     if (!runContext) return;
-    let unmounted = false;
-    startScript(0, 1000, () => unmounted);
-    return () => {
-      unmounted = true;
-    };
+    startScript(0, 1000);
+    return () => runContext.cancelCurrentRun();
   }, [runContext]);
 
   const options = useMemo<EditorProps["options"]>(
@@ -89,14 +78,14 @@ export const ScriptedEditor = (props: Props) => {
     editor.layout({ height, width });
   }, []);
 
-  const stopScript = useCallback(() => {
-    scriptIdRef.current++;
-  }, []);
+  const cancelCurrentRun = useCallback(() => {
+    runContext?.cancelCurrentRun();
+  }, [runContext]);
 
   const [mode] = useColorMode();
 
   return (
-    <div id="editor-container" onMouseDown={stopScript} onKeyDown={stopScript}>
+    <div id="editor-container" onMouseDown={cancelCurrentRun} onKeyDown={cancelCurrentRun}>
       <MemoizedEditor
         defaultValue={initialCode}
         className={styles.editor}

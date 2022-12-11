@@ -1,5 +1,5 @@
 import { customCommandHandlers as customHandlers, CustomCommands } from "./runCustomCommand";
-import { MonacoEditor } from "../types/scriptedEditorTypes";
+import { RunContext } from "./RunContext";
 
 export const builtInCommands = <const>[
   { command: "Command D", trigger: "editor.action.addSelectionToNextFindMatch" },
@@ -32,14 +32,14 @@ for (const { command, trigger } of builtInCommands) {
 
 export type Command = { command: BuiltInCommand["command"] } | CustomCommands;
 
-export async function runCommand(editor: MonacoEditor, command: Command) {
+export async function runCommand(runContext: RunContext, command: Command) {
   for (const handler of customCommandHandlers) {
     if (handler.command !== command.command) continue;
-    handler.handler(editor, command);
+    await handler.handler(runContext, command);
     return;
   }
 
   const trigger = commandToTrigger[command.command];
   if (!trigger) throw new Error(`Unknown command '${command}'`);
-  editor.trigger(null, trigger, null);
+  runContext.editor.trigger(null, trigger, null);
 }

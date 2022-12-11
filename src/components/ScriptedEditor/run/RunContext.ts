@@ -4,8 +4,10 @@ import { ScriptCommand } from "../types/scriptTypes";
 type OnRunCommand = (index: number, time: number) => void;
 
 export class RunContext {
+  runId = 0;
   editor: MonacoEditor;
   script: ScriptCommand[];
+  sync = true;
   private moveIndexHandlers: OnRunCommand[] = [];
 
   constructor(editor: MonacoEditor, script: ScriptCommand[]) {
@@ -33,5 +35,21 @@ export class RunContext {
     if (type === "run-command") {
       this.moveIndexHandlers.forEach((handler) => handler(data.index, data.time));
     }
+  }
+
+  getCheckCanceledFunction() {
+    const runId = this.runId;
+    return () => this.runId !== runId;
+  }
+
+  cancelCurrentRun() {
+    this.runId++;
+  }
+
+  /**
+   * Also cancels the current run if there is a current run in process.
+   */
+  startNewRun() {
+    this.runId++;
   }
 }
