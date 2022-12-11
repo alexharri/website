@@ -1,10 +1,12 @@
+import { useEffect, useState } from "react";
+import { RunContext } from "../run/RunContext";
 import { ScriptCommand } from "../types/scriptTypes";
 import styles from "./ScriptCommands.module.scss";
 
 interface Props {
-  index: number;
   moveToIndex: (index: number) => void;
   script: ScriptCommand[];
+  runContext: RunContext;
 }
 
 const modifierKeys = new Set(["Command", "Shift", "Option", "Ctrl"]);
@@ -45,12 +47,30 @@ function extractKeys(command: string): { modifierKeys: string[]; keys: string[] 
 }
 
 export const ScriptCommands = (props: Props) => {
+  const { runContext } = props;
+
+  const [index, setIndex] = useState(-1);
+
+  useEffect(() => {
+    const handler = (index: number, _time: number) => {
+      setIndex(index);
+    };
+    runContext.subscribe("run-command", handler);
+    return () => runContext.unsubscribe("run-command", handler);
+  }, [runContext]);
+
   return (
     <div className={styles.container}>
+      {index}
       {props.script.map((command, i) => {
         const { keys, modifierKeys } = extractKeys(command.command);
         return (
-          <button className={styles.line} key={i} onClick={() => props.moveToIndex(i)}>
+          <button
+            className={styles.line}
+            data-active={i <= index}
+            key={i}
+            onClick={() => props.moveToIndex(i)}
+          >
             <div className={styles.left}>
               {modifierKeys.map((key, i) => (
                 <div className={styles.key} key={i}>

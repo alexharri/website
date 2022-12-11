@@ -7,6 +7,7 @@ import { runScript } from "./run/runScript";
 import { ScriptCommands } from "./ScriptCommands/ScriptCommands";
 import React from "react";
 import { useColorMode } from "../../utils/colorMode";
+import { RunContext } from "./run/RunContext";
 
 const MemoizedEditor = React.memo(Editor);
 
@@ -24,14 +25,21 @@ export const ScriptedEditor = (props: Props) => {
   const initialCode = useMemo(() => props.initialCode.slice(1, props.initialCode.length - 3), []);
 
   const [_editor, setEditor] = useState<MonacoEditor | null>(null);
-  const editorRef = useRef<MonacoEditor>(null!);
-  if (_editor) editorRef.current = _editor;
+
+  const runContext = useMemo(
+    () => (_editor ? new RunContext(_editor, props.script) : null),
+    [_editor],
+  );
+  const runContextRef = useRef(runContext);
+  runContextRef.current = runContext;
 
   const scriptIdRef = useRef(0);
 
   const startScript = useCallback(
     async (index: number, delay: number, _isCanceled?: () => boolean) => {
-      const editor = editorRef.current;
+      if (!runContext) return;
+
+      const { editor } = runContext;
       if (editor.getValue() !== initialCode) {
         editor.setValue(initialCode);
       }
@@ -42,23 +50,21 @@ export const ScriptedEditor = (props: Props) => {
         return _isCanceled?.() || scriptIdRef.current !== localScriptId;
       }
 
-      runScript(index, delay, editorRef.current, props.script, isCanceled);
+      console.log("start", index);
+      runScript(index, delay, runContext, isCanceled);
     },
-    [],
+    [runContext],
   );
 
+  // Run script on mount
   useEffect(() => {
-    const editor = editorRef.current;
-    if (!editor) {
-      return () => {};
-    }
-
+    if (!runContext) return;
     let unmounted = false;
     startScript(0, 1000, () => unmounted);
     return () => {
       unmounted = true;
     };
-  }, [_editor]);
+  }, [runContext]);
 
   const options = useMemo<EditorProps["options"]>(
     () => ({
@@ -77,9 +83,10 @@ export const ScriptedEditor = (props: Props) => {
   }, []);
 
   const onChange = useCallback((value?: string) => {
+    const { editor } = runContext!;
     const height = value ? calculateHeight(value) : 128;
     const width = document.getElementById("editor-container")!.getBoundingClientRect().width;
-    editorRef.current?.layout({ height, width });
+    editor.layout({ height, width });
   }, []);
 
   const stopScript = useCallback(() => {
@@ -101,11 +108,13 @@ export const ScriptedEditor = (props: Props) => {
         height={calculateHeight(initialCode)}
       />
       <button onClick={() => startScript(0, 1000)}>Start script</button>
-      <ScriptCommands
-        index={2}
-        moveToIndex={(index) => startScript(index, 1000)}
-        script={props.script}
-      />
+      {runContext && (
+        <ScriptCommands
+          moveToIndex={(index) => startScript(index, 1000)}
+          script={props.script}
+          runContext={runContext}
+        />
+      )}
     </div>
   );
 };

@@ -32,7 +32,7 @@ for (const { command, trigger } of builtInCommands) {
 
 export type Command = { command: BuiltInCommand["command"] } | CustomCommands;
 
-export function runCommand(editor: MonacoEditor, command: Command) {
+export async function runCommand(editor: MonacoEditor, command: Command) {
   for (const handler of customCommandHandlers) {
     if (handler.command !== command.command) continue;
     handler.handler(editor, command);
