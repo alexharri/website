@@ -13,8 +13,10 @@ function doStuff() {
 }
   `}
   script={[
-    { type: "select", line: "1", word: "const" },
-    { type: "select_next" },
-    { type: "select_next" },
+    { command: "Select Word", word: "const", line: 2 },
+    { command: "Command D" },
+    { command: "Command D" },
+    { command: "Command Right" },
+    { command: "Left", times: 4 },
   ]}
 />
