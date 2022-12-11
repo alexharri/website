@@ -1,4 +1,4 @@
-import { ScriptCommand } from "./scriptTypes";
+import { ScriptCommand } from "../types/scriptTypes";
 import styles from "./ScriptCommands.module.scss";
 
 interface Props {

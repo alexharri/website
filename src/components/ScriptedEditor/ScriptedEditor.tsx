@@ -1,10 +1,10 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Editor, { EditorProps } from "@monaco-editor/react";
 import styles from "./ScriptedEditor.module.scss";
-import { MonacoEditor } from "./scriptedEditorTypes";
-import { ScriptCommand } from "./scriptTypes";
-import { runScript } from "./runScript";
-import { ScriptCommands } from "./ScriptCommands";
+import { MonacoEditor } from "./types/scriptedEditorTypes";
+import { ScriptCommand } from "./types/scriptTypes";
+import { runScript } from "./run/runScript";
+import { ScriptCommands } from "./ScriptCommands/ScriptCommands";
 import React from "react";
 import { useColorMode } from "../../utils/colorMode";
 

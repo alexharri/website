@@ -1,4 +1,4 @@
-import { MonacoEditor } from "./scriptedEditorTypes";
+import { MonacoEditor } from "../types/scriptedEditorTypes";
 
 type SelectWordCommand = { command: "Select Word"; word: string; line: number };
 export type CustomCommands = SelectWordCommand;

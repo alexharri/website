@@ -1,6 +1,6 @@
 import { runCommand } from "./runCommand";
-import { MonacoEditor } from "./scriptedEditorTypes";
-import { ScriptCommand } from "./scriptTypes";
+import { MonacoEditor } from "../types/scriptedEditorTypes";
+import { ScriptCommand } from "../types/scriptTypes";
 
 export async function runScript(
   index: number,

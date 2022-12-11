@@ -1,5 +1,5 @@
 import { customCommandHandlers as customHandlers, CustomCommands } from "./runCustomCommand";
-import { MonacoEditor } from "./scriptedEditorTypes";
+import { MonacoEditor } from "../types/scriptedEditorTypes";
 
 export const builtInCommands = <const>[
   { command: "Command D", trigger: "editor.action.addSelectionToNextFindMatch" },
