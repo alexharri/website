@@ -1,66 +1,98 @@
-import { useEffect, useMemo, useState } from "react";
-import MonacoEditor, { EditorProps } from "@monaco-editor/react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import Editor, { EditorProps } from "@monaco-editor/react";
 import styles from "./ScriptedEditor.module.scss";
-import { Command, runCommand } from "./runCommand";
+import { MonacoEditor } from "./scriptedEditorTypes";
+import { ScriptCommand } from "./scriptTypes";
+import { runScript } from "./runScript";
+
+const FONT_SIZE = 24;
+const LINE_HEIGHT_FACTOR = 1.5;
+const LINE_HEIGHT = FONT_SIZE * LINE_HEIGHT_FACTOR;
+const V_PADDING = 24;
 
 interface Props {
   initialCode: string;
-  script: (Command & { times?: number; msBetween?: number })[];
+  script: ScriptCommand[];
 }
 
 export const ScriptedEditor = (props: Props) => {
-  const initialCode = useMemo(() => props.initialCode.slice(1, -1), []);
+  const initialCode = useMemo(() => props.initialCode.slice(1, props.initialCode.length - 3), []);
 
-  const [_editor, setEditor] = useState<
-    import("monaco-editor").editor.IStandaloneCodeEditor | null
-  >(null);
+  const [_editor, setEditor] = useState<MonacoEditor | null>(null);
+  const editorRef = useRef<MonacoEditor>(null!);
+  if (_editor) editorRef.current = _editor;
+
+  const scriptIdRef = useRef(0);
+
+  const startScript = useCallback(async (_isCanceled?: () => boolean) => {
+    const editor = editorRef.current;
+    if (editor.getValue() !== initialCode) {
+      editor.setValue(initialCode);
+    }
+
+    const localScriptId = scriptIdRef.current;
+
+    function isCanceled() {
+      return _isCanceled?.() || scriptIdRef.current !== localScriptId;
+    }
+
+    runScript(editorRef.current, props.script, isCanceled);
+  }, []);
 
   useEffect(() => {
-    if (!_editor) {
+    const editor = editorRef.current;
+    if (!editor) {
       return () => {};
     }
-    const editor = _editor;
-    editor.focus();
 
     let unmounted = false;
-
-    const run = async () => {
-      for (const command of props.script) {
-        if (unmounted) return;
-
-        const { times = 1, msBetween = 128 } = command;
-        if (!Number.isFinite(times)) throw new Error(`Unexpected times value ${times}`);
-
-        for (let i = 0; i < times; i++) {
-          runCommand(editor, command);
-          if (i < times - 1) {
-            await new Promise<void>((resolve) => setTimeout(resolve, msBetween));
-          }
-        }
-
-        await new Promise<void>((resolve) => setTimeout(resolve, 500));
-      }
-    };
-
-    setTimeout(run, 1000);
-
+    setTimeout(() => startScript(() => unmounted), 1000);
     return () => {
       unmounted = true;
     };
   }, [_editor]);
 
-  const options = useMemo<EditorProps["options"]>(() => ({}), []);
+  const options = useMemo<EditorProps["options"]>(
+    () => ({
+      fontSize: FONT_SIZE,
+      lineHeight: LINE_HEIGHT_FACTOR,
+      lineNumbers: "off",
+      minimap: { enabled: false },
+      scrollBeyondLastLine: false,
+      padding: { top: V_PADDING, bottom: V_PADDING },
+    }),
+    [],
+  );
+
+  const calculateHeight = useCallback((code: string) => {
+    return code.split("\n").length * LINE_HEIGHT + V_PADDING * 2;
+  }, []);
+
+  const initialheight = useMemo(() => calculateHeight(initialCode), []);
+
+  const onChange = useCallback((value?: string) => {
+    const height = value ? calculateHeight(value) : 128;
+    const width = document.getElementById("editor-container")!.getBoundingClientRect().width;
+    editorRef.current?.layout({ height, width });
+  }, []);
+
+  const stopScript = useCallback(() => {
+    scriptIdRef.current++;
+  }, []);
 
   return (
-    <div>
-      <MonacoEditor
+    <div id="editor-container" onMouseDown={stopScript} onKeyDown={stopScript}>
+      <Editor
         defaultValue={initialCode}
         className={styles.editor}
         theme="vs-dark"
         language="typescript"
         options={options}
         onMount={setEditor}
+        onChange={onChange}
+        height={initialheight}
       />
+      <button onClick={() => startScript()}>Start script</button>
     </div>
   );
 };
