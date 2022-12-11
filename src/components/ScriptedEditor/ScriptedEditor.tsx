@@ -4,6 +4,7 @@ import styles from "./ScriptedEditor.module.scss";
 import { MonacoEditor } from "./scriptedEditorTypes";
 import { ScriptCommand } from "./scriptTypes";
 import { runScript } from "./runScript";
+import { ScriptCommands } from "./ScriptCommands";
 
 const FONT_SIZE = 24;
 const LINE_HEIGHT_FACTOR = 1.5;
@@ -93,6 +94,7 @@ export const ScriptedEditor = (props: Props) => {
         height={initialheight}
       />
       <button onClick={() => startScript()}>Start script</button>
+      <ScriptCommands index={2} moveToIndex={() => {}} script={props.script} />
     </div>
   );
 };

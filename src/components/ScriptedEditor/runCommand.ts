@@ -30,25 +30,16 @@ for (const { command, trigger } of builtInCommands) {
   commandToTrigger[command] = trigger;
 }
 
-export type Command =
-  | BuiltInCommand["command"]
-  | { command: BuiltInCommand["command"] }
-  | CustomCommands;
+export type Command = { command: BuiltInCommand["command"] } | CustomCommands;
 
 export function runCommand(editor: MonacoEditor, command: Command) {
-  if (typeof command !== "string") {
-    for (const handler of customCommandHandlers) {
-      if (handler.command !== command.command) continue;
-      handler.handler(editor, command);
-      return;
-    }
+  for (const handler of customCommandHandlers) {
+    if (handler.command !== command.command) continue;
+    handler.handler(editor, command);
+    return;
   }
 
-  if (typeof command !== "string") {
-    command = command.command as BuiltInCommand["command"];
-  }
-
-  const trigger = commandToTrigger[command];
+  const trigger = commandToTrigger[command.command];
   if (!trigger) throw new Error(`Unknown command '${command}'`);
   editor.trigger(null, trigger, null);
 }
