@@ -5,6 +5,10 @@ import { MonacoEditor } from "./scriptedEditorTypes";
 import { ScriptCommand } from "./scriptTypes";
 import { runScript } from "./runScript";
 import { ScriptCommands } from "./ScriptCommands";
+import React from "react";
+import { useColorMode } from "../../utils/colorMode";
+
+const MemoizedEditor = React.memo(Editor);
 
 const FONT_SIZE = 24;
 const LINE_HEIGHT_FACTOR = 1.5;
@@ -25,20 +29,23 @@ export const ScriptedEditor = (props: Props) => {
 
   const scriptIdRef = useRef(0);
 
-  const startScript = useCallback(async (_isCanceled?: () => boolean) => {
-    const editor = editorRef.current;
-    if (editor.getValue() !== initialCode) {
-      editor.setValue(initialCode);
-    }
+  const startScript = useCallback(
+    async (index: number, delay: number, _isCanceled?: () => boolean) => {
+      const editor = editorRef.current;
+      if (editor.getValue() !== initialCode) {
+        editor.setValue(initialCode);
+      }
 
-    const localScriptId = scriptIdRef.current;
+      const localScriptId = ++scriptIdRef.current;
 
-    function isCanceled() {
-      return _isCanceled?.() || scriptIdRef.current !== localScriptId;
-    }
+      function isCanceled() {
+        return _isCanceled?.() || scriptIdRef.current !== localScriptId;
+      }
 
-    runScript(editorRef.current, props.script, isCanceled);
-  }, []);
+      runScript(index, delay, editorRef.current, props.script, isCanceled);
+    },
+    [],
+  );
 
   useEffect(() => {
     const editor = editorRef.current;
@@ -47,7 +54,7 @@ export const ScriptedEditor = (props: Props) => {
     }
 
     let unmounted = false;
-    setTimeout(() => startScript(() => unmounted), 1000);
+    startScript(0, 1000, () => unmounted);
     return () => {
       unmounted = true;
     };
@@ -69,8 +76,6 @@ export const ScriptedEditor = (props: Props) => {
     return code.split("\n").length * LINE_HEIGHT + V_PADDING * 2;
   }, []);
 
-  const initialheight = useMemo(() => calculateHeight(initialCode), []);
-
   const onChange = useCallback((value?: string) => {
     const height = value ? calculateHeight(value) : 128;
     const width = document.getElementById("editor-container")!.getBoundingClientRect().width;
@@ -81,20 +86,26 @@ export const ScriptedEditor = (props: Props) => {
     scriptIdRef.current++;
   }, []);
 
+  const [mode] = useColorMode();
+
   return (
     <div id="editor-container" onMouseDown={stopScript} onKeyDown={stopScript}>
-      <Editor
+      <MemoizedEditor
         defaultValue={initialCode}
         className={styles.editor}
-        theme="vs-dark"
+        theme={mode === "dark" ? "vs-dark" : "light"}
         language="typescript"
         options={options}
         onMount={setEditor}
         onChange={onChange}
-        height={initialheight}
+        height={calculateHeight(initialCode)}
       />
-      <button onClick={() => startScript()}>Start script</button>
-      <ScriptCommands index={2} moveToIndex={() => {}} script={props.script} />
+      <button onClick={() => startScript(0, 1000)}>Start script</button>
+      <ScriptCommands
+        index={2}
+        moveToIndex={(index) => startScript(index, 1000)}
+        script={props.script}
+      />
     </div>
   );
 };
