@@ -96,7 +96,6 @@ export const ScriptedEditor = (props: Props) => {
         onChange={onChange}
         height={calculateHeight(initialCode)}
       />
-      <button onClick={() => startScript(0, 1000)}>Start script</button>
       {runContext && (
         <ScriptCommands
           moveToIndex={(index) => startScript(index, 1000)}

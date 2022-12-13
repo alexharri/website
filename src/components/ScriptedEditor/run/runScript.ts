@@ -30,8 +30,8 @@ export async function runScript(index: number, delay: number, runContext: RunCon
     if (!Number.isFinite(times)) throw new Error(`Unexpected times value ${times}`);
 
     for (let i = 0; i < times; i++) {
-      await runCommand(runContext, command);
       runContext.emit("run-command", { index: commandIndex, time: i + 1 });
+      await runCommand(runContext, command);
       if (i < times - 1) {
         await new Promise<void>((resolve) => setTimeout(resolve, msBetween));
       }

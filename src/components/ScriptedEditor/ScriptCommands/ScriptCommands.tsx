@@ -61,7 +61,6 @@ export const ScriptCommands = (props: Props) => {
 
   return (
     <div className={styles.container}>
-      {index}
       {props.script.map((command, i) => {
         const { keys, modifierKeys } = extractKeys(command.command);
         return (

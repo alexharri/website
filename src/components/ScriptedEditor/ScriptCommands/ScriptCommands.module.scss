@@ -1,9 +1,9 @@
 .container {
-  padding: 16px;
-  max-height: 128px;
+  padding: 8px;
+  // max-height: 128px;
   overflow-y: auto;
   background: var(--color-background-500);
-  border-radius: 8px;
+  border-radius: 16px;
   color: white; 
 }
 
@@ -16,12 +16,19 @@
   border-bottom: 1px solid var(--color-background);
   padding: 2px 0;
 
+  &:first-of-type {
+    border-top-left-radius: 8px;
+    border-top-right-radius: 8px;
+  }
+  
   &:last-of-type {
     border-bottom: none;
+    border-bottom-left-radius: 8px;
+    border-bottom-right-radius: 8px;
   }
 
-  [data-active="true"] {
-    background: cyan;
+  &[data-active="true"] {
+    background: #213148;
   }
 }
 
