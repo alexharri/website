@@ -34,8 +34,10 @@ export const ScriptedEditor = (props: Props) => {
   }, []);
 
   const [_editor, setEditor] = useState<MonacoEditor | null>(null);
-
   const [script, setScript] = useState<ScriptCommand[] | null>(null);
+
+  const containerRef = useRef<HTMLDivElement>(null);
+  const editorWrapperRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (Array.isArray(props.script)) {
@@ -54,7 +56,7 @@ export const ScriptedEditor = (props: Props) => {
   runContextRef.current = runContext;
 
   const startScript = useCallback(
-    async (index: number, delay: number) => {
+    async (index: number, delayMs: number) => {
       if (!runContext) return;
       runContext.startNewRun();
 
@@ -63,15 +65,35 @@ export const ScriptedEditor = (props: Props) => {
         editor.setValue(initialCode);
       }
 
-      runScript(index, delay, runContext);
+      runScript({ index, delayMs, runContext });
     },
     [runContext],
   );
 
+  async function applyHeightToContainer(runContext: RunContext) {
+    const container = containerRef.current!;
+    const editorWrapper = editorWrapperRef.current!;
+
+    let height = 0;
+
+    await runScript({
+      index: 0,
+      runContext,
+      forceSync: true,
+      onEachStep: () => {
+        height = Math.max(height, calculateHeight(runContext.editor.getValue()));
+      },
+    });
+
+    console.log({ height });
+    runContext.editor.layout({ height, width: container.offsetWidth });
+    editorWrapper.style.height = height + "px";
+  }
+
   // Run script on mount
   useEffect(() => {
     if (!runContext) return;
-    startScript(0, 1000);
+    applyHeightToContainer(runContext).then(() => startScript(0, 1000));
     return () => runContext.cancelCurrentRun();
   }, [runContext]);
 
@@ -91,16 +113,6 @@ export const ScriptedEditor = (props: Props) => {
     return code.split("\n").length * LINE_HEIGHT + V_PADDING * 2;
   }, []);
 
-  const onChange = useCallback(
-    (value?: string) => {
-      const { editor } = runContext!;
-      const height = value ? calculateHeight(value) : 128;
-      const width = document.getElementById("editor-container")!.getBoundingClientRect().width;
-      editor.layout({ height, width });
-    },
-    [runContext],
-  );
-
   const cancelCurrentRun = useCallback(() => {
     runContext?.cancelCurrentRun();
   }, [runContext]);
@@ -108,17 +120,17 @@ export const ScriptedEditor = (props: Props) => {
   const [mode] = useColorMode();
 
   return (
-    <div id="editor-container" onMouseDown={cancelCurrentRun} onKeyDown={cancelCurrentRun}>
-      <MemoizedEditor
-        defaultValue={initialCode}
-        className={styles.editor}
-        theme={mode === "dark" ? "vs-dark" : "light"}
-        language="javascript"
-        options={options}
-        onMount={setEditor}
-        onChange={onChange}
-        height={calculateHeight(initialCode)}
-      />
+    <div ref={containerRef} onMouseDown={cancelCurrentRun} onKeyDown={cancelCurrentRun}>
+      <div ref={editorWrapperRef} style={{ minHeight: calculateHeight(initialCode) }}>
+        <MemoizedEditor
+          defaultValue={initialCode}
+          className={styles.editor}
+          theme={mode === "dark" ? "vs-dark" : "light"}
+          language="javascript"
+          options={options}
+          onMount={setEditor}
+        />
+      </div>
       {runContext && (
         <ScriptCommands moveToIndex={(index) => startScript(index, 1000)} runContext={runContext} />
       )}

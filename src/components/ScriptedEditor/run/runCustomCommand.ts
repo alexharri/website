@@ -3,7 +3,8 @@ import { RunContext } from "./RunContext";
 type SelectCommand = { command: "Select"; line: number; col: number; length?: number };
 type SelectWordCommand = { command: "Select Word"; word: string; line: number };
 type TypeCommand = { command: "Type"; text: string };
-export type CustomCommands = SelectWordCommand;
+type PasteCommand = { command: "Type"; text: string };
+export type CustomCommands = SelectWordCommand | SelectWordCommand | TypeCommand | PasteCommand;
 
 export async function selectHandler(runContext: RunContext, command: SelectCommand) {
   const { editor, sync } = runContext;
@@ -45,6 +46,11 @@ export async function selectWordHandler(runContext: RunContext, command: SelectW
   });
 }
 
+export async function pasteHandler(runContext: RunContext, command: PasteCommand) {
+  runContext.sync = true;
+  return typeHandler(runContext, command);
+}
+
 export async function typeHandler(runContext: RunContext, command: TypeCommand) {
   const { editor, sync } = runContext;
   const { text } = command;
@@ -70,4 +76,5 @@ export const customCommandHandlers = {
   selectHandler,
   selectWordHandler,
   typeHandler,
+  pasteHandler,
 };

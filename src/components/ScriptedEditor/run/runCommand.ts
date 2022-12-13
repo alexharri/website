@@ -25,6 +25,8 @@ export const builtInCommands = <const>[
   // Text selection
   { command: "Shift Right", trigger: "cursorRightSelect" },
   { command: "Shift Left", trigger: "cursorLeftSelect" },
+  { command: "Shift Up", trigger: "cursorUpSelect" },
+  { command: "Shift Down", trigger: "cursorDownSelect" },
   { command: "Shift Option Right", trigger: "cursorWordEndRightSelect" },
   { command: "Shift Option Left", trigger: "cursorWordLeftSelect" },
   { command: "Shift Command Right", trigger: "cursorEndSelect" },
@@ -40,6 +42,7 @@ const customCommandHandlers = <const>[
   { command: "Select", handler: customHandlers.selectHandler },
   { command: "Select Word", handler: customHandlers.selectWordHandler },
   { command: "Type", handler: customHandlers.typeHandler },
+  { command: "Paste", handler: customHandlers.pasteHandler },
 ];
 
 type BuiltInCommand = typeof builtInCommands[number];
@@ -54,7 +57,7 @@ export type Command = { command: BuiltInCommand["command"] } | CustomCommands;
 export async function runCommand(runContext: RunContext, command: Command) {
   for (const handler of customCommandHandlers) {
     if (handler.command !== command.command) continue;
-    await handler.handler(runContext, command);
+    await handler.handler(runContext, command as any);
     return;
   }
 
