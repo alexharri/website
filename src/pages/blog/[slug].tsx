@@ -8,6 +8,7 @@ import path from "path";
 import { Layout } from "../../components/Layout";
 import { Link } from "../../components/Link";
 import { Meta } from "../../components/Meta/Meta";
+import { FocusedScriptProvider } from "../../components/ScriptedEditor/FocusedScriptContext";
 import { ScriptedEditor, withScriptedEditor } from "../../components/ScriptedEditor/ScriptedEditor";
 import { SmallNote } from "../../components/SmallNote/SmallNote";
 import { Pre, StaticCodeBlock } from "../../components/StaticCodeBlock/StaticCodeBlock";
@@ -52,7 +53,9 @@ export default function PostPage(props: Props) {
       <Layout>
         <main>
           <h1>{scope.title}</h1>
-          <MDXRemote {...(source as any)} components={components} />
+          <FocusedScriptProvider>
+            <MDXRemote {...(source as any)} components={components} />
+          </FocusedScriptProvider>
         </main>
       </Layout>
     </>

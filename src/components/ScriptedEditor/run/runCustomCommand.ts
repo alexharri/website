@@ -34,7 +34,14 @@ export async function selectWordHandler(runContext: RunContext, command: SelectW
   const { line, word } = command;
   const code = editor.getValue();
 
-  const lineAtIndex = code.split("\n")[line - 1];
+  const lines = code.split("\n");
+  const lineAtIndex = lines[line - 1];
+
+  if (!lineAtIndex) {
+    console.warn(`Failed to get line number ${line}. Code only has ${lines.length} lines.`);
+    return;
+  }
+  
   const index = lineAtIndex.indexOf(word);
   const col = index + 1;
 

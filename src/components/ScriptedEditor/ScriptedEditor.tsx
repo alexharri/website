@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 import Editor, { EditorProps } from "@monaco-editor/react";
 import styles from "./ScriptedEditor.module.scss";
 import { MonacoEditor } from "./types/scriptedEditorTypes";
@@ -8,17 +8,20 @@ import { ScriptCommands } from "./ScriptCommands/ScriptCommands";
 import React from "react";
 import { useColorMode } from "../../utils/colorMode";
 import { RunContext } from "./run/RunContext";
+import { FocusedScriptContext } from "./FocusedScriptContext";
+import { useDidUpdate } from "../../utils/hooks/useDidUpdate";
+import { useMouseDownOutside } from "../../utils/hooks/useMouseDownOutside";
 
 const MemoizedEditor = React.memo(Editor);
 
-const FONT_SIZE = 20;
+const FONT_SIZE = 18;
 const LINE_HEIGHT_FACTOR = 1.5;
 const LINE_HEIGHT = FONT_SIZE * LINE_HEIGHT_FACTOR;
 const V_PADDING = 24;
 
 interface Props {
   initialCode: string;
-  script: ScriptCommand[] | string;
+  scriptId: string;
 }
 
 export const ScriptedEditor = (props: Props) => {
@@ -38,13 +41,11 @@ export const ScriptedEditor = (props: Props) => {
 
   const containerRef = useRef<HTMLDivElement>(null);
   const editorWrapperRef = useRef<HTMLDivElement>(null);
+  const heightMeasuredRef = useRef(false);
+  const clickedInsideRef = useRef(false);
 
   useEffect(() => {
-    if (Array.isArray(props.script)) {
-      setScript(props.script);
-      return;
-    }
-    const el = document.querySelector(`[data-script-id="${props.script}"]`)!;
+    const el = document.querySelector(`[data-script-id="${props.scriptId}"]`)!;
     setScript(JSON.parse(el.getAttribute("data-script")!));
   }, []);
 
@@ -57,7 +58,8 @@ export const ScriptedEditor = (props: Props) => {
 
   const startScript = useCallback(
     async (index: number, delayMs: number) => {
-      if (!runContext) return;
+      if (!runContext || !heightMeasuredRef.current) return;
+
       runContext.startNewRun();
 
       const { editor } = runContext;
@@ -85,16 +87,18 @@ export const ScriptedEditor = (props: Props) => {
       },
     });
 
-    console.log({ height });
     runContext.editor.layout({ height, width: container.offsetWidth });
+    runContext.editor.setValue(initialCode);
     editorWrapper.style.height = height + "px";
   }
 
-  // Run script on mount
+  // Measure height on mount
   useEffect(() => {
     if (!runContext) return;
-    applyHeightToContainer(runContext).then(() => startScript(0, 1000));
-    return () => runContext.cancelCurrentRun();
+    applyHeightToContainer(runContext).then(() => {
+      heightMeasuredRef.current = true;
+      (document.activeElement as HTMLInputElement | null)?.blur?.();
+    });
   }, [runContext]);
 
   const options = useMemo<EditorProps["options"]>(
@@ -117,44 +121,93 @@ export const ScriptedEditor = (props: Props) => {
     runContext?.cancelCurrentRun();
   }, [runContext]);
 
+  const keyDownCapture = useCallback(
+    (_e: React.KeyboardEvent) => {
+      if (clickedInsideRef.current) return;
+
+      const el = document.activeElement as HTMLInputElement | null;
+      if (!el) return;
+      el.blur();
+      requestAnimationFrame(() => {
+        el?.focus();
+      });
+    },
+    [runContext],
+  );
+
+  const { scriptId } = useContext(FocusedScriptContext);
+
+  useDidUpdate(() => {
+    if (scriptId === props.scriptId) {
+      startScript(0, 1000);
+    } else {
+      runContextRef.current?.cancelCurrentRun();
+    }
+  }, [scriptId]);
+
+  useMouseDownOutside(containerRef, () => {
+    clickedInsideRef.current = false;
+    runContextRef.current?.cancelCurrentRun();
+  });
+
+  const onMouseDown = () => {
+    clickedInsideRef.current = true;
+    cancelCurrentRun();
+  };
+
   const [mode] = useColorMode();
 
+  const active = scriptId === props.scriptId;
+
   return (
-    <div ref={containerRef} onMouseDown={cancelCurrentRun} onKeyDown={cancelCurrentRun}>
-      <div ref={editorWrapperRef} style={{ minHeight: calculateHeight(initialCode) }}>
-        <MemoizedEditor
-          defaultValue={initialCode}
-          className={styles.editor}
-          theme={mode === "dark" ? "vs-dark" : "light"}
-          language="javascript"
-          options={options}
-          onMount={setEditor}
-        />
+    <div
+      data-scripted-editor={props.scriptId}
+      ref={containerRef}
+      onMouseDown={onMouseDown}
+      onKeyDownCapture={keyDownCapture}
+    >
+      <div className={styles.container} data-active={active}>
+        <div ref={editorWrapperRef} style={{ minHeight: calculateHeight(initialCode) }}>
+          <MemoizedEditor
+            defaultValue={initialCode}
+            className={styles.editor}
+            theme={mode === "dark" ? "vs-dark" : "light"}
+            language="javascript"
+            options={options}
+            onMount={setEditor}
+          />
+        </div>
+        {runContext && (
+          <ScriptCommands
+            moveToIndex={(index) => startScript(index, 1000)}
+            runContext={runContext}
+          />
+        )}
       </div>
-      {runContext && (
-        <ScriptCommands moveToIndex={(index) => startScript(index, 1000)} runContext={runContext} />
-      )}
     </div>
   );
 };
 
-export function withScriptedEditor<T extends { children: any }>(Component: React.ComponentType<T>, getChildren: (props: T) => string) {
+export function withScriptedEditor<T extends { children: any }>(
+  Component: React.ComponentType<T>,
+  getChildren: (props: T) => string,
+) {
   return (props: T) => {
     const children = getChildren(props);
     const searchStr = "// @script ";
 
     const allLines = children.split("\n");
 
-    const lines = allLines.filter(line => !line.startsWith(searchStr))
-    const scriptLine = allLines.find(line => line.startsWith(searchStr));
-    
+    const lines = allLines.filter((line) => !line.startsWith(searchStr));
+    const scriptLine = allLines.find((line) => line.startsWith(searchStr));
+
     if (!scriptLine) {
       return <Component {...props} />;
     }
 
     const initialCode = lines.join("\n");
     const scriptId = scriptLine.split(searchStr)[1].trim();
-    
-    return <ScriptedEditor initialCode={initialCode} script={scriptId} />;
-  }
-};
+
+    return <ScriptedEditor initialCode={initialCode} scriptId={scriptId} />;
+  };
+}
