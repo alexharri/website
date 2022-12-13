@@ -11,7 +11,7 @@ import { RunContext } from "./run/RunContext";
 
 const MemoizedEditor = React.memo(Editor);
 
-const FONT_SIZE = 24;
+const FONT_SIZE = 20;
 const LINE_HEIGHT_FACTOR = 1.5;
 const LINE_HEIGHT = FONT_SIZE * LINE_HEIGHT_FACTOR;
 const V_PADDING = 24;
@@ -91,12 +91,15 @@ export const ScriptedEditor = (props: Props) => {
     return code.split("\n").length * LINE_HEIGHT + V_PADDING * 2;
   }, []);
 
-  const onChange = useCallback((value?: string) => {
-    const { editor } = runContext!;
-    const height = value ? calculateHeight(value) : 128;
-    const width = document.getElementById("editor-container")!.getBoundingClientRect().width;
-    editor.layout({ height, width });
-  }, []);
+  const onChange = useCallback(
+    (value?: string) => {
+      const { editor } = runContext!;
+      const height = value ? calculateHeight(value) : 128;
+      const width = document.getElementById("editor-container")!.getBoundingClientRect().width;
+      editor.layout({ height, width });
+    },
+    [runContext],
+  );
 
   const cancelCurrentRun = useCallback(() => {
     runContext?.cancelCurrentRun();
@@ -110,7 +113,7 @@ export const ScriptedEditor = (props: Props) => {
         defaultValue={initialCode}
         className={styles.editor}
         theme={mode === "dark" ? "vs-dark" : "light"}
-        language="typescript"
+        language="javascript"
         options={options}
         onMount={setEditor}
         onChange={onChange}

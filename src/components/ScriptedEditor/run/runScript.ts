@@ -26,6 +26,8 @@ export async function runScript(index: number, delay: number, runContext: RunCon
     const command = script[commandIndex];
     if (canceled()) return;
 
+    runContext.sync = command.sync ?? false;
+
     const { times = 1, msBetween = 128 } = command;
     if (!Number.isFinite(times)) throw new Error(`Unexpected times value ${times}`);
 

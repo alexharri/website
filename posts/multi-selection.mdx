@@ -4,7 +4,7 @@ description: ""
 publishedAt: ""
 ---
 
-```tsx
+{/* ```tsx
 // @script test-1
 function doStuff() {
   const x = 1;
@@ -14,8 +14,47 @@ function doStuff() {
 ```
 
 <CodeScript id="test-1" script={[
-  { command: "Select Word", word: "const", line: 2 },
+  { command: "Select Word", word: "const", line: 2, msBetween: 500 },
   { command: "Command D", times: 2 },
   { command: "Command Right" },
   { command: "Left", times: 4 },
+]} /> */}
+
+```tsx
+// @script turn-ifs-into-switch
+if (element.type === "property") {
+  return formatProperty(element);
+}
+
+if (element.type === "modifier") {
+  return formatModifier(element);
+}
+
+if (element.type === "group") {
+  return formatGroup(element);
+}
+```
+
+<CodeScript id="turn-ifs-into-switch" script={[
+  { command: "Select Word", word: "element.type", line: 1 },
+  { command: "Insert Line Above" },
+  { command: "Type", text: "switch (" },
+  { command: "Type", text: "element.type", sync: true },
+  { command: "Type", text: ") {" },
+  { command: "Down" },
+  { command: "Command Left" },
+  { command: "Shift Command Down" },
+  { command: "Tab" },
+  { command: "Right" },
+  { command: "Type", text: "\n}" },
+  { command: "Select Word", word: "element.type", line: 2 },
+  { command: "Command D", times: 2, msBetween: 500 },
+  { command: "Shift Command Left" },
+  { command: "Type", text: "case " },
+  { command: "Command Right" },
+  { command: "Shift Left", times: 3 },
+  { command: "Backspace" },
+  { command: "Type", text: ":" },
+  { command: "Down", times: 2 },
+  { command: "Backspace", times: 3 },
 ]} />
