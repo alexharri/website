@@ -18,17 +18,37 @@ const V_PADDING = 24;
 
 interface Props {
   initialCode: string;
-  script: ScriptCommand[];
+  script: ScriptCommand[] | string;
 }
 
 export const ScriptedEditor = (props: Props) => {
-  const initialCode = useMemo(() => props.initialCode.slice(1, props.initialCode.length - 3), []);
+  const initialCode = useMemo(() => {
+    const lines = props.initialCode.split("\n");
+    while (lines[0] === "") {
+      lines.shift();
+    }
+    while (lines[lines.length - 1] === "") {
+      lines.pop();
+    }
+    return lines.join("\n");
+  }, []);
 
   const [_editor, setEditor] = useState<MonacoEditor | null>(null);
 
+  const [script, setScript] = useState<ScriptCommand[] | null>(null);
+
+  useEffect(() => {
+    if (Array.isArray(props.script)) {
+      setScript(props.script);
+      return;
+    }
+    const el = document.querySelector(`[data-script-id="${props.script}"]`)!;
+    setScript(JSON.parse(el.getAttribute("data-script")!));
+  }, []);
+
   const runContext = useMemo(
-    () => (_editor ? new RunContext(_editor, props.script) : null),
-    [_editor],
+    () => (_editor && script ? new RunContext(_editor, script) : null),
+    [_editor, script],
   );
   const runContextRef = useRef(runContext);
   runContextRef.current = runContext;
@@ -97,12 +117,29 @@ export const ScriptedEditor = (props: Props) => {
         height={calculateHeight(initialCode)}
       />
       {runContext && (
-        <ScriptCommands
-          moveToIndex={(index) => startScript(index, 1000)}
-          script={props.script}
-          runContext={runContext}
-        />
+        <ScriptCommands moveToIndex={(index) => startScript(index, 1000)} runContext={runContext} />
       )}
     </div>
   );
+};
+
+export function withScriptedEditor<T extends { children: any }>(Component: React.ComponentType<T>, getChildren: (props: T) => string) {
+  return (props: T) => {
+    const children = getChildren(props);
+    const searchStr = "// @script ";
+
+    const allLines = children.split("\n");
+
+    const lines = allLines.filter(line => !line.startsWith(searchStr))
+    const scriptLine = allLines.find(line => line.startsWith(searchStr));
+    
+    if (!scriptLine) {
+      return <Component {...props} />;
+    }
+
+    const initialCode = lines.join("\n");
+    const scriptId = scriptLine.split(searchStr)[1].trim();
+    
+    return <ScriptedEditor initialCode={initialCode} script={scriptId} />;
+  }
 };

@@ -1,11 +1,9 @@
 import { useEffect, useState } from "react";
 import { RunContext } from "../run/RunContext";
-import { ScriptCommand } from "../types/scriptTypes";
 import styles from "./ScriptCommands.module.scss";
 
 interface Props {
   moveToIndex: (index: number) => void;
-  script: ScriptCommand[];
   runContext: RunContext;
 }
 
@@ -61,7 +59,7 @@ export const ScriptCommands = (props: Props) => {
 
   return (
     <div className={styles.container}>
-      {props.script.map((command, i) => {
+      {props.runContext.script.map((command, i) => {
         const { keys, modifierKeys } = extractKeys(command.command);
         return (
           <button

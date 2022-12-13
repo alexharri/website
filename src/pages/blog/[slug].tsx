@@ -8,7 +8,7 @@ import path from "path";
 import { Layout } from "../../components/Layout";
 import { Link } from "../../components/Link";
 import { Meta } from "../../components/Meta/Meta";
-import { ScriptedEditor } from "../../components/ScriptedEditor/ScriptedEditor";
+import { ScriptedEditor, withScriptedEditor } from "../../components/ScriptedEditor/ScriptedEditor";
 import { SmallNote } from "../../components/SmallNote/SmallNote";
 import { Pre, StaticCodeBlock } from "../../components/StaticCodeBlock/StaticCodeBlock";
 import { FrontMatter } from "../../types/FrontMatter";
@@ -22,10 +22,16 @@ import { withMargin } from "../../utils/withMargin";
 // here.
 const components = {
   a: Link,
-  pre: withMargin([32, -24], Pre),
-  StaticCodeBlock: withMargin([32, -24], StaticCodeBlock),
+  pre: withScriptedEditor(withMargin([32, -24], Pre), (props) => props.children.props.children),
+  StaticCodeBlock: withScriptedEditor(
+    withMargin([32, -24], StaticCodeBlock),
+    (props) => props.children,
+  ),
   SmallNote,
   ScriptedEditor,
+  CodeScript: (props: any) => (
+    <div data-script-id={props.id} data-script={JSON.stringify(props.script)} />
+  ),
   // ExampleComponent: dynamic(() => import("../../src/components/ExampleComponent")),
   Head,
 };

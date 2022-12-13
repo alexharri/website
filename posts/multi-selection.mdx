@@ -4,19 +4,18 @@ description: ""
 publishedAt: ""
 ---
 
-<ScriptedEditor
-  initialCode={`
+```tsx
+// @script test-1
 function doStuff() {
   const x = 1;
   const y = 2;
   const z = 3;
 }
-  `}
-  script={[
-    { command: "Select Word", word: "const", line: 2 },
-    { command: "Command D" },
-    { command: "Command D" },
-    { command: "Command Right" },
-    { command: "Left", times: 4 },
-  ]}
-/>
+```
+
+<CodeScript id="test-1" script={[
+  { command: "Select Word", word: "const", line: 2 },
+  { command: "Command D", times: 2 },
+  { command: "Command Right" },
+  { command: "Left", times: 4 },
+]} />
