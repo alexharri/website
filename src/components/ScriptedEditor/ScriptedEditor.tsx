@@ -122,13 +122,24 @@ export const ScriptedEditor = (props: Props) => {
   }, [runContext]);
 
   const keyDownCapture = useCallback(
-    (_e: React.KeyboardEvent) => {
+    (e: React.KeyboardEvent) => {
       if (clickedInsideRef.current) return;
+
+      const isDownArrow = e.keyCode === 40;
 
       const el = document.activeElement as HTMLInputElement | null;
       if (!el) return;
       el.blur();
       requestAnimationFrame(() => {
+        const rect = el.getBoundingClientRect();
+        if (isDownArrow && rect.top < 64) {
+          // If the cursor goes off screen, the browser force-scrolls
+          // the focused element back into view.
+          //
+          // Do not refocus if we are using the arrow keys to scroll
+          // down and the element is about to go off screen.
+          return;
+        }
         el?.focus();
       });
     },

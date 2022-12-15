@@ -38,11 +38,11 @@ export const FocusedScriptProvider = (props: { children: React.ReactNode }) => {
       const y1 = window.scrollY;
       const y2 = window.scrollY + window.innerHeight;
 
-      const buf = window.innerHeight * 0.2;
+      const buf = window.innerHeight * 0.15;
 
       const activationBounds: [number, number] = [y1 + 48, y2 - buf];
       const boundsIfActive: [number, number] = [y1 + 48, y2 - 24];
-      const looseActivationMark = y2 - window.innerHeight * 0.35;
+      const looseActivationMark = y2 - window.innerHeight * 0.3;
 
       const heightExceedsBounds = (height: number, bounds: [number, number]) => {
         const [top, bottom] = bounds;
@@ -86,10 +86,6 @@ export const FocusedScriptProvider = (props: { children: React.ReactNode }) => {
   }, []);
 
   const value = useMemo(() => ({ scriptId }), [scriptId]);
-
-  useEffect(() => {
-    console.log(scriptId);
-  }, [scriptId]);
 
   return (
     <FocusedScriptContext.Provider value={value}>{props.children}</FocusedScriptContext.Provider>
