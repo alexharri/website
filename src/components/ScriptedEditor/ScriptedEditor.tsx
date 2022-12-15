@@ -95,6 +95,12 @@ export const ScriptedEditor = (props: Props) => {
   // Measure height on mount
   useEffect(() => {
     if (!runContext) return;
+    const container = containerRef.current!;
+    for (const selector of [".monaco-editor", ".overflow-guard"]) {
+      const el = container.querySelector(selector) as HTMLElement | null;
+      if (!el) continue;
+      el.style.borderRadius = "8px";
+    }
     applyHeightToContainer(runContext).then(() => {
       heightMeasuredRef.current = true;
       (document.activeElement as HTMLInputElement | null)?.blur?.();
@@ -158,11 +164,13 @@ export const ScriptedEditor = (props: Props) => {
 
   useMouseDownOutside(containerRef, () => {
     clickedInsideRef.current = false;
+    editorWrapperRef.current?.removeAttribute("data-focus-inside");
     runContextRef.current?.cancelCurrentRun();
   });
 
   const onMouseDown = () => {
     clickedInsideRef.current = true;
+    editorWrapperRef.current?.setAttribute("data-focus-inside", "true");
     cancelCurrentRun();
   };
 
@@ -178,10 +186,13 @@ export const ScriptedEditor = (props: Props) => {
       onKeyDownCapture={keyDownCapture}
     >
       <div className={styles.container} data-active={active}>
-        <div ref={editorWrapperRef} style={{ minHeight: calculateHeight(initialCode) }}>
+        <div
+          ref={editorWrapperRef}
+          className={styles.editor}
+          style={{ minHeight: calculateHeight(initialCode) }}
+        >
           <MemoizedEditor
             defaultValue={initialCode}
-            className={styles.editor}
             theme={mode === "dark" ? "vs-dark" : "light"}
             language="javascript"
             options={options}
