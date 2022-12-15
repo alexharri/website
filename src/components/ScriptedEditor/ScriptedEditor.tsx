@@ -162,7 +162,7 @@ export const ScriptedEditor = (props: Props) => {
     }
   }, [scriptId]);
 
-  useMouseDownOutside(containerRef, () => {
+  useMouseDownOutside(editorWrapperRef, () => {
     clickedInsideRef.current = false;
     editorWrapperRef.current?.removeAttribute("data-focus-inside");
     runContextRef.current?.cancelCurrentRun();
@@ -179,17 +179,13 @@ export const ScriptedEditor = (props: Props) => {
   const active = scriptId === props.scriptId;
 
   return (
-    <div
-      data-scripted-editor={props.scriptId}
-      ref={containerRef}
-      onMouseDown={onMouseDown}
-      onKeyDownCapture={keyDownCapture}
-    >
+    <div data-scripted-editor={props.scriptId} ref={containerRef} onKeyDownCapture={keyDownCapture}>
       <div className={styles.container} data-active={active}>
         <div
           ref={editorWrapperRef}
           className={styles.editor}
           style={{ minHeight: calculateHeight(initialCode) }}
+          onMouseDown={onMouseDown}
         >
           <MemoizedEditor
             defaultValue={initialCode}
