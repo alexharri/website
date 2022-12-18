@@ -218,7 +218,16 @@ export const ScriptedEditor = (props: Props) => {
           />
         </div>
       </div>
-      <button onClick={() => setShowNavigation((show) => !show)}>Step-by-step</button>
+      <button
+        onClick={() => {
+          setShowNavigation((show) => !show);
+          if (!showNavigation) {
+            startScript(0, 1250);
+          }
+        }}
+      >
+        Step-by-step
+      </button>
       {runContext &&
         ReactDOM.createPortal(
           <ScriptNavigation
@@ -226,6 +235,7 @@ export const ScriptedEditor = (props: Props) => {
             runContext={runContext}
             scriptId={props.scriptId}
             show={showNavigation}
+            setShow={setShowNavigation}
           />,
           document.body,
         )}

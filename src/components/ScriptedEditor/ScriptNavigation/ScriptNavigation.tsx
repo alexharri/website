@@ -1,4 +1,4 @@
-import { useContext, useEffect, useRef, useState } from "react";
+import { useContext, useEffect, useRef } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { useDidUpdate } from "../../../utils/hooks/useDidUpdate";
 import { FocusedScriptContext } from "../FocusedScriptContext/FocusedScriptContext";
@@ -11,10 +11,11 @@ interface Props {
   moveToIndex: (index: number) => void;
   runContext: RunContext;
   show: boolean;
+  setShow: (show: boolean) => void;
 }
 
 export const ScriptNavigation = (props: Props) => {
-  const { runContext } = props;
+  const { runContext, show, setShow } = props;
   const { scriptId } = useContext(FocusedScriptContext);
 
   const commandElRef = useRef<Partial<Record<number, HTMLDivElement>>>({});
@@ -56,10 +57,9 @@ export const ScriptNavigation = (props: Props) => {
     };
   }, [runContext]);
 
-  const [show, setShow] = useState(false);
   const showRef = useRef(show);
-
   showRef.current = show;
+
   const lastShownAt = useRef(0);
 
   useDidUpdate(() => {
@@ -68,14 +68,11 @@ export const ScriptNavigation = (props: Props) => {
       if (showRef.current) setShow(false);
       return;
     }
-    const timeSinceLastShow = Math.max(500, Date.now() - lastShownAt.current);
-    const timeout = setTimeout(() => setShow(true), 500 - timeSinceLastShow);
-    return () => clearTimeout(timeout);
   }, [scriptId]);
 
   return (
     <AnimatePresence>
-      {show && props.show && (
+      {show && (
         <motion.div
           transition={{ duration: 0.5, ease: [0.26, 0.03, 0.3, 0.96] }}
           initial={{ x: -300 }}
