@@ -233,12 +233,12 @@ export const ScriptedEditor = (props: Props) => {
                 cancelCurrentRun();
               } else {
                 if (!runContext) return;
-                startScript(runContext.index % (runContext.script.length - 1), 500);
+                startScript(Math.max(0, runContext.index) % (runContext.script.length - 1), 500);
               }
             }}
             data-down={isPlaying}
           >
-            <div className={styles.bigButton}>Play/Pause</div>
+            <div className={styles.bigButton}>Play</div>
           </button>
           <button
             className={styles.bigButtonWrapper}
@@ -250,7 +250,7 @@ export const ScriptedEditor = (props: Props) => {
             }}
             data-down={showNavigation}
           >
-            <div className={styles.bigButton}>Step-by-step</div>
+            <div className={styles.bigButton}>Focus</div>
           </button>
         </div>
       </div>
