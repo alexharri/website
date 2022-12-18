@@ -8,6 +8,7 @@ interface Options {
   delayMs?: number;
   forceSync?: boolean;
   onEachStep?: () => void;
+  onlyRunOneCommand?: boolean;
 }
 
 export async function runScript(options: Options) {
@@ -27,8 +28,8 @@ export async function runScript(options: Options) {
     }
   }
 
-  const time = script[index - 1]?.times ?? 1;
-  runContext.emit("run-command", { index: index - 1, time });
+  const time = script[index]?.times ?? 1;
+  runContext.emit("run-command", { index, time });
 
   if (options.delayMs) await delayMs(options.delayMs);
 
@@ -52,7 +53,10 @@ export async function runScript(options: Options) {
       }
     }
 
-    if (!options.forceSync) await delayMs(command.msAfter ?? 500);
+    if (options.onlyRunOneCommand) break;
+
+    const last = commandIndex === script.length - 1;
+    if (!last && !options.forceSync) await delayMs(command.msAfter ?? 500);
   }
 
   runContext.emit("playing", { playing: false });

@@ -45,7 +45,7 @@ export const ScriptedEditor = (props: Props) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const editorWrapperRef = useRef<HTMLDivElement>(null);
   const heightMeasuredRef = useRef(false);
-  const clickedInsideRef = useRef(false);
+  const focusInsideEditorRef = useRef(false);
 
   useEffect(() => {
     const el = document.querySelector(`[data-script-id="${props.scriptId}"]`)!;
@@ -58,6 +58,28 @@ export const ScriptedEditor = (props: Props) => {
   );
   const runContextRef = useRef(runContext);
   runContextRef.current = runContext;
+
+  const moveToIndex = useCallback(
+    async (index: number) => {
+      if (!runContext || !heightMeasuredRef.current) return false;
+
+      runContext.startNewRun();
+
+      const { editor } = runContext;
+      if (editor.getValue() !== initialCode) {
+        editor.setValue(initialCode);
+      }
+
+      const canceled = runContext.getCheckCanceledFunction();
+
+      await runScript({ index, runContext, forceSync: true, onlyRunOneCommand: true });
+
+      if (!canceled()) {
+        runContext.cancelCurrentRun();
+      }
+    },
+    [runContext],
+  );
 
   const startScript = useCallback(
     async (index: number, delayMs: number) => {
@@ -138,9 +160,17 @@ export const ScriptedEditor = (props: Props) => {
 
   const keyDownCapture = useCallback(
     (e: React.KeyboardEvent) => {
-      if (clickedInsideRef.current) return;
+      if (focusInsideEditorRef.current) return;
 
       const isDownArrow = e.keyCode === 40;
+      const isUpArrow = e.keyCode === 38;
+
+      if (showNavigationRef.current && runContext && (isDownArrow || isUpArrow)) {
+        const delta = isDownArrow ? 1 : -1;
+        const index = Math.max(Math.min(runContext.index + delta, runContext.script.length - 1), 0);
+        moveToIndex(index);
+        e.preventDefault();
+      }
 
       const el = document.activeElement as HTMLInputElement | null;
       if (!el) return;
@@ -171,14 +201,14 @@ export const ScriptedEditor = (props: Props) => {
     }
   }, [scriptId]);
 
-  useMouseDownOutside(editorWrapperRef, () => {
-    clickedInsideRef.current = false;
+  const onMouseDownOutside = () => {
+    focusInsideEditorRef.current = false;
     editorWrapperRef.current?.removeAttribute("data-focus-inside");
-    runContextRef.current?.cancelCurrentRun();
-  });
+  };
+  useMouseDownOutside(editorWrapperRef, onMouseDownOutside);
 
   const onMouseDown = () => {
-    clickedInsideRef.current = true;
+    focusInsideEditorRef.current = true;
     editorWrapperRef.current?.setAttribute("data-focus-inside", "true");
     cancelCurrentRun();
   };
@@ -188,6 +218,8 @@ export const ScriptedEditor = (props: Props) => {
   const active = scriptId === props.scriptId;
 
   const [showNavigation, setShowNavigation] = useState(false);
+  const showNavigationRef = useRef(showNavigation);
+  showNavigationRef.current = showNavigation;
 
   useIsomorphicLayoutEffect(() => {
     const main = document.querySelector("main");
@@ -206,6 +238,11 @@ export const ScriptedEditor = (props: Props) => {
     main.style.transform = `translateX(${translate}px)`;
     main.style.transition = "transform .5s";
   }, [showNavigation]);
+
+  const onBigButtonMouseDown = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    onMouseDownOutside();
+  };
 
   return (
     <div data-scripted-editor={props.scriptId} ref={containerRef} onKeyDownCapture={keyDownCapture}>
@@ -227,7 +264,7 @@ export const ScriptedEditor = (props: Props) => {
           </div>
           <button
             className={styles.bigButtonWrapper}
-            onMouseDown={(e) => e.stopPropagation()}
+            onMouseDown={onBigButtonMouseDown}
             onClick={() => {
               if (isPlaying) {
                 cancelCurrentRun();
@@ -242,11 +279,18 @@ export const ScriptedEditor = (props: Props) => {
           </button>
           <button
             className={styles.bigButtonWrapper}
+            onMouseDown={onBigButtonMouseDown}
+            onClick={() => {
+              startScript(0, 500);
+            }}
+          >
+            <div className={styles.bigButton}>Restart</div>
+          </button>
+          <button
+            className={styles.bigButtonWrapper}
+            onMouseDown={onBigButtonMouseDown}
             onClick={() => {
               setShowNavigation((showNavigation) => !showNavigation);
-              if (!showNavigation) {
-                startScript(0, 1250);
-              }
             }}
             data-down={showNavigation}
           >
@@ -257,11 +301,12 @@ export const ScriptedEditor = (props: Props) => {
       {runContext &&
         ReactDOM.createPortal(
           <ScriptNavigation
-            moveToIndex={(index) => startScript(index, 1000)}
+            moveToIndex={moveToIndex}
             runContext={runContext}
             scriptId={props.scriptId}
             show={showNavigation}
             setShow={setShowNavigation}
+            focusInsideEditorRef={focusInsideEditorRef}
           />,
           document.body,
         )}

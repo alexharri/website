@@ -1,6 +1,6 @@
-import { useContext, useEffect, useRef } from "react";
+import { useCallback, useContext, useEffect, useRef } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { useDidUpdate } from "../../../utils/hooks/useDidUpdate";
+import { useDidUpdate, useDidUpdateLayoutEffect } from "../../../utils/hooks/useDidUpdate";
 import { FocusedScriptContext } from "../FocusedScriptContext/FocusedScriptContext";
 import { RunContext } from "../run/RunContext";
 import styles from "./ScriptNavigation.module.scss";
@@ -12,6 +12,7 @@ interface Props {
   runContext: RunContext;
   show: boolean;
   setShow: (show: boolean) => void;
+  focusInsideEditorRef: React.RefObject<boolean>;
 }
 
 export const ScriptNavigation = (props: Props) => {
@@ -22,38 +23,38 @@ export const ScriptNavigation = (props: Props) => {
   const commandHeightRef = useRef<Partial<Record<number, number>>>({});
   const scrollRef = useRef<HTMLDivElement>(null);
 
+  const getEl = useCallback((index: number) => {
+    return scrollRef.current!.querySelector(`[data-command="${index}"]`) as HTMLDivElement;
+  }, []);
+
+  const getCommandHeight = useCallback((index: number) => {
+    if (!commandHeightRef.current[index]) {
+      commandHeightRef.current[index] = getEl(index).getBoundingClientRect().height;
+    }
+    return commandHeightRef.current[index]!;
+  }, []);
+
+  const onIndexChange = useCallback((index: number) => {
+    if (!scrollRef.current) return;
+    let translateY = -32;
+    for (let i = 0; i < index; i++) {
+      translateY -= getCommandHeight(i);
+    }
+    scrollRef.current.style.transform = `translateY(${translateY}px)`;
+
+    for (let i = 0; i < runContext.script.length; i++) {
+      const distance = Math.abs(i - index);
+      const el = getEl(i);
+      el.style.opacity = distance === 0 ? "" : String(Math.max(0.2, 0.6 - distance * 0.1));
+    }
+  }, []);
+
   useEffect(() => {
-    const getEl = (index: number) => {
-      return scrollRef.current!.querySelector(`[data-command="${index}"]`) as HTMLDivElement;
-    };
-
-    const getCommandHeight = (index: number) => {
-      if (!commandHeightRef.current[index]) {
-        commandHeightRef.current[index] = getEl(index).getBoundingClientRect().height;
-      }
-      return commandHeightRef.current[index]!;
-    };
-
-    const handler = (index: number, _time: number) => {
-      if (!scrollRef.current) return;
-      let translateY = -32;
-      for (let i = 0; i < index; i++) {
-        translateY -= getCommandHeight(i);
-      }
-      scrollRef.current.style.transform = `translateY(${translateY}px)`;
-
-      for (let i = 0; i < runContext.script.length; i++) {
-        const distance = Math.abs(i - index);
-        const el = getEl(i);
-        el.style.opacity = distance === 0 ? "" : String(Math.max(0.2, 0.6 - distance * 0.1));
-      }
-    };
-    runContext.subscribe("run-command", handler);
-    handler(0, 0);
+    runContext.subscribe("run-command", onIndexChange);
     return () => {
       commandElRef.current = {};
       commandHeightRef.current = {};
-      runContext.unsubscribe("run-command", handler);
+      runContext.unsubscribe("run-command", onIndexChange);
     };
   }, [runContext]);
 
@@ -69,6 +70,17 @@ export const ScriptNavigation = (props: Props) => {
       return;
     }
   }, [scriptId]);
+
+  useDidUpdateLayoutEffect(() => {
+    const scroll = scrollRef.current;
+    if (!show || !scroll) return;
+    const originalTransition = scroll.style.transition;
+    scroll.style.transition = "none";
+    onIndexChange(runContext.index);
+    requestAnimationFrame(() => {
+      scroll.style.transition = originalTransition;
+    });
+  }, [show]);
 
   return (
     <AnimatePresence>
