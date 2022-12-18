@@ -40,6 +40,7 @@ export const ScriptedEditor = (props: Props) => {
 
   const [_editor, setEditor] = useState<MonacoEditor | null>(null);
   const [script, setScript] = useState<ScriptCommand[] | null>(null);
+  const [isPlaying, setIsPlaying] = useState(false);
 
   const containerRef = useRef<HTMLDivElement>(null);
   const editorWrapperRef = useRef<HTMLDivElement>(null);
@@ -107,6 +108,12 @@ export const ScriptedEditor = (props: Props) => {
       heightMeasuredRef.current = true;
       (document.activeElement as HTMLInputElement | null)?.blur?.();
     });
+  }, [runContext]);
+
+  useEffect(() => {
+    if (!runContext) return;
+    runContext.subscribe("playing", setIsPlaying);
+    return () => runContext.unsubscribe("playing", setIsPlaying);
   }, [runContext]);
 
   const options = useMemo<EditorProps["options"]>(
@@ -218,7 +225,19 @@ export const ScriptedEditor = (props: Props) => {
               onMount={setEditor}
             />
           </div>
-          <button className={styles.bigButtonWrapper}>
+          <button
+            className={styles.bigButtonWrapper}
+            onMouseDown={(e) => e.stopPropagation()}
+            onClick={() => {
+              if (isPlaying) {
+                cancelCurrentRun();
+              } else {
+                if (!runContext) return;
+                startScript(runContext.index % (runContext.script.length - 1), 500);
+              }
+            }}
+            data-down={isPlaying}
+          >
             <div className={styles.bigButton}>Play/Pause</div>
           </button>
           <button

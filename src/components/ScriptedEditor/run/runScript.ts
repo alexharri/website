@@ -54,4 +54,6 @@ export async function runScript(options: Options) {
 
     if (!options.forceSync) await delayMs(command.msAfter ?? 500);
   }
+
+  runContext.emit("playing", { playing: false });
 }
