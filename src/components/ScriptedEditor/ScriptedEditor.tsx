@@ -4,13 +4,13 @@ import styles from "./ScriptedEditor.module.scss";
 import { MonacoEditor } from "./types/scriptedEditorTypes";
 import { ScriptCommand } from "./types/scriptTypes";
 import { runScript } from "./run/runScript";
-import { ScriptCommands } from "./ScriptCommands/ScriptCommands";
 import React from "react";
 import { useColorMode } from "../../utils/colorMode";
 import { RunContext } from "./run/RunContext";
-import { FocusedScriptContext } from "./FocusedScriptContext";
+import { FocusedScriptContext } from "./FocusedScriptContext/FocusedScriptContext";
 import { useDidUpdate } from "../../utils/hooks/useDidUpdate";
 import { useMouseDownOutside } from "../../utils/hooks/useMouseDownOutside";
+import { ScriptNavigation } from "./ScriptNavigation/ScriptNavigation";
 
 const MemoizedEditor = React.memo(Editor);
 
@@ -178,6 +178,8 @@ export const ScriptedEditor = (props: Props) => {
 
   const active = scriptId === props.scriptId;
 
+  const [showNavigation, setShowNavigation] = useState(false);
+
   return (
     <div data-scripted-editor={props.scriptId} ref={containerRef} onKeyDownCapture={keyDownCapture}>
       <div className={styles.container} data-active={active}>
@@ -195,13 +197,15 @@ export const ScriptedEditor = (props: Props) => {
             onMount={setEditor}
           />
         </div>
-        {runContext && (
-          <ScriptCommands
-            moveToIndex={(index) => startScript(index, 1000)}
-            runContext={runContext}
-          />
-        )}
       </div>
+      <button onClick={() => setShowNavigation((show) => !show)}>Step-by-step</button>
+      {runContext && showNavigation && (
+        <ScriptNavigation
+          moveToIndex={(index) => startScript(index, 1000)}
+          runContext={runContext}
+          scriptId={props.scriptId}
+        />
+      )}
     </div>
   );
 };

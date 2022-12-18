@@ -14,6 +14,7 @@
     "@types/node": "18.11.9",
     "@types/react": "18.0.24",
     "@types/react-dom": "18.0.8",
+    "framer-motion": "^7.10.2",
     "gray-matter": "^4.0.3",
     "monaco-editor": "^0.34.1",
     "next": "13.0.1",
