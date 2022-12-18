@@ -23,3 +23,45 @@
     box-shadow: 0 0 0 8px rgba(35, 156, 255, 0.35);
   }
 }
+
+.bigButtonWrapper {
+  position: relative;
+  display: inline-block;
+  margin-right: 16px;
+  margin-bottom: 16px;
+  
+  &:after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: -12px;
+    height: 24px;
+    z-index: 0;
+    border: 2px solid var(--color-blue-200);
+    border-radius: 8px;
+  }
+}
+
+.bigButton {
+  position: relative;
+  z-index: 1;
+  padding: 12px 12px;
+  border-radius: 8px;
+  font-size: 20px;
+  border: 2px solid var(--color-blue);
+  background: var(--color-background-700);
+  transition: transform .15s;
+
+  &:after {
+    content: "";
+    position: absolute;
+  }
+
+  &:active {
+    transform: translateY(8px);
+  }
+  &[data-down=true] {
+    transform: translateY(5px);
+  }
+}

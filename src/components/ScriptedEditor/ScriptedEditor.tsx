@@ -218,16 +218,23 @@ export const ScriptedEditor = (props: Props) => {
           />
         </div>
       </div>
-      <button
-        onClick={() => {
-          setShowNavigation((show) => !show);
-          if (!showNavigation) {
-            startScript(0, 1250);
-          }
-        }}
-      >
-        Step-by-step
-      </button>
+      <div className={styles.bigButtonWrapper}>
+        <button className={styles.bigButton}>Play/Pause</button>
+      </div>
+      <div className={styles.bigButtonWrapper}>
+        <button
+          className={styles.bigButton}
+          onClick={() => {
+            setShowNavigation((showNavigation) => !showNavigation);
+            if (!showNavigation) {
+              startScript(0, 1250);
+            }
+          }}
+          data-down={showNavigation}
+        >
+          Step-by-step
+        </button>
+      </div>
       {runContext &&
         ReactDOM.createPortal(
           <ScriptNavigation
