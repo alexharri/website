@@ -1,4 +1,5 @@
 import { useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
+import ReactDOM from "react-dom";
 import Editor, { EditorProps } from "@monaco-editor/react";
 import styles from "./ScriptedEditor.module.scss";
 import { MonacoEditor } from "./types/scriptedEditorTypes";
@@ -11,6 +12,7 @@ import { FocusedScriptContext } from "./FocusedScriptContext/FocusedScriptContex
 import { useDidUpdate } from "../../utils/hooks/useDidUpdate";
 import { useMouseDownOutside } from "../../utils/hooks/useMouseDownOutside";
 import { ScriptNavigation } from "./ScriptNavigation/ScriptNavigation";
+import { useIsomorphicLayoutEffect } from "../../utils/hooks/useIsomorphicLayoutEffect";
 
 const MemoizedEditor = React.memo(Editor);
 
@@ -180,6 +182,24 @@ export const ScriptedEditor = (props: Props) => {
 
   const [showNavigation, setShowNavigation] = useState(false);
 
+  useIsomorphicLayoutEffect(() => {
+    const main = document.querySelector("main");
+    const editorWrapper = editorWrapperRef.current;
+    if (!main || !editorWrapper) return;
+
+    if (!showNavigation) {
+      main.style.transform = "";
+      return;
+    }
+
+    const { left } = editorWrapperRef.current.getBoundingClientRect();
+
+    const translate = 300 - (left - 24);
+
+    main.style.transform = `translateX(${translate}px)`;
+    main.style.transition = "transform .5s";
+  }, [showNavigation]);
+
   return (
     <div data-scripted-editor={props.scriptId} ref={containerRef} onKeyDownCapture={keyDownCapture}>
       <div className={styles.container} data-active={active}>
@@ -199,13 +219,16 @@ export const ScriptedEditor = (props: Props) => {
         </div>
       </div>
       <button onClick={() => setShowNavigation((show) => !show)}>Step-by-step</button>
-      {runContext && showNavigation && (
-        <ScriptNavigation
-          moveToIndex={(index) => startScript(index, 1000)}
-          runContext={runContext}
-          scriptId={props.scriptId}
-        />
-      )}
+      {runContext &&
+        ReactDOM.createPortal(
+          <ScriptNavigation
+            moveToIndex={(index) => startScript(index, 1000)}
+            runContext={runContext}
+            scriptId={props.scriptId}
+            show={showNavigation}
+          />,
+          document.body,
+        )}
     </div>
   );
 };

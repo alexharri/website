@@ -10,6 +10,7 @@ interface Props {
   scriptId: string;
   moveToIndex: (index: number) => void;
   runContext: RunContext;
+  show: boolean;
 }
 
 export const ScriptNavigation = (props: Props) => {
@@ -22,12 +23,7 @@ export const ScriptNavigation = (props: Props) => {
 
   useEffect(() => {
     const getEl = (index: number) => {
-      if (!commandElRef.current[index]) {
-        commandElRef.current[index] = scrollRef.current!.querySelector(
-          `[data-command="${index}"]`,
-        ) as HTMLDivElement;
-      }
-      return commandElRef.current[index]!;
+      return scrollRef.current!.querySelector(`[data-command="${index}"]`) as HTMLDivElement;
     };
 
     const getCommandHeight = (index: number) => {
@@ -79,8 +75,9 @@ export const ScriptNavigation = (props: Props) => {
 
   return (
     <AnimatePresence>
-      {show && (
+      {show && props.show && (
         <motion.div
+          transition={{ duration: 0.5, ease: [0.26, 0.03, 0.3, 0.96] }}
           initial={{ x: -300 }}
           animate={{ x: 0 }}
           exit={{ x: -300 }}
