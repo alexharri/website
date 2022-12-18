@@ -194,7 +194,7 @@ export const ScriptedEditor = (props: Props) => {
 
     const { left } = editorWrapperRef.current.getBoundingClientRect();
 
-    const translate = 300 - (left - 24);
+    const translate = Math.max(0, 300 - (left - 24));
 
     main.style.transform = `translateX(${translate}px)`;
     main.style.transition = "transform .5s";
@@ -202,38 +202,38 @@ export const ScriptedEditor = (props: Props) => {
 
   return (
     <div data-scripted-editor={props.scriptId} ref={containerRef} onKeyDownCapture={keyDownCapture}>
-      <div className={styles.container} data-active={active}>
-        <div
-          ref={editorWrapperRef}
-          className={styles.editor}
-          style={{ minHeight: calculateHeight(initialCode) }}
-          onMouseDown={onMouseDown}
-        >
-          <MemoizedEditor
-            defaultValue={initialCode}
-            theme={mode === "dark" ? "vs-dark" : "light"}
-            language="javascript"
-            options={options}
-            onMount={setEditor}
-          />
+      <div className={styles.outerContainer} data-active={active}>
+        <div className={styles.container}>
+          <div
+            ref={editorWrapperRef}
+            className={styles.editor}
+            style={{ minHeight: calculateHeight(initialCode) }}
+            onMouseDown={onMouseDown}
+          >
+            <MemoizedEditor
+              defaultValue={initialCode}
+              theme={mode === "dark" ? "vs-dark" : "light"}
+              language="javascript"
+              options={options}
+              onMount={setEditor}
+            />
+          </div>
+          <button className={styles.bigButtonWrapper}>
+            <div className={styles.bigButton}>Play/Pause</div>
+          </button>
+          <button
+            className={styles.bigButtonWrapper}
+            onClick={() => {
+              setShowNavigation((showNavigation) => !showNavigation);
+              if (!showNavigation) {
+                startScript(0, 1250);
+              }
+            }}
+            data-down={showNavigation}
+          >
+            <div className={styles.bigButton}>Step-by-step</div>
+          </button>
         </div>
-      </div>
-      <div className={styles.bigButtonWrapper}>
-        <button className={styles.bigButton}>Play/Pause</button>
-      </div>
-      <div className={styles.bigButtonWrapper}>
-        <button
-          className={styles.bigButton}
-          onClick={() => {
-            setShowNavigation((showNavigation) => !showNavigation);
-            if (!showNavigation) {
-              startScript(0, 1250);
-            }
-          }}
-          data-down={showNavigation}
-        >
-          Step-by-step
-        </button>
       </div>
       {runContext &&
         ReactDOM.createPortal(

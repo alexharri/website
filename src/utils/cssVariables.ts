@@ -5,6 +5,8 @@ export const colors = {
   "text-600": "var(--color-text-600)",
   blue: "var(--color-blue)",
   "blue-200": "var(--color-blue-200)",
+  "blue-700": "var(--color-blue-700)",
+  "dark-blue-400": "var(--color-dark-blue-400)",
   green: "var(--color-green)",
   background: "var(--color-background)",
   "background-500": "var(--color-background-500)",
@@ -19,6 +21,7 @@ export const colors = {
   "header-background": "var(--color-header-background)",
   "header-border-background": "var(--color-header-border-background)",
   "light-rgb": "var(--color-light-rgb)",
+  "blue-rgb": "var(--color-blue-rgb)",
   scheme: "var(--color-scheme)",
 };
 
@@ -28,7 +31,9 @@ export const colorValues: Record<"dark" | "light", Record<ColorName, string>> = 
     "text-300": "#9fcff9",
     "text-600": "#6691b5",
     blue: "#399ef4",
-    "blue-200": "#1e4668",
+    "blue-200": "#246eac",
+    "blue-700": "#6ac2fa",
+    "dark-blue-400": "#032949",
     green: "#4eb071",
     background: "#090D13",
     "background-700": "#1c2837",
@@ -43,6 +48,7 @@ export const colorValues: Record<"dark" | "light", Record<ColorName, string>> = 
     "header-background": "rgba(9, 13, 19, 0.6)",
     "header-border-background": "rgba(9, 13, 19, 0.8)",
     "light-rgb": "255, 255, 255",
+    "blue-rgb": "57, 157, 244",
     scheme: "dark",
   },
   light: {
