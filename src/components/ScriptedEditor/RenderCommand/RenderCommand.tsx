@@ -21,6 +21,8 @@ function getKeyLabel(key: string) {
       return "→";
     case "Left":
       return "←";
+    case "Backspace":
+      return "⌫";
     default:
       return key;
   }
@@ -58,6 +60,15 @@ interface Props {
 
 export const RenderCommand = (props: Props) => {
   const { command, onClick } = props;
+
+  if (command.command === "Type") {
+    return (
+      <Container onClick={onClick}>
+        <div className={styles.left} />
+        Type&nbsp;<code className={styles.key}>{command.text}</code>
+      </Container>
+    );
+  }
 
   if (command.command === "Select Word") {
     return (

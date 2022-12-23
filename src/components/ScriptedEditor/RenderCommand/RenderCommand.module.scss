@@ -23,7 +23,8 @@
   justify-content: flex-end;
   align-items: center;
   margin-right: 8px;
-  width: 40px;
+  width: 80px;
+  gap: 8px;
 }
 
 .right {
@@ -37,5 +38,4 @@
   font-family: var(--font-monospace);
   background: var(--color-medium-400);
   color: var(--color-text);
-
 }

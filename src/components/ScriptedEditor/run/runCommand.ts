@@ -3,7 +3,7 @@ import { RunContext } from "./RunContext";
 
 export const builtInCommands = <const>[
   { command: "Command D", trigger: "editor.action.addSelectionToNextFindMatch" },
-  { command: "Insert Line Above", trigger: "editor.action.insertLineBefore" },
+  { command: "Shift Command Enter", trigger: "editor.action.insertLineBefore" },
   { command: "Tab", trigger: "tab" },
 
   // Move around
