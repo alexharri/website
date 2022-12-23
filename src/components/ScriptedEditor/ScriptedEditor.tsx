@@ -20,6 +20,7 @@ const MemoizedEditor = React.memo(Editor);
 const { FONT_SIZE, LINE_HEIGHT_FACTOR, V_PADDING } = scriptedEditorConstants;
 
 interface Props {
+  language: string;
   initialCode: string;
   scriptId: string;
   onMaxLinesCalculated: (lines: number) => void;
@@ -208,7 +209,7 @@ export const ScriptedEditor = (props: Props) => {
             <MemoizedEditor
               defaultValue={initialCode}
               theme={mode === "dark" ? "vs-dark" : "light"}
-              language="javascript"
+              language={props.language}
               options={options}
               onMount={setEditor}
             />
@@ -221,13 +222,13 @@ export const ScriptedEditor = (props: Props) => {
 
 export function withScriptedEditor<T extends { children: any }>(
   Component: React.ComponentType<T>,
-  getChildren: (props: T) => string,
+  getProps: (props: T) => { code: string; language: string },
 ) {
   return withMargin([40, 0], (props: T) => {
-    const children = getChildren(props);
+    const { code, language } = getProps(props);
     const searchStr = "// @script ";
 
-    const allLines = children.split("\n");
+    const allLines = code.split("\n");
 
     const lines = allLines.filter((line) => !line.startsWith(searchStr));
     const scriptLine = allLines.find((line) => line.startsWith(searchStr));
@@ -249,6 +250,7 @@ export function withScriptedEditor<T extends { children: any }>(
     return (
       <LazyScriptedEditor
         initialCode={initialCode}
+        language={language}
         scriptId={scriptId}
         expectedMaxLines={expectedLines ? Number(expectedLines) : lines.length}
       />

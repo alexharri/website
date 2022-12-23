@@ -24,11 +24,14 @@ import { withMargin } from "../../utils/withMargin";
 // here.
 const components = {
   a: Link,
-  pre: withScriptedEditor(withMargin([32, -24], Pre), (props) => props.children.props.children),
-  StaticCodeBlock: withScriptedEditor(
-    withMargin([32, -24], StaticCodeBlock),
-    (props) => props.children,
-  ),
+  pre: withScriptedEditor(withMargin([32, -24], Pre), (props) => {
+    const language = props.children.props.className?.split("-")[1] ?? "text";
+    return { code: props.children.props.children, language };
+  }),
+  StaticCodeBlock: withScriptedEditor(withMargin([32, -24], StaticCodeBlock), (props) => ({
+    code: props.children,
+    language: props.language,
+  })),
   SmallNote,
   ScriptedEditor: LazyScriptedEditor,
   CodeScript: (props: any) => (

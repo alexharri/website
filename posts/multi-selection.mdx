@@ -4,6 +4,305 @@ description: ""
 publishedAt: ""
 ---
 
+## Intro
+
+As a Software Engineer, you write code.
+
+You will write some new code, and you will modify existing code.
+
+Early in my career, I discovered a few tricks that have made me immensely productive when writing code. They do not involve Vim, and they do not involve memorizing dozens of obscure commands.
+
+I've used these tricks with Sublime, Atom, and now VSCode. These are also not context-specific, they are applicable in every programming language.
+
+But most importantly, you can use these to impress other developers :smile:.
+
+Let's start off with a common operation, renaming a variable.
+
+```javascript
+const element = document.querySelect("#container");
+
+if (element && element.hasAttribute("data-active")) {
+  element.classList.add("active");
+}
+// @script slow-rename
+```
+
+<CodeScript id="slow-rename" script={[
+  { command: "Select Word", word: "element", line: 1 },
+  { command: "Type", text: "container" },
+  { command: "Select Word", word: "element", line: 3 },
+  { command: "Type", text: "container" },
+  { command: "Select Word", word: "element", line: 3 },
+  { command: "Type", text: "container" },
+  { command: "Select Word", word: "element", line: 4 },
+  { command: "Type", text: "container" },
+]} />
+
+You've definitely done this before. Select and type, select and type.
+
+You know that there is a better way to go about this, but that takes time and effort to learn.
+
+That better way is __multi-selection__.
+
+```javascript
+const element = document.querySelect("#container");
+
+if (element && element.hasAttribute("data-active")) {
+  element.classList.add("active");
+}
+// @script fast-rename
+```
+
+<CodeScript id="fast-rename" script={[
+  { command: "Select Word", word: "element", line: 1 },
+  { command: "Command D", times: 3, msBetween: 300 },
+  { command: "Type", text: "container" },
+]} />
+
+This is what `Command D` does.
+
+You will be surprised by how far we can take this seemingly simple command. `Command D`, combined with clever text navigation techniques, let's you do a lot.
+
+
+## Navigating text
+
+Before we get into `Command D`, let's take a quick look at text navigation.
+
+Everyone knows the basics. Use the arrow keys to move the cursor, and hold shift to select text when moving with the arrow keys.
+
+```
+// @script arrow-keys
+one two three four five.
+```
+
+<CodeScript id="arrow-keys" script={[
+  { command: "Select", line: 1, col: 1 },
+  { command: "Right", times: 4, msBetween: 140, msAfter: 700 },
+  { command: "Shift Right", times: 3, msBetween: 140, msAfter: 700 },
+  { command: "Left", times: 7, msBetween: 140 },
+]} />
+
+You can jump over words with the arrow keys by holding down `Option`.
+
+```
+// @script jump-over-words
+one two three four five.
+```
+
+<CodeScript id="jump-over-words" script={[
+  { command: "Select", line: 1, col: 1 },
+  { command: "Option Right", times: 5, msBetween: 300 },
+  { command: "Option Left", times: 5, msBetween: 300 },
+]} />
+
+Additionally, holding down `Shift` allows you to shift your selection by words.
+
+```
+// @script jump-over-words-select
+one two three four five.
+```
+
+<CodeScript id="jump-over-words-select" script={[
+  { command: "Select", line: 1, col: 1 },
+  { command: "Shift Option Right", times: 5, msBetween: 300 },
+  { command: "Shift Option Left", times: 5, msBetween: 300 },
+]} />
+
+To jump to the end or beginning of a line, you can combine `Command` with the arrow keys.
+
+```
+// @script jump-to-end-start-of-line
+one two three four five.
+```
+
+<CodeScript id="jump-to-end-start-of-line" script={[
+  { command: "Select", line: 1, col: 1 },
+  { command: "Shift Command Right", msAfter: 1000 },
+  { command: "Shift Command Left" },
+]} />
+
+This is useful, for example, when selecting blocks of code:
+
+```javascript
+// @script select-block-of-code
+const items = [
+  { id: 1, content: ["foo", "bar"] },
+  { id: 2, content: [] },
+  { id: 3, content: ["baz"] },
+]
+```
+
+<CodeScript id="select-block-of-code" script={[
+  { command: "Select", line: 2, col: 3 },
+  { command: "Shift Down", times: 2 },
+  { command: "Shift Command Right" },
+  { command: "Right" },
+  { command: "Up", times: 2 },
+  { command: "Command Left" },
+]} />
+
+This is all we need to know about text navigation.
+
+ * Jump over words with `Option`.
+ * Jump to line boundaries with `Command`.
+
+
+## Selecting data
+
+Let's apply the text navigation knowledge we just learned with a concrete example.
+
+Given that we have a JSON file of users and we want to select the name of every user, we can do that with `Command D`. Select `name`, press `Command D` to select all instances and use `Option Right` select the names:
+
+```json
+// @script select-names
+[
+  { "name": "Bill Mason", "email": "bill@domain.co.uk" },
+  { "name": "Janet Hills", "email": "janet@example.com" },
+  { "name": "Gregory Smith", "email": "g.smith@company.biz" }
+]
+```
+<CodeScript id="select-names" script={[
+  { command: "Select Word", line: 2, word: "name" },
+  { command: "Command D", times: 2 },
+  { command: "Right", times: 5 },
+  { command: "Shift Option Right", times: 2 },
+]} />
+
+This was easy, but what if some user have a middle name, or unusual characters?
+
+```json
+// @script select-names-non-uniform-failure
+[
+  { "name": "Bill Mason", "email": "bill@domain.co.uk" },
+  { "name": "Janet Rose Hills", "email": "janet@example.com" },
+  { "name": "Gregory D'Andre", "email": "g.dandre@company.biz" }
+]
+```
+<CodeScript id="select-names-non-uniform-failure" script={[
+  { command: "Select Word", line: 2, word: "name" },
+  { command: "Command D", times: 2 },
+  { command: "Right", times: 5 },
+  { command: "Shift Option Right", times: 2 },
+]} />
+
+Jumping over a fixed number of words breaks down when lines have different numbers of words.
+
+Well, in this case we can get around it by using `email` as the anchor and using `Command` to jump over the non-uniform names.
+
+```json
+// @script select-names-non-uniform
+[
+  { "name": "Bill Mason", "email": "bill@domain.co.uk" },
+  { "name": "Janet Rose Hills", "email": "janet@example.com" },
+  { "name": "Gregory D'Andre", "email": "g.dandre@company.biz" }
+]
+```
+<CodeScript id="select-names-non-uniform" script={[
+  { command: "Select Word", line: 2, word: "email" },
+  { command: "Command D", times: 2 },
+  { command: "Left", times: 5 },
+  { command: "Shift Command Left" },
+  { command: "Shift Option Right", times: 3 },
+  { command: "Shift Right", times: 2 },
+]} />
+
+Effective use of `Command D` very often lies in finding uniformities that act as anchors for selection.
+
+So far we've just been dealing with selection. Before we move onto the next example, let's transform the list of users into email strings.
+
+```javascript
+// @script convert-users-to-email-string
+[
+  { "name": "Bill Mason", "email": "bill@domain.co.uk" },
+  { "name": "Janet Rose Hills", "email": "janet@example.com" },
+  { "name": "Gregory D'Andre", "email": "g.dandre@company.biz" }
+]
+```
+<CodeScript id="convert-users-to-email-string" script={[
+  { command: "Select Word", line: 2, word: "name" },
+  { command: "Command D", times: 2 },
+  { command: "Right", times: 5 },
+  { command: "Shift Command Left" },
+  { command: "Backspace" },
+  { command: "Type", text: "\"" },
+  { command: "Select Word", line: 2, word: "email" },
+  { command: "Command D", times: 2 },
+  { command: "Right", times: 5 },
+  { command: "Shift Option Left", times: 3 },
+  { command: "Shift Left", times: 4 },
+  { command: "Backspace" },
+  { command: "Type", text: " <" },
+  { command: "Command Right" },
+  { command: "Shift Option Left" },
+  { command: "Backspace", times: 3 },
+  { command: "Type", text: ">\"," },
+]} />
+
+Nice!
+
+
+## Skipping over instances
+
+Given a list of markdown bullet points, we can somewhat trivially transform it into a bullet list:
+
+```txt
+// @script markdown-bullets-to-checkboxes
+- Top level task 1
+- Top level task 2
+  - Subtask A
+  - Subtask B
+  - Subtask C
+    - Subtask D
+- Top level task 3
+  - Yet another subtask
+```
+
+<CodeScript id="markdown-bullets-to-checkboxes" script={[
+  { command: "Shift Right" },
+  { command: "Command D", times: 7 },
+  { command: "Right" },
+  { command: "Type", text: " [ ]" },
+  { command: "Command Up" },
+]} />
+
+But maybe one of the bullet points has a `-` that we don't want to match, what then?
+
+Well, we can use `Command K` and then `Command D` to skip over instances.
+
+```txt
+// @script markdown-bullets-to-checkboxes-with-skip
+- Top level task 1
+- Top level task 2
+  - Subtask A
+  - Subtask B-C
+  - Subtask D
+    - Subtask E
+- Top level task 3
+  - Yet another subtask
+```
+
+<CodeScript id="markdown-bullets-to-checkboxes-with-skip" script={[
+  { command: "Shift Right" },
+  { command: "Command D", times: 4 },
+  { command: "Command K D" },
+  { command: "Command D", times: 3 },
+  { command: "Right" },
+  { command: "Type", text: " [ ]" },
+  { command: "Command Up" },
+]} />
+
+
+{/* ## Why does any of this matter?
+
+What "being a productive software engineer" means could be interpreted in a lot of ways.
+
+It could mean that you quickly find elegant and performant solutions to problems, or that you help make other engineers more productive. There's lots of technical and human factors at play that make up how an engineer's productivity.
+
+There's also the purely mechanical aspect. Writing code.
+
+I've often read that typing speed is not the limiting factor to a Software Engineer's productivity. Rather, it is thinking speed that limits people. The argument is that time spent reading and reasoning about code dominates an engineers time compared to writing code. */}
+
+
 Here is some text.
 
 Here is some more text.
@@ -30,7 +329,7 @@ Here is some more text.
 
 What, even more text?
 
-```tsx
+```javascript
 // @script test-1 expectedLines=5
 function doStuff() {
   const x = 1;
@@ -58,7 +357,7 @@ Here is some more text.
 
 What, even more text?
 
-```tsx
+```javascript
 // @script turn-ifs-into-switch expectedLines=13
 if (element.type === "property") {
   return formatProperty(element);

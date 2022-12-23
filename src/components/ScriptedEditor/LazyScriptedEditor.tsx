@@ -5,6 +5,7 @@ import { ScriptedEditorControls } from "./ScriptedEditorControls";
 import { calculateHeight } from "./scriptedEditorUtils";
 
 interface Props {
+  language: string;
   initialCode: string;
   scriptId: string;
   expectedMaxLines: number;
@@ -64,6 +65,7 @@ export function LazyScriptedEditor(props: Props) {
             {...props}
             onMaxLinesCalculated={onMaxLinesCalculated}
             setRunContext={setRunContext}
+            language={props.language}
           />
         )}
       </div>
