@@ -12,7 +12,7 @@ import { useDidUpdate } from "../../utils/hooks/useDidUpdate";
 import { useMouseDownOutside } from "../../utils/hooks/useMouseDownOutside";
 import { LazyScriptedEditor } from "./LazyScriptedEditor";
 import { scriptedEditorConstants } from "./scriptedEditorConstants";
-import { calculateHeight } from "./scriptedEditorUtils";
+import { calculateHeight, moveToIndex, startScript } from "./scriptedEditorUtils";
 
 const MemoizedEditor = React.memo(Editor);
 
@@ -44,7 +44,7 @@ export const ScriptedEditor = (props: Props) => {
   }, []);
 
   const runContext = useMemo(
-    () => (_editor && script ? new RunContext(_editor, script) : null),
+    () => (_editor && script ? new RunContext(_editor, script, initialCode) : null),
     [_editor, script],
   );
   const runContextRef = useRef(runContext);
@@ -56,43 +56,15 @@ export const ScriptedEditor = (props: Props) => {
     }
   }, [runContext]);
 
-  const moveToIndex = useCallback(
-    async (index: number) => {
-      if (!runContext || !heightMeasuredRef.current) return false;
-
-      runContext.startNewRun();
-
-      const { editor } = runContext;
-      if (editor.getValue() !== initialCode) {
-        editor.setValue(initialCode);
-      }
-
-      const canceled = runContext.getCheckCanceledFunction();
-
-      await runScript({ index, runContext, forceSync: true, onlyRunOneCommand: true });
-
-      if (!canceled()) {
-        runContext.cancelCurrentRun();
-      }
-    },
+  const onMoveToIndex = useCallback(
+    async (index: number) => runContext && moveToIndex(runContext, index),
     [runContext],
   );
 
-  const startScript = useCallback(
-    async (index: number, delayMs: number) => {
-      if (!runContext || !heightMeasuredRef.current) return;
-
-      runContext.startNewRun();
-
-      const { editor } = runContext;
-      if (editor.getValue() !== initialCode) {
-        editor.setValue(initialCode);
-      }
-
-      runScript({ index, delayMs, runContext });
-    },
-    [runContext],
-  );
+  const onStartScript = useCallback(async () => {
+    if (!runContext || !heightMeasuredRef.current) return;
+    startScript(runContext, 0, 1000);
+  }, [runContext]);
 
   async function applyHeightToContainer(runContext: RunContext) {
     const container = containerRef.current!;
@@ -161,8 +133,9 @@ export const ScriptedEditor = (props: Props) => {
       if (navigationVisible && runContext && (isDownArrow || isUpArrow)) {
         const delta = isDownArrow ? 1 : -1;
         const index = Math.max(Math.min(runContext.index + delta, runContext.script.length - 1), 0);
-        moveToIndex(index);
+        onMoveToIndex(index);
         e.preventDefault();
+        e.stopPropagation();
         return;
       }
 
@@ -194,7 +167,7 @@ export const ScriptedEditor = (props: Props) => {
 
   useDidUpdate(() => {
     if (scriptId === props.scriptId) {
-      startScript(0, 1000);
+      onStartScript();
     } else {
       runContextRef.current?.cancelCurrentRun();
     }

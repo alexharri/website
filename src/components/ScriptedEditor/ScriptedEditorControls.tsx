@@ -2,8 +2,8 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import ReactDOM from "react-dom";
 import { useIsomorphicLayoutEffect } from "../../utils/hooks/useIsomorphicLayoutEffect";
 import { RunContext } from "./run/RunContext";
-import { runScript } from "./run/runScript";
 import styles from "./ScriptedEditor.module.scss";
+import { moveToIndex, startScript } from "./scriptedEditorUtils";
 import { ScriptNavigation } from "./ScriptNavigation/ScriptNavigation";
 
 interface Props {
@@ -13,7 +13,7 @@ interface Props {
 }
 
 export const ScriptedEditorControls = (props: Props) => {
-  const { runContext, initialCode } = props;
+  const { runContext } = props;
 
   const getEditorWrapper = () =>
     document.querySelector(`[data-sripted-editor-wrapper="${props.scriptId}"]`);
@@ -30,41 +30,13 @@ export const ScriptedEditorControls = (props: Props) => {
     onMouseDownOutside();
   };
 
-  const startScript = useCallback(
-    async (index: number, delayMs: number) => {
-      if (!runContext) return;
-
-      runContext.startNewRun();
-
-      const { editor } = runContext;
-      if (editor.getValue() !== initialCode) {
-        editor.setValue(initialCode);
-      }
-
-      runScript({ index, delayMs, runContext });
-    },
+  const onStartScript = useCallback(
+    async (index: number) => runContext && startScript(runContext, index, 500),
     [runContext],
   );
 
-  const moveToIndex = useCallback(
-    async (index: number) => {
-      if (!runContext) return false;
-
-      runContext.startNewRun();
-
-      const { editor } = runContext;
-      if (editor.getValue() !== initialCode) {
-        editor.setValue(initialCode);
-      }
-
-      const canceled = runContext.getCheckCanceledFunction();
-
-      await runScript({ index, runContext, forceSync: true, onlyRunOneCommand: true });
-
-      if (!canceled()) {
-        runContext.cancelCurrentRun();
-      }
-    },
+  const onMoveToIndex = useCallback(
+    async (index: number) => runContext && moveToIndex(runContext, index),
     [runContext],
   );
 
@@ -106,7 +78,7 @@ export const ScriptedEditorControls = (props: Props) => {
             runContext?.cancelCurrentRun();
           } else {
             if (!runContext) return;
-            startScript(Math.max(0, runContext.index) % (runContext.script.length - 1), 500);
+            onStartScript(Math.max(0, runContext.index) % (runContext.script.length - 1));
           }
         }}
         data-down={isPlaying}
@@ -116,9 +88,7 @@ export const ScriptedEditorControls = (props: Props) => {
       <button
         className={styles.bigButtonWrapper}
         onMouseDown={onBigButtonMouseDown}
-        onClick={() => {
-          startScript(0, 500);
-        }}
+        onClick={() => onStartScript(0)}
       >
         <div className={styles.bigButton}>Restart</div>
       </button>
@@ -135,7 +105,7 @@ export const ScriptedEditorControls = (props: Props) => {
       {runContext &&
         ReactDOM.createPortal(
           <ScriptNavigation
-            moveToIndex={moveToIndex}
+            moveToIndex={onMoveToIndex}
             runContext={runContext}
             scriptId={props.scriptId}
             show={showNavigation}

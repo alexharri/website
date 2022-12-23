@@ -6,6 +6,7 @@ type OnPlaying = (playing: boolean) => void;
 
 export class RunContext {
   runId = 0;
+  initialCode: string;
   editor: MonacoEditor;
   script: ScriptCommand[];
   sync = true;
@@ -13,9 +14,10 @@ export class RunContext {
   private moveIndexHandlers: OnRunCommand[] = [];
   private playingHandlers: OnPlaying[] = [];
 
-  constructor(editor: MonacoEditor, script: ScriptCommand[]) {
+  constructor(editor: MonacoEditor, script: ScriptCommand[], initialCode: string) {
     this.editor = editor;
     this.script = script;
+    this.initialCode = initialCode;
   }
 
   subscribe(type: "playing", handler: OnPlaying): void;
