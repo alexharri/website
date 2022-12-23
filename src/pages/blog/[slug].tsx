@@ -32,7 +32,11 @@ const components = {
   SmallNote,
   ScriptedEditor: LazyScriptedEditor,
   CodeScript: (props: any) => (
-    <div data-script-id={props.id} data-script={JSON.stringify(props.script)} />
+    <div
+      data-script-id={props.id}
+      data-script={JSON.stringify(props.script)}
+      data-expected-lines={props.expectedLines}
+    />
   ),
   // ExampleComponent: dynamic(() => import("../../src/components/ExampleComponent")),
   Head,

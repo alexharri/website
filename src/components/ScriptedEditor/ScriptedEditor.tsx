@@ -1,5 +1,4 @@
 import { useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
-import ReactDOM from "react-dom";
 import Editor, { EditorProps } from "@monaco-editor/react";
 import styles from "./ScriptedEditor.module.scss";
 import { MonacoEditor } from "./types/scriptedEditorTypes";
@@ -11,44 +10,33 @@ import { RunContext } from "./run/RunContext";
 import { FocusedScriptContext } from "./FocusedScriptContext/FocusedScriptContext";
 import { useDidUpdate } from "../../utils/hooks/useDidUpdate";
 import { useMouseDownOutside } from "../../utils/hooks/useMouseDownOutside";
-import { ScriptNavigation } from "./ScriptNavigation/ScriptNavigation";
-import { useIsomorphicLayoutEffect } from "../../utils/hooks/useIsomorphicLayoutEffect";
 import { LazyScriptedEditor } from "./LazyScriptedEditor";
+import { scriptedEditorConstants } from "./scriptedEditorConstants";
+import { calculateHeight } from "./scriptedEditorUtils";
 
 const MemoizedEditor = React.memo(Editor);
 
-const FONT_SIZE = 18;
-const LINE_HEIGHT_FACTOR = 1.5;
-const LINE_HEIGHT = FONT_SIZE * LINE_HEIGHT_FACTOR;
-const V_PADDING = 24;
+const { FONT_SIZE, LINE_HEIGHT_FACTOR, V_PADDING } = scriptedEditorConstants;
 
-export interface ScriptedEditorProps {
+interface Props {
   initialCode: string;
   scriptId: string;
-  expectedHeight?: number;
-  setHeight: (height: number) => void;
+  onMaxLinesCalculated: (lines: number) => void;
+  setRunContext: (runContext: RunContext) => void;
 }
 
-export const ScriptedEditor = (props: ScriptedEditorProps) => {
-  const initialCode = useMemo(() => {
-    const lines = props.initialCode.split("\n");
-    while (lines[0] === "") {
-      lines.shift();
-    }
-    while (lines[lines.length - 1] === "") {
-      lines.pop();
-    }
-    return lines.join("\n");
-  }, []);
+export const ScriptedEditor = (props: Props) => {
+  const { initialCode } = props;
 
   const [_editor, setEditor] = useState<MonacoEditor | null>(null);
   const [script, setScript] = useState<ScriptCommand[] | null>(null);
-  const [isPlaying, setIsPlaying] = useState(false);
 
   const containerRef = useRef<HTMLDivElement>(null);
   const editorWrapperRef = useRef<HTMLDivElement>(null);
   const heightMeasuredRef = useRef(false);
-  const focusInsideEditorRef = useRef(false);
+
+  const focusInsideEditor = () =>
+    editorWrapperRef.current?.getAttribute("data-focus-inside") === "true";
 
   useEffect(() => {
     const el = document.querySelector(`[data-script-id="${props.scriptId}"]`)!;
@@ -61,6 +49,12 @@ export const ScriptedEditor = (props: ScriptedEditorProps) => {
   );
   const runContextRef = useRef(runContext);
   runContextRef.current = runContext;
+
+  useEffect(() => {
+    if (runContext) {
+      props.setRunContext(runContext);
+    }
+  }, [runContext]);
 
   const moveToIndex = useCallback(
     async (index: number) => {
@@ -104,7 +98,6 @@ export const ScriptedEditor = (props: ScriptedEditorProps) => {
     const container = containerRef.current!;
     const editorWrapper = editorWrapperRef.current!;
 
-    let height = 0;
     let lines = 0;
 
     await runScript({
@@ -113,15 +106,15 @@ export const ScriptedEditor = (props: ScriptedEditorProps) => {
       forceSync: true,
       onEachStep: () => {
         const value = runContext.editor.getValue();
-        height = Math.max(height, calculateHeight(value));
         lines = Math.max(lines, value.split("\n").length);
       },
     });
 
+    const height = calculateHeight(lines);
     runContext.editor.layout({ height, width: container.offsetWidth });
     runContext.editor.setValue(initialCode);
     editorWrapper.style.height = height + "px";
-    props.setHeight(height);
+    props.onMaxLinesCalculated(lines);
   }
 
   // Measure height on mount
@@ -139,12 +132,6 @@ export const ScriptedEditor = (props: ScriptedEditorProps) => {
     });
   }, [runContext]);
 
-  useEffect(() => {
-    if (!runContext) return;
-    runContext.subscribe("playing", setIsPlaying);
-    return () => runContext.unsubscribe("playing", setIsPlaying);
-  }, [runContext]);
-
   const options = useMemo<EditorProps["options"]>(
     () => ({
       fontSize: FONT_SIZE,
@@ -157,26 +144,26 @@ export const ScriptedEditor = (props: ScriptedEditorProps) => {
     [],
   );
 
-  const calculateHeight = useCallback((code: string) => {
-    return code.split("\n").length * LINE_HEIGHT + V_PADDING * 2;
-  }, []);
-
   const cancelCurrentRun = useCallback(() => {
     runContext?.cancelCurrentRun();
   }, [runContext]);
 
   const keyDownCapture = useCallback(
-    (e: React.KeyboardEvent) => {
-      if (focusInsideEditorRef.current) return;
+    (e: React.KeyboardEvent | KeyboardEvent) => {
+      if (focusInsideEditor()) return;
 
       const isDownArrow = e.keyCode === 40;
       const isUpArrow = e.keyCode === 38;
 
-      if (showNavigationRef.current && runContext && (isDownArrow || isUpArrow)) {
+      const navigationVisible = !!document.querySelector(
+        `[data-script-navigation="${props.scriptId}"]`,
+      );
+      if (navigationVisible && runContext && (isDownArrow || isUpArrow)) {
         const delta = isDownArrow ? 1 : -1;
         const index = Math.max(Math.min(runContext.index + delta, runContext.script.length - 1), 0);
         moveToIndex(index);
         e.preventDefault();
+        return;
       }
 
       const el = document.activeElement as HTMLInputElement | null;
@@ -198,6 +185,11 @@ export const ScriptedEditor = (props: ScriptedEditorProps) => {
     [runContext],
   );
 
+  useEffect(() => {
+    window.addEventListener("keydown", keyDownCapture);
+    return () => window.removeEventListener("keydown", keyDownCapture);
+  }, [keyDownCapture]);
+
   const { scriptId } = useContext(FocusedScriptContext);
 
   useDidUpdate(() => {
@@ -209,13 +201,11 @@ export const ScriptedEditor = (props: ScriptedEditorProps) => {
   }, [scriptId]);
 
   const onMouseDownOutside = () => {
-    focusInsideEditorRef.current = false;
     editorWrapperRef.current?.removeAttribute("data-focus-inside");
   };
   useMouseDownOutside(editorWrapperRef, onMouseDownOutside);
 
   const onMouseDown = () => {
-    focusInsideEditorRef.current = true;
     editorWrapperRef.current?.setAttribute("data-focus-inside", "true");
     cancelCurrentRun();
   };
@@ -224,41 +214,15 @@ export const ScriptedEditor = (props: ScriptedEditorProps) => {
 
   const active = scriptId === props.scriptId;
 
-  const [showNavigation, setShowNavigation] = useState(false);
-  const showNavigationRef = useRef(showNavigation);
-  showNavigationRef.current = showNavigation;
-
-  useIsomorphicLayoutEffect(() => {
-    const main = document.querySelector("main");
-    const editorWrapper = editorWrapperRef.current;
-    if (!main || !editorWrapper) return;
-
-    if (!showNavigation) {
-      main.style.transform = "";
-      return;
-    }
-
-    const { left } = editorWrapperRef.current.getBoundingClientRect();
-
-    const translate = Math.max(0, 300 - (left - 24));
-
-    main.style.transform = `translateX(${translate}px)`;
-    main.style.transition = "transform .5s";
-  }, [showNavigation]);
-
-  const onBigButtonMouseDown = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    onMouseDownOutside();
-  };
-
   return (
     <div data-scripted-editor={props.scriptId} ref={containerRef} onKeyDownCapture={keyDownCapture}>
       <div className={styles.outerContainer} data-active={active}>
         <div className={styles.container}>
           <div
+            data-sripted-editor-wrapper={props.scriptId}
             ref={editorWrapperRef}
             className={styles.editor}
-            style={{ minHeight: calculateHeight(initialCode) }}
+            style={{ minHeight: calculateHeight(initialCode.split("\n").length) }}
             onMouseDown={onMouseDown}
           >
             <MemoizedEditor
@@ -269,54 +233,8 @@ export const ScriptedEditor = (props: ScriptedEditorProps) => {
               onMount={setEditor}
             />
           </div>
-          <button
-            className={styles.bigButtonWrapper}
-            onMouseDown={onBigButtonMouseDown}
-            onClick={() => {
-              if (isPlaying) {
-                cancelCurrentRun();
-              } else {
-                if (!runContext) return;
-                startScript(Math.max(0, runContext.index) % (runContext.script.length - 1), 500);
-              }
-            }}
-            data-down={isPlaying}
-          >
-            <div className={styles.bigButton}>Play</div>
-          </button>
-          <button
-            className={styles.bigButtonWrapper}
-            onMouseDown={onBigButtonMouseDown}
-            onClick={() => {
-              startScript(0, 500);
-            }}
-          >
-            <div className={styles.bigButton}>Restart</div>
-          </button>
-          <button
-            className={styles.bigButtonWrapper}
-            onMouseDown={onBigButtonMouseDown}
-            onClick={() => {
-              setShowNavigation((showNavigation) => !showNavigation);
-            }}
-            data-down={showNavigation}
-          >
-            <div className={styles.bigButton}>Focus</div>
-          </button>
         </div>
       </div>
-      {runContext &&
-        ReactDOM.createPortal(
-          <ScriptNavigation
-            moveToIndex={moveToIndex}
-            runContext={runContext}
-            scriptId={props.scriptId}
-            show={showNavigation}
-            setShow={setShowNavigation}
-            focusInsideEditorRef={focusInsideEditorRef}
-          />,
-          document.body,
-        )}
     </div>
   );
 };
@@ -338,9 +256,22 @@ export function withScriptedEditor<T extends { children: any }>(
       return <Component {...props} />;
     }
 
+    while (lines[0] === "") {
+      lines.shift();
+    }
+    while (lines[lines.length - 1] === "") {
+      lines.pop();
+    }
     const initialCode = lines.join("\n");
-    const scriptId = scriptLine.split(searchStr)[1].trim();
+    const [scriptId, expectedLinesStr] = scriptLine.split(searchStr)[1].trim().split(" ");
+    const expectedLines = (expectedLinesStr ?? "").split("expectedLines=")[1];
 
-    return <LazyScriptedEditor initialCode={initialCode} scriptId={scriptId} />;
+    return (
+      <LazyScriptedEditor
+        initialCode={initialCode}
+        scriptId={scriptId}
+        expectedMaxLines={expectedLines ? Number(expectedLines) : undefined}
+      />
+    );
   };
 }

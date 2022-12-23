@@ -12,7 +12,6 @@ interface Props {
   runContext: RunContext;
   show: boolean;
   setShow: (show: boolean) => void;
-  focusInsideEditorRef: React.RefObject<boolean>;
 }
 
 export const ScriptNavigation = (props: Props) => {
@@ -91,6 +90,7 @@ export const ScriptNavigation = (props: Props) => {
           animate={{ x: 0 }}
           exit={{ x: -300 }}
           className={styles.container}
+          data-script-navigation={props.scriptId}
         >
           <div className={styles.scroll} style={{ transform: "translateY(-32px)" }} ref={scrollRef}>
             {props.runContext.script.map((command, i) => (

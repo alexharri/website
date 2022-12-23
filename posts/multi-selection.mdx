@@ -31,7 +31,7 @@ Here is some more text.
 What, even more text?
 
 ```tsx
-// @script test-1
+// @script test-1 expectedLines=5
 function doStuff() {
   const x = 1;
   const y = 2;
@@ -59,7 +59,7 @@ Here is some more text.
 What, even more text?
 
 ```tsx
-// @script turn-ifs-into-switch
+// @script turn-ifs-into-switch expectedLines=13
 if (element.type === "property") {
   return formatProperty(element);
 }
