@@ -13,6 +13,7 @@ import { useDidUpdate } from "../../utils/hooks/useDidUpdate";
 import { useMouseDownOutside } from "../../utils/hooks/useMouseDownOutside";
 import { ScriptNavigation } from "./ScriptNavigation/ScriptNavigation";
 import { useIsomorphicLayoutEffect } from "../../utils/hooks/useIsomorphicLayoutEffect";
+import { LazyScriptedEditor } from "./LazyScriptedEditor";
 
 const MemoizedEditor = React.memo(Editor);
 
@@ -21,12 +22,14 @@ const LINE_HEIGHT_FACTOR = 1.5;
 const LINE_HEIGHT = FONT_SIZE * LINE_HEIGHT_FACTOR;
 const V_PADDING = 24;
 
-interface Props {
+export interface ScriptedEditorProps {
   initialCode: string;
   scriptId: string;
+  expectedHeight?: number;
+  setHeight: (height: number) => void;
 }
 
-export const ScriptedEditor = (props: Props) => {
+export const ScriptedEditor = (props: ScriptedEditorProps) => {
   const initialCode = useMemo(() => {
     const lines = props.initialCode.split("\n");
     while (lines[0] === "") {
@@ -102,19 +105,23 @@ export const ScriptedEditor = (props: Props) => {
     const editorWrapper = editorWrapperRef.current!;
 
     let height = 0;
+    let lines = 0;
 
     await runScript({
       index: 0,
       runContext,
       forceSync: true,
       onEachStep: () => {
-        height = Math.max(height, calculateHeight(runContext.editor.getValue()));
+        const value = runContext.editor.getValue();
+        height = Math.max(height, calculateHeight(value));
+        lines = Math.max(lines, value.split("\n").length);
       },
     });
 
     runContext.editor.layout({ height, width: container.offsetWidth });
     runContext.editor.setValue(initialCode);
     editorWrapper.style.height = height + "px";
+    props.setHeight(height);
   }
 
   // Measure height on mount
@@ -334,6 +341,6 @@ export function withScriptedEditor<T extends { children: any }>(
     const initialCode = lines.join("\n");
     const scriptId = scriptLine.split(searchStr)[1].trim();
 
-    return <ScriptedEditor initialCode={initialCode} scriptId={scriptId} />;
+    return <LazyScriptedEditor initialCode={initialCode} scriptId={scriptId} />;
   };
 }

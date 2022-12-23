@@ -9,7 +9,8 @@ import { Layout } from "../../components/Layout";
 import { Link } from "../../components/Link";
 import { Meta } from "../../components/Meta/Meta";
 import { FocusedScriptProvider } from "../../components/ScriptedEditor/FocusedScriptContext/FocusedScriptContext";
-import { ScriptedEditor, withScriptedEditor } from "../../components/ScriptedEditor/ScriptedEditor";
+import { withScriptedEditor } from "../../components/ScriptedEditor/ScriptedEditor";
+import { LazyScriptedEditor } from "../../components/ScriptedEditor/LazyScriptedEditor";
 import { SmallNote } from "../../components/SmallNote/SmallNote";
 import { Pre, StaticCodeBlock } from "../../components/StaticCodeBlock/StaticCodeBlock";
 import { FrontMatter } from "../../types/FrontMatter";
@@ -29,7 +30,7 @@ const components = {
     (props) => props.children,
   ),
   SmallNote,
-  ScriptedEditor,
+  ScriptedEditor: LazyScriptedEditor,
   CodeScript: (props: any) => (
     <div data-script-id={props.id} data-script={JSON.stringify(props.script)} />
   ),
