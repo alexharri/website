@@ -16,7 +16,7 @@ interface Props {
 
 export const ScriptNavigation = (props: Props) => {
   const { runContext, show, setShow } = props;
-  const { scriptId } = useContext(FocusedScriptContext);
+  const { focusedScriptId: scriptId } = useContext(FocusedScriptContext);
 
   const commandElRef = useRef<Partial<Record<number, HTMLDivElement>>>({});
   const commandHeightRef = useRef<Partial<Record<number, number>>>({});

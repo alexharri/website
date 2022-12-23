@@ -20,14 +20,9 @@ export const ScriptedEditorControls = (props: Props) => {
 
   const [isPlaying, setIsPlaying] = useState(false);
 
-  const onMouseDownOutside = () => {
-    // focusInsideEditorRef.current = false;
-    getEditorWrapper()?.removeAttribute("data-focus-inside");
-  };
-
   const onBigButtonMouseDown = (e: React.MouseEvent) => {
     e.stopPropagation();
-    onMouseDownOutside();
+    getEditorWrapper()?.removeAttribute("data-focus-inside");
   };
 
   const onStartScript = useCallback(
@@ -69,7 +64,7 @@ export const ScriptedEditorControls = (props: Props) => {
   }, [showNavigation]);
 
   return (
-    <div>
+    <div style={{ marginTop: 24 }}>
       <button
         className={styles.bigButtonWrapper}
         onMouseDown={onBigButtonMouseDown}

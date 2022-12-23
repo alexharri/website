@@ -13,6 +13,7 @@ import { useMouseDownOutside } from "../../utils/hooks/useMouseDownOutside";
 import { LazyScriptedEditor } from "./LazyScriptedEditor";
 import { scriptedEditorConstants } from "./scriptedEditorConstants";
 import { calculateHeight, moveToIndex, startScript } from "./scriptedEditorUtils";
+import { withMargin } from "../../utils/withMargin";
 
 const MemoizedEditor = React.memo(Editor);
 
@@ -27,6 +28,9 @@ interface Props {
 
 export const ScriptedEditor = (props: Props) => {
   const { initialCode } = props;
+  const { focusedScriptId } = useContext(FocusedScriptContext);
+  const focusedScriptIdRef = useRef(focusedScriptId);
+  focusedScriptIdRef.current = focusedScriptId;
 
   const [_editor, setEditor] = useState<MonacoEditor | null>(null);
   const [script, setScript] = useState<ScriptCommand[] | null>(null);
@@ -37,9 +41,14 @@ export const ScriptedEditor = (props: Props) => {
 
   const focusInsideEditor = () =>
     editorWrapperRef.current?.getAttribute("data-focus-inside") === "true";
+  const notActiveScript = () => focusedScriptIdRef.current !== props.scriptId;
 
   useEffect(() => {
     const el = document.querySelector(`[data-script-id="${props.scriptId}"]`)!;
+    if (!el) {
+      console.warn(`No <CodeScript /> with id ${props.scriptId}`);
+      return;
+    }
     setScript(JSON.parse(el.getAttribute("data-script")!));
   }, []);
 
@@ -122,7 +131,7 @@ export const ScriptedEditor = (props: Props) => {
 
   const keyDownCapture = useCallback(
     (e: React.KeyboardEvent | KeyboardEvent) => {
-      if (focusInsideEditor()) return;
+      if (focusInsideEditor() || notActiveScript()) return;
 
       const isDownArrow = e.keyCode === 40;
       const isUpArrow = e.keyCode === 38;
@@ -163,15 +172,13 @@ export const ScriptedEditor = (props: Props) => {
     return () => window.removeEventListener("keydown", keyDownCapture);
   }, [keyDownCapture]);
 
-  const { scriptId } = useContext(FocusedScriptContext);
-
   useDidUpdate(() => {
-    if (scriptId === props.scriptId) {
+    if (focusedScriptId === props.scriptId) {
       onStartScript();
     } else {
       runContextRef.current?.cancelCurrentRun();
     }
-  }, [scriptId]);
+  }, [focusedScriptId]);
 
   const onMouseDownOutside = () => {
     editorWrapperRef.current?.removeAttribute("data-focus-inside");
@@ -185,7 +192,7 @@ export const ScriptedEditor = (props: Props) => {
 
   const [mode] = useColorMode();
 
-  const active = scriptId === props.scriptId;
+  const active = focusedScriptId === props.scriptId;
 
   return (
     <div data-scripted-editor={props.scriptId} ref={containerRef} onKeyDownCapture={keyDownCapture}>
@@ -216,7 +223,7 @@ export function withScriptedEditor<T extends { children: any }>(
   Component: React.ComponentType<T>,
   getChildren: (props: T) => string,
 ) {
-  return (props: T) => {
+  return withMargin([40, 0], (props: T) => {
     const children = getChildren(props);
     const searchStr = "// @script ";
 
@@ -243,8 +250,8 @@ export function withScriptedEditor<T extends { children: any }>(
       <LazyScriptedEditor
         initialCode={initialCode}
         scriptId={scriptId}
-        expectedMaxLines={expectedLines ? Number(expectedLines) : undefined}
+        expectedMaxLines={expectedLines ? Number(expectedLines) : lines.length}
       />
     );
-  };
+  });
 }

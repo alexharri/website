@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 
-export const FocusedScriptContext = React.createContext({ scriptId: "" });
+export const FocusedScriptContext = React.createContext({ focusedScriptId: "" });
 
 interface Item {
   top: number;
@@ -85,7 +85,7 @@ export const FocusedScriptProvider = (props: { children: React.ReactNode }) => {
     };
   }, []);
 
-  const value = useMemo(() => ({ scriptId }), [scriptId]);
+  const value = useMemo(() => ({ focusedScriptId: scriptId }), [scriptId]);
 
   return (
     <FocusedScriptContext.Provider value={value}>{props.children}</FocusedScriptContext.Provider>

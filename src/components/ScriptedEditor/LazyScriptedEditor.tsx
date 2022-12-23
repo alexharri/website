@@ -7,7 +7,7 @@ import { calculateHeight } from "./scriptedEditorUtils";
 interface Props {
   initialCode: string;
   scriptId: string;
-  expectedMaxLines?: number;
+  expectedMaxLines: number;
 }
 
 export function LazyScriptedEditor(props: Props) {
@@ -15,19 +15,14 @@ export function LazyScriptedEditor(props: Props) {
 
   const [runContext, setRunContext] = useState<RunContext | null>(null);
   const [render, setRender] = useState(true);
-  const [height, setHeight] = useState(() => calculateHeight(expectedMaxLines ?? 1));
+  const [height, setHeight] = useState(() => calculateHeight(expectedMaxLines));
 
   const onMaxLinesCalculated = (lines: number) => {
-    if (expectedMaxLines) {
-      if (lines !== expectedMaxLines) {
-        console.warn(
-          `Expected lines did not match for ${scriptId}.\n` +
-            `\tExpected ${expectedMaxLines} but got ${lines}`,
-        );
-        setHeight(calculateHeight(lines));
-      }
-    } else {
-      console.warn(`Received ${lines} lines for ${scriptId}`);
+    if (lines !== expectedMaxLines) {
+      console.warn(
+        `Expected lines did not match for ${scriptId}.\n` +
+          `\tExpected ${expectedMaxLines} but got ${lines}`,
+      );
       setHeight(calculateHeight(lines));
     }
   };
