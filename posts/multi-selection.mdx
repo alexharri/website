@@ -68,7 +68,10 @@ You will be surprised by how far we can take this seemingly simple command. `Com
 
 Before we get into `Command D`, let's take a quick look at text navigation.
 
-Everyone knows the basics. Use the arrow keys to move the cursor, and hold shift to select text when moving with the arrow keys.
+First off, the basics:
+
+ * __Arrow keys__ to move the cursor
+ * __Shift__ to select text while moving the cursor.
 
 ```
 // @script arrow-keys
@@ -82,7 +85,7 @@ one two three four five.
   { command: "Left", times: 7, msBetween: 140 },
 ]} />
 
-You can jump over words with the arrow keys by holding down `Option`.
+Use `Option` to jump over words.
 
 ```
 // @script jump-over-words
@@ -91,24 +94,13 @@ one two three four five.
 
 <CodeScript id="jump-over-words" script={[
   { command: "Select", line: 1, col: 1 },
-  { command: "Option Right", times: 5, msBetween: 300 },
+  { command: "Option Right", times: 3, msBetween: 300, msAfter: 300 },
+  { command: "Right", msAfter: 700 },
+  { command: "Shift Option Right", times: 2, msBetween: 300 },
   { command: "Option Left", times: 5, msBetween: 300 },
 ]} />
 
-Additionally, holding down `Shift` allows you to shift your selection by words.
-
-```
-// @script jump-over-words-select
-one two three four five.
-```
-
-<CodeScript id="jump-over-words-select" script={[
-  { command: "Select", line: 1, col: 1 },
-  { command: "Shift Option Right", times: 5, msBetween: 300 },
-  { command: "Shift Option Left", times: 5, msBetween: 300 },
-]} />
-
-To jump to the end or beginning of a line, you can combine `Command` with the arrow keys.
+Use `Command` to jump to the beginning or end of a line.
 
 ```
 // @script jump-to-end-start-of-line
@@ -121,7 +113,9 @@ one two three four five.
   { command: "Shift Command Left" },
 ]} />
 
-This is useful, for example, when selecting blocks of code:
+<SmallNote moveCloserUpBy={16}>From now I'll refer to the beginning and end of lines as _line boundaries_</SmallNote>
+
+`Command` is useful, for example, when selecting blocks of code:
 
 ```javascript
 // @script select-block-of-code
@@ -149,7 +143,7 @@ This is all we need to know about text navigation.
 
 ## Selecting data
 
-Let's apply the text navigation knowledge we just learned with a concrete example.
+Let's combine our text navigation knowledge with `Command D`, using a concrete example.
 
 Given that we have a JSON file of users and we want to select the name of every user, we can do that with `Command D`. Select `name`, press `Command D` to select all instances and use `Option Right` select the names:
 
@@ -292,70 +286,19 @@ Well, we can use `Command K` and then `Command D` to skip over instances.
 ]} />
 
 
-{/* ## Why does any of this matter?
+## Refactoring
 
-What "being a productive software engineer" means could be interpreted in a lot of ways.
+Mundane refactoring tasks come up from time to time. For example:
 
-It could mean that you quickly find elegant and performant solutions to problems, or that you help make other engineers more productive. There's lots of technical and human factors at play that make up how an engineer's productivity.
+ * Convert a series of `if` statements into a `switch` statement.
+ * Move object properties to a single line.
+ * Wrap these expressions with a function call.
 
-There's also the purely mechanical aspect. Writing code.
+This is the bread and butter of `Command D`. Using `Command D` takes these tasks from feeling robotic drudge work to being a small mental challenge that takes no time at all.
 
-I've often read that typing speed is not the limiting factor to a Software Engineer's productivity. Rather, it is thinking speed that limits people. The argument is that time spent reading and reasoning about code dominates an engineers time compared to writing code. */}
+Let's tackle these examples one at a time.
 
-
-Here is some text.
-
-Here is some more text.
-
-What, even more text?
-Here is some text.
-
-Here is some more text.
-
-What, even more text?
-Here is some text.
-
-Here is some more text.
-
-What, even more text?
-Here is some text.
-
-Here is some more text.
-
-What, even more text?
-Here is some text.
-
-Here is some more text.
-
-What, even more text?
-
-```javascript
-// @script test-1 expectedLines=5
-function doStuff() {
-  const x = 1;
-  const y = 2;
-  const z = 3;
-}
-```
-
-<CodeScript id="test-1" script={[
-  { command: "Select Word", word: "const", line: 2, msBetween: 500 },
-  { command: "Command D", times: 2 },
-  { command: "Command Right" },
-  { command: "Left", times: 4 },
-]} />
-
-Here is some text.
-
-Here is some more text.
-
-What, even more text?
-
-Here is some text.
-
-Here is some more text.
-
-What, even more text?
+### Converting a series of `if` statements into a `switch` statement
 
 ```javascript
 // @script turn-ifs-into-switch expectedLines=13
@@ -399,6 +342,78 @@ if (element.type === "group") {
   { command: "Shift Command Right" },
   { command: "Backspace" },
 ]} />
+
+## Move object properties to a single line
+
+Maybe you have a function call with some options that are taking up too much vertical space.
+
+```javascript
+// @script inline-object-properties
+await animate({
+  from: 0,
+  to: 100,
+  curve: "ease-in",
+});
+```
+
+<CodeScript id="inline-object-properties" script={[
+  { command: "Select Word", word: "  ", line: 2, msAfter: 700 },
+  { command: "Command D", times: 2, msBetween: 150, msAfter: 500 },
+  { command: "Backspace", times: 2, msBetween: 500, msAfter: 200 },
+  { command: "Type", text: " " },
+  { command: "Down", msAfter: 250 },
+  { command: "Command Left" },
+  { command: "Shift Up", msAfter: 200 },
+  { command: "Shift Command Right" },
+  { command: "Backspace", msAfter: 300 },
+  { command: "Backspace", msAfter: 300 },
+  { command: "Type", text: " " },
+]} />
+
+Even if you have a series of these, you can do them all at once:
+
+```javascript
+// @script inline-multiple-object-properties
+await animate({
+  from: 0,
+  to: 100,
+  curve: "ease-in",
+});
+
+await animate({
+  delay: 500,
+  from: 100,
+  to: 50,
+  curve: 'ease-out',
+});
+```
+
+<CodeScript id="inline-multiple-object-properties" script={[
+  { command: "Select Word", word: "  ", line: 2, msAfter: 700 },
+  { command: "Command D", times: 2, msBetween: 150, msAfter: 300 },
+  { command: "Command D", times: 4, msBetween: 150, msAfter: 500 },
+  { command: "Backspace", times: 2, msBetween: 500, msAfter: 200 },
+  { command: "Type", text: " " },
+  { command: "Down", msAfter: 250 },
+  { command: "Command Left" },
+  { command: "Shift Up", msAfter: 200 },
+  { command: "Shift Command Right", msAfter: 200 },
+  { command: "Shift Left" },
+  { command: "Backspace", msAfter: 300 },
+  { command: "Type", text: " " },
+  { command: "Command Left" },
+]} />
+
+
+{/* ## Why does any of this matter?
+
+What "being a productive software engineer" means could be interpreted in a lot of ways.
+
+It could mean that you quickly find elegant and performant solutions to problems, or that you help make other engineers more productive. There's lots of technical and human factors at play that make up how an engineer's productivity.
+
+There's also the purely mechanical aspect. Writing code.
+
+I've often read that typing speed is not the limiting factor to a Software Engineer's productivity. Rather, it is thinking speed that limits people. The argument is that time spent reading and reasoning about code dominates an engineers time compared to writing code. */}
 
 Here is some text.
 
