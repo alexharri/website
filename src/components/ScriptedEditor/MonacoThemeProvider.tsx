@@ -3,7 +3,11 @@ import loader from "@monaco-editor/loader";
 import {
   editorBackground,
   editorSelectionHighlight,
+  editorSelectionBackground,
+  editorSelectionForeground,
+  editorInactiveSelection,
 } from "monaco-editor/esm/vs/platform/theme/common/colorRegistry";
+import { colorValues } from "../../utils/cssVariables";
 
 let themeDefined = false;
 
@@ -15,56 +19,42 @@ function defineThemes(monaco: ReturnType<typeof useMonaco>) {
 }
 
 function defineDarkTheme(monaco: ReturnType<typeof useMonaco>) {
-  defineTheme(monaco, "alexharri-dark", "vs-dark", {
-    background: "#192535",
-    blue: "#399EF4",
-    text: "#9FCFF9",
-    string: "#DA6771",
-    number: "#E5949B",
-    green: "#4EB071",
-    comment: "#535A6B",
-    selection: "#293951",
-  });
+  defineTheme(monaco, "alexharri-dark", "vs-dark", colorValues.dark);
 }
 
 function defineLightTheme(monaco: ReturnType<typeof useMonaco>) {
-  defineTheme(monaco, "alexharri-light", "vs", {
-    background: "#eaeeef",
-    blue: "#006bc5",
-    text: "#141d2c",
-    string: "#ba391a",
-    number: "#ab5e07",
-    green: "#008f10",
-    comment: "#7998a7",
-    selection: "#cedbe9",
-  });
-}
-
-interface Colors {
-  background: string;
-  blue: string;
-  text: string;
-  string: string;
-  number: string;
-  green: string;
-  comment: string;
-  selection: string;
+  defineTheme(monaco, "alexharri-light", "vs", colorValues.light);
 }
 
 function defineTheme(
   monaco: ReturnType<typeof useMonaco>,
   theme: string,
   base: "vs" | "vs-dark",
-  colors: Colors,
+  colors: typeof colorValues["dark" | "light"],
 ) {
-  const { background, blue, text, string, number, green, comment, selection } = colors;
+  const background = colors["background-500"];
+  const text = colors.text;
+  const blue = colors.blue;
+  const green = colors.green;
+  const string = colors["token-string"];
+  const number = colors["token-number"];
+  const comment = colors["token-comment"];
   monaco!.editor.defineTheme(theme, {
     base,
     inherit: true,
-    colors: {
-      [editorBackground]: background,
-      [editorSelectionHighlight]: selection,
-    },
+    colors:
+      base === "vs"
+        ? {
+            [editorBackground]: background,
+            [editorSelectionHighlight]: "#bcd3dc", // Token selection
+            [editorSelectionBackground]: "#9cb7c5", // Command D
+            [editorSelectionForeground]: "#b5c9d2",
+            [editorInactiveSelection]: "#bdd0da", // Editor does not have focus
+          }
+        : {
+            [editorBackground]: background,
+            [editorSelectionHighlight]: "#26354b",
+          },
     rules: [
       { token: "", foreground: text, background },
       { token: "emphasis", fontStyle: "italic" },

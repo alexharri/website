@@ -202,6 +202,16 @@ export const ScriptedEditor = (props: Props) => {
   useMouseDownOutside(editorWrapperRef, onMouseDownOutside);
 
   const onMouseDown = () => {
+    if (!focusInsideEditor()) {
+      runContext?.editor.setSelections([
+        {
+          positionColumn: 1,
+          positionLineNumber: 1,
+          selectionStartColumn: 1,
+          selectionStartLineNumber: 1,
+        },
+      ]);
+    }
     editorWrapperRef.current?.setAttribute("data-focus-inside", "true");
     cancelCurrentRun();
   };
