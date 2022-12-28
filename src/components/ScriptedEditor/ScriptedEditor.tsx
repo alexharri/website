@@ -1,4 +1,12 @@
-import { useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
+import {
+  useCallback,
+  useContext,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import Editor, { EditorProps } from "@monaco-editor/react";
 import styles from "./ScriptedEditor.module.scss";
 import { MonacoEditor } from "./types/scriptedEditorTypes";
@@ -14,6 +22,7 @@ import { LazyScriptedEditor } from "./LazyScriptedEditor";
 import { scriptedEditorConstants } from "./scriptedEditorConstants";
 import { calculateHeight, moveToIndex, startScript } from "./scriptedEditorUtils";
 import { withMargin } from "../../utils/withMargin";
+import { MonacoThemeContext } from "./MonacoThemeProvider";
 
 const MemoizedEditor = React.memo(Editor);
 
@@ -52,6 +61,10 @@ export const ScriptedEditor = (props: Props) => {
     }
     setScript(JSON.parse(el.getAttribute("data-script")!));
   }, []);
+
+  useLayoutEffect(() => {
+    if (!_editor) return;
+  }, [_editor]);
 
   const runContext = useMemo(
     () => (_editor && script ? new RunContext(_editor, script, initialCode) : null),
@@ -122,6 +135,8 @@ export const ScriptedEditor = (props: Props) => {
       minimap: { enabled: false },
       scrollBeyondLastLine: false,
       padding: { top: V_PADDING, bottom: V_PADDING },
+      renderLineHighlight: "none",
+      folding: true,
     }),
     [],
   );
@@ -208,7 +223,7 @@ export const ScriptedEditor = (props: Props) => {
           >
             <MemoizedEditor
               defaultValue={initialCode}
-              theme={mode === "dark" ? "vs-dark" : "light"}
+              theme={mode === "dark" ? "alexharri-dark" : "alexharri-light"}
               language={props.language}
               options={options}
               onMount={setEditor}
@@ -225,6 +240,8 @@ export function withScriptedEditor<T extends { children: any }>(
   getProps: (props: T) => { code: string; language: string },
 ) {
   return withMargin([40, 0], (props: T) => {
+    const { defined } = useContext(MonacoThemeContext);
+
     const { code, language } = getProps(props);
     const searchStr = "// @script ";
 
@@ -246,6 +263,8 @@ export function withScriptedEditor<T extends { children: any }>(
     const initialCode = lines.join("\n");
     const [scriptId, expectedLinesStr] = scriptLine.split(searchStr)[1].trim().split(" ");
     const expectedLines = (expectedLinesStr ?? "").split("expectedLines=")[1];
+
+    if (!defined) return null;
 
     return (
       <LazyScriptedEditor

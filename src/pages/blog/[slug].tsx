@@ -17,6 +17,7 @@ import { FrontMatter } from "../../types/FrontMatter";
 import { usePostWatcher } from "../../utils/hooks/usePostWatcher";
 import { postFileNames, POSTS_PATH } from "../../utils/mdxUtils";
 import { withMargin } from "../../utils/withMargin";
+import { MonacoThemeProvider } from "../../components/ScriptedEditor/MonacoThemeProvider";
 
 // Custom components/renderers to pass to MDX.
 // Since the MDX files aren't loaded by webpack, they have no knowledge of how
@@ -62,7 +63,9 @@ export default function PostPage(props: Props) {
         <main>
           <h1>{scope.title}</h1>
           <FocusedScriptProvider>
-            <MDXRemote {...(source as any)} components={components} />
+            <MonacoThemeProvider>
+              <MDXRemote {...(source as any)} components={components} />
+            </MonacoThemeProvider>
           </FocusedScriptProvider>
         </main>
       </Layout>
