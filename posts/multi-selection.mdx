@@ -74,7 +74,7 @@ First off, the basics:
  * __Shift__ to select text while moving the cursor.
 
 ```
-// @script arrow-keys
+// @script arrow-keys loop
 one two three four five.
 ```
 
@@ -88,7 +88,7 @@ one two three four five.
 Use `Option` to jump over words.
 
 ```
-// @script jump-over-words
+// @script jump-over-words loop
 one two three four five.
 ```
 
@@ -103,7 +103,7 @@ one two three four five.
 Use `Command` to jump to the beginning or end of a line.
 
 ```
-// @script jump-to-end-start-of-line
+// @script jump-to-end-start-of-line loop
 one two three four five.
 ```
 
@@ -118,7 +118,7 @@ one two three four five.
 `Command` is useful, for example, when selecting blocks of code:
 
 ```javascript
-// @script select-block-of-code
+// @script select-block-of-code loop
 const items = [
   { id: 1, content: ["foo", "bar"] },
   { id: 2, content: [] },
@@ -465,7 +465,7 @@ const blue = "#399ef4";
   { command: "Right", times: 2 },
   { command: "Shift Option Right" },
   { command: "Copy" },
-  { command: "Command down" },
+  { command: "Command Down" },
   { command: "Left", times: 3 },
   { command: "Enter", indent: 1 },
   { command: "Paste" },
@@ -485,7 +485,7 @@ const blue = "#399ef4";
 You may need to convert some HTML into React code, which requires snake-case attributes to be converted to camelCase. We can combine `Command D` with the `Transform to Uppercase` command.
 
 ```javascript
-// @script snake-case-to-camelcase
+// @script snake-case-to-camelcase expectedLines=13
 function getAttributes(el) {
 }
 

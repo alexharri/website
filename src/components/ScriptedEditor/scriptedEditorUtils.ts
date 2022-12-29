@@ -1,3 +1,4 @@
+import { delayMs } from "../../utils/delay";
 import { RunContext } from "./run/RunContext";
 import { runScript } from "./run/runScript";
 import { scriptedEditorConstants } from "./scriptedEditorConstants";
@@ -8,15 +9,36 @@ export const calculateHeight = (lines: number) => {
   return lines * LINE_HEIGHT + V_PADDING * 2;
 };
 
-export const startScript = async (runContext: RunContext, index: number, delayMs: number) => {
-  runContext.startNewRun();
+interface StartScriptOptions {
+  runContext: RunContext;
+  index: number;
+  delayMs: number;
+  loop: boolean;
+}
 
-  const { editor, initialCode } = runContext;
-  if (editor.getValue() !== initialCode) {
-    editor.setValue(initialCode);
+export const startScript = async (options: StartScriptOptions) => {
+  const { runContext } = options;
+
+  let runAgain = true;
+
+  while (runAgain) {
+    runContext.startNewRun();
+    const canceled = runContext.getCheckCanceledFunction();
+
+    const { editor, initialCode } = runContext;
+    if (editor.getValue() !== initialCode) {
+      editor.setValue(initialCode);
+    }
+
+    await runScript(options);
+
+    runAgain = options.loop && !canceled();
+    if (runAgain) {
+      options.index = 0;
+      options.delayMs = 1000;
+      await delayMs(options.delayMs);
+    }
   }
-
-  runScript({ index, delayMs, runContext });
 };
 
 export const moveToIndex = async (runContext: RunContext, index: number) => {

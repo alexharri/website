@@ -10,6 +10,7 @@ interface Props {
   scriptId: string;
   initialCode: string;
   runContext: RunContext | null;
+  loop: boolean;
 }
 
 export const ScriptedEditorControls = (props: Props) => {
@@ -26,7 +27,8 @@ export const ScriptedEditorControls = (props: Props) => {
   };
 
   const onStartScript = useCallback(
-    async (index: number) => runContext && startScript(runContext, index, 500),
+    async (index: number) =>
+      runContext && startScript({ runContext, index, delayMs: 500, loop: props.loop }),
     [runContext],
   );
 

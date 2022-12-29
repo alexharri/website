@@ -9,6 +9,7 @@ interface Props {
   initialCode: string;
   scriptId: string;
   expectedMaxLines: number;
+  loop: boolean;
 }
 
 export function LazyScriptedEditor(props: Props) {
@@ -66,6 +67,7 @@ export function LazyScriptedEditor(props: Props) {
             onMaxLinesCalculated={onMaxLinesCalculated}
             setRunContext={setRunContext}
             language={props.language}
+            loop={props.loop}
           />
         )}
       </div>
@@ -73,6 +75,7 @@ export function LazyScriptedEditor(props: Props) {
         initialCode={props.initialCode}
         scriptId={props.scriptId}
         runContext={runContext}
+        loop={props.loop}
       />
     </>
   );

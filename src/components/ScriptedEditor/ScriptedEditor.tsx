@@ -34,6 +34,7 @@ interface Props {
   scriptId: string;
   onMaxLinesCalculated: (lines: number) => void;
   setRunContext: (runContext: RunContext) => void;
+  loop: boolean;
 }
 
 export const ScriptedEditor = (props: Props) => {
@@ -108,7 +109,7 @@ export const ScriptedEditor = (props: Props) => {
 
   const onStartScript = useCallback(async () => {
     if (!runContext || !heightMeasuredRef.current) return;
-    startScript(runContext, 0, 1000);
+    startScript({ runContext, index: 0, delayMs: 1000, loop: props.loop });
   }, [runContext]);
 
   async function applyHeightToContainer(runContext: RunContext) {
@@ -285,8 +286,12 @@ export function withScriptedEditor<T extends { children: any }>(
       lines.pop();
     }
     const initialCode = lines.join("\n");
-    const [scriptId, expectedLinesStr] = scriptLine.split(searchStr)[1].trim().split(" ");
-    const expectedLines = (expectedLinesStr ?? "").split("expectedLines=")[1];
+    const [scriptId, ...rest] = scriptLine.split(searchStr)[1].trim().split(" ");
+
+    const expectedLinesStr = rest.find((item) => item.startsWith("expectedLines=")) ?? "";
+    const expectedLines = expectedLinesStr.split("expectedLines=")[1];
+
+    const loop = !!rest.find((item) => item === "loop");
 
     if (!defined) return null;
 
@@ -296,6 +301,7 @@ export function withScriptedEditor<T extends { children: any }>(
         language={language}
         scriptId={scriptId}
         expectedMaxLines={expectedLines ? Number(expectedLines) : lines.length}
+        loop={loop}
       />
     );
   });
