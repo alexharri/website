@@ -76,3 +76,35 @@
     position: absolute;
   }
 }
+
+@keyframes fade-in {
+  from { opacity: 0; transform: translate(-50%, -16px); }
+  to { opacity: 1; transform: translate(-50%, 0); }
+}
+
+.exec {
+  position: absolute;
+  top: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  height: 40px;
+  width: 320px;
+  padding: 0 8px;
+  color: var(--color-text);
+  font-size: 20px;
+  font-family: var(--font-family);
+  border: 2px solid var(--color-blue);
+  background: var(--color-background-500);
+  border-radius: 4px;
+  animation: fade-in .5s;
+
+  &:after {
+    content: "";
+    display: inline-block;
+    height: 24px;
+    width: 1px;
+    background: currentColor;
+  }
+}

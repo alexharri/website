@@ -67,7 +67,29 @@ export const ScriptedEditor = (props: Props) => {
   }, [_editor]);
 
   const runContext = useMemo(
-    () => (_editor && script ? new RunContext(_editor, script, initialCode) : null),
+    () =>
+      _editor && script
+        ? new RunContext({
+            editor: _editor,
+            script,
+            initialCode,
+            scriptId: props.scriptId,
+            renderExecElement: (text) => {
+              const container = editorWrapperRef.current;
+
+              const el = document.createElement("div");
+              el.className = styles.exec;
+              container?.appendChild(el);
+
+              const textEl = document.createElement("span");
+              textEl.setAttribute("data-text-element", "true");
+              textEl.innerText = text;
+              el.appendChild(textEl);
+
+              return el;
+            },
+          })
+        : null,
     [_editor, script],
   );
   const runContextRef = useRef(runContext);

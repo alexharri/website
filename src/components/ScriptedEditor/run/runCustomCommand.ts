@@ -1,3 +1,4 @@
+import { delayMs } from "../../../utils/delay";
 import { RunContext } from "./RunContext";
 
 type SelectCommand = { command: "Select"; line: number; col: number; length?: number };
@@ -65,7 +66,6 @@ async function selectWordHandler(runContext: RunContext, command: SelectWordComm
 
 async function pasteHandler(runContext: RunContext, _command: PasteCommand) {
   const { editor, clipboard } = runContext;
-  console.log(clipboard);
   const selections = editor.getSelections() || [];
   if (selections.length === clipboard.length) {
     editor.executeEdits(
@@ -145,7 +145,29 @@ function enterHandler(runContext: RunContext, command: EnterCommand) {
   ]);
 }
 
-function execHandler(runContext: RunContext, command: ExecCommand) {
+async function execHandler(runContext: RunContext, command: ExecCommand) {
+  const canceled = runContext.getCheckCanceledFunction();
+  let execElement: HTMLElement | null = null;
+
+  if (!runContext.sync) {
+    execElement = runContext.createExecElement("");
+    await delayMs(700);
+
+    for (let i = 0; i < command.label.length; i++) {
+      if (canceled()) {
+        runContext.clearExecElement(execElement!);
+        return;
+      }
+
+      const text = command.label.substring(0, i + 1);
+      runContext.updateExecElement(execElement, text);
+
+      await delayMs(50);
+    }
+
+    await delayMs(600);
+  }
+  runContext.clearExecElement(execElement!);
   runContext.editor.trigger(null, command.trigger, {});
 }
 

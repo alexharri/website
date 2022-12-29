@@ -4,21 +4,34 @@ import { ScriptCommand } from "../types/scriptTypes";
 type OnRunCommand = (index: number, time: number) => void;
 type OnPlaying = (playing: boolean) => void;
 
+interface Options {
+  editor: MonacoEditor;
+  script: ScriptCommand[];
+  scriptId: string;
+  initialCode: string;
+  renderExecElement: (text: string) => HTMLElement;
+}
+
 export class RunContext {
   clipboard: string[] = [""];
   runId = 0;
   initialCode: string;
   editor: MonacoEditor;
   script: ScriptCommand[];
+  scriptId: string;
   sync = true;
   index = 0;
+  execEl: HTMLElement | null = null;
+  renderExecElement: Options["renderExecElement"];
   private moveIndexHandlers: OnRunCommand[] = [];
   private playingHandlers: OnPlaying[] = [];
 
-  constructor(editor: MonacoEditor, script: ScriptCommand[], initialCode: string) {
-    this.editor = editor;
-    this.script = script;
-    this.initialCode = initialCode;
+  constructor(options: Options) {
+    this.editor = options.editor;
+    this.script = options.script;
+    this.initialCode = options.initialCode;
+    this.scriptId = options.scriptId;
+    this.renderExecElement = options.renderExecElement;
   }
 
   subscribe(type: "playing", handler: OnPlaying): void;
@@ -84,5 +97,18 @@ export class RunContext {
   startNewRun() {
     this.playingHandlers.forEach((fn) => fn(true));
     this.runId++;
+  }
+
+  createExecElement(text: string) {
+    return this.renderExecElement(">" + text);
+  }
+
+  updateExecElement(el: HTMLElement, text: string) {
+    const textElement = el.querySelector(`[data-text-element]`)! as HTMLElement;
+    textElement.innerText = ">" + text;
+  }
+
+  clearExecElement(el: HTMLElement | null) {
+    el?.parentNode?.removeChild(el);
   }
 }
