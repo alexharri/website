@@ -7,6 +7,7 @@ export const builtInCommands = <const>[
   { command: "Command Enter", trigger: "editor.action.insertLineAfter" },
   { command: "Shift Command Enter", trigger: "editor.action.insertLineBefore" },
   { command: "Tab", trigger: "tab" },
+  { command: "Shift Tab", trigger: "outdent" },
 
   // Move around
   { command: "Right", trigger: "cursorRight" },

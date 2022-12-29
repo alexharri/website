@@ -4,19 +4,19 @@ description: ""
 publishedAt: ""
 ---
 
-## Intro
+Early in my career, I discovered a trick that has made me immensely productive when writing code. The trick does not involve learning Vim, and it does not involve any magic plugin.
 
-As a Software Engineer, you write code.
+I've used this trick with Sublime Text, Atom, and now VSCode. The trick is basic enough that every text editor I've used supports it out of the box.
 
-You will write some new code, and you will modify existing code.
+The trick is broadly applicable. I use it with multiple programming languages, and I've used it when performing non-programming text editing tasks such as formatting, filtering, or selecting data.
 
-Early in my career, I discovered a few tricks that have made me immensely productive when writing code. They do not involve Vim, and they do not involve memorizing dozens of obscure commands.
+This trick is great for productivity. It also makes writing code just _that_ much more enjoyable. I don't believe I would enjoy my day-to-day as much without it.
 
-I've used these tricks with Sublime, Atom, and now VSCode. These are also not context-specific, they are applicable in every programming language.
+So what's the trick?
 
-But most importantly, you can use these to impress other developers :smile:.
+## Starting with the problem
 
-Let's start off with a common operation, renaming a variable.
+When editing text, especially structured text, the need occurs to make repeated changes in multiple locations. A common case is renaming a variable.
 
 ```javascript
 const element = document.querySelect("#container");
@@ -38,11 +38,13 @@ if (element && element.hasAttribute("data-active")) {
   { command: "Type", text: "container" },
 ]} />
 
-You've definitely done this before. Select and type, select and type.
+Select and type, select and type.
 
-You know that there is a better way to go about this, but that takes time and effort to learn.
+For a small block of code it's fine. A bit tedious, but fine. Banging this out doesn't take a lot of time.
 
-That better way is __multi-selection__.
+However, the number of keystrokes grows linearly. Increase the number of references to a few dozens and the task has suddenly become quite taxing.
+
+We want to the effort, currently growing linearly, to grow in a non-linear fashion instead. We can do that using `Command D`.
 
 ```javascript
 const element = document.querySelect("#container");
@@ -59,9 +61,11 @@ if (element && element.hasAttribute("data-active")) {
   { command: "Type", text: "container" },
 ]} />
 
-This is what `Command D` does.
+`Command D` selects the next instance of whatever you have selected, which enables multi-cursor editing.
 
-You will be surprised by how far we can take this seemingly simple command. `Command D`, combined with clever text navigation techniques, let's you do a lot.
+Combined with smart text navigation techniques, we can take `Command D` very far.
+
+<SmallNote>The right way to rename a variable would be to use Rename Symbol, but renaming a variable is a simple example that demonstrates `Command D` well.</SmallNote>
 
 
 ## Navigating text
@@ -75,21 +79,21 @@ First off, the basics:
 
 ```
 // @script arrow-keys loop
-one two three four five.
+The quick brown fox jumps over the lazy dog
 ```
 
 <CodeScript id="arrow-keys" script={[
   { command: "Select", line: 1, col: 1 },
   { command: "Right", times: 4, msBetween: 140, msAfter: 700 },
-  { command: "Shift Right", times: 3, msBetween: 140, msAfter: 700 },
-  { command: "Left", times: 7, msBetween: 140 },
+  { command: "Shift Right", times: 5, msBetween: 140, msAfter: 700 },
+  { command: "Left", times: 5, msBetween: 140 },
 ]} />
 
 Use `Option` to jump over words.
 
 ```
 // @script jump-over-words loop
-one two three four five.
+The quick brown fox jumps over the lazy dog
 ```
 
 <CodeScript id="jump-over-words" script={[
@@ -100,25 +104,44 @@ one two three four five.
   { command: "Option Left", times: 5, msBetween: 300 },
 ]} />
 
+Jumping over words allows us to navigate text containing words of different lengths.
+
+```javascript
+// @script jump-over-words-demonstration
+const items = [
+  { show: types.indexOf("added") !== -1 },
+  { show: types.indexOf("started") !== -1 },
+  { show: types.indexOf("completed") !== -1 },
+]
+```
+
+<CodeScript id="jump-over-words-demonstration" script={[
+  { command: "Select Word", line: 2, word: "indexOf" },
+  { command: "Command D", times: 2 },
+  { command: "Type", text: "includes" },
+  { command: "Option Right", times: 3 },
+  { command: "Shift Option Right", times: 2 },
+  { command: "Backspace" },
+]} />
+
 Use `Command` to jump to the beginning or end of a line.
 
 ```
 // @script jump-to-end-start-of-line loop
-one two three four five.
+The quick brown fox jumps over the lazy dog
 ```
 
 <CodeScript id="jump-to-end-start-of-line" script={[
   { command: "Select", line: 1, col: 1 },
   { command: "Shift Command Right", msAfter: 1000 },
-  { command: "Shift Command Left" },
+  { command: "Right" },
+  { command: "Command Left" },
 ]} />
 
-<SmallNote moveCloserUpBy={16}>From now I'll refer to the beginning and end of lines as _line boundaries_</SmallNote>
-
-`Command` is useful, for example, when selecting blocks of code:
+`Command` allows us to navigate text that contains a variable number of words.
 
 ```javascript
-// @script select-block-of-code loop
+// @script jump-to-end-start-of-line-demonstration loop
 const items = [
   { id: 1, content: ["foo", "bar"] },
   { id: 2, content: [] },
@@ -126,129 +149,35 @@ const items = [
 ]
 ```
 
-<CodeScript id="select-block-of-code" script={[
-  { command: "Select", line: 2, col: 3 },
-  { command: "Shift Down", times: 2 },
-  { command: "Shift Command Right" },
-  { command: "Right" },
-  { command: "Up", times: 2 },
-  { command: "Command Left" },
-]} />
-
-This is all we need to know about text navigation.
-
- * Jump over words with `Option`.
- * Jump to line boundaries with `Command`.
-
-
-## Selecting data
-
-Let's combine our text navigation knowledge with `Command D`, using a concrete example.
-
-Given that we have a JSON file of users and we want to select the name of every user, we can do that with `Command D`. Select `name`, press `Command D` to select all instances and use `Option Right` select the names:
-
-```json
-// @script select-names
-[
-  { "name": "Bill Mason", "email": "bill@domain.co.uk" },
-  { "name": "Janet Hills", "email": "janet@example.com" },
-  { "name": "Gregory Smith", "email": "g.smith@company.biz" }
-]
-```
-<CodeScript id="select-names" script={[
-  { command: "Select Word", line: 2, word: "name" },
+<CodeScript id="jump-to-end-start-of-line-demonstration" script={[
+  { command: "Select Word", line: 2, word: "content" },
   { command: "Command D", times: 2 },
-  { command: "Right", times: 5 },
-  { command: "Shift Option Right", times: 2 },
-]} />
-
-This was easy, but what if some user have a middle name, or unusual characters?
-
-```json
-// @script select-names-non-uniform-failure
-[
-  { "name": "Bill Mason", "email": "bill@domain.co.uk" },
-  { "name": "Janet Rose Hills", "email": "janet@example.com" },
-  { "name": "Gregory D'Andre", "email": "g.dandre@company.biz" }
-]
-```
-<CodeScript id="select-names-non-uniform-failure" script={[
-  { command: "Select Word", line: 2, word: "name" },
-  { command: "Command D", times: 2 },
-  { command: "Right", times: 5 },
-  { command: "Shift Option Right", times: 2 },
-]} />
-
-Jumping over a fixed number of words breaks down when lines have different numbers of words.
-
-Well, in this case we can get around it by using `email` as the anchor and using `Command` to jump over the non-uniform names.
-
-```json
-// @script select-names-non-uniform
-[
-  { "name": "Bill Mason", "email": "bill@domain.co.uk" },
-  { "name": "Janet Rose Hills", "email": "janet@example.com" },
-  { "name": "Gregory D'Andre", "email": "g.dandre@company.biz" }
-]
-```
-<CodeScript id="select-names-non-uniform" script={[
-  { command: "Select Word", line: 2, word: "email" },
-  { command: "Command D", times: 2 },
-  { command: "Left", times: 5 },
-  { command: "Shift Command Left" },
-  { command: "Shift Option Right", times: 3 },
-  { command: "Shift Right", times: 2 },
-]} />
-
-Effective use of `Command D` very often lies in finding uniformities that act as anchors for selection.
-
-So far we've just been dealing with selection. Before we move onto the next example, let's transform the list of users into email strings.
-
-```javascript
-// @script convert-users-to-email-string
-[
-  { "name": "Bill Mason", "email": "bill@domain.co.uk" },
-  { "name": "Janet Rose Hills", "email": "janet@example.com" },
-  { "name": "Gregory D'Andre", "email": "g.dandre@company.biz" }
-]
-```
-<CodeScript id="convert-users-to-email-string" script={[
-  { command: "Select Word", line: 2, word: "name" },
-  { command: "Command D", times: 2 },
-  { command: "Right", times: 5 },
-  { command: "Shift Command Left" },
-  { command: "Backspace" },
-  { command: "Type", text: "\"" },
-  { command: "Select Word", line: 2, word: "email" },
-  { command: "Command D", times: 2 },
-  { command: "Right", times: 5 },
-  { command: "Shift Option Left", times: 3 },
-  { command: "Shift Left", times: 4 },
-  { command: "Backspace" },
-  { command: "Type", text: " <" },
+  { command: "Right", times: 3 },
+  { command: "Type", text: "new Set(" },
   { command: "Command Right" },
-  { command: "Shift Option Left" },
-  { command: "Backspace", times: 3 },
-  { command: "Type", text: ">\"," },
+  { command: "Left", times: 3 },
+  { command: "Type", text: ")" },
 ]} />
 
-Nice!
+With text navigation locked down, let's do some cool stuff.
 
 
-## Skipping over instances
+## Finding the pattern
 
-Given a list of markdown bullet points, we can somewhat trivially transform it into a bullet list:
+Making effective use of `Command D` comes down to finding patterns in the edits you intend to make.
+
+Take this example of converting a list of markdown bullets to a list of checkboxes.
 
 ```txt
 // @script markdown-bullets-to-checkboxes
-- Top level task 1
-- Top level task 2
+- Task 1
+- Task 2
   - Subtask A
   - Subtask B
   - Subtask C
     - Subtask D
-- Top level task 3
-  - Yet another subtask
+- Task 3
+  - Another subtask
 ```
 
 <CodeScript id="markdown-bullets-to-checkboxes" script={[
@@ -259,46 +188,10 @@ Given a list of markdown bullet points, we can somewhat trivially transform it i
   { command: "Command Up" },
 ]} />
 
-But maybe one of the bullet points has a `-` that we don't want to match, what then?
+In this case, matching `-` is somewhat obvious.
 
-Well, we can use `Command K` and then `Command D` to skip over instances.
+Increasing the complexity, we can convert a series of `if` statements to a switch statement.
 
-```txt
-// @script markdown-bullets-to-checkboxes-with-skip
-- Top level task 1
-- Top level task 2
-  - Subtask A
-  - Subtask B-C
-  - Subtask D
-    - Subtask E
-- Top level task 3
-  - Yet another subtask
-```
-
-<CodeScript id="markdown-bullets-to-checkboxes-with-skip" script={[
-  { command: "Shift Right" },
-  { command: "Command D", times: 4 },
-  { command: "Command K D" },
-  { command: "Command D", times: 3 },
-  { command: "Right" },
-  { command: "Type", text: " [ ]" },
-  { command: "Command Up" },
-]} />
-
-
-## Refactoring
-
-Mundane refactoring tasks come up from time to time. For example:
-
- * Convert a series of `if` statements into a `switch` statement.
- * Move object properties to a single line.
- * Wrap these expressions with a function call.
-
-This is the bread and butter of `Command D`. Using `Command D` takes these tasks from feeling robotic drudge work to being a small mental challenge that takes no time at all.
-
-Let's tackle these examples one at a time.
-
-### Converting a series of `if` statements into a `switch` statement
 
 ```javascript
 // @script turn-ifs-into-switch expectedLines=13
@@ -343,6 +236,128 @@ if (element.type === "group") {
   { command: "Shift Command Right" },
   { command: "Backspace" },
 ]} />
+
+Sometimes, the pattern to match is not as obvious.
+
+
+### Advanced pattern matching
+
+Let's say that we're developing a library for evaluating math expressions.
+
+We have a test utility function that looks like so:
+
+```tsx
+function expectEqual(expression: string, expectedValue: any): void;
+```
+
+It's currently being used to test some behaviors of the library.
+
+```tsx
+expectEqual("2**4", 16);
+expectEqual("1/0", E_DIV_ZERO);
+expectEqual("[1, 3] * 2", [2, 6]);
+expectEqual("1/10 < 0.2 ? 'a' : 'b'", "a");
+```
+
+However, we want to convert this to something like so:
+
+```tsx
+const tests = [
+  { expression: "2**4", value: 16 },
+  { expression: "1/0", value: E_DIV_ZERO },
+  { expression: "[1, 3] * 2", value: [2, 6] },
+  { expression: "1/10 < 0.2 ? 'a' : 'b'", value: "a" },
+];
+```
+
+But what do we match? If we match `expectEqual` and move in from there, we run into the problem of the formulas being of different lengths.
+
+```javascript
+// @script match-expect-equal
+expectEqual("2**4", 16);
+expectEqual("1/0", E_DIV_ZERO);
+expectEqual("[1, 3, 5] * 2", [2, 6, 10]);
+expectEqual("1/10 < 0.2 ? 'a' : 'b'", "a");
+```
+
+<CodeScript id="match-expect-equal" script={[
+  { command: "Select Word", word: "expectEqual", line: 1 },
+  { command: "Command D", times: 3 },
+  { command: "Right", times: 2 },
+  { command: "Shift Option Right", times: 4 },
+]} />
+
+Matching the end runs into the same problem.
+
+```javascript
+// @script match-end
+expectEqual("2**4", 16);
+expectEqual("1/0", E_DIV_ZERO);
+expectEqual("[1, 3, 5] * 2", [2, 6, 10]);
+expectEqual("1/10 < 0.2 ? 'a' : 'b'", "a");
+```
+
+<CodeScript id="match-end" script={[
+  { command: "Select Word", word: ");", line: 1 },
+  { command: "Command D", times: 3 },
+  { command: "Left" },
+  { command: "Shift Option Left" },
+]} />
+
+And if try to match the separator `,`, we also match usage of `,` within the expressions and expected values:
+
+```javascript
+// @script match-comma
+expectEqual("2**4", 16);
+expectEqual("1/0", E_DIV_ZERO);
+expectEqual("[1, 3, 5] * 2", [2, 6, 10]);
+expectEqual("1/10 < 0.2 ? 'a' : 'b'", "a");
+```
+
+<CodeScript id="match-comma" script={[
+  { command: "Select Word", word: ",", line: 1 },
+  { command: "Command D", times: 7 },
+]} />
+
+Sometimes there are truly no patterns to match, but I find that to rarely be the case. There is __almost always__ some pattern that we can leverage as our anchor for matching. We just need to get creative
+
+We can observe that the expression is always a string, followed by some arbitrary second argument. The expression can be of any length, so matching its start is of no use. But it always ends with `"`, immediately followed by a `,`.
+
+That's a pattern!
+
+```javascript
+// @script match-quote-and-comma
+expectEqual("2**4", 16);
+expectEqual("1/0", E_DIV_ZERO);
+expectEqual("[1, 3, 5] * 2", [2, 6, 10]);
+expectEqual("1/10 < 0.2 ? 'a' : 'b'", "a");
+```
+
+<CodeScript id="match-quote-and-comma" script={[
+  { command: "Select Word", word: "\",", line: 1 },
+  { command: "Command D", times: 3 },
+  { command: "Right" },
+  { command: "Type", text: " value:" },
+  { command: "Command Right" },
+  { command: "Backspace", times: 2 },
+  { command: "Type", text: " }," },
+  { command: "Command Left" },
+  { command: "Shift Option Right" },
+  { command: "Shift Right" },
+  { command: "Type", text: "{ expression: " },
+  { command: "Command Up" },
+  { command: "Shift Command Enter" },
+  { command: "Type", text: "[" },
+  { command: "Command Down" },
+  { command: "Command Enter" },
+  { command: "Type", text: "];" },
+  { command: "Up" },
+  { command: "Shift Up", times: 3 },
+  { command: "Tab" },
+  { command: "Command Up" },
+  { command: "Type", text: "const tests = " },
+]} />
+
 
 ## Move object properties to a single line
 
@@ -524,39 +539,35 @@ function getAttributes(el) {
 ]} />
 
 
+## Format data
 
-{/* ## Why does any of this matter?
+So far we've just been dealing with selection. Before we move onto the next example, let's transform the list of users into email strings.
 
-What "being a productive software engineer" means could be interpreted in a lot of ways.
+```javascript
+// @script convert-users-to-email-string
+[
+  { "name": "Bill Mason", "email": "bill@domain.co.uk" },
+  { "name": "Janet Rose Hills", "email": "janet@example.com" },
+  { "name": "Gregory D'Andre", "email": "g.dandre@company.biz" }
+]
+```
 
-It could mean that you quickly find elegant and performant solutions to problems, or that you help make other engineers more productive. There's lots of technical and human factors at play that make up how an engineer's productivity.
-
-There's also the purely mechanical aspect. Writing code.
-
-I've often read that typing speed is not the limiting factor to a Software Engineer's productivity. Rather, it is thinking speed that limits people. The argument is that time spent reading and reasoning about code dominates an engineers time compared to writing code. */}
-
-Here is some text.
-
-Here is some more text.
-
-What, even more text?
-Here is some text.
-
-Here is some more text.
-
-What, even more text?
-Here is some text.
-
-Here is some more text.
-
-What, even more text?
-Here is some text.
-
-Here is some more text.
-
-What, even more text?
-Here is some text.
-
-Here is some more text.
-
-What, even more text?
+<CodeScript id="convert-users-to-email-string" script={[
+  { command: "Select Word", line: 2, word: "name" },
+  { command: "Command D", times: 2 },
+  { command: "Right", times: 5 },
+  { command: "Shift Command Left" },
+  { command: "Backspace" },
+  { command: "Type", text: "\"" },
+  { command: "Select Word", line: 2, word: "email" },
+  { command: "Command D", times: 2 },
+  { command: "Right", times: 5 },
+  { command: "Shift Option Left", times: 3 },
+  { command: "Shift Left", times: 4 },
+  { command: "Backspace" },
+  { command: "Type", text: " <" },
+  { command: "Command Right" },
+  { command: "Shift Option Left" },
+  { command: "Backspace", times: 3 },
+  { command: "Type", text: ">\"," },
+]} />

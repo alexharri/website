@@ -73,7 +73,7 @@ export const ScriptedEditorControls = (props: Props) => {
   return (
     <div style={{ marginTop: 24 }}>
       <button
-        className={styles.bigButtonWrapper}
+        className={[styles.bigButtonWrapper, styles.slideIn].join(" ")}
         onMouseDown={onBigButtonMouseDown}
         onClick={() => {
           if (isPlaying) {
@@ -89,24 +89,28 @@ export const ScriptedEditorControls = (props: Props) => {
         <div className={styles.bigButton}>Play</div>
       </button>
       <button
-        className={styles.bigButtonWrapper}
+        className={[styles.textButton, styles.slideIn].join(" ")}
         onMouseDown={onBigButtonMouseDown}
         onClick={() => onStartScript(0)}
+        data-nth="2"
         data-active={isFocused}
       >
-        <div className={styles.bigButton}>Restart</div>
+        Play again
       </button>
+
       <button
-        className={styles.bigButtonWrapper}
+        className={[styles.textButton, styles.slideIn].join(" ")}
         onMouseDown={onBigButtonMouseDown}
         onClick={() => {
           setShowNavigation((showNavigation) => !showNavigation);
         }}
+        data-nth="3"
         data-down={showNavigation}
         data-active={isFocused}
       >
-        <div className={styles.bigButton}>Focus</div>
+        View steps
       </button>
+
       {runContext &&
         ReactDOM.createPortal(
           <ScriptNavigation

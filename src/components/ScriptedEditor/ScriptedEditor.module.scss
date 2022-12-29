@@ -1,11 +1,11 @@
 .outerContainer {
-  transform: scale(0.95);
+  transform: translateY(26px) scale(0.95);
   opacity: 0.8;
   transition: transform .5s, opacity .5s;
   
   &[data-active="true"] {
     opacity: 1;
-    transform: scale(1);
+    transform: translateY(0) scale(1);
     transition: transform .4s, opacity .3s;
   }
 }
@@ -28,19 +28,15 @@
   }
 }
 
-.bigButtonWrapper {
-  position: relative;
-  display: inline-block;
-  margin-right: 16px;
-  margin-bottom: 16px;
-  opacity: 0;
+.slideIn {
   transform: translateX(16px);
-  transition: opacity .4s, transform .5s;
+  opacity: 0;
+  transition: all .3s, opacity .4s, transform .5s;
 
-  &:nth-child(2) {
+  &[data-nth="2"] {
     transition-delay: .04s;
   }
-  &:nth-child(3) {
+  &[data-nth="3"] {
     transition-delay: .08s;
   }
 
@@ -51,6 +47,13 @@
   &[data-active=false] {
     pointer-events: none;
   }
+}
+
+.bigButtonWrapper {
+  position: relative;
+  display: inline-block;
+  margin-right: 16px;
+  margin-bottom: 16px;
   
   &:after {
     content: "";
@@ -77,21 +80,38 @@
   }
 }
 
+.bigButton, .textButton {
+  color: var(--color-blue);
+  font-weight: bold;
+  border-radius: 8px;
+}
+
 .bigButton {
   position: relative;
   z-index: 1;
   padding: 12px 12px;
-  border-radius: 8px;
   font-size: 20px;
   border: 2px solid var(--color-blue);
   background: var(--color-background);
-  color: var(--color-blue);
-  font-weight: bold;
   transition: transform .15s, border-color .2s, color .2s, text-shadow .15s, box-shadow .15s;
 
   &:after {
     content: "";
     position: absolute;
+  }
+}
+
+.textButton {
+  font-size: 16px;
+  padding: 12px 16px;
+  margin-top: 8px;
+  margin-right: 4px;
+  border: 1px solid transparent;
+  
+
+  &[data-down=true] {
+    border-color: var(--color-blue);
+    color: var(--color-blue-700);
   }
 }
 
