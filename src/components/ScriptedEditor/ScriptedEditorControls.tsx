@@ -1,6 +1,7 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useContext, useEffect, useRef, useState } from "react";
 import ReactDOM from "react-dom";
 import { useIsomorphicLayoutEffect } from "../../utils/hooks/useIsomorphicLayoutEffect";
+import { FocusedScriptContext } from "./FocusedScriptContext/FocusedScriptContext";
 import { RunContext } from "./run/RunContext";
 import styles from "./ScriptedEditor.module.scss";
 import { moveToIndex, startScript } from "./scriptedEditorUtils";
@@ -15,6 +16,8 @@ interface Props {
 
 export const ScriptedEditorControls = (props: Props) => {
   const { runContext } = props;
+
+  const { focusedScriptId } = useContext(FocusedScriptContext);
 
   const getEditorWrapper = () =>
     document.querySelector(`[data-sripted-editor-wrapper="${props.scriptId}"]`);
@@ -65,6 +68,8 @@ export const ScriptedEditorControls = (props: Props) => {
     main.style.transition = "transform .5s";
   }, [showNavigation]);
 
+  const isFocused = props.scriptId === focusedScriptId;
+
   return (
     <div style={{ marginTop: 24 }}>
       <button
@@ -79,6 +84,7 @@ export const ScriptedEditorControls = (props: Props) => {
           }
         }}
         data-down={isPlaying}
+        data-active={isFocused}
       >
         <div className={styles.bigButton}>Play</div>
       </button>
@@ -86,6 +92,7 @@ export const ScriptedEditorControls = (props: Props) => {
         className={styles.bigButtonWrapper}
         onMouseDown={onBigButtonMouseDown}
         onClick={() => onStartScript(0)}
+        data-active={isFocused}
       >
         <div className={styles.bigButton}>Restart</div>
       </button>
@@ -96,6 +103,7 @@ export const ScriptedEditorControls = (props: Props) => {
           setShowNavigation((showNavigation) => !showNavigation);
         }}
         data-down={showNavigation}
+        data-active={isFocused}
       >
         <div className={styles.bigButton}>Focus</div>
       </button>
