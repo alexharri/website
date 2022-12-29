@@ -5,6 +5,7 @@ type OnRunCommand = (index: number, time: number) => void;
 type OnPlaying = (playing: boolean) => void;
 
 export class RunContext {
+  clipboard: string[] = [""];
   runId = 0;
   initialCode: string;
   editor: MonacoEditor;

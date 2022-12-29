@@ -317,9 +317,10 @@ if (element.type === "group") {
 
 <CodeScript id="turn-ifs-into-switch" script={[
   { command: "Select Word", word: "element.type", line: 1 },
+  { command: "Copy" },
   { command: "Shift Command Enter" },
   { command: "Type", text: "switch (" },
-  { command: "Paste", text: "element.type" },
+  { command: "Paste" },
   { command: "Type", text: ") {", msAfter: 200 },
   { command: "Down", msAfter: 150 },
   { command: "Command Left" },
@@ -404,6 +405,123 @@ await animate({
   { command: "Command Left" },
 ]} />
 
+
+## Extract properties to variables
+
+I sometimes find myself having to extract some properties into variables.
+
+```javascript
+// @script extract-properties-to-variables expectedLines=11
+setTheme({
+  text: "#b9dbfa",
+  background: "#090d13",
+  medium: "#293946",
+  blue: "#399ef4",
+});
+```
+
+<CodeScript id="extract-properties-to-variables" script={[
+  { command: "Select Word", line: 2, word: "  " },
+  { command: "Command D", times: 3 },
+  { command: "Right" },
+  { command: "Shift Command Right" },
+  { command: "Copy" },
+  { command: "Right" },
+  { command: "Shift Option Left", times: 3 },
+  { command: "Shift Left", times: 2 },
+  { command: "Backspace" },
+  { command: "Type", text: "," },
+  { command: "Command Up" },
+  { command: "Shift Command Enter", times: 2 },
+  { command: "Paste" },
+  { command: "Select Word", line: 1, word: ": " },
+  { command: "Command D", times: 3 },
+  { command: "Backspace" },
+  { command: "Type", text: " = " },
+  { command: "Command Left" },
+  { command: "Type", text: "const " },
+  { command: "Command Right" },
+  { command: "Backspace" },
+  { command: "Type", text: ";" },
+]} />
+
+
+## Copy variable names to paste
+
+```javascript
+// @script copy-variable-names-into-object expectedLines=11
+const text = "#b9dbfa";
+const background = "#090d13";
+const medium = "#293946";
+const blue = "#399ef4";
+```
+
+<CodeScript id="copy-variable-names-into-object" script={[
+  { command: "Command Down" },
+  { command: "Type", text: "\n", times: 2 },
+  { command: "Type", text: `setTheme({});` },
+  { command: "Select Word", line: 1, word: "const" },
+  { command: "Command D", times: 3 },
+  { command: "Right", times: 2 },
+  { command: "Shift Option Right" },
+  { command: "Copy" },
+  { command: "Command down" },
+  { command: "Left", times: 3 },
+  { command: "Enter", indent: 1 },
+  { command: "Paste" },
+  { command: "Shift Up", times: 2 },
+  { command: "Tab" },
+  { command: "Up" },
+  { command: "Command Left" },
+  { command: "Shift Command Left" },
+  { command: "Command D", times: 3 },
+  { command: "Command Right" },
+  { command: "Type", text: "," },
+]} />
+
+
+## Converting snake-case to camelCase
+
+You may need to convert some HTML into React code, which requires snake-case attributes to be converted to camelCase. We can combine `Command D` with the `Transform to Uppercase` command.
+
+```javascript
+// @script snake-case-to-camelcase
+function getAttributes(el) {
+}
+
+<div
+  data-active="false"
+  data-x="0"
+  data-y="0"
+  data-has-been-modified="false"
+/>
+```
+
+<CodeScript id="snake-case-to-camelcase" script={[
+  { command: "Select Word", line: 5, word: "=\"" },
+  { command: "Command D", times: 3 },
+  { command: "Left" },
+  { command: "Shift Command Left" },
+  { command: "Copy" },
+  { command: "Command Up" },
+  { command: "Command Enter" },
+  { command: "Paste" },
+  { command: "Shift Up", times: 2 },
+  { command: "Tab" },
+  { command: "Left", times: 3 },
+  { command: "Up" },
+  { command: "Shift Right" },
+  { command: "Command D", times: 5 },
+  { command: "Backspace" },
+  { command: "Shift Right" },
+  { command: "Exec", label: "Transform to Uppercase", trigger: "editor.action.transformToUppercase" },
+  { command: "Command Left" },
+  { command: "Type", text: "const " },
+  { command: "Command Right" },
+  { command: "Type", text: " = el.getAttribute(\"\");" },
+  { command: "Left", times: 3 },
+  { command: "Paste" },
+]} />
 
 
 

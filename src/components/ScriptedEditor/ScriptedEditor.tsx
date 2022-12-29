@@ -137,6 +137,8 @@ export const ScriptedEditor = (props: Props) => {
       padding: { top: V_PADDING, bottom: V_PADDING },
       renderLineHighlight: "none",
       folding: true,
+      insertSpaces: true,
+      tabSize: 2,
     }),
     [],
   );

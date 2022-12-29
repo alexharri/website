@@ -4,6 +4,7 @@ import { RunContext } from "./RunContext";
 export const builtInCommands = <const>[
   { command: "Command D", trigger: "editor.action.addSelectionToNextFindMatch" },
   { command: "Command K D", trigger: "editor.action.moveSelectionToNextFindMatch" },
+  { command: "Command Enter", trigger: "editor.action.insertLineAfter" },
   { command: "Shift Command Enter", trigger: "editor.action.insertLineBefore" },
   { command: "Tab", trigger: "tab" },
 
@@ -43,7 +44,10 @@ const customCommandHandlers = <const>[
   { command: "Select", handler: customHandlers.selectHandler },
   { command: "Select Word", handler: customHandlers.selectWordHandler },
   { command: "Type", handler: customHandlers.typeHandler },
+  { command: "Copy", handler: customHandlers.copyHandler },
   { command: "Paste", handler: customHandlers.pasteHandler },
+  { command: "Enter", handler: customHandlers.enterHandler },
+  { command: "Exec", handler: customHandlers.execHandler },
 ];
 
 type BuiltInCommand = typeof builtInCommands[number];
