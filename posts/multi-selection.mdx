@@ -188,9 +188,9 @@ Take this example of converting a list of markdown bullets to a list of checkbox
   { command: "Command Up" },
 ]} />
 
-In this case, matching `-` is somewhat obvious.
+In this case, matching the dashes `-` is somewhat obvious.
 
-Increasing the complexity, we can convert a series of `if` statements to a switch statement.
+Here's a slightly more complicated example where we convert a series of `if` statements to a switch statement.
 
 
 ```javascript
@@ -240,7 +240,7 @@ if (element.type === "group") {
 Sometimes, the pattern to match is not as obvious.
 
 
-### Advanced pattern matching
+### Finding non-obvious patterns
 
 Let's say that we're developing a library for evaluating math expressions.
 
@@ -287,7 +287,7 @@ expectEqual("1/10 < 0.2 ? 'a' : 'b'", "a");
   { command: "Shift Option Right", times: 4 },
 ]} />
 
-Matching the end runs into the same problem.
+Matching the end runs into the same problem. The values are of different lengths.
 
 ```javascript
 // @script match-end
@@ -304,7 +304,7 @@ expectEqual("1/10 < 0.2 ? 'a' : 'b'", "a");
   { command: "Shift Option Left" },
 ]} />
 
-And if try to match the separator `,`, we also match usage of `,` within the expressions and expected values:
+If we try to match the commas `,` between the expression and the value, we also match commas within the expressions and expected values:
 
 ```javascript
 // @script match-comma
@@ -319,14 +319,18 @@ expectEqual("1/10 < 0.2 ? 'a' : 'b'", "a");
   { command: "Command D", times: 7 },
 ]} />
 
-Sometimes there are truly no patterns to match, but I find that to rarely be the case. There is __almost always__ some pattern that we can leverage as our anchor for matching. We just need to get creative
+Sometimes, there truly is no pattern to match. but that is rarely the case.
 
-We can observe that the expression is always a string, followed by some arbitrary second argument. The expression can be of any length, so matching its start is of no use. But it always ends with `"`, immediately followed by a `,`.
+There is __almost always__ some pattern that we can leverage as an anchor for matching.
 
-That's a pattern!
+In this case, we can observe that the expression is always a string followed by some arbitrary second argument. The expression can be of any length, so matching its start is of no use.
+
+But wait! The expression always ends with double quote `"`, immediately followed by a comma `,`.
+
+That's a pattern we can match!
 
 ```javascript
-// @script match-quote-and-comma
+// @script match-quote-and-comma expectedLines=6
 expectEqual("2**4", 16);
 expectEqual("1/0", E_DIV_ZERO);
 expectEqual("[1, 3, 5] * 2", [2, 6, 10]);
@@ -356,68 +360,6 @@ expectEqual("1/10 < 0.2 ? 'a' : 'b'", "a");
   { command: "Tab" },
   { command: "Command Up" },
   { command: "Type", text: "const tests = " },
-]} />
-
-
-## Move object properties to a single line
-
-Maybe you have a function call with some options that are taking up too much vertical space.
-
-```javascript
-// @script inline-object-properties
-await animate({
-  from: 0,
-  to: 100,
-  curve: "ease-in",
-});
-```
-
-<CodeScript id="inline-object-properties" script={[
-  { command: "Select Word", word: "  ", line: 2, msAfter: 700 },
-  { command: "Command D", times: 2, msBetween: 150, msAfter: 500 },
-  { command: "Backspace", times: 2, msBetween: 500, msAfter: 200 },
-  { command: "Type", text: " " },
-  { command: "Down", msAfter: 250 },
-  { command: "Command Left" },
-  { command: "Shift Up", msAfter: 200 },
-  { command: "Shift Command Right" },
-  { command: "Backspace", msAfter: 300 },
-  { command: "Backspace", msAfter: 300 },
-  { command: "Type", text: " " },
-]} />
-
-Even if you have a series of these, you can do them all at once:
-
-```javascript
-// @script inline-multiple-object-properties
-await animate({
-  from: 0,
-  to: 100,
-  curve: "ease-in",
-});
-
-await animate({
-  delay: 500,
-  from: 100,
-  to: 50,
-  curve: 'ease-out',
-});
-```
-
-<CodeScript id="inline-multiple-object-properties" script={[
-  { command: "Select Word", word: "  ", line: 2, msAfter: 700 },
-  { command: "Command D", times: 2, msBetween: 150, msAfter: 300 },
-  { command: "Command D", times: 4, msBetween: 150, msAfter: 500 },
-  { command: "Backspace", times: 2, msBetween: 500, msAfter: 200 },
-  { command: "Type", text: " " },
-  { command: "Down", msAfter: 250 },
-  { command: "Command Left" },
-  { command: "Shift Up", msAfter: 200 },
-  { command: "Shift Command Right", msAfter: 200 },
-  { command: "Shift Left" },
-  { command: "Backspace", msAfter: 300 },
-  { command: "Type", text: " " },
-  { command: "Command Left" },
 ]} />
 
 
@@ -570,4 +512,66 @@ So far we've just been dealing with selection. Before we move onto the next exam
   { command: "Shift Option Left" },
   { command: "Backspace", times: 3 },
   { command: "Type", text: ">\"," },
+]} />
+
+
+## Move object properties to a single line
+
+Maybe you have a function call with some options that are taking up too much vertical space.
+
+```javascript
+// @script inline-object-properties
+await animate({
+  from: 0,
+  to: 100,
+  curve: "ease-in",
+});
+```
+
+<CodeScript id="inline-object-properties" script={[
+  { command: "Select Word", word: "  ", line: 2, msAfter: 700 },
+  { command: "Command D", times: 2, msBetween: 150, msAfter: 500 },
+  { command: "Backspace", times: 2, msBetween: 500, msAfter: 200 },
+  { command: "Type", text: " " },
+  { command: "Down", msAfter: 250 },
+  { command: "Command Left" },
+  { command: "Shift Up", msAfter: 200 },
+  { command: "Shift Command Right" },
+  { command: "Backspace", msAfter: 300 },
+  { command: "Backspace", msAfter: 300 },
+  { command: "Type", text: " " },
+]} />
+
+Even if you have a series of these, you can do them all at once:
+
+```javascript
+// @script inline-multiple-object-properties
+await animate({
+  from: 0,
+  to: 100,
+  curve: "ease-in",
+});
+
+await animate({
+  delay: 500,
+  from: 100,
+  to: 50,
+  curve: 'ease-out',
+});
+```
+
+<CodeScript id="inline-multiple-object-properties" script={[
+  { command: "Select Word", word: "  ", line: 2, msAfter: 700 },
+  { command: "Command D", times: 2, msBetween: 150, msAfter: 300 },
+  { command: "Command D", times: 4, msBetween: 150, msAfter: 500 },
+  { command: "Backspace", times: 2, msBetween: 500, msAfter: 200 },
+  { command: "Type", text: " " },
+  { command: "Down", msAfter: 250 },
+  { command: "Command Left" },
+  { command: "Shift Up", msAfter: 200 },
+  { command: "Shift Command Right", msAfter: 200 },
+  { command: "Shift Left" },
+  { command: "Backspace", msAfter: 300 },
+  { command: "Type", text: " " },
+  { command: "Command Left" },
 ]} />
