@@ -45,6 +45,7 @@ const customCommandHandlers = <const>[
   { command: "Select", handler: customHandlers.selectHandler },
   { command: "Select Word", handler: customHandlers.selectWordHandler },
   { command: "Type", handler: customHandlers.typeHandler },
+  { command: "Wrap", handler: customHandlers.wrapHandler },
   { command: "Copy", handler: customHandlers.copyHandler },
   { command: "Paste", handler: customHandlers.pasteHandler },
   { command: "Enter", handler: customHandlers.enterHandler },

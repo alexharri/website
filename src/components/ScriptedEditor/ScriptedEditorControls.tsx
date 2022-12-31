@@ -71,7 +71,7 @@ export const ScriptedEditorControls = (props: Props) => {
   const isFocused = props.scriptId === focusedScriptId;
 
   return (
-    <div style={{ marginTop: 24 }}>
+    <div style={{ marginTop: 16 }}>
       <button
         className={[styles.bigButtonWrapper, styles.slideIn].join(" ")}
         onMouseDown={onBigButtonMouseDown}

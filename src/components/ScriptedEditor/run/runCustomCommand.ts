@@ -8,6 +8,7 @@ type EnterCommand = { command: "Enter"; indent: number };
 type CopyCommand = { command: "Copy" };
 type PasteCommand = { command: "Paste" };
 type ExecCommand = { command: "Exec"; label: string; trigger: string };
+type WrapCommand = { command: "Wrap"; text: string };
 export type CustomCommands =
   | SelectWordCommand
   | SelectWordCommand
@@ -15,7 +16,8 @@ export type CustomCommands =
   | EnterCommand
   | CopyCommand
   | PasteCommand
-  | ExecCommand;
+  | ExecCommand
+  | WrapCommand;
 
 async function selectHandler(runContext: RunContext, command: SelectCommand) {
   const { editor, sync } = runContext;
@@ -171,6 +173,40 @@ async function execHandler(runContext: RunContext, command: ExecCommand) {
   runContext.editor.trigger(null, command.trigger, {});
 }
 
+async function wrapHandler(runContext: RunContext, command: WrapCommand) {
+  const { editor } = runContext;
+  const { text } = command;
+  const selections = editor.getSelections() || [];
+
+  function createRange(col: number, line: number) {
+    return { endColumn: col, startColumn: col, endLineNumber: line, startLineNumber: line };
+  }
+  +editor.executeEdits(
+    null,
+    selections
+      .map((range) => {
+        const { startColumn, endColumn, startLineNumber, endLineNumber } = range;
+        const left = text[0];
+        const right = text.length > 1 ? text[1] : text;
+        return [
+          { range: createRange(endColumn, endLineNumber), text: left },
+          { range: createRange(startColumn, startLineNumber), text: right },
+        ];
+      })
+      .flat(),
+  );
+  editor.setSelections(
+    selections.map((sel) => {
+      return {
+        positionColumn: sel.endColumn + 1,
+        positionLineNumber: sel.endLineNumber,
+        selectionStartColumn: sel.startColumn + 1,
+        selectionStartLineNumber: sel.startLineNumber,
+      };
+    }),
+  );
+}
+
 export const customCommandHandlers = {
   selectHandler,
   selectWordHandler,
@@ -179,4 +215,5 @@ export const customCommandHandlers = {
   copyHandler,
   enterHandler,
   execHandler,
+  wrapHandler,
 };

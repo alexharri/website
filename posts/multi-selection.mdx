@@ -6,7 +6,7 @@ publishedAt: ""
 
 Early in my career, I discovered a trick that has made me immensely productive when writing code. The trick does not involve learning Vim, and it does not involve any magic plugin.
 
-I've used this trick with Sublime Text, Atom, and now VSCode. The trick is basic enough that every text editor I've used supports it out of the box.
+I've used this trick with Sublime Text, Atom, and now VS Code. The trick is basic enough that every text editor I've used supports it out of the box.
 
 The trick is broadly applicable. I use it with multiple programming languages, and I've used it when performing non-programming text editing tasks such as formatting, filtering, or selecting data.
 
@@ -363,83 +363,130 @@ expectEqual("1/10 < 0.2 ? 'a' : 'b'", "a");
 ]} />
 
 
-## Extract properties to variables
+## Skipping an element
 
-I sometimes find myself having to extract some properties into variables.
+Skipping a match comes up now and then. To skip an element _once you've matched it_, press `Command K` followed by `Command D`.
 
 ```javascript
-// @script extract-properties-to-variables expectedLines=11
-setTheme({
-  text: "#b9dbfa",
-  background: "#090d13",
-  medium: "#293946",
-  blue: "#399ef4",
-});
+// @script rename-button
+const button = document.createElement("button");
+
+button.addEventListener("click", handleSubmit);
+button.className = "button";
+button.innerText = "Submit";
+
+buttonContainer.appendChild(button);
 ```
 
-<CodeScript id="extract-properties-to-variables" script={[
-  { command: "Select Word", line: 2, word: "  " },
-  { command: "Command D", times: 3 },
-  { command: "Right" },
-  { command: "Shift Command Right" },
-  { command: "Copy" },
-  { command: "Right" },
-  { command: "Shift Option Left", times: 3 },
-  { command: "Shift Left", times: 2 },
-  { command: "Backspace" },
-  { command: "Type", text: "," },
+<CodeScript id="rename-button" script={[
+  { command: "Select Word", line: 1, word: "button" },
+  { command: "Command D" },
+  { command: "Command K D" },
+  { command: "Command D" },
+  { command: "Command D" },
+  { command: "Command K D" },
+  { command: "Command D" },
+  { command: "Command K D" },
+  { command: "Type", text: "submitButton" },
+]} />
+
+To me, this is the least intuitive part of using `Command D`. It eventually becomes second-nature, given enough practice.
+
+
+## Matching line breaks
+
+Matching every line can be useful when working with arbitrary data.
+
+Let's say that we want to transform this text file into a JSON array.
+
+```
+Python
+Java
+C++
+Go
+Rust
+Elixir
+```
+
+There is no pattern across these lines, so matching each lime seems hard. However, `Command D` allows us to match line breaks.
+
+```javascript
+// @script match-newlines expectedLines=8
+Python
+Java
+C++
+Go
+Rust
+Elixir
+```
+
+<CodeScript id="match-newlines" script={[
+  { command: "Shift Command Enter" },
+  { command: "Type", text: "[" },
+  { command: "Command Down" },
+  { command: "Command Enter" },
+  { command: "Type", text: "]" },
   { command: "Command Up" },
-  { command: "Shift Command Enter", times: 2 },
-  { command: "Paste" },
-  { command: "Select Word", line: 1, word: ": " },
-  { command: "Command D", times: 3 },
-  { command: "Backspace" },
-  { command: "Type", text: " = " },
-  { command: "Command Left" },
-  { command: "Type", text: "const " },
+  { command: "Down" },
   { command: "Command Right" },
-  { command: "Backspace" },
-  { command: "Type", text: ";" },
+  { command: "Shift Right" },
+  { command: "Command D", times: 5 },
+  { command: "Left" },
+  { command: "Shift Command Left" },
+  { command: "Wrap", text: "\"" },
+  { command: "Right", times: 2 },
+  { command: "Type", text: "," },
+  { command: "Command Left" },
+  { command: "Tab" },
+  { command: "Command Up" },
 ]} />
 
+Matching newlines is occasionally useful when:
 
-## Copy variable names to paste
+ * matching every line, or
+ * matching a pattern that only appears at the end of a line, or
+ * matching a pattern that spans two or more lines.
+
+For an example of matching a multi-line pattern, take this example of only matching the empty arrays:
 
 ```javascript
-// @script copy-variable-names-into-object expectedLines=11
-const text = "#b9dbfa";
-const background = "#090d13";
-const medium = "#293946";
-const blue = "#399ef4";
+// @script match-empty-arrays
+const entries = {
+  a: [
+  ],
+  b: [
+    { id: 1 },
+    { id: 2 },
+  ],
+  c: [
+    { id: 3 },
+  ],
+  d: [
+  ],
+  e: [
+  ],
+ }
 ```
 
-<CodeScript id="copy-variable-names-into-object" script={[
-  { command: "Command Down" },
-  { command: "Type", text: "\n", times: 2 },
-  { command: "Type", text: `setTheme({});` },
-  { command: "Select Word", line: 1, word: "const" },
-  { command: "Command D", times: 3 },
-  { command: "Right", times: 2 },
-  { command: "Shift Option Right" },
-  { command: "Copy" },
-  { command: "Command Down" },
-  { command: "Left", times: 3 },
-  { command: "Enter", indent: 1 },
-  { command: "Paste" },
-  { command: "Shift Up", times: 2 },
-  { command: "Tab" },
-  { command: "Up" },
-  { command: "Command Left" },
-  { command: "Shift Command Left" },
-  { command: "Command D", times: 3 },
+<CodeScript id="match-empty-arrays" script={[
+  { command: "Down" },
   { command: "Command Right" },
-  { command: "Type", text: "," },
+  { command: "Left" },
+  { command: "Shift Down" },
+  { command: "Command D", times: 2 },
+  { command: "Right" },
+  { command: "Left", times: 2 },
+  { command: "Shift Up" },
+  { command: "Shift Command Right" },
+  { command: "Backspace" },
 ]} />
 
 
-## Converting snake-case to camelCase
+## Case transformations
 
-You may need to convert some HTML into React code, which requires snake-case attributes to be converted to camelCase. We can combine `Command D` with the `Transform to Uppercase` command.
+Translating between cases (such as changing snake-case to camelCase) comes up from time-to-time. I often encounter this case when working across HTML, CSS and JavaScript.
+
+VS Code has a handy `Transform to Uppercase` command that we can combine with `Command D` to make this happen.
 
 ```javascript
 // @script snake-case-to-camelcase expectedLines=13
@@ -480,10 +527,94 @@ function getAttributes(el) {
   { command: "Paste" },
 ]} />
 
+There is not a direct keyboard shortcut for the `Transform to Uppercase` command. Run it by opening the command prompt with `Shift Command P` and then typing the name of the command.
+
+<SmallNote>There's also a `Transform to Lowercase` command.</SmallNote>
+
+
+## Use cases for `Command D`
+
+Now that we've covered every major feature of `Command D`, I want to run through a few examples where `Command D` is useful.
+
+These may help give you an idea of where `Command D` can be used.
+
+### Extract properties to variables
+
+I sometimes find myself having to extract some properties into variables.
+
+```javascript
+// @script extract-properties-to-variables expectedLines=11
+setTheme({
+  text: "#b9dbfa",
+  background: "#090d13",
+  medium: "#293946",
+  blue: "#399ef4",
+});
+```
+
+<CodeScript id="extract-properties-to-variables" script={[
+  { command: "Select Word", line: 2, word: "  " },
+  { command: "Command D", times: 3 },
+  { command: "Right" },
+  { command: "Shift Command Right" },
+  { command: "Copy" },
+  { command: "Right" },
+  { command: "Shift Option Left", times: 3 },
+  { command: "Shift Left", times: 2 },
+  { command: "Backspace" },
+  { command: "Type", text: "," },
+  { command: "Command Up" },
+  { command: "Shift Command Enter", times: 2 },
+  { command: "Paste" },
+  { command: "Select Word", line: 1, word: ": " },
+  { command: "Command D", times: 3 },
+  { command: "Backspace" },
+  { command: "Type", text: " = " },
+  { command: "Command Left" },
+  { command: "Type", text: "const " },
+  { command: "Command Right" },
+  { command: "Backspace" },
+  { command: "Type", text: ";" },
+]} />
+
+
+### Copy names
+
+```javascript
+// @script copy-names expectedLines=9
+const mul = (a, b) => a * b;
+const div = (a, b) => a / b;
+const exp = (a, b) => a ** b;
+```
+
+<CodeScript id="copy-names" script={[
+  { command: "Shift Option Right" },
+  { command: "Command D", times: 2 },
+  { command: "Right", times: 2 },
+  { command: "Shift Option Right" },
+  { command: "Copy" },
+  { command: "Command Down" },
+  { command: "Command Enter", times: 2 },
+  { command: "Type", text: "export const math = " },
+  { command: "Wrap", text: "{}" },
+  { command: "Enter", indent: 1 },
+  { command: "Paste" },
+  { command: "Shift Up" },
+  { command: "Tab" },
+  { command: "Up" },
+  { command: "Option Left" },
+  { command: "Shift Option Left" },
+  { command: "Command D", times: 2 },
+  { command: "Option Right" },
+  { command: "Type", text: "," },
+  { command: "Command Down" },
+  { command: "Type", text: ";" },
+]} />
+
 
 ## Format data
 
-So far we've just been dealing with selection. Before we move onto the next example, let's transform the list of users into email strings.
+Here we take a list of users (name and email) and format them as email strings.
 
 ```javascript
 // @script convert-users-to-email-string
@@ -515,16 +646,14 @@ So far we've just been dealing with selection. Before we move onto the next exam
 ]} />
 
 
-## Move object properties to a single line
-
-Maybe you have a function call with some options that are taking up too much vertical space.
+## Move properties to a single line
 
 ```javascript
 // @script inline-object-properties
 await animate({
   from: 0,
   to: 100,
-  curve: "ease-in",
+  duration: 300,
 });
 ```
 
@@ -540,38 +669,4 @@ await animate({
   { command: "Backspace", msAfter: 300 },
   { command: "Backspace", msAfter: 300 },
   { command: "Type", text: " " },
-]} />
-
-Even if you have a series of these, you can do them all at once:
-
-```javascript
-// @script inline-multiple-object-properties
-await animate({
-  from: 0,
-  to: 100,
-  curve: "ease-in",
-});
-
-await animate({
-  delay: 500,
-  from: 100,
-  to: 50,
-  curve: 'ease-out',
-});
-```
-
-<CodeScript id="inline-multiple-object-properties" script={[
-  { command: "Select Word", word: "  ", line: 2, msAfter: 700 },
-  { command: "Command D", times: 2, msBetween: 150, msAfter: 300 },
-  { command: "Command D", times: 4, msBetween: 150, msAfter: 500 },
-  { command: "Backspace", times: 2, msBetween: 500, msAfter: 200 },
-  { command: "Type", text: " " },
-  { command: "Down", msAfter: 250 },
-  { command: "Command Left" },
-  { command: "Shift Up", msAfter: 200 },
-  { command: "Shift Command Right", msAfter: 200 },
-  { command: "Shift Left" },
-  { command: "Backspace", msAfter: 300 },
-  { command: "Type", text: " " },
-  { command: "Command Left" },
 ]} />
