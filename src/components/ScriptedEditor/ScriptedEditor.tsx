@@ -1,12 +1,4 @@
-import {
-  useCallback,
-  useContext,
-  useEffect,
-  useLayoutEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import { useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 import Editor, { EditorProps } from "@monaco-editor/react";
 import styles from "./ScriptedEditor.module.scss";
 import { MonacoEditor } from "./types/scriptedEditorTypes";
@@ -62,10 +54,6 @@ export const ScriptedEditor = (props: Props) => {
     }
     setScript(JSON.parse(el.getAttribute("data-script")!));
   }, []);
-
-  useLayoutEffect(() => {
-    if (!_editor) return;
-  }, [_editor]);
 
   const runContext = useMemo(
     () =>

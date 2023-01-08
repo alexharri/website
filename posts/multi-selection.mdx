@@ -1,20 +1,21 @@
 ---
-title: "Multi-selection"
-description: ""
+title: "Multi-cursor code editing: An animated introduction"
+description: "A deep dive into multi-cursor editing, using Command D and clever text navigation techniques."
 publishedAt: ""
 ---
 
-Early in my career, I discovered a trick that has made me immensely productive when writing code. The trick does not involve learning Vim, and it does not involve any magic plugin.
+Early in my career, I discovered a trick that has made me very productive when writing code. The trick does not involve learning Vim, and it does not involve any magic plugin.
 
 I've used this trick with Sublime Text, Atom, and now VS Code. The trick is basic enough that every text editor I've used supports it out of the box.
 
-The trick is broadly applicable. I use it with multiple programming languages, and I've used it when performing non-programming text editing tasks such as formatting, filtering, or selecting data.
+The trick is broadly applicable. I use it with multiple programming languages, and I use it when performing non-programming text editing tasks such as formatting, filtering, or selecting data.
 
 This trick is great for productivity. It also makes writing code just _that_ much more enjoyable. I don't believe I would enjoy my day-to-day as much without it.
 
-So what's the trick?
 
-## Starting with the problem
+## Repeated changes
+
+Before diving into the trick, let's understand the problem that it solves.
 
 When editing text, especially structured text, the need occurs to make repeated changes in multiple locations. A common case is renaming a variable.
 
@@ -42,9 +43,9 @@ Select and type, select and type.
 
 For a small block of code it's fine. A bit tedious, but fine. Banging this out doesn't take a lot of time.
 
-However, the number of keystrokes grows linearly. Increase the number of references to a few dozens and the task has suddenly become quite taxing.
+However, the number of keystrokes grows linearly. Increasing the number of references to a few dozens already makes the task quite taxing.
 
-We want to the effort, currently growing linearly, to grow in a non-linear fashion instead. We can do that using `Command D`.
+We want to the effort for repeated changes to grow in a non-linear fashion. We can do that using `Command D`.
 
 ```javascript
 const element = document.querySelect("#container");
@@ -63,16 +64,36 @@ if (element && element.hasAttribute("data-active")) {
 
 `Command D` selects the next instance of whatever you have selected, which enables multi-cursor editing.
 
-Combined with smart text navigation techniques, we can take `Command D` very far.
+On the surface, `Command D` is deceptively simple. Find a pattern to match, and then make the change:
 
-<SmallNote>The right way to rename a variable would be to use Rename Symbol, but renaming a variable is a simple example that demonstrates `Command D` well.</SmallNote>
+```txt
+// @script markdown-bullets-to-checkboxes
+- Task 1
+- Task 2
+  - Subtask A
+  - Subtask B
+  - Subtask C
+    - Subtask D
+- Task 3
+  - Another subtask
+```
+
+<CodeScript id="markdown-bullets-to-checkboxes" script={[
+  { command: "Shift Right" },
+  { command: "Command D", times: 7 },
+  { command: "Right" },
+  { command: "Type", text: " [ ]" },
+  { command: "Command Up" },
+]} />
+
+There's already a lot of value in using `Command D` for simple transformations, such as the above, but we're just scratching the surface.
+
+Combined with smart text navigation techniques, we can take `Command D` far.
 
 
 ## Navigating text
 
-Before we get into `Command D`, let's take a quick look at text navigation.
-
-First off, the basics:
+First off, the basics.
 
  * __Arrow keys__ to move the cursor
  * __Shift__ to select text while moving the cursor.
@@ -138,7 +159,7 @@ The quick brown fox jumps over the lazy dog
   { command: "Command Left" },
 ]} />
 
-`Command` allows us to navigate text that contains a variable number of words.
+Jumping to line boundaries allows us to navigate text that contains a variable number of words.
 
 ```javascript
 // @script jump-to-end-start-of-line-demonstration loop
@@ -166,31 +187,7 @@ With text navigation locked down, let's do some cool stuff.
 
 Making effective use of `Command D` comes down to finding patterns in the edits you intend to make.
 
-Take this example of converting a list of markdown bullets to a list of checkboxes.
-
-```txt
-// @script markdown-bullets-to-checkboxes
-- Task 1
-- Task 2
-  - Subtask A
-  - Subtask B
-  - Subtask C
-    - Subtask D
-- Task 3
-  - Another subtask
-```
-
-<CodeScript id="markdown-bullets-to-checkboxes" script={[
-  { command: "Shift Right" },
-  { command: "Command D", times: 7 },
-  { command: "Right" },
-  { command: "Type", text: " [ ]" },
-  { command: "Command Up" },
-]} />
-
-In this case, matching the dashes `-` is somewhat obvious.
-
-Here's a slightly more complicated example where we convert a series of `if` statements to a switch statement.
+Take this example of converting a series of `if` statements to a switch statement.
 
 
 ```javascript
@@ -237,45 +234,63 @@ if (element.type === "group") {
   { command: "Backspace" },
 ]} />
 
-Sometimes, the pattern to match is not as obvious.
+Matching the `if` if somewhat obvious, especially since each of the `if` statements have an identical structure.
+
+Though the pattern I want to match are typically uniform, sometimes I encounter more complex patterns. These can come in the form of
+
+ * a variable number of arguments,
+ * a variable number of words in a string, or
+ * different argument types.
+
+Let's take a look at such an example.
 
 
-### Finding non-obvious patterns
+### Non-uniform patterns
 
 Let's say that we're developing a library for evaluating math expressions.
 
-We have a test utility function that looks like so:
+```tsx
+import { evaluate } from "imaginary-mathlib";
+
+evaluate("2 * 4"); // 8
+evaluate("[5, 10] / 2"); // [2.5, 5]
+evaluate("1 > 1/2 ? 1 : 'err'"); // 1
+```
+
+In making testing the library less verbose, we developed a test utility function that takes an expression, and its expected value.
 
 ```tsx
 function expectEqual(expression: string, expectedValue: any): void;
 ```
 
-It's currently being used to test some behaviors of the library.
+We now have test code that looks like so:
 
 ```tsx
 expectEqual("2**4", 16);
-expectEqual("1/0", E_DIV_ZERO);
+expectEqual("1/0", ERR_DIV_ZERO);
 expectEqual("[1, 3] * 2", [2, 6]);
 expectEqual("1/10 < 0.2 ? 'a' : 'b'", "a");
 ```
 
-However, we want to convert this to something like so:
+However, we want to convert this test code into the following:
 
 ```tsx
 const tests = [
   { expression: "2**4", value: 16 },
-  { expression: "1/0", value: E_DIV_ZERO },
+  { expression: "1/0", value: ERR_DIV_ZERO },
   { expression: "[1, 3] * 2", value: [2, 6] },
   { expression: "1/10 < 0.2 ? 'a' : 'b'", value: "a" },
 ];
 ```
 
-But what do we match? If we match `expectEqual` and move in from there, we run into the problem of the formulas being of different lengths.
+Since we have a lot of tests, doing this manually would be a lot of work. Luckily for us, we know how to use `Command D`. We just need to find a pattern to match.
+
+If we match `expectEqual` and move in from there, we run into the problem of the expressions being of different lengths.
 
 ```javascript
 // @script match-expect-equal
 expectEqual("2**4", 16);
-expectEqual("1/0", E_DIV_ZERO);
+expectEqual("1/0", ERR_DIV_ZERO);
 expectEqual("[1, 3, 5] * 2", [2, 6, 10]);
 expectEqual("1/10 < 0.2 ? 'a' : 'b'", "a");
 ```
@@ -292,7 +307,7 @@ Matching the end runs into the same problem. The values are of different lengths
 ```javascript
 // @script match-end
 expectEqual("2**4", 16);
-expectEqual("1/0", E_DIV_ZERO);
+expectEqual("1/0", ERR_DIV_ZERO);
 expectEqual("[1, 3, 5] * 2", [2, 6, 10]);
 expectEqual("1/10 < 0.2 ? 'a' : 'b'", "a");
 ```
@@ -309,7 +324,7 @@ If we try to match the commas `,` between the expression and the value, we also 
 ```javascript
 // @script match-comma
 expectEqual("2**4", 16);
-expectEqual("1/0", E_DIV_ZERO);
+expectEqual("1/0", ERR_DIV_ZERO);
 expectEqual("[1, 3, 5] * 2", [2, 6, 10]);
 expectEqual("1/10 < 0.2 ? 'a' : 'b'", "a");
 ```
@@ -319,20 +334,16 @@ expectEqual("1/10 < 0.2 ? 'a' : 'b'", "a");
   { command: "Command D", times: 7 },
 ]} />
 
-Sometimes, there truly is no pattern to match. but that is rarely the case.
+This one's definitely not as obvious as our `if` to `switch` example.
 
-There is __almost always__ some pattern that we can leverage as an anchor for matching.
+However, we can observe that the expression is always a string followed by some arbitrary second argument. The expression can be of any length, so matching its start is of no use.
 
-In this case, we can observe that the expression is always a string followed by some arbitrary second argument. The expression can be of any length, so matching its start is of no use.
-
-But wait! The expression always ends with double quote `"`, immediately followed by a comma `,`.
-
-That's a pattern we can match!
+We notice that the expression always ends with double quote `"` immediately followed by a comma `,`. That's a pattern we can match!
 
 ```javascript
 // @script match-quote-and-comma expectedLines=6
 expectEqual("2**4", 16);
-expectEqual("1/0", E_DIV_ZERO);
+expectEqual("1/0", ERR_DIV_ZERO);
 expectEqual("[1, 3, 5] * 2", [2, 6, 10]);
 expectEqual("1/10 < 0.2 ? 'a' : 'b'", "a");
 ```
@@ -363,9 +374,37 @@ expectEqual("1/10 < 0.2 ? 'a' : 'b'", "a");
 ]} />
 
 
-## Skipping an element
+## Matching every instance
 
-Skipping a match comes up now and then. To skip an element _once you've matched it_, press `Command K` followed by `Command D`.
+In the example above, we matched four tests. That's a pretty small number of tests, especially for a library that evaluates math expressions.
+
+Pressing `Command D` three times is not a lot of work, but if the number of tests were increased to 1,000 we would need to press `Command D` 999 times. This goes against our goal of making repeated changes grow non-linearly.
+
+This is a nice time to introduce `Shift Command L`, which is the keyboard shortcut for _Select All Matches_.
+
+```javascript
+const element = document.querySelect("#container");
+
+if (element && element.hasAttribute("data-active")) {
+  element.classList.add("active");
+}
+// @script select-all-matches
+```
+
+<CodeScript id="select-all-matches" script={[
+  { command: "Option Right", times: 2 },
+  { command: "Shift Option Left", msAfter: 800 },
+  { command: "Shift Command L" },
+]} />
+
+You have to be a bit more careful with `Shift Command L`, since it selects __every__ match in a file. You may match something that you did not intend to, which can occur outside of the current viewport.
+
+For this reason, I prefer `Command D` when working with a small number of matches. The matching feels more local as you visually see every match happen.
+
+
+## Skipping an instance
+
+When selecting matches, you may want to skip an instance. To skip a match, press `Command K` followed by `Command D`.
 
 ```javascript
 // @script rename-button
@@ -389,6 +428,13 @@ buttonContainer.appendChild(button);
   { command: "Command K D" },
   { command: "Type", text: "submitButton" },
 ]} />
+
+In order to skip a match, you first need to add the match to the selection. After you have added a match to your selection, press `Command K` and `Command D` to unselect it and select the next match.
+
+Pressing `Command K` and `Command D` resolves to a command called __Move Last Selection to Next Find Match__. It's quite a technical name, but basically means:
+
+ * remove the most recent match, and
+ * select the next match
 
 To me, this is the least intuitive part of using `Command D`. It eventually becomes second-nature, given enough practice.
 
@@ -527,146 +573,15 @@ function getAttributes(el) {
   { command: "Paste" },
 ]} />
 
-There is not a direct keyboard shortcut for the `Transform to Uppercase` command. Run it by opening the command prompt with `Shift Command P` and then typing the name of the command.
+There is not a direct keyboard shortcut for the `Transform to Uppercase` command. In VS Code, you can run it by opening the command prompt with `Shift Command P` and then typing the name of the command.
 
-<SmallNote>There's also a `Transform to Lowercase` command.</SmallNote>
-
-
-## Use cases for `Command D`
-
-Now that we've covered every major feature of `Command D`, I want to run through a few examples where `Command D` is useful.
-
-These may help give you an idea of where `Command D` can be used.
-
-### Extract properties to variables
-
-I sometimes find myself having to extract some properties into variables.
-
-```javascript
-// @script extract-properties-to-variables expectedLines=11
-setTheme({
-  text: "#b9dbfa",
-  background: "#090d13",
-  medium: "#293946",
-  blue: "#399ef4",
-});
-```
-
-<CodeScript id="extract-properties-to-variables" script={[
-  { command: "Select Word", line: 2, word: "  " },
-  { command: "Command D", times: 3 },
-  { command: "Right" },
-  { command: "Shift Command Right" },
-  { command: "Copy" },
-  { command: "Right" },
-  { command: "Shift Option Left", times: 3 },
-  { command: "Shift Left", times: 2 },
-  { command: "Backspace" },
-  { command: "Type", text: "," },
-  { command: "Command Up" },
-  { command: "Shift Command Enter", times: 2 },
-  { command: "Paste" },
-  { command: "Select Word", line: 1, word: ": " },
-  { command: "Command D", times: 3 },
-  { command: "Backspace" },
-  { command: "Type", text: " = " },
-  { command: "Command Left" },
-  { command: "Type", text: "const " },
-  { command: "Command Right" },
-  { command: "Backspace" },
-  { command: "Type", text: ";" },
-]} />
+<SmallNote>Unfortunately, you will not be able to use the `Transform to Uppercase` method in this editor. This post uses Monaco Editor, which does not have VS Code's command prompt.</SmallNote>
 
 
-### Copy names
+## That's a wrap!
 
-```javascript
-// @script copy-names expectedLines=9
-const mul = (a, b) => a * b;
-const div = (a, b) => a / b;
-const exp = (a, b) => a ** b;
-```
+There are many ways to do multi-cursor editing using VS Code, but I find `Command D` to be the simplest and most useful method.
 
-<CodeScript id="copy-names" script={[
-  { command: "Shift Option Right" },
-  { command: "Command D", times: 2 },
-  { command: "Right", times: 2 },
-  { command: "Shift Option Right" },
-  { command: "Copy" },
-  { command: "Command Down" },
-  { command: "Command Enter", times: 2 },
-  { command: "Type", text: "export const math = " },
-  { command: "Wrap", text: "{}" },
-  { command: "Enter", indent: 1 },
-  { command: "Paste" },
-  { command: "Shift Up" },
-  { command: "Tab" },
-  { command: "Up" },
-  { command: "Option Left" },
-  { command: "Shift Option Left" },
-  { command: "Command D", times: 2 },
-  { command: "Option Right" },
-  { command: "Type", text: "," },
-  { command: "Command Down" },
-  { command: "Type", text: ";" },
-]} />
+Take what you learned in this post and apply it in your own work! There is a learning curve, but if you get past it then I promise that `Command D` will prove itself to be a really useful and productive tool.
 
-
-## Format data
-
-Here we take a list of users (name and email) and format them as email strings.
-
-```javascript
-// @script convert-users-to-email-string
-[
-  { "name": "Bill Mason", "email": "bill@domain.co.uk" },
-  { "name": "Janet Rose Hills", "email": "janet@example.com" },
-  { "name": "Gregory D'Andre", "email": "g.dandre@company.biz" }
-]
-```
-
-<CodeScript id="convert-users-to-email-string" script={[
-  { command: "Select Word", line: 2, word: "name" },
-  { command: "Command D", times: 2 },
-  { command: "Right", times: 5 },
-  { command: "Shift Command Left" },
-  { command: "Backspace" },
-  { command: "Type", text: "\"" },
-  { command: "Select Word", line: 2, word: "email" },
-  { command: "Command D", times: 2 },
-  { command: "Right", times: 5 },
-  { command: "Shift Option Left", times: 3 },
-  { command: "Shift Left", times: 4 },
-  { command: "Backspace" },
-  { command: "Type", text: " <" },
-  { command: "Command Right" },
-  { command: "Shift Option Left" },
-  { command: "Backspace", times: 3 },
-  { command: "Type", text: ">\"," },
-]} />
-
-
-## Move properties to a single line
-
-```javascript
-// @script inline-object-properties
-await animate({
-  from: 0,
-  to: 100,
-  duration: 300,
-});
-```
-
-<CodeScript id="inline-object-properties" script={[
-  { command: "Select Word", word: "  ", line: 2, msAfter: 700 },
-  { command: "Command D", times: 2, msBetween: 150, msAfter: 500 },
-  { command: "Backspace", times: 2, msBetween: 500, msAfter: 200 },
-  { command: "Type", text: " " },
-  { command: "Down", msAfter: 250 },
-  { command: "Command Left" },
-  { command: "Shift Up", msAfter: 200 },
-  { command: "Shift Command Right" },
-  { command: "Backspace", msAfter: 300 },
-  { command: "Backspace", msAfter: 300 },
-  { command: "Type", text: " " },
-]} />
+Thanks for reading the post!

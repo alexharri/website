@@ -181,7 +181,7 @@ async function wrapHandler(runContext: RunContext, command: WrapCommand) {
   function createRange(col: number, line: number) {
     return { endColumn: col, startColumn: col, endLineNumber: line, startLineNumber: line };
   }
-  +editor.executeEdits(
+  editor.executeEdits(
     null,
     selections
       .map((range) => {
