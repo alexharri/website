@@ -33,7 +33,11 @@ export async function runScript(options: Options) {
 
   if (options.delayMs) await delayMs(options.delayMs);
 
+  await runContext.waitIdle();
+
   for (let commandIndex = index; commandIndex < script.length; commandIndex++) {
+    await runContext.waitIdle();
+
     const command = script[commandIndex];
     if (canceled()) return;
 
@@ -44,6 +48,8 @@ export async function runScript(options: Options) {
     if (!Number.isFinite(times)) throw new Error(`Unexpected times value ${times}`);
 
     for (let i = 0; i < times; i++) {
+      await runContext.waitIdle();
+
       runContext.emit("run-command", { index: commandIndex, time: i + 1 });
       await runCommand(runContext, command);
       options.onEachStep?.();

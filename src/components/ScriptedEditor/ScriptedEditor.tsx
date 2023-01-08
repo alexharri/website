@@ -160,7 +160,7 @@ export const ScriptedEditor = (props: Props) => {
 
   const keyDownCapture = useCallback(
     (e: React.KeyboardEvent | KeyboardEvent) => {
-      if (focusInsideEditor() || notActiveScript()) return;
+      if (notActiveScript() || focusInsideEditor()) return;
 
       const isDownArrow = e.keyCode === 40;
       const isUpArrow = e.keyCode === 38;
@@ -180,18 +180,7 @@ export const ScriptedEditor = (props: Props) => {
       const el = document.activeElement as HTMLInputElement | null;
       if (!el) return;
       el.blur();
-      requestAnimationFrame(() => {
-        const rect = el.getBoundingClientRect();
-        if (isDownArrow && rect.top < 64) {
-          // If the cursor goes off screen, the browser force-scrolls
-          // the focused element back into view.
-          //
-          // Do not refocus if we are using the arrow keys to scroll
-          // down and the element is about to go off screen.
-          return;
-        }
-        el?.focus();
-      });
+      runContextRef.current!.scrolledAt = Date.now();
     },
     [runContext],
   );
@@ -205,7 +194,14 @@ export const ScriptedEditor = (props: Props) => {
     if (focusedScriptId === props.scriptId) {
       onStartScript();
     } else {
-      runContextRef.current?.cancelCurrentRun();
+      if (runContextRef.current) {
+        const runContext = runContextRef.current;
+        const { editor } = runContext;
+        runContext.cancelCurrentRun();
+        if (editor.hasTextFocus()) {
+          (document.activeElement as HTMLTextAreaElement | null)?.blur();
+        }
+      }
     }
   }, [focusedScriptId]);
 

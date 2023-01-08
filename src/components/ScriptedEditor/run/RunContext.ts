@@ -1,3 +1,4 @@
+import { delayMs } from "../../../utils/delay";
 import { MonacoEditor } from "../types/scriptedEditorTypes";
 import { ScriptCommand } from "../types/scriptTypes";
 
@@ -13,6 +14,7 @@ interface Options {
 }
 
 export class RunContext {
+  scrolledAt = 0;
   clipboard: string[] = [""];
   runId = 0;
   initialCode: string;
@@ -110,5 +112,21 @@ export class RunContext {
 
   clearExecElement(el: HTMLElement | null) {
     el?.parentNode?.removeChild(el);
+  }
+
+  async waitIdle() {
+    const canceled = this.getCheckCanceledFunction();
+    const waitAfterScroll = 750;
+
+    while (true) {
+      const dist = this.scrolledAt + waitAfterScroll - Date.now();
+
+      if (dist < 0) {
+        if (!canceled()) this.editor.focus();
+        return;
+      }
+
+      await delayMs(dist);
+    }
   }
 }
