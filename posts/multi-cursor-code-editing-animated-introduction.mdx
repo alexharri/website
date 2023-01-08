@@ -454,7 +454,7 @@ Rust
 Elixir
 ```
 
-There is no pattern across these lines, so matching each lime seems hard. However, `Command D` allows us to match line breaks.
+There is no pattern across these lines, so matching each line seems impossible. However, `Command D` allows us to match newlines.
 
 ```javascript
 // @script match-newlines expectedLines=8
@@ -487,7 +487,7 @@ Elixir
   { command: "Command Up" },
 ]} />
 
-Matching newlines is occasionally useful when:
+Matching newlines is occasionally useful when
 
  * matching every line, or
  * matching a pattern that only appears at the end of a line, or
@@ -530,7 +530,7 @@ const entries = {
 
 ## Case transformations
 
-Translating between cases (such as changing snake-case to camelCase) comes up from time-to-time. I often encounter this case when working across HTML, CSS and JavaScript.
+Translating between cases (such as changing snake-case to camelCase) comes up from time-to-time. I typically encounter this case when working across HTML, CSS and JavaScript.
 
 VS Code has a handy `Transform to Uppercase` command that we can combine with `Command D` to make this happen.
 
