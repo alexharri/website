@@ -33,8 +33,6 @@ export async function runScript(options: Options) {
 
   if (options.delayMs) await delayMs(options.delayMs);
 
-  await runContext.waitIdle();
-
   for (let commandIndex = index; commandIndex < script.length; commandIndex++) {
     await runContext.waitIdle();
 

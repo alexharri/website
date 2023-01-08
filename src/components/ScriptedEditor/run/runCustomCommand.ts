@@ -27,7 +27,7 @@ async function selectHandler(runContext: RunContext, command: SelectCommand) {
 
   const startIndex = sync ? length : 0;
   for (let i = startIndex; i <= length; i++) {
-    await runContext.waitIdle();
+    if (!sync) await runContext.waitIdle();
     if (canceled()) return;
 
     const selection = {
@@ -113,7 +113,7 @@ async function typeHandler(runContext: RunContext, command: TypeCommand) {
 
   const startIndex = sync ? text.length : 0;
   for (let i = startIndex; i <= text.length; i++) {
-    await runContext.waitIdle();
+    if (!sync) await runContext.waitIdle();
     if (canceled()) return;
     const selections = editor.getSelections() || [];
     const toInsert = sync ? text : text[i];

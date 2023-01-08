@@ -118,15 +118,19 @@ export class RunContext {
     const canceled = this.getCheckCanceledFunction();
     const waitAfterScroll = 750;
 
-    while (true) {
-      const dist = this.scrolledAt + waitAfterScroll - Date.now();
+    const getDist = () => this.scrolledAt + waitAfterScroll - Date.now();
 
+    let dist = getDist();
+    if (dist < 0) return;
+
+    while (true) {
       if (dist < 0) {
         if (!canceled()) this.editor.focus();
         return;
       }
 
       await delayMs(dist);
+      dist = getDist();
     }
   }
 }
