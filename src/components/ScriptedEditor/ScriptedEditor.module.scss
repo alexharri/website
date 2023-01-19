@@ -2,16 +2,14 @@
   transform: translateY(26px) scale(0.95);
   opacity: 0.8;
   transition: transform .5s, opacity .5s;
+  margin: 0 -24px;
+  min-width: 640px;
   
   &[data-active="true"] {
     opacity: 1;
     transform: translateY(0) scale(1);
     transition: transform .4s, opacity .3s;
   }
-}
-
-.container {
-  margin: 0 -24px;
 }
 
 .editor {

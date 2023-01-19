@@ -1,0 +1,27 @@
+.outerWrapper {
+  position: relative;
+}
+
+.editorWrapper {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+}
+
+.lineWrapper {
+  padding: 24px 0;
+  overflow: hidden;
+
+  @media (max-width: 640px) {
+    padding: 3.75vw 0; // 24px / 640px
+  }
+}
+
+.line {
+  height: 27px;
+
+  @media (max-width: 640px) {
+    height: 4.21875vw; // 27px / 640px
+  }
+}

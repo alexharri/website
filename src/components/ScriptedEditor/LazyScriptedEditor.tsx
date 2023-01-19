@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { RunContext } from "./run/RunContext";
 import { ScriptedEditor } from "./ScriptedEditor";
 import { ScriptedEditorControls } from "./ScriptedEditorControls";
-import { calculateHeight } from "./scriptedEditorUtils";
+import styles from "./LazyScriptedEditor.module.scss";
 
 interface Props {
   language: string;
@@ -17,7 +17,7 @@ export function LazyScriptedEditor(props: Props) {
 
   const [runContext, setRunContext] = useState<RunContext | null>(null);
   const [render, setRender] = useState(true);
-  const [height, setHeight] = useState(() => calculateHeight(expectedMaxLines));
+  const [lines, setLines] = useState(expectedMaxLines);
 
   const onMaxLinesCalculated = (lines: number) => {
     if (lines !== expectedMaxLines) {
@@ -25,7 +25,7 @@ export function LazyScriptedEditor(props: Props) {
         `Expected lines did not match for ${scriptId}.\n` +
           `\tExpected ${expectedMaxLines} but got ${lines}`,
       );
-      setHeight(calculateHeight(lines));
+      setLines(lines);
     }
   };
 
@@ -60,15 +60,22 @@ export function LazyScriptedEditor(props: Props) {
 
   return (
     <>
-      <div style={{ height }} ref={ref}>
+      <div ref={ref} className={styles.outerWrapper}>
+        <div className={styles.lineWrapper}>
+          {Array.from({ length: lines }).map((_, i) => (
+            <div key={i} className={styles.line} />
+          ))}
+        </div>
         {render && (
-          <ScriptedEditor
-            {...props}
-            onMaxLinesCalculated={onMaxLinesCalculated}
-            setRunContext={setRunContext}
-            language={props.language}
-            loop={props.loop}
-          />
+          <div className={styles.editorWrapper}>
+            <ScriptedEditor
+              {...props}
+              onMaxLinesCalculated={onMaxLinesCalculated}
+              setRunContext={setRunContext}
+              language={props.language}
+              loop={props.loop}
+            />
+          </div>
         )}
       </div>
       <ScriptedEditorControls

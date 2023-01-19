@@ -15,6 +15,8 @@ import { scriptedEditorConstants } from "./scriptedEditorConstants";
 import { calculateHeight, moveToIndex, startScript } from "./scriptedEditorUtils";
 import { withMargin } from "../../utils/withMargin";
 import { MonacoThemeContext } from "./MonacoThemeProvider";
+import { useIsMobile, useViewportWidth } from "../../utils/hooks/useViewportWidth";
+import { useIsomorphicLayoutEffect } from "../../utils/hooks/useIsomorphicLayoutEffect";
 
 const MemoizedEditor = React.memo(Editor);
 
@@ -37,6 +39,8 @@ export const ScriptedEditor = (props: Props) => {
 
   const [_editor, setEditor] = useState<MonacoEditor | null>(null);
   const [script, setScript] = useState<ScriptCommand[] | null>(null);
+
+  const width = useViewportWidth()!;
 
   const containerRef = useRef<HTMLDivElement>(null);
   const editorWrapperRef = useRef<HTMLDivElement>(null);
@@ -123,20 +127,25 @@ export const ScriptedEditor = (props: Props) => {
     props.onMaxLinesCalculated(lines);
   }
 
+  const isMobile = useIsMobile();
+
   // Measure height on mount
   useEffect(() => {
     if (!runContext) return;
-    const container = containerRef.current!;
-    for (const selector of [".monaco-editor", ".overflow-guard"]) {
-      const el = container.querySelector(selector) as HTMLElement | null;
-      if (!el) continue;
-      el.style.borderRadius = "8px";
-    }
     applyHeightToContainer(runContext).then(() => {
       heightMeasuredRef.current = true;
       (document.activeElement as HTMLInputElement | null)?.blur?.();
     });
   }, [runContext]);
+
+  useIsomorphicLayoutEffect(() => {
+    const container = containerRef.current!;
+    for (const selector of [".monaco-editor", ".overflow-guard"]) {
+      const el = container.querySelector(selector) as HTMLElement | null;
+      if (!el) continue;
+      el.style.borderRadius = isMobile ? "" : "8px";
+    }
+  }, [isMobile, runContext]);
 
   const options = useMemo<EditorProps["options"]>(
     () => ({
@@ -220,10 +229,12 @@ export const ScriptedEditor = (props: Props) => {
 
   const active = focusedScriptId === props.scriptId;
 
+  const scale = width < 640 ? width / 640 : 1;
+
   return (
     <div data-scripted-editor={props.scriptId} ref={containerRef} onKeyDownCapture={keyDownCapture}>
       <div className={styles.outerContainer} data-active={active}>
-        <div className={styles.container}>
+        <div style={{ transform: `scale(${scale})`, transformOrigin: "0 0" }}>
           <div
             data-sripted-editor-wrapper={props.scriptId}
             ref={editorWrapperRef}
