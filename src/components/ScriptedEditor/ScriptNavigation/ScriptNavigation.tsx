@@ -5,6 +5,7 @@ import { FocusedScriptContext } from "../FocusedScriptContext/FocusedScriptConte
 import { RunContext } from "../run/RunContext";
 import styles from "./ScriptNavigation.module.scss";
 import { RenderCommand } from "../RenderCommand/RenderCommand";
+import { useViewportWidth } from "../../../utils/hooks/useViewportWidth";
 
 interface Props {
   scriptId: string;
@@ -17,6 +18,9 @@ interface Props {
 export const ScriptNavigation = (props: Props) => {
   const { runContext, show, setShow } = props;
   const { focusedScriptId: scriptId } = useContext(FocusedScriptContext);
+
+  const width = useViewportWidth();
+  const isMobile = typeof width === "number" && width < 1080;
 
   const commandElRef = useRef<Partial<Record<number, HTMLDivElement>>>({});
   const commandHeightRef = useRef<Partial<Record<number, number>>>({});
@@ -86,10 +90,10 @@ export const ScriptNavigation = (props: Props) => {
       {show && (
         <motion.div
           transition={{ duration: 0.5, ease: [0.26, 0.03, 0.3, 0.96] }}
-          initial={{ x: -300 }}
-          animate={{ x: 0 }}
-          exit={{ x: -300 }}
-          className={styles.container}
+          initial={isMobile ? { y: "40vh" } : { x: -300 }}
+          animate={isMobile ? { y: "0vh" } : { x: 0 }}
+          exit={isMobile ? { y: "40vh" } : { x: -300 }}
+          className={isMobile ? styles.containerMobile : styles.container}
           data-script-navigation={props.scriptId}
         >
           <div className={styles.activeCommandHighlight} />

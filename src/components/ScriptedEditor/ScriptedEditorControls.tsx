@@ -18,6 +18,8 @@ export const ScriptedEditorControls = (props: Props) => {
   const { runContext } = props;
 
   const { focusedScriptId } = useContext(FocusedScriptContext);
+  const isFocusedRef = useRef(false);
+  isFocusedRef.current = focusedScriptId === props.scriptId;
 
   const getEditorWrapper = () =>
     document.querySelector(`[data-sripted-editor-wrapper="${props.scriptId}"]`);
@@ -50,23 +52,49 @@ export const ScriptedEditorControls = (props: Props) => {
   const showNavigationRef = useRef(showNavigation);
   showNavigationRef.current = showNavigation;
 
-  useIsomorphicLayoutEffect(() => {
+  const setMainPosition = useCallback((showNavigation: boolean, resize: boolean) => {
+    const isMobile = window.innerWidth < 1080;
     const main = document.querySelector("main");
     const editorWrapper = getEditorWrapper();
     if (!main || !editorWrapper) return;
 
-    if (!showNavigation) {
+    if (!showNavigation || isMobile) {
+      if (!resize) {
+        main.style.transition = "transform .5s";
+      }
       main.style.transform = "";
       return;
     }
 
-    const { left } = editorWrapper.getBoundingClientRect();
+    // Reset before measuring
+    main.style.transform = "";
+    main.style.transition = "";
 
-    const translate = Math.max(0, 300 - (left - 24));
+    const { left, width } = editorWrapper.getBoundingClientRect();
 
+    const availableWidth = window.innerWidth - 300;
+    const targetLeft = 300 + availableWidth / 2 - width / 2;
+    const translate = targetLeft - left;
+
+    if (!resize) {
+      main.style.transition = "transform .5s";
+    }
     main.style.transform = `translateX(${translate}px)`;
-    main.style.transition = "transform .5s";
+  }, []);
+
+  useIsomorphicLayoutEffect(() => {
+    setMainPosition(showNavigation, false);
   }, [showNavigation]);
+
+  useEffect(() => {
+    const listener = () => {
+      if (!isFocusedRef.current) return;
+      setMainPosition(showNavigationRef.current, true);
+    };
+    listener();
+    window.addEventListener("resize", listener);
+    return () => window.removeEventListener("resize", listener);
+  }, []);
 
   const isFocused = props.scriptId === focusedScriptId;
 

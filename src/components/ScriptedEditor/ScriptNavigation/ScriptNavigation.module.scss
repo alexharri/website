@@ -12,6 +12,20 @@
   z-index: 10;
 }
 
+.containerMobile {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 40vh;
+  background: var(--color-background-500);
+  padding: 64px 8px 24px;
+  overflow: hidden;
+  border-radius: 16px;
+  color: white;
+  z-index: 10;
+}
+
 .scroll {
   position: absolute;
   top: 50%;
