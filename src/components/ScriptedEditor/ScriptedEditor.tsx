@@ -141,6 +141,7 @@ export const ScriptedEditor = (props: Props) => {
   const options = useMemo<EditorProps["options"]>(
     () => ({
       fontSize: FONT_SIZE,
+      fontFamily: "var(--font-monospace)",
       lineHeight: LINE_HEIGHT_FACTOR,
       lineNumbers: "off",
       minimap: { enabled: false },

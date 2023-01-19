@@ -24,3 +24,13 @@
   overflow: hidden;
   transition: opacity .5s;
 }
+
+.activeCommandHighlight {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  height: 44px;
+  background: var(--color-background-700);
+  transform: translateY(-100%) translateY(6px);
+}

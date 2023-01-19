@@ -64,8 +64,8 @@ export const RenderCommand = (props: Props) => {
   if (command.command === "Type") {
     return (
       <Container onClick={onClick}>
-        <div className={styles.left} />
-        Type&nbsp;<code className={styles.key}>{command.text}</code>
+        <div className={styles.left}>Type</div>
+        <code className={styles.key}>{command.text}</code>
       </Container>
     );
   }
@@ -73,8 +73,8 @@ export const RenderCommand = (props: Props) => {
   if (command.command === "Select Word") {
     return (
       <Container onClick={onClick}>
-        <div className={styles.left} />
-        Select&nbsp;<code className={styles.key}>{command.word}</code>
+        <div className={styles.left}>Select</div>
+        <code className={styles.key}>{command.word}</code>
       </Container>
     );
   }

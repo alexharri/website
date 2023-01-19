@@ -2,6 +2,7 @@
   display: flex;
   cursor: pointer;
   border: none;
+  color: var(--color-text);
   border-bottom: 1px solid var(--color-background);
   padding: 2px 0;
   margin-bottom: 16px;
@@ -38,4 +39,5 @@
   font-family: var(--font-monospace);
   background: var(--color-medium-400);
   color: var(--color-text);
+  white-space: pre;
 }

@@ -16,7 +16,8 @@
 
 html {
   --color-transition-duration: .5s;
-  --font-monospace: 'League Mono';
+  --font-monospace: 'League Mono', monospace;
+  --font-body: 'Fira Sans', sans-serif;
 }
 
 html,
@@ -42,7 +43,7 @@ body {
   font-size: 16px;
   line-height: 1.75;
   font-weight: 400;
-  font-family: 'Fira Sans', sans-serif;
+  font-family: var(--font-body);
 }
 
 

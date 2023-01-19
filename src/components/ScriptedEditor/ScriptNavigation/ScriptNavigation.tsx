@@ -92,6 +92,7 @@ export const ScriptNavigation = (props: Props) => {
           className={styles.container}
           data-script-navigation={props.scriptId}
         >
+          <div className={styles.activeCommandHighlight} />
           <div className={styles.scroll} style={{ transform: "translateY(-32px)" }} ref={scrollRef}>
             {props.runContext.script.map((command, i) => (
               <div data-command={i} className={styles.command} key={i}>
