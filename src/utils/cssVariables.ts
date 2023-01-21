@@ -74,7 +74,7 @@ export const colorValues: Record<"dark" | "light", Record<ColorName, string>> = 
     "header-border-background": "rgba(255, 255, 255, 0.8)",
     "light-rgb": "0, 0, 0",
     scheme: "light",
-  },
+  } as any,
 };
 
 type ColorName = keyof typeof colors;
