@@ -10,7 +10,7 @@
 }
 
 .lineWrapper {
-  padding: 24px 0;
+  padding: 24px /* V_PADDING */ 0;
   overflow: hidden;
 
   @media (max-width: 640px /* SCRIPTED_EDITOR_MIN_WIDTH */) {
@@ -19,7 +19,7 @@
 }
 
 .line {
-  height: 27px;
+  height: 27px /* LINE_HEIGHT */;
 
   @media (max-width: 640px /* SCRIPTED_EDITOR_MIN_WIDTH */) {
     height: 4.21875vw; // 27px / 640px
