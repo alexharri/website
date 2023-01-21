@@ -3,7 +3,7 @@ import ReactDOM from "react-dom";
 import { useIsomorphicLayoutEffect } from "../../utils/hooks/useIsomorphicLayoutEffect";
 import { FocusedScriptContext } from "./FocusedScriptContext/FocusedScriptContext";
 import { RunContext } from "./run/RunContext";
-import styles from "./ScriptedEditor.module.scss";
+import styles from "./ScriptedEditorControls.module.scss";
 import { scriptedEditorConstants } from "./scriptedEditorConstants";
 import { moveToIndex, startScript } from "./scriptedEditorUtils";
 import { ScriptNavigation } from "./ScriptNavigation/ScriptNavigation";
