@@ -125,7 +125,7 @@ export class RunContext {
 
     while (true) {
       if (dist < 0) {
-        if (!canceled() && !this.editor.hasTextFocus()) this.editor.focus();
+        if (!canceled()) this.editor.focus();
         return;
       }
 

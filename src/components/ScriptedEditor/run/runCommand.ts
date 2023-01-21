@@ -1,6 +1,5 @@
 import { customCommandHandlers as customHandlers, CustomCommands } from "./runCustomCommand";
 import { RunContext } from "./RunContext";
-import { delayMs } from "../../../utils/delay";
 
 export const builtInCommands = <const>[
   { command: "Command D", trigger: "editor.action.addSelectionToNextFindMatch" },
@@ -65,10 +64,9 @@ export type Command = { command: BuiltInCommand["command"] } | CustomCommands;
 
 export async function runCommand(runContext: RunContext, command: Command) {
   if (!runContext.sync && !runContext.editor.hasTextFocus()) {
-    await delayMs(20);
     runContext.editor.focus();
   }
-
+  
   for (const handler of customCommandHandlers) {
     if (handler.command !== command.command) continue;
     await handler.handler(runContext, command as any);

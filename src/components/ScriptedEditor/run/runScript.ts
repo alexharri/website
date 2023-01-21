@@ -15,11 +15,7 @@ export async function runScript(options: Options) {
   const { runContext, index } = options;
 
   const { editor, script } = runContext;
-  
-  if (!editor.hasTextFocus()) {
-    await delayMs(20);
-    editor.focus();
-  }
+  editor.focus();
   editor.setSelection({ startColumn: 1, endColumn: 1, startLineNumber: 1, endLineNumber: 1 });
 
   const canceled = runContext.getCheckCanceledFunction();
