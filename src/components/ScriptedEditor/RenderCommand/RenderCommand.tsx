@@ -1,5 +1,14 @@
+import { ArrowIcon16 } from "../../Icon/ArrowIcon16";
+import { BackspaceIcon18 } from "../../Icon/BackspaceIcon18";
+import { MetaIcon18 } from "../../Icon/MetaIcon18";
+import { OptionIcon18 } from "../../Icon/OptionIcon18";
+import { ShiftIcon18 } from "../../Icon/ShiftIcon18";
 import { ScriptCommand } from "../types/scriptTypes";
 import styles from "./RenderCommand.module.scss";
+
+function escapeText(text: string) {
+  return text.replace(/\n/g, "\\n");
+}
 
 const modifierKeys = new Set(["Command", "Shift", "Option", "Ctrl"]);
 
@@ -10,19 +19,21 @@ function isModifier(key: string) {
 function getKeyLabel(key: string) {
   switch (key) {
     case "Command":
-      return "⌘";
+      return <MetaIcon18 />;
     case "Option":
-      return "⌥";
+      return <OptionIcon18 />;
     case "Shift":
-      return "⇧";
-    case "Ctrl":
-      return "⌃";
+      return <ShiftIcon18 />;
     case "Right":
-      return "→";
+      return <ArrowIcon16 direction="right" />;
     case "Left":
-      return "←";
+      return <ArrowIcon16 direction="left" />;
+    case "Up":
+      return <ArrowIcon16 direction="up" />;
+    case "Down":
+      return <ArrowIcon16 direction="down" />;
     case "Backspace":
-      return "⌫";
+      return <BackspaceIcon18 />;
     default:
       return key;
   }
@@ -33,7 +44,7 @@ function extractKeys(command: string): { modifierKeys: string[]; keys: string[] 
   const modifierKeys: string[] = [];
 
   for (const key of command.split(" ")) {
-    const list = isModifier(key) ? modifierKeys : keys;
+    const list: React.ReactNode[] = isModifier(key) ? modifierKeys : keys;
     list.push(getKeyLabel(key));
   }
 
@@ -65,7 +76,9 @@ export const RenderCommand = (props: Props) => {
     return (
       <Container onClick={onClick}>
         <div className={styles.left}>Type</div>
-        <code className={styles.key}>{command.text}</code>
+        <div className={styles.right}>
+          <code className={styles.key}>{escapeText(command.text)}</code>
+        </div>
       </Container>
     );
   }
@@ -74,7 +87,9 @@ export const RenderCommand = (props: Props) => {
     return (
       <Container onClick={onClick}>
         <div className={styles.left}>Select</div>
-        <code className={styles.key}>{command.word}</code>
+        <div className={styles.right}>
+          <code className={styles.key}>{escapeText(command.word)}</code>
+        </div>
       </Container>
     );
   }
