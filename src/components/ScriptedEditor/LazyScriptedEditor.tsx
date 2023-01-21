@@ -62,7 +62,7 @@ export function LazyScriptedEditor(props: Props) {
 
   return (
     <>
-      <div ref={ref} className={styles.outerWrapper}>
+      <div ref={ref} className={styles.outerWrapper} data-scripted-editor={props.scriptId}>
         <div className={styles.lineWrapper}>
           {Array.from({ length: lines }).map((_, i) => (
             <div key={i} className={styles.line} />

@@ -17,7 +17,7 @@ export const FocusedScriptProvider = (props: { children: React.ReactNode }) => {
   const itemsRef = useRef<Item[]>([]);
 
   useEffect(() => {
-    const getItemsInterval = setInterval(() => {
+    const getItems = () => {
       const els = document.querySelectorAll("[data-scripted-editor]");
 
       const items: Item[] = [];
@@ -30,7 +30,7 @@ export const FocusedScriptProvider = (props: { children: React.ReactNode }) => {
         const bottom = top + height;
         items.push({ top, height, bottom, scriptId });
       });
-    }, 500);
+    };
 
     const recalcFocused = () => {
       let focusedItem: Item | null = null;
@@ -81,13 +81,18 @@ export const FocusedScriptProvider = (props: { children: React.ReactNode }) => {
       if (scriptIdRef.current !== scriptId) setScriptId(scriptId);
     };
 
+    const resizeListener = () => {
+      getItems();
+      recalcFocused();
+    };
+
     window.addEventListener("scroll", recalcFocused);
-    window.addEventListener("resize", recalcFocused);
+    window.addEventListener("resize", resizeListener);
+    resizeListener();
 
     return () => {
-      clearInterval(getItemsInterval);
       window.removeEventListener("scroll", recalcFocused);
-      window.removeEventListener("resize", recalcFocused);
+      window.removeEventListener("resize", resizeListener);
     };
   }, []);
 

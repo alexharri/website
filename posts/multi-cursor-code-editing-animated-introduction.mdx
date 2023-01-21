@@ -4,19 +4,6 @@ description: "A deep dive into multi-cursor editing, using Command D and clever 
 publishedAt: ""
 ---
 
-Early in my career, I discovered a trick that has made me very productive when writing code. The trick does not involve learning Vim, and it does not involve any magic plugin.
-
-I've used this trick with Sublime Text, Atom, and now VS Code. The trick is basic enough that every text editor I've used supports it out of the box.
-
-The trick is broadly applicable. I use it with multiple programming languages, and I use it when performing non-programming text editing tasks such as formatting, filtering, or selecting data.
-
-This trick is great for productivity. It also makes writing code just _that_ much more enjoyable. I don't believe I would enjoy my day-to-day as much without it.
-
-
-## Repeated changes
-
-Before diving into the trick, let's understand the problem that it solves.
-
 When editing text, especially structured text, the need occurs to make repeated changes in multiple locations. A common case is renaming a variable.
 
 ```javascript
@@ -89,6 +76,8 @@ On the surface, `Command D` is deceptively simple. Find a pattern to match, and 
 There's already a lot of value in using `Command D` for simple transformations, such as the above, but we're just scratching the surface.
 
 Combined with smart text navigation techniques, we can take `Command D` far.
+
+<SmallNote>This article uses VS Code, but `Command D` can be used in other text editors such as Sublime and Atom. Other text editors will likely have analogous keyboard shortcuts.</SmallNote>
 
 
 ## Navigating text
@@ -185,8 +174,6 @@ With text navigation locked down, let's do some cool stuff.
 
 ## Finding the pattern
 
-Making effective use of `Command D` comes down to finding patterns in the edits you intend to make.
-
 Take this example of converting a series of `if` statements to a switch statement.
 
 
@@ -234,15 +221,15 @@ if (element.type === "group") {
   { command: "Backspace" },
 ]} />
 
-Matching the `if` if somewhat obvious, especially since each of the `if` statements have an identical structure.
+The `if` statements all have the exact same structure, so matching them is somewhat trivial. These sorts of patterns are the bread and butter of `Command D`, they're very common.
 
-Though the pattern I want to match are typically uniform, sometimes I encounter more complex patterns. These can come in the form of
+But `Command D` is still very effective for non-uniform patterns. Those more complex patterns can come in the form of
 
  * a variable number of arguments,
  * a variable number of words in a string, or
  * different argument types.
 
-Let's take a look at such an example.
+Let's take a look at an example.
 
 
 ### Non-uniform patterns
@@ -257,13 +244,13 @@ evaluate("[5, 10] / 2"); // [2.5, 5]
 evaluate("1 > 1/2 ? 1 : 'err'"); // 1
 ```
 
-In making testing the library less verbose, we developed a test utility function that takes an expression, and its expected value.
+In making testing the library less verbose, we made a utility function that takes an expression, and its expected value.
 
 ```tsx
 function expectEqual(expression: string, expectedValue: any): void;
 ```
 
-We have test code that looks like so:
+We have some test code using it that looks like so:
 
 ```tsx
 expectEqual("2**4", 16);
@@ -283,7 +270,7 @@ const tests = [
 ];
 ```
 
-Since we have a lot of tests, doing this manually would be a lot of work. Luckily for us, we know how to use `Command D`. We just need to find a pattern to match.
+Since we have a lot of tests, doing this manually would be a lot of work. This is a prime case for using `Command D`, we just need to find a pattern to match.
 
 If we match `expectEqual` and move in from there, we run into the problem of the expressions being of different lengths.
 
@@ -333,8 +320,6 @@ expectEqual("1/10 < 0.2 ? 'a' : 'b'", "a");
   { command: "Select Word", word: ",", line: 1 },
   { command: "Command D", times: 7 },
 ]} />
-
-This one's definitely not as obvious as our `if` to `switch` example.
 
 However, we can observe that the expression is always a string followed by some arbitrary second argument. The expression can be of any length, so matching its start is of no use.
 
@@ -399,7 +384,7 @@ if (element && element.hasAttribute("data-active")) {
 
 You have to be a bit more careful with `Shift Command L`, since it selects __every__ match in a file. You may match something that you did not intend to, which can occur outside of the current viewport.
 
-For this reason, I prefer `Command D` when working with a small number of matches. The matching feels more local as you visually see every match happen.
+For this reason, I prefer `Command D` when working with a small number of matches. The matching feels more local, you visually see every match happen.
 
 
 ## Skipping an instance
@@ -436,7 +421,7 @@ Pressing `Command K` and `Command D` resolves to a command called __Move Last Se
  * remove the most recent match, and
  * select the next match
 
-To me, this is the least intuitive part of using `Command D`. It eventually becomes second-nature, given enough practice.
+This is not very intuitive at first, but becomes second-nature given enough practice.
 
 
 ## Matching line breaks

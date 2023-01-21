@@ -15,6 +15,7 @@ import { calculateHeight, moveToIndex, startScript } from "./scriptedEditorUtils
 import { withMargin } from "../../utils/withMargin";
 import { useIsMobile, useViewportWidth } from "../../utils/hooks/useViewportWidth";
 import { useIsomorphicLayoutEffect } from "../../utils/hooks/useIsomorphicLayoutEffect";
+import { useDidUpdate } from "../../utils/hooks/useDidUpdate";
 
 const MemoizedEditor = React.memo(Editor);
 
@@ -133,6 +134,9 @@ export const ScriptedEditor = (props: Props) => {
     applyHeightToContainer(runContext).then(() => {
       heightMeasuredRef.current = true;
       (document.activeElement as HTMLInputElement | null)?.blur?.();
+      if (focusedScriptIdRef.current === runContext.scriptId) {
+        onStartScript();
+      }
     });
   }, [runContext]);
 
@@ -198,7 +202,7 @@ export const ScriptedEditor = (props: Props) => {
     return () => window.removeEventListener("keydown", keyDownCapture);
   }, [keyDownCapture]);
 
-  useEffect(() => {
+  useDidUpdate(() => {
     if (focusedScriptId === props.scriptId) {
       onStartScript();
     } else {
@@ -230,7 +234,7 @@ export const ScriptedEditor = (props: Props) => {
   const scale = width < 640 ? width / 640 : 1;
 
   return (
-    <div data-scripted-editor={props.scriptId} ref={containerRef} onKeyDownCapture={keyDownCapture}>
+    <div ref={containerRef} onKeyDownCapture={keyDownCapture}>
       <div className={styles.outerContainer} data-active={active}>
         <div
           style={{
