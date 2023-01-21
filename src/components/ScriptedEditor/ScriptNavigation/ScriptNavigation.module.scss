@@ -16,7 +16,7 @@
   left: 0;
   right: 0;
   bottom: 0;
-  height: calc(64px + 20vh);
+  height: 214px;
   background: var(--color-background-500);
   padding: 64px 8px 24px;
   overflow: hidden;
@@ -74,6 +74,7 @@
   display: flex;
   background: var(--color-background-300);
   border-top: 2px solid var(--color-background-500);
+  padding-bottom: 32px;
 }
 
 .moveButton {

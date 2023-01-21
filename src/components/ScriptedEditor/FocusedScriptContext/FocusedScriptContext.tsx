@@ -39,7 +39,7 @@ export const FocusedScriptProvider = (props: { children: React.ReactNode }) => {
       const y2 = window.scrollY + window.innerHeight;
 
       const desktopBuf = window.innerHeight * 0.15;
-      const mobileBuf = window.innerHeight * 0.2 + 64;
+      const mobileBuf = 214;
 
       const isMobile = window.innerWidth <= 1080;
       const buf = isMobile ? mobileBuf : desktopBuf;
