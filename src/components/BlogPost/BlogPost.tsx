@@ -11,7 +11,10 @@ export const BlogPost = (props: Props) => {
 
   return (
     <article>
-      <Link href={`/blog/${post.slug}`} className={styles.link}>
+      <Link
+        href={post.publishedAt ? `/blog/${post.slug}` : `/blog/draft/${post.slug}`}
+        className={styles.link}
+      >
         <h2>{post.title}</h2>
         {post.description && <p>{post.description}</p>}
 

@@ -2,12 +2,10 @@ import fs from "fs";
 import matter from "gray-matter";
 import { GetStaticProps } from "next";
 import path from "path";
-import { AboutMe } from "../components/AboutMe/AboutMe";
 import { BlogPost } from "../components/BlogPost/BlogPost";
 import { Layout } from "../components/Layout";
 import { Post } from "../types/Post";
 import { postFileNames, POSTS_PATH } from "../utils/mdxUtils";
-
 
 interface Props {
   posts: Post[];
@@ -16,14 +14,10 @@ interface Props {
 export default function Page(props: Props) {
   return (
     <Layout>
-      <h1>Posts</h1>
+      <h1>Drafts</h1>
       {props.posts.map((post) => (
         <BlogPost post={post} key={post.slug} />
       ))}
-
-      <hr style={{ margin: "80px 0" }} />
-
-      <AboutMe />
     </Layout>
   );
 }
@@ -49,7 +43,7 @@ export const getStaticProps: GetStaticProps<Props> = async (ctx) => {
 
     const slug = fileName.replace(/\.mdx?$/, "");
 
-    if (publishedAt) {
+    if (!publishedAt) {
       posts.push({ title, description, slug, publishedAt });
     }
   }

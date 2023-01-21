@@ -15,9 +15,10 @@ import { SmallNote } from "../../components/SmallNote/SmallNote";
 import { Pre, StaticCodeBlock } from "../../components/StaticCodeBlock/StaticCodeBlock";
 import { FrontMatter } from "../../types/FrontMatter";
 import { usePostWatcher } from "../../utils/hooks/usePostWatcher";
-import { postFileNames, POSTS_PATH } from "../../utils/mdxUtils";
+import { POSTS_PATH } from "../../utils/mdxUtils";
 import { withMargin } from "../../utils/withMargin";
 import { MonacoThemeProvider } from "../../components/ScriptedEditor/MonacoThemeProvider";
+import { getPostPaths } from "../../utils/getPostPaths";
 
 // Custom components/renderers to pass to MDX.
 // Since the MDX files aren't loaded by webpack, they have no knowledge of how
@@ -107,13 +108,6 @@ export const getStaticProps: GetStaticProps<Props, Params> = async (ctx) => {
   return { props: { source, slug: params.slug, version } };
 };
 
-export const getStaticPaths: GetStaticPaths<Params> = async () => {
-  const paths = postFileNames
-    .map((path) => path.replace(/\.mdx?$/, ""))
-    .map((slug) => ({ params: { slug } }));
-
-  return {
-    paths,
-    fallback: false,
-  };
+export const getStaticPaths: GetStaticPaths = async () => {
+  return { paths: getPostPaths({ type: "published" }), fallback: false };
 };
