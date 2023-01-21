@@ -22,11 +22,10 @@ export const startScript = async (options: StartScriptOptions) => {
   const { runContext } = options;
 
   let runAgain = true;
+  runContext.startNewRun();
+  const canceled = runContext.getCheckCanceledFunction();
 
   while (runAgain) {
-    runContext.startNewRun();
-    const canceled = runContext.getCheckCanceledFunction();
-
     const { editor, initialCode } = runContext;
     if (editor.getValue() !== initialCode) {
       editor.setValue(initialCode);
