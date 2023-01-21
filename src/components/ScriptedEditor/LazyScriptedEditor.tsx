@@ -1,8 +1,9 @@
-import { useEffect, useRef, useState } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 import { RunContext } from "./run/RunContext";
 import { ScriptedEditor } from "./ScriptedEditor";
 import { ScriptedEditorControls } from "./ScriptedEditorControls";
 import styles from "./LazyScriptedEditor.module.scss";
+import { MonacoThemeContext } from "./MonacoThemeProvider";
 
 interface Props {
   language: string;
@@ -15,6 +16,7 @@ interface Props {
 export function LazyScriptedEditor(props: Props) {
   const { expectedMaxLines, scriptId } = props;
 
+  const { defined } = useContext(MonacoThemeContext);
   const [runContext, setRunContext] = useState<RunContext | null>(null);
   const [render, setRender] = useState(true);
   const [lines, setLines] = useState(expectedMaxLines);
@@ -66,7 +68,7 @@ export function LazyScriptedEditor(props: Props) {
             <div key={i} className={styles.line} />
           ))}
         </div>
-        {render && (
+        {render && defined ? (
           <div className={styles.editorWrapper}>
             <ScriptedEditor
               {...props}
@@ -76,6 +78,8 @@ export function LazyScriptedEditor(props: Props) {
               loop={props.loop}
             />
           </div>
+        ) : (
+          <div className={styles.placeholder}>Loading</div>
         )}
       </div>
       <ScriptedEditorControls

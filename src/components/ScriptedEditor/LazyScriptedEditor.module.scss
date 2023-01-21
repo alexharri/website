@@ -25,3 +25,19 @@
     height: 4.21875vw; // 27px / 640px
   }
 }
+
+.placeholder {
+  position: absolute;
+  top: 16px;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: var(--color-background-300);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 20px;
+  font-family: var(--font-monospace);
+  color: var(--color-text-600);
+  border-radius: 8px;
+}

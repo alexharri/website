@@ -8,13 +8,11 @@ import React from "react";
 import { useColorMode } from "../../utils/colorMode";
 import { RunContext } from "./run/RunContext";
 import { FocusedScriptContext } from "./FocusedScriptContext/FocusedScriptContext";
-import { useDidUpdate } from "../../utils/hooks/useDidUpdate";
 import { useMouseDownOutside } from "../../utils/hooks/useMouseDownOutside";
 import { LazyScriptedEditor } from "./LazyScriptedEditor";
 import { scriptedEditorConstants } from "./scriptedEditorConstants";
 import { calculateHeight, moveToIndex, startScript } from "./scriptedEditorUtils";
 import { withMargin } from "../../utils/withMargin";
-import { MonacoThemeContext } from "./MonacoThemeProvider";
 import { useIsMobile, useViewportWidth } from "../../utils/hooks/useViewportWidth";
 import { useIsomorphicLayoutEffect } from "../../utils/hooks/useIsomorphicLayoutEffect";
 
@@ -200,7 +198,7 @@ export const ScriptedEditor = (props: Props) => {
     return () => window.removeEventListener("keydown", keyDownCapture);
   }, [keyDownCapture]);
 
-  useDidUpdate(() => {
+  useEffect(() => {
     if (focusedScriptId === props.scriptId) {
       onStartScript();
     } else {
@@ -267,8 +265,6 @@ export function withScriptedEditor<T extends { children: any }>(
   getProps: (props: T) => { code: string; language: string },
 ) {
   return withMargin([40, 0], (props: T) => {
-    const { defined } = useContext(MonacoThemeContext);
-
     const { code, language } = getProps(props);
     const searchStr = "// @script ";
 
@@ -294,8 +290,6 @@ export function withScriptedEditor<T extends { children: any }>(
     const expectedLines = expectedLinesStr.split("expectedLines=")[1];
 
     const loop = !!rest.find((item) => item === "loop");
-
-    if (!defined) return null;
 
     return (
       <LazyScriptedEditor
