@@ -13,7 +13,7 @@
   padding: 24px 0;
   overflow: hidden;
 
-  @media (max-width: 640px) {
+  @media (max-width: 640px /* SCRIPTED_EDITOR_MIN_WIDTH */) {
     padding: 3.75vw 0; // 24px / 640px
   }
 }
@@ -21,7 +21,7 @@
 .line {
   height: 27px;
 
-  @media (max-width: 640px) {
+  @media (max-width: 640px /* SCRIPTED_EDITOR_MIN_WIDTH */) {
     height: 4.21875vw; // 27px / 640px
   }
 }

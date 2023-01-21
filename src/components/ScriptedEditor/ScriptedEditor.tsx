@@ -17,7 +17,8 @@ import { useDidUpdate } from "../../utils/hooks/useDidUpdate";
 
 const MemoizedEditor = React.memo(Editor);
 
-const { FONT_SIZE, LINE_HEIGHT_FACTOR, V_PADDING } = scriptedEditorConstants;
+const { FONT_SIZE, LINE_HEIGHT_FACTOR, V_PADDING, SCRIPTED_EDITOR_MIN_WIDTH } =
+  scriptedEditorConstants;
 
 interface Props {
   language: string;
@@ -233,7 +234,7 @@ export const __ScriptedEditor = (props: Props) => {
 
   const active = focusedScriptId === props.scriptId;
 
-  const scale = width < 640 ? width / 640 : 1;
+  const scale = width < SCRIPTED_EDITOR_MIN_WIDTH ? width / SCRIPTED_EDITOR_MIN_WIDTH : 1;
 
   return (
     <div ref={containerRef} onKeyDownCapture={keyDownCapture}>
