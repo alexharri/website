@@ -32,16 +32,20 @@ export const FocusedScriptProvider = (props: { children: React.ReactNode }) => {
       });
     }, 500);
 
-    const onScroll = () => {
+    const recalcFocused = () => {
       let focusedItem: Item | null = null;
 
       const y1 = window.scrollY;
       const y2 = window.scrollY + window.innerHeight;
 
-      const buf = window.innerHeight * 0.15;
+      const desktopBuf = window.innerHeight * 0.15;
+      const mobileBuf = window.innerHeight * 0.2 + 64;
+
+      const isMobile = window.innerWidth <= 1080;
+      const buf = isMobile ? mobileBuf : desktopBuf;
 
       const activationBounds: [number, number] = [y1 + 48, y2 - buf];
-      const boundsIfActive: [number, number] = [y1 + 48, y2 - 24];
+      const boundsIfActive: [number, number] = isMobile ? [y1 + 48, y2 - buf] : [y1 + 48, y2 - 24];
       const looseActivationMark = y2 - window.innerHeight * 0.3;
 
       const heightExceedsBounds = (height: number, bounds: [number, number]) => {
@@ -77,11 +81,13 @@ export const FocusedScriptProvider = (props: { children: React.ReactNode }) => {
       if (scriptIdRef.current !== scriptId) setScriptId(scriptId);
     };
 
-    window.addEventListener("scroll", onScroll);
+    window.addEventListener("scroll", recalcFocused);
+    window.addEventListener("resize", recalcFocused);
 
     return () => {
       clearInterval(getItemsInterval);
-      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("scroll", recalcFocused);
+      window.removeEventListener("resize", recalcFocused);
     };
   }, []);
 
