@@ -234,7 +234,13 @@ export const ScriptedEditor = (props: Props) => {
   return (
     <div data-scripted-editor={props.scriptId} ref={containerRef} onKeyDownCapture={keyDownCapture}>
       <div className={styles.outerContainer} data-active={active}>
-        <div style={{ transform: `scale(${scale})`, transformOrigin: "0 0" }}>
+        <div
+          style={{
+            transform: `scale(${scale})`,
+            width: scale < 1 ? window.innerWidth / scale : undefined,
+            transformOrigin: "0 0",
+          }}
+        >
           <div
             data-sripted-editor-wrapper={props.scriptId}
             ref={editorWrapperRef}

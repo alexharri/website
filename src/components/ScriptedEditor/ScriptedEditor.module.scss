@@ -3,7 +3,6 @@
   opacity: 0.8;
   transition: transform .5s, opacity .5s;
   margin: 0 -24px;
-  min-width: 640px;
   
   &[data-active="true"] {
     opacity: 1;
