@@ -8,6 +8,7 @@ import { RenderCommand } from "../RenderCommand/RenderCommand";
 import { useViewportWidth } from "../../../utils/hooks/useViewportWidth";
 import { moveToIndex } from "../scriptedEditorUtils";
 import { scriptedEditorConstants } from "../scriptedEditorConstants";
+import { ArrowIcon16 } from "../../Icon/ArrowIcon16";
 
 const { SCRIPT_NAVIGATION_WIDTH, SCRIPT_NAVIGATION_BREAKPOINT } = scriptedEditorConstants;
 
@@ -29,6 +30,7 @@ export const ScriptNavigation = (props: Props) => {
   const commandElRef = useRef<Partial<Record<number, HTMLDivElement>>>({});
   const commandHeightRef = useRef<Partial<Record<number, number>>>({});
   const scrollRef = useRef<HTMLDivElement>(null);
+  const arrowKeyHintRef = useRef<HTMLParagraphElement>(null);
 
   const getEl = useCallback((index: number) => {
     return scrollRef.current!.querySelector(`[data-command="${index}"]`) as HTMLDivElement;
@@ -53,6 +55,13 @@ export const ScriptNavigation = (props: Props) => {
       const distance = Math.abs(i - index);
       const el = getEl(i);
       el.style.opacity = distance === 0 ? "" : String(Math.max(0.2, 0.4 - distance * 0.1));
+    }
+
+    if (arrowKeyHintRef.current) {
+      arrowKeyHintRef.current.setAttribute(
+        "data-active",
+        String(index === runContext.script.length - 1),
+      );
     }
   }, []);
 
@@ -112,6 +121,22 @@ export const ScriptNavigation = (props: Props) => {
                 <RenderCommand command={command} onClick={() => props.moveToIndex(i)} />
               </div>
             ))}
+            {!isMobile && (
+              <p className={styles.arrowKeyHint} ref={arrowKeyHintRef}>
+                <span>Hint:</span>
+                <span>
+                  Use the arrow keys (
+                  <i className={styles.arrowIcon}>
+                    <ArrowIcon16 direction="up" />
+                  </i>
+                  ,{" "}
+                  <i className={styles.arrowIcon}>
+                    <ArrowIcon16 direction="down" />
+                  </i>
+                  ) to move between the steps
+                </span>
+              </p>
+            )}
           </div>
           {isMobile && (
             <div className={styles.moveButtonWrapper}>

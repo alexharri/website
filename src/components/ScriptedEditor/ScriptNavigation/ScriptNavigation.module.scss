@@ -90,3 +90,28 @@
     border-right: 2px solid var(--color-background-500);
   }
 }
+
+.arrowKeyHint {
+  display: flex;
+  opacity: 0;
+  color: var(--color-text-600);
+  font-size: 16px;
+  transition: opacity .7s;
+  
+  &[data-active=true] {
+    opacity: 1;
+  }
+
+  span:first-of-type {
+    min-width: 100px;
+    padding-right: 8px;
+    text-align: right;
+  }
+}
+
+.arrowIcon {
+  svg {
+    width: 14px;
+    height: 14px;
+  }
+}
