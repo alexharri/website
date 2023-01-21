@@ -119,8 +119,6 @@ function useMonaco() {
   return monaco;
 }
 
-export default useMonaco;
-
 export const MonacoThemeContext = React.createContext<{ defined: boolean }>({ defined: false });
 
 export const MonacoThemeProvider: React.FC<{ children: React.ReactNode }> = React.memo(
