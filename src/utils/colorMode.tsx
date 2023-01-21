@@ -2,9 +2,13 @@ import React, { useContext, useMemo } from "react";
 import { useEffect, useState } from "react";
 import { colorValues } from "./cssVariables";
 
+export const DISABLE_LIGHT_MODE = true;
+
 type ColorMode = "dark" | "light";
 
-function getCurrentColorMode() {
+function getCurrentColorMode(): ColorMode {
+  if (DISABLE_LIGHT_MODE) return "dark";
+
   const colorMode = window.localStorage.getItem("color-mode");
   switch (colorMode) {
     case "dark":
@@ -34,7 +38,7 @@ const ColorModeContext = React.createContext<{
 }>({ colorMode: null, setColorMode: () => {} });
 
 export const ColorModeProvider = (props: { children: React.ReactNode }) => {
-  const [colorMode, _setColorMode] = useState<ColorMode | null>(null);
+  const [colorMode, _setColorMode] = useState<ColorMode | null>(DISABLE_LIGHT_MODE ? "dark" : null);
 
   const setColorMode = (colorMode: ColorMode) => {
     applyColorMode(colorMode);
@@ -43,6 +47,8 @@ export const ColorModeProvider = (props: { children: React.ReactNode }) => {
   };
 
   useEffect(() => {
+    if (DISABLE_LIGHT_MODE) return;
+
     _setColorMode(getCurrentColorMode());
 
     const listener = (e: MediaQueryListEvent) => {
@@ -59,11 +65,7 @@ export const ColorModeProvider = (props: { children: React.ReactNode }) => {
 
   const value = useMemo(() => ({ colorMode, setColorMode }), [colorMode]);
 
-  return (
-    <ColorModeContext.Provider value={value}>
-      {props.children}
-    </ColorModeContext.Provider>
-  );
+  return <ColorModeContext.Provider value={value}>{props.children}</ColorModeContext.Provider>;
 };
 
 export function useColorMode() {

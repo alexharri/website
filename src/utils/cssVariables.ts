@@ -60,9 +60,16 @@ export const colorValues: Record<"dark" | "light", Record<ColorName, string>> = 
     "text-300": "#1d2737",
     "text-600": "#456279",
     blue: "#006bc5",
+    "blue-200": "",
+    "blue-700": "",
+    "blue-rgb": "",
+    "dark-blue-400": "",
     green: "#008f10",
     background: "#f9f9f9",
+    "background-rgb": "",
+    "background-700": "#dde2e2",
     "background-500": "#eaeeef",
+    "background-300": "#f9fafa",
     "code-background": "#d0e8f6",
     "medium-500": "#ccd5dc",
     "medium-400": "#d7e0e6",
@@ -74,7 +81,7 @@ export const colorValues: Record<"dark" | "light", Record<ColorName, string>> = 
     "header-border-background": "rgba(255, 255, 255, 0.8)",
     "light-rgb": "0, 0, 0",
     scheme: "light",
-  } as any,
+  },
 };
 
 type ColorName = keyof typeof colors;

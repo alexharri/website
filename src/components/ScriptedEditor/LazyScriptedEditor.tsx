@@ -79,7 +79,7 @@ export function LazyScriptedEditor(props: Props) {
             />
           </div>
         ) : (
-          <div className={styles.placeholder}>Loading</div>
+          <div className={styles.placeholder}>Loading editor...</div>
         )}
       </div>
       <ScriptedEditorControls
