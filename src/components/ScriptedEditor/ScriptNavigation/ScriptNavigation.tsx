@@ -10,7 +10,8 @@ import { moveToIndex } from "../scriptedEditorUtils";
 import { scriptedEditorConstants } from "../scriptedEditorConstants";
 import { ArrowIcon16 } from "../../Icon/ArrowIcon16";
 
-const { SCRIPT_NAVIGATION_WIDTH, SCRIPT_NAVIGATION_BREAKPOINT } = scriptedEditorConstants;
+const { SCRIPT_NAVIGATION_WIDTH, SCRIPT_NAVIGATION_BREAKPOINT, SCRIPT_NAVIGATION_DRAWER_HEIGHT } =
+  scriptedEditorConstants;
 
 interface Props {
   scriptId: string;
@@ -108,9 +109,11 @@ export const ScriptNavigation = (props: Props) => {
       {show && (
         <motion.div
           transition={{ duration: 0.5, ease: [0.26, 0.03, 0.3, 0.96] }}
-          initial={isMobile ? { y: "40vh" } : { x: -SCRIPT_NAVIGATION_WIDTH }}
-          animate={isMobile ? { y: "0vh" } : { x: 0 }}
-          exit={isMobile ? { y: "40vh" } : { x: -SCRIPT_NAVIGATION_WIDTH }}
+          initial={
+            isMobile ? { y: SCRIPT_NAVIGATION_DRAWER_HEIGHT } : { x: -SCRIPT_NAVIGATION_WIDTH }
+          }
+          animate={isMobile ? { y: 0 } : { x: 0 }}
+          exit={isMobile ? { y: SCRIPT_NAVIGATION_DRAWER_HEIGHT } : { x: -SCRIPT_NAVIGATION_WIDTH }}
           className={isMobile ? styles.containerMobile : styles.container}
           data-script-navigation={props.scriptId}
         >
