@@ -28,7 +28,6 @@ export const ScriptNavigation = (props: Props) => {
   const width = useViewportWidth();
   const isMobile = typeof width === "number" && width < SCRIPT_NAVIGATION_BREAKPOINT;
 
-  const commandElRef = useRef<Partial<Record<number, HTMLDivElement>>>({});
   const commandHeightRef = useRef<Partial<Record<number, number>>>({});
   const scrollRef = useRef<HTMLDivElement>(null);
   const arrowKeyHintRef = useRef<HTMLParagraphElement>(null);
@@ -69,7 +68,6 @@ export const ScriptNavigation = (props: Props) => {
   useEffect(() => {
     runContext.subscribe("run-command", onIndexChange);
     return () => {
-      commandElRef.current = {};
       commandHeightRef.current = {};
       runContext.unsubscribe("run-command", onIndexChange);
     };
