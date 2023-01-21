@@ -83,6 +83,13 @@ function defineTheme(
   });
 }
 
+/**
+ * Forked implementation of useMonaco from '@monaco-editor/react'.
+ *
+ * The original implementation contains a lot of unnecessary error
+ * logging for canceling promises, which created a lot of noise
+ * in the console during development.
+ */
 function useMonaco() {
   const [monaco, setMonaco] = useState(loader.__getMonacoInstance());
   useEffect(() => {
