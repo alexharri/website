@@ -61,6 +61,21 @@ export const __ScriptedEditor = (props: Props) => {
     setScript(JSON.parse(el.getAttribute("data-script")!));
   }, []);
 
+  const renderExecElement = useCallback((text: string) => {
+    const container = editorWrapperRef.current;
+
+    const el = document.createElement("div");
+    el.className = styles.exec;
+    container?.appendChild(el);
+
+    const textEl = document.createElement("span");
+    textEl.setAttribute("data-text-element", "true");
+    textEl.innerText = text;
+    el.appendChild(textEl);
+
+    return el;
+  }, []);
+
   const runContext = useMemo(
     () =>
       _editor && script
@@ -69,20 +84,7 @@ export const __ScriptedEditor = (props: Props) => {
             script,
             initialCode,
             scriptId: props.scriptId,
-            renderExecElement: (text) => {
-              const container = editorWrapperRef.current;
-
-              const el = document.createElement("div");
-              el.className = styles.exec;
-              container?.appendChild(el);
-
-              const textEl = document.createElement("span");
-              textEl.setAttribute("data-text-element", "true");
-              textEl.innerText = text;
-              el.appendChild(textEl);
-
-              return el;
-            },
+            renderExecElement,
           })
         : null,
     [_editor, script],
