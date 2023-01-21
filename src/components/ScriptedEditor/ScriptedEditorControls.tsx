@@ -4,8 +4,11 @@ import { useIsomorphicLayoutEffect } from "../../utils/hooks/useIsomorphicLayout
 import { FocusedScriptContext } from "./FocusedScriptContext/FocusedScriptContext";
 import { RunContext } from "./run/RunContext";
 import styles from "./ScriptedEditor.module.scss";
+import { scriptedEditorConstants } from "./scriptedEditorConstants";
 import { moveToIndex, startScript } from "./scriptedEditorUtils";
 import { ScriptNavigation } from "./ScriptNavigation/ScriptNavigation";
+
+const { SCRIPT_NAVIGATION_WIDTH, SCRIPT_NAVIGATION_BREAKPOINT } = scriptedEditorConstants;
 
 interface Props {
   scriptId: string;
@@ -53,7 +56,7 @@ export const ScriptedEditorControls = (props: Props) => {
   showNavigationRef.current = showNavigation;
 
   const setMainPosition = useCallback((showNavigation: boolean, resize: boolean) => {
-    const isMobile = window.innerWidth < 1080;
+    const isMobile = window.innerWidth < SCRIPT_NAVIGATION_BREAKPOINT;
     const main = document.querySelector("main");
     const editorWrapper = getEditorWrapper();
     if (!main || !editorWrapper) return;
@@ -72,8 +75,8 @@ export const ScriptedEditorControls = (props: Props) => {
 
     const { left, width } = editorWrapper.getBoundingClientRect();
 
-    const availableWidth = window.innerWidth - 300;
-    const targetLeft = 300 + availableWidth / 2 - width / 2;
+    const availableWidth = window.innerWidth - SCRIPT_NAVIGATION_WIDTH;
+    const targetLeft = SCRIPT_NAVIGATION_WIDTH + availableWidth / 2 - width / 2;
     const translate = targetLeft - left;
 
     if (!resize) {

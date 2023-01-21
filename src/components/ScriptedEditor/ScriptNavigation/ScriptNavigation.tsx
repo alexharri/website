@@ -7,6 +7,9 @@ import styles from "./ScriptNavigation.module.scss";
 import { RenderCommand } from "../RenderCommand/RenderCommand";
 import { useViewportWidth } from "../../../utils/hooks/useViewportWidth";
 import { moveToIndex } from "../scriptedEditorUtils";
+import { scriptedEditorConstants } from "../scriptedEditorConstants";
+
+const { SCRIPT_NAVIGATION_WIDTH, SCRIPT_NAVIGATION_BREAKPOINT } = scriptedEditorConstants;
 
 interface Props {
   scriptId: string;
@@ -21,7 +24,7 @@ export const ScriptNavigation = (props: Props) => {
   const { focusedScriptId: scriptId } = useContext(FocusedScriptContext);
 
   const width = useViewportWidth();
-  const isMobile = typeof width === "number" && width < 1080;
+  const isMobile = typeof width === "number" && width < SCRIPT_NAVIGATION_BREAKPOINT;
 
   const commandElRef = useRef<Partial<Record<number, HTMLDivElement>>>({});
   const commandHeightRef = useRef<Partial<Record<number, number>>>({});
@@ -96,9 +99,9 @@ export const ScriptNavigation = (props: Props) => {
       {show && (
         <motion.div
           transition={{ duration: 0.5, ease: [0.26, 0.03, 0.3, 0.96] }}
-          initial={isMobile ? { y: "40vh" } : { x: -300 }}
+          initial={isMobile ? { y: "40vh" } : { x: -SCRIPT_NAVIGATION_WIDTH }}
           animate={isMobile ? { y: "0vh" } : { x: 0 }}
-          exit={isMobile ? { y: "40vh" } : { x: -300 }}
+          exit={isMobile ? { y: "40vh" } : { x: -SCRIPT_NAVIGATION_WIDTH }}
           className={isMobile ? styles.containerMobile : styles.container}
           data-script-navigation={props.scriptId}
         >

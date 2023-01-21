@@ -75,6 +75,10 @@
   &:active > div {
     transform: translateY(8px);
   }
+
+  @media (max-width: 340px) {
+    margin-right: 8px;
+  }
 }
 
 .bigButton, .textButton {

@@ -1,4 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
+import { scriptedEditorConstants } from "../scriptedEditorConstants";
+
+const { SCRIPT_NAVIGATION_BREAKPOINT } = scriptedEditorConstants;
 
 export const FocusedScriptContext = React.createContext({ focusedScriptId: "" });
 
@@ -41,7 +44,7 @@ export const FocusedScriptProvider = (props: { children: React.ReactNode }) => {
       const desktopBuf = window.innerHeight * 0.15;
       const mobileBuf = 214;
 
-      const isMobile = window.innerWidth <= 1080;
+      const isMobile = window.innerWidth <= SCRIPT_NAVIGATION_BREAKPOINT;
       const buf = isMobile ? mobileBuf : desktopBuf;
 
       const activationBounds: [number, number] = [y1 + 48, y2 - buf];
