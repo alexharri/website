@@ -11,6 +11,10 @@ const withTM = TM([
 const nextConfig = {
   reactStrictMode: true,
   swcMinify: true,
+
+  // See https://github.com/vercel/next.js/issues/31692
+  outputFileTracing: false,
+
   webpack: config => {
     const rule = config.module.rules
       .find(rule => rule.oneOf)
