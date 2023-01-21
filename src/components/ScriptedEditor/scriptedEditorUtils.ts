@@ -17,6 +17,8 @@ interface StartScriptOptions {
 }
 
 export const startScript = async (options: StartScriptOptions) => {
+  await delayMs(20); // Prevent keyboard popupp on iOS
+
   const { runContext } = options;
 
   let runAgain = true;
@@ -42,6 +44,8 @@ export const startScript = async (options: StartScriptOptions) => {
 };
 
 export const moveToIndex = async (runContext: RunContext, index: number) => {
+  await delayMs(20); // Prevent keyboard popupp on iOS
+
   runContext.startNewRun();
 
   const { editor, initialCode } = runContext;
