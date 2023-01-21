@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { scriptedEditorConstants } from "../scriptedEditorConstants";
 
-const { SCRIPT_NAVIGATION_BREAKPOINT } = scriptedEditorConstants;
+const { SCRIPT_NAVIGATION_BREAKPOINT, SCRIPT_NAVIGATION_DRAWER_HEIGHT } = scriptedEditorConstants;
 
 export const FocusedScriptContext = React.createContext({ focusedScriptId: "" });
 
@@ -42,7 +42,7 @@ export const FocusedScriptProvider = (props: { children: React.ReactNode }) => {
       const y2 = window.scrollY + window.innerHeight;
 
       const desktopBuf = window.innerHeight * 0.15;
-      const mobileBuf = 214;
+      const mobileBuf = SCRIPT_NAVIGATION_DRAWER_HEIGHT;
 
       const isMobile = window.innerWidth <= SCRIPT_NAVIGATION_BREAKPOINT;
       const buf = isMobile ? mobileBuf : desktopBuf;

@@ -9,10 +9,8 @@ import { useColorMode } from "../../utils/colorMode";
 import { RunContext } from "./run/RunContext";
 import { FocusedScriptContext } from "./FocusedScriptContext/FocusedScriptContext";
 import { useMouseDownOutside } from "../../utils/hooks/useMouseDownOutside";
-import { LazyScriptedEditor } from "./LazyScriptedEditor";
 import { scriptedEditorConstants } from "./scriptedEditorConstants";
 import { calculateHeight, moveToIndex, startScript } from "./scriptedEditorUtils";
-import { withMargin } from "../../utils/withMargin";
 import { useIsMobile, useViewportWidth } from "../../utils/hooks/useViewportWidth";
 import { useIsomorphicLayoutEffect } from "../../utils/hooks/useIsomorphicLayoutEffect";
 import { useDidUpdate } from "../../utils/hooks/useDidUpdate";
@@ -30,7 +28,11 @@ interface Props {
   loop: boolean;
 }
 
-export const ScriptedEditor = (props: Props) => {
+/**
+ * Do NOT use directly. Use through 'withScriptedEditor' defined
+ * in 'LazyScriptedEditor.js'.
+ */
+export const __ScriptedEditor = (props: Props) => {
   const { initialCode } = props;
   const { focusedScriptId } = useContext(FocusedScriptContext);
   const focusedScriptIdRef = useRef(focusedScriptId);
@@ -263,46 +265,3 @@ export const ScriptedEditor = (props: Props) => {
     </div>
   );
 };
-
-export function withScriptedEditor<T extends { children: any }>(
-  Component: React.ComponentType<T>,
-  getProps: (props: T) => { code: string; language: string },
-) {
-  return withMargin([40, 0], (props: T) => {
-    const { code, language } = getProps(props);
-    const searchStr = "// @script ";
-
-    const allLines = code.split("\n");
-
-    const lines = allLines.filter((line) => !line.startsWith(searchStr));
-    const scriptLine = allLines.find((line) => line.startsWith(searchStr));
-
-    if (!scriptLine) {
-      return <Component {...props} />;
-    }
-
-    while (lines[0] === "") {
-      lines.shift();
-    }
-    while (lines[lines.length - 1] === "") {
-      lines.pop();
-    }
-    const initialCode = lines.join("\n");
-    const [scriptId, ...rest] = scriptLine.split(searchStr)[1].trim().split(" ");
-
-    const expectedLinesStr = rest.find((item) => item.startsWith("expectedLines=")) ?? "";
-    const expectedLines = expectedLinesStr.split("expectedLines=")[1];
-
-    const loop = !!rest.find((item) => item === "loop");
-
-    return (
-      <LazyScriptedEditor
-        initialCode={initialCode}
-        language={language}
-        scriptId={scriptId}
-        expectedMaxLines={expectedLines ? Number(expectedLines) : lines.length}
-        loop={loop}
-      />
-    );
-  });
-}
