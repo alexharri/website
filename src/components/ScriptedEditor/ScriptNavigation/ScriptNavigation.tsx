@@ -6,6 +6,7 @@ import { RunContext } from "../run/RunContext";
 import styles from "./ScriptNavigation.module.scss";
 import { RenderCommand } from "../RenderCommand/RenderCommand";
 import { useViewportWidth } from "../../../utils/hooks/useViewportWidth";
+import { moveToIndex } from "../scriptedEditorUtils";
 
 interface Props {
   scriptId: string;
@@ -48,7 +49,7 @@ export const ScriptNavigation = (props: Props) => {
     for (let i = 0; i < runContext.script.length; i++) {
       const distance = Math.abs(i - index);
       const el = getEl(i);
-      el.style.opacity = distance === 0 ? "" : String(Math.max(0.2, 0.6 - distance * 0.1));
+      el.style.opacity = distance === 0 ? "" : String(Math.max(0.2, 0.4 - distance * 0.1));
     }
   }, []);
 
@@ -85,6 +86,11 @@ export const ScriptNavigation = (props: Props) => {
     });
   }, [show]);
 
+  const onMoveIndex = (delta: number) => {
+    const index = Math.max(Math.min(runContext.index + delta, runContext.script.length - 1), 0);
+    moveToIndex(runContext, index);
+  };
+
   return (
     <AnimatePresence>
       {show && (
@@ -104,6 +110,16 @@ export const ScriptNavigation = (props: Props) => {
               </div>
             ))}
           </div>
+          {isMobile && (
+            <div className={styles.moveButtonWrapper}>
+              <button className={styles.moveButton} onClick={() => onMoveIndex(-1)}>
+                Prev
+              </button>
+              <button className={styles.moveButton} onClick={() => onMoveIndex(1)}>
+                Next
+              </button>
+            </div>
+          )}
         </motion.div>
       )}
     </AnimatePresence>

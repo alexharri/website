@@ -7,7 +7,6 @@
   background: var(--color-background-500);
   padding: 64px 8px 24px;
   overflow: hidden;
-  border-radius: 16px;
   color: white;
   z-index: 10;
 }
@@ -17,13 +16,18 @@
   left: 0;
   right: 0;
   bottom: 0;
-  height: 40vh;
+  height: calc(64px + 20vh);
   background: var(--color-background-500);
   padding: 64px 8px 24px;
   overflow: hidden;
-  border-radius: 16px;
   color: white;
   z-index: 10;
+  border-radius: 12px;
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+  box-shadow:
+    0 0 16px 4px rgba(var(--color-background-rgba), .5),
+    0 0 40px rgba(var(--color-background-rgba), .5);
 }
 
 .scroll {
@@ -32,11 +36,20 @@
   left: 0;
   right: 0;
   transition: transform .5s;
+
+  @media (max-width: 1080px) {
+    top: 80px;
+  }
 }
 
 .command {
   overflow: hidden;
   transition: opacity .5s;
+
+  @media (max-width: 1080px) {
+    margin: 0 auto;
+    width: 300px;
+  }
 }
 
 .activeCommandHighlight {
@@ -47,4 +60,32 @@
   height: 44px;
   background: var(--color-background-700);
   transform: translateY(-100%) translateY(6px);
+
+  @media (max-width: 1080px) {
+    top: 80px;
+  }
+}
+
+.moveButtonWrapper {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  background: var(--color-background-300);
+  border-top: 2px solid var(--color-background-500);
+}
+
+.moveButton {
+  flex-basis: 0;
+  flex-grow: 1;
+  height: calc(56px);
+  color: var(--color-blue-700);
+  background: transparent;
+  font-size: calc(18px);
+  font-family: var(--font-monospace);
+
+  &:first-of-type {
+    border-right: 2px solid var(--color-background-500);
+  }
 }
