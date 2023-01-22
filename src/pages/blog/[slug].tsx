@@ -58,7 +58,7 @@ export default function PostPage(props: Props) {
 
   return (
     <>
-      <Meta title={scope.title} description={scope.description} />
+      <Meta title={scope.title} description={scope.description} image={scope.image} />
       <Layout>
         <main>
           <h1>{scope.title}</h1>
