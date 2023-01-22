@@ -318,9 +318,9 @@ expectEqual("1/10 < 0.2 ? 'a' : 'b'", "a");
   { command: "Command D", times: 7 },
 ]} />
 
-However, we can observe that the expression is always a string followed by some arbitrary second argument. The expression can be of any length, so matching its start is of no use.
+The expression and expected value can be of any length, so matching the start or end is of no use.
 
-We notice that the expression always ends with double quote `"` immediately followed by a comma `,`. That's a pattern we can match!
+However, we can observe that the expression is always a string. The expression always ends with double quote `"` immediately followed by a comma `,`. That's a pattern we can match!
 
 ```javascript
 // @script match-quote-and-comma expectedLines=6
