@@ -16,7 +16,7 @@ import { FrontMatter } from "../../types/FrontMatter";
 import { usePostWatcher } from "../../utils/hooks/usePostWatcher";
 import { POSTS_PATH } from "../../utils/mdxUtils";
 import { withMargin } from "../../utils/withMargin";
-import { MonacoThemeProvider } from "../../components/ScriptedEditor/MonacoThemeProvider";
+import { MonacoProvider } from "../../components/ScriptedEditor/MonacoProvider";
 import { getPostPaths } from "../../utils/getPostPaths";
 
 // Custom components/renderers to pass to MDX.
@@ -62,9 +62,9 @@ export default function PostPage(props: Props) {
         <main>
           <h1>{scope.title}</h1>
           <FocusedScriptProvider>
-            <MonacoThemeProvider>
+            <MonacoProvider>
               <MDXRemote {...(source as any)} components={components} />
-            </MonacoThemeProvider>
+            </MonacoProvider>
           </FocusedScriptProvider>
         </main>
       </Layout>

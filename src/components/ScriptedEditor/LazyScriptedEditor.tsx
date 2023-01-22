@@ -3,7 +3,7 @@ import { RunContext } from "./run/RunContext";
 import { __ScriptedEditor } from "./ScriptedEditor";
 import { ScriptedEditorControls } from "./ScriptedEditorControls";
 import styles from "./LazyScriptedEditor.module.scss";
-import { MonacoThemeContext } from "./MonacoThemeProvider";
+import { MonacoContext } from "./MonacoProvider";
 import { withMargin } from "../../utils/withMargin";
 
 interface Props {
@@ -17,10 +17,14 @@ interface Props {
 function LazyScriptedEditor(props: Props) {
   const { expectedMaxLines, scriptId } = props;
 
-  const { defined } = useContext(MonacoThemeContext);
+  const { ready, requestLoad } = useContext(MonacoContext);
   const [runContext, setRunContext] = useState<RunContext | null>(null);
   const [render, setRender] = useState(true);
   const [lines, setLines] = useState(expectedMaxLines);
+
+  useEffect(() => {
+    requestLoad();
+  }, []);
 
   const onMaxLinesCalculated = (lines: number) => {
     if (lines !== expectedMaxLines) {
@@ -69,7 +73,7 @@ function LazyScriptedEditor(props: Props) {
             <div key={i} className={styles.line} />
           ))}
         </div>
-        {render && defined ? (
+        {render && ready ? (
           <div className={styles.editorWrapper}>
             <__ScriptedEditor
               {...props}

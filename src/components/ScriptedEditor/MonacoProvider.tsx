@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import loader from "@monaco-editor/loader";
 import {
   editorBackground,
@@ -90,9 +90,11 @@ function defineTheme(
  * logging for canceling promises, which created a lot of noise
  * in the console during development.
  */
-function useMonaco() {
+function useMonaco(load: boolean) {
   const [monaco, setMonaco] = useState(loader.__getMonacoInstance());
   useEffect(() => {
+    if (!load) return;
+
     let cancelable: ReturnType<typeof loader.init> | null;
 
     if (!monaco) {
@@ -115,26 +117,39 @@ function useMonaco() {
         cancelable.cancel();
       }
     };
-  }, []);
+  }, [load]);
   return monaco;
 }
 
-export const MonacoThemeContext = React.createContext<{ defined: boolean }>({ defined: false });
+export const MonacoContext = React.createContext<{ ready: boolean; requestLoad: () => void }>({
+  ready: false,
+  requestLoad: () => {
+    throw new Error("MonacoThemeContext was not provided.");
+  },
+});
 
-export const MonacoThemeProvider: React.FC<{ children: React.ReactNode }> = React.memo(
+export const MonacoProvider: React.FC<{ children: React.ReactNode }> = React.memo(
   ({ children }) => {
-    const [defined, setDefined] = useState(false);
+    const [ready, setReady] = useState(false);
+    const [load, setLoad] = useState(false);
+    const loadRef = useRef(load);
+    loadRef.current = load;
 
-    const value = useMemo(() => ({ defined }), [defined]);
+    const requestLoad = useCallback(() => {
+      if (loadRef.current) return;
+      setLoad(true);
+    }, []);
 
-    const monaco = useMonaco();
+    const value = useMemo(() => ({ ready, requestLoad }), [ready, requestLoad]);
+
+    const monaco = useMonaco(load);
 
     useEffect(() => {
       if (!monaco) return;
       defineThemes(monaco);
-      setDefined(true);
+      setReady(true);
     }, [monaco]);
 
-    return <MonacoThemeContext.Provider value={value}>{children}</MonacoThemeContext.Provider>;
+    return <MonacoContext.Provider value={value}>{children}</MonacoContext.Provider>;
   },
 );
