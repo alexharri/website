@@ -1,13 +1,9 @@
-import fs from "fs";
-import matter from "gray-matter";
 import { GetStaticProps } from "next";
-import path from "path";
 import { AboutMe } from "../components/AboutMe/AboutMe";
 import { BlogPost } from "../components/BlogPost/BlogPost";
 import { Layout } from "../components/Layout";
 import { Post } from "../types/Post";
-import { postFileNames, POSTS_PATH } from "../utils/mdxUtils";
-
+import { getPosts } from "../utils/blogPageUtils";
 
 interface Props {
   posts: Post[];
@@ -28,31 +24,6 @@ export default function Page(props: Props) {
   );
 }
 
-export const getStaticProps: GetStaticProps<Props> = async (ctx) => {
-  const posts: Post[] = [];
-
-  for (const fileName of postFileNames) {
-    const filePath = path.join(POSTS_PATH, fileName);
-    const fileContent = fs.readFileSync(filePath);
-
-    const { data } = matter(fileContent);
-
-    const {
-      title,
-      description = "",
-      publishedAt = "",
-    } = data as {
-      title: string;
-      description?: string;
-      publishedAt?: string;
-    };
-
-    const slug = fileName.replace(/\.mdx?$/, "");
-
-    if (publishedAt) {
-      posts.push({ title, description, slug, publishedAt });
-    }
-  }
-
-  return { props: { posts } };
+export const getStaticProps: GetStaticProps<Props> = async () => {
+  return { props: { posts: getPosts("published") } };
 };

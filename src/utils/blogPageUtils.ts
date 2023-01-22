@@ -5,6 +5,38 @@ import { postFileNames, POSTS_PATH } from "./mdxUtils";
 import { GetStaticProps } from "next";
 import { MDXRemoteSerializeResult } from "next-mdx-remote";
 import { serialize } from "next-mdx-remote/serialize";
+import { Post } from "../types/Post";
+
+export const getPosts = (type: "published" | "draft") => {
+  const posts: Post[] = [];
+
+  for (const fileName of postFileNames) {
+    const filePath = path.join(POSTS_PATH, fileName);
+    const fileContent = fs.readFileSync(filePath);
+
+    const { data } = matter(fileContent);
+
+    const {
+      title,
+      description = "",
+      publishedAt = "",
+    } = data as {
+      title: string;
+      description?: string;
+      publishedAt?: string;
+    };
+
+    const slug = fileName.replace(/\.mdx?$/, "");
+
+    const includePost = publishedAt ? type === "published" : type === "draft";
+
+    if (includePost) {
+      posts.push({ title, description, slug, publishedAt });
+    }
+  }
+
+  return posts;
+};
 
 export function getPostPaths(options: { type: "published" | "draft" }) {
   const paths = postFileNames
