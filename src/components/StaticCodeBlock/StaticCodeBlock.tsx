@@ -35,7 +35,7 @@ interface CodeProps {
   children: string;
 }
 
-interface Props {
+export interface StaticCodeBlockProps {
   language: string;
   children: string;
   small?: boolean;
@@ -65,7 +65,7 @@ const CopyButton = (props: { text: string }) => {
   );
 };
 
-export const StaticCodeBlock = (props: Props) => {
+export const StaticCodeBlock = (props: StaticCodeBlockProps) => {
   const { language, children, marginBottom, small } = props;
 
   const padding = small ? 16 : 24;

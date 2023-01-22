@@ -1,6 +1,9 @@
 export interface Post {
   title: string;
-  description: string;
   slug: string;
+  /** Empty string if not provided */
+  description: string;
+  /** Empty string if not provided */
+  publishedAt: string;
 }
 

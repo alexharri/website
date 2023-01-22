@@ -1,7 +1,12 @@
+import { DISABLE_LIGHT_MODE } from "./colorMode";
 import { colorValues } from "./cssVariables";
 
 export const initColorsScript = `
+  const DISABLE_LIGHT_MODE = ${DISABLE_LIGHT_MODE};
+
   function getInitialColorMode() {
+    if (DISABLE_LIGHT_MODE) return "dark";
+    
     const colorMode = window.localStorage.getItem("color-mode");
     switch (colorMode) {
       case "dark":

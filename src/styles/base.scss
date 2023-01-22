@@ -16,6 +16,8 @@
 
 html {
   --color-transition-duration: .5s;
+  --font-monospace: 'League Mono', monospace;
+  --font-body: 'Fira Sans', sans-serif;
 }
 
 html,
@@ -41,7 +43,9 @@ body {
   font-size: 16px;
   line-height: 1.75;
   font-weight: 400;
-  font-family: 'Fira Sans', sans-serif;
+  font-family: var(--font-body);
+  overflow-x: hidden;
+  width: 100vw;
 }
 
 
@@ -133,4 +137,20 @@ hr {
   background: var(--color-medium-500);
   border: none;
   height: 1px;
+}
+
+blockquote {
+  position: relative;
+  margin: 24px 0;
+  padding-left: 16px;
+  
+  &:before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    width: 4px;
+    background: var(--color-medium-500);
+  }
 }
