@@ -202,14 +202,12 @@ export const __ScriptedEditor = (props: Props) => {
   useDidUpdate(() => {
     if (focusedScriptId === scriptId) {
       onStartScript();
-    } else {
-      if (runContextRef.current) {
-        const runContext = runContextRef.current;
-        const { editor } = runContext;
-        runContext.cancelCurrentRun();
-        if (editor.hasTextFocus()) {
-          (document.activeElement as HTMLTextAreaElement | null)?.blur();
-        }
+    } else if (runContextRef.current) {
+      const runContext = runContextRef.current;
+      const { editor } = runContext;
+      runContext.cancelCurrentRun();
+      if (editor.hasTextFocus()) {
+        (document.activeElement as HTMLTextAreaElement | null)?.blur();
       }
     }
   }, [focusedScriptId]);
