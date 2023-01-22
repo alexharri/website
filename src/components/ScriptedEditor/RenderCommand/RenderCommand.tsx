@@ -1,6 +1,7 @@
 import React from "react";
 import { ArrowIcon16 } from "../../Icon/ArrowIcon16";
 import { BackspaceIcon18 } from "../../Icon/BackspaceIcon18";
+import { ControlIcon18 } from "../../Icon/ControlIcon18";
 import { MetaIcon18 } from "../../Icon/MetaIcon18";
 import { OptionIcon18 } from "../../Icon/OptionIcon18";
 import { ShiftIcon18 } from "../../Icon/ShiftIcon18";
@@ -11,7 +12,7 @@ function escapeText(text: string) {
   return text.replace(/\n/g, "\\n");
 }
 
-const modifierKeys = new Set(["Command", "Shift", "Option", "Ctrl"]);
+const modifierKeys = new Set(["Command", "Shift", "Option", "Control", "Alt"]);
 
 function isModifier(key: string) {
   return modifierKeys.has(key);
@@ -25,6 +26,8 @@ interface RenderableKey {
 function getKeyLabel(key: string) {
   const withLabel = (render: React.ReactNode) => ({ label: key, render });
   switch (key) {
+    case "Control":
+      return withLabel(<ControlIcon18 />);
     case "Command":
       return withLabel(<MetaIcon18 />);
     case "Option":
@@ -50,7 +53,7 @@ function extractKeys(command: string): { modifierKeys: RenderableKey[]; keys: Re
   const keys: RenderableKey[] = [];
   const modifierKeys: RenderableKey[] = [];
 
-  for (const key of command.split(" ")) {
+  for (let key of command.split(" ")) {
     const list: RenderableKey[] = isModifier(key) ? modifierKeys : keys;
     list.push(getKeyLabel(key));
   }
@@ -125,7 +128,19 @@ export const RenderCommand = (props: Props) => {
   );
 };
 
-export const RenderTextCommand = ({ children, scale }: { children: string; scale?: number }) => {
+interface RenderTextCommandProps {
+  children: React.ReactNode;
+  faded?: boolean;
+  small?: boolean;
+  noMarginLeft?: boolean;
+}
+
+export const RenderTextCommand = ({
+  children,
+  noMarginLeft,
+  faded,
+  small,
+}: RenderTextCommandProps) => {
   if (typeof children !== "string") {
     return "<Invalid command>";
   }
@@ -134,11 +149,11 @@ export const RenderTextCommand = ({ children, scale }: { children: string; scale
   const allKeys = [...modifierKeys, ...keys];
 
   return (
-    <span className={styles.containerInline}>
+    <span className={styles.containerInline} style={{ marginLeft: noMarginLeft ? 0 : undefined }}>
       {allKeys.map((key, i) => (
         <React.Fragment key={i}>
           {typeof key.render !== "string" && <span className={styles.keyLabel}>{key.label}</span>}
-          <code className={styles.key} title={key.label}>
+          <code className={styles.key} title={key.label} data-faded={faded} data-small={small}>
             {key.render}
           </code>
           {i === allKeys.length - 1 ? null : <>&nbsp;</>}

@@ -18,6 +18,7 @@ export const FocusedScriptProvider = (props: { children: React.ReactNode }) => {
   scriptIdRef.current = scriptId;
 
   const itemsRef = useRef<Item[]>([]);
+  const fetchedItemsAtRef = useRef(0);
 
   useEffect(() => {
     const getItems = () => {
@@ -36,6 +37,12 @@ export const FocusedScriptProvider = (props: { children: React.ReactNode }) => {
     };
 
     const recalcFocused = () => {
+      const timeSinceFetched = Date.now() - fetchedItemsAtRef.current;
+      if (timeSinceFetched > 2000) {
+        getItems();
+        fetchedItemsAtRef.current = Date.now();
+      }
+
       let focusedItem: Item | null = null;
 
       const y1 = window.scrollY;
@@ -84,18 +91,13 @@ export const FocusedScriptProvider = (props: { children: React.ReactNode }) => {
       if (scriptIdRef.current !== scriptId) setScriptId(scriptId);
     };
 
-    const resizeListener = () => {
-      getItems();
-      recalcFocused();
-    };
-
     window.addEventListener("scroll", recalcFocused);
-    window.addEventListener("resize", resizeListener);
-    resizeListener();
+    window.addEventListener("resize", recalcFocused);
+    recalcFocused();
 
     return () => {
       window.removeEventListener("scroll", recalcFocused);
-      window.removeEventListener("resize", resizeListener);
+      window.removeEventListener("resize", recalcFocused);
     };
   }, []);
 

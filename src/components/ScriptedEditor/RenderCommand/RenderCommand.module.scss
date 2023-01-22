@@ -26,9 +26,8 @@
 
 .containerInline {
   display: inline-flex;
-  margin: 0 2px;
+  margin: 0 3px;
 }
-
 
 .left {
   display: flex;
@@ -58,6 +57,23 @@
   justify-content: center;
   min-width: 32px;
   user-select: all;
+
+  &[data-faded=true] {
+    border: 1px solid var(--color-background-700);
+    background: var(--color-background-300);
+    color: var(--color-text-600);
+  }
+
+  &[data-small] {
+    font-size: 13px;
+    min-width: 24px;
+    padding: 2px 4px;
+
+    svg {
+      width: 14px;
+      height: 14px;
+    }
+  }
 }
 
 .keyLabel {

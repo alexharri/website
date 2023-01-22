@@ -14,6 +14,8 @@ import { withMargin } from "../../utils/withMargin";
 import { MonacoProvider } from "../../components/ScriptedEditor/MonacoProvider";
 import { getPostPaths, getPostProps } from "../../utils/blogPageUtils";
 import { RenderTextCommand } from "../../components/ScriptedEditor/RenderCommand/RenderCommand";
+import { MediumText } from "../../components/Text/MediumText";
+import { NotMacOs } from "../../components/OperatingSystem/OperatingSystem";
 
 // Custom components/renderers to pass to MDX.
 // Since the MDX files aren't loaded by webpack, they have no knowledge of how
@@ -38,6 +40,8 @@ const components = {
     />
   ),
   Command: RenderTextCommand,
+  MediumText,
+  NotMacOs,
   // ExampleComponent: dynamic(() => import("../../src/components/ExampleComponent")),
   Head,
 };

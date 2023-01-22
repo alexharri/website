@@ -34,6 +34,10 @@ However, the number of keystrokes grows linearly. Increasing the number of refer
 
 We want to the effort for repeated changes to grow in a non-linear fashion. We can do that using <Command>Command D</Command>.
 
+<NotMacOs>
+  <SmallNote>On Windows and Linux, the keyboard shortcut is <Command small faded>Control D</Command>.<br /><span style={{ display: "inline-block", marginTop: 8 }}>This post is MacOS-oriented, but non-Mac shortcuts will be displayed throughout.</span></SmallNote>
+</NotMacOs>
+
 ```javascript
 const element = document.querySelect("#container");
 
@@ -49,7 +53,7 @@ if (element && element.hasAttribute("data-active")) {
   { command: "Type", text: "container" },
 ]} />
 
-<Command>Command D</Command> selects the next instance of whatever you have selected, which enables multi-cursor editing.
+<Command noMarginLeft>Command D</Command> selects the next instance of whatever you have selected, which enables multi-cursor editing.
 
 On the surface, <Command>Command D</Command> is deceptively simple. Find a pattern to match, and then make the change:
 
@@ -100,6 +104,10 @@ The quick brown fox jumps over the lazy dog
 
 Use <Command>Option</Command> to jump over words.
 
+<NotMacOs>
+  <SmallNote label="">Use <Command small faded>Control</Command> with the arrow keys to jump over words on Windows and Linux.</SmallNote>
+</NotMacOs>
+
 ```
 // @script jump-over-words loop
 The quick brown fox jumps over the lazy dog
@@ -133,6 +141,10 @@ const items = [
 ]} />
 
 Use <Command>Command</Command> to jump to the beginning or end of a line.
+
+<NotMacOs>
+  <SmallNote label="">On Windows and Linux, use <Command small faded>Home</Command> and <Command small faded>End</Command> to jump to the beginning and end of a line, respectively.</SmallNote>
+</NotMacOs>
 
 ```
 // @script jump-to-end-start-of-line loop
@@ -364,6 +376,10 @@ Pressing <Command>Command D</Command> three times is not a lot of work, but if t
 
 This is a nice time to introduce <Command>Shift Command L</Command>, which is the keyboard shortcut for _Select All Matches_.
 
+<NotMacOs>
+  <SmallNote label="">Select All Matches with <Command small faded>Shift Control L</Command> on Windows and Linux.</SmallNote>
+</NotMacOs>
+
 ```javascript
 const element = document.querySelect("#container");
 
@@ -387,6 +403,10 @@ For this reason, I prefer <Command>Command D</Command> when working with a small
 ## Skipping an instance
 
 When selecting matches, you may want to skip an instance. To skip a match, press <Command>Command K</Command> followed by <Command>Command D</Command>.
+
+<NotMacOs>
+  <SmallNote label=""><Command small faded>Control K</Command> followed by <Command small faded>Control D</Command> on Windows and Linux.</SmallNote>
+</NotMacOs>
 
 ```javascript
 // @script rename-button
