@@ -1,8 +1,7 @@
 import Head from "next/head";
 
-const title = "Posts | Alex Harri";
-const description =
-  "Thoughts on programming from a software developer from Iceland";
+const title = "Alex Harri";
+const description = "Thoughts on programming from a software engineer from Iceland";
 
 export const DefaultMeta = () => {
   return (
