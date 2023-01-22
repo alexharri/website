@@ -1,3 +1,7 @@
+.outerWrapper {
+  position: relative;
+}
+
 .wrapper {
   background: var(--color-background-500);
   border-radius: 4px;
@@ -41,4 +45,5 @@
   align-items: center;
   justify-content: center;
   transition: opacity .3s;
+  z-index: 1;
 }

@@ -72,26 +72,28 @@ export const StaticCodeBlock = (props: StaticCodeBlockProps) => {
   const fontSize = small ? 14 : 16;
 
   return (
-    <div className={styles.wrapper} style={{ marginBottom, padding }}>
-      <Highlight {...defaultProps} code={children} language={language as any} theme={prismTheme}>
-        {({ className, style, tokens: lines, getLineProps, getTokenProps }) => (
-          <pre className={[className, styles.pre].join(" ")} style={{ ...style, fontSize }}>
-            {lines.map((line, i) => {
-              const lastLine = i === lines.length - 1;
-              const isEmpty = () => line.map((token) => token.content).join("") === "\n";
-              if (lastLine && isEmpty()) return null;
-              return (
-                <div {...getLineProps({ line, key: i })}>
-                  {line.map((token, key) => (
-                    <span {...getTokenProps({ token, key })} />
-                  ))}
-                </div>
-              );
-            })}
-          </pre>
-        )}
-      </Highlight>
+    <div className={styles.outerWrapper}>
       <CopyButton text={children} />
+      <div className={styles.wrapper} style={{ marginBottom, padding }}>
+        <Highlight {...defaultProps} code={children} language={language as any} theme={prismTheme}>
+          {({ className, style, tokens: lines, getLineProps, getTokenProps }) => (
+            <pre className={[className, styles.pre].join(" ")} style={{ ...style, fontSize }}>
+              {lines.map((line, i) => {
+                const lastLine = i === lines.length - 1;
+                const isEmpty = () => line.map((token) => token.content).join("") === "\n";
+                if (lastLine && isEmpty()) return null;
+                return (
+                  <div {...getLineProps({ line, key: i })}>
+                    {line.map((token, key) => (
+                      <span {...getTokenProps({ token, key })} />
+                    ))}
+                  </div>
+                );
+              })}
+            </pre>
+          )}
+        </Highlight>
+      </div>
     </div>
   );
 };
