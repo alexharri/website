@@ -25,6 +25,7 @@ export const startScript = async (options: StartScriptOptions) => {
   runContext.startNewRun();
   const canceled = runContext.getCheckCanceledFunction();
 
+  runContext.emit("playing", { playing: true });
   while (runAgain) {
     const { editor, initialCode } = runContext;
     if (editor.getValue() !== initialCode) {
@@ -40,6 +41,7 @@ export const startScript = async (options: StartScriptOptions) => {
       await delayMs(options.delayMs);
     }
   }
+  if (!canceled()) runContext.emit("playing", { playing: false });
 };
 
 export const moveToIndex = async (runContext: RunContext, index: number) => {

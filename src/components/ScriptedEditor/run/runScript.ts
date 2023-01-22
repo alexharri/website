@@ -62,6 +62,4 @@ export async function runScript(options: Options) {
     const last = commandIndex === script.length - 1;
     if (!last && !options.forceSync) await delayMs(command.msAfter ?? 500);
   }
-
-  runContext.emit("playing", { playing: false });
 }
