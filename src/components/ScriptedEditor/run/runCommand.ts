@@ -2,31 +2,32 @@ import { customCommandHandlers as customHandlers, CustomCommands } from "./runCu
 import { RunContext } from "./RunContext";
 
 export const builtInCommands = <const>[
+  // Text selection
   { command: "Command D", trigger: "editor.action.addSelectionToNextFindMatch" },
-  { command: "Shift Command L", trigger: "editor.action.selectHighlights" },
   { command: "Command K D", trigger: "editor.action.moveSelectionToNextFindMatch" },
+  { command: "Shift Command L", trigger: "editor.action.selectHighlights" },
+
+  // Add newline before/after
   { command: "Command Enter", trigger: "editor.action.insertLineAfter" },
   { command: "Shift Command Enter", trigger: "editor.action.insertLineBefore" },
+
+  // Indentation
   { command: "Tab", trigger: "tab" },
   { command: "Shift Tab", trigger: "outdent" },
 
-  // Move around
+  // Arrow keys - movement
   { command: "Right", trigger: "cursorRight" },
   { command: "Left", trigger: "cursorLeft" },
   { command: "Down", trigger: "cursorDown" },
   { command: "Up", trigger: "cursorUp" },
-
-  // Jump words
   { command: "Option Right", trigger: "cursorWordEndRight" },
   { command: "Option Left", trigger: "cursorWordLeft" },
-
-  // Jump to start or end of line/file
   { command: "Command Right", trigger: "cursorEnd" },
   { command: "Command Left", trigger: "cursorHome" },
   { command: "Command Up", trigger: "cursorTop" },
   { command: "Command Down", trigger: "cursorBottom" },
 
-  // Text selection
+  // Arrow keys - selection
   { command: "Shift Right", trigger: "cursorRightSelect" },
   { command: "Shift Left", trigger: "cursorLeftSelect" },
   { command: "Shift Up", trigger: "cursorUpSelect" },
