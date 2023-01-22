@@ -13,6 +13,7 @@ import { usePostWatcher } from "../../utils/hooks/usePostWatcher";
 import { withMargin } from "../../utils/withMargin";
 import { MonacoProvider } from "../../components/ScriptedEditor/MonacoProvider";
 import { getPostPaths, getPostProps } from "../../utils/blogPageUtils";
+import { RenderTextCommand } from "../../components/ScriptedEditor/RenderCommand/RenderCommand";
 
 // Custom components/renderers to pass to MDX.
 // Since the MDX files aren't loaded by webpack, they have no knowledge of how
@@ -36,6 +37,7 @@ const components = {
       data-expected-lines={props.expectedLines}
     />
   ),
+  Command: RenderTextCommand,
   // ExampleComponent: dynamic(() => import("../../src/components/ExampleComponent")),
   Head,
 };

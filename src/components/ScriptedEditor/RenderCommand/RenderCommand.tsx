@@ -1,3 +1,4 @@
+import React from "react";
 import { ArrowIcon16 } from "../../Icon/ArrowIcon16";
 import { BackspaceIcon18 } from "../../Icon/BackspaceIcon18";
 import { MetaIcon18 } from "../../Icon/MetaIcon18";
@@ -16,35 +17,41 @@ function isModifier(key: string) {
   return modifierKeys.has(key);
 }
 
+interface RenderableKey {
+  label: string;
+  render: React.ReactNode;
+}
+
 function getKeyLabel(key: string) {
+  const withLabel = (render: React.ReactNode) => ({ label: key, render });
   switch (key) {
     case "Command":
-      return <MetaIcon18 />;
+      return withLabel(<MetaIcon18 />);
     case "Option":
-      return <OptionIcon18 />;
+      return withLabel(<OptionIcon18 />);
     case "Shift":
-      return <ShiftIcon18 />;
+      return withLabel(<ShiftIcon18 />);
     case "Right":
-      return <ArrowIcon16 direction="right" />;
+      return withLabel(<ArrowIcon16 direction="right" />);
     case "Left":
-      return <ArrowIcon16 direction="left" />;
+      return withLabel(<ArrowIcon16 direction="left" />);
     case "Up":
-      return <ArrowIcon16 direction="up" />;
+      return withLabel(<ArrowIcon16 direction="up" />);
     case "Down":
-      return <ArrowIcon16 direction="down" />;
+      return withLabel(<ArrowIcon16 direction="down" />);
     case "Backspace":
-      return <BackspaceIcon18 />;
+      return withLabel(<BackspaceIcon18 />);
     default:
-      return key;
+      return withLabel(key);
   }
 }
 
-function extractKeys(command: string): { modifierKeys: string[]; keys: string[] } {
-  const keys: string[] = [];
-  const modifierKeys: string[] = [];
+function extractKeys(command: string): { modifierKeys: RenderableKey[]; keys: RenderableKey[] } {
+  const keys: RenderableKey[] = [];
+  const modifierKeys: RenderableKey[] = [];
 
   for (const key of command.split(" ")) {
-    const list: React.ReactNode[] = isModifier(key) ? modifierKeys : keys;
+    const list: RenderableKey[] = isModifier(key) ? modifierKeys : keys;
     list.push(getKeyLabel(key));
   }
 
@@ -101,19 +108,42 @@ export const RenderCommand = (props: Props) => {
       <div className={styles.left}>
         {modifierKeys.map((key, i) => (
           <code className={styles.key} key={i}>
-            {key}
+            {key.render}
           </code>
         ))}
       </div>
       <div className={styles.right}>
         {keys.map((key, i) => (
           <code className={styles.key} key={i}>
-            {key}
+            {key.render}
           </code>
         ))}
 
         {typeof command.times === "number" && <div>x{command.times}</div>}
       </div>
     </Container>
+  );
+};
+
+export const RenderTextCommand = ({ children, scale }: { children: string; scale?: number }) => {
+  if (typeof children !== "string") {
+    return "<Invalid command>";
+  }
+
+  const { keys, modifierKeys } = extractKeys(children);
+  const allKeys = [...modifierKeys, ...keys];
+
+  return (
+    <span className={styles.containerInline}>
+      {allKeys.map((key, i) => (
+        <React.Fragment key={i}>
+          {typeof key.render !== "string" && <span className={styles.keyLabel}>{key.label}</span>}
+          <code className={styles.key} title={key.label}>
+            {key.render}
+          </code>
+          {i === allKeys.length - 1 ? null : <>&nbsp;</>}
+        </React.Fragment>
+      ))}
+    </span>
   );
 };

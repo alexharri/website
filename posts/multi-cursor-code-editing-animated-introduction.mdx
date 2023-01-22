@@ -32,7 +32,7 @@ For a small block of code it's fine. A bit tedious, but fine. Banging this out d
 
 However, the number of keystrokes grows linearly. Increasing the number of references to a few dozens already makes the task quite taxing.
 
-We want to the effort for repeated changes to grow in a non-linear fashion. We can do that using `Command D`.
+We want to the effort for repeated changes to grow in a non-linear fashion. We can do that using <Command>Command D</Command>.
 
 ```javascript
 const element = document.querySelect("#container");
@@ -49,9 +49,9 @@ if (element && element.hasAttribute("data-active")) {
   { command: "Type", text: "container" },
 ]} />
 
-`Command D` selects the next instance of whatever you have selected, which enables multi-cursor editing.
+<Command>Command D</Command> selects the next instance of whatever you have selected, which enables multi-cursor editing.
 
-On the surface, `Command D` is deceptively simple. Find a pattern to match, and then make the change:
+On the surface, <Command>Command D</Command> is deceptively simple. Find a pattern to match, and then make the change:
 
 ```txt
 // @script markdown-bullets-to-checkboxes
@@ -73,9 +73,9 @@ On the surface, `Command D` is deceptively simple. Find a pattern to match, and 
   { command: "Command Up" },
 ]} />
 
-There's already a lot of value in using `Command D` for simple transformations, such as the above, but we're just scratching the surface.
+There's already a lot of value in using <Command>Command D</Command> for simple transformations, such as the above, but we're just scratching the surface.
 
-Combined with smart text navigation techniques, we can take `Command D` far.
+Combined with smart text navigation techniques, we can take <Command>Command D</Command> far.
 
 <SmallNote>This article uses VS Code, but `Command D` can be used in other text editors such as Sublime and Atom. Other text editors will likely have analogous keyboard shortcuts.</SmallNote>
 
@@ -93,13 +93,12 @@ The quick brown fox jumps over the lazy dog
 ```
 
 <CodeScript id="arrow-keys" script={[
-  { command: "Select", line: 1, col: 1 },
   { command: "Right", times: 4, msBetween: 140, msAfter: 700 },
   { command: "Shift Right", times: 5, msBetween: 140, msAfter: 700 },
   { command: "Left", times: 5, msBetween: 140 },
 ]} />
 
-Use `Option` to jump over words.
+Use <Command>Option</Command> to jump over words.
 
 ```
 // @script jump-over-words loop
@@ -107,7 +106,6 @@ The quick brown fox jumps over the lazy dog
 ```
 
 <CodeScript id="jump-over-words" script={[
-  { command: "Select", line: 1, col: 1 },
   { command: "Option Right", times: 3, msBetween: 300, msAfter: 300 },
   { command: "Right", msAfter: 700 },
   { command: "Shift Option Right", times: 2, msBetween: 300 },
@@ -134,7 +132,7 @@ const items = [
   { command: "Backspace" },
 ]} />
 
-Use `Command` to jump to the beginning or end of a line.
+Use <Command>Command</Command> to jump to the beginning or end of a line.
 
 ```
 // @script jump-to-end-start-of-line loop
@@ -142,7 +140,6 @@ The quick brown fox jumps over the lazy dog
 ```
 
 <CodeScript id="jump-to-end-start-of-line" script={[
-  { command: "Select", line: 1, col: 1 },
   { command: "Shift Command Right", msAfter: 1000 },
   { command: "Right" },
   { command: "Command Left" },
@@ -221,9 +218,9 @@ if (element.type === "group") {
   { command: "Backspace" },
 ]} />
 
-The `if` statements all have the exact same structure, so matching them is somewhat trivial. These sorts of patterns are the bread and butter of `Command D`, they're very common.
+The `if` statements all have the exact same structure, so matching them is somewhat trivial. These sorts of patterns are the bread and butter of <Command>Command D</Command>, they're very common.
 
-But `Command D` is still very effective for non-uniform patterns. Those more complex patterns can come in the form of
+But <Command>Command D</Command> is still very effective for non-uniform patterns. Those more complex patterns can come in the form of
 
  * a variable number of arguments,
  * a variable number of words in a string, or
@@ -270,7 +267,7 @@ const tests = [
 ];
 ```
 
-Since we have a lot of tests, doing this manually would be a lot of work. This is a prime case for using `Command D`, we just need to find a pattern to match.
+Since we have a lot of tests, doing this manually would be a lot of work. This is a prime case for using <Command>Command D</Command>, we just need to find a pattern to match.
 
 If we match `expectEqual` and move in from there, we run into the problem of the expressions being of different lengths.
 
@@ -363,9 +360,9 @@ expectEqual("1/10 < 0.2 ? 'a' : 'b'", "a");
 
 In the example above, we matched four tests. That's a pretty small number of tests, especially for a library that evaluates math expressions.
 
-Pressing `Command D` three times is not a lot of work, but if the number of tests were increased to 1,000 we would need to press `Command D` 999 times. This goes against our goal of making repeated changes grow non-linearly.
+Pressing <Command>Command D</Command> three times is not a lot of work, but if the number of tests were increased to 1,000 we would need to press <Command>Command D</Command> 999 times. This goes against our goal of making repeated changes grow non-linearly.
 
-This is a nice time to introduce `Shift Command L`, which is the keyboard shortcut for _Select All Matches_.
+This is a nice time to introduce <Command>Shift Command L</Command>, which is the keyboard shortcut for _Select All Matches_.
 
 ```javascript
 const element = document.querySelect("#container");
@@ -382,14 +379,14 @@ if (element && element.hasAttribute("data-active")) {
   { command: "Shift Command L" },
 ]} />
 
-You have to be a bit more careful with `Shift Command L`, since it selects __every__ match in a file. You may match something that you did not intend to, which can occur outside of the current viewport.
+You have to be a bit more careful with <Command>Shift Command L</Command>, since it selects __every__ match in a file. You may match something that you did not intend to, which can occur outside of the current viewport.
 
-For this reason, I prefer `Command D` when working with a small number of matches. The matching feels more local, you visually see every match happen.
+For this reason, I prefer <Command>Command D</Command> when working with a small number of matches. The matching feels more local, you visually see every match happen.
 
 
 ## Skipping an instance
 
-When selecting matches, you may want to skip an instance. To skip a match, press `Command K` followed by `Command D`.
+When selecting matches, you may want to skip an instance. To skip a match, press <Command>Command K</Command> followed by <Command>Command D</Command>.
 
 ```javascript
 // @script rename-button
@@ -414,9 +411,9 @@ buttonContainer.appendChild(button);
   { command: "Type", text: "submitButton" },
 ]} />
 
-In order to skip a match, you first need to add the match to the selection. After you have added a match to your selection, press `Command K` and `Command D` to unselect it and select the next match.
+In order to skip a match, you first need to add the match to the selection. After you have added a match to your selection, press <Command>Command K</Command> and <Command>Command D</Command> to unselect it and select the next match.
 
-Pressing `Command K` and `Command D` resolves to a command called __Move Last Selection to Next Find Match__. It's quite a technical name, but basically means:
+Pressing <Command>Command K</Command> and <Command>Command D</Command> resolves to a command called __Move Last Selection to Next Find Match__. It's quite a technical name, but basically means:
 
  * remove the most recent match, and
  * select the next match
@@ -439,7 +436,7 @@ Rust
 Elixir
 ```
 
-There is no pattern across these lines, so matching each line seems impossible. However, `Command D` allows us to match newlines.
+There is no pattern across these lines, so matching each line seems impossible. However, <Command>Command D</Command> allows us to match newlines.
 
 ```javascript
 // @script match-newlines expectedLines=8
@@ -517,7 +514,7 @@ const entries = {
 
 Translating between cases (such as changing snake-case to camelCase) comes up from time-to-time. I typically encounter this case when working across HTML, CSS and JavaScript.
 
-VS Code has a handy `Transform to Uppercase` command that we can combine with `Command D` to make this happen.
+VS Code has a handy `Transform to Uppercase` command that we can combine with <Command>Command D</Command> to make this happen.
 
 ```javascript
 // @script snake-case-to-camelcase expectedLines=13
@@ -558,15 +555,15 @@ function getAttributes(el) {
   { command: "Paste" },
 ]} />
 
-There is not a direct keyboard shortcut for the `Transform to Uppercase` command. In VS Code, you can run it by opening the command prompt with `Shift Command P` and then typing the name of the command.
+There is not a direct keyboard shortcut for the `Transform to Uppercase` command. In VS Code, you can run it by opening the command prompt with <Command>Shift Command P</Command> and then typing the name of the command.
 
 <SmallNote>Unfortunately, you will not be able to use the `Transform to Uppercase` method in this editor. This post uses Monaco Editor, which does not have VS Code's command prompt.</SmallNote>
 
 
 ## That's a wrap!
 
-There are many ways to do multi-cursor editing using VS Code, but I find `Command D` to be the simplest and most useful method.
+There are many ways to do multi-cursor editing using VS Code, but I find <Command>Command D</Command> to be the simplest and most useful method.
 
-Take what you learned in this post and apply it in your own work! There is a learning curve, but if you get past it then I promise that `Command D` will prove itself to be a really useful and productive tool.
+Take what you learned in this post and apply it in your own work! There is a learning curve, but if you get past it then I promise that <Command>Command D</Command> will prove itself to be a really useful and productive tool.
 
 Thanks for reading the post!
