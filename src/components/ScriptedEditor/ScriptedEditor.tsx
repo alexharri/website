@@ -34,7 +34,7 @@ interface Props {
  * in 'LazyScriptedEditor.js'.
  */
 export const __ScriptedEditor = (props: Props) => {
-  const { initialCode } = props;
+  const { initialCode, scriptId } = props;
   const { focusedScriptId } = useContext(FocusedScriptContext);
   const focusedScriptIdRef = useRef(focusedScriptId);
   focusedScriptIdRef.current = focusedScriptId;
@@ -50,12 +50,12 @@ export const __ScriptedEditor = (props: Props) => {
 
   const focusInsideEditor = () =>
     editorWrapperRef.current?.getAttribute("data-focus-inside") === "true";
-  const notActiveScript = () => focusedScriptIdRef.current !== props.scriptId;
+  const notActiveScript = () => focusedScriptIdRef.current !== scriptId;
 
   useEffect(() => {
-    const el = document.querySelector(`[data-script-id="${props.scriptId}"]`)!;
+    const el = document.querySelector(`[data-script-id="${scriptId}"]`)!;
     if (!el) {
-      console.warn(`No <CodeScript /> with id ${props.scriptId}`);
+      console.warn(`No <CodeScript /> with id ${scriptId}`);
       return;
     }
     setScript(JSON.parse(el.getAttribute("data-script")!));
@@ -79,13 +79,7 @@ export const __ScriptedEditor = (props: Props) => {
   const runContext = useMemo(
     () =>
       _editor && script
-        ? new RunContext({
-            editor: _editor,
-            script,
-            initialCode,
-            scriptId: props.scriptId,
-            renderExecElement,
-          })
+        ? new RunContext({ editor: _editor, script, initialCode, scriptId, renderExecElement })
         : null,
     [_editor, script],
   );
@@ -139,7 +133,7 @@ export const __ScriptedEditor = (props: Props) => {
     applyHeightToContainer(runContext).then(() => {
       heightMeasuredRef.current = true;
       (document.activeElement as HTMLInputElement | null)?.blur?.();
-      if (focusedScriptIdRef.current === runContext.scriptId) {
+      if (focusedScriptIdRef.current === scriptId) {
         onStartScript();
       }
     });
@@ -182,9 +176,7 @@ export const __ScriptedEditor = (props: Props) => {
       const isDownArrow = e.keyCode === 40;
       const isUpArrow = e.keyCode === 38;
 
-      const navigationVisible = !!document.querySelector(
-        `[data-script-navigation="${props.scriptId}"]`,
-      );
+      const navigationVisible = !!document.querySelector(`[data-script-navigation="${scriptId}"]`);
       if (navigationVisible && runContext && (isDownArrow || isUpArrow)) {
         const delta = isDownArrow ? 1 : -1;
         const index = Math.max(Math.min(runContext.index + delta, runContext.script.length - 1), 0);
@@ -208,7 +200,7 @@ export const __ScriptedEditor = (props: Props) => {
   }, [keyDownCapture]);
 
   useDidUpdate(() => {
-    if (focusedScriptId === props.scriptId) {
+    if (focusedScriptId === scriptId) {
       onStartScript();
     } else {
       if (runContextRef.current) {
@@ -234,7 +226,7 @@ export const __ScriptedEditor = (props: Props) => {
 
   const [mode] = useColorMode();
 
-  const active = focusedScriptId === props.scriptId;
+  const active = focusedScriptId === scriptId;
 
   const scale = width < SCRIPTED_EDITOR_MIN_WIDTH ? width / SCRIPTED_EDITOR_MIN_WIDTH : 1;
 
@@ -249,7 +241,7 @@ export const __ScriptedEditor = (props: Props) => {
           }}
         >
           <div
-            data-sripted-editor-wrapper={props.scriptId}
+            data-sripted-editor-wrapper={scriptId}
             ref={editorWrapperRef}
             className={styles.editor}
             style={{ minHeight: calculateHeight(initialCode.split("\n").length) }}
