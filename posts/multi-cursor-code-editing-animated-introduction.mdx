@@ -425,7 +425,7 @@ This is not very intuitive at first, but becomes second-nature given enough prac
 
 Matching every line can be useful when working with arbitrary data.
 
-Let's say that we want to transform this text file into a JSON array.
+Take this text file:
 
 ```
 Python
@@ -434,6 +434,19 @@ C++
 Go
 Rust
 Elixir
+```
+
+Let's say that we want to convert the lines of this file into a JSON array of strings:
+
+```javascript
+[
+  "Python",
+  "Java",
+  "C++",
+  "Go",
+  "Rust",
+  "Elixir",
+]
 ```
 
 There is no pattern across these lines, so matching each line seems impossible. However, <Command>Command D</Command> allows us to match newlines.
