@@ -144,6 +144,8 @@ export class RunContext {
     const { editor } = this;
     const selections = editor.getSelections() || [];
 
+    const lines = editor.getValue().split("\n");
+
     this.decorationIds = editor.deltaDecorations(this.decorationIds, [
       ...selections.map((sel) => ({
         options: {
@@ -163,17 +165,27 @@ export class RunContext {
           }
           return true;
         })
-        .map((sel) => ({
-          options: {
-            className: "selection-bg",
-          },
-          range: {
-            startColumn: sel.startColumn,
-            endColumn: sel.endColumn,
-            startLineNumber: sel.startLineNumber,
-            endLineNumber: sel.endLineNumber,
-          },
-        })),
+        .map((sel) => {
+          const out = [];
+
+          for (let i = sel.startLineNumber; i <= sel.endLineNumber; i++) {
+            const line = lines[i - 1];
+            out.push({
+              options: {
+                className: i === sel.endLineNumber ? "selection-bg" : "selection-bg newline",
+              },
+              range: {
+                startColumn: i === sel.startLineNumber ? sel.startColumn : 1,
+                endColumn: i === sel.endLineNumber ? sel.endColumn : line.length + 1,
+                startLineNumber: i,
+                endLineNumber: i,
+              },
+            });
+          }
+
+          return out;
+        })
+        .flat(),
     ]);
   }
 }
