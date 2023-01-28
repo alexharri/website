@@ -8,17 +8,14 @@ export const DefaultMeta = () => {
     <Head>
       <link rel="icon" type="image/png" href="/favicon.ico" />
       <meta http-equiv="x-ua-compatible" content="ie=edge" />
-      <meta property="og:type" content="website" />
-      <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1, shrink-to-fit=no"
-      />
+      <meta key="og:type" property="og:type" content="website" />
+      <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
 
-      <title>{title}</title>
-      <meta property="og:title" content={title} />
+      <title key="title">{title}</title>
+      <meta key="og:title" property="og:title" content={title} />
 
-      <meta name="description" content={description} />
-      <meta name="og:description" content={description} />
+      <meta key="description" name="description" content={description} />
+      <meta key="og:description" name="og:description" content={description} />
     </Head>
   );
 };
