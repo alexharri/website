@@ -89,7 +89,10 @@ export const __ScriptedEditor = (props: Props) => {
   useEffect(() => {
     if (runContext) {
       props.setRunContext(runContext);
-      runContext.editor.onDidFocusEditorText(() => runContext.clearDecorations());
+      runContext.editor.onDidFocusEditorText(() => {
+        runContext.clearDecorations();
+        runContext.cancelCurrentRun();
+      });
     }
   }, [runContext]);
 
