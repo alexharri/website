@@ -143,7 +143,6 @@ export class RunContext {
   updateDecorations() {
     const { editor } = this;
     const selections = editor.getSelections() || [];
-    console.log(selections);
 
     const lines = editor.getValue().split("\n");
 

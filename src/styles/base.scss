@@ -170,16 +170,17 @@ blockquote {
     position: absolute;
     top: 0;
     bottom: 0;
-    left: 0;
+    left: -1px;
     width: 2px;
-    background: var(--color-text);
     content: "";
+    background: var(--color-text);
     animation: blink 1s infinite;
     animation-delay: 1s;
   }
 }
 .selection-bg {
   background: rgba(19, 137, 255, 0.3);
+
   &.newline {
     min-width: 12px;
   }
