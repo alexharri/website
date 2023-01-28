@@ -48,6 +48,7 @@ export async function runScript(options: Options) {
 
     for (let i = 0; i < times; i++) {
       await runContext.waitIdle();
+      if (canceled()) return;
 
       runContext.emit("run-command", { index: commandIndex, time: i + 1 });
       await runCommand(runContext, command);
