@@ -169,10 +169,6 @@ export const __ScriptedEditor = (props: Props) => {
     [],
   );
 
-  const cancelCurrentRun = useCallback(() => {
-    runContext?.cancelCurrentRun();
-  }, [runContext]);
-
   const keyDownCapture = useCallback(
     (e: React.KeyboardEvent | KeyboardEvent) => {
       if (notActiveScript() || focusInsideEditor()) return;
@@ -223,7 +219,7 @@ export const __ScriptedEditor = (props: Props) => {
 
   const onMouseDown = () => {
     editorWrapperRef.current?.setAttribute("data-focus-inside", "true");
-    cancelCurrentRun();
+    runContextRef.current?.cancelCurrentRun();
   };
 
   const [mode] = useColorMode();
