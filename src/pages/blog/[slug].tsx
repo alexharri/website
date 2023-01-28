@@ -15,7 +15,6 @@ import { MonacoProvider } from "../../components/ScriptedEditor/MonacoProvider";
 import { getPostPaths, getPostProps } from "../../utils/blogPageUtils";
 import { RenderTextCommand } from "../../components/ScriptedEditor/RenderCommand/RenderCommand";
 import { NotMacOs } from "../../components/OperatingSystem/OperatingSystem";
-import { AboutMe } from "../../components/AboutMe/AboutMe";
 
 // Custom components/renderers to pass to MDX.
 // Since the MDX files aren't loaded by webpack, they have no knowledge of how
@@ -66,7 +65,6 @@ export default function PostPage(props: Props) {
               <MDXRemote {...(source as any)} components={components} />
             </MonacoProvider>
           </FocusedScriptProvider>
-          <AboutMe />
         </main>
       </Layout>
     </>
