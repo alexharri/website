@@ -38,6 +38,7 @@ async function selectHandler(runContext: RunContext, command: SelectCommand) {
     };
     editor.setSelection(selection);
     if (i < length - 1) {
+      runContext.updateDecorations();
       await new Promise<void>((resolve) => setTimeout(resolve, i === 0 ? 200 : 40));
     }
   }
@@ -122,6 +123,7 @@ async function typeHandler(runContext: RunContext, command: TypeCommand) {
       selections.map((range) => ({ range, text: toInsert, forceMoveMarkers: true })),
     );
     if (i < text.length - 1) {
+      runContext.updateDecorations();
       await new Promise<void>((resolve) => setTimeout(resolve, i === 0 ? 200 : 80));
     }
   }

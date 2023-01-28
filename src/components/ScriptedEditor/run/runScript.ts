@@ -13,9 +13,9 @@ interface Options {
 
 export async function runScript(options: Options) {
   const { runContext, index } = options;
-
   const { editor, script } = runContext;
-  editor.focus();
+
+  runContext.clearDecorations();
   editor.setSelection({ startColumn: 1, endColumn: 1, startLineNumber: 1, endLineNumber: 1 });
 
   const canceled = runContext.getCheckCanceledFunction();
@@ -27,6 +27,7 @@ export async function runScript(options: Options) {
       runCommand(runContext, command);
     }
   }
+  runContext.updateDecorations();
 
   const time = script[index]?.times ?? 1;
   runContext.emit("run-command", { index, time });
@@ -50,6 +51,7 @@ export async function runScript(options: Options) {
 
       runContext.emit("run-command", { index: commandIndex, time: i + 1 });
       await runCommand(runContext, command);
+      runContext.updateDecorations();
       options.onEachStep?.();
 
       if (i < times - 1) {

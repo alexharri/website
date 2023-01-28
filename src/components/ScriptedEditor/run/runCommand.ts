@@ -64,10 +64,6 @@ for (const { command, trigger } of builtInCommands) {
 export type Command = { command: BuiltInCommand["command"] } | CustomCommands;
 
 export async function runCommand(runContext: RunContext, command: Command) {
-  if (!runContext.sync && !runContext.editor.hasTextFocus()) {
-    runContext.editor.focus();
-  }
-  
   for (const handler of customCommandHandlers) {
     if (handler.command !== command.command) continue;
     await handler.handler(runContext, command as any);

@@ -25,6 +25,7 @@ export class RunContext {
   index = 0;
   execEl: HTMLElement | null = null;
   renderExecElement: Options["renderExecElement"];
+  decorationIds: string[] = [];
   private moveIndexHandlers: OnRunCommand[] = [];
   private playingHandlers: OnPlaying[] = [];
 
@@ -125,12 +126,54 @@ export class RunContext {
 
     while (true) {
       if (dist < 0) {
-        if (!canceled()) this.editor.focus();
+        if (!canceled() && false) this.editor.focus();
         return;
       }
 
       await delayMs(dist);
       dist = getDist();
     }
+  }
+
+  clearDecorations() {
+    const { editor } = this;
+    this.decorationIds = editor.deltaDecorations(this.decorationIds, []);
+  }
+
+  updateDecorations() {
+    const { editor } = this;
+    const selections = editor.getSelections() || [];
+
+    this.decorationIds = editor.deltaDecorations(this.decorationIds, [
+      ...selections.map((sel) => ({
+        options: {
+          className: "selection-cursor",
+        },
+        range: {
+          startColumn: sel.endColumn,
+          endColumn: sel.endColumn,
+          startLineNumber: sel.endLineNumber,
+          endLineNumber: sel.endLineNumber,
+        },
+      })),
+      ...selections
+        .filter((sel) => {
+          if (sel.startColumn === sel.endColumn && sel.startLineNumber === sel.endLineNumber) {
+            return false;
+          }
+          return true;
+        })
+        .map((sel) => ({
+          options: {
+            className: "selection-bg",
+          },
+          range: {
+            startColumn: sel.startColumn,
+            endColumn: sel.endColumn,
+            startLineNumber: sel.startLineNumber,
+            endLineNumber: sel.endLineNumber,
+          },
+        })),
+    ]);
   }
 }
