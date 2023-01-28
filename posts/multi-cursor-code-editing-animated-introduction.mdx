@@ -35,10 +35,6 @@ However, the number of keystrokes grows linearly. Increasing the number of refer
 
 We want to the effort for repeated changes to grow in a non-linear fashion. We can do that using <Command>Command D</Command>.
 
-<NotMacOs>
-  <SmallNote>On Windows and Linux, the keyboard shortcut is <Command small faded>Control D</Command>.<br /><span style={{ display: "inline-block", marginTop: 8 }}>This post is MacOS-oriented, but non-Mac shortcuts will be displayed throughout.</span></SmallNote>
-</NotMacOs>
-
 ```javascript
 const element = document.querySelect("#container");
 
@@ -53,6 +49,10 @@ if (element && element.hasAttribute("data-active")) {
   { command: "Command D", times: 3, msBetween: 300 },
   { command: "Type", text: "container" },
 ]} />
+
+<NotMacOs>
+  <SmallNote>On Windows and Linux, the keyboard shortcut is <Command small faded>Control D</Command>.<br /><span style={{ display: "inline-block", marginTop: 8 }}>This post is MacOS-oriented, but non-Mac shortcuts will be displayed throughout.</span></SmallNote>
+</NotMacOs>
 
 <Command noMarginLeft>Command D</Command> selects the next instance of whatever you have selected, which enables multi-cursor editing.
 
@@ -82,7 +82,7 @@ There's already a lot of value in using <Command>Command D</Command> for simple 
 
 Combined with smart text navigation techniques, we can take <Command>Command D</Command> far.
 
-<SmallNote>This article uses VS Code, but `Command D` can be used in other text editors such as Sublime and Atom. Other text editors will likely have analogous keyboard shortcuts.</SmallNote>
+<SmallNote>This article is VS Code oriented, but <Command small faded>Command D</Command> can be used in other text editors such as Sublime and Atom. Other text editors will likely have analogous keyboard shortcuts.</SmallNote>
 
 
 ## Navigating text
@@ -105,10 +105,6 @@ The quick brown fox jumps over the lazy dog
 
 Use <Command>Option</Command> to jump over words.
 
-<NotMacOs>
-  <SmallNote label="">Use <Command small faded>Control</Command> with the arrow keys to jump over words on Windows and Linux.</SmallNote>
-</NotMacOs>
-
 ```
 // @script jump-over-words loop
 The quick brown fox jumps over the lazy dog
@@ -120,6 +116,10 @@ The quick brown fox jumps over the lazy dog
   { command: "Shift Option Right", times: 2, msBetween: 300 },
   { command: "Option Left", times: 5, msBetween: 300 },
 ]} />
+
+<NotMacOs>
+  <SmallNote label="">Use <Command small faded>Control</Command> with the arrow keys to jump over words on Windows and Linux.</SmallNote>
+</NotMacOs>
 
 Jumping over words allows us to navigate text containing words of different lengths.
 
@@ -143,10 +143,6 @@ const items = [
 
 Use <Command>Command</Command> to jump to the beginning or end of a line.
 
-<NotMacOs>
-  <SmallNote label="">On Windows and Linux, use <Command small faded>Home</Command> and <Command small faded>End</Command> to jump to the beginning and end of a line, respectively.</SmallNote>
-</NotMacOs>
-
 ```
 // @script jump-to-end-start-of-line loop
 The quick brown fox jumps over the lazy dog
@@ -157,6 +153,10 @@ The quick brown fox jumps over the lazy dog
   { command: "Right" },
   { command: "Command Left" },
 ]} />
+
+<NotMacOs>
+  <SmallNote label="">On Windows and Linux, use <Command small faded>Home</Command> and <Command small faded>End</Command> to jump to the beginning and end of a line, respectively.</SmallNote>
+</NotMacOs>
 
 Jumping to line boundaries allows us to navigate text that contains a variable number of words.
 
@@ -377,10 +377,6 @@ Pressing <Command>Command D</Command> three times is not a lot of work, but if t
 
 This is a nice time to introduce <Command>Shift Command L</Command>, which is the keyboard shortcut for _Select All Matches_.
 
-<NotMacOs>
-  <SmallNote label="">Select All Matches with <Command small faded>Shift Control L</Command> on Windows and Linux.</SmallNote>
-</NotMacOs>
-
 ```javascript
 const element = document.querySelect("#container");
 
@@ -396,6 +392,10 @@ if (element && element.hasAttribute("data-active")) {
   { command: "Shift Command L" },
 ]} />
 
+<NotMacOs>
+  <SmallNote label="">Select All Matches with <Command small faded>Shift Control L</Command> on Windows and Linux.</SmallNote>
+</NotMacOs>
+
 You have to be a bit more careful with <Command>Shift Command L</Command>, since it selects __every__ match in a file. You may match something that you did not intend to, which can occur outside of the current viewport.
 
 For this reason, I prefer <Command>Command D</Command> when working with a small number of matches. The matching feels more local, you visually see every match happen.
@@ -404,10 +404,6 @@ For this reason, I prefer <Command>Command D</Command> when working with a small
 ## Skipping an instance
 
 When selecting matches, you may want to skip an instance. To skip a match, press <Command>Command K</Command> followed by <Command>Command D</Command>.
-
-<NotMacOs>
-  <SmallNote label=""><Command small faded>Control K</Command> followed by <Command small faded>Control D</Command> on Windows and Linux.</SmallNote>
-</NotMacOs>
 
 ```javascript
 // @script rename-button
@@ -431,6 +427,10 @@ buttonContainer.appendChild(button);
   { command: "Command K D" },
   { command: "Type", text: "submitButton" },
 ]} />
+
+<NotMacOs>
+  <SmallNote label="">Skip matches with <Command small faded>Control K</Command> followed by <Command small faded>Control D</Command> on Windows and Linux.</SmallNote>
+</NotMacOs>
 
 In order to skip a match, you first need to add the match to the selection. After you have added a match to your selection, press <Command>Command K</Command> and <Command>Command D</Command> to unselect it and select the next match.
 
