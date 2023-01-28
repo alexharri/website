@@ -15,6 +15,7 @@ export default function Page(props: Props) {
       {props.posts.map((post) => (
         <BlogPost post={post} key={post.slug} />
       ))}
+      {props.posts.length === 0 && <p>There are no draft posts right now. Check back later.</p>}
     </Layout>
   );
 }

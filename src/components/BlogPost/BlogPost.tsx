@@ -16,6 +16,7 @@ export const BlogPost = (props: Props) => {
         className={styles.link}
       >
         <h2>{post.title}</h2>
+
         {post.description && <p>{post.description}</p>}
 
         <div className={styles.read}>Read</div>

@@ -35,7 +35,9 @@ export const getPosts = (type: "published" | "draft") => {
     }
   }
 
-  return posts;
+  return posts.sort((a, b) => {
+    return b.publishedAt.localeCompare(a.publishedAt);
+  });
 };
 
 export function getPostPaths(options: { type: "published" | "draft" }) {
