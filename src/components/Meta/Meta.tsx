@@ -13,13 +13,13 @@ export const Meta = (props: Props) => {
       <meta key="og:title" property="og:title" content={props.title} />
 
       {props.description && (
-        <meta key="description" name="description" content={props.description} />
-      )}
-      {props.description && (
-        <meta key="og:description" name="og:description" content={props.description} />
+        <>
+          <meta key="description" property="description" content={props.description} />
+          <meta key="og:description" property="og:description" content={props.description} />
+        </>
       )}
       {props.image && (
-        <meta key="og:image" name="og:image" content={process.env.SITE_URL + props.image} />
+        <meta key="og:image" property="og:image" content={process.env.SITE_URL + props.image} />
       )}
     </Head>
   );

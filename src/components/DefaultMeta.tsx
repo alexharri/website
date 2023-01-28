@@ -14,8 +14,8 @@ export const DefaultMeta = () => {
       <title key="title">{title}</title>
       <meta key="og:title" property="og:title" content={title} />
 
-      <meta key="description" name="description" content={description} />
-      <meta key="og:description" name="og:description" content={description} />
+      <meta key="description" property="description" content={description} />
+      <meta key="og:description" property="og:description" content={description} />
     </Head>
   );
 };
