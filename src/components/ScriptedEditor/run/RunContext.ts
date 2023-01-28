@@ -143,6 +143,7 @@ export class RunContext {
   updateDecorations() {
     const { editor } = this;
     const selections = editor.getSelections() || [];
+    console.log(selections);
 
     const lines = editor.getValue().split("\n");
 
@@ -152,10 +153,10 @@ export class RunContext {
           className: "selection-cursor",
         },
         range: {
-          startColumn: sel.endColumn,
-          endColumn: sel.endColumn,
-          startLineNumber: sel.endLineNumber,
-          endLineNumber: sel.endLineNumber,
+          startColumn: sel.positionColumn,
+          endColumn: sel.positionColumn,
+          startLineNumber: sel.positionLineNumber,
+          endLineNumber: sel.positionLineNumber,
         },
       })),
       ...selections
