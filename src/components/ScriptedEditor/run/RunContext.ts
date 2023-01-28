@@ -149,7 +149,7 @@ export class RunContext {
     this.decorationIds = editor.deltaDecorations(this.decorationIds, [
       ...selections.map((sel) => ({
         options: {
-          className: "selection-cursor",
+          className: ["selection-cursor", "rand-" + Math.floor(Math.random() * 1000000)].join(" "),
         },
         range: {
           startColumn: sel.positionColumn,
@@ -176,7 +176,7 @@ export class RunContext {
               },
               range: {
                 startColumn: i === sel.startLineNumber ? sel.startColumn : 1,
-                endColumn: i === sel.endLineNumber ? sel.endColumn : line.length + 1,
+                endColumn: i === sel.endLineNumber ? sel.endColumn : line.length + 2,
                 startLineNumber: i,
                 endLineNumber: i,
               },

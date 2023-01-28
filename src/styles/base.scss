@@ -182,6 +182,7 @@ blockquote {
   background: rgba(19, 137, 255, 0.3);
 
   &.newline {
-    min-width: 12px;
+    padding-right: 12px;
+    box-sizing: content-box;
   }
 }

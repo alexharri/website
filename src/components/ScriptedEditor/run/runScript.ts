@@ -52,7 +52,7 @@ export async function runScript(options: Options) {
 
       runContext.emit("run-command", { index: commandIndex, time: i + 1 });
       await runCommand(runContext, command);
-      runContext.updateDecorations();
+      if (!canceled()) runContext.updateDecorations();
       options.onEachStep?.();
 
       if (i < times - 1) {

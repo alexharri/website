@@ -133,7 +133,7 @@ const items = [
 ```
 
 <CodeScript id="jump-over-words-demonstration" script={[
-  { command: "Select Word", line: 2, word: "indexOf" },
+  { command: "Select Word", line: 2, word: "indexOf", msAfter: 700 },
   { command: "Command D", times: 2 },
   { command: "Type", text: "includes" },
   { command: "Option Right", times: 3 },
@@ -216,7 +216,7 @@ if (element.type === "group") {
   { command: "Right" },
   { command: "Type", text: "\n}" },
   { command: "Select Word", word: "if (", line: 2 },
-  { command: "Command D", times: 2, msBetween: 350 },
+  { command: "Command D", times: 2, msBetween: 200 },
   { command: "Type", text: "case " },
   { command: "Shift Option Right", times: 3 },
   { command: "Shift Right" },
@@ -328,7 +328,7 @@ expectEqual("1/10 < 0.2 ? 'a' : 'b'", "a");
 
 <CodeScript id="match-comma" script={[
   { command: "Select Word", word: ",", line: 1 },
-  { command: "Command D", times: 7 },
+  { command: "Command D", times: 7, msBetween: 200 },
 ]} />
 
 The expression and expected value can be of any length, so matching the start or end is of no use.
@@ -345,7 +345,7 @@ expectEqual("1/10 < 0.2 ? 'a' : 'b'", "a");
 
 <CodeScript id="match-quote-and-comma" script={[
   { command: "Select Word", word: "\",", line: 1 },
-  { command: "Command D", times: 3 },
+  { command: "Command D", times: 3, msBetween: 150 },
   { command: "Right" },
   { command: "Type", text: " value:" },
   { command: "Command Right" },
@@ -418,13 +418,12 @@ buttonContainer.appendChild(button);
 
 <CodeScript id="rename-button" script={[
   { command: "Select Word", line: 1, word: "button" },
-  { command: "Command D" },
-  { command: "Command K D" },
-  { command: "Command D" },
-  { command: "Command D" },
-  { command: "Command K D" },
-  { command: "Command D" },
-  { command: "Command K D" },
+  { command: "Command D", msAfter: 1000 },
+  { command: "Command K D", msAfter: 300 },
+  { command: "Command D", times: 2, msBetween: 600, msAfter: 1000 },
+  { command: "Command K D", msAfter: 300 },
+  { command: "Command D", msAfter: 950 },
+  { command: "Command K D", msAfter: 600 },
   { command: "Type", text: "submitButton" },
 ]} />
 
