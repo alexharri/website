@@ -1,5 +1,14 @@
 # Post ideas
 
+## When does crossing the WASM boundary become worth it?
+
+What types of workloads benefit from using WASM?
+
+How high do the performance gains in WASM need to be so that passing memory is worth it?
+
+Are there ways to get around passing memory?
+
+
 ## When to use 'as' in TypeScript
 
 When should you use `as X`? How can `as X` be used safely? When should `as const` be preferred?
