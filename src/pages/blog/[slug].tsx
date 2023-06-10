@@ -15,6 +15,7 @@ import { MonacoProvider } from "../../components/ScriptedEditor/MonacoProvider";
 import { getPostPaths, getPostProps } from "../../utils/blogPageUtils";
 import { RenderTextCommand } from "../../components/ScriptedEditor/RenderCommand/RenderCommand";
 import { NotMacOs } from "../../components/OperatingSystem/OperatingSystem";
+import { Image } from "../../components/Image";
 
 // Custom components/renderers to pass to MDX.
 // Since the MDX files aren't loaded by webpack, they have no knowledge of how
@@ -26,6 +27,8 @@ const components = {
     const language = props.children.props.className?.split("-")[1] ?? "text";
     return { code: props.children.props.children, language };
   }),
+  img: Image,
+  Image,
   StaticCodeBlock: withScriptedEditor(withMargin([32, -24], StaticCodeBlock), (props) => ({
     code: props.children,
     language: props.language,
