@@ -30,7 +30,7 @@ For this reason, I would advise picking the most active repository as the monore
 
 Before the merge, decide what you want the directory structure to look like once the repositories have been merged.
 
-Most standalone repositories tend to look something like so:
+Most standalone repositories tend to have a directory structure along these lines:
 
 ```bash
 # Application code
@@ -43,7 +43,10 @@ package.json
 tsconfig.json
 ```
 
-While a multi-app monorepo looks like so:
+In a multi-app monorepo, the two main differences are that:
+
+ * You have multiple apps, each in their own directory.
+ * There is likely a directory containing shared code libraries.
 
 ```bash
 # Application code (and app-specific config files)
@@ -59,7 +62,9 @@ package.json
 tsconfig.json
 ```
 
-We'll now consider how each of these will need to be handled when merging the repositories:
+The `packages/` directory will naturally be created as you extract common logic from your applications into shared code libraries.
+
+However, we'll need to merge the other categories of files when moving to the monorepo. Let's take a look at how we can go about merging each of them.
 
  * [The source code directory](#source-code)
  * [External dependencies](#external-dependencies)
