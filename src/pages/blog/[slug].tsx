@@ -17,6 +17,7 @@ import { RenderTextCommand } from "../../components/ScriptedEditor/RenderCommand
 import { NotMacOs } from "../../components/OperatingSystem/OperatingSystem";
 import { Image } from "../../components/Image";
 import { SectionAnchor } from "../../components/SectionAnchor/SectionAnchor";
+import { formatDate } from "../../utils/formatDate";
 
 // Custom components/renderers to pass to MDX.
 // Since the MDX files aren't loaded by webpack, they have no knowledge of how
@@ -64,7 +65,14 @@ export default function PostPage(props: Props) {
       <Meta title={scope.title} description={scope.description} image={scope.image} />
       <Layout>
         <main>
-          <h1>{scope.title}</h1>
+          <div style={{ marginBottom: 40 }}>
+            <h1 style={{ marginBottom: 8 }}>{scope.title}</h1>
+            {scope.publishedAt && (
+              <time dateTime={scope.publishedAt} style={{ fontSize: 20 }}>
+                {formatDate(scope.publishedAt)}
+              </time>
+            )}
+          </div>
           <FocusedScriptProvider>
             <MonacoProvider>
               <MDXRemote {...(source as any)} components={components} />
