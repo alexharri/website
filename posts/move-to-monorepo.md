@@ -144,7 +144,7 @@ In addition to eliminating the aforementioned problems, there are numerous benef
  * Common logic in your applications can more easily be extracted to shared packages.
  * In being able to make more assumptions, tooling and infrastructure can be simplified.
 
-The main drawback of a single-version policy is that upgrading dependencies becomes harder. Every app and package making direct use of a dependency will need to be updated.
+The main drawback of a single-version policy is that upgrading dependencies becomes harder. Every app and package making direct use of the dependency being upgraded will need to be updated.
 
 However, the difficulty of upgrades can be circumvented by creating packages that abstract away the API of external dependencies. Using this approach, only the package that is abstracting away the dependency needs to be touched.
 
