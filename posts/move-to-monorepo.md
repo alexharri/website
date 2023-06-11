@@ -269,7 +269,7 @@ But be practical. While there are only two projects in the monorepo, running the
 
 You don’t need a monorepo tool, though they certainly help.
 
-I've had a positive experience with [Nx’s][nx] before. Its `print-affected` command allows you to see which apps were affected by the changes between two commits or branches. Really useful for CI/CD!
+I've had a positive experience with [Nx][nx] before. Its `print-affected` command allows you to see which apps were affected by the changes between two commits or branches. Really useful for CI/CD!
 
 [nx]:https://nx.dev/
 
