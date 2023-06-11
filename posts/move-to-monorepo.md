@@ -5,34 +5,36 @@ publishedAt: ""
 image: ""
 ---
 
-Monorepos have been a hot topic in the JavaScript community for the past few years. There have been a lot of discussions about the pros and cons of monorepos.
+Monorepos have been a hot topic in the JavaScript community for a while now. I've heard quite a bit about their pros and cons, and you probably have too.
 
-If you've decided to move to a monorepo, it's not necessarily obvious how to go about it. There's lots of boilerplate examples online, but what if you want to move existing repositories?
+However, if you've decided to move to a monorepo it's not necessarily obvious how to go about it.
 
-This post is intended as a rough playbook for migrating existing repositories to a monorepo. Having merged a few repositories at two different companies, I've found a pretty good approach.
+There's lots of boilerplate examples online, which is great. But what if you want to move existing repositories?
+
+This post is intended as a rough playbook for migrating your existing repositories to a monorepo. Having done that at two different companies, I've found a pretty good approach.
 
 
 ## Merging repositories
 
-Instead of creating a new repository for the monorepo, I would recommend merging other repositories into an existing repository.
+Instead of creating a new repository for the monorepo, I would recommend picking one of your existing repositories as the monorepo destination. The other repositories will then be merged into it, one by one.
 
-Given that we take this approach, we will be moving a separate repository (B) into the repository that will become the monorepo (A).
+Taking this approach, the first step in establishing the monorepo will be merging a different repository (`B`) into the repository that will become the monorepo (`A`).
 
 <Image src="~/move-a-into-b.png" />
 
-I would pick the most active repository as the destination.
+Reusing an existing repository minimizes disruptions to in-flight pull requests for that repository, and avoids having to set up the processes and settings for the repo again.
 
-Reusing the repo minimizes disruptions to in-flight pull requests, and avoids having to set up the processes and settings for the repo again.
+For this reason, I would advise picking the most active repository as the monorepo destination.
 
 
-## Decide on the end result
+## Directory structure
 
 Before the merge, decide what you want the directory structure to look like once the repositories have been merged.
 
-Most repositories tend to look something like so:
+Most standalone repositories tend to look something like so:
 
 ```bash
-# Main source code
+# Application code
 src/
 
 # External dependencies
@@ -45,10 +47,10 @@ tsconfig.json
 While a multi-app monorepo looks like so:
 
 ```bash
-# Apps
+# Application code (and app-specific config files)
 apps/[app-name]/
 
-# Internal packages
+# Shared code libraries
 packages/[package-name]/
 
 # External dependencies
@@ -58,22 +60,20 @@ package.json
 tsconfig.json
 ```
 
-The difference is not that great:
+We'll now consider how each of these will need to be handled when merging the repositories:
 
- * Each `src/` directory moves into an app-specific directory `apps/[app-name]/`.
- * A `packages/` directory is created around shared code packages.
+ * [The source code directory](#source-code)
+ * [External dependencies](#external-dependencies)
+ * [Config files](#config-files)
 
-But this does not mean that the merge is trivial. Let's take a look at how to approach merging each of these:
 
- * The source code directory
- * External dependencies
- * Config files
+<SectionAnchor id="source-code">
+  <h2>The source code directory</h2>
+</SectionAnchor>
 
-## The source code directory
+Most repositories contain a single directory, containing the application code for the project, while the configuration and build files typically live in the root or separate directories. We'll call the application code directory `src/`.
 
-Most repositories contain a single directory, containing the application code for the project, while the configuration and build files typically live in the root or separate directories. We'll call this application code directory `src/`.
-
-This application code is the easiest to merge. The application code for each repository is moved into the appropriate `apps/[app-name]` directory.
+The `src/` directory is the easiest to handle. The `src/` directory for each repository is moved to `apps/[app-name]/src/`.
 
 <Image src="~/src-directory.png" />
 
@@ -81,62 +81,53 @@ As a rule of thumb, we can consider each directory under `apps` to be an indepen
 
 Some repositories may have multiple directories containing application code (e.g. Next.js projects with a `pages/` and `components/` directories), but those are migrated in the same manner as the `src/` directory in the example above.
 
-## External dependencies
+
+<SectionAnchor id="external-dependencies">
+  <h2>External dependencies</h2>
+</SectionAnchor>
 
 There are two ways to go about external dependencies in a monorepo.
 
  * A per-app version policy
  * A single-version policy
 
-Under a per-app policy, each app specifies its own dependencies via its `package.json` file:
+ ### Single-version policy
 
-```bash
-apps/app-a/
-  package.json
-  node_modules/
-
-apps/app-b/
-  package.json
-  node_modules/
-```
-
-Migrating to a single-version policy is more involved. It will involve merging the list of dependencies for each project into a single list of dependencies.
+Migrating to a single-version policy is harder up-front. It involves merging the list of dependencies for each project into a single list of dependencies.
 
 <Image src="~/single-version-migration.png" />
 
-Under a per-app version policy, the `package.json` files can mostly be migrated as-is in the same manner as the `src/` directory.
+This can be difficult if your repositories are using different versions of the same dependency.
+
+I would strongly advise you to apply a single-version policy to your monorepo.
+
+
+### Per-app version policy
+
+Under a per-app policy, each app specifies its own dependencies via its `package.json` file. This means that the `package.json` files can mostly be migrated as-is in the same manner as the `src/` directory.
 
 <Image src="~/per-app-version-migration.png" />
 
-I would strongly advocate for a single-version policy for managing external dependencies.
+But you also need to consider the versions of external dependencies that your shared code in `packages/` will use.
 
-Here are some reasons:
+If packages don't specify their dependencies, then the interface and behavior of those dependencies will be determined by the app that imports the package. That's a recipe for disaster, so your packages will also need to specify dependencies
 
-### Dependencies of shared code
-
-The shared packages in your `packages/` directory will make use of external dependencies. But which versions of the dependencies should they use?
-
-If packages don't specify their dependencies, then the API and behavior of those dependencies will be determined by the app that imported the package. That's a recipe for disaster, so your packages will need a fixed version for their dependencies.
-
-This means that you will also need to decide whether to maintain a per-app or single-version policy for your packages:
-
- * Should all shared packages use the same version of dependencies, specified by the `package.json` in the root?
- * Or should each shared package specify its own dependencies via its `package.json`?
+This introduces some problems for the apps making use of shared packages.
 
 
-### Bundle size
+### Problem 1: Bundle size
 
 When different packages can specify different version of dependencies, multiple version of dependencies may be included in the JS bundle sent to the client. This can easily go undetected.
 
 
-### Singletons
+### Problem 2: Singletons
 
 A lot of libraries export singletons with shared state, for example the `Router` class in Next.js.
 
-Singletons imported from such libraries are no longer guaranteed to be singletons globally. Each version of the library instantiates and exports its own singleton. This leads to very tricky bugs.
+Singletons imported from such libraries are no longer guaranteed to be singletons globally. Each version of the library instantiates and exports its own singletons. This leads to very tricky bugs.
 
 
-### Tech debt accumulation
+### Problem 3: Tech debt accumulation
 
 When developers need to upgrade a dependency in one project, it's tempting to skip upgrading the dependency for all projects.
 
@@ -145,10 +136,10 @@ This inevitably leads to the dependencies of some projects slowly drifting out-o
 
 ## TL;DR: Use a single-version policy
 
-Under a single version policy, every app and every package use the same version of external dependencies. In addition to eliminating the aforementioned problems.
+In addition to eliminating the aforementioned problems, there are numerous benefits to a single-version policy.
 
- * External dependencies work the same across every project, making working across projects easier.
- * Common logic across your applications can more easily be extracted to shared packages.
+ * External dependencies work the same in every project, making working across projects easier.
+ * Common logic in your applications can more easily be extracted to shared packages.
  * In being able to make more assumptions, tooling and infrastructure can be simplified.
 
 The main drawback of a single version policy is that upgrading dependencies becomes harder. Every app and package making direct use of the dependency will need to be updated.
@@ -156,16 +147,15 @@ The main drawback of a single version policy is that upgrading dependencies beco
 However, the difficulty of upgrades can be circumvented by creating packages that abstract away the API of external dependencies. Using this approach, only the package that is abstracting away the dependency needs to be touched.
 
 
+<SectionAnchor id="config-files">
+  <h2>Config files</h2>
+</SectionAnchor>
 
-## Config files
+One of the core reason for moving to a monorepo tends to be reducing friction and making cross-project work easier. A developer moving from one project to another should be able to get up to speed and be productive quickly.
 
-One of the core reason for moving to a monorepo tends to be reducing friction and making cross-project work easier. A developers moving from one project to another should be able to quickly get up to speed and be productive.
+This becomes easier when differences across projects are minimal.
 
-An obstacles to this may be the absence of familiar guardrails. Take the example of moving from a project with TypeScript's strict mode enabled, to one without. When neither the editor nor type checker provide the usual complaints about accessing properties of a potentially `null` object, the code written likely becomes less safe.
-
-Diverging workflows and code standards across teams also increase friction. There will of course be differences across teams, but they do slow developers down.
-
-With this in mind, project-specific configuration should be as minimal as possible. For your monorepo, create config files in the root and extend those in project-specific config files.
+In a monorepo, project-specific configuration should be as minimal as possible. For your monorepo, create config files in the root and extend those in project-specific config files.
 
 ```json
 {
@@ -179,54 +169,49 @@ With this in mind, project-specific configuration should be as minimal as possib
 
 The project-specific config files should be kept as small and simple as possible.
 
-So before merging the repositories, each repository will contain its own independent config files. We will want to combine config files that exist in both into common config files in the root. There will be some differences, which you can resolve by creating project-specific config files that extend the root and override as needed.
+Before merging the repositories, each repository will contain its own config files. We will want to combine config files that exist in both repositories into common config files in the root.
 
-We will want to unify these configs and remove the overrides over time. However, don't try to do that right away.
+There will be some differences, which you can resolve by creating project-specific config files that extend the root and override as needed.
 
-Getting the merge done is hard enough. If you try to resolve all of the differences before merging, you will have a really hard time getting the merge done. Be practical and override where needed. The configs can be unified over time.
+You can try to resolve minor differences, but don't go overboard. Trying to resolve every difference will suck up a lot of time and make it harder for the merge to pass review. Be practical and override where needed. The configs can be unified over time.
 
----
 
-We now have a better sense of what the directory structure should look like, and how we’re going to deal with dependencies and config files.
+## Merging the repositories
 
-We can now move onto the actual merge.
+We have two standalone repositories, `A` and `B`, which we intend to move to a monorepo. `A` has been designated to become the monorepo destination, so we will be merging `B` into `A`.
 
-## Preparing for the merge
-
-At first we have two independent repositories, `A` and `B`, which we intend to merge into a single repository. `A` has been designated to become the monorepo destination, so we will be merging `B` into `A`.
-
-Create a branch in each repository where the directory structured is "as-if" the repositories were already merged. Make sure that everything still works (CI is green, scripts can be run).
+Create a branch in each repository where the directory structure is "as-if" the repositories were already merged. Make sure that everything still works (CI is green, scripts work as expected).
 
 Once the directory structure is ready, we have two "pre-merge" branches ready:
 
  * `prepare-merge-b` in repo `A`
  * `merge-into-a` in repo `B`
 
-Before we merge them, let’s zoom out and understand what we want to happen.
+Let’s zoom out and take a look at the next steps.
 
 <Image src="~/merge-overview.png" />
 
 The process can be described like so:
 
- 1. Create the pre-merge branches in `A` and `B`.
- 2. Create a branch off the pre-merge branch in `A` and merge `B` into it (we'll get to how later).
+ 1. Create pre-merge branches for `A` and `B`.
+ 2. Create a branch from the pre-merge branch in `A` and merge `B` into it (we'll get to how later).
  3. Resolve the differences and get everything working.
 
 <Image src="~/merge-overview-annotated.png" />
 
-Separating these stages makes the code review phase much easier, because the changes made in the different phases can be reviewed independently.
+Separating these stages makes the code review phase easier by making the changes made in each phase independently reviewable.
 
 <Image src="~/merge-overview-diffs.png" />
 
  * Diff 1 and 2 enable reviewing the changes made when changing the directory structure.
  * Diff 3 enables reviewing the changes made in connecting `A` and `B` together and getting everything working.
 
-Merging repositories is quite noisy, so making it easier to review the merge is very valuable.
+Merging repositories is quite noisy, and reviewing a single "big-bang" PR is very hard. Even though the changes will all be merged into `A` at the same time, we can still review them separately.
 
 
-## Merging the repositories
+## Retaining Git history
 
-Copy-paste is not the way to go because the Git history would be lost. Git has a way to merge repositories without losing history.
+Copy-paste is not the way to go because the Git history of `B` would be lost. Git has a way to merge repositories without losing history.
 
 Given that you are in repository `A`, you can merge `B` into `A` like so:
 
@@ -264,9 +249,9 @@ git merge app-b/merge-into-a
 
 ## After the merge
 
-The `merge-b` branch now contains the files from repository B. The next step is getting everything hooked up and working.
+The `merge-b` branch now contains the files from `B`'s pre-merge branch. The next step is getting everything hooked up and working. Before doing that, create a `connect-b` branch from the `merge-b` branch to be able to review those changes separately, as mentioned earlier.
 
-Most notably, you will need to get the existing CI/CD pipelines for both projects working together. Once the CI pipelines are green and you've got everything working, we can put merge up for review.
+Most notably, you will need to get the existing CI/CD pipelines for both projects working together. Once the CI pipelines are green and you've got everything working, we can put your changes up for review.
 
 
 ## CI/CD in a monorepo
@@ -275,7 +260,7 @@ The hardest technical challenge for monorepos is the CI/CD pipeline. Over time, 
 
 You can test and build the apps in parallel to speed things up. However, this can get very expensive in CI minutes. At some point, monorepos have to start only running CI/CD for the apps affected by the change.
 
-But be practical. While there are only two projects in the monorepo, running the CI pipelines for both apps while getting the monorepo is perfectly fine. But as the monorepo grows, this becomes untenable.
+But be practical. While there are only two projects in the monorepo, running the CI pipelines for both apps while getting the monorepo up and running is perfectly fine. But as the monorepo grows, this becomes untenable.
 
 
 ## Monorepo tooling

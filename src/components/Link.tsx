@@ -1,7 +1,6 @@
 import NextLink, { LinkProps } from "next/link";
 import React from "react";
 
-
 /**
  * Returns '_blank' for URLs pointing to external websites.
  *
@@ -9,6 +8,10 @@ import React from "react";
  */
 function getTarget(href: LinkProps["href"]) {
   if (typeof href === "string") {
+    if (href.startsWith("#")) {
+      return "";
+    }
+
     // Links starting with '//' may be "schemaless" URLs like:
     //
     //    //assets.site.com/image/something.png

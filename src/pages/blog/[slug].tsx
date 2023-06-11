@@ -16,6 +16,7 @@ import { getPostPaths, getPostProps } from "../../utils/blogPageUtils";
 import { RenderTextCommand } from "../../components/ScriptedEditor/RenderCommand/RenderCommand";
 import { NotMacOs } from "../../components/OperatingSystem/OperatingSystem";
 import { Image } from "../../components/Image";
+import { SectionAnchor } from "../../components/SectionAnchor/SectionAnchor";
 
 // Custom components/renderers to pass to MDX.
 // Since the MDX files aren't loaded by webpack, they have no knowledge of how
@@ -42,6 +43,7 @@ const components = {
     />
   ),
   Command: RenderTextCommand,
+  SectionAnchor,
   NotMacOs,
   // ExampleComponent: dynamic(() => import("../../src/components/ExampleComponent")),
   Head,
