@@ -92,8 +92,8 @@ Some repositories may have multiple directories containing application code (e.g
 
 There are two ways to go about external dependencies in a monorepo.
 
- * A per-app version policy
  * A single-version policy
+ * A per-app version policy
 
  ### Single-version policy
 
@@ -102,8 +102,6 @@ Migrating to a single-version policy is harder up-front. It involves merging the
 <Image src="~/single-version-migration.png" />
 
 This can be difficult if your repositories are using different versions of the same dependency.
-
-I would strongly advise you to apply a single-version policy to your monorepo.
 
 
 ### Per-app version policy
@@ -119,19 +117,19 @@ If packages don't specify their dependencies, then the interface and behavior of
 This introduces some problems for the apps making use of shared packages.
 
 
-### Problem 1: Bundle size
+### Bundle size
 
 When different packages can specify different versions of dependencies, multiple versions of dependencies may be included in the JS bundle sent to the client. This can easily go undetected.
 
 
-### Problem 2: Singletons
+### Singletons
 
 A lot of libraries export singletons with shared state, for example, the `Router` class in Next.js.
 
 Singletons imported from such libraries are no longer guaranteed to be singletons globally. Each version of the library instantiates and exports its own singletons. This leads to very tricky bugs.
 
 
-### Problem 3: Tech debt accumulation
+### Tech debt accumulation
 
 When developers need to upgrade a dependency in one project, it's tempting to skip upgrading the dependency for all projects.
 
