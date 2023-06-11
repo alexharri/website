@@ -75,7 +75,7 @@ However, we'll need to merge the other categories of files when moving to the mo
   <h2>The source code directory</h2>
 </SectionAnchor>
 
-Most repositories contain a single directory, containing the application code for the project, while the configuration and build files typically live in the root or separate directories. We'll call the application code directory `src/`.
+Most repositories hve a single directory, containing the application code for the project, while the configuration and build files typically live in the root (or root-level directories). We'll call the application code directory `src/`.
 
 The `src/` directory is the easiest to handle. The `src/` directory for each repository is moved to `apps/[app-name]/src/`.
 
