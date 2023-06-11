@@ -278,3 +278,6 @@ A notable competitor in the JS monorepo space has been [Turborepo][turborepo]. I
 [turborepo]:https://turbo.build/
 
 
+## Final words
+
+Moving existing repositories to a monorepo is not a trivial task. I hope this post provided you with insight into how you might go about that process yourself.
