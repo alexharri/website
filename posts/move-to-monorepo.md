@@ -9,7 +9,7 @@ Monorepos have been a hot topic in the JavaScript community for a while now. I'v
 
 However, if you've decided to move to a monorepo it's not necessarily obvious how to go about it.
 
-There's lots of boilerplate examples online, which is great. But what if you want to move existing repositories?
+There are lots of boilerplate examples online, which is great. But what if you want to move existing repositories?
 
 This post is intended as a rough playbook for migrating your existing repositories to a monorepo. Having done that at two different companies, I've found a pretty good approach.
 
@@ -79,7 +79,7 @@ The `src/` directory is the easiest to handle. The `src/` directory for each rep
 
 As a rule of thumb, we can consider each directory under `apps` to be an independently deployed project.
 
-Some repositories may have multiple directories containing application code (e.g. Next.js projects with a `pages/` and `components/` directories), but those are migrated in the same manner as the `src/` directory in the example above.
+Some repositories may have multiple directories containing application code (e.g. Next.js projects with `pages/` and `components/` directories), but those are migrated in the same manner as the `src/` directory in the example above.
 
 
 <SectionAnchor id="external-dependencies">
@@ -117,12 +117,12 @@ This introduces some problems for the apps making use of shared packages.
 
 ### Problem 1: Bundle size
 
-When different packages can specify different version of dependencies, multiple version of dependencies may be included in the JS bundle sent to the client. This can easily go undetected.
+When different packages can specify different versions of dependencies, multiple versions of dependencies may be included in the JS bundle sent to the client. This can easily go undetected.
 
 
 ### Problem 2: Singletons
 
-A lot of libraries export singletons with shared state, for example the `Router` class in Next.js.
+A lot of libraries export singletons with shared state, for example, the `Router` class in Next.js.
 
 Singletons imported from such libraries are no longer guaranteed to be singletons globally. Each version of the library instantiates and exports its own singletons. This leads to very tricky bugs.
 
@@ -131,7 +131,7 @@ Singletons imported from such libraries are no longer guaranteed to be singleton
 
 When developers need to upgrade a dependency in one project, it's tempting to skip upgrading the dependency for all projects.
 
-This inevitably leads to the dependencies of some projects slowly drifting out-of-date.
+This inevitably leads to the dependencies of some projects slowly drifting out of date.
 
 
 ## TL;DR: Use a single-version policy
@@ -142,7 +142,7 @@ In addition to eliminating the aforementioned problems, there are numerous benef
  * Common logic in your applications can more easily be extracted to shared packages.
  * In being able to make more assumptions, tooling and infrastructure can be simplified.
 
-The main drawback of a single version policy is that upgrading dependencies becomes harder. Every app and package making direct use of the dependency will need to be updated.
+The main drawback of a single-version policy is that upgrading dependencies becomes harder. Every app and package making direct use of the dependency will need to be updated.
 
 However, the difficulty of upgrades can be circumvented by creating packages that abstract away the API of external dependencies. Using this approach, only the package that is abstracting away the dependency needs to be touched.
 
@@ -151,7 +151,7 @@ However, the difficulty of upgrades can be circumvented by creating packages tha
   <h2>Config files</h2>
 </SectionAnchor>
 
-One of the core reason for moving to a monorepo tends to be reducing friction and making cross-project work easier. A developer moving from one project to another should be able to get up to speed and be productive quickly.
+One of the core reasons for moving to a monorepo tends to be reducing friction and making cross-project work easier. A developer moving from one project to another should be able to get up to speed and be productive quickly.
 
 This becomes easier when differences across projects are minimal.
 
@@ -204,7 +204,7 @@ Separating these stages makes the code review phase easier by making the changes
 <Image src="~/merge-overview-diffs.png" />
 
  * Diff 1 and 2 enable reviewing the changes made when changing the directory structure.
- * Diff 3 enables reviewing the changes made in connecting `A` and `B` together and getting everything working.
+ * Diff 3 enables reviewing the changes made in connecting `A` and `B` and getting everything working.
 
 Merging repositories is quite noisy, and reviewing a single "big-bang" PR is very hard. Even though the changes will all be merged into `A` at the same time, we can still review them separately.
 
