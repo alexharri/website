@@ -2,6 +2,7 @@
 title: "Moving to a monorepo: Yes, but how?"
 description: "Migrating existing repositories to a monorepo structure. A step-by-step guide."
 publishedAt: "2023-06-11"
+image: "/images/og-move-to-monorepo.png"
 ---
 
 Monorepos have been a hot topic in the JavaScript community for a while now. I've heard quite a bit about their pros and cons, and you probably have too.
@@ -189,7 +190,7 @@ Once the directory structure is ready, we have two "pre-merge" branches ready:
  * `prepare-merge-b` in repo `A`
  * `merge-into-a` in repo `B`
 
-Let’s zoom out and take a look at the next steps.
+Let's zoom out and take a look at the next steps.
 
 <Image src="~/merge-overview.png" />
 
@@ -267,13 +268,13 @@ But be practical. While there are only two projects in the monorepo, running the
 
 ## Monorepo tooling
 
-You don’t need a monorepo tool, though they certainly help.
+You don't need a monorepo tool, though they certainly help.
 
 I've had a positive experience with [Nx][nx] before. Its `print-affected` command allows you to see which apps were affected by the changes between two commits or branches. Really useful for CI/CD!
 
 [nx]:https://nx.dev/
 
-Nx has a suite of features geared towards monorepos. But keep in mind, you don’t have to buy into a monorepo tool wholesale. In the monorepo I set up at a previous workplace, we only used the `print-affected` command from Nx. Nothing else.
+Nx has a suite of features geared towards monorepos. But keep in mind, you don't have to buy into a monorepo tool wholesale. In the monorepo I set up at a previous workplace, we only used the `print-affected` command from Nx. Nothing else.
 
 A notable competitor in the JS monorepo space has been [Turborepo][turborepo]. I don't have personal experience with it yet, but I've heard good things about it.
 
