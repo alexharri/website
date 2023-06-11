@@ -18,9 +18,11 @@ export const Meta = (props: Props) => {
           <meta key="og:description" property="og:description" content={props.description} />
         </>
       )}
-      {props.image && (
-        <meta key="og:image" property="og:image" content={process.env.SITE_URL + props.image} />
-      )}
+      <meta
+        key="og:image"
+        property="og:image"
+        content={props.image ? process.env.SITE_URL + props.image : ""}
+      />
     </Head>
   );
 };
