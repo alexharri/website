@@ -1,6 +1,6 @@
 ---
 title: "Moving to a monorepo: Yes, but how?"
-description: ""
+description: "Migrating existing repositories to a monorepo structure. A step-by-step guide."
 publishedAt: ""
 image: ""
 ---
