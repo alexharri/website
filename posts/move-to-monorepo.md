@@ -1,8 +1,7 @@
 ---
 title: "Moving to a monorepo: Yes, but how?"
 description: "Migrating existing repositories to a monorepo structure. A step-by-step guide."
-publishedAt: ""
-image: ""
+publishedAt: "2023-06-11"
 ---
 
 Monorepos have been a hot topic in the JavaScript community for a while now. I've heard quite a bit about their pros and cons, and you probably have too.

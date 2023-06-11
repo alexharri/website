@@ -15,7 +15,7 @@ export const Image = (props: Props) => {
   const { slug } = router.query;
 
   if (src.startsWith("~/")) {
-    const isBlogPost = ["/blog/draft/[slug]" || "/blog/[slug]"].includes(router.pathname);
+    const isBlogPost = ["/blog/draft/[slug]", "/blog/[slug]"].includes(router.pathname);
     if (typeof slug === "string" && isBlogPost) {
       const dirName = `/images/posts/${slug}/`;
       src = dirName + src.substr(2);
