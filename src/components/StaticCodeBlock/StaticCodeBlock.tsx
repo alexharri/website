@@ -3,7 +3,8 @@ import { CopyIcon18 } from "../Icon/CopyIcon18";
 import styles from "./StaticCodeBlock.module.scss";
 import { prismTheme } from "./prismTheme";
 import { copyTextToClipboard } from "../../utils/clipboard";
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
+import { squiggleIcon10x7Base64Blue, squiggleIcon10x7Base64Red } from "../Icon/SquiggleIcon10x7";
 
 /**
  * A markdown code block like so:
@@ -65,6 +66,121 @@ const CopyButton = (props: { text: string }) => {
   );
 };
 
+interface ErrorProps {
+  type: "error" | "info";
+  message: string;
+  padding: string;
+  props: Partial<Record<string, number>>;
+}
+
+const Message = (props: ErrorProps) => {
+  const {
+    type,
+    message,
+    padding,
+    props: { w: width },
+  } = props;
+
+  const spaces = (length: number) =>
+    Array.from({ length }).map((_, i) => <React.Fragment key={i}>&nbsp;</React.Fragment>);
+
+  const paddingSpaces = spaces(padding.length);
+
+  const spacesAtStart = (str: string) => {
+    let i = 0;
+    for (; str.substr(i, 1) === " "; i++) {}
+    return spaces(i);
+  };
+
+  return (
+    <div className={styles.outerContainer}>
+      <div style={{ userSelect: "none" }}>{paddingSpaces}</div>
+      <div className={styles.innerContainer}>
+        <div className={styles.messageContainer} data-type={type}>
+          <span className={styles.injectComment}>{paddingSpaces}//&nbsp;</span>
+          {message.split("\n").map((message, i) => (
+            <p key={i}>
+              {spacesAtStart(message)}
+              {message.trim()}
+            </p>
+          ))}
+        </div>
+        <div
+          className={styles.squiggle}
+          style={{
+            backgroundImage: `url("data:image/svg+xml;base64,${
+              type === "error" ? squiggleIcon10x7Base64Red : squiggleIcon10x7Base64Blue
+            }")`,
+          }}
+        >
+          {spaces(width || 1)}
+        </div>
+      </div>
+      <div className={styles.fillSpace} />
+    </div>
+  );
+};
+
+interface Token {
+  types: string[];
+  content: string;
+  empty?: boolean;
+}
+
+interface LineProps {
+  line: Token[];
+  last: boolean;
+  getLineProps: () => any;
+  getTokenProps: (options: { token: Token; key: number }) => any;
+}
+
+const Line = (props: LineProps) => {
+  const { line, getLineProps, getTokenProps } = props;
+  const content = line.map((token) => token.content).join("");
+
+  for (const type of ["error", "info"] as const) {
+    const errorMarker = `// @${type} `;
+    const errorIndex = content.indexOf(errorMarker);
+    if (errorIndex !== -1) {
+      const afterMarker = content.slice(errorIndex + errorMarker.length);
+      const propsEnd = afterMarker.indexOf("}");
+      const propsStr = afterMarker.slice(1, propsEnd).trim();
+      const props = propsStr
+        .split(",")
+        .map((part) => {
+          const [key, str] = part.split("=").map((s) => s.trim());
+          return [key, Number(str)] as const;
+        })
+        .reduce((acc, [key, value]) => {
+          acc[key] = value;
+          return acc;
+        }, {} as Partial<Record<string, number>>);
+
+      return (
+        <Message
+          type={type}
+          message={afterMarker
+            .slice(propsEnd + 2)
+            .trim()
+            .replace("\\n", "\n")}
+          padding={content.slice(0, errorIndex)}
+          props={props}
+        />
+      );
+    }
+  }
+
+  const isEmpty = content === "\n";
+  if (props.last && isEmpty) return null;
+  return (
+    <div {...getLineProps()}>
+      {line.map((token, key) => (
+        <span {...getTokenProps({ token, key })} />
+      ))}
+    </div>
+  );
+};
+
 export const StaticCodeBlock = (props: StaticCodeBlockProps) => {
   const { language, children, marginBottom, small } = props;
 
@@ -79,15 +195,14 @@ export const StaticCodeBlock = (props: StaticCodeBlockProps) => {
           {({ className, style, tokens: lines, getLineProps, getTokenProps }) => (
             <pre className={[className, styles.pre].join(" ")} style={{ ...style, fontSize }}>
               {lines.map((line, i) => {
-                const lastLine = i === lines.length - 1;
-                const isEmpty = () => line.map((token) => token.content).join("") === "\n";
-                if (lastLine && isEmpty()) return null;
                 return (
-                  <div {...getLineProps({ line, key: i })}>
-                    {line.map((token, key) => (
-                      <span {...getTokenProps({ token, key })} />
-                    ))}
-                  </div>
+                  <Line
+                    key={i}
+                    getLineProps={() => getLineProps({ line, key: i })}
+                    getTokenProps={getTokenProps}
+                    last={i === lines.length - 1}
+                    line={line}
+                  />
                 );
               })}
             </pre>
