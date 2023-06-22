@@ -239,7 +239,7 @@ Looks good, but TypeScript complains:
 
 ```tsx 
 getKeyboardShortcut({ key: "s", metaKey: true });
-                    // @error {w=27} Type '{ key: string; metaKey: true; }' is missing the following properties from type 'KeyboardEvent': altKey, charCode, code, ctrlKey, and 37 more.
+                    // @error {w=27,shiftLeft=48} Type '{ key: string; metaKey: true; }' is missing the following properties from type 'KeyboardEvent': altKey, charCode, code, ctrlKey, and 37 more.
 ```
 
 Ugh. Specifying all 37 additional properties would be super noisy, so that's out of the question.

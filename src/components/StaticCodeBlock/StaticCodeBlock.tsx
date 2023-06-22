@@ -78,7 +78,7 @@ const Message = (props: ErrorProps) => {
     type,
     message,
     padding,
-    props: { w: width },
+    props: { w: width, shiftLeft },
   } = props;
 
   const spaces = (length: number) =>
@@ -96,7 +96,11 @@ const Message = (props: ErrorProps) => {
     <div className={styles.outerContainer}>
       <div style={{ userSelect: "none" }}>{paddingSpaces}</div>
       <div className={styles.innerContainer}>
-        <div className={styles.messageContainer} data-type={type}>
+        <div
+          className={styles.messageContainer}
+          data-type={type}
+          style={{ marginLeft: -(shiftLeft || 0) }}
+        >
           <span className={styles.injectComment}>{paddingSpaces}//&nbsp;</span>
           {message.split("\n").map((message, i) => (
             <p key={i}>
