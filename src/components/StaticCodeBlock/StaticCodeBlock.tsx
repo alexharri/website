@@ -101,12 +101,13 @@ const Message = (props: ErrorProps) => {
           data-type={type}
           style={{ marginLeft: -(shiftLeft || 0) }}
         >
-          <span className={styles.injectComment}>{paddingSpaces}//&nbsp;</span>
+          {/* <span className={styles.injectComment}>{paddingSpaces}//&nbsp;</span> */}
           {message.split("\n").map((message, i) => (
-            <p key={i}>
+            <div key={i}>
+              <span className={styles.injectComment}>{paddingSpaces}//&nbsp;</span>
               {spacesAtStart(message)}
               {message.trim()}
-            </p>
+            </div>
           ))}
         </div>
         <div
