@@ -105,7 +105,7 @@ const Message = (props: ErrorProps) => {
           {message.split("\n").map((message, i) => (
             <div key={i}>
               <span className={styles.injectComment}>{paddingSpaces}//&nbsp;</span>
-              {spacesAtStart(message)}
+              <span>{spacesAtStart(message)}</span>
               {message.trim()}
             </div>
           ))}

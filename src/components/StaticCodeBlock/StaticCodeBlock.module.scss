@@ -86,6 +86,7 @@
   padding: 12px 16px;
   white-space: normal;
   position: relative;
+  min-width: 380px;
 
   &:after {
     content: "";
@@ -119,6 +120,7 @@
     font-size: inherit;
     line-height: inherit;
     margin: 0 0 4px;
+    display: flex;
 
     &:last-of-type {
       margin-bottom: 0;
