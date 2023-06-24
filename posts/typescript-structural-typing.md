@@ -290,3 +290,7 @@ window.addEventListener("keydown", (e: KeyboardEvent) => {
 ```
 
 This idea is explored in this fantastic post by Evan Martin: [Interfaces generally belong with users](https://neugierig.org/software/blog/2019/11/interface-pattern.html). I highly recommend giving it a read! It changed how I write and think about TypeScript code.
+
+---
+
+This post generated [a lot of interesting discussions on Hacker News](https://news.ycombinator.com/item?id=36457557). If this post was interesting, I recommend taking a look.
