@@ -195,7 +195,6 @@ At runtime, the `email` property will cause `validator` to be `undefined` and th
 ```tsx
 for (const key of Object.keys(user)) {
   const validate = validators[key];
-                   // @info {w=15} Evaluates to 'undefined' if the user value contains keys not present in 'validators'.
   error ||= validate(user[key]);
             // @error {w=8} TypeError: 'validate' is not a function.
 }
