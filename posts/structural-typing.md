@@ -58,7 +58,7 @@ class Object {
 }
 ```
 
-If `Object.keys` were defined like this, we wouldn't have run into the type error at the start of this post.
+If `Object.keys` were defined like this, we wouldn't have run into the type error.
 
 It seems like a no brainer to define `Object.keys` like this, but TypeScript has a good reason for not doing so. The reason has to do with TypeScript's [structural type system](https://en.wikipedia.org/wiki/Structural_type_system).
 
@@ -206,7 +206,7 @@ Luckily for us, TypeScript emitted type errors before this code had a chance to 
 ```tsx
 for (const key of Object.keys(user)) {
   const validate = validators[key];
-                   // @error {w=15} Expression of type 'string' can't be used to index type '{ name: string, password: string }'.
+                   // @error {w=15} Expression of type 'string' can't be used to index type '{ name: ..., password: ... }'.
   error ||= validate(user[key]);
                      // @error {w=9} Expression of type 'string' can't be used to index type 'User'.
 }
@@ -214,7 +214,7 @@ for (const key of Object.keys(user)) {
 
 We now have our answer for why `Object.keys` is typed the way it is. It forces us to acknowledge that objects may contain properties that the type system is not aware of.
 
-With our newfound knowledge of the pitfalls of structural typing, let's take a look at how we can use the features of structural typing to our benefit.
+With our newfound knowledge of structural typing and its pitfalls, let's take a look at how we can effectively use structural typing to our benefit.
 
 ### Making use of structural typing
 
