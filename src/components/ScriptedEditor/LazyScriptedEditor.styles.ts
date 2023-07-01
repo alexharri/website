@@ -1,9 +1,10 @@
+import { cssVariables } from "../../utils/cssVariables";
 import { StyleOptions } from "../../utils/styles";
 import { scriptedEditorConstants } from "./scriptedEditorConstants";
 
 const { LINE_HEIGHT, V_PADDING, SCRIPTED_EDITOR_MIN_WIDTH } = scriptedEditorConstants;
 
-export const LazyScriptedEditorStyles = ({ styled }: StyleOptions) => ({
+export const LazyScriptedEditorStyles = ({ styled, theme }: StyleOptions) => ({
   outerWrapper: styled.css`
     position: relative;
   `,
@@ -38,13 +39,13 @@ export const LazyScriptedEditorStyles = ({ styled }: StyleOptions) => ({
     left: 0;
     right: 0;
     bottom: 0;
-    background: var(--color-background-300);
+    background: ${theme.background300};
     display: flex;
     justify-content: center;
     align-items: center;
     font-size: 20px;
-    font-family: var(--font-monospace);
-    color: var(--color-text-600);
+    font-family: ${cssVariables.fontMonospace};
+    color: ${theme.text600};
     border-radius: 8px;
   `,
 });

@@ -1,6 +1,6 @@
 import { StyleOptions } from "../../utils/styles";
 
-export const BlogPostStyles = ({ styled }: StyleOptions) => ({
+export const BlogPostStyles = ({ styled, theme }: StyleOptions) => ({
   link: styled.css`
     color: inherit;
     display: block;
@@ -20,7 +20,7 @@ export const BlogPostStyles = ({ styled }: StyleOptions) => ({
 
   read: styled.css`
     font-size: 18px;
-    color: var(--color-blue);
+    color: ${theme.blue};
     font-weight: 600;
     display: inline-block;
 

@@ -1,8 +1,9 @@
 import { css, keyframes } from "@emotion/css";
 import React, { useContext, useMemo } from "react";
+import { colors } from "./cssVariables";
 
 export interface StyleOptions {
-  theme: unknown;
+  theme: typeof colors;
   styled: { css: typeof css };
   keyframes: typeof keyframes;
 }
@@ -14,7 +15,7 @@ export function useStyles<T extends Record<string, string>>(
 ) {
   const theme = useContext(ThemeContext);
   return useMemo(() => {
-    const classNames = stylesheet({ theme, styled: { css }, keyframes });
+    const classNames = stylesheet({ theme: colors, styled: { css }, keyframes });
 
     return (className: keyof T & string, props: Partial<Record<string, boolean>> = {}) => {
       const baseClassName = classNames[className];

@@ -1,9 +1,9 @@
 import { StyleOptions, useStyles } from "../../utils/styles";
 
-const SmallNoteStyles = ({ styled }: StyleOptions) => ({
+const SmallNoteStyles = ({ styled, theme }: StyleOptions) => ({
   p: styled.css`
     font-size: 14px;
-    color: var(--color-text-600);
+    color: ${theme.text600};
   `,
 });
 

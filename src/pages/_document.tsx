@@ -1,5 +1,4 @@
 import Document, { Html, Head, Main, NextScript, DocumentContext } from "next/document";
-import { initColorsScript, defaultColorsStyles } from "../utils/initColors";
 import createEmotionServer from "@emotion/server/create-instance";
 import { cache } from "@emotion/css";
 
@@ -32,10 +31,6 @@ export default class CustomDocument extends Document {
   render() {
     return (
       <Html>
-        {/* The style tag provides default colors to browser that do not support JS */}
-        <style dangerouslySetInnerHTML={{ __html: defaultColorsStyles }} />
-        <script dangerouslySetInnerHTML={{ __html: initColorsScript }} />
-
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="true" />
         <link

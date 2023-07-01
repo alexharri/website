@@ -4,7 +4,6 @@ import { MonacoEditor } from "./types/scriptedEditorTypes";
 import { ScriptCommand } from "./types/scriptTypes";
 import { runScript } from "./run/runScript";
 import React from "react";
-import { useColorMode } from "../../utils/colorMode";
 import { RunContext } from "./run/RunContext";
 import { FocusedScriptContext } from "./FocusedScriptContext/FocusedScriptContext";
 import { useMouseDownOutside } from "../../utils/hooks/useMouseDownOutside";
@@ -15,6 +14,7 @@ import { useIsomorphicLayoutEffect } from "../../utils/hooks/useIsomorphicLayout
 import { useDidUpdate } from "../../utils/hooks/useDidUpdate";
 import { useStyles } from "../../utils/styles";
 import { ScriptedEditorStyles } from "./ScriptedEditor.styles";
+import { cssVariables } from "../../utils/cssVariables";
 
 const MemoizedEditor = React.memo(Editor);
 
@@ -157,7 +157,7 @@ export const __ScriptedEditor = (props: Props) => {
   const options = useMemo<EditorProps["options"]>(
     () => ({
       fontSize: FONT_SIZE,
-      fontFamily: "var(--font-monospace)",
+      fontFamily: cssVariables.fontMonospace,
       lineHeight: LINE_HEIGHT_FACTOR,
       lineNumbers: "off",
       minimap: { enabled: false },
@@ -224,8 +224,6 @@ export const __ScriptedEditor = (props: Props) => {
     runContextRef.current?.cancelCurrentRun();
   };
 
-  const [mode] = useColorMode();
-
   const active = focusedScriptId === scriptId;
 
   const scale = width < SCRIPTED_EDITOR_MIN_WIDTH ? width / SCRIPTED_EDITOR_MIN_WIDTH : 1;
@@ -249,7 +247,7 @@ export const __ScriptedEditor = (props: Props) => {
           >
             <MemoizedEditor
               defaultValue={initialCode}
-              theme={mode === "dark" ? "alexharri-dark" : "alexharri-light"}
+              theme="alexharri-dark"
               language={props.language}
               options={options}
               onMount={setEditor}

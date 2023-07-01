@@ -3,52 +3,32 @@ import { colors } from "../../utils/cssVariables";
 
 export const prismTheme: PrismTheme = {
   plain: {
-    color: colors["text-300"],
+    color: colors.text300,
   },
   styles: [
     {
       types: ["function"],
-      style: {
-        color: colors["token-function"],
-      },
+      style: { color: colors.token.function },
     },
     {
       types: ["string"],
-      style: {
-        color: colors["token-string"],
-      },
+      style: { color: colors.token.string },
     },
     {
-      types: [
-        "boolean",
-        "attr-name",
-        "punctuation",
-        "prolog",
-        "operator",
-        "keyword",
-      ],
-      style: {
-        color: colors.blue,
-      },
+      types: ["boolean", "attr-name", "punctuation", "prolog", "operator", "keyword"],
+      style: { color: colors.blue },
     },
     {
       types: ["number", "inserted"],
-      style: {
-        color: colors["token-number"],
-      },
+      style: { color: colors.token.number },
     },
     {
       types: ["comment"],
-      style: {
-        color: colors["token-comment"],
-        fontStyle: "italic",
-      },
+      style: { color: colors.token.comment, fontStyle: "italic" },
     },
     {
       types: ["builtin", "constant"],
-      style: {
-        color: colors.green,
-      },
+      style: { color: colors.green },
     },
   ],
 };

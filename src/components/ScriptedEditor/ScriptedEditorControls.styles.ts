@@ -1,6 +1,6 @@
 import { StyleOptions } from "../../utils/styles";
 
-export const ScriptedEditorControlsStyles = ({ styled }: StyleOptions) => ({
+export const ScriptedEditorControlsStyles = ({ styled, theme }: StyleOptions) => ({
   slideIn: styled.css`
     transform: translateX(16px);
     opacity: 0;
@@ -36,17 +36,17 @@ export const ScriptedEditorControlsStyles = ({ styled }: StyleOptions) => ({
       bottom: -12px;
       height: 24px;
       z-index: 0;
-      border: 2px solid var(--color-blue-200);
-      background: var(--color-dark-blue-400);
+      border: 2px solid ${theme.blue200};
+      background: ${theme.darkBlue400};
       border-radius: 8px;
     }
 
     &[data-down="true"] > div {
       transform: translateY(5px);
-      border-color: var(--color-blue-700);
-      color: var(--color-blue-700);
-      text-shadow: 0 0 12px rgba(var(--color-blue-rgb), 0.8);
-      box-shadow: inset 0 0 16px rgba(var(--color-blue-rgb), 0.4);
+      border-color: ${theme.blue700};
+      color: ${theme.blue700};
+      text-shadow: 0 0 12px rgba(${theme.blueRgb}, 0.8);
+      box-shadow: inset 0 0 16px rgba(${theme.blueRgb}, 0.4);
     }
     &:active > div {
       transform: translateY(8px);
@@ -58,15 +58,15 @@ export const ScriptedEditorControlsStyles = ({ styled }: StyleOptions) => ({
   `,
 
   bigButton: styled.css`
-    color: var(--color-blue);
+    color: ${theme.blue};
     font-weight: bold;
     border-radius: 8px;
     position: relative;
     z-index: 1;
     padding: 12px 12px;
     font-size: 20px;
-    border: 2px solid var(--color-blue);
-    background: var(--color-background);
+    border: 2px solid ${theme.blue};
+    background: ${theme.background};
     transition: transform 0.15s, border-color 0.2s, color 0.2s, text-shadow 0.15s, box-shadow 0.15s;
 
     @media (max-width: 500px) {
@@ -76,7 +76,7 @@ export const ScriptedEditorControlsStyles = ({ styled }: StyleOptions) => ({
   `,
 
   textButton: styled.css`
-    color: var(--color-blue);
+    color: ${theme.blue};
     font-weight: bold;
     border-radius: 8px;
     font-size: 16px;
@@ -86,8 +86,8 @@ export const ScriptedEditorControlsStyles = ({ styled }: StyleOptions) => ({
     border: 1px solid transparent;
 
     &[data-down="true"] {
-      border-color: var(--color-blue);
-      color: var(--color-blue-700);
+      border-color: ${theme.blue};
+      color: ${theme.blue700};
     }
 
     @media (max-width: 500px) {

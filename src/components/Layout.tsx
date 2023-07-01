@@ -1,7 +1,5 @@
 import React from "react";
-import { ToggleDarkMode } from "./ToggleDarkMode/ToggleDarkMode";
 import Link from "next/link";
-import { DISABLE_LIGHT_MODE } from "../utils/colorMode";
 import { useStyles } from "../utils/styles";
 import { LayoutStyles } from "./Layout.styles";
 
@@ -20,7 +18,7 @@ export const Layout = (props: Props) => {
               alexharri
             </Link>
           </div>
-          <div className={s("headerSection")}>{!DISABLE_LIGHT_MODE && <ToggleDarkMode />}</div>
+          <div className={s("headerSection")} />
         </div>
       </header>
       <div className={s("headerBorder")} />

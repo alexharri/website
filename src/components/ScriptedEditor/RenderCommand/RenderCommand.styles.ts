@@ -1,9 +1,10 @@
+import { cssVariables } from "../../../utils/cssVariables";
 import { StyleOptions } from "../../../utils/styles";
 
-export const RenderCommandStyles = ({ styled }: StyleOptions) => ({
+export const RenderCommandStyles = ({ styled, theme }: StyleOptions) => ({
   containerInline: styled.css`
     border: none;
-    color: var(--color-text);
+    color: ${theme.text};
     padding: 0 0;
     display: inline-flex;
     margin: 0 3px;
@@ -11,13 +12,13 @@ export const RenderCommandStyles = ({ styled }: StyleOptions) => ({
 
   container: styled.css`
     border: none;
-    color: var(--color-text);
+    color: ${theme.text};
     padding: 0 0;
     display: flex;
     cursor: pointer;
     height: 38px;
     margin-bottom: 16px;
-    border-bottom: 1px solid var(--color-background);
+    border-bottom: 1px solid ${theme.background};
 
     &:first-of-type {
       border-top-left-radius: 8px;
@@ -47,12 +48,12 @@ export const RenderCommandStyles = ({ styled }: StyleOptions) => ({
   `,
 
   key: styled.css`
-    border: 1px solid var(--color-medium-500);
-    font-family: var(--font-monospace);
+    border: 1px solid ${theme.medium500};
+    font-family: ${cssVariables.fontMonospace};
     font-size: 16px;
     line-height: 1;
-    background: var(--color-medium-400);
-    color: var(--color-text);
+    background: ${theme.medium400};
+    color: ${theme.text};
     white-space: pre;
     display: flex;
     align-items: center;
@@ -61,9 +62,9 @@ export const RenderCommandStyles = ({ styled }: StyleOptions) => ({
     user-select: all;
 
     &[data-faded="true"] {
-      border: 1px solid var(--color-background-700);
-      background: var(--color-background-300);
-      color: var(--color-text-600);
+      border: 1px solid ${theme.background700};
+      background: ${theme.background300};
+      color: ${theme.text600};
     }
 
     &[data-small] {

@@ -1,17 +1,16 @@
 import { StyleOptions } from "../../utils/styles";
 
-export const StaticCodeBlockStyles = ({ styled }: StyleOptions) => ({
+export const StaticCodeBlockStyles = ({ styled, theme }: StyleOptions) => ({
   outerWrapper: styled.css`
     position: relative;
   `,
 
   wrapper: styled.css`
-    background: var(--color-background-500);
+    background: ${theme.background500};
     border-radius: 4px;
     display: flex;
     overflow: auto;
     position: relative;
-    transition: background var(--color-transition-duration);
 
     @media (max-width: 800px) {
       border-radius: 0;
@@ -39,9 +38,9 @@ export const StaticCodeBlockStyles = ({ styled }: StyleOptions) => ({
     min-width: 32px;
     padding: 6px;
     height: 32px;
-    color: var(--color-text);
-    background: rgba(var(--color-light-rgb), 0.05);
-    border: 1px solid rgba(var(--color-light-rgb), 0.1);
+    color: ${theme.text};
+    background: rgba(${theme.lightRgb}, 0.05);
+    border: 1px solid rgba(${theme.lightRgb}, 0.1);
     border-radius: 4px;
     display: flex;
     align-items: center;
@@ -79,7 +78,7 @@ export const StaticCodeBlockStyles = ({ styled }: StyleOptions) => ({
 
   messageContainer: styled.css`
     border: 1px solid #203142;
-    background: var(--color-background-300);
+    background: ${theme.background300};
     border-top-color: #2a4051;
     border-left-color: #2a4051;
     border-radius: 4px;
@@ -103,7 +102,7 @@ export const StaticCodeBlockStyles = ({ styled }: StyleOptions) => ({
 
     &[data-type="error"] {
       &:after {
-        background: var(--color-dark-red-400);
+        background: ${theme.darkRed400};
         border-top: 1px solid #c0172f;
         border-left: 1px solid #c0172f;
       }

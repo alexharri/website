@@ -1,6 +1,7 @@
+import { cssVariables } from "../../utils/cssVariables";
 import { StyleOptions } from "../../utils/styles";
 
-export const ScriptedEditorStyles = ({ styled, keyframes }: StyleOptions) => {
+export const ScriptedEditorStyles = ({ styled, keyframes, theme }: StyleOptions) => {
   const fadeIn = keyframes`
     from {
       opacity: 0;
@@ -49,11 +50,11 @@ export const ScriptedEditorStyles = ({ styled, keyframes }: StyleOptions) => {
       height: 40px;
       width: 320px;
       padding: 0 8px;
-      color: var(--color-text);
+      color: ${theme.text};
       font-size: 20px;
-      font-family: var(--font-family);
-      border: 2px solid var(--color-blue);
-      background: var(--color-background-500);
+      font-family: ${cssVariables.fontFamily};
+      border: 2px solid ${theme.blue};
+      background: ${theme.background500};
       border-radius: 4px;
       animation: ${fadeIn} 0.5s;
 

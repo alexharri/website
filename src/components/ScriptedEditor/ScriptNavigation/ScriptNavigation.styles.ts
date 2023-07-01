@@ -1,13 +1,14 @@
+import { cssVariables } from "../../../utils/cssVariables";
 import { StyleOptions } from "../../../utils/styles";
 
-export const ScriptNavigationStyles = ({ styled }: StyleOptions) => ({
+export const ScriptNavigationStyles = ({ styled, theme }: StyleOptions) => ({
   container: styled.css`
     position: fixed;
     top: 0;
     left: 0;
     bottom: 0;
     width: 348px; // SCRIPT_NAVIGATION_WIDTH
-    background: var(--color-background-500);
+    background: ${theme.background500};
     padding: 64px 8px 24px;
     overflow: hidden;
     color: white;
@@ -20,7 +21,7 @@ export const ScriptNavigationStyles = ({ styled }: StyleOptions) => ({
     right: 0;
     bottom: 0;
     height: 214px /* SCRIPT_NAVIGATION_DRAWER_HEIGHT */;
-    background: var(--color-background-500);
+    background: ${theme.background500};
     padding: 64px 8px 24px;
     overflow: hidden;
     color: white;
@@ -28,8 +29,8 @@ export const ScriptNavigationStyles = ({ styled }: StyleOptions) => ({
     border-radius: 12px;
     border-bottom-left-radius: 0;
     border-bottom-right-radius: 0;
-    box-shadow: 0 0 16px 4px rgba(var(--color-background-rgba), 0.5),
-      0 0 40px rgba(var(--color-background-rgba), 0.5);
+    box-shadow: 0 0 16px 4px rgba(${theme.backgroundRgb}, 0.5),
+      0 0 40px rgba(${theme.backgroundRgb}, 0.5);
   `,
 
   scroll: styled.css`
@@ -60,7 +61,7 @@ export const ScriptNavigationStyles = ({ styled }: StyleOptions) => ({
     left: 0;
     right: 0;
     height: 48px;
-    background: var(--color-background-700);
+    background: ${theme.background700};
     transform: translateY(-100%) translateY(11px);
 
     @media (max-width: 1180px /* SCRIPT_NAVIGATION_BREAKPOINT */) {
@@ -74,8 +75,8 @@ export const ScriptNavigationStyles = ({ styled }: StyleOptions) => ({
     left: 0;
     right: 0;
     display: flex;
-    background: var(--color-background-300);
-    border-top: 2px solid var(--color-background-500);
+    background: ${theme.background300};
+    border-top: 2px solid ${theme.background500};
     padding-bottom: 32px;
   `,
 
@@ -83,20 +84,20 @@ export const ScriptNavigationStyles = ({ styled }: StyleOptions) => ({
     flex-basis: 0;
     flex-grow: 1;
     height: calc(56px);
-    color: var(--color-blue-700);
+    color: ${theme.blue700};
     background: transparent;
     font-size: calc(18px);
-    font-family: var(--font-monospace);
+    font-family: ${cssVariables.fontMonospace};
 
     &:first-of-type {
-      border-right: 2px solid var(--color-background-500);
+      border-right: 2px solid ${theme.background500};
     }
   `,
 
   arrowKeyHint: styled.css`
     display: flex;
     opacity: 0;
-    color: var(--color-text-600);
+    color: ${theme.text600};
     font-size: 16px;
     transition: opacity 0.7s;
 
