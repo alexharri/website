@@ -1,5 +1,6 @@
 import { useRouter } from "next/router";
-import styles from "./Image.module.scss";
+import { useStyles } from "../utils/styles";
+import { ImageStyles } from "./Image.styles";
 
 interface Props {
   src?: string;
@@ -7,6 +8,7 @@ interface Props {
 }
 
 export const Image = (props: Props) => {
+  const s = useStyles(ImageStyles);
   const router = useRouter();
 
   const { wide } = props;
@@ -23,8 +25,8 @@ export const Image = (props: Props) => {
   }
 
   return (
-    <div className={styles.container} data-wide={wide}>
-      <img {...props} src={src} width="100%" className={styles.image} />
+    <div className={s("container", { wide })}>
+      <img {...props} src={src} width="100%" className={s("image")} />
     </div>
   );
 };

@@ -1,5 +1,4 @@
 import { Link } from "../Link";
-import styles from "./SnippetTitle.module.scss";
 
 interface Props {
   title: string;
@@ -7,8 +6,8 @@ interface Props {
 
 export const SnippetTitle = (props: Props) => {
   return (
-    <div className={styles.container}>
-      <h1 className={styles.title}>{props.title}</h1>
+    <div style={{ marginBottom: 64 }}>
+      <h1 style={{ marginBottom: 0 }}>{props.title}</h1>
       <Link href="/snippets">Back to snippets</Link>
     </div>
   );

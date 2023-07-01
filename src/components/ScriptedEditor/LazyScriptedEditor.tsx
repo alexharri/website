@@ -2,9 +2,10 @@ import { useContext, useEffect, useRef, useState } from "react";
 import { RunContext } from "./run/RunContext";
 import { __ScriptedEditor } from "./ScriptedEditor";
 import { ScriptedEditorControls } from "./ScriptedEditorControls";
-import styles from "./LazyScriptedEditor.module.scss";
 import { MonacoContext } from "./MonacoProvider";
 import { withMargin } from "../../utils/withMargin";
+import { useStyles } from "../../utils/styles";
+import { LazyScriptedEditorStyles } from "./LazyScriptedEditor.styles";
 
 interface Props {
   language: string;
@@ -15,6 +16,8 @@ interface Props {
 }
 
 function LazyScriptedEditor(props: Props) {
+  const s = useStyles(LazyScriptedEditorStyles);
+
   const { expectedMaxLines, scriptId } = props;
 
   const { ready, requestLoad } = useContext(MonacoContext);
@@ -67,14 +70,14 @@ function LazyScriptedEditor(props: Props) {
 
   return (
     <>
-      <div ref={ref} className={styles.outerWrapper} data-scripted-editor={props.scriptId}>
-        <div className={styles.lineWrapper}>
+      <div ref={ref} className={s("outerWrapper")} data-scripted-editor={props.scriptId}>
+        <div className={s("lineWrapper")}>
           {Array.from({ length: lines }).map((_, i) => (
-            <div key={i} className={styles.line} />
+            <div key={i} className={s("line")} />
           ))}
         </div>
         {render && ready ? (
-          <div className={styles.editorWrapper}>
+          <div className={s("editorWrapper")}>
             <__ScriptedEditor
               {...props}
               onMaxLinesCalculated={onMaxLinesCalculated}
@@ -84,7 +87,7 @@ function LazyScriptedEditor(props: Props) {
             />
           </div>
         ) : (
-          <div className={styles.placeholder}>Loading editor...</div>
+          <div className={s("placeholder")}>Loading editor...</div>
         )}
       </div>
       <ScriptedEditorControls

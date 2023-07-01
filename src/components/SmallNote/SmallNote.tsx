@@ -1,4 +1,11 @@
-import styles from "./SmallNote.module.scss";
+import { StyleOptions, useStyles } from "../../utils/styles";
+
+const SmallNoteStyles = ({ styled }: StyleOptions) => ({
+  p: styled.css`
+    font-size: 14px;
+    color: var(--color-text-600);
+  `,
+});
 
 interface Props {
   children: React.ReactNode;
@@ -7,9 +14,10 @@ interface Props {
 }
 
 export const SmallNote = (props: Props) => {
+  const s = useStyles(SmallNoteStyles);
   const { label = "Note" } = props;
   return (
-    <p className={styles.p} style={{ marginTop: -(props.moveCloserUpBy ?? 0) }}>
+    <p className={s("p")} style={{ marginTop: -(props.moveCloserUpBy ?? 0) }}>
       {label ? label + ": " : null}
       {props.children}
     </p>

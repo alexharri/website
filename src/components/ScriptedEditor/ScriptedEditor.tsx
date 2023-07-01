@@ -1,6 +1,5 @@
 import { useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 import Editor, { EditorProps } from "@monaco-editor/react";
-import styles from "./ScriptedEditor.module.scss";
 import { MonacoEditor } from "./types/scriptedEditorTypes";
 import { ScriptCommand } from "./types/scriptTypes";
 import { runScript } from "./run/runScript";
@@ -14,6 +13,8 @@ import { calculateHeight, moveToIndex, startScript } from "./scriptedEditorUtils
 import { useIsMobile, useViewportWidth } from "../../utils/hooks/useViewportWidth";
 import { useIsomorphicLayoutEffect } from "../../utils/hooks/useIsomorphicLayoutEffect";
 import { useDidUpdate } from "../../utils/hooks/useDidUpdate";
+import { useStyles } from "../../utils/styles";
+import { ScriptedEditorStyles } from "./ScriptedEditor.styles";
 
 const MemoizedEditor = React.memo(Editor);
 
@@ -34,6 +35,7 @@ interface Props {
  * in 'LazyScriptedEditor.js'.
  */
 export const __ScriptedEditor = (props: Props) => {
+  const s = useStyles(ScriptedEditorStyles);
   const { initialCode, scriptId } = props;
   const { focusedScriptId } = useContext(FocusedScriptContext);
   const focusedScriptIdRef = useRef(focusedScriptId);
@@ -65,7 +67,7 @@ export const __ScriptedEditor = (props: Props) => {
     const container = editorWrapperRef.current;
 
     const el = document.createElement("div");
-    el.className = styles.exec;
+    el.className = s("exec");
     container?.appendChild(el);
 
     const textEl = document.createElement("span");
@@ -230,7 +232,7 @@ export const __ScriptedEditor = (props: Props) => {
 
   return (
     <div ref={containerRef} onKeyDownCapture={keyDownCapture}>
-      <div className={styles.outerContainer} data-active={active}>
+      <div className={s("outerContainer")} data-active={active}>
         <div
           style={{
             transform: `scale(${scale})`,
@@ -241,7 +243,7 @@ export const __ScriptedEditor = (props: Props) => {
           <div
             data-sripted-editor-wrapper={scriptId}
             ref={editorWrapperRef}
-            className={styles.editor}
+            className={s("editor")}
             style={{ minHeight: calculateHeight(initialCode.split("\n").length) }}
             onMouseDown={onMouseDown}
           >

@@ -1,10 +1,11 @@
 import Highlight, { defaultProps } from "prism-react-renderer";
 import { CopyIcon18 } from "../Icon/CopyIcon18";
-import styles from "./StaticCodeBlock.module.scss";
 import { prismTheme } from "./prismTheme";
 import { copyTextToClipboard } from "../../utils/clipboard";
 import React, { useEffect, useState } from "react";
 import { squiggleIcon10x7Base64Blue, squiggleIcon10x7Base64Red } from "../Icon/SquiggleIcon10x7";
+import { useStyles } from "../../utils/styles";
+import { StaticCodeBlockStyles } from "./StaticCodeBlock.styles";
 
 /**
  * A markdown code block like so:
@@ -44,6 +45,7 @@ export interface StaticCodeBlockProps {
 }
 
 const CopyButton = (props: { text: string }) => {
+  const s = useStyles(StaticCodeBlockStyles);
   const [copied, setCopied] = useState(false);
 
   useEffect(() => {
@@ -54,7 +56,7 @@ const CopyButton = (props: { text: string }) => {
 
   return (
     <button
-      className={styles.copyButton}
+      className={s("copyButton")}
       onClick={async () => {
         const copied = await copyTextToClipboard(props.text);
         setCopied(copied);
@@ -74,6 +76,8 @@ interface ErrorProps {
 }
 
 const Message = (props: ErrorProps) => {
+  const s = useStyles(StaticCodeBlockStyles);
+
   const {
     type,
     message,
@@ -93,25 +97,25 @@ const Message = (props: ErrorProps) => {
   };
 
   return (
-    <div className={styles.outerContainer}>
+    <div className={s("outerContainer")}>
       <div style={{ userSelect: "none" }}>{paddingSpaces}</div>
-      <div className={styles.innerContainer}>
+      <div className={s("innerContainer")}>
         <div
-          className={styles.messageContainer}
+          className={s("messageContainer")}
           data-type={type}
           style={{ marginLeft: -(shiftLeft || 0) }}
         >
-          {/* <span className={styles.injectComment}>{paddingSpaces}//&nbsp;</span> */}
+          {/* <span className={s("injectComment")}>{paddingSpaces}//&nbsp;</span> */}
           {message.split("\n").map((message, i) => (
             <div key={i}>
-              <span className={styles.injectComment}>{paddingSpaces}//&nbsp;</span>
+              <span className={s("injectComment")}>{paddingSpaces}//&nbsp;</span>
               <span>{spacesAtStart(message)}</span>
               {message.trim()}
             </div>
           ))}
         </div>
         <div
-          className={styles.squiggle}
+          className={s("squiggle")}
           style={{
             backgroundImage: `url("data:image/svg+xml;base64,${
               type === "error" ? squiggleIcon10x7Base64Red : squiggleIcon10x7Base64Blue
@@ -121,7 +125,7 @@ const Message = (props: ErrorProps) => {
           {spaces(width || 1)}
         </div>
       </div>
-      <div className={styles.fillSpace} />
+      <div className={s("fillSpace")} />
     </div>
   );
 };
@@ -187,18 +191,20 @@ const Line = (props: LineProps) => {
 };
 
 export const StaticCodeBlock = (props: StaticCodeBlockProps) => {
+  const s = useStyles(StaticCodeBlockStyles);
+
   const { language, children, marginBottom, small } = props;
 
   const padding = small ? 16 : 24;
   const fontSize = small ? 14 : 16;
 
   return (
-    <div className={styles.outerWrapper}>
+    <div className={s("outerWrapper")}>
       <CopyButton text={children} />
-      <div className={styles.wrapper} style={{ marginBottom, padding }}>
+      <div className={s("wrapper")} style={{ marginBottom, padding }}>
         <Highlight {...defaultProps} code={children} language={language as any} theme={prismTheme}>
           {({ className, style, tokens: lines, getLineProps, getTokenProps }) => (
-            <pre className={[className, styles.pre].join(" ")} style={{ ...style, fontSize }}>
+            <pre className={[className, s("pre")].join(" ")} style={{ ...style, fontSize }}>
               {lines.map((line, i) => {
                 return (
                   <Line

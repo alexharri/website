@@ -1,4 +1,5 @@
 import React from "react";
+import { useStyles } from "../../../utils/styles";
 import { ArrowIcon16 } from "../../Icon/ArrowIcon16";
 import { BackspaceIcon18 } from "../../Icon/BackspaceIcon18";
 import { ControlIcon18 } from "../../Icon/ControlIcon18";
@@ -6,7 +7,7 @@ import { MetaIcon18 } from "../../Icon/MetaIcon18";
 import { OptionIcon18 } from "../../Icon/OptionIcon18";
 import { ShiftIcon18 } from "../../Icon/ShiftIcon18";
 import { ScriptCommand } from "../types/scriptTypes";
-import styles from "./RenderCommand.module.scss";
+import { RenderCommandStyles } from "./RenderCommand.styles";
 
 function escapeText(text: string) {
   return text.replace(/\n/g, "\\n");
@@ -67,8 +68,9 @@ interface ContainerProps {
 }
 
 const Container = ({ children, onClick }: ContainerProps) => {
+  const s = useStyles(RenderCommandStyles);
   return (
-    <div className={styles.container} onClick={onClick}>
+    <div className={s("container")} onClick={onClick}>
       {children}
     </div>
   );
@@ -80,14 +82,27 @@ interface Props {
 }
 
 export const RenderCommand = (props: Props) => {
+  const s = useStyles(RenderCommandStyles);
+
   const { command, onClick } = props;
 
   if (command.command === "Type") {
     return (
       <Container onClick={onClick}>
-        <div className={styles.left}>Type</div>
-        <div className={styles.right}>
-          <code className={styles.key}>{escapeText(command.text)}</code>
+        <div className={s("left")}>Type</div>
+        <div className={s("right")}>
+          <code className={s("key")}>{escapeText(command.text)}</code>
+        </div>
+      </Container>
+    );
+  }
+
+  if (command.command === "Exec") {
+    return (
+      <Container onClick={onClick}>
+        <div className={s("left")}>Exec</div>
+        <div className={s("right")}>
+          <code className={s("key")}>{escapeText(command.label)}</code>
         </div>
       </Container>
     );
@@ -96,9 +111,9 @@ export const RenderCommand = (props: Props) => {
   if (command.command === "Select Word") {
     return (
       <Container onClick={onClick}>
-        <div className={styles.left}>Select</div>
-        <div className={styles.right}>
-          <code className={styles.key}>{escapeText(command.word)}</code>
+        <div className={s("left")}>Select</div>
+        <div className={s("right")}>
+          <code className={s("key")}>{escapeText(command.word)}</code>
         </div>
       </Container>
     );
@@ -108,16 +123,16 @@ export const RenderCommand = (props: Props) => {
 
   return (
     <Container onClick={onClick}>
-      <div className={styles.left}>
+      <div className={s("left")}>
         {modifierKeys.map((key, i) => (
-          <code className={styles.key} key={i}>
+          <code className={s("key")} key={i}>
             {key.render}
           </code>
         ))}
       </div>
-      <div className={styles.right}>
+      <div className={s("right")}>
         {keys.map((key, i) => (
-          <code className={styles.key} key={i}>
+          <code className={s("key")} key={i}>
             {key.render}
           </code>
         ))}
@@ -141,6 +156,8 @@ export const RenderTextCommand = ({
   faded,
   small,
 }: RenderTextCommandProps) => {
+  const s = useStyles(RenderCommandStyles);
+
   if (typeof children !== "string") {
     return "<Invalid command>";
   }
@@ -149,11 +166,11 @@ export const RenderTextCommand = ({
   const allKeys = [...modifierKeys, ...keys];
 
   return (
-    <span className={styles.containerInline} style={{ marginLeft: noMarginLeft ? 0 : undefined }}>
+    <span className={s("containerInline")} style={{ marginLeft: noMarginLeft ? 0 : undefined }}>
       {allKeys.map((key, i) => (
         <React.Fragment key={i}>
-          {typeof key.render !== "string" && <span className={styles.keyLabel}>{key.label}</span>}
-          <code className={styles.key} title={key.label} data-faded={faded} data-small={small}>
+          {typeof key.render !== "string" && <span className={s("keyLabel")}>{key.label}</span>}
+          <code className={s("key")} title={key.label} data-faded={faded} data-small={small}>
             {key.render}
           </code>
           {i === allKeys.length - 1 ? null : <>&nbsp;</>}

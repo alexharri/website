@@ -3,12 +3,13 @@ import { AnimatePresence, motion } from "framer-motion";
 import { useDidUpdate, useDidUpdateLayoutEffect } from "../../../utils/hooks/useDidUpdate";
 import { FocusedScriptContext } from "../FocusedScriptContext/FocusedScriptContext";
 import { RunContext } from "../run/RunContext";
-import styles from "./ScriptNavigation.module.scss";
 import { RenderCommand } from "../RenderCommand/RenderCommand";
 import { useViewportWidth } from "../../../utils/hooks/useViewportWidth";
 import { moveToIndex } from "../scriptedEditorUtils";
 import { scriptedEditorConstants } from "../scriptedEditorConstants";
 import { ArrowIcon16 } from "../../Icon/ArrowIcon16";
+import { useStyles } from "../../../utils/styles";
+import { ScriptNavigationStyles } from "./ScriptNavigation.styles";
 
 const { SCRIPT_NAVIGATION_WIDTH, SCRIPT_NAVIGATION_BREAKPOINT, SCRIPT_NAVIGATION_DRAWER_HEIGHT } =
   scriptedEditorConstants;
@@ -22,6 +23,8 @@ interface Props {
 }
 
 export const ScriptNavigation = (props: Props) => {
+  const s = useStyles(ScriptNavigationStyles);
+
   const { runContext, show, setShow } = props;
   const { focusedScriptId: scriptId } = useContext(FocusedScriptContext);
 
@@ -112,26 +115,26 @@ export const ScriptNavigation = (props: Props) => {
           }
           animate={isMobile ? { y: 0 } : { x: 0 }}
           exit={isMobile ? { y: SCRIPT_NAVIGATION_DRAWER_HEIGHT } : { x: -SCRIPT_NAVIGATION_WIDTH }}
-          className={isMobile ? styles.containerMobile : styles.container}
+          className={isMobile ? s("containerMobile") : s("container")}
           data-script-navigation={props.scriptId}
         >
-          <div className={styles.activeCommandHighlight} />
-          <div className={styles.scroll} style={{ transform: "translateY(-32px)" }} ref={scrollRef}>
+          <div className={s("activeCommandHighlight")} />
+          <div className={s("scroll")} style={{ transform: "translateY(-32px)" }} ref={scrollRef}>
             {props.runContext.script.map((command, i) => (
-              <div data-command={i} className={styles.command} key={i}>
+              <div data-command={i} className={s("command")} key={i}>
                 <RenderCommand command={command} onClick={() => props.moveToIndex(i)} />
               </div>
             ))}
             {!isMobile && (
-              <p className={styles.arrowKeyHint} ref={arrowKeyHintRef}>
+              <p className={s("arrowKeyHint")} ref={arrowKeyHintRef}>
                 <span>Hint:</span>
                 <span>
                   Use the arrow keys (
-                  <i className={styles.arrowIcon}>
+                  <i className={s("arrowIcon")}>
                     <ArrowIcon16 direction="up" />
                   </i>
                   ,{" "}
-                  <i className={styles.arrowIcon}>
+                  <i className={s("arrowIcon")}>
                     <ArrowIcon16 direction="down" />
                   </i>
                   ) to move between the steps
@@ -140,11 +143,11 @@ export const ScriptNavigation = (props: Props) => {
             )}
           </div>
           {isMobile && (
-            <div className={styles.moveButtonWrapper}>
-              <button className={styles.moveButton} onClick={() => onMoveIndex(-1)}>
+            <div className={s("moveButtonWrapper")}>
+              <button className={s("moveButton")} onClick={() => onMoveIndex(-1)}>
                 Prev
               </button>
-              <button className={styles.moveButton} onClick={() => onMoveIndex(1)}>
+              <button className={s("moveButton")} onClick={() => onMoveIndex(1)}>
                 Next
               </button>
             </div>

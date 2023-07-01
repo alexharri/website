@@ -3,10 +3,11 @@ import ReactDOM from "react-dom";
 import { useIsomorphicLayoutEffect } from "../../utils/hooks/useIsomorphicLayoutEffect";
 import { FocusedScriptContext } from "./FocusedScriptContext/FocusedScriptContext";
 import { RunContext } from "./run/RunContext";
-import styles from "./ScriptedEditorControls.module.scss";
 import { scriptedEditorConstants } from "./scriptedEditorConstants";
 import { moveToIndex, startScript } from "./scriptedEditorUtils";
 import { ScriptNavigation } from "./ScriptNavigation/ScriptNavigation";
+import { useStyles } from "../../utils/styles";
+import { ScriptedEditorControlsStyles } from "./ScriptedEditorControls.styles";
 
 const { SCRIPT_NAVIGATION_WIDTH, SCRIPT_NAVIGATION_BREAKPOINT } = scriptedEditorConstants;
 
@@ -18,6 +19,8 @@ interface Props {
 }
 
 export const ScriptedEditorControls = (props: Props) => {
+  const s = useStyles(ScriptedEditorControlsStyles);
+
   const { runContext } = props;
 
   const { focusedScriptId } = useContext(FocusedScriptContext);
@@ -104,7 +107,7 @@ export const ScriptedEditorControls = (props: Props) => {
   return (
     <div style={{ marginTop: 16 }}>
       <button
-        className={[styles.bigButtonWrapper, styles.slideIn].join(" ")}
+        className={[s("bigButtonWrapper"), s("slideIn")].join(" ")}
         onMouseDown={onBigButtonMouseDown}
         onClick={() => {
           if (isPlaying) {
@@ -117,10 +120,10 @@ export const ScriptedEditorControls = (props: Props) => {
         data-down={isPlaying}
         data-active={isFocused}
       >
-        <div className={styles.bigButton}>Play</div>
+        <div className={s("bigButton")}>Play</div>
       </button>
       <button
-        className={[styles.textButton, styles.slideIn].join(" ")}
+        className={[s("textButton"), s("slideIn")].join(" ")}
         onMouseDown={onBigButtonMouseDown}
         onClick={() => onStartScript(0)}
         data-nth="2"
@@ -130,7 +133,7 @@ export const ScriptedEditorControls = (props: Props) => {
       </button>
 
       <button
-        className={[styles.textButton, styles.slideIn].join(" ")}
+        className={[s("textButton"), s("slideIn")].join(" ")}
         onMouseDown={onBigButtonMouseDown}
         onClick={() => {
           setShowNavigation((showNavigation) => !showNavigation);
