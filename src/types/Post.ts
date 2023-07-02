@@ -5,5 +5,5 @@ export interface Post {
   description: string;
   /** Empty string if not provided */
   publishedAt: string;
+  updatedAt?: string;
 }
-
