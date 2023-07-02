@@ -16,7 +16,6 @@ import { usePostWatcher } from "../../../utils/hooks/usePostWatcher";
 import { snippetFileNames, SNIPPETS_PATH } from "../../../utils/mdxUtils";
 import { withMargin } from "../../../utils/withMargin";
 
-
 // Custom components/renderers to pass to MDX.
 // Since the MDX files aren't loaded by webpack, they have no knowledge of how
 // to handle import statements. Instead, you must include components in scope
@@ -34,6 +33,7 @@ interface Props {
   source: MDXRemoteSerializeResult;
   version: string;
   slug: string;
+  category: string;
 }
 
 export default function PostPage(props: Props) {
@@ -42,7 +42,11 @@ export default function PostPage(props: Props) {
 
   return (
     <>
-      <Meta title={scope.title} description={scope.description} />
+      <Meta
+        title={scope.title}
+        description={scope.description}
+        pathName={`/snippets/${props.category}/${props.slug}`}
+      />
       <Layout>
         <main>
           <SnippetTitle title={scope.title} />
@@ -85,7 +89,7 @@ export const getStaticProps: GetStaticProps<Props, Params> = async (ctx) => {
     version = fs.readFileSync(versionFilePath, "utf-8");
   }
 
-  return { props: { source, slug: params.slug, version } };
+  return { props: { source, slug: params.slug, category: params.category, version } };
 };
 
 export const getStaticPaths: GetStaticPaths<Params> = async () => {

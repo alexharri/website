@@ -4,6 +4,7 @@ interface Props {
   title: string;
   description?: string;
   image?: string;
+  pathName: string;
 }
 
 export const Meta = (props: Props) => {
@@ -11,6 +12,8 @@ export const Meta = (props: Props) => {
     <Head>
       <title key="title">{props.title}</title>
       <meta key="og:title" property="og:title" content={props.title} />
+
+      <link rel="canonical" href={process.env.SITE_URL + props.pathName} />
 
       {props.description && (
         <>

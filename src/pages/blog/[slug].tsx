@@ -62,7 +62,12 @@ export default function PostPage(props: Props) {
 
   return (
     <>
-      <Meta title={scope.title} description={scope.description} image={scope.image} />
+      <Meta
+        title={scope.title}
+        description={scope.description}
+        image={scope.image}
+        pathName={`/blog/${props.slug}`}
+      />
       <Layout>
         <main>
           <div style={{ marginBottom: 40 }}>
