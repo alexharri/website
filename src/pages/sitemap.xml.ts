@@ -7,7 +7,7 @@ function generateSiteMap() {
     return `
   <url>
     <loc>https://alexharri.com/blog/${post.slug}</loc>
-    <lastmod>${post.updatedAt || post.publishedAt}T00:00:00+00:00</lastmod>
+    <lastmod>${post.updatedAt || post.publishedAt}</lastmod>
   </url>`.trim();
   };
 
