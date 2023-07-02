@@ -1,14 +1,14 @@
 {
   "name": "website",
   "version": "0.1.0",
-  "private": true,
   "scripts": {
     "dev": "next dev -p 8080",
     "build": "next build",
     "start": "next start -p 8080",
     "lint": "next lint",
-    "watcher": "ts-node -T -O '{\"module\":\"commonjs\"}' ./watcher/postWatcher.ts",
-    "typecheck": "tsc --noEmit --skipLibCheck"
+    "watcher": "ts-node -T ./watcher/postWatcher.ts",
+    "typecheck": "tsc --noEmit --skipLibCheck",
+    "generate-sitemap": "ts-node -T ./scripts/generate-sitemap.ts"
   },
   "dependencies": {
     "@emotion/css": "^11.11.2",

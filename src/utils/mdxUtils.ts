@@ -1,7 +1,6 @@
 import fs from "fs";
 import path from "path";
 
-
 export const POSTS_PATH = path.resolve(process.cwd(), "./posts");
 export const SNIPPETS_PATH = path.resolve(process.cwd(), "./snippets");
 

@@ -4,7 +4,6 @@ import matter from "gray-matter";
 import { postFileNames, POSTS_PATH } from "./mdxUtils";
 import { GetStaticProps } from "next";
 import { MDXRemoteSerializeResult } from "next-mdx-remote";
-import { serialize } from "next-mdx-remote/serialize";
 import { Post } from "../types/Post";
 
 export const getPosts = (type: "published" | "draft") => {
@@ -78,6 +77,7 @@ export const getPostProps: GetStaticProps<Props, Params> = async (ctx) => {
 
   const { content, data } = matter(fileContent);
 
+  const serialize = (await import("next-mdx-remote/serialize")).serialize;
   const source = await serialize(content, {
     scope: data,
     mdxOptions: {
