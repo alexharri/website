@@ -24,6 +24,12 @@ export const ImageStyles = ({ styled }: StyleOptions) => ({
       margin-right: -24px;
     }
 
+    &--plain {
+      &:before {
+        display: none;
+      }
+    }
+
     @media (max-width: 800px) {
       margin-left: 0;
       margin-right: 0;
@@ -33,6 +39,12 @@ export const ImageStyles = ({ styled }: StyleOptions) => ({
   image: styled.css`
     border-radius: 8px;
     border: 2px solid #1f4f76;
-    margin: 0;
+    margin: 0 auto;
+    display: block;
+
+    &--plain {
+      border: none;
+      border-radius: 0;
+    }
   `,
 });

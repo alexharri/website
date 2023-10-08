@@ -5,13 +5,14 @@ import { ImageStyles } from "./Image.styles";
 interface Props {
   src?: string;
   wide?: boolean;
+  plain?: boolean;
+  width?: number;
 }
 
-export const Image = (props: Props) => {
+export const Image = ({ wide, plain, width, ...props }: Props) => {
   const s = useStyles(ImageStyles);
   const router = useRouter();
 
-  const { wide } = props;
   let src = props.src || "";
 
   const { slug } = router.query;
@@ -25,8 +26,14 @@ export const Image = (props: Props) => {
   }
 
   return (
-    <div className={s("container", { wide })}>
-      <img {...props} src={src} width="100%" className={s("image")} />
+    <div className={s("container", { wide, plain })}>
+      <img
+        {...props}
+        src={src}
+        width="100%"
+        className={s("image", { plain })}
+        style={{ maxWidth: width }}
+      />
     </div>
   );
 };
