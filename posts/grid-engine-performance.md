@@ -1,17 +1,17 @@
 ---
-title: "Making GRID's spreadsheet engine 10% faster by sharing immutable objects"
-description: ""
+title: "Making GRIDs spreadsheet engine 10% faster"
+description: "Optimizing the performance of GRIDs browser-based spreadsheet engine, through the use of shared immutable objects."
 publishedAt: ""
 image: ""
 ---
 
-GRID's engine is a beaut. Written in JavaScript, it's a feature-complete spreadsheet engine running the browser, supporting advanced features like [spilling][spilling], [iterative calculation][iterative_calculation], and the [`QUERY` function][query_func]. As a member of GRID's Engine Team, I got to implement some of these features, and do a lot of interesting performance and optimization work.
+GRIDs product sports a feature-complete spreadsheet engine running the browser, with advanced features such as [spilling][spilling], [iterative calculation][iterative_calculation], and the [`QUERY` function][query_func]. It's a beaut.
 
 [spilling]: https://grid.is/@hjalli/spilling-support-in-grid-Uq_xPRt7SXuKlWf2WnwYZA
 [iterative_calculation]: https://grid.is/@hjalli/iterative-calculations-example-hjmC1fe5RoqjEstgAEnaJw
 [query_func]: https://grid.is/@grid/summarize-data-with-the-query-function-InXxO_7vS6KNkV6tYScx3Q
 
-The Engine Team regularly handles customer care requests relating to bugs and performance issues in spreadsheets. Last June, I took a look at a particularly large and complicated spreadsheet where a write to a single cell caused ~12.000 cells to be recalculated. The recalculation took >700ms to execute on my machine (M1 Pro).
+The Engine Team, regularly handles customer care requests relating to bugs and performance issues in spreadsheets. Last June, I took a look at a particularly large and complicated spreadsheet where a write to a single cell caused ~12.000 cells to be recalculated. The recalculation took >700ms to execute on my machine (M1 Pro).
 
 Profiling the recalculation, about 12.5% of the time was spent in a method called `_makeCalcCellEvaluationContext`.
 
@@ -20,7 +20,7 @@ Profiling the recalculation, about 12.5% of the time was spent in a method calle
 In this post, we'll explore the techniques I used to take this time to near zero.
 
 
-## GRID's Spreadsheet Engine
+## GRIDs Spreadsheet Engine
 
 Spreadsheets have _a lot_ of use cases, ranging from budget management and attendance sheets, all the way to complex financial models. At the heart of the more complex models are dependencies. Cells depending on other cells.
 
@@ -233,7 +233,7 @@ The Engine Team has developed a performance and regression testing suite for its
 
 This suite enables the Engine Team to evaluate the performance impact of changes, and detect discrepancies that our unit tests might fail to detect.
 
-Running GRID's performance tests on this change shows that it yields, roughly, a 10% performance boost.
+Running GRIDs performance tests on this change shows that it yields, roughly, a 10% performance boost.
 
 ```
 Proportional differences from baseline
@@ -257,7 +257,7 @@ Proportional differences from baseline
 
 ## Conclusion
 
-Aside from the positive effect this change had on GRID's performance, I think it serves as a useful example to think about performance:
+Aside from the positive effect this change had on GRIDs performance, I think it serves as a useful example to think about performance:
 
 > _Which information do we need to evaluate now, and which can we evaluate later?_
 >
