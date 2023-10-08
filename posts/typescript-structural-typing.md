@@ -3,6 +3,8 @@ title: "Why doesn't TypeScript properly type Object.keys?"
 description: "A look at TypeScript's structural type system, and we how we can effectively use it to our benefit."
 publishedAt: "2023-06-24"
 image: ""
+translations:
+  Korean: https://kofearticle.substack.com/p/korean-fe-article-objectkeys
 ---
 
 If you've written TypeScript for a while, you've probably run into this:
