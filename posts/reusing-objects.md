@@ -5,7 +5,7 @@ publishedAt: ""
 image: ""
 ---
 
-GRID's spreadsheet engine is a beaut. It's a sophisticated and feature-complete spreadsheet engine, supporting advanced features like [spilling][spilling], [iterative calculation][iterative_calculation], and the [`QUERY` function][query_func]. As a member of GRID's Engine Team, I got to implement some of these features, and do a lot of interesting performance and optimization work.
+GRID's engine is a beaut. Written in JavaScript, it's a feature-complete spreadsheet engine running the browser, supporting advanced features like [spilling][spilling], [iterative calculation][iterative_calculation], and the [`QUERY` function][query_func]. As a member of GRID's Engine Team, I got to implement some of these features, and do a lot of interesting performance and optimization work.
 
 [spilling]: https://grid.is/@hjalli/spilling-support-in-grid-Uq_xPRt7SXuKlWf2WnwYZA
 [iterative_calculation]: https://grid.is/@hjalli/iterative-calculations-example-hjmC1fe5RoqjEstgAEnaJw
@@ -17,7 +17,7 @@ Profiling the recalculation, about 12.5% of the time was spent in a method calle
 
 <Image src="~/profiler.png" plain />
 
-In this post, we'll explore the trick we used to take this time to near zero.
+In this post, we'll explore the techniques I used to take this time to near zero.
 
 
 ## GRID's Spreadsheet Engine
@@ -37,7 +37,7 @@ Different scenarios are modeled by adjusting the inputs and seeing how the model
 >
 > _What if the interest rate rises to 9%?_
 
-For the model to "react" to changes in the inputs:
+For the model to "react" to changes in an input cell:
 
  * Cells depending on the changed input cell need to be recalculated.
  * To find the cell's dependents, the model employs a dependency graph.
@@ -47,12 +47,14 @@ This cycle of recalculating dependents occurs recursively. A cell's value changi
 <iframe src="https://grid.is/embed/project-x-revenue-model-calculator-svb0l49pTlGx64orRDXjJQ" width="100%" height="440" data-document-id="b2f6f497-8f69-4e51-b1eb-8a2b4435e325" style={{ border: "0px" }}referrerPolicy="strict-origin-when-cross-origin"></iframe>
 <script type="text/javascript" src="https://grid.is/static/embed/v1/script.js"></script>
 
-This GRID document is powered by an underlying spreadsheet that looks like so:
+What you're looking at is a GRID document, containing a graph powered by this underlying spreadsheet:
 
 <iframe src="https://grid.is/embed/exponential-grow-copy-LglRQ4ToRsu10ukWgl1msw" width="100%" height="448" data-document-id="2e095143-84e8-46cb-b5d2-e916825d66b3" style={{ border: "0px" }} referrerPolicy="strict-origin-when-cross-origin"></iframe>
 <script type="text/javascript" src="https://grid.is/static/embed/v1/script.js"></script>
 
-This spreadsheet is simple, but more complex models often contain tens or hundrends of thousands of cells. A single output cell is often the product of calculations encompassing dozens of thousands of cells. And the reverse! A single input cell is often indirectly used in the majority of calculations in a spreadsheet.
+While this spreadsheet is small, more complex models often contain tens or hundrends of thousands of cells.
+
+A single output cell is often the product of calculations encompassing dozens of thousands of cells. And the reverse: A single input cell is often used — directly or indirectly — in the majority of calculations in a spreadsheet.
 
 
 ## The cost of recalculation
@@ -62,64 +64,61 @@ The cost of recalculation can be split into a two distinct parts:
  1. Determining which cells to recalculate, and in which order.
  2. Recalculating cells.
 
-The recalculation of cells can further be split up into the fixed cost associated with recalculating a cell, and the variable cost associated with recalculating a cell.
+The recalculation of cells can further be split up into the __fixed cost__ associated with recalculating a cell, and the __variable cost__ associated with recalculating a cell.
 
 The variable cost is more immediately obvious: A cell invoking an expensive function like `QUERY` on a large dataset will take longer to recalculate than a cell adding two numbers together.
-
-The variable cost just depends on how expensive the user-written formula for the cell is.
 
 ```
 # This will take a while
 =QUERY(A:E, "select Name, Age where Age > 18 order by Name desc");
 
 # This will take no time at all
-=SUM(D3:D7)
+=SUM(A1, B1)
 ```
 
-Cells also need to have access to some contextual information. For example, when using a reference like `A:A`, the engine needs to know which workbook and sheet to resolve the `A:A` reference in. Given that the formula is written in `Sheet1` in `workbook.xlsx`:
+For the most part, the variable cost is derived from how expensive the cell's user-written formula is.
+
+The fixed cost arises from setting up the context needed to evaluate the formula. For example, when evaluating a reference like `A1`, the engine needs a bit of context to know which workbook and sheet to resolve the reference to.
+
+Given that the following formulas are written in `Sheet1` in `workbook.xlsx`:
 
 ```
-# Resolves to '[workbook.xlsx]Sheet1!A:A'
-=A:A
+# Resolves to '[workbook.xlsx]Sheet1!A1'
+=A1
 
-# Resolves to '[workbook.xlsx]Sheet2!A:A'
-=Sheet2!A:A
+# Resolves to '[workbook.xlsx]Sheet2!A1'
+=Sheet2!A1
 
-# Resolves to '[numbers.xlsx]Sheet3!A:A'
-=[numbers.xlsx]Sheet3!A:A
+# Resolves to '[wb2.xlsx]Sheet3!A1'
+=[wb2.xlsx]Sheet3!A1
 ```
 
-In addition to the current workbook and sheet, there's a lot of contextual information that cells _may_ need during recalculation. For example:
+In addition to the current workbook and sheet, there's other contextual information that the engine _may_ require during recalculation. For example:
 
  * When using structured references without a table name such as `[[#This row], [Value]]`, the engine needs to resolve the table encompassing the cell.
- * Because Excel and Google Sheets implement some (_a lot_) of functions differently, GRID contains Excel and Google Sheets mode for compatibility. Spreadsheet functions need to be able to resolve the current mode to match mode-specific behaviors.
+ * Because Excel and Google Sheets implement some (_a lot_) of functions differently, GRID has Excel and Google Sheets modes for compatibility. Spreadsheet functions need to be able to resolve the current mode to match mode-specific behaviors.
 
-To provide this contextual information, the engine constructs an object containing this information — which we call the _evaluation context_ — in a method called  `_makeCalcCellEvaluationContext`. This is what we see taking 12.5% of recalculation time.
+To provide this contextual information, the engine constructs an object called the _evaluation context_ in a method called  `_makeCalcCellEvaluationContext`. This is what we see taking 12.5% of recalculation time.
 
 <Image src="~/profiler.png" plain />
 
-Constructing the evaluation context is done once for each cell, and the cost of constructing it is the same for every cell. This is the fixed cost associated with reclaculating a cell.
+Constructing the evaluation context is done once for each cell, and the cost of doing so is the same for every cell, which constitutes the fixed cost associated with recalculating a cell.
 
-The fixed cost was especially high for this particular workbook because there were thousands of cells being recalculated, and the formulas themselves were not very expensive. In workbooks with fewer, more expensive formulas, the variable cost would dominate over the fixed cost.
+The proportion of the total work that is spent constructing the evaluation context depends on how high the variable cost (formula evaluation) is. In workbooks with fewer, more expensive formulas, the variable cost dominates over the fixed cost.
 
-```
-[Graph showing fixed vs variable cost dynamic]
-```
-
-
-Whether individual pieces of information in the evaluation context were consumed depends entirely on the cell's formula, and the functions it invokes. We were expending a fixed amount of effort for a variable amount of benefit.
+<Image src="~/fixed-cost-ratio.png" plain />
 
 
 ## Evaluating the fixed cost
 
-When recalculating a cell, the evaluation context would be created and passed to a `evaluateCellFormula` function.
+When recalculating a cell, the evaluation context is created and passed to a function that evaluates the cell's formula (more specifically, evaluates the formula's AST).
 
 ```tsx
 const ctx = this._makeCalcCellEvaluationContext(cell, ref, ...);
-const value = evaluateCellFormula(cell, ctx);
+const value = evaluateAST(cell, ctx);
 ```
 
-The `_makeCalcCellEvaluationContext` method's implementation looked something like so:
+The `_makeCalcCellEvaluationContext` method exists on the `Workbook` class, with the implementation looking like so:
 
 ```tsx
 class Workbook implements EvaluationContext {
@@ -130,6 +129,7 @@ class Workbook implements EvaluationContext {
     const property2 = ...;
     const method1 = () => { ... };
     const method2 = () => { ... };
+    // ...
   
     const evaluationContext: EvaluationContext = {
       ...this,
@@ -144,26 +144,18 @@ class Workbook implements EvaluationContext {
 }
 ```
 
-We're doing a few things here:
+A key observation is that not all of the properties and methods are necessarily used.
 
- 1. Computing some properties and defining some methods.
- 2. Spreading the workbook (`this`) into a new object, alongside the properties and methods.
+Whether a piece of information is used during evaluation depends entirely on the cell's formula, and the functions it invokes. By computing all properties ahead of time, we expend a fixed amount of effort for a variable amount of benefit.
 
-Creating the properties and methods does not seem very expensive. However, the sheer number of repitions starts to create issues. Creating 10 properties and methods for 12,000 cells results in 120,000 properties and methods to compute and allocate. That's a lot.
-
-In addition to the properties and methods, the `Workbook` class itself was quite large. Assigning it into a new object required assigning 30+ methods into a new object. Repeated 12,000 times, that becomes significant amount of work.
-
-As we saw in the profiler, this amounted to 12.5% work done during recalculation.
+In addition, the `Workbook` class is quite large, containing >30 methods and properties. Assigning those to a new object is costly.
 
 
 ## Eliminating the fixed cost
 
-To reduce the work we were doing, we want to do a few things:
+As with any performance optimization, the solution is doing less work.
 
- 1. Do not compute properties ahead of time. Compute them lazily on-demand.
- 2. Do not spread `this` into a new object for each evaluation.
-
-The first step in doing less work is to lazily compute the properties. This could be done with getters:
+The first way to do less work is to lazily compute information, which we implemented through the use of getters.
 
 ```tsx
 const method1 = ...;
@@ -180,9 +172,9 @@ const evaluationContext: EvaluationContext = {
 return evaluationContext
 ```
 
-Now we're only computing those properties when they're actually used, resulting in less work. Fantastic!
+Now we only compute properties if they're actually used.
 
-To avoid spreading `this` over and over, we created a single shared evaluation context, encapsulated in a new `CellEvaluator` class.
+To avoid assigning `this` into a new object over and over, we created a single shared evaluation context object, encapsulated in a new `CellEvaluator` class.
 
 ```tsx
 class CellEvaluator {
@@ -190,10 +182,10 @@ class CellEvaluator {
   private cell: Cell;
   private ref: Reference;
   // ...
-  
+
   constructor (workbook: Workbook) {
     const self = this;
-    
+
     this.evaluationContext = Object.freeze({
       ...workbook,
 
@@ -203,28 +195,28 @@ class CellEvaluator {
       get property2 () { ... },
       method1 () { ... },
       method2 () { ... },
-    })
+    });
   }
 
   evaluate (cell: Cell, ref: Reference, ...) {
     this.cell = cell;
     this.ref = ref;
     // ...
-    return evaluateCellFormula(cell, this.evaluationContext);
+    return evaluateAST(cell, this.evaluationContext);
   }
 }
 ```
 
-The `CellEvaluator` contains a few private mutable properties, which the evaluation context has access to.
+The dynamic portion of the evaluation context (`cell`, `ref`, etc) are placed into private properties on `CellEvaluator`, accessible via the `self` reference. By mutating those properties, we effectively create a new evaluation context without creating a new object instance.
 
-By creating a single shared evaluation context object, we avoid spreading the workbook into a new object repeatedly, which also creates less work for the garbage collector.
+By only creating a single shared evaluation context object, we avoid spreading the workbook into a new object repeatedly — which also creates less work for the garbage collector.
 
-The code for cell evaluation also became a tad simpler:
+As a small side benefit, the code for recalculation became a _tad_ simpler:
 
 ```tsx
 // Before
 const ctx = this._makeCalcCellEvaluationContext(cell, ref, ...);
-const value = evaluateCellFormula(cell, ctx);
+const value = evaluateAST(cell, ctx);
 
 // After
 const value = this.cellEvaluator.evaluate(cell, ref, ...);
@@ -233,16 +225,15 @@ const value = this.cellEvaluator.evaluate(cell, ref, ...);
 
 ## Evaluating the impact
 
-The Engine Team has developed a fairly sophisticated performance and regression testing suite for its spreadsheet engine. It runs on real public GRID documents and performs a series of tests measuring:
+The Engine Team has developed a performance and regression testing suite for its spreadsheet engine. It runs on real public GRID documents, on which it performs a series of tests measuring:
 
  * Initialization time
  * Write duration (recalculation performance)
- * Memory usage
  * Discrepancies (expected vs actual output)
 
-This suite enables the engine team to evaluate the performance impact of changes (and detect discrepancies that our roughly 100,000 unit tests might fail to detect).
+This suite enables the Engine Team to evaluate the performance impact of changes, and detect discrepancies that our unit tests might fail to detect.
 
-Running GRID's performance test suite on this change showed that it yielded roughly a 10% performance increase.
+Running GRID's performance tests on this change shows that it yields, roughly, a 10% performance boost.
 
 ```
 Proportional differences from baseline
@@ -263,3 +254,28 @@ Proportional differences from baseline
     +6.60% (from 89.7 ms to 95.6 ms)
 ```
 
+
+## Conclusion
+
+Aside from the positive effect this change had on GRID's performance, I think it serves as a useful example to think about performance:
+
+> _Which information do we need to evaluate now, and which can we evaluate later?_
+>
+> _What is the fixed cost associated with performing this operation?_
+>
+> _Do we need to do this work in the first place?_
+>
+> _Can we cache the result of this operation? How does that impact memory usage?_
+
+
+Also, consider that changes that yield a performance benefit overall may causes degraded performance under some circumstances. Considering the worst case, and the circumstances under which it might occur.
+
+As an example, the change from static properties to getters creates a worst-case scenario in which formulas repeatedly evaluate the same piece of information. This is the likely cause of the degraded performance we saw in a few documents (aside from noise). Maybe that could be resolved with caching!
+
+Anyway, I hope this served as an interesting read. Maybe you got some ideas which you can apply to your own code!
+
+— Alex Harri
+
+---
+
+PS: Check out [GRID](https://grid.is/)! It's a fantastic tool for, amongst other things, building interactive documents on top of your spreadsheets.
