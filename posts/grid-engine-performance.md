@@ -1,17 +1,17 @@
 ---
-title: "Making GRIDs spreadsheet engine 10% faster"
-description: "Optimizing the performance of GRIDs browser-based spreadsheet engine, through the use of shared immutable objects."
+title: "Making GRID's spreadsheet engine 10% faster"
+description: "Optimizing the performance of GRID's browser-based spreadsheet engine, through the use of shared immutable objects."
 publishedAt: ""
 image: ""
 ---
 
-GRIDs product sports a feature-complete spreadsheet engine running the browser, with advanced features such as [spilling][spilling], [iterative calculation][iterative_calculation], and the [`QUERY` function][query_func]. It's a beaut.
+GRID's product sports a feature-complete spreadsheet engine running in the browser, with advanced features such as [spilling][spilling], [iterative calculation][iterative_calculation], and the [`QUERY` function][query_func]. It's a beaut.
 
 [spilling]: https://grid.is/@hjalli/spilling-support-in-grid-Uq_xPRt7SXuKlWf2WnwYZA
 [iterative_calculation]: https://grid.is/@hjalli/iterative-calculations-example-hjmC1fe5RoqjEstgAEnaJw
 [query_func]: https://grid.is/@grid/summarize-data-with-the-query-function-InXxO_7vS6KNkV6tYScx3Q
 
-The Engine Team, regularly handles customer care requests relating to bugs and performance issues in spreadsheets. Last June, I took a look at a particularly large and complicated spreadsheet where a write to a single cell caused ~12.000 cells to be recalculated. The recalculation took >700ms to execute on my machine (M1 Pro).
+The Engine Team regularly handles customer care requests relating to bugs and performance issues in spreadsheets. Last June, I took a look at a particularly large and complicated spreadsheet where a write to a single cell caused ~12.000 cells to be recalculated. The recalculation took >700ms to execute on my machine (M1 Pro).
 
 Profiling the recalculation, about 12.5% of the time was spent in a method called `_makeCalcCellEvaluationContext`.
 
@@ -20,12 +20,12 @@ Profiling the recalculation, about 12.5% of the time was spent in a method calle
 In this post, we'll explore the techniques I used to take this time to near zero.
 
 
-## GRIDs Spreadsheet Engine
+## GRID's Spreadsheet Engine
 
 Spreadsheets have _a lot_ of use cases, ranging from budget management and attendance sheets, all the way to complex financial models. At the heart of the more complex models are dependencies. Cells depending on other cells.
 
  * A mortgage calculator may have cells depending, directly or indirectly, on a cell representing an `Interest Rate`.
- * In a spreadsheet to calculate marketing spend, the `Interest Rate` might be replaced with `Cost-per-Click` and `Conversion Rate` variables instead.
+ * In a spreadsheet to calculate marketing spend, you might instead have `Cost-per-Click` and `Conversion Rate` variables.
 
 <Image src="~/mortgage-calculator.png" plain width={400} />
 
@@ -52,14 +52,14 @@ What you're looking at is a GRID document, containing a graph powered by this un
 <iframe src="https://grid.is/embed/exponential-grow-copy-LglRQ4ToRsu10ukWgl1msw" width="100%" height="448" data-document-id="2e095143-84e8-46cb-b5d2-e916825d66b3" style={{ border: "0px" }} referrerPolicy="strict-origin-when-cross-origin"></iframe>
 <script type="text/javascript" src="https://grid.is/static/embed/v1/script.js"></script>
 
-While this spreadsheet is small, more complex models often contain tens or hundrends of thousands of cells.
+While this spreadsheet is small, more complex models often contain tens or hundreds of thousands of cells.
 
 A single output cell is often the product of calculations encompassing dozens of thousands of cells. And the reverse: A single input cell is often used — directly or indirectly — in the majority of calculations in a spreadsheet.
 
 
 ## The cost of recalculation
 
-The cost of recalculation can be split into a two distinct parts:
+The cost of recalculation can be split into two distinct parts:
 
  1. Determining which cells to recalculate, and in which order.
  2. Recalculating cells.
@@ -118,7 +118,7 @@ const ctx = this._makeCalcCellEvaluationContext(cell, ref, ...);
 const value = evaluateAST(cell, ctx);
 ```
 
-The `_makeCalcCellEvaluationContext` method exists on the `Workbook` class, with the implementation looking like so:
+The `_makeCalcCellEvaluationContext` method exists on the `Workbook` class, with the implementation along the lines of:
 
 ```tsx
 class Workbook implements EvaluationContext {
@@ -233,7 +233,7 @@ The Engine Team has developed a performance and regression testing suite for its
 
 This suite enables the Engine Team to evaluate the performance impact of changes, and detect discrepancies that our unit tests might fail to detect.
 
-Running GRIDs performance tests on this change shows that it yields, roughly, a 10% performance boost.
+Running GRID's performance tests on this change shows that it yields, roughly, a 10% performance boost.
 
 ```
 Proportional differences from baseline
@@ -257,7 +257,7 @@ Proportional differences from baseline
 
 ## Conclusion
 
-Aside from the positive effect this change had on GRIDs performance, I think it serves as a useful example to think about performance:
+Aside from the positive effect this change had on GRID's performance, I think it serves as a useful example to think about performance:
 
 > _Which information do we need to evaluate now, and which can we evaluate later?_
 >
@@ -267,10 +267,9 @@ Aside from the positive effect this change had on GRIDs performance, I think it 
 >
 > _Can we cache the result of this operation? How does that impact memory usage?_
 
+Bear in mind that changes yielding a performance boost in some cases might cause degraded performance in others. Consider the worst case scenario, and the circumstances under which it might occur.
 
-Also, consider that changes that yield a performance benefit overall may causes degraded performance under some circumstances. Considering the worst case, and the circumstances under which it might occur.
-
-As an example, the change from static properties to getters creates a worst-case scenario in which formulas repeatedly evaluate the same piece of information. This is the likely cause of the degraded performance we saw in a few documents (aside from noise). Maybe that could be resolved with caching!
+As an example, the change from static properties to getters creates a worst-case scenario in which formulas repeatedly evaluate the same piece of information. This is the likely cause of the degraded performance we saw in a few documents (aside from noise). Maybe that could be mitigated with caching!
 
 Anyway, I hope this served as an interesting read. Maybe you got some ideas which you can apply to your own code!
 
@@ -278,4 +277,9 @@ Anyway, I hope this served as an interesting read. Maybe you got some ideas whic
 
 ---
 
+Big thank you to [Gunnlaugur Þór Briem][gthb_linkedin] for reading the draft of this post and providing great feedback!
+
+[gthb_linkedin]: https://www.linkedin.com/in/gunnlaugur-briem/
+
 PS: Check out [GRID](https://grid.is/)! It's a fantastic tool for, amongst other things, building interactive documents on top of your spreadsheets.
+
