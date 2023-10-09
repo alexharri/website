@@ -207,7 +207,7 @@ class CellEvaluator {
 }
 ```
 
-The dynamic portion of the evaluation context (`cell`, `ref`, etc) are placed into private properties on `CellEvaluator`, accessible via the `self` reference. By mutating those properties, we effectively create a new evaluation context without creating a new object instance.
+The dynamic portion of the evaluation context (`cell`, `ref`, etc) is placed into private properties on `CellEvaluator`, accessible via the `self` reference. By mutating those properties, we effectively create a new evaluation context without creating a new object instance.
 
 By only creating a single shared evaluation context object, we avoid spreading the workbook into a new object repeatedly — which also creates less work for the garbage collector.
 
@@ -231,7 +231,7 @@ The Engine Team has developed a performance and regression testing suite for its
  * Write duration (recalculation performance)
  * Discrepancies (expected vs actual output)
 
-This suite enables the Engine Team to evaluate the performance impact of changes, and detect discrepancies that our unit tests might fail to detect.
+This suite enables the Engine Team to evaluate the performance impact of changes and detect discrepancies that our unit tests might fail to detect.
 
 Running GRID's performance tests on this change shows that it yields, roughly, a 10% performance boost.
 
@@ -267,11 +267,11 @@ Aside from the positive effect this change had on GRID's performance, I think it
 >
 > _Can we cache the result of this operation? How does that impact memory usage?_
 
-Bear in mind that changes yielding a performance boost in some cases might cause degraded performance in others. Consider the worst case scenario, and the circumstances under which it might occur.
+Bear in mind that changes yielding a performance boost in some cases might cause degraded performance in others. Consider the worst case scenario and the circumstances under which it might occur.
 
 As an example, the change from static properties to getters creates a worst-case scenario in which formulas repeatedly evaluate the same piece of information. This is the likely cause of the degraded performance we saw in a few documents (aside from noise). Maybe that could be mitigated with caching!
 
-Anyway, I hope this served as an interesting read. Maybe you got some ideas which you can apply to your own code!
+Anyway, I hope this served as an interesting read. Maybe you got some ideas that you can apply to your own code!
 
 — Alex Harri
 
