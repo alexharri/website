@@ -111,7 +111,9 @@ The proportion of the total work that is spent constructing the evaluation conte
 
 ## Evaluating the fixed cost
 
-When recalculating a cell, the evaluation context is created and passed to a function that evaluates the cell's formula (more specifically, evaluates the formula's AST).
+When recalculating a cell, the evaluation context is created and passed to a function that evaluates the cell's formula (more specifically, evaluates the formula's [AST][ast]).
+
+[ast]: https://en.wikipedia.org/wiki/Abstract_syntax_tree
 
 ```tsx
 const ctx = this._makeCalcCellEvaluationContext(cell, ref, ...);
@@ -277,9 +279,10 @@ Anyway, I hope this served as an interesting read. Maybe you got some ideas that
 
 ---
 
-Big thank you to [Gunnlaugur Þór Briem][gthb_linkedin] for reading the draft of this post and providing great feedback!
+Big thank you to [Gunnlaugur Þór Briem][gthb_linkedin] and [Hjálmar Gíslason][hjalli_linkedin] for reading the draft of this post and providing feedback!
 
 [gthb_linkedin]: https://www.linkedin.com/in/gunnlaugur-briem/
+[hjalli_linkedin]: https://www.linkedin.com/in/hjalli/
 
 PS: Check out [GRID](https://grid.is/)! It's a fantastic tool for, amongst other things, building interactive documents on top of your spreadsheets.
 
