@@ -2,7 +2,7 @@ import Head from "next/head";
 
 const title = "Personal website | Alex Harri Jónsson";
 const description =
-  "Welcome to my personal website and blog. I write about TypeScript, and other software engineering topics.";
+  "Welcome to my personal website and blog. I write about TypeScript and other software engineering topics.";
 
 export const DefaultMeta = () => {
   return (
