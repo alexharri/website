@@ -1,7 +1,7 @@
 ---
 title: "Making GRID's spreadsheet engine 10% faster"
 description: "Optimizing the performance of GRID's browser-based spreadsheet engine, through the use of shared immutable objects."
-publishedAt: ""
+publishedAt: "2023-10-11"
 image: ""
 ---
 
