@@ -129,6 +129,29 @@ li {
   }
 }
 
+table {
+  border-collapse: collapse;
+  margin: 32px 0;
+
+  &[data-align="right"] {
+    td {
+      text-align: right;
+    }
+  }
+}
+
+tbody tr:nth-child(even) {
+  background-color: ${colors.background100};
+}
+
+th, td {
+  border: 1px solid ${colors.darkBlue400};
+  padding: 8px 16px;
+}
+th {
+  padding: 8px 32px;
+}
+
 button {
   cursor: pointer;
   padding: 0;
