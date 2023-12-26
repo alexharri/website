@@ -459,7 +459,89 @@ class BitSet {
 }
 ```
 
-...
+However, there is one simplification we can make. Because the bitwise shift operators `<<` and `>>` operate on 32 bit integers, the maximum shift possible is 31 (from 32nd to 1st bit, or 1st to 32nd bit).
+
+The [ECMAScript standard states](https://262.ecma-international.org/14.0/#sec-numeric-types-number-leftShift):
+
+> Let shiftCount be ℝ(rnum) modulo 32.
+
+In other words, only read the 5 least-significant bits which represent 0 to 31; all other bits are dismissed. This means that we don't need to compute `bitIndex` and can left shift on `index` directly.
+
+```tsx
+class BitSet {
+  add(index: number) {
+    const wordIndex = index >> WORD_LOG;
+    this.words[wordIndex] |= (1 << index);
+  }
+}
+```
+
+
+### BitSet.remove
+
+In implementing `BitSet.remove`, we want to set a specific bit to zero. We've already seen how this was done in a previous example:
+
+```tsx
+const READ = 0b0001;
+
+function removeReadPermission(permissions: number) {
+  return permissions & ~READ;
+}
+```
+
+As we did in `BitSet.add`, we'll use `1 << index` to create a bit mask for a specific bit that looks like so:
+
+```tsx
+1 << 4
+//=> 0b00010000
+```
+
+We then reverse the bit mask using bitwise NOT:
+
+```tsx
+~(1 << 4)
+//=> 0b11101111
+```
+
+And then apply this reverse bit mask via bitwise AND:
+
+```tsx
+const word = 0b01111100;
+
+word & ~(1 << 4)
+//=> 0b01101100
+```
+
+With that, our implementation of `BitSet.remove` looks like so:
+
+```tsx
+class BitSet {
+  remove(index: number) {
+    const wordIndex = index >> WORD_LOG;
+    this.words[wordIndex] &= ~(1 << index);
+  }
+}
+```
+
+
+### BitSet.has
+
+The `BitSet.has` method should return true if a specific bit is set to 1, and false otherwise. We've also seen how this is done:
+
+```tsx
+const READ = 0b0001;
+
+function canRead(permissions: number) {
+  return (permissions & READ) !== 0;
+}
+```
+
+As with our previous two methods, we create a bit mask using left shift:
+
+```tsx
+1 << 4
+//=> 0b00010000
+```
 
 
 ### Set operation performance
