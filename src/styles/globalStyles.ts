@@ -12,6 +12,10 @@ injectGlobal`
   src: url(/fonts/league-mono/LeagueMono-Regular.woff2) format('woff2');
 }
 
+:root {
+  --font-monospace: 'League Mono', monospace;
+}
+
 * {
   box-sizing: border-box;
 }
@@ -131,13 +135,23 @@ li {
 
 table {
   border-collapse: collapse;
-  margin: 32px 0;
 
   &[data-align="right"] {
     td {
       text-align: right;
     }
   }
+  &[data-align="center"] {
+    td {
+      text-align: center;
+    }
+  }
+
+  display: block;
+  max-width: fit-content;
+  margin: 32px 0;
+  overflow-x: auto;
+  white-space: nowrap;
 }
 
 tbody tr:nth-child(even) {
@@ -148,7 +162,7 @@ th, td {
   border: 1px solid ${colors.darkBlue400};
   padding: 8px 16px;
 }
-th {
+table[data-pad-heading="true"] th {
   padding: 8px 32px;
 }
 
