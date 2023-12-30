@@ -45,7 +45,7 @@ export const LazyScriptedEditorStyles = ({ styled, theme }: StyleOptions) => ({
     align-items: center;
     font-size: 20px;
     font-family: ${cssVariables.fontMonospace};
-    color: ${theme.text600};
+    color: ${theme.text400};
     border-radius: 8px;
   `,
 });

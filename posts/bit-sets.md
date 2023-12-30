@@ -593,6 +593,29 @@ class BitSet {
 ```
 
 
+### Handling edge cases
+
+I've intentionally omitted handling cases like `wordIndex` being out-of-bounds.
+
+That problem could be resolved by adding a `resize` method that ensures that the `words` array encompasses `wordIndex`:
+
+```tsx
+class BitSet {
+  set(index: number) {
+    const wordIndex = index >> WORD_LOG;
+    this.resize(wordIndex);
+    // ...
+  }
+  
+  private resize(wordIndex: number) {
+    // Make 'this.words' encompass 'wordIndex'
+  }
+}
+```
+
+I won't cover these cases here. If you're interested, feel free to explore [my full implementation of `BitSet` on GitHub][alexharri_bitset].
+
+
 ## Next up: Iteration
 
 We covered a lot in this post!
@@ -602,3 +625,5 @@ Next up in our bit set journey is iterating over bits. We'll learn how exploitin
 See you in part 2: <a href="/blog/bit-sets-fast-foreach" target="_blank">Iterating over Bit Sets really quickly</a>
 
 — Alex Harri
+
+[alexharri_bitset]: https://github.com/alexharri/bitset

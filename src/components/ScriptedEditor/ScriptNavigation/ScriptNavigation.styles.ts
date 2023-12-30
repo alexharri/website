@@ -97,7 +97,7 @@ export const ScriptNavigationStyles = ({ styled, theme }: StyleOptions) => ({
   arrowKeyHint: styled.css`
     display: flex;
     opacity: 0;
-    color: ${theme.text600};
+    color: ${theme.text400};
     font-size: 16px;
     transition: opacity 0.7s;
 

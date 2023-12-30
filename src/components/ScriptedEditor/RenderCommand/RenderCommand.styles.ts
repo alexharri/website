@@ -64,7 +64,7 @@ export const RenderCommandStyles = ({ styled, theme }: StyleOptions) => ({
     &[data-faded="true"] {
       border: 1px solid ${theme.background700};
       background: ${theme.background300};
-      color: ${theme.text600};
+      color: ${theme.text400};
     }
 
     &[data-small] {

@@ -3,7 +3,7 @@ import { colors } from "../../utils/cssVariables";
 
 export const prismTheme: PrismTheme = {
   plain: {
-    color: colors.text300,
+    color: colors.text800,
   },
   styles: [
     {

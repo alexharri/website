@@ -3,7 +3,7 @@ import { StyleOptions, useStyles } from "../../utils/styles";
 const SmallNoteStyles = ({ styled, theme }: StyleOptions) => ({
   p: styled.css`
     font-size: 14px;
-    color: ${theme.text600};
+    color: ${theme.text400};
 
     &--center {
       text-align: center;

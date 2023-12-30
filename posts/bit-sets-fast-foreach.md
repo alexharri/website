@@ -5,9 +5,11 @@ publishedAt: ""
 image: ""
 ---
 
-Note: This is part 2 of 3 of a series of posts on Bit Sets. If you're not familiar with bit manipulation, or don't know what bit sets are, I recommend reading part 1 first: <a href="/blog/bit-sets" target="_blank">Bit Sets: An introduction to bit manipulation</a>.
+<Note>
+  Welcome to part 2 of my 3-part series on bit sets! If you're not very familiar with bit manipulation — or don't know what bit sets are — I recommend reading part 1 first: <a href="/blog/bit-sets" target="_blank">Bit Sets: An introduction to bit manipulation</a>.
+</Note>
 
-We're implementing a `BitSet` class, representing a list of booleans, addressable via indices. These booleans are stored as bits in a `number[]` called `words`:
+We're implementing a `BitSet` class, which stores an array of bits. A bit set can be used as a set of integers, or a list of booleans. The bits are stored in a `number[]` called `words`:
 
 ```tsx
 class BitSet {
@@ -15,24 +17,27 @@ class BitSet {
 }
 ```
 
-Since JavaScript only supports 32 bit integers, each `word` stores 32 bits. The first words stores bits 1-32, the second word stores bits 33-64, and so on.
+Since JavaScript only [supports 32-bit integers][js_32_bit_integers], each `word` stores 32 bits. The first words stores bits 1-32, the second word stores bits 33-64, and so on.
 
-We implemented the first three methods of our `BitSet` interface in part 1.
+[js_32_bit_integers]: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number#fixed-width_number_conversion
+
+In <a href="/blog/bit-sets" target="_blank">part 1</a> we implemented a few basic methods for our `BitSet` class:
 
 ```tsx
 interface BitSet {
   add(index: number): void;
   remove(index: number): void;
   has(index: number): boolean;
-  forEach(callback: (index: number) => void): void;
 }
 ```
 
-In this post, we'll take a look at `BitSet.forEach`. We'll start off implementing the naive approach, and see how far we can optimize it. We'll then learn about [Two's Complement][twos_complement] and [Hamming weights][hamming_weight], and how exploiting those lets us iterate over bit sets _really_ quickly.
+In this post we'll tackle `BitSet.forEach`. We'll start off implementing the naive approach where we iterate over the bits (and see how far we can optimize that approach).
+
+We'll then learn about [two's complement][twos_complement] and [Hamming weights][hamming_weight], and how exploiting them lets us iterate over bit sets _really_ quickly.
 
 ## Implementing BitSet.forEach
 
-Our `BitSet.forEach` implementation should invoke a callback for every bit that is set to 1 with the index of that bit.
+The `BitSet.forEach` method should invoke a callback for every bit that is set to 1, with the index of that bit.
 
 ```tsx
 class BitSet {
@@ -42,7 +47,7 @@ class BitSet {
 }
 ```
 
-To start off, we'll iterate through every word in `words`:
+To start off, we'll iterate over every word in `words`:
 
 ```tsx
 const words = this.words;
@@ -61,24 +66,35 @@ for (let i = 0; i < WORD_LEN; i++) {
 }
 ```
 
-If the bit is non-zero, we invoke the callback:
+<SmallNote label="" moveCloserUpBy={24}>`WORD_LEN` is set to 32: the number of bits in each `word`</SmallNote>
+
+We can check whether the bit is set via `(word & (1 << i)) !== 0`:
+
+```tsx
+const bitIsSetToOne = (word & (1 << i)) !== 0;
+```
+
+If the bit is non-zero, we'll want to invoke `callback` with the index of the bit:
 
 ```tsx
 for (let i = 0; i < WORD_LEN; i++) {
   const bitIsSetToOne = (word & (1 << i)) !== 0;
   if (bitIsSetToOne) {
-    // Invoke callback
+    callback(index)
+             // @error {w=5} Cannot find name 'index'.
   }
 }
 ```
 
-We'll need to invoke the callback with the index of the bit, which we can compute like so:
+We can compute the bit's index in the bit set like so:
 
 ```tsx
 const index = (wordIndex << WORD_LOG) + i;
 ```
 
-The `wordIndex << WORD_LOG` expression is equivalent to `wordIndex * WORD_LEN` because left shifting by one is equivalent to multiplying by 2 (and `2 ** WORD_LOG` equals `WORD_LEN`).
+<SmallNote label="" moveCloserUpBy={24}>`WORD_LOG` is set to 5: the base 2 logarithm of 32</SmallNote>
+
+The expression `wordIndex << WORD_LOG` is equivalent to `wordIndex * WORD_LEN` because left shifting by one is equivalent to multiplying by 2 (and `2 ** WORD_LOG` equals `WORD_LEN`).
 
 ```tsx
 1 << WORD_LOG
@@ -97,6 +113,7 @@ class BitSet {
 
     for (let wordIndex = 0; wordIndex < words.length; wordIndex++) {
       const word = words[wordIndex];
+
       for (let i = 0; i < WORD_LEN; i++) {
         const bitIsSetToOne = (word & (1 << i)) !== 0;
         if (bitIsSetToOne) {
@@ -113,7 +130,7 @@ class BitSet {
 
 We've now got a working implementation for `BitSet.forEach`. Can we optimize it further?
 
-The first thing that pops out to me is that we always iterate over every bit in every word. If we can know whether a word has no set bits, then we can skip iterating over that word.
+The first thing that pops out to me is that we always iterate over every bit in every word. We can skip words with no set bits with a cheap `word === 0` check.
 
 ```tsx
 for (let wordIndex = 0; wordIndex < words.length; wordIndex++) {
@@ -135,9 +152,9 @@ This won't do much for dense sets where most words have some bits set, but this 
 [ 11101101, 01110001, 10110101, 11010001, 0101101 ]
 ```
 
-But to figure out how this optimization affects performance, we'll need to run some benchmarks.
+But how much performance gains does this optimization really yield? Let's figure it out by running some benchmarks.
 
-To see the performance characteristics for bit sets with different densities, we'll benchmark different densities:
+We'll run our benchmarks for bit sets with various densities:
 
 ```tsx
 // From 100% dense (all 1s) to 0.1% dense (mostly 0s)
@@ -167,7 +184,7 @@ function makeBitSet(size: number, density: number) {
 }
 ```
 
-Now that we've created the bit sets, we'll run the `forEach` method for them all and log out how long it takes.
+Now that we've created our bit sets, we'll run the `forEach` method for each of them and log out how long it takes.
 
 ```tsx
 for (const { bitset, density } of bitsetsAndDensities) {
@@ -202,7 +219,7 @@ With the `ìf (word === 0) continue;` optimization, we get:
   0.1% density:      5.6 ms
 ```
 
-Putting this in a table, we can compare the performance:
+Let's put this into a table and compare the performance:
 
 {<table data-align="right">
   <tbody>
@@ -279,9 +296,12 @@ Putting this in a table, we can compare the performance:
 
 <SmallNote label="" moveCloserUpBy={24}>* Speed compared to baseline</SmallNote>
 
-We get no significant performance gains for densities under 10%, but once we reach densities of &lt;5% we start to see significant performance improvements. __>2x faster__ at 1% density and __>10x faster__ at 0.1% density.
+We observe no significant difference in performance for densities above 10%, but once we reach densities of ≤5% we start to see significant performance improvements. __>2x faster__ at 1% density and __>10x faster__ at 0.1% density.
 
-We can try to improve this further by skipping _each half_ of a word if it's all 0s. First off, we'll create bitmasks for each half of a word:
+
+### Skipping halves
+
+We can take this method of optimization further by skipping _each half_ of a word if it's all 0s. We'll create bitmasks for each half of a word:
 
 ```tsx
 // '0x' is the hexidecimal prefix (base 16).
@@ -297,7 +317,7 @@ console.log(WORD_LATTER_HALF_MASK);
 //=> 0b11111111111111110000000000000000
 ```
 
-Using this, we want to
+Using them, we want to
 
  * only iterate over bits 1-16 if there are any set bits in the first half, and
  * only iterate over bits 17-32 if there are any set bits in the latter half.
@@ -451,7 +471,7 @@ This optimization may or may not be worth it depending on your average set densi
 It was at this point in my bit set journey that I discovered a different approach for iterating over bits that yields significantly better results across all set densities.
 
 
-### Two's complement
+## Two's complement
 
 Iterating over individual bits is expensive and requires an `if` statment at each iteration to check whether to invoke the callback or not. This `if` statement creates a [branch][branching] which further degrades performance.
 
@@ -459,44 +479,26 @@ Iterating over individual bits is expensive and requires an `if` statment at eac
 
 If we were able to somehow "jump" to the next set bit, we would eliminate the need to iterate over 0 bits and perform a bunch of `if` statements.
 
-As it turns out, there's a really cheap method to find the least significant bit set to 1, which looks like so:
+As it turns out, there's a really cheap method to find the least-significant bit set to 1, which looks like so:
 
 ```tsx
 word & -word
 ```
 
-When I first saw this, it made no sense to me.
+When I first saw this, it made no sense to me. I thought:
 
-> _“Doesn't making a number negative just set the sign bit to 1?”_
+> _“Doesn't making a number negative just set the sign bit to 1?_
+>
+> _If so, then `x & -x` just yields `x`.”_
 
-But I was wrong. As we see below, `x & -x` yields the least-significant set bit in `x`.
+That would be true if signed integers were represented using [sign-magnitude][sign_magnitude], where the leftmost bit is the sign bit and the rest of the bits denote the value (magnitude).
 
-```tsx
-function lsb(x: number) {
-  return x & -x;
-}
-
- lsb(0b10011010);
-//=> 0b00000010
-
- lsb(0b10011000);
-//=> 0b00001000
-
- lsb(0b10010000);
-//=> 0b00010000
-
- lsb(0b10000000);
-//=> 0b10000000
-```
-
-This is because of [two's complement][twos_complement], which is the most common way that signed numbers are represented.
-
-[twos_complement]: https://en.wikipedia.org/wiki/Two%27s_complement
+[sign_magnitude]: https://en.wikipedia.org/wiki/Signed_number_representations#Sign%E2%80%93magnitude
 
 {<table data-pad-heading data-align="center">
   <tbody>
     <tr>
-      <th colSpan="4">Negative numbers, represented in two's complement</th>
+      <th colSpan="4">Numbers, represented using sign-magnitude</th>
     </tr>
     <tr>
       <th colSpan="2">Positive</th>
@@ -507,6 +509,70 @@ This is because of [two's complement][twos_complement], which is the most common
       <th>Value</th>
       <th>Bits</th>
       <th>Value</th>
+    </tr>
+    <tr>
+      <td style={{ fontFamily: "var(--font-monospace)" }}>00000000</td>
+      <td>0</td>
+      <td style={{ fontFamily: "var(--font-monospace)" }}>10000000</td>
+      <td>-0</td>
+    </tr>
+    <tr>
+      <td style={{ fontFamily: "var(--font-monospace)" }}>00000001</td>
+      <td>1</td>
+      <td style={{ fontFamily: "var(--font-monospace)" }}>10000001</td>
+      <td>-1</td>
+    </tr>
+    <tr>
+      <td style={{ fontFamily: "var(--font-monospace)" }}>00000010</td>
+      <td>2</td>
+      <td style={{ fontFamily: "var(--font-monospace)" }}>10000010</td>
+      <td>-2</td>
+    </tr>
+    <tr>
+      <td style={{ fontFamily: "var(--font-monospace)" }}>00000011</td>
+      <td>3</td>
+      <td style={{ fontFamily: "var(--font-monospace)" }}>10000011</td>
+      <td>-3</td>
+    </tr>
+    <tr>
+      <td style={{ fontFamily: "var(--font-monospace)" }}>00001001</td>
+      <td>9</td>
+      <td style={{ fontFamily: "var(--font-monospace)" }}>10001001</td>
+      <td>-9</td>
+    </tr>
+    <tr>
+      <td style={{ fontFamily: "var(--font-monospace)" }}>01111111</td>
+      <td>127</td>
+      <td style={{ fontFamily: "var(--font-monospace)" }}>11111111</td>
+      <td>−127</td>
+    </tr>
+  </tbody>
+</table>}
+
+But as I learned, signed integers are most commonly represented using [two's complement][twos_complement].
+
+Two's complement is different from sign-magnitude (and [one's complement][ones_complement]) in that it only has one representation for 0 (there's no -0).
+
+{<table data-pad-heading data-align="center">
+  <tbody>
+    <tr>
+      <th colSpan="4">Numbers, represented using two's complement</th>
+    </tr>
+    <tr>
+      <th colSpan="2">Positive</th>
+      <th colSpan="2">Negative</th>
+    </tr>
+    <tr>
+      <th>Bits</th>
+      <th>Value</th>
+      <th>Bits</th>
+      <th>Value</th>
+    </tr>
+    <tr>
+      <td style={{ fontFamily: "var(--font-monospace)" }}>00000000</td>
+      <td>0</td>
+      <td style={{ fontFamily: "var(--font-monospace)" }}></td>
+      <td></td>
     </tr>
     <tr>
       <td style={{ fontFamily: "var(--font-monospace)" }}>00000001</td>
@@ -532,16 +598,31 @@ This is because of [two's complement][twos_complement], which is the most common
       <td style={{ fontFamily: "var(--font-monospace)" }}>11110111</td>
       <td>-9</td>
     </tr>
+    <tr>
+      <td style={{ fontFamily: "var(--font-monospace)" }}>01111111</td>
+      <td>127</td>
+      <td style={{ fontFamily: "var(--font-monospace)" }}>10000001</td>
+      <td>−127</td>
+    </tr>
+    <tr>
+      <td style={{ fontFamily: "var(--font-monospace)" }}></td>
+      <td></td>
+      <td style={{ fontFamily: "var(--font-monospace)" }}>10000000</td>
+      <td>−128</td>
+    </tr>
   </tbody>
 </table>}
 
-Using two's complement, the negative counterpart of a positive integer is computed by:
+[ones_complement]: https://en.wikipedia.org/wiki/Signed_number_representations#Ones'_complement
 
- 1. Inverting the bits (bitwise NOT), including the sign bit
- 2. Adding 1 to the number, ignoring overflow
+The two's complement of an integer is computed by:
+
+ 1. inverting the bits (including the sign bit), and
+ 2. adding 1 to the number.
+
 
 ```tsx
-00110000 // 19
+00010011 // 19
 
 // Invert bits
 11101100
@@ -550,7 +631,9 @@ Using two's complement, the negative counterpart of a positive integer is comput
 11101101 // -19
 ```
 
-The binary representation of `19` has a 1 as the least-significant bit. Once inverted, adding one will always make the first bit 1, which makes `19 & -19` yield the 1st bit.
+<SmallNote moveCloserUpBy={24}>This also works in the opposite direction (from negative to positive)</SmallNote>
+
+The binary representation of `19` has a 1 as the least-significant bit. Inverting makes the least-significant bit become 0, so adding one will always make the first bit 1. This makes `x & -x` yield the 1st set bit for any number where the least-significant bit is 1.
 
 Let's take a look at a number with some leading 0s:
 
@@ -564,9 +647,9 @@ Let's take a look at a number with some leading 0s:
 11010000 // -48
 ```
 
-In this case, we observe that all the bits before the least-significant set bit become 1 when inverted. When 1 is added to the number, the 1s are carried until they reach the least-significant bit, which makes `48 & -48` yield the 5th bit.
+Here we observe that all the bits before the least-significant set bit become 1 when inverted. When 1 is added to the number, the 1s are carried until they reach the least-significant 0 (which was the least-significant 1 pre-inversion). This makes `x & -x` yield the 1st set bit for any number with leading 0s.
 
-So when iterating over the bits of a word, we can always find the next (least-significant) set bit via `x & -x`. What's really neat is that we can then use bitwise XOR to unset the bit:
+So when iterating over the bits of a word, we can always find the least-significant set bit via `word & -word`. What's really neat is that we can then use bitwise XOR to unset the bit:
 
 ```tsx
 while (word !== 0) {
@@ -580,9 +663,9 @@ while (word !== 0) {
 }
 ```
 
-This is great, we can iterate directly over the set bits without any `if` statements!
+By unsetting the least-significant set bit `word & -word` will yield the next set bit in the next iteration, which we keep doing while `word` is non-zero. This lets us iterate over the set bits without any `if` statements!
 
-But we've got a problem. We want to invoke the callback with the _index of_ the set bits, not the set bits themselves. We'll accomplish this through the use of [Hamming weights][hamming_weight].
+But we've got one more problem. We want to invoke the callback with the _index of_ the set bits, not the set bits themselves. We'll accomplish this through the use of [Hamming weights][hamming_weight].
 
 [hamming_weight]: https://en.wikipedia.org/wiki/Hamming_weight
 

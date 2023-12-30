@@ -18,6 +18,7 @@ import { NotMacOs } from "../../components/OperatingSystem/OperatingSystem";
 import { Image } from "../../components/Image";
 import { SectionAnchor } from "../../components/SectionAnchor/SectionAnchor";
 import { formatDate } from "../../utils/formatDate";
+import { Note } from "../../components/Note/Note";
 
 // Custom components/renderers to pass to MDX.
 // Since the MDX files aren't loaded by webpack, they have no knowledge of how
@@ -48,6 +49,7 @@ const components = {
   NotMacOs,
   // ExampleComponent: dynamic(() => import("../../src/components/ExampleComponent")),
   Head,
+  Note,
 };
 
 interface Props {
