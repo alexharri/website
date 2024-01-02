@@ -82,7 +82,7 @@ const Message = (props: ErrorProps) => {
     type,
     message,
     padding,
-    props: { w: width, shiftLeft },
+    props: { w: width, shiftLeft, noHeight },
   } = props;
 
   const spaces = (length: number) =>
@@ -96,8 +96,9 @@ const Message = (props: ErrorProps) => {
     return spaces(i);
   };
 
+  console.log({ noHeight });
   return (
-    <div className={s("outerContainer")}>
+    <div className={s("outerContainer", { noHeight: noHeight === 1 })}>
       <div style={{ userSelect: "none" }}>{paddingSpaces}</div>
       <div className={s("innerContainer")}>
         <div

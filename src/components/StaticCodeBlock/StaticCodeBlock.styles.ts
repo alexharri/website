@@ -55,6 +55,10 @@ export const StaticCodeBlockStyles = ({ styled, theme }: StyleOptions) => ({
     display: flex;
     width: 100%;
     max-width: calc(100vw - 48px);
+
+    &--noHeight {
+      height: 0;
+    }
   `,
 
   innerContainer: styled.css`

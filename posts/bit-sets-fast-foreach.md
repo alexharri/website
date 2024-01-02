@@ -6,7 +6,7 @@ image: ""
 ---
 
 <Note>
-  Welcome to part 2 of my 3-part series on bit sets! If you're not very familiar with bit manipulation — or don't know what bit sets are — I recommend reading part 1 first: <a href="/blog/bit-sets" target="_blank">Bit Sets: An introduction to bit manipulation</a>.
+  Welcome to part 2 of my 2-part series on bit sets! If you're not very familiar with bit manipulation — or don't know what bit sets are — I recommend reading part 1 first: <a href="/blog/draft/bit-sets" target="_blank">Bit Sets: An introduction to bit manipulation</a>.
 </Note>
 
 We're implementing a `BitSet` class, which stores an array of bits. A bit set can be used as a set of integers, or a list of booleans. The bits are stored in a `number[]` called `words`:
@@ -21,19 +21,23 @@ Since JavaScript only [supports 32-bit integers][js_32_bit_integers], each `word
 
 [js_32_bit_integers]: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number#fixed-width_number_conversion
 
-In <a href="/blog/bit-sets" target="_blank">part 1</a> we implemented a few basic methods for our `BitSet` class:
+In <a href="/blog/draft/bit-sets" target="_blank">part 1</a> we implemented a few basic methods for our `BitSet` class:
 
 ```tsx
-interface BitSet {
+class BitSet {
+  private words: number[];
+
   add(index: number): void;
   remove(index: number): void;
-  has(index: number): boolean;
+  has(index: number): boolean
 }
 ```
 
 In this post we'll tackle `BitSet.forEach`. We'll start off implementing the naive approach where we iterate over the bits (and see how far we can optimize that approach).
 
-We'll then learn about [two's complement][twos_complement] and [Hamming weights][hamming_weight], and how exploiting them lets us iterate over bit sets _really_ quickly.
+We'll then learn about [two's complement][twos_complement] and [Hamming weights][hamming_weight], and how exploiting those lets us iterate over bit sets _really_ quickly.
+
+[twos_complement]: https://en.wikipedia.org/wiki/Two%27s_complement
 
 ## Implementing BitSet.forEach
 
@@ -81,12 +85,12 @@ for (let i = 0; i < WORD_LEN; i++) {
   const bitIsSetToOne = (word & (1 << i)) !== 0;
   if (bitIsSetToOne) {
     callback(index)
-             // @error {w=5} Cannot find name 'index'.
+             // @error {w=5,noHeight=1} Cannot find name 'index'.
   }
 }
 ```
 
-We can compute the bit's index in the bit set like so:
+We can compute the bit's `index` in the bit set like so:
 
 ```tsx
 const index = (wordIndex << WORD_LOG) + i;
@@ -158,7 +162,7 @@ We'll run our benchmarks for bit sets with various densities:
 
 ```tsx
 // From 100% dense (all 1s) to 0.1% dense (mostly 0s)
-const densities = [1, 0.75, 0.5, 0.25, 0.1, 0.01, 0.001];
+const densities = [1, 0.75, 0.5, 0.25, 0.1, 0.05, 0.01, 0.001];
 ```
 
 For each density, we'll create a bit set with 100 million bits.
@@ -296,7 +300,7 @@ Let's put this into a table and compare the performance:
 
 <SmallNote label="" moveCloserUpBy={24}>* Speed compared to baseline</SmallNote>
 
-We observe no significant difference in performance for densities above 10%, but once we reach densities of ≤5% we start to see significant performance improvements. __>2x faster__ at 1% density and __>10x faster__ at 0.1% density.
+We observe no significant difference in performance for densities above 10%, but once we reach densities of ≤5% we start to see significant performance improvements: __>2x faster__ at 1% density and __>10x faster__ at 0.1% density.
 
 
 ### Skipping halves
@@ -655,17 +659,16 @@ So when iterating over the bits of a word, we can always find the least-signific
 while (word !== 0) {
   const lsb = word & -word;
 
-  // Unset the least-significant bit
-  word ^= lsb;
+  word ^= lsb; // Unset the least-significant bit
 
   // With the least-significant bit unset, the next iteration
   // will yield the next least-significant set bit.
 }
 ```
 
-By unsetting the least-significant set bit `word & -word` will yield the next set bit in the next iteration, which we keep doing while `word` is non-zero. This lets us iterate over the set bits without any `if` statements!
+We can now iterate over the set bits of a word, but we've got a small problem. We want to invoke the callback with the _index of_ the set bits, not the set bits themselves.
 
-But we've got one more problem. We want to invoke the callback with the _index of_ the set bits, not the set bits themselves. We'll accomplish this through the use of [Hamming weights][hamming_weight].
+We'll find the index of the set bit through the use of [Hamming weights][hamming_weight].
 
 [hamming_weight]: https://en.wikipedia.org/wiki/Hamming_weight
 
@@ -701,7 +704,7 @@ Consider what happens when we subtract 1. The leading 0s turn into 1s, and the s
 //=> 0b00011111
 ```
 
-This transforms the problem from finding the index of the set bit in `x` into computing the number of set bits in `x - 1`. The number of non-zero bits is known as the [Hamming weight][hamming_weight], and turns out that we can [compute the Hamming weight][compute_hamming_weight] of an integer very cheaply:
+This transforms the problem from finding the index of the set bit in `x` into computing the number of set bits in `x - 1`. The number of non-zero bits is known as the [Hamming weight][hamming_weight], and it turns out that we can [compute the Hamming weight][compute_hamming_weight] of an integer very cheaply:
 
 [compute_hamming_weight]: https://en.wikipedia.org/wiki/Hamming_weight#Efficient_implementation
 
@@ -869,4 +872,18 @@ But how fast is this optimized version? Let's run our benchmark and compare.
 
 <SmallNote label="" moveCloserUpBy={24}>* Speed compared to baseline</SmallNote>
 
-For densities of 5-50%, we receive a __~5x increase in performance__. Higher densities above 50% receive a notable speedup of >2x, while lower densities (&lt;5%) see a __5-17x increase in performance__.
+For densities of 5-50%, we receive a __~5x increase in performance__. Higher densities of 75% and above receive a notable speedup of >2x, while the densities below 5% see a __5-17x increase in performance__.
+
+## Parting thoughts
+
+Any given piece of code can be heavily optimized, but taking a different approach can often completely outweigh all of those optimizations.
+
+Different algorithms will often favor some inputs over others, like we saw with low vs high-density sets in this post. It's useful to keep these sorts of trade-offs in mind when considering which way to go. Benchmark when possible!
+
+---
+
+Anyway, thanks for reading this short series on bit set! If you haven't read part 1 yet, you can find it here: <a href="/blog/draft/bit-sets" target="_blank">Bit Sets: An introduction to bit manipulation</a>.
+
+I may write a part 3, taking an in-depth look at bit set performance for boolean operations (and, or, xor, andNot, etc), but I've thought about bit sets quite enough for now.
+
+— Alex Harri
