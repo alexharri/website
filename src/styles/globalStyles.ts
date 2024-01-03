@@ -4,16 +4,9 @@ import { colors, cssVariables } from "../utils/cssVariables";
 const theme = colors;
 
 injectGlobal`
-@font-face {
-  font-family: 'League Mono';
-  font-style: normal;
-  font-weight: 400;
-  font-display: swap;
-  src: url(/fonts/league-mono/LeagueMono-Regular.woff2) format('woff2');
-}
 
 :root {
-  --font-monospace: 'League Mono', monospace;
+  --font-monospace: ${cssVariables.fontMonospace};
 }
 
 * {

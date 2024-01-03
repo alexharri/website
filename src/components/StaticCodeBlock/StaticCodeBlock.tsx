@@ -184,9 +184,20 @@ const Line = (props: LineProps) => {
   if (props.last && isEmpty) return null;
   return (
     <div {...getLineProps()}>
-      {line.map((token, key) => (
-        <span {...getTokenProps({ token, key })} />
-      ))}
+      {line.map((token, key) => {
+        let { children, ...tokenProps } = getTokenProps({ token, key });
+        if (typeof children === "string" && children.startsWith("//=>")) {
+          children = (
+            // I really don't like the //=> ligature in Fira Code
+            <span>
+              <span style={{ fontVariantLigatures: "none" }}>//</span>
+              <span>{"=>"}</span>
+              {children.slice(4)}
+            </span>
+          );
+        }
+        return <span {...tokenProps} children={children} />;
+      })}
     </div>
   );
 };

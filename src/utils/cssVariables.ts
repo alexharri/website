@@ -1,5 +1,5 @@
 export const cssVariables = {
-  fontMonospace: "'League Mono', monospace",
+  fontMonospace: "'Fira Code', monospace",
   fontFamily: "'Fira Sans', sans-serif",
 };
 
