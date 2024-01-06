@@ -1,6 +1,6 @@
 ---
 title: "Bit Sets: An introduction to bit manipulation"
-description: ""
+description: "Learn about bitwise operators and bit manipulation by implementing a BitSet class in JavaScript."
 publishedAt: "2024-01-06"
 image: ""
 ---
