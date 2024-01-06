@@ -27,7 +27,9 @@ class BitSet {
 }
 ```
 
-The bits of our bit set are stored in a `number[]` called `words`. Since JavaScript only [supports 32-bit integers][js_32_bit_integers], each `word` stores 32 bits (the first word stores bits 1-32, the second word stores bits 33-64, and so on).
+The bits of our bit set are stored in a `number[]` called `words`. Since JavaScript only [supports 32-bit integers][js_32_bit_integers], each [word][words] stores 32 bits (the first word stores bits 1-32, the second word stores bits 33-64, and so on).
+
+[words]: https://en.wikipedia.org/wiki/Word_(computer_architecture)
 
 [js_32_bit_integers]: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number#fixed-width_number_conversion
 
