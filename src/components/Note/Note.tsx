@@ -11,7 +11,11 @@ const NoteStyles = ({ styled, theme }: StyleOptions) => ({
     p {
       font-size: 16px;
       color: ${theme.text700};
-      margin: 0;
+      margin: 0 0 16px;
+
+      &:last-of-type {
+        margin-bottom: 0;
+      }
     }
   `,
 });

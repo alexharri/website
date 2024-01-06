@@ -7,21 +7,15 @@ image: ""
 
 <Note>
   Welcome to part 2 of my 2-part series on bit sets! If you're not very familiar with bit manipulation — or don't know what bit sets are — I recommend reading part 1 first: <a href="/blog/draft/bit-sets" target="_blank">Bit Sets: An introduction to bit manipulation</a>.
+
+  If you know your bit manipulation, then you can freely skip part 1.
 </Note>
 
-We're implementing a `BitSet` class, which stores an array of bits. A bit set can be used as a set of integers, or a list of booleans. The bits are stored in a `number[]` called `words`:
+[Bit sets][bitset] — also known as bit arrays or bit vectors — are a highly compact data structure that stores a list of bits. They are often used to represent a set of integers or an array of booleans.
 
-```tsx
-class BitSet {
-  words: number[];
-}
-```
+[bitset]: https://en.wikipedia.org/wiki/Bit_array
 
-Since JavaScript only [supports 32-bit integers][js_32_bit_integers], each `word` stores 32 bits. The first words stores bits 1-32, the second word stores bits 33-64, and so on.
-
-[js_32_bit_integers]: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number#fixed-width_number_conversion
-
-In <a href="/blog/draft/bit-sets" target="_blank">part 1</a> we implemented a few basic methods for our `BitSet` class:
+In <a href="/blog/draft/bit-sets" target="_blank">part 1</a> we started writing a `BitSet` class, and implemented a few basic methods:
 
 ```tsx
 class BitSet {
@@ -33,7 +27,11 @@ class BitSet {
 }
 ```
 
-In this post we'll tackle `BitSet.forEach`. We'll start off implementing the naive approach where we iterate over the bits (and see how far we can optimize that approach).
+The bits of our bit set are stored in a `number[]` called `words`. Since JavaScript only [supports 32-bit integers][js_32_bit_integers], each `word` stores 32 bits (the first word stores bits 1-32, the second word stores bits 33-64, and so on).
+
+[js_32_bit_integers]: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number#fixed-width_number_conversion
+
+In this post, we'll tackle `BitSet.forEach`. We'll start off implementing the naive approach where we iterate over the bits and see how far we can optimize that approach.
 
 We'll then learn about [two's complement][twos_complement] and [Hamming weights][hamming_weight], and how exploiting those lets us iterate over bit sets _really_ quickly.
 
@@ -51,7 +49,7 @@ class BitSet {
 }
 ```
 
-To start off, we'll iterate over every word in `words`:
+To start, we'll iterate over every word in `words`:
 
 ```tsx
 const words = this.words;
@@ -156,7 +154,7 @@ This won't do much for dense sets where most words have some bits set, but this 
 [ 11101101, 01110001, 10110101, 11010001, 0101101 ]
 ```
 
-But how much performance gains does this optimization really yield? Let's figure it out by running some benchmarks.
+But how significant are the performance gains from this optimization? Let's figure it out by running some benchmarks.
 
 We'll run our benchmarks for bit sets with various densities:
 
@@ -229,7 +227,7 @@ Let's put this into a table and compare the performance:
   <tbody>
     <tr>
       <th></th>
-      <th colSpan="2">Unoptimize (baseline)</th>
+      <th colSpan="2">Unoptimized (baseline)</th>
       <th colSpan="2">Skip 0s</th>
     </tr>
     <tr data-reduce-padding>
@@ -308,7 +306,7 @@ We observe no significant difference in performance for densities above 10%, but
 We can take this method of optimization further by skipping _each half_ of a word if it's all 0s. We'll create bitmasks for each half of a word:
 
 ```tsx
-// '0x' is the hexidecimal prefix (base 16).
+// '0x' is the hexadecimal prefix (base 16).
 //
 // Each '0' and 'f' denotes four 1s or 0s
 export const WORD_FIRST_HALF_MASK = 0x0000ffff;
@@ -376,7 +374,7 @@ Let's see the difference this makes:
   <tbody>
     <tr>
       <th></th>
-      <th colSpan="2">Unoptimize (baseline)</th>
+      <th colSpan="2">Unoptimized (baseline)</th>
       <th colSpan="2">Skip 0s</th>
       <th colSpan="2">Skip 0s and halves</th>
     </tr>
@@ -477,13 +475,13 @@ It was at this point in my bit set journey that I discovered a different approac
 
 ## Two's complement
 
-Iterating over individual bits is expensive and requires an `if` statment at each iteration to check whether to invoke the callback or not. This `if` statement creates a [branch][branching] which further degrades performance.
+Iterating over individual bits is expensive and requires an `if` statement at each iteration to check whether to invoke the callback or not. This `if` statement creates a [branch][branching] that further degrades performance.
 
 [branching]: https://johnnysswlab.com/how-branches-influence-the-performance-of-your-code-and-what-can-you-do-about-it/
 
 If we were able to somehow "jump" to the next set bit, we would eliminate the need to iterate over 0 bits and perform a bunch of `if` statements.
 
-As it turns out, there's a really cheap method to find the least-significant bit set to 1, which looks like so:
+As it turns out, there's a very cheap method to find the least significant bit set to 1, which looks like so:
 
 ```tsx
 word & -word
@@ -502,7 +500,7 @@ That would be true if signed integers were represented using [sign-magnitude][si
 {<table data-pad-heading data-align="center">
   <tbody>
     <tr>
-      <th colSpan="4">Numbers, represented using sign-magnitude</th>
+      <th colSpan="4">Numbers represented using sign-magnitude</th>
     </tr>
     <tr>
       <th colSpan="2">Positive</th>
@@ -560,7 +558,7 @@ Two's complement is different from sign-magnitude (and [one's complement][ones_c
 {<table data-pad-heading data-align="center">
   <tbody>
     <tr>
-      <th colSpan="4">Numbers, represented using two's complement</th>
+      <th colSpan="4">Numbers represented using two's complement</th>
     </tr>
     <tr>
       <th colSpan="2">Positive</th>
@@ -637,7 +635,7 @@ The two's complement of an integer is computed by:
 
 <SmallNote moveCloserUpBy={24}>This also works in the opposite direction (from negative to positive)</SmallNote>
 
-The binary representation of `19` has a 1 as the least-significant bit. Inverting makes the least-significant bit become 0, so adding one will always make the first bit 1. This makes `x & -x` yield the 1st set bit for any number where the least-significant bit is 1.
+The binary representation of `19` has a 1 as the least-significant bit. Inverting makes the least significant bit become 0, so adding one will always make the first bit 1. This makes `x & -x` yield the 1st set bit for any number where the least-significant bit is 1.
 
 Let's take a look at a number with some leading 0s:
 
@@ -653,7 +651,7 @@ Let's take a look at a number with some leading 0s:
 
 Here we observe that all the bits before the least-significant set bit become 1 when inverted. When 1 is added to the number, the 1s are carried until they reach the least-significant 0 (which was the least-significant 1 pre-inversion). This makes `x & -x` yield the 1st set bit for any number with leading 0s.
 
-So when iterating over the bits of a word, we can always find the least-significant set bit via `word & -word`. What's really neat is that we can then use bitwise XOR to unset the bit:
+So when iterating over the bits of a word, we can always find the least significant set bit via `word & -word`. What's neat is that we can then use bitwise XOR to unset the bit:
 
 ```tsx
 while (word !== 0) {
@@ -688,7 +686,7 @@ indexOfFirstSetBit(0b00100000)
 //=> 5
 ```
 
-The brute-force approach would be to walk over the bits one-by-one, but then we're back to iterating over bits. That's a no-go.
+The brute-force approach would be to walk over the bits one by one, but then we're back to iterating over bits. That's a no-go.
 
 One observation to make is that the index of the set bit is equal to the number of leading 0s.
 
@@ -753,7 +751,7 @@ const index = (wordIndex << WORD_LOG) + hammingWeight(lsb - 1);
 callback(index);
 ```
 
-Before the next iteration, we unset the least-significant bit via `word XOR lsb`, making `word` ready for the next iteration:
+Before the next iteration, we unset the least significant bit via `word XOR lsb`, making `word` ready for the next iteration:
 
 ```tsx
 word ^= lsb;
@@ -782,7 +780,7 @@ But how fast is this optimized version? Let's run our benchmark and compare.
   <tbody>
     <tr>
       <th></th>
-      <th colSpan="2">Unoptimize (baseline)</th>
+      <th colSpan="2">Unoptimized (baseline)</th>
       <th colSpan="2">Skip 0s</th>
       <th colSpan="2">Optimized</th>
     </tr>
@@ -874,11 +872,21 @@ But how fast is this optimized version? Let's run our benchmark and compare.
 
 For densities of 5-50%, we receive a __~5x increase in performance__. Higher densities of 75% and above receive a notable speedup of >2x, while the densities below 5% see a __5-17x increase in performance__.
 
+## A full BitSet implementation
+
+I've recently published a performant and feature-complete `BitSet` package [on npm](https://www.npmjs.com/package/bitset-mut).
+
+If you want to explore the full implementation, take a look at the [GitHub repo](https://github.com/alexharri/bitset-mut).
+
+## Further reading
+
+[Daniel Lemire](https://lemire.me/blog/) has written [lots](https://lemire.me/blog/2018/02/21/iterating-over-set-bits-quickly/) [of](https://lemire.me/blog/2012/11/13/fast-sets-of-integers/) [posts](https://lemire.me/blog/2019/05/03/really-fast-bitset-decoding-for-average-densities/) about bit sets. His [`FastBitSet` implementation](https://github.com/lemire/FastBitSet.js) is where I discovered this trick for optimizing over set bits. If you're into software performance, he's written _a lot_ on that topic.
+
 ## Parting thoughts
 
-Any given piece of code can be heavily optimized, but taking a different approach can often completely outweigh all of those optimizations.
+Any given piece of code can be optimized, but taking a different approach will often outperform those local optimizations.
 
-Different algorithms will often favor some inputs over others, like we saw with low vs high-density sets in this post. It's useful to keep these sorts of trade-offs in mind when considering which way to go. Benchmark when possible!
+Different algorithms will often favor some inputs over others, as we saw with low vs high-density sets in this post. It's useful to keep these sorts of trade-offs in mind when considering which way to go. Benchmark when possible!
 
 ---
 

@@ -5,7 +5,7 @@ publishedAt: ""
 image: ""
 ---
 
-[Bit sets][bitset] — also known as bit arrays or bit vectors — are a highly compact data structure that stores a list of bits. It is often used to represent a set of integers or an array of booleans.
+[Bit sets][bitset] — also known as bit arrays or bit vectors — are a highly compact data structure that stores a list of bits. They are often used to represent a set of integers or an array of booleans.
 
 In addition to their memory-compactness, bit sets support extremely performant boolean operations like [unions][union] and [intersections][intersection], achieved through the use of [bitwise operations][bitwise_ops].
 
@@ -21,8 +21,11 @@ In this 2-part series on bit sets, we'll walk through implementing a `BitSet` fr
 [intersection]: https://en.wikipedia.org/wiki/Intersection_(set_theory)
 [hamming_weight]: https://en.wikipedia.org/wiki/Hamming_weight
 
-Let's get started!
+The post assumes that you're somewhat familiar with [binary numbers][binary_numbers], so refresh your memory if you haven't used them for a while.
 
+[binary_numbers]: https://www.mathsisfun.com/binary-number-system.html
+
+With that out of the way, let's get started!
 
 ## Bit masks
 
