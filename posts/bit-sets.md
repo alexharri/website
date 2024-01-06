@@ -5,7 +5,7 @@ publishedAt: ""
 image: ""
 ---
 
-[Bit sets][bitset] — also known as bit arrays or bit vectors — are a highly compact data structure that stores a list of bits. It is often used to represent a set of integers, or an array of booleans.
+[Bit sets][bitset] — also known as bit arrays or bit vectors — are a highly compact data structure that stores a list of bits. It is often used to represent a set of integers or an array of booleans.
 
 In addition to their memory-compactness, bit sets support extremely performant boolean operations like [unions][union] and [intersections][intersection], achieved through the use of [bitwise operations][bitwise_ops].
 
@@ -26,7 +26,7 @@ Let's get started!
 
 ## Bit masks
 
-[Bit masks][mask] allows us compactly store multiple booleans in a single number. You may know bit masks as _bit flags_ or _bit fields_.
+[Bit masks][mask] allow us to compactly store multiple booleans in a single number. You may know bit masks as _bit flags_ or _bit fields_.
 
 [mask]: https://en.wikipedia.org/wiki/Mask_(computing)
 
@@ -42,7 +42,7 @@ Let's get started!
 
 Each bit in the bit mask corresponds to a single boolean — 1 representing true, and 0 representing false.
 
-In the following example, we'll represent a users permissions using a bit mask. Certain positions in the bit mask correspond to a specific permission (e.g. `READ` or `WRITE`). If the corresponding bit is set to 1, the user has the permission, otherwise they don't.
+In the following example, we'll represent a user's permissions using a bit mask. Certain positions in the bit mask correspond to specific permissions (e.g. `READ` or `WRITE`). If the corresponding bit is set to 1, the user has the permission, otherwise, they don't.
 
 ```tsx
 // The '0b' prefix denotes a binary numbers
@@ -301,7 +301,7 @@ The rest of the bits in `index` (leftmost) specify the word index.
            00000 // bit index
 ```
 
-When all of the bits in the bit index region are set to 1, we get a word index of 0 and bit index of 31, corresponding to the 32nd bit.
+When all of the bits in the bit index region are set to 1, we get a word index of 0 and a bit index of 31, corresponding to the 32nd bit.
 
 ```ts
 00000000000 = 0 // word index
@@ -325,7 +325,7 @@ If we increment the input index by 1, we get a word index of 1 and a bit index o
 // 33rd bit
 ```
 
-This works for any input index. An input `index` of 100 corresponds to `0b1100100` in binary. Broken down, we get a word index of 3 and bit index of 4, corresponding to the 101st bit.
+This works for any input index. An input `index` of 100 corresponds to `0b1100100` in binary. Broken down, we get a word index of 3 and a bit index of 4, corresponding to the 101st bit.
 
 ```tsx
 00000000011 = 3 // word index
@@ -399,7 +399,7 @@ Computing the bit index is quite simple: we take the 5 least-significant bits fr
 const bitIndex = index & 0b11111;
 ```
 
-This sets any bits left of the 5 least-significant bits to zero.
+This sets any bits left of the 5 least significant bits to zero.
 
 And with that, we know how to parse an input `index` into word and bit indices:
 
