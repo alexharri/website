@@ -1,12 +1,12 @@
 ---
 title: "Iterating over Bit Sets really quickly"
 description: ""
-publishedAt: ""
+publishedAt: "2024-01-06"
 image: ""
 ---
 
 <Note>
-  Welcome to part 2 of my 2-part series on bit sets! If you're not very familiar with bit manipulation — or don't know what bit sets are — I recommend reading part 1 first: <a href="/blog/draft/bit-sets" target="_blank">Bit Sets: An introduction to bit manipulation</a>.
+  Welcome to part 2 of my 2-part series on bit sets! If you're not very familiar with bit manipulation — or don't know what bit sets are — I recommend reading part 1 first: <a href="/blog/bit-sets" target="_blank">Bit Sets: An introduction to bit manipulation</a>.
 
   If you know your bit manipulation, then you can freely skip part 1.
 </Note>
@@ -15,7 +15,7 @@ image: ""
 
 [bitset]: https://en.wikipedia.org/wiki/Bit_array
 
-In <a href="/blog/draft/bit-sets" target="_blank">part 1</a> we started writing a `BitSet` class, and implemented a few basic methods:
+In <a href="/blog/bit-sets" target="_blank">part 1</a> we started writing a `BitSet` class, and implemented a few basic methods:
 
 ```tsx
 class BitSet {
@@ -890,7 +890,7 @@ Different algorithms will often favor some inputs over others, as we saw with lo
 
 ---
 
-Anyway, thanks for reading this short series on bit set! If you haven't read part 1 yet, you can find it here: <a href="/blog/draft/bit-sets" target="_blank">Bit Sets: An introduction to bit manipulation</a>.
+Anyway, thanks for reading this short series on bit set! If you haven't read part 1 yet, you can find it here: <a href="/blog/bit-sets" target="_blank">Bit Sets: An introduction to bit manipulation</a>.
 
 I may write a part 3, taking an in-depth look at bit set performance for boolean operations (and, or, xor, andNot, etc), but I've thought about bit sets quite enough for now.
 

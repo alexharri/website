@@ -1,7 +1,7 @@
 ---
 title: "Bit Sets: An introduction to bit manipulation"
 description: ""
-publishedAt: ""
+publishedAt: "2024-01-06"
 image: ""
 ---
 
@@ -14,7 +14,7 @@ In addition to their memory-compactness, bit sets support extremely performant b
 In this 2-part series on bit sets, we'll walk through implementing a `BitSet` from scratch in JavaScript.
 
  * This post covers the basics of bitwise operators and bit manipulation. We'll use that knowledge to implement a basic `BitSet` class.
- * <a href="/blog/draft/bit-sets-fast-foreach" target="_blank">In part 2</a> we'll add the ability to iterate over bit sets extremely quickly by exploiting [two's complement][twos_complement] and [Hamming weights][hamming_weight].
+ * <a href="/blog/bit-sets-fast-foreach" target="_blank">In part 2</a> we'll add the ability to iterate over bit sets extremely quickly by exploiting [two's complement][twos_complement] and [Hamming weights][hamming_weight].
 
 [bitset]: https://en.wikipedia.org/wiki/Bit_array
 [union]: https://en.wikipedia.org/wiki/Union_(set_theory)
@@ -608,7 +608,7 @@ We covered a lot of ground in this post!
 
 Next up in our bit set journey is iterating over bits. We'll learn how exploiting [two's complement][twos_complement] and [Hamming weights][hamming_weight] enables us to make our iteration extremely fast!
 
-See you in part 2: <a href="/blog/draft/bit-sets-fast-foreach" target="_blank">Iterating over Bit Sets really quickly</a>
+See you in part 2: <a href="/blog/bit-sets-fast-foreach" target="_blank">Iterating over Bit Sets really quickly</a>
 
 — Alex Harri
 
