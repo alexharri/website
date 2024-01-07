@@ -2,8 +2,7 @@ import fs from "fs";
 import path from "path";
 import matter from "gray-matter";
 import { postFileNames, POSTS_PATH } from "./mdxUtils";
-import { GetStaticProps } from "next";
-import { MDXRemoteSerializeResult } from "next-mdx-remote";
+import { GetStaticPropsContext } from "next";
 import { Post } from "../types/Post";
 
 export const getPosts = (type: "published" | "draft") => {
@@ -39,7 +38,12 @@ export const getPosts = (type: "published" | "draft") => {
   });
 };
 
-export function getPostPaths(options: { type: "published" | "draft" }) {
+interface Redirect {
+  from: string;
+  to: string;
+}
+
+export function getPostPaths(options: { type: "published" | "draft" }, redirects: Redirect[] = []) {
   const paths = postFileNames
     .filter((filePath) => {
       const fileContent = fs.readFileSync(path.resolve(POSTS_PATH, filePath));
@@ -53,21 +57,23 @@ export function getPostPaths(options: { type: "published" | "draft" }) {
     .map((path) => path.replace(/\.mdx?$/, ""))
     .map((slug) => ({ params: { slug } }));
 
-  return paths;
-}
-
-interface Props {
-  source: MDXRemoteSerializeResult;
-  version: string;
-  slug: string;
+  return [...paths, ...redirects.map((redirect) => ({ params: { slug: redirect.from } }))];
 }
 
 type Params = {
   slug: string;
 };
 
-export const getPostProps: GetStaticProps<Props, Params> = async (ctx) => {
+export const getPostProps = async (
+  ctx: GetStaticPropsContext<Params>,
+  redirects: Redirect[] = [],
+) => {
   const params = ctx.params!;
+
+  const redirect = redirects.find((redirect) => redirect.from === params.slug);
+  if (redirect) {
+    return { redirect: { destination: `/blog/${redirect.to}`, permanent: true } };
+  }
 
   let filePath = path.join(POSTS_PATH, `${params.slug}.mdx`);
   if (!fs.existsSync(filePath)) {

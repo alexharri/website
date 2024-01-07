@@ -95,8 +95,11 @@ export type Params = {
   slug: string;
 };
 
-export const getStaticProps: GetStaticProps<Props, Params> = async (ctx) => getPostProps(ctx);
+const redirects = [{ from: "bit-sets-fast-foreach", to: "bit-set-iteration" }];
+
+export const getStaticProps: GetStaticProps<Props, Params> = async (ctx) =>
+  getPostProps(ctx, redirects);
 
 export const getStaticPaths: GetStaticPaths<Params> = async () => {
-  return { paths: getPostPaths({ type: "published" }), fallback: false };
+  return { paths: getPostPaths({ type: "published" }, redirects), fallback: false };
 };
