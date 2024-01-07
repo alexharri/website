@@ -38,11 +38,6 @@ export const getPosts = (type: "published" | "draft") => {
   });
 };
 
-interface Redirect {
-  from: string;
-  to: string;
-}
-
 export function getPostPaths(options: { type: "published" | "draft" }) {
   const paths = postFileNames
     .filter((filePath) => {
@@ -64,16 +59,8 @@ type Params = {
   slug: string;
 };
 
-export const getPostProps = async (
-  ctx: GetStaticPropsContext<Params>,
-  redirects: Redirect[] = [],
-) => {
+export const getPostProps = async (ctx: GetStaticPropsContext<Params>) => {
   const params = ctx.params!;
-
-  const redirect = redirects.find((redirect) => redirect.from === params.slug);
-  if (redirect) {
-    return { redirect: { destination: `/blog/${redirect.to}`, permanent: true } };
-  }
 
   let filePath = path.join(POSTS_PATH, `${params.slug}.mdx`);
   if (!fs.existsSync(filePath)) {

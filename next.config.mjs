@@ -10,6 +10,14 @@ const withTM = TM([
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  redirects: async () => [
+    {
+      source: "/blog/bit-sets-fast-foreach",
+      destination: "/blog/bit-set-iteration",
+      permanent: true,
+    },
+  ],
+
   reactStrictMode: true,
   swcMinify: true,
 
