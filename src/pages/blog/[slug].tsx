@@ -101,5 +101,5 @@ export const getStaticProps: GetStaticProps<Props, Params> = async (ctx) =>
   getPostProps(ctx, redirects);
 
 export const getStaticPaths: GetStaticPaths<Params> = async () => {
-  return { paths: getPostPaths({ type: "published" }, redirects), fallback: false };
+  return { paths: getPostPaths({ type: "published" }), fallback: "blocking" };
 };

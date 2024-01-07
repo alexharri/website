@@ -96,7 +96,6 @@ const Message = (props: ErrorProps) => {
     return spaces(i);
   };
 
-  console.log({ noHeight });
   return (
     <div className={s("outerContainer", { noHeight: noHeight === 1 })}>
       <div style={{ userSelect: "none" }}>{paddingSpaces}</div>

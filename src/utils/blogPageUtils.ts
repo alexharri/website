@@ -43,7 +43,7 @@ interface Redirect {
   to: string;
 }
 
-export function getPostPaths(options: { type: "published" | "draft" }, redirects: Redirect[] = []) {
+export function getPostPaths(options: { type: "published" | "draft" }) {
   const paths = postFileNames
     .filter((filePath) => {
       const fileContent = fs.readFileSync(path.resolve(POSTS_PATH, filePath));
@@ -57,7 +57,7 @@ export function getPostPaths(options: { type: "published" | "draft" }, redirects
     .map((path) => path.replace(/\.mdx?$/, ""))
     .map((slug) => ({ params: { slug } }));
 
-  return [...paths, ...redirects.map((redirect) => ({ params: { slug: redirect.from } }))];
+  return [...paths];
 }
 
 type Params = {
@@ -79,6 +79,11 @@ export const getPostProps = async (
   if (!fs.existsSync(filePath)) {
     filePath = path.join(POSTS_PATH, `${params.slug}.md`);
   }
+
+  if (!fs.existsSync(filePath)) {
+    return { notFound: true as const };
+  }
+
   const fileContent = fs.readFileSync(filePath);
 
   const { content, data } = matter(fileContent);
