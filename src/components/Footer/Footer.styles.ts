@@ -26,7 +26,7 @@ export const FooterStyles = ({ styled, theme }: StyleOptions) => ({
     font-size: 18px;
     color: ${theme.text};
     font-weight: 600;
-    margin: 0 0 6px;
+    margin: 0 0 2px;
   `,
 
   copyright: styled.css`

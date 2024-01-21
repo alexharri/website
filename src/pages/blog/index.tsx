@@ -1,4 +1,5 @@
 import { GetStaticProps } from "next";
+import Head from "next/head";
 import { AboutMe } from "../../components/AboutMe/AboutMe";
 import { Layout } from "../../components/Layout";
 import { PostCard } from "../../components/PostCard/PostCard";
@@ -27,6 +28,9 @@ export default function Page(props: Props) {
 
   return (
     <Layout>
+      <Head>
+        <title>Blog | Alex Harri Jónsson</title>
+      </Head>
       <h1>All posts</h1>
 
       <div className={s("list")}>
