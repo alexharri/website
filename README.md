@@ -1,5 +1,5 @@
 <h1 align="center">
-  <a href="https://alexharri.com">alexharri.com</a>
+  alexharri.com
 </h1>
 
 <p align="center">
