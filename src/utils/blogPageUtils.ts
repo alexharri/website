@@ -38,6 +38,28 @@ export const getPosts = (type: "published" | "draft") => {
   });
 };
 
+export function getPopularPosts() {
+  const postsBySlug = getPosts("published").reduce((acc, post) => {
+    acc[post.slug] = post;
+    return acc;
+  }, {} as Record<string, Post>);
+
+  const popularPosts = [
+    "multi-cursor-code-editing-animated-introduction",
+    "typescript-structural-typing",
+    "build-schema-language-with-infer",
+    "grid-engine-performance",
+  ];
+
+  for (const slug of popularPosts) {
+    if (!postsBySlug[slug]) {
+      throw new Error(`No post with slug '${slug}'`);
+    }
+  }
+
+  return popularPosts.map((slug) => postsBySlug[slug]);
+}
+
 export function getPostPaths(options: { type: "published" | "draft" }) {
   const paths = postFileNames
     .filter((filePath) => {

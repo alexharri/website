@@ -14,11 +14,18 @@ export const Layout = (props: Props) => {
       <header className={s("header")}>
         <div className={s("headerContent")}>
           <div className={s("headerSection")}>
-            <Link href="/" className={s("homeLink")}>
-              alexharri
+            <Link href="/" className={s("link", { home: true })}>
+              Alex Harri
             </Link>
           </div>
-          <div className={s("headerSection")} />
+          <div className={s("headerSection")}>
+            <Link href="/" className={s("link")}>
+              Home
+            </Link>
+            <Link href="/blog" className={s("link")}>
+              Blog
+            </Link>
+          </div>
         </div>
       </header>
       <div className={s("headerBorder")} />

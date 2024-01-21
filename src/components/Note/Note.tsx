@@ -3,7 +3,7 @@ import { StyleOptions, useStyles } from "../../utils/styles";
 
 const NoteStyles = ({ styled, theme }: StyleOptions) => ({
   container: styled.css`
-    background: ${theme.background100};
+    background: ${theme.background200};
     padding: 12px 16px;
     border-radius: 8px;
     margin: 32px -16px;

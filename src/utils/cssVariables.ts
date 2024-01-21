@@ -1,6 +1,8 @@
 export const cssVariables = {
   fontMonospace: "'Fira Code', monospace",
   fontFamily: "'Fira Sans', sans-serif",
+  contentWidth: 750,
+  contentPadding: 24,
 };
 
 export const colors = {
@@ -19,7 +21,8 @@ export const colors = {
   background700: "#1c2837",
   background500: "#17222F",
   background300: "#101821",
-  background100: "#0e1824",
+  background200: "#0e1824",
+  background100: "#051420",
   codeBackground: "#192535",
   medium500: "#293946",
   medium400: "#1f2d38",

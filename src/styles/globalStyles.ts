@@ -148,7 +148,7 @@ table {
 }
 
 tbody tr:nth-child(even) {
-  background-color: ${colors.background100};
+  background-color: ${colors.background200};
 }
 
 th, td {

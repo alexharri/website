@@ -28,6 +28,7 @@ function getTarget(href: LinkProps["href"]) {
 
 interface Props extends LinkProps {
   children: React.ReactNode;
+  className?: string;
 }
 
 export const Link = (props: Props) => {

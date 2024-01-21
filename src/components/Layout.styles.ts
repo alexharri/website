@@ -1,3 +1,4 @@
+import { cssVariables } from "../utils/cssVariables";
 import { StyleOptions } from "../utils/styles";
 
 export const LayoutStyles = ({ styled, theme }: StyleOptions) => ({
@@ -14,7 +15,7 @@ export const LayoutStyles = ({ styled, theme }: StyleOptions) => ({
   headerBorder: styled.css`
     height: 1px;
     position: fixed;
-    top: 40px;
+    top: 48px;
     left: 0;
     right: 0;
     background: ${theme.headerBorderBackground};
@@ -23,7 +24,7 @@ export const LayoutStyles = ({ styled, theme }: StyleOptions) => ({
 
   headerContent: styled.css`
     justify-content: space-between;
-    padding: 8px 24px;
+    padding: 12px 16px;
     width: 750px;
     max-width: 100%;
     display: flex;
@@ -33,25 +34,28 @@ export const LayoutStyles = ({ styled, theme }: StyleOptions) => ({
   headerSection: styled.css`
     display: flex;
     align-items: center;
+    gap: 8px;
   `,
 
-  homeLink: styled.css`
+  link: styled.css`
     color: ${theme.text};
     font-size: 16px;
     line-height: 24px;
     padding: 0 8px;
-    margin-left: -8px;
 
-    &:hover {
-      text-decoration: none;
+    &--home {
+      font-size: 18px;
+      &:hover {
+        text-decoration: none;
+      }
     }
   `,
 
   content: styled.css`
-    width: 750px;
+    width: ${cssVariables.contentWidth}px;
     max-width: 100%;
     margin: 0 auto;
-    padding: 128px 24px 25vh;
+    padding: 128px ${cssVariables.contentPadding}px 25vh;
 
     @media (max-width: 800px) {
       padding-top: 80px;
