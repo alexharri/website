@@ -6,13 +6,27 @@ export const AboutMe = () => {
   const s = useStyles(AboutMeStyles);
 
   return (
-    <div className={s("container")}>
+    <section className={s("container")}>
       <div className={s("left")}>
         <img src="/images/me.png" className={s("image")} />
       </div>
       <div className={s("right")}>
-        <h2>About me</h2>
-        <p>Hey, my name is Alex Harri Jónsson. Welcome to my personal website and blog!</p>
+        <p>Hey, I'm Alex Harri.</p>
+        <p>
+          I write about software engineering topics, such as TypeScript, monorepos, and performance.
+        </p>
+        <p>
+          I've been working as a software engineer in Iceland's vibrant startup scene for the past
+          5+ years. My experience spans very early-stage startups (I was the first employee at{" "}
+          <Link href="https://www.taktikal.com/">Taktikal</Link>) and Series A startups like{" "}
+          <Link href="https://grid.is/">GRID</Link>.
+        </p>
+        <p>
+          I'm currently working as a Senior Software Engineer at{" "}
+          <Link href="https://arkio.is">Arkio</Link>, where I'm developing Arkio's modeling core.
+          Arkio is a VR/AR-native volumetric 3D modeler and review tool for architects supporting
+          real-time collaboration.
+        </p>
         <p className={s("links")}>
           <Link href="https://github.com/alexharri">GitHub</Link>
           <span data-dot />
@@ -23,6 +37,6 @@ export const AboutMe = () => {
           <Link href="https://alexharri.medium.com/">Medium</Link>
         </p>
       </div>
-    </div>
+    </section>
   );
 };

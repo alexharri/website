@@ -45,6 +45,7 @@ export const LayoutStyles = ({ styled, theme }: StyleOptions) => ({
 
     &--home {
       font-size: 18px;
+      font-weight: 600;
       &:hover {
         text-decoration: none;
       }

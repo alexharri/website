@@ -28,7 +28,7 @@ export const AboutMeStyles = ({ styled, theme }: StyleOptions) => ({
   `,
 
   links: styled.css`
-    margin-top: -8px;
+    margin-top: 16px;
     display: flex;
     gap: 12px;
     align-items: center;

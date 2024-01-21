@@ -22,7 +22,7 @@ const Styles = ({ styled }: StyleOptions) => ({
     div {
       margin-bottom: 6px;
       a {
-        font-size: 20px;
+        font-size: 18px;
       }
       @media (max-width: 500px) {
         display: none;
@@ -38,7 +38,8 @@ const Styles = ({ styled }: StyleOptions) => ({
       font-size: 20px;
     }
     svg {
-      transform: translateY(1px);
+      display: inline-block;
+      margin-left: 4px;
     }
     @media (min-width: 901px) {
       display: none;
