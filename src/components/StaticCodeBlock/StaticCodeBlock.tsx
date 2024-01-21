@@ -208,11 +208,16 @@ export const StaticCodeBlock = (props: StaticCodeBlockProps) => {
 
   const padding = small ? 16 : 24;
   const fontSize = small ? 14 : 16;
+  const paddingRight = small ? 32 : 48;
+
+  const textToCopy = children
+    .replaceAll(/@error {.*} /g, "Error: ")
+    .replaceAll(/@info {.*} /g, "Info: ");
 
   return (
     <div className={s("outerWrapper")}>
-      <CopyButton text={children} />
-      <div className={s("wrapper")} style={{ marginBottom, padding }}>
+      <CopyButton text={textToCopy} />
+      <div className={s("wrapper")} style={{ marginBottom, padding, paddingRight }}>
         <Highlight {...defaultProps} code={children} language={language as any} theme={prismTheme}>
           {({ className, style, tokens: lines, getLineProps, getTokenProps }) => (
             <pre className={[className, s("pre")].join(" ")} style={{ ...style, fontSize }}>
