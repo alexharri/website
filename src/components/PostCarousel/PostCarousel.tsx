@@ -41,7 +41,10 @@ export const PostCarousel = (props: Props) => {
           const outOfBounds = indexRelative < 0 || indexRelative > 1;
           const onClick = !outOfBounds
             ? undefined
-            : () => setIndex((index) => (indexRelative < 0 ? index - 1 : index + 1));
+            : () =>
+                setIndex((index) =>
+                  indexRelative < 0 ? index + indexRelative : index + indexRelative - 1,
+                );
           return (
             <div className={s("item", { outOfBounds })} key={i} onClick={onClick}>
               {child}
