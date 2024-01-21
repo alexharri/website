@@ -2,6 +2,7 @@ import React from "react";
 import Link from "next/link";
 import { useStyles } from "../utils/styles";
 import { LayoutStyles } from "./Layout.styles";
+import { Footer } from "./Footer/Footer";
 
 interface Props {
   children: React.ReactNode;
@@ -30,6 +31,7 @@ export const Layout = (props: Props) => {
       </header>
       <div className={s("headerBorder")} />
       <div className={s("content")}>{props.children}</div>
+      <Footer />
     </>
   );
 };

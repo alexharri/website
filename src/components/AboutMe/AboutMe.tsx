@@ -27,15 +27,6 @@ export const AboutMe = () => {
           Arkio is a VR/AR-native volumetric 3D modeler and review tool for architects supporting
           real-time collaboration.
         </p>
-        <p className={s("links")}>
-          <Link href="https://github.com/alexharri">GitHub</Link>
-          <span data-dot />
-          <Link href="https://www.linkedin.com/in/alex-harri-j%C3%B3nsson-b1273613b/">
-            LinkedIn
-          </Link>
-          <span data-dot />
-          <Link href="https://alexharri.medium.com/">Medium</Link>
-        </p>
       </div>
     </section>
   );

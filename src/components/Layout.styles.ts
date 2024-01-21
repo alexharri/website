@@ -56,7 +56,8 @@ export const LayoutStyles = ({ styled, theme }: StyleOptions) => ({
     width: ${cssVariables.contentWidth}px;
     max-width: 100%;
     margin: 0 auto;
-    padding: 128px ${cssVariables.contentPadding}px 25vh;
+    padding: 128px ${cssVariables.contentPadding}px 64px;
+    min-height: calc(100vh - 24px);
 
     @media (max-width: 800px) {
       padding-top: 80px;
