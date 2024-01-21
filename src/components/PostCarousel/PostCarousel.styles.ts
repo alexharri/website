@@ -18,6 +18,7 @@ export const PostCarouselStyles = ({ styled, theme }: StyleOptions) => ({
       display: grid;
       grid-template-columns: repeat(2, 1fr);
       gap: 16px;
+      transition: none;
     }
 
     @media (max-width: 670px) {
