@@ -1,6 +1,6 @@
 ---
 title: "Exhaustive Switch in TypeScript"
-description: "Enforce exhaustive matching at compile- and run-time in TypeScript"
+description: "Enforce exhaustive matching at compile- and run-time in TypeScript."
 publishedAt: "27-11-2022"
 ---
 
