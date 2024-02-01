@@ -5,7 +5,7 @@
 <path d="M187 9.5L136 97.8346" stroke="#20C831" stroke-width="4"/>
 <circle cx="136" cy="97.5" r="5" fill="black" stroke="#D9EBFF" stroke-width="2"/>
 <path d="M338 97.5L338 199.5" stroke="#B3BFD8" stroke-width="4"/>
-<path opacity="0.2" d="M261 28.5195C295.669 25.617 328.997 50.7559 337.58 95.8959" stroke="#3491FF" stroke-width="4"/>
+<path opacity="0.4" d="M261 28.5195C295.669 25.617 328.997 50.7559 337.58 95.8959" stroke="#3491FF" stroke-width="4"/>
 <path d="M389 9.5L338 97.8346" stroke="#20C831" stroke-width="4"/>
 <path d="M261 28.5L338 97.8346" stroke="#3491FF" stroke-width="4"/>
 <circle cx="338" cy="97.5" r="5" fill="black" stroke="#D9EBFF" stroke-width="2"/>

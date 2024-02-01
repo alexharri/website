@@ -73,7 +73,7 @@ Any path can be described as a list of nodes and edges.
 
 <Image plain src="~/9.svg" width="auto" noMargin />
 
-This path can be described as the series of nodes <code>(0, 1, 2, 3, 4)</code>. It could also be thought of as the series of the edges that composed it.That list of edges would be <code>(0, 1), (1, 2), (2, 3), (3, 4), (4, 0)</code>.
+This path can be described as the series of nodes <code>(0, 1, 2, 3, 4)</code>. It could also be thought of as the series of the edges that composed it. That list of edges would be `(0, 1)`, `(1, 2)`, `(2, 3)`, `(3, 4)`, `(4, 0)`.
 
 You can think of this like the [dot to dot puzzles](https://www.google.com/search?q=dot+to+dot+for+kids&tbm=isch) that you used to do as a kid: Draw the edges of the path in the order that the points lay out.
 
@@ -85,7 +85,7 @@ But instead of a kid drawing lines between numbered points on a paper, a cold ca
 
 ## Edges
 
-An edge is a line between a pair of nodes. Edges describe a line from node <code>a</code> to node <code>b</code>.
+An edge is a connection between a pair of nodes. Visually, edges are a line from node <code>a</code> to node <code>b</code>.
 
 But that line can be drawn in a lot of different ways. How do you describe those different types of lines?
 
@@ -175,11 +175,11 @@ You can see an interactive demo of bezier curves at [Jason Davies' site](https:/
 
 ## The creative constraints of paths
 
-Earlier in this piece, paths were defined as a continuous series of lines and curves that may or may not form a loop.
+Earlier in this post, paths were defined as a continuous series of lines and curves that may or may not form a loop.
 
 The fact that paths are a single continuous chain is a pretty big limitation.
 
-It means three way intersections are not possible using a single path. To create a three-way intersection, two or more paths will have to be used. This means dealing with positioning and grouping different paths together. It also means that changes to a single path can lead to changes to multiple other paths.
+It means three way intersections are not possible using a single path. To create a three way intersection, two or more paths will have to be used. This means dealing with positioning and grouping different paths together. It also means that changes to a single path can lead to changes to multiple other paths.
 
 But that's simply the routine. Seasoned designers know how paths behave, they can plan around it without really thinking about it. For a static design it doesn't really matter how many paths and layers you have to create if the piece is planned properly upfront.
 
@@ -239,7 +239,7 @@ With an understanding of what Vector Networks are, we can now take a look at how
 
 ### Graph
 
-The main data structure behind Vector Networks is the graph. A graph can be thought of as a collection of nodes and edges.
+The main data structure behind Vector Networks is a graph. A graph can be thought of as a collection of nodes and edges.
 
 <Image plain src="~/37.svg" width="auto" noMargin />
 
@@ -295,7 +295,7 @@ But that's not what we want. What we need to find are the 16 small areas.
 
 <Image plain src="~/45.svg" width="auto" noMargin />
 
-We need a way to find the _small cycles_ in the graph.
+We need a way to find the _“small cycles”_ in the graph.
 
 ## Minimal cycle basis
 
@@ -309,7 +309,7 @@ It's just a fancy way to refer to all of the “small areas” of a graph. You c
 
 ### Left or right?
 
-The main tool for finding the “minimal cycle basis” will be determining which edge to choose based on left- or right-ness.
+The main tool for finding the “minimal cycle basis” will be determining which edge to choose based on left- or rightness.
 
 <Image plain src="~/47.svg" width="auto" noMargin />
 
@@ -353,7 +353,7 @@ In this case <code>a</code> is more CW relative to <code>prev</code> than <code>
 
 <Image plain src="~/54.svg" width="auto" noMargin />
 
-When we travel to a new node, <code>curr</code> becomes <code>prev</code> and the node at the end of the selected edge <code>curr</code>. Then we pick the counter clockwise-most edge relative to the new <code>prev</code> node.
+After the first walk, we start picking the CCW edge.
 
 <Image plain src="~/55.svg" width="auto" noMargin />
 
@@ -365,7 +365,7 @@ When we reach the original node again, a cycle is found.
 
 <Image plain src="~/57.svg" width="auto" noMargin />
 
-And so we have the first small cycle in the graph.
+We now have the first small cycle in the graph.
 
 <Image plain src="~/58.svg" width="auto" noMargin />
 
@@ -403,11 +403,11 @@ Now we have the cycles <code>(0, 1, 3, 4, 5, 6, 7)</code> and <code>(1, 2, 3)</c
 
 <Image plain src="~/65.svg" width="auto" noMargin />
 
-Then we remove the filaments like before. We start with the filaments connected to the first two nodes of the cycle.
+Then we remove the first edge of the cycle and filaments like before. We start by removing the filaments connected to the first two nodes of the cycle.
 
 <Image plain src="~/66.svg" width="auto" noMargin />
 
-Then keep going until we find don't have any filaments.
+We keep going until there aren't any filaments left.
 
 <Image plain src="~/67.svg" width="auto" noMargin />
 
@@ -417,7 +417,7 @@ Finding the next cycle is pretty obvious.
 
 <SmallNote label="" center>CW then CCW</SmallNote>
 
-And now we have all the cycles of the graph.
+We now have all the cycles of the graph.
 
 <Image plain src="~/69.svg" width="auto" noMargin />
 
@@ -427,7 +427,7 @@ This is the minimal cycle basis of our graph! Now we can toggle the fills of the
 
 ## The math
 
-I want to dig into how the clockwise-ness of edge relative to another edge is computed.
+I want to dig into how the clockwise-ness of an edge relative to another edge is determined.
 
 The only prerequisite for understanding this section are [vectors](https://www.mathsisfun.com/algebra/vectors.html); arrows pointing from one point of a 2D coordinate system to another.
 
@@ -439,7 +439,7 @@ With two vectors sitting at the origin, <code>i</code> and <code>j</code>, we ca
 
 <Image plain src="~/72.svg" width="auto" noMargin />
 
-We can create a square by placing a copy of <code>j</code> at the “tip” of <code>i</code> and placing a copy of <code>i</code> at the tip of <code>j</code>. The square this creates will have an area of 1.
+For the unit vectors `(1, 0)` and `(0, 1)` the square has an area of 1.
 
 <Image plain src="~/73.svg" width="auto" noMargin />
 
@@ -447,9 +447,7 @@ We can do this with any two vectors.
 
 <Image plain src="~/74.svg" width="auto" noMargin />
 
-This shape is called a _parallelogram_. It's the shape of any two vectors that you put tip to tip like we did above to create the square.
-
-Parallelograms have one property that we care about, which is that its area is equal to the absolute value of its determinant.
+This shape is called a _parallelogram_. Parallelograms have one property that we care about, which is that their area is equal to the absolute value of their determinant.
 
 That may sound like jargon, but the determinant happens to be really useful for us. Take a look at what happens when we move the vectors of the one-by-one square closer together.
 
@@ -463,7 +461,7 @@ At this point the natural question to ask is what happens when we keep going and
 
 The determinant becomes negative!
 
-When the blue arrow (<code>j</code>) is to the left of the green arrow (<code>i</code>) the determinant of the parallelogram becomes negative. If the opposite is true it becomes positive.
+When the blue vector <code>j</code> is to the left of the green vector <code>i</code> the determinant of the parallelogram becomes negative. When the opposite is true it becomes positive.
 
 The implication for our use case is that we can check whether the determinant of two vectors is positive or negative to determine whether or not a vector is to the left or right of another vector.
 
@@ -485,15 +483,15 @@ Say we're in the middle of the finding a cycle and we're deciding whether or not
 
 <Image plain src="~/79.svg" width="auto" noMargin />
 
-We can move this into the coordinate system.
+Let's move this into the coordinate system.
 
 <Image plain src="~/80.svg" width="auto" noMargin />
 
-Let's first take a look at <code>a</code>.
+We'll start off with <code>a</code>.
 
 <Image plain src="~/81.svg" width="auto" noMargin />
 
-We want to move the vector from <code>curr</code> to <code>a</code> relative to the origin. We can do that by subtracting <code>curr</code> from <code>a</code>. We will differentiate this new vector by using <code>d</code> as a prefix, so <code>a</code> becomes <code>da</code>.
+We want to get the vector from <code>curr</code> to <code>a</code>, which we do by subtracting <code>curr</code> from <code>a</code>. We'll call this new vector <code>da</code>.
 
 <Image plain src="~/82.svg" width="auto" noMargin />
 
@@ -505,7 +503,7 @@ Now we can determine whether <code>a</code> is left of <code>curr</code> by comp
 
 <Image plain src="~/84.svg" width="auto" noMargin />
 
-Note that the order is important. If we use <code>da</code> as <code>i</code> the area is negative. If we use it as <code>j</code> instead it becomes positive.
+Note that the order is important. If we use <code>da</code> as <code>i</code> the area is negative. If we use it as <code>j</code> it becomes positive.
 
 <Image plain src="~/85.svg" width="auto" noMargin />
 
@@ -519,11 +517,11 @@ What do we do with this information?
 
 ## The green zone
 
-We will be focusing on determining whether <code>a</code> is more CCW than <code>b</code>. Simply put, is <code>a</code> left of <code>b</code>?
+We will be focusing on determining whether <code>da</code> is more CCW than <code>db</code> relative to `curr`. Simply put, is <code>da</code> left of <code>db</code>?
 
-If <code>a</code> is CCW of <code>b</code>, <code>a</code> can be said to be _better_ than <code>b</code>.
+If <code>da</code> is more CCW than <code>db</code> relative to `dcurr`, <code>da</code> can be said to be _better_ than <code>db</code>.
 
-The first step is to determine whether the angle between <code>curr</code> and <code>b</code> is convex.
+The first step is to determine whether the angle between <code>dcurr</code> and <code>db</code> is convex.
 
 <Image plain src="~/87.svg" width="auto" noMargin />
 
@@ -533,11 +531,11 @@ This “convexity” can more easily visualized by shifting <code>dcurr</code> b
 
 <SmallNote label="" center>The angle is convex</SmallNote>
 
-If the angle is convex, we we use the following expression to check whether <code>a</code> is better than <code>b</code>.
+If the angle is convex, we we use the following expression to check whether <code>da</code> is better than <code>db</code>.
 
 <Image plain src="~/89.svg" width="auto" noMargin />
 
-The ∨ symbol represents the logical OR_ _operator in math.
+The ∨ symbol represents the logical OR operator in math.
 
 Let's take a look at the individual parts of this expression.
 
@@ -549,7 +547,7 @@ Let's take a look at the individual parts of this expression.
 
 <SmallNote label="" center>Is `da` CCW of `db`?</SmallNote>
 
-I find that it's pretty hard to visualize this mentally, so I think of the two different expressions creating a “green zone” where <code>a</code> is better than <code>b</code>.
+I find that it's pretty hard to visualize this mentally, so I think of the two different expressions creating a “green zone” where <code>da</code> is better than <code>db</code>.
 
 For the first part of the expression (is <code>da</code> left of <code>dcurr</code>), the green area looks like so.
 
@@ -713,7 +711,7 @@ When we encounter an intersection, we create a node whose position is at the int
 
 <Image plain src="~/120.svg" width="auto" noMargin />
 
-For the intersection with the lowest <code>t</code> value, we create an edge with the first _edge part _having the <code>nodeId</code> of the first edge part of the original edge. The second edge part should contain the <code>nodeId</code> of the intersection. This creates the edge <code>(2, 4)</code>.
+For the intersection with the lowest <code>t</code> value, we create an edge with the first _edge part_ having the <code>nodeId</code> of the first edge part of the original edge. The second edge part should contain the <code>nodeId</code> of the intersection. This creates the edge <code>(2, 4)</code>.
 
 <Image plain src="~/121.svg" width="auto" noMargin />
 
@@ -793,7 +791,7 @@ For clarity, the start of our edge, <code>n0</code>, is the same node as <code>c
 
 <Image plain src="~/134.svg" width="auto" noMargin />
 
-So by converting edges defined cubic bezier into a line defined by <code>(n0, cp0)</code>, we get the _initial_ angle of the curve.
+So by converting edges defined by cubic beziers into a line defined by <code>(n0, cp0)</code>, we get the _initial_ angle of the curve.
 
 <Image plain src="~/135.svg" width="auto" noMargin />
 
@@ -820,8 +818,6 @@ Like we covered earlier, an expanded graph is a graph that has replaced all inte
 <Image plain src="~/138.svg" width="auto" noMargin />
 
 <SmallNote label="" center>The same edges as above, but expanded</SmallNote>
-
-Going forward, we will assume that all graphs are expanded unless stated otherwise.
 
 ## Parallel edges
 
@@ -993,7 +989,7 @@ Telling a computer to draw the outline of a 2D shape is simple enough. But if yo
 
 <Image plain src="~/165.svg" width="auto" noMargin />
 
-One way of finding out whether a point is inside of a shape or not is by shooting an infinite laser in any direction from that point and counting how many “walls” it passes through.
+One way of finding out whether a point is inside a shape or not is by shooting an infinite laser in any direction from that point and counting how many “walls” it passes through.
 
 If the laser intersects an odd number of walls, it's inside of the shape. Otherwise it is outside of the shape.
 
@@ -1069,37 +1065,15 @@ And after all this is done, our cycles look like so:
 
 <Image plain src="~/180.svg" width="auto" noMargin />
 
-### Rendering implications
-
-When we render this shape, we get the following:
-
-<Image plain src="~/181.svg" width="auto" noMargin />
-
-Notice the gaps? They form because the conversion from [vectors](https://en.wikipedia.org/wiki/Vector_graphics) to [pixels on a canvas](https://en.wikipedia.org/wiki/Raster_graphics) uses _anti aliasing_ to make curves and lines appear smoother.
-
-<Image plain src="~/182.png" width="auto" noMargin />
-
-<SmallNote label="" center>Example of rasterization</SmallNote>
-
-Separating the outer and inner cycles also simplifies the render operation.
-
-<Image plain src="~/183.svg" width="auto" noMargin />
-
-Without separating them we have to draw 14 different lines to draw a square, and 10 different lines to draw the square with a square hole.
-
-<Image plain src="~/184.svg" width="auto" noMargin />
-
-By separating the cycles, we can draw the square with 4 lines. And we can add the square hole with 4 additional lines.
-
 ## Subcycles
 
-Instead of referring to an “inner” and “outer” cycle, I will refer to these as subcycles and parent cycles respectively. This will make it easier to think about multiple cycles relative to each other.
+Instead of referring to “inner” and “outer” cycles, I will refer to subcycles and parent cycles. This will make it easier to think about multiple cycles relative to each other.
 
 Having said that, let's introduce a third cycle.
 
 <Image plain src="~/185.svg" width="auto" noMargin />
 
-Now when we hover over the outermost cycle, what do you expect to happen?
+When we hover over the outermost cycle, what do you expect to happen?
 
 <Image plain src="~/186.svg" width="auto" noMargin />
 
@@ -1119,7 +1093,7 @@ Let's take a look at how this works.
 
 <Image plain src="~/189.svg" width="auto" noMargin />
 
-This graph has a a rectangle, our outermost cycle. That square has two _direct subcycles_, a diamond and an hourglass. The diamond has two direct subcycles in the shape of triangles, and the hourglass has three direct subcycles in some funky shapes.
+This graph has a a rectangle, our outermost cycle, which has two direct subcycles: a diamond and an hourglass. The diamond has two direct subcycles of its own, and the hourglass has three direct subcycles.
 
 We will begin with the rectangle and its direct subcycles. We will name them, <code>c0</code>, <code>c1</code> and <code>c2</code>.
 
@@ -1155,7 +1129,7 @@ Our laser is intersecting two walls as a result of drawing both of the shapes wh
 
 So to draw the image the user wanted we can simply skip drawing the diamond since the parent cycle implicitly draws direct subcycles with the same fill setting.
 
-The hourglass, <code>c2</code>, is supposed to be empty. With that being the case, just not drawing it seems like a reasonable conclusion. But since the parent cycle — the rectangle — has already drawn the hourglass as if it was filled we need to “flip” the fill by drawing the hourglass.
+The hourglass, <code>c2</code>, is supposed to be empty. With that being the case, just not drawing it seems like a reasonable conclusion. But since the parent cycle (rectangle) has already drawn the hourglass as if it were filled we need to “flip” the fill by drawing the hourglass.
 
 <Image plain src="~/196.svg" width="auto" noMargin />
 
@@ -1181,13 +1155,13 @@ We only need to draw cycles if their parent cycle has the opposite “fill setti
 
 <Image plain src="~/200.svg" width="auto" noMargin />
 
-This means that when drawing cycles, start by drawing the outermost non-empty cycle. We then recursively operate on that cycle's direct subcycles. If a subcycle has the same fill setting (filled or empty) as their parent cycle, they can be omitted from the drawing operation.
+This means that when drawing cycles, start by drawing the outermost “filled” cycle and then look at that cycle's subcycles. If a subcycle has the same fill setting as its parent cycle, it should not be drawn.
 
 <Image plain src="~/201.svg" width="auto" noMargin />
 
 ## Contiguous cycles
 
-A graph may have multiple “clusters” of adjacent cycles.
+A graph may have multiple “clusters” of cycles.
 
 <Image plain src="~/202.svg" width="auto" noMargin />
 
@@ -1213,11 +1187,11 @@ So in the end, our colors actually look like this:
 
 <Image plain src="~/207.svg" width="auto" noMargin />
 
-Imagine one of these groups is nested inside of another group of contiguous cycles.
+Take this group of contiguous cycles nested inside another group of contiguous cycles:
 
 <Image plain src="~/208.svg" width="auto" noMargin />
 
-Because of the non-intersection rule we know that if one of the nodes in this contiguous cycle is inside of another cycle, all of them are.
+Because of the non-intersection rule we know that if one of the nodes in a group of contiguous cycles is inside of a cycle not in the group, all of them are.
 
 <Image plain src="~/209.svg" width="auto" noMargin />
 
