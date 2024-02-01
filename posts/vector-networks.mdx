@@ -1,0 +1,1322 @@
+---
+title: "The Engineering behind Figma's Vector Networks"
+description: ""
+publishedAt: "2019-11-24"
+image: "/images/posts/vector-networks/0.svg"
+---
+
+<Image plain src="~/0.svg" width={2160} noMargin />
+
+Adobe Illustrator introduced the pen tool back in [1987](https://www.youtube.com/watch?v=sT8Y7o-zsVw) as a tool for creating and modifying paths. Since then the pen tool has become incredibly widespread, so much so that is has become the de facto icon of the graphic design industry.
+
+The pen tool's functionality hasn't changed significantly in the 30 years since its introduction. Just click and drag to create smooth curves. Designers have learned to work with it, and around its idiosyncrasies.
+
+<Image plain src="~/1.svg" width="auto" noMargin />
+
+<SmallNote label="" center>The pen tool</SmallNote>
+
+But Figma felt like they could improve some aspects of how the pen tool worked, so they had a go at redesigning it. Instead of it being used to work with traditional paths, they improved the pen tool by creating what they call Vector Networks.
+
+In this post we will go through what Vector Networks are and what problems they try to solve. After we've defined what Vector Networks are, we will take a look at some of the engineering challenges you would face if you were to take a stab at implementing them.
+
+This post can be thought of as an introduction to a really interesting problem space, and as a resource for people interesting in making use of some aspects of Vector Networks for future applications. I hope it succeeds in providing value to both developers being introduced to new concepts and ideas, and to designers interesting in learning more about the tool they know and love.
+
+I will start off by laying out the core concepts behind the pen tool, and from there we will move onto Figma's Vector Networks.
+
+## Paths
+
+The pen tool is used to create and manipulate paths.
+
+If you've every worked with graphics software like [Illustrator](https://www.adobe.com/products/illustrator.html) before, you've worked with paths. Paths are a series of lines and curves that may or may not form a loop.
+
+<Image plain src="~/2.svg" width="auto" noMargin />
+
+<SmallNote label="" center>Some paths</SmallNote>
+
+The path to the left loops, while the path to the right doesn't. Both of these are valid paths.
+
+The main characteristic of paths is that they form a single continuous unbroken chain. This means that each node can only be connected to one or two other nodes.
+
+<Image plain src="~/3.svg" width="auto" noMargin />
+
+<SmallNote label="" center>Not valid paths</SmallNote>
+
+However, you could construct these shapes from multiple paths if you position them correctly together.
+
+<Image plain src="~/4.svg" width="auto" noMargin />
+
+<SmallNote label="" center>Multiple paths are used to create more complex shapes</SmallNote>
+
+From a combination of paths, you can create any shape imaginable.
+
+<Image plain src="~/5.svg" width="auto" noMargin />
+
+This beer glass, for example, is just a combination of five different paths positioned and scaled a certain way.
+
+<Image plain src="~/6.svg" width="auto" noMargin />
+
+### The building blocks of paths
+
+A path is made up of two things, points and lines.
+
+<Image plain src="~/7.svg" width="auto" noMargin />
+
+<SmallNote label="" center>Points and lines</SmallNote>
+
+The points are known as __nodes__ (or vertices) and the lines are called __edges__.
+
+<Image plain src="~/8.svg" width="auto" noMargin />
+
+<SmallNote label="" center>Together, they make a path</SmallNote>
+
+Any path can be described as a list of nodes and edges.
+
+<Image plain src="~/9.svg" width="auto" noMargin />
+
+This path can be described as the series of nodes <code>(0, 1, 2, 3, 4)</code>. It could also be thought of as the series of the edges that composed it.That list of edges would be <code>(0, 1), (1, 2), (2, 3), (3, 4), (4, 0)</code>.
+
+You can think of this like the [dot to dot puzzles](https://www.google.com/search?q=dot+to+dot+for+kids&tbm=isch) that you used to do as a kid: Draw the edges of the path in the order that the points lay out.
+
+<Image plain src="~/10.svg" width="auto" noMargin />
+
+But instead of a kid drawing lines between numbered points on a paper, a cold calculating machine does it along the cartesian coordinate system.
+
+<Image plain src="~/11.svg" width="auto" noMargin />
+
+## Edges
+
+An edge is a line between a pair of nodes. Edges describe a line from node <code>a</code> to node <code>b</code>.
+
+But that line can be drawn in a lot of different ways. How do you describe those different types of lines?
+
+Edges fall into two categories, straight and curvy.
+
+<Image plain src="~/12.svg" width="auto" noMargin />
+
+Straight edges are as simple as they seem, just a line from <code>a</code> to <code>b</code>. But how are those curvy edges defined?
+
+### Bezier curves
+
+Curvy edges are [bezier curves](https://en.wikipedia.org/wiki/B%C3%A9zier_curve). Bezier curves are a special type of curve defined by four points.
+
+<Image plain src="~/13.svg" width="auto" noMargin />
+
+The positions of the two nodes in our edge make up the start and end points of the curve. Each of the two nodes has a _control point_.
+
+In most applications, these control points are shown as _handles_ that extend from their respective node. These handles are used to control the shape of the curve.
+
+Bezier curves can be chained to make more complex shapes that a single curve can't draw on its own. They can also be combined with straight lines to make some cool designs.
+
+<Image plain src="~/14.svg" width="auto" />
+
+But what exactly are the handles doing? How do the handles tell the computer to draw the curve like it does?
+
+Computers draw curves by splitting them into straight lines and drawing the individual lines.
+
+<Image plain src="~/15.svg" width="auto" noMargin />
+
+The more lines you split a curve into, the smoother the curve becomes.
+
+<Image plain src="~/16.svg" width="auto" noMargin />
+
+So to draw the curve we need to know how to get the different points that make up the curve. If we compute enough of them, we get a smooth curve.
+
+<Image plain src="~/17.svg" width="auto" noMargin />
+
+### Computing a point on a bezier curve
+
+Let's compute the point at 25% point of the curve. We can start by connecting the control points with a third blue line.
+
+<Image plain src="~/18.svg" width="auto" noMargin />
+
+Then for each blue line, we draw a blue dot at the 25% point of the line.
+
+<Image plain src="~/19.svg" width="auto" noMargin />
+
+Next, draw two green lines between the three blue dots.
+
+<Image plain src="~/20.svg" width="auto" noMargin />
+
+And we repeat the same step as we did with the blue dots. Draw green points at the 25% points of the green lines.
+
+<Image plain src="~/21.svg" width="auto" noMargin />
+
+And then one more red line between the newly created green points.
+
+<Image plain src="~/22.svg" width="auto" noMargin />
+
+Then we add a red point at the 25% point of the red line.
+
+<Image plain src="~/23.svg" width="auto" noMargin />
+
+And just like that, we've computed the point at the 25% point of the curve.
+
+From now on we'll refer to points on curves through a `t` value, where `t` is a number from <code>0</code> to <code>1</code>. In the above example, the point would be at <code>t=0.25</code> (25%).
+
+<Image plain src="~/24.svg" width="auto" noMargin />
+
+<SmallNote label="" center>t=0.25, t=0.5 and t=0.75</SmallNote>
+
+This way of computing the point at <code>t</code> is called [De Casteljau's algorithm](https://en.wikipedia.org/wiki/De_Casteljau%27s_algorithm) and can also be used to subdivide a bezier curve. Using the points we created along the way, we can also subdivide the bezier curve into two smaller bezier curves.
+
+<Image plain src="~/25.svg" width="auto" />
+
+Bezier curves are pretty amazing things. Shaping the curve by adjusting the handles feels surprisingly natural, and chaining them together allows you to create detailed and complex shapes.
+
+<Image plain src="~/26.svg" width="auto" noMargin />
+
+And for computers, they're stable and inexpensive to compute. For this reason they're used for everything from [vector graphics](https://helpx.adobe.com/illustrator/using/drawing-pen-curvature-or-pencil.html#draw_curves_with_the_pen_tool) to [animation curves](https://www.austinsaylor.com/blog/2015/3/20/4-after-effects-graph-editor-basics-you-need-to-know) and [automobile bodies](https://en.wikipedia.org/wiki/Pierre_B%C3%A9zier#B%C3%A9zier_curve).
+
+You can see an interactive demo of bezier curves at [Jason Davies' site](https://www.jasondavies.com/animated-bezier/). It's fascinating to watch a series of straight lines trace out a smooth curve.
+
+<Image plain src="~/27.png" />
+
+<SmallNote label="" center>From [https://jasondavies.com/animated-bezier](https://jasondavies.com/animated-bezier)</SmallNote>
+
+## The creative constraints of paths
+
+Earlier in this piece, paths were defined as a continuous series of lines and curves that may or may not form a loop.
+
+The fact that paths are a single continuous chain is a pretty big limitation.
+
+It means three way intersections are not possible using a single path. To create a three-way intersection, two or more paths will have to be used. This means dealing with positioning and grouping different paths together. It also means that changes to a single path can lead to changes to multiple other paths.
+
+But that's simply the routine. Seasoned designers know how paths behave, they can plan around it without really thinking about it. For a static design it doesn't really matter how many paths and layers you have to create if the piece is planned properly upfront.
+
+But for some situations the constraints that paths impose cause a lot of friction.
+
+## Vector Networks
+
+In 2016, Figma [introduced Vector Networks](https://www.figma.com/blog/introducing-vector-networks/). They lift the “single continuous” limitation by allowing any two nodes to be joined together without restrictions.
+
+> “A vector network improves on the path model by allowing lines and curves between any two points instead of requiring that they all join up to form a single chain.”
+
+<Image plain src="~/28.gif" width="auto" noMargin />
+
+<SmallNote label="" center>Source: [https://www.figma.com/blog/introducing-vector-networks/](https://www.figma.com/blog/introducing-vector-networks/)</SmallNote>
+
+The cube is the quintessential example for demonstrating Vector Networks.
+
+<Image plain src="~/29.svg" width="auto" noMargin />
+
+Via traditional paths, you would have to create at minimum 3 different paths to describe this shape.
+
+<Image plain src="~/30.svg" width="auto" noMargin />
+
+This creates a lot of friction for a seemingly simple and common shape. To modify the cube, you would have to modify two or three different paths. But with Vector Networks you can simply grab an edge and move it around, and the shape behaves like you would expect.
+
+<Image plain src="~/31.svg" width="auto" noMargin />
+
+So if you would want to increase the extrusion of the cube, you could just grab the two appropriate edges and move them together.
+
+<Image plain src="~/32.svg" width="auto" noMargin />
+
+This is the big selling point for Figma's Vector Networks. Ease of use.
+
+Vector Networks don't enable you to create something that you couldn't create with other tools, but it does remove a lot of the friction in the process of creating things.
+
+And you can take this even further. Say you want to add a hole to the side of the cube.
+
+<Image plain src="~/33.svg" width="auto" noMargin />
+
+Just start off by selecting and copying the sides of the cube. You can then duplicate those edges and scale them to the size you want them to be.
+
+<Image plain src="~/34.svg" width="auto" noMargin />
+
+And just like that, you have a cube with a hole.
+
+<Image plain src="~/35.svg" width="auto" noMargin />
+
+And to make this hole believable, you just need the inner edge.
+
+<Image plain src="~/36.svg" width="auto" noMargin />
+
+Again, Vector Networks may not allow you to create something you couldn't otherwise. Instead, they enable workflows that weren't previously possible.
+
+## Creating Vector Networks
+
+With an understanding of what Vector Networks are, we can now take a look at how we would go about implementing them.
+
+### Graph
+
+The main data structure behind Vector Networks is the graph. A graph can be thought of as a collection of nodes and edges.
+
+<Image plain src="~/37.svg" width="auto" noMargin />
+
+<SmallNote label="" center>A graph</SmallNote>
+
+### Nodes
+
+A graph may have any number of nodes. For our purposes nodes have two properties, a unique <code>id</code> and a <code>position</code>.
+
+<Image plain src="~/38.svg" width="auto" noMargin />
+
+### Edges
+
+Edges are the connection between two nodes. Each edge is a composed of two _edge parts_. An edge part contains a node's id and an optional control point.
+
+The labels <code>n0</code> and <code>n1</code> will be used to refer to the nodes at the start and end of an edge, respectively. The control points will be labeled <code>cp0</code> and <code>cp1</code>.
+
+<Image plain src="~/39.svg" width="auto" noMargin />
+
+If the control points of the edge are omitted, the edge becomes a straight line.
+
+## Filling the holes
+
+<Image plain src="~/40.gif" width="auto" noMargin />
+
+<SmallNote label="" center>Source: [https://www.figma.com/blog/introducing-vector-networks/](https://www.figma.com/blog/introducing-vector-networks/)</SmallNote>
+
+When working with vector networks, the Fill tool allows you to “toggle” the fill of different “areas” of the graph.
+
+<Image plain src="~/41.svg" width="auto" noMargin />
+
+These areas can be defined as a sequence of node <code>id</code>s that go in a circle, a loop, if you will.
+
+This loopy sequence is referred to as a _cycle_. In the above example, the cycle would consist of the nodes <code>n0</code>, <code>n1</code>, <code>n3</code>, <code>n4</code>, <code>n5</code>, <code>n6</code> and <code>n7</code>. These cycles will be written like <code>(0, 1, 3, 4, 5, 6, 7)</code>.
+
+If you were to count the different visually distinct “areas” of the cycle your answer would probably be three, but you could easily find more than three cycles.
+
+<Image plain src="~/42.svg" width="auto" noMargin />
+
+<SmallNote label="" center>What makes this correct or incorrect?</SmallNote>
+
+The sequence <code>(0, 1, 2, 3, 4, 5, 6, 7)</code> is a cycle and it loops, but it is not what we're looking for. The problem can be illustrated with the “how many triangles” puzzle you might have seen on Facebook.
+
+<Image plain src="~/43.svg" width="auto" noMargin />
+
+<SmallNote label="" center>How many triangles are in this image?</SmallNote>
+
+You should be able to count 24 different triangles depending on which areas you choose to include.
+
+<Image plain src="~/44.svg" width="auto" noMargin />
+
+But that's not what we want. What we need to find are the 16 small areas.
+
+<Image plain src="~/45.svg" width="auto" noMargin />
+
+We need a way to find the _small cycles_ in the graph.
+
+## Minimal cycle basis
+
+This [paper on Minimal Cycle Basis](https://www.geometrictools.com/Documentation/MinimalCycleBasis.pdf) is a bit less dense than most others academic papers (and it has pictures!). Its goal is:
+
+> …to compute a minimal number of cycles that form a cycle basis for the graph.
+
+### What does “Minimal Cycle Basis” mean?
+
+It's just a fancy way to refer to all of the “small areas” of a graph. You can think of these as the “visually distinct” areas of a graph. Enclosed areas.
+
+### Left or right?
+
+The main tool for finding the “minimal cycle basis” will be determining which edge to choose based on left- or right-ness.
+
+<Image plain src="~/47.svg" width="auto" noMargin />
+
+<SmallNote label="" center>Should we go to `a` or `b`?</SmallNote>
+
+We'll think of this in terms of clockwise and counter clockwise.
+
+<Image plain src="~/48.svg" width="auto" noMargin />
+
+<SmallNote label="" center>`curr` for current, `prev` for previous</SmallNote>
+
+When traveling left, we choose the counter clockwise most edge (CCW) relative to the previous one.
+
+<Image plain src="~/49.svg" width="auto" noMargin />
+
+<SmallNote label="" center>CCW</SmallNote>
+
+When traveling right, we choose the clockwise most edge (CW) relative to the previous one.
+
+<Image plain src="~/50.svg" width="auto" noMargin />
+
+<SmallNote label="" center>CW</SmallNote>
+
+### The algorithm
+
+We will be finding the minimal cycle basis for the graph we saw earlier.
+
+<Image plain src="~/51.svg" width="auto" noMargin />
+
+The first step is choosing the leftmost node in the graph.
+
+<Image plain src="~/52.svg" width="auto" noMargin />
+
+When traveling from the first node, we want to go clockwise (CW). But relative to which edge?
+
+For the first node, we imagine that the previous edge is “below” the current one. We then pick the CW edge relative to that.
+
+<Image plain src="~/53.svg" width="auto" noMargin />
+
+In this case <code>a</code> is more CW relative to <code>prev</code> than <code>b</code>, so we'll walk to <code>a</code>.
+
+<Image plain src="~/54.svg" width="auto" noMargin />
+
+When we travel to a new node, <code>curr</code> becomes <code>prev</code> and the node at the end of the selected edge <code>curr</code>. Then we pick the counter clockwise-most edge relative to the new <code>prev</code> node.
+
+<Image plain src="~/55.svg" width="auto" noMargin />
+
+In this case, that's <code>b</code>. We repeat the previous step and keep selecting the CCW edge until we reach the original node.
+
+<Image plain src="~/56.svg" width="auto" noMargin />
+
+When we reach the original node again, a cycle is found.
+
+<Image plain src="~/57.svg" width="auto" noMargin />
+
+And so we have the first small cycle in the graph.
+
+<Image plain src="~/58.svg" width="auto" noMargin />
+
+When a cycle has been found, the first edge of the cycle is then removed from the graph.
+
+<Image plain src="~/59.svg" width="auto" noMargin />
+
+<SmallNote label="" center>The first edge, `(n0 n1)`, is removed</SmallNote>
+
+Then, the _filaments_ of the first two nodes in the cycle are removed.
+
+<Image plain src="~/60.svg" width="auto" noMargin />
+
+<SmallNote label="" center>In this case, we only have a single filament</SmallNote>
+
+Filaments are nodes that only have one adjacent edge. Think of these as dead ends. When a filament is found, we also check whether or not the single adjacent node is a filament. This ensures that the first node of the next cycle has two adjacent nodes. We'll see an example of this later.
+
+Now we pick the first node in the next cycle. In our graph, there are two equally left most nodes.
+
+<Image plain src="~/61.svg" width="auto" noMargin />
+
+When this happens, we pick the bottom node, <code>n1</code> in this case.
+
+<Image plain src="~/62.svg" width="auto" noMargin />
+
+We then repeat the process from before. CW from the bottom for the first node, then CCW from the previous node until we find the first node.
+
+<Image plain src="~/63.svg" width="auto" noMargin />
+
+We find the cycle <code>(1, 2, 3)</code>.
+
+<Image plain src="~/64.svg" width="auto" noMargin />
+
+Now we have the cycles <code>(0, 1, 3, 4, 5, 6, 7)</code> and <code>(1, 2, 3)</code>.
+
+<Image plain src="~/65.svg" width="auto" noMargin />
+
+Then we remove the filaments like before. We start with the filaments connected to the first two nodes of the cycle.
+
+<Image plain src="~/66.svg" width="auto" noMargin />
+
+Then keep going until we find don't have any filaments.
+
+<Image plain src="~/67.svg" width="auto" noMargin />
+
+Finding the next cycle is pretty obvious.
+
+<Image plain src="~/68.svg" width="auto" noMargin />
+
+<SmallNote label="" center>CW then CCW</SmallNote>
+
+And now we have all the cycles of the graph.
+
+<Image plain src="~/69.svg" width="auto" noMargin />
+
+This is the minimal cycle basis of our graph! Now we can toggle the fills of these cycles as we please.
+
+<Image plain src="~/70.svg" width="auto" noMargin />
+
+## The math
+
+I want to dig into how the clockwise-ness of edge relative to another edge is computed.
+
+The only prerequisite for understanding this section are [vectors](https://www.mathsisfun.com/algebra/vectors.html); arrows pointing from one point of a 2D coordinate system to another.
+
+<Image plain src="~/71.svg" width="auto" noMargin />
+
+<SmallNote label="" center>i = (1, 0), j = (0, 1)</SmallNote>
+
+With two vectors sitting at the origin, <code>i</code> and <code>j</code>, we can create a square like so.
+
+<Image plain src="~/72.svg" width="auto" noMargin />
+
+We can create a square by placing a copy of <code>j</code> at the “tip” of <code>i</code> and placing a copy of <code>i</code> at the tip of <code>j</code>. The square this creates will have an area of 1.
+
+<Image plain src="~/73.svg" width="auto" noMargin />
+
+We can do this with any two vectors.
+
+<Image plain src="~/74.svg" width="auto" noMargin />
+
+This shape is called a _parallelogram_. It's the shape of any two vectors that you put tip to tip like we did above to create the square.
+
+Parallelograms have one property that we care about, which is that its area is equal to the absolute value of its determinant.
+
+That may sound like jargon, but the determinant happens to be really useful for us. Take a look at what happens when we move the vectors of the one-by-one square closer together.
+
+<Image plain src="~/75.svg" width="auto" noMargin />
+
+When the vectors get closer, their area gets smaller. And when the vectors are parallel, the determinant and area become 0.
+
+At this point the natural question to ask is what happens when we keep going and the blue arrow is to the right of the green arrow?
+
+<Image plain src="~/76.svg" width="auto" noMargin />
+
+The determinant becomes negative!
+
+When the blue arrow (<code>j</code>) is to the left of the green arrow (<code>i</code>) the determinant of the parallelogram becomes negative. If the opposite is true it becomes positive.
+
+The implication for our use case is that we can check whether the determinant of two vectors is positive or negative to determine whether or not a vector is to the left or right of another vector.
+
+And we can do this no matter the direction because the area of a parallelogram does not change depending on the orientation of the vectors that create it.
+
+<Image plain src="~/77.svg" width="auto" noMargin />
+
+The determinant changes when the orientation of the vectors change __relative to each other__.
+
+With this knowledge as our weapon, we can create a function, <code>det(i, j)</code>, that takes in two vectors and returns the determinant.
+
+<Image plain src="~/78.svg" width="auto" noMargin />
+
+The function will return a positive value when <code>j</code> is to the left (CCW) of <code>i</code>.
+
+### Applying the math
+
+Say we're in the middle of the finding a cycle and we're deciding whether or not to move to <code>n0</code> or <code>n1</code>.
+
+<Image plain src="~/79.svg" width="auto" noMargin />
+
+We can move this into the coordinate system.
+
+<Image plain src="~/80.svg" width="auto" noMargin />
+
+Let's first take a look at <code>a</code>.
+
+<Image plain src="~/81.svg" width="auto" noMargin />
+
+We want to move the vector from <code>curr</code> to <code>a</code> relative to the origin. We can do that by subtracting <code>curr</code> from <code>a</code>. We will differentiate this new vector by using <code>d</code> as a prefix, so <code>a</code> becomes <code>da</code>.
+
+<Image plain src="~/82.svg" width="auto" noMargin />
+
+We can do the same for <code>curr</code> using <code>prev</code>.
+
+<Image plain src="~/83.svg" width="auto" noMargin />
+
+Now we can determine whether <code>a</code> is left of <code>curr</code> by computing the determinant of the parallelogram that <code>da</code> and <code>dcurr</code> form.
+
+<Image plain src="~/84.svg" width="auto" noMargin />
+
+Note that the order is important. If we use <code>da</code> as <code>i</code> the area is negative. If we use it as <code>j</code> instead it becomes positive.
+
+<Image plain src="~/85.svg" width="auto" noMargin />
+
+We can do the same with <code>b</code>.
+
+<Image plain src="~/86.svg" width="auto" noMargin />
+
+With this information as our weapon, we know whether or not <code>a</code>, <code>b</code> and <code>curr</code> are left or right of each other.
+
+What do we do with this information?
+
+## The green zone
+
+We will be focusing on determining whether <code>a</code> is more CCW than <code>b</code>. Simply put, is <code>a</code> left of <code>b</code>?
+
+If <code>a</code> is CCW of <code>b</code>, <code>a</code> can be said to be _better_ than <code>b</code>.
+
+The first step is to determine whether the angle between <code>curr</code> and <code>b</code> is convex.
+
+<Image plain src="~/87.svg" width="auto" noMargin />
+
+This “convexity” can more easily visualized by shifting <code>dcurr</code> back and imagining an arc like so:
+
+<Image plain src="~/88.svg" width="auto" noMargin />
+
+<SmallNote label="" center>The angle is convex</SmallNote>
+
+If the angle is convex, we we use the following expression to check whether <code>a</code> is better than <code>b</code>.
+
+<Image plain src="~/89.svg" width="auto" noMargin />
+
+The ∨ symbol represents the logical OR_ _operator in math.
+
+Let's take a look at the individual parts of this expression.
+
+<Image plain src="~/90.svg" width="auto" noMargin />
+
+<SmallNote label="" center>Is `da` CCW of `dcurr`?</SmallNote>
+
+<Image plain src="~/91.svg" width="auto" noMargin />
+
+<SmallNote label="" center>Is `da` CCW of `db`?</SmallNote>
+
+I find that it's pretty hard to visualize this mentally, so I think of the two different expressions creating a “green zone” where <code>a</code> is better than <code>b</code>.
+
+For the first part of the expression (is <code>da</code> left of <code>dcurr</code>), the green area looks like so.
+
+<Image plain src="~/92.svg" width="auto" noMargin />
+
+The second part of the expression asks if <code>da</code> is left of <code>db</code>. The green area look looks like so.
+
+<Image plain src="~/93.svg" width="auto" noMargin />
+
+And since it's an OR expression, either of these sub-expressions being true would result in <code>a</code> being better than <code>b</code>. Thus, the green area looks like this:
+
+<Image plain src="~/94.svg" width="auto" noMargin />
+
+<SmallNote label="" center>Is `a` better than `b`?</SmallNote>
+
+We use this to determine the better-ness of <code>a</code> when the angle is convex.
+
+But what if the angle from <code>dcurr</code> to <code>db</code> is concave?
+
+<Image plain src="~/95.svg" width="auto" noMargin />
+
+Then the expression looks like so:
+
+<Image plain src="~/96.svg" width="auto" noMargin />
+
+The only thing that changed here is that the logical OR operator (∨) changed to the logical AND operator (∧).
+
+Let's take a look at what happens with the green zones using this expression.
+
+<Image plain src="~/97.svg" width="auto" noMargin />
+
+<SmallNote label="" center>Is `da` left of `dcurr`?</SmallNote>
+
+<Image plain src="~/98.svg" width="auto" noMargin />
+
+<SmallNote label="" center>Is `da` left of `db`?</SmallNote>
+
+And since these sub-expressions are joined by logical AND, the green zone looks like so:
+
+<Image plain src="~/99.svg" width="auto" noMargin />
+
+Using this method, we can always get the CCW or CW most node. And the great thing is that this method is independent of rotation and really cheap to compute.
+
+### Computing the determinant
+
+Given two vectors, the [determinant](https://en.wikipedia.org/wiki/Determinant) can be computed with this formula:
+
+<Image plain src="~/100.svg" width="auto" noMargin />
+
+## Intersections in the graph
+
+Let's go back to our graph for a bit.
+
+<Image plain src="~/101.svg" width="auto" noMargin />
+
+This graph is the simplest, most optimistic case. This graph only has straight lines, and no two lines cross each other.
+
+<Image plain src="~/102.svg" width="auto" noMargin />
+
+This box shape has an intersection. The edge <code>(0, 2)</code> crosses the edge <code>(1, 3)</code>.
+
+<Image plain src="~/103.svg" width="auto" noMargin />
+
+With the intersection, the above area looks fillable. But defining the “filled area” is pretty difficult.
+
+<Image plain src="~/104.svg" width="auto" noMargin />
+
+What makes defining this area so difficult? Consider this rectangle and line.
+
+<Image plain src="~/105.svg" width="auto" noMargin />
+
+There are two intersections with the edge <code>(4, 5)</code> intersecting <code>(0, 1)</code> and <code>(2, 3)</code>.
+
+<Image plain src="~/106.svg" width="auto" noMargin />
+
+Say the area left of the line is filled. What happens if we move the line left?
+
+<Image plain src="~/107.svg" width="auto" noMargin />
+
+Obviously the area shrinks, but what if we keep going and move the line outside of the rectangle? Which of these outcomes below should be the result, and why?
+
+<Image plain src="~/108.svg" width="auto" noMargin />
+
+In this case kinda feels like the rectangle should be empty. But what if we move the line right?
+
+<Image plain src="~/109.svg" width="auto" noMargin />
+
+Should it then be filled? Sure, but what if we move the line up or down instead? Should the rectangle fill or empty when the line is no longer separating the two sections?
+
+## Expanding the graph
+
+This is how I believe Figma solves this problem. I call it “expanding the graph”, but the engineers at Figma probably use a different vocabulary to describe it.
+
+Expanding the graph means taking each intersection, creating a node at the point of the intersections, and then splitting the edges that intersected each other at that point.
+
+This is the original graph:
+
+<Image plain src="~/110.svg" width="auto" noMargin />
+
+The edge <code>(0, 2)</code> intersects the edge <code>(1, 3)</code>. When expanded, the graph would look like so:
+
+<Image plain src="~/111.svg" width="auto" noMargin />
+
+A new node, <code>5</code> would be added at the point of the intersection.
+
+The edges <code>(0, 2)</code> and <code>(1, 3)</code> have been removed and replaced by the edges <code>(0, 5)</code>, <code>(5, 2)</code>, <code>(1, 5)</code>, and <code>(5, 3)</code>.
+
+<Image plain src="~/112.svg" width="auto" noMargin />
+
+<SmallNote label="" center>The structure of the graph has been changed</SmallNote>
+
+Here's a graphic that should illustrate this a bit more clearly.
+
+<Image plain src="~/113.svg" width="auto" noMargin />
+
+<SmallNote label="" center>Expanding an intersection</SmallNote>
+
+### Multiple intersections
+
+These steps are pretty simple for line edges with a single intersections. But each edge can have multiple other edges intersecting it, and two cubic bezier curves can create 9 intersections.
+
+<Image plain src="~/114.svg" width="auto" noMargin />
+
+This complicates things a bit. Let's take a look at a bezier-line intersection.
+
+<Image plain src="~/115.svg" width="auto" noMargin />
+
+The best way to go about this is to treat the intersections for an edge as separate from the edge that intersected it.
+
+<Image plain src="~/116.svg" width="auto" noMargin />
+
+<SmallNote label="" center>The `t` values go from 0 at the start of the curve to 1 at the end of it</SmallNote>
+
+The line has two intersections at <code>t = 0.3</code> and <code>t = 0.7</code>. The bezier has two intersections, but at <code>t = 0.25</code> and <code>t = 0.75</code>.
+
+Before we move on with this example, I want to introduce a different way of thinking about edges since I believe it will help with the overall understanding of the problem.
+
+### Duplicate edges
+
+Two nodes may be connected multiple times by different edges.
+
+<Image plain src="~/117.svg" width="auto" noMargin />
+
+In this graph, an edge represented by the node pair <code>(2, 3)</code> could represent either of the two edges that connect <code>n2</code> and <code>n3</code>.
+
+To get around this problem, we will give each edge a unique <code>id</code>.
+
+<Image plain src="~/118.svg" width="auto" noMargin />
+
+For most future examples, I will still refer to edges by the nodes they connect since I feel it's easier to think about. But for the next example it's better to separate nodes and edges.
+
+### Intersection map
+
+We can structure the data for the intersections of the edges like so:
+
+<Image plain src="~/119.svg" width="auto" noMargin />
+
+<SmallNote label="" center>Creating nodes at the intersection points of edges</SmallNote>
+
+When we encounter an intersection, we create a node whose position is at the intersection. We then add intersections to an _intersection map_ that will contain the intersections for each edge with a corresponding <code>t</code> value and a <code>nodeId</code>. These intersections are sorted by the <code>t</code> value.
+
+<Image plain src="~/120.svg" width="auto" noMargin />
+
+For the intersection with the lowest <code>t</code> value, we create an edge with the first _edge part _having the <code>nodeId</code> of the first edge part of the original edge. The second edge part should contain the <code>nodeId</code> of the intersection. This creates the edge <code>(2, 4)</code>.
+
+<Image plain src="~/121.svg" width="auto" noMargin />
+
+Subsequent edges will have the first edge part's <code>nodeId</code> be the <code>nodeId</code> of the previous intersection and the second <code>nodeId</code> be the <code>nodeId</code> of the current intersection. In this example, that edge is <code>(4, 5)</code>.
+
+<Image plain src="~/122.svg" width="auto" noMargin />
+
+One additional edge will be created for each edge with any intersections.
+
+The first edge part's <code>nodeId</code> will be the <code>nodeId</code> of the last intersection and the second edge part's <code>nodeId</code> will be the <code>nodeId</code> of the second edge part of the original edge.
+
+This was a bit of a mouthful, so hopefully this graphic helps a bit with understanding that alphabet soup.
+
+<Image plain src="~/123.svg" width="auto" noMargin />
+
+Separating the intersections of an edge from the edges that created those intersections makes it easier to think about. It alleviates some of the complexity that might arise from multiple edges intersecting with each other.
+
+<Image plain src="~/124.svg" width="auto" noMargin />
+
+## Self-intersection
+
+Cubic beziers can self-intersect.
+
+<Image plain src="~/125.svg" width="auto" noMargin />
+
+This, unfortunately, means that every single cubic bezier edge has to be checked for self-intersection. It's an interesting problem that involves finding the two different <code>t</code> values that the bezier intersects itself at, but I won't be covering how to find those values here.
+
+Once you have the <code>t</code> values, a self-intersecting bezier can be expanded like so:
+
+<Image plain src="~/126.svg" width="auto" noMargin />
+
+<SmallNote label="" center>The blue node should be invisible to the user</SmallNote>
+
+We insert <code>n3</code> since having a node with an edge that has itself on both ends of the edge is problematic, but it should be hidden from the user.
+
+<Image plain src="~/127.svg" width="auto" noMargin />
+
+<SmallNote label="" center>Intersecting the loop of a self-intersecting bezier</SmallNote>
+
+<Image plain src="~/128.svg" width="auto" noMargin />
+
+<SmallNote label="" center>Removing n3 at the first opportunity</SmallNote>
+
+## Curvy edges
+
+Earlier we covered the CW - CCW graph traversal algorithm to find the minimal cycle basis (small areas).
+
+<Image plain src="~/129.svg" width="auto" noMargin />
+
+<SmallNote label="" center>Finding the better (counter clockwise most) point adjacent to `curr`</SmallNote>
+
+But the algorithm described in the paper was designed to work with nodes connected by straight lines that don't intersect. Introducing edges defined by cubic beziers introduces significant complexity.
+
+<Image plain src="~/130.svg" width="auto" noMargin />
+
+<SmallNote label="" center>Which edge to choose, blue or green?</SmallNote>
+
+In the example above, we can find out that the blue edge is better than the green one by using the determinant. We are stilling defining better to mean the CCW most edge.
+
+When working with cubic bezier curves, the naive solution would be to just convert the bezier to a line defined by the points at the start and end of the curve.
+
+<Image plain src="~/131.svg" width="auto" noMargin />
+
+But that idea breaks down as soon as one edge curves over the other.
+
+<Image plain src="~/132.svg" width="auto" noMargin />
+
+<SmallNote label="" center>Oops</SmallNote>
+
+Let's take a fresh look at a bezier curves and try to work from there.
+
+<Image plain src="~/133.svg" width="auto" noMargin />
+
+Looking at this, we notice that the tangent at the start of the curve, <code>n0</code>, is parallel to the line from <code>n0</code> to <code>cp0</code>. So to get the direction at the start of the edge we can use the line <code>(n0, cp0)</code>.
+
+For clarity, the start of our edge, <code>n0</code>, is the same node as <code>curr</code>.
+
+<Image plain src="~/134.svg" width="auto" noMargin />
+
+So by converting edges defined cubic bezier into a line defined by <code>(n0, cp0)</code>, we get the _initial_ angle of the curve.
+
+<Image plain src="~/135.svg" width="auto" noMargin />
+
+This seems like a good solution when looking at the “curve around” case.
+
+<Image plain src="~/136.svg" width="auto" noMargin />
+
+Looks like we've solved the problem. Right?
+
+### No intersections
+
+Before we move on to further edge cases, it helps to understand that any solutions assume that no two edges may intersect when deciding which edge to travel.
+
+<Image plain src="~/137.svg" width="auto" noMargin />
+
+<SmallNote label="" center>This is not allowed</SmallNote>
+
+The edges of the graph we're traversing must not have any intersections when we compute the cycles (minimal cycle basis) of the graph.
+
+We can only operate on an _expanded graph_.
+
+Like we covered earlier, an expanded graph is a graph that has replaced all intersections with new nodes and edges. So if the original, user-defined graph has any intersections, they would have to be expanded before we can find the graph's cycles.
+
+<Image plain src="~/138.svg" width="auto" noMargin />
+
+<SmallNote label="" center>The same edges as above, but expanded</SmallNote>
+
+Going forward, we will assume that all graphs are expanded unless stated otherwise.
+
+## Parallel edges
+
+The next edge case is two edges being parallel (pointing in the same direction).
+
+<Image plain src="~/139.svg" width="auto" noMargin />
+
+If the lines go in the same direction, determining which is better is impossible without more information.
+
+Here are a few possible solutions for the cases where the control points of the curves are parallel.
+
+### Point at `t`
+
+What if we just take the point on the curve at, for example, <code>t = 0.1</code>?
+
+<Image plain src="~/140.svg" width="auto" noMargin />
+
+This produces the correct result for curves of a similar length, but we can easily break this with one curve being significantly bigger than the other.
+
+<Image plain src="~/141.svg" width="auto" noMargin />
+
+This is effectively the same problem as the “curve around” case we saw earlier.
+
+### Point at length
+
+Instead of taking a point at a fixed <code>t</code> value, we could take a point at some length along the curve. The length would be determined by some point on the smaller curve, e.g. at <code>t=0.1</code>.
+
+<Image plain src="~/142.svg" width="auto" noMargin />
+
+I have not tried implementing this since I have another working solution, but this could possibly be a viable and performant solution if it works for all edge cases.
+
+### Lasers!
+
+The next solution is a bit esoteric but produces the correct result. This is the solution I'm currently using.
+
+<Image plain src="~/143.svg" width="auto" noMargin />
+
+We begin by splitting each bezier at <code>t = 0.05</code> (image above is exaggerated). We then tesselate each part into n points.
+
+Then, for each point of the tesselated bezier, we check whether a line from <code>n0</code> to that point intersects the other edge.
+
+<Image plain src="~/144.svg" width="auto" noMargin />
+
+It's pretty hard to see what's going on at this scale, so let's zoom in a bit.
+
+<Image plain src="~/145.svg" width="auto" noMargin />
+
+When a point intersects the other edge, we use the point before it.
+
+<Image plain src="~/146.svg" width="auto" noMargin />
+
+<SmallNote label="" center>Found an intersection</SmallNote>
+
+Let's zoom in a bit.
+
+<Image plain src="~/147.svg" width="auto" noMargin />
+
+<SmallNote label="" center>The intersection close up</SmallNote>
+
+For the other edge, we have no intersection.
+
+<Image plain src="~/148.svg" width="auto" noMargin />
+
+In that case, we just use the end of the edge as the direction line.
+
+<Image plain src="~/149.svg" width="auto" noMargin />
+
+With this method we've produced lines that seem to represent their respective curves.
+
+<Image plain src="~/150.svg" width="auto" noMargin />
+
+And this also works for the “curve around” case.
+
+<Image plain src="~/151.svg" width="auto" noMargin />
+
+But it fails for a “curve behind” case.
+
+<Image plain src="~/152.svg" width="auto" noMargin />
+
+This would produce the green edge as the more CCW edge, which is wrong.
+
+My solution to this problem is to shoot an infinite laser in the direction of the previous edge.
+
+<Image plain src="~/153.svg" width="auto" noMargin />
+
+We then check whether the points of the tesselated bezier intersect this laser.
+
+<Image plain src="~/154.svg" width="auto" noMargin />
+
+But a line from <code>n0</code> to the points would never intersect the laser.
+
+<Image plain src="~/155.svg" width="auto" noMargin />
+
+<SmallNote label="" center>Passes right through</SmallNote>
+
+Instead, we can create a line from the current point to the previous point and use that for the intersection test.
+
+<Image plain src="~/156.svg" width="auto" noMargin />
+
+When we intersect the laser, we use the previous point. The previous point will always be on the correct side of the laser.
+
+<Image plain src="~/157.svg" width="auto" noMargin />
+
+<SmallNote label="" center>The point we use</SmallNote>
+
+And like that, we have a solution.
+
+<Image plain src="~/158.svg" width="auto" noMargin />
+
+## Parallel, but in reverse!
+
+It could also be the case that the blue or green edges, <code>a</code> and <code>b</code> respectively, could be parallel to the edge from <code>curr</code> to <code>prev</code>.
+
+<Image plain src="~/159.svg" width="auto" noMargin />
+
+<SmallNote label="" center>`a` is parallel to `prev`</SmallNote>
+
+The process for finding the better edge follows a process similar to the one described above so we will cover this very quickly.
+
+There are two cases:
+
+### A or B are parallel to <code>Prev</code> , but not both
+
+If either <code>a</code> or <code>b</code>, but not both, are parallel to <code>prev</code>, we can simply compare the parallel edge to <code>prev</code>.
+
+If the parallel edge is CW of <code>prev</code>, the parallel edge is better.
+
+If the parallel edge is CCW of <code>prev</code>, the other edge is better.
+
+Think a bit about why this is true.
+
+If one edge is parallel to <code>prev</code> and curves CW, and the other is not parallel to <code>prev</code>, then the parallel edge is as CCW as can be. This means that the green zone for the other edge is completely empty.
+
+The reverse is true if the parallel edge curves CCW, since it would be as CW as possible. This means that the green zone for the other edge is the whole circle.
+
+<Image plain src="~/160.svg" width="auto" noMargin />
+
+### Both A and B are parallel to Prev
+
+Using the same laser solution as before, this case is covered.
+
+## Cycles inside of cycles
+
+Now we're going to look at fills for a bit.
+
+Let's take a look at a basic example of a graph with a cycle inside of another cycle.
+
+<Image plain src="~/161.svg" width="auto" noMargin />
+
+You would expect the graph's areas to be defined like so:
+
+<Image plain src="~/162.svg" width="auto" noMargin />
+
+But as it stands, if you hover over the outer area you get a different, unsatisfactory result.
+
+<Image plain src="~/163.svg" width="auto" noMargin />
+
+But this makes sense. Let's take a look at the nodes of the graph.
+
+<Image plain src="~/164.svg" width="auto" noMargin />
+
+The cycle <code>(0, 1, 2, 3)</code> describes the outer boundary of the area we want, but we aren't describing the “inner boundary” of the area yet.
+
+Let's take a look at how we can do that.
+
+### Even-odd rule
+
+Telling a computer to draw the outline of a 2D shape is simple enough. But if you want to fill that shape, how do you tell the computer what is “inside” and what is “outside”?
+
+<Image plain src="~/165.svg" width="auto" noMargin />
+
+One way of finding out whether a point is inside of a shape or not is by shooting an infinite laser in any direction from that point and counting how many “walls” it passes through.
+
+If the laser intersects an odd number of walls, it's inside of the shape. Otherwise it is outside of the shape.
+
+<Image plain src="~/166.svg" width="auto" noMargin />
+
+<SmallNote label="" center>Intersects 1 wall, we're inside of the shape</SmallNote>
+
+<Image plain src="~/167.svg" width="auto" noMargin />
+
+<SmallNote label="" center>Intersects 4 walls, we're outside of the shape</SmallNote>
+
+This works for any 2D shape, no matter which point you choose and which direction you shoot the laser in.
+
+This also helps in the case of nested paths.
+
+<Image plain src="~/168.svg" width="auto" noMargin />
+
+This gives us an idea for how we can define the “inner boundary” of a shape.
+
+<Image plain src="~/169.svg" width="auto" noMargin />
+
+### Reducing closed walks
+
+Let's look at a graph with a cycle nested inside of another cycle, but with an edge connecting two nodes of the cycles.
+
+<Image plain src="~/170.svg" width="auto" noMargin />
+
+This will lead back to how we can think about nested cycles and give us a deeper understanding on how to think about them.
+
+Let's find the cycles. We use the same CW-CCW method as usual.
+
+<Image plain src="~/171.svg" width="auto" noMargin />
+
+With this method, we go on what looks like a small detour around the inner cycle.
+
+<Image plain src="~/172.svg" width="auto" noMargin />
+
+When we reach the node we started at, this is what the cycle looks like.
+
+<Image plain src="~/173.svg" width="auto" noMargin />
+
+This is the first cycle we've seen where we cross a node twice (both <code>n3</code> and <code>n4</code>). Something interesting appears when we take a look at the direction that the cycle takes throughout the graph.
+
+<Image plain src="~/174.svg" width="auto" noMargin />
+
+We start off traveling CCW, but when we cross the edge from the outer cycle to the inner cycle the orientation we travel seems to flip.
+
+I will state for now that we want to separate the outer cycle from the inner cycle and treat the edge between them as if it didn't exist. I will go into the _why_ later and explain the _how_ here.
+
+<Image plain src="~/175.svg" width="auto" noMargin />
+
+We take all repeated nodes, in this case <code>n3</code>, and remove them from the cycle. We also remove any nodes that are between the two repeated nodes.
+
+You might notice that <code>n4</code> is also repeated, but since it's “inside” of the part of the cycle that <code>n3</code> removes, we can ignore it.
+
+We leave one instance of the repeated node, and then we have the cycle that would have been found if the _crossing_ didn't exist.
+
+<Image plain src="~/176.svg" width="auto" noMargin />
+
+We then mark the edge that connected the outer cycle from the inner cycle. I call these marked edges _crossings_.
+
+<Image plain src="~/177.svg" width="auto" noMargin />
+
+It could also be the case that an outer-inner cycle combo has multiple crossings.
+
+<Image plain src="~/178.svg" width="auto" noMargin />
+
+In that case, we mark all edges adjacent to the node connected to the outer cycle as a crossing.
+
+<Image plain src="~/179.svg" width="auto" noMargin />
+
+And after all this is done, our cycles look like so:
+
+<Image plain src="~/180.svg" width="auto" noMargin />
+
+### Rendering implications
+
+When we render this shape, we get the following:
+
+<Image plain src="~/181.svg" width="auto" noMargin />
+
+Notice the gaps? They form because the conversion from [vectors](https://en.wikipedia.org/wiki/Vector_graphics) to [pixels on a canvas](https://en.wikipedia.org/wiki/Raster_graphics) uses _anti aliasing_ to make curves and lines appear smoother.
+
+<Image plain src="~/182.png" width="auto" noMargin />
+
+<SmallNote label="" center>Example of rasterization</SmallNote>
+
+Separating the outer and inner cycles also simplifies the render operation.
+
+<Image plain src="~/183.svg" width="auto" noMargin />
+
+Without separating them we have to draw 14 different lines to draw a square, and 10 different lines to draw the square with a square hole.
+
+<Image plain src="~/184.svg" width="auto" noMargin />
+
+By separating the cycles, we can draw the square with 4 lines. And we can add the square hole with 4 additional lines.
+
+## Subcycles
+
+Instead of referring to an “inner” and “outer” cycle, I will refer to these as subcycles and parent cycles respectively. This will make it easier to think about multiple cycles relative to each other.
+
+Having said that, let's introduce a third cycle.
+
+<Image plain src="~/185.svg" width="auto" noMargin />
+
+Now when we hover over the outermost cycle, what do you expect to happen?
+
+<Image plain src="~/186.svg" width="auto" noMargin />
+
+Because of the even-odd rule, the innermost cycle is filled too!
+
+<Image plain src="~/187.svg" width="auto" noMargin />
+
+To fix this, we can introduce the concept of _direct subcycles_.
+
+<Image plain src="~/188.svg" width="auto" noMargin />
+
+<SmallNote label="" center>Parent cycles (blue) and their direct subcycles (green)</SmallNote>
+
+A parent cycle may have multiple direct subcycles. But due to the non-intersection rule, a subcycle may only have a single parent cycle.
+
+Let's take a look at how this works.
+
+<Image plain src="~/189.svg" width="auto" noMargin />
+
+This graph has a a rectangle, our outermost cycle. That square has two _direct subcycles_, a diamond and an hourglass. The diamond has two direct subcycles in the shape of triangles, and the hourglass has three direct subcycles in some funky shapes.
+
+We will begin with the rectangle and its direct subcycles. We will name them, <code>c0</code>, <code>c1</code> and <code>c2</code>.
+
+<Image plain src="~/190.svg" width="auto" noMargin />
+
+The user has decided to fill some of these cycles, and leave some of them empty.
+
+<Image plain src="~/191.svg" width="auto" noMargin />
+
+<SmallNote label="" center>`c0` and `c1` are filled, and `c2` is empty</SmallNote>
+
+Let's draw the graph without a stroke and with a gray fill. When drawing this graph we start with the outermost cycle, <code>c0</code>.
+
+<Image plain src="~/192.svg" width="auto" noMargin />
+
+<SmallNote label="" center>The graph to the left with the render to the right</SmallNote>
+
+Since <code>c0</code> is filled, we draw it. If it were not filled we could skip drawing it. We can shoot a laser out of the rectangle and see that it intersects the walls of the rectangle once, so we can expect it to be filled considering the even-odd rule.
+
+<Image plain src="~/193.svg" width="auto" noMargin />
+
+This may seem really obvious, but it's good to have the rules of the game laid out clearly before we move on.
+
+Next we want to draw <code>c1</code>, the diamond in our graph. It was filled, just like the rectangle so we should draw it as well. But if we try to draw the diamond as well, we get the wrong result.
+
+<Image plain src="~/194.svg" width="auto" noMargin />
+
+Our laser is intersecting two walls as a result of drawing both of the shapes when the have the same fill setting.
+
+<Image plain src="~/195.svg" width="auto" noMargin />
+
+<SmallNote label="" center>We intersect an even number of walls, so we're “outside” of the shape</SmallNote>
+
+So to draw the image the user wanted we can simply skip drawing the diamond since the parent cycle implicitly draws direct subcycles with the same fill setting.
+
+The hourglass, <code>c2</code>, is supposed to be empty. With that being the case, just not drawing it seems like a reasonable conclusion. But since the parent cycle — the rectangle — has already drawn the hourglass as if it was filled we need to “flip” the fill by drawing the hourglass.
+
+<Image plain src="~/196.svg" width="auto" noMargin />
+
+And again, if we try to use the laser intersection method we see that the number of intersections is 2, an even number. And with the even-odd rule, an even number of walls means you're “outside” of the shape.
+
+<Image plain src="~/197.svg" width="auto" noMargin />
+
+Now that we've drawn the rectangle and its direct subcycles, we can move onto the direct subcycles of those.
+
+<Image plain src="~/198.svg" width="auto" noMargin />
+
+When working with <code>c3</code> and <code>c4</code>, the direct subcycles of <code>c1</code>, we can treat them as if they're direct subcycles of <code>c0</code> since <code>c1</code> had the same fill setting.
+
+For <code>c3</code>, we want to “flip” the fill setting so we draw it. But <code>c4</code> has the same fill setting as its parent cycle so we don't draw it.
+
+<Image plain src="~/199.svg" width="auto" noMargin />
+
+<SmallNote label="" center>Even number of intersections so we're outside of the shape</SmallNote>
+
+And we can think of <code>c5</code>, <code>c6</code> and <code>c7</code> in the same way. We don't care whether they're filled or empty when rendering them. We care whether or not they have the same fill as their parent cycle.
+
+We only need to draw cycles if their parent cycle has the opposite “fill setting” as themselves. If they have the same fill setting, we don't have to draw them.
+
+<Image plain src="~/200.svg" width="auto" noMargin />
+
+This means that when drawing cycles, start by drawing the outermost non-empty cycle. We then recursively operate on that cycle's direct subcycles. If a subcycle has the same fill setting (filled or empty) as their parent cycle, they can be omitted from the drawing operation.
+
+<Image plain src="~/201.svg" width="auto" noMargin />
+
+## Contiguous cycles
+
+A graph may have multiple “clusters” of adjacent cycles.
+
+<Image plain src="~/202.svg" width="auto" noMargin />
+
+I use the phrase _contiguous cycles_ to describe the “togetherness” of the cycles, if you will. I often think of these contiguous groups of cycles as being in different colors.
+
+<Image plain src="~/203.svg" width="auto" noMargin />
+
+Finding these contiguous cycles can be done with a depth-first traversal:
+
+<Image plain src="~/204.svg" width="auto" noMargin />
+
+<SmallNote label="" center>Start at the first node of the cycle</SmallNote>
+
+<Image plain src="~/205.svg" width="auto" noMargin />
+
+<SmallNote label="" center>Color each node you find</SmallNote>
+
+But remember the _crossings_? In the search, you may not crawl to adjacent nodes by edges marked as crossings.
+
+<Image plain src="~/206.svg" width="auto" noMargin />
+
+So in the end, our colors actually look like this:
+
+<Image plain src="~/207.svg" width="auto" noMargin />
+
+Imagine one of these groups is nested inside of another group of contiguous cycles.
+
+<Image plain src="~/208.svg" width="auto" noMargin />
+
+Because of the non-intersection rule we know that if one of the nodes in this contiguous cycle is inside of another cycle, all of them are.
+
+<Image plain src="~/209.svg" width="auto" noMargin />
+
+This “contiguous cycles” idea is maybe not the most interesting part of this post on the surface, but I've found it to be useful when working on Vector Networks.
+
+## Partial expansion
+
+When hovering an area defined by intersections, we are showing a cycle of the expanded graph.
+
+Take this triangle as an example.
+
+<Image plain src="~/210.svg" width="auto" noMargin />
+
+If we hover over one of its areas, we see an area defined by nodes that don't exist yet.
+
+<Image plain src="~/211.svg" width="auto" noMargin />
+
+What the blue striped area represents is the area whose fill state would be “toggled” if the user clicks the left mouse button. This area does not exist on the graph as the user defined it. It exists as a cycle on the expanded version of the original graph.
+
+<Image plain src="~/212.svg" width="auto" noMargin />
+
+<SmallNote label="" center>The expanded graph</SmallNote>
+
+When the user clicks to toggle the fill state of the area, we would first have to expand the graph for the nodes and edges that make up that area to exist.
+
+<Image plain src="~/213.svg" width="auto" noMargin />
+
+<SmallNote label="" center>The expanded graph</SmallNote>
+
+But by doing that we've expanded two intersections that we didn't need to expand to be able to describe the area. These expansions are destructive in nature and should be avoided when possible.
+
+Instead, we can _partially expand_ the graph by only expanding the intersections that define the selected cycle.
+
+<Image plain src="~/214.svg" width="auto" noMargin />
+
+<SmallNote label="" center>Partially expanded graph</SmallNote>
+
+This allows us to maintain as much of the original graph as possible while still being able to define the fill.
+
+### Implementing partial expansions
+
+The basic implementation is reasonably simple. When you create the expanded graph, just add a little metadata to each expanded node that tells you which two edges of the original graph were used to create it and at what <code>t</code> values those intersections occurred.
+
+Then when the cycle is clicked, iterate over each node. If the node exists in the expanded graph but not the original graph, add it to a new partially expanded graph.
+
+There are edge cases, but I will not be covering them here.
+
+## Omitted topics
+
+Here are some of the topics that I decided to omit for this post. Go have a stab at them yourself!
+
+### Parallel line edges
+
+If you have two parallel line edges that overlap each other, you will run into some problems when trying to find the CCW-most edge. Can you find out how to expand them?
+
+### Joins
+
+Figma offers three types of joins. Round, pointy and square. How could these different types of joins be implemented?
+
+<Image plain src="~/215.svg" width="auto" noMargin />
+
+### Stroke align
+
+Figma also offers three ways to align the stroke of a graph: center, inside and outside.
+
+How do you determine inside- or outside-ness and what happens when the graph has no cycles?
+
+### Boolean operations
+
+Figma, like most vector graphics tools, offers [boolean operations](https://help.figma.com/article/65-boolean-operations). How could those be implemented?
+
+[Paper.js](http://paperjs.org/) is open source and has boolean operations for paths, maybe you can start there?
+
+## Future topics
+
+These are some of the more open-ended features and ideas I want to explore in the future.
+
+### A different way of working with fills
+
+There are alternatives to how Figma allows the user to work with fills.
+
+One possible solution I'm interested in exploring is multiple different “fill layers” that use one vector object as a reference. This would solve the “[one graph, multiple colors](https://spectrum.chat/figma/feature-requests/paint-bucket-tool-with-multiple-colors~1b55179b-f911-468b-9355-fd361564fda0)” problem without having to duplicate the layer and keep multiple vector objects in sync if you want to make changes later on.
+
+### Animating the graph
+
+Given an [expression](https://helpx.adobe.com/after-effects/using/expression-basics.html) and reference based system similar to After Effects, what could you achieve when you combine it with Vector Networks?
+
+Or maybe we could make use of a node editor similar to [Blender's shader editor](https://docs.blender.org/manual/en/latest/editors/shader_editor/index.html) or [Fusion's node based workflow](https://www.blackmagicdesign.com/products/fusion/visualeffects)?
+
+There's a lot of exploration to be done here and I'm really excited to dive into this topic.
+
+## In closing
+
+Thanks for reading this post! I hope it served as a good introduction to what I think is a really interesting problem space. I've been working on this problem alongside school and work for a good while. It's part of an animation editor plus runtime for the web I'm working on. I intend for a modified version of Vector Networks to be the core of a few features.
+
+I've been working on implementing Vector Networks for a bit over half a year now. The vector editor is pretty robust when it comes to creating, modifying and expanding the graph. But the edge cases when modifying the fill state have been stumping me for quite a while now.
+
+I wanted to have a fully working demo before publishing this post, but it's going to be a few months until it's stable enough for it to be usable for people that are not me.
+
+The big idea behind the project is to be a piece of animation software that's tailor-made for creating and running dynamic animations on the web. I'll share more about this project at a later date.
+
+I also just think that Figma's Vector Networks are super cool and it's really hard to find material about it online. I hope this post helps fix the lack of information that I encountered when attempting to find information about Vector Networks.

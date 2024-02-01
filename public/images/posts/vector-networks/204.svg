@@ -1,0 +1,12 @@
+<svg width="700" height="220" viewBox="0 0 700 220" fill="none" xmlns="http://www.w3.org/2000/svg">
+<rect width="700" height="219" transform="translate(0 0.5)" fill="#0A0D12"/>
+<path d="M400 60.5L300 60.5L300 160.5L400 160.5L400 60.5ZM400 60.5L449.5 11M250 210.5H450V10.5H250L250 210.5Z" stroke="#B3BFD8" stroke-width="2"/>
+<circle cx="250" cy="10.5" r="5" fill="black" stroke="#D9EBFF" stroke-width="2"/>
+<circle cx="299.656" cy="60.1569" r="5" transform="rotate(45 299.656 60.1569)" fill="black" stroke="#D9EBFF" stroke-width="2"/>
+<circle cx="450" cy="10.5" r="5" fill="black" stroke="#D9EBFF" stroke-width="2"/>
+<circle cx="399.656" cy="60.1569" r="5" transform="rotate(45 399.656 60.1569)" fill="black" stroke="#D9EBFF" stroke-width="2"/>
+<circle cx="250" cy="210.5" r="5" fill="black" stroke="#D9EBFF" stroke-width="2"/>
+<circle cx="299.656" cy="160.157" r="5" transform="rotate(45 299.656 160.157)" fill="black" stroke="#D9EBFF" stroke-width="2"/>
+<circle cx="450" cy="210.5" r="5" fill="black" stroke="#D9EBFF" stroke-width="2"/>
+<circle cx="399.656" cy="160.157" r="5" transform="rotate(45 399.656 160.157)" fill="black" stroke="#D9EBFF" stroke-width="2"/>
+</svg>

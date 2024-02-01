@@ -1,0 +1,15 @@
+<svg width="701" height="227" viewBox="0 0 701 227" fill="none" xmlns="http://www.w3.org/2000/svg">
+<rect width="700" height="226" transform="translate(0.794922 0.5)" fill="#0A0D12"/>
+<path d="M96.2949 218C204.795 16.5 486.795 16.5 604.295 218" stroke="#B3BFD8" stroke-width="2"/>
+<line x1="96.914" y1="217.027" x2="204.914" y2="16.0267" stroke="#3491FF" stroke-width="2"/>
+<line x1="486.795" y1="16.5" x2="205.795" y2="16.5" stroke="#3491FF" stroke-width="2"/>
+<line x1="486.659" y1="15.9966" x2="603.174" y2="216.007" stroke="#3491FF" stroke-width="2"/>
+<rect x="486.795" y="12.0858" width="6.24264" height="6.24264" transform="rotate(45 486.795 12.0858)" fill="#0A0D12" stroke="#3491FF" stroke-width="2"/>
+<rect x="204.795" y="12.0858" width="6.24264" height="6.24264" transform="rotate(45 204.795 12.0858)" fill="#0A0D12" stroke="#3491FF" stroke-width="2"/>
+<circle cx="604.295" cy="218" r="4.5" fill="black" stroke="#D9EBFF" stroke-width="2"/>
+<circle cx="97.2949" cy="217" r="4.5" fill="black" stroke="#D9EBFF" stroke-width="2"/>
+<path d="M123.914 166.777L276.045 16.5L515.788 65.9991" stroke="#27AE60" stroke-width="2"/>
+<circle cx="123.295" cy="166" r="4.5" fill="black" stroke="#3491FF" stroke-width="2"/>
+<circle cx="276.295" cy="16" r="4.5" fill="black" stroke="#3491FF" stroke-width="2"/>
+<circle cx="515.295" cy="66" r="4.5" fill="black" stroke="#3491FF" stroke-width="2"/>
+</svg>

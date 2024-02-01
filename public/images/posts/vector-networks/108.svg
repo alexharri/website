@@ -1,0 +1,19 @@
+<svg width="700" height="117" viewBox="0 0 700 117" fill="none" xmlns="http://www.w3.org/2000/svg">
+<rect width="700" height="117" fill="#0A0D12"/>
+<path d="M125 28V89H308V28L125 28Z" fill="#0E4559"/>
+<path fill-rule="evenodd" clip-rule="evenodd" d="M125 89V28L308 28V89H125Z" fill="#0E4559"/>
+<path d="M105 9V108M125.495 89.6425V28.0133L308 28.0132V89.6425H125.495Z" stroke="#B3BFD8" stroke-width="2"/>
+<circle cx="125" cy="28" r="5" fill="black" stroke="#D9EBFF" stroke-width="2"/>
+<circle cx="105" cy="108" r="5" fill="black" stroke="#D9EBFF" stroke-width="2"/>
+<circle cx="105" cy="9" r="5" fill="black" stroke="#D9EBFF" stroke-width="2"/>
+<circle cx="308" cy="28" r="5" fill="black" stroke="#D9EBFF" stroke-width="2"/>
+<circle cx="125" cy="89" r="5" fill="black" stroke="#D9EBFF" stroke-width="2"/>
+<circle cx="308" cy="89" r="5" fill="black" stroke="#D9EBFF" stroke-width="2"/>
+<path d="M391 9V108M411.495 89.6425V28.0133L594 28.0132V89.6425H411.495Z" stroke="#B3BFD8" stroke-width="2"/>
+<circle cx="411" cy="28" r="5" fill="black" stroke="#D9EBFF" stroke-width="2"/>
+<circle cx="594" cy="28" r="5" fill="black" stroke="#D9EBFF" stroke-width="2"/>
+<circle cx="411" cy="89" r="5" fill="black" stroke="#D9EBFF" stroke-width="2"/>
+<circle cx="594" cy="89" r="5" fill="black" stroke="#D9EBFF" stroke-width="2"/>
+<circle cx="391" cy="108" r="5" fill="black" stroke="#D9EBFF" stroke-width="2"/>
+<circle cx="391" cy="9" r="5" fill="black" stroke="#D9EBFF" stroke-width="2"/>
+</svg>

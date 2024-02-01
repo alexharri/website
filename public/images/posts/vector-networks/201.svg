@@ -1,0 +1,41 @@
+<svg width="700" height="220" viewBox="0 0 700 220" fill="none" xmlns="http://www.w3.org/2000/svg">
+<rect width="700" height="219" transform="translate(0 0.5)" fill="#0A0D12"/>
+<path d="M532 210.5H132L132 10.5H532V210.5Z" fill="#0E4559" stroke="#B3BFD8" stroke-width="2"/>
+<path d="M232 181.211L161.289 110.5L232 39.7893L302.71 110.5L232 181.211Z" fill="#0E4559" stroke="#B3BFD8" stroke-width="2"/>
+<circle cx="132" cy="10.5" r="5" fill="black" stroke="#D9EBFF" stroke-width="2"/>
+<circle cx="532" cy="10.5" r="5" fill="black" stroke="#D9EBFF" stroke-width="2"/>
+<circle cx="532" cy="210.5" r="5" fill="black" stroke="#D9EBFF" stroke-width="2"/>
+<circle cx="232" cy="39.7891" r="5" fill="black" stroke="#D9EBFF" stroke-width="2"/>
+<circle cx="302.711" cy="110.5" r="5" fill="black" stroke="#D9EBFF" stroke-width="2"/>
+<circle cx="132" cy="210.5" r="5" fill="black" stroke="#D9EBFF" stroke-width="2"/>
+<circle cx="161.289" cy="110.5" r="5" fill="black" stroke="#D9EBFF" stroke-width="2"/>
+<circle cx="232" cy="181.211" r="5" fill="black" stroke="#D9EBFF" stroke-width="2"/>
+<path d="M411.487 110.5L350 48.5H489L427.513 110.5L489 172.5H350L411.487 110.5Z" fill="#0A0D12" stroke="#B3BFD8" stroke-width="2"/>
+<circle cx="350" cy="48.5" r="5" fill="black" stroke="#D9EBFF" stroke-width="2"/>
+<circle cx="489" cy="48.5" r="5" fill="black" stroke="#D9EBFF" stroke-width="2"/>
+<circle cx="489" cy="172.5" r="5" fill="black" stroke="#D9EBFF" stroke-width="2"/>
+<circle cx="350" cy="172.5" r="5" fill="black" stroke="#D9EBFF" stroke-width="2"/>
+<circle cx="411" cy="110.5" r="5" fill="black" stroke="#D9EBFF" stroke-width="2"/>
+<circle cx="428" cy="110.5" r="5" fill="black" stroke="#D9EBFF" stroke-width="2"/>
+<path d="M198.5 99.5L231.5 66.5L264.5 99.5H198.5Z" fill="#0A0D12" stroke="#B3BFD8" stroke-width="2"/>
+<path d="M264.5 119.5L231.5 152.5L198.5 119.5L264.5 119.5Z" fill="#0E4559" stroke="#B3BFD8" stroke-width="2"/>
+<path d="M410.5 81.5H428L445.5 64H393L410.5 81.5Z" fill="#0E4559" stroke="#B3BFD8" stroke-width="2"/>
+<circle cx="411" cy="81.5" r="5" fill="black" stroke="#D9EBFF" stroke-width="2"/>
+<circle cx="393" cy="64.5" r="5" fill="black" stroke="#D9EBFF" stroke-width="2"/>
+<circle cx="231.5" cy="151.5" r="5" fill="black" stroke="#D9EBFF" stroke-width="2"/>
+<circle cx="231.5" cy="67.5" r="5" fill="black" stroke="#D9EBFF" stroke-width="2"/>
+<circle cx="265" cy="99.5" r="5" fill="black" stroke="#D9EBFF" stroke-width="2"/>
+<circle cx="199" cy="99.5" r="5" fill="black" stroke="#D9EBFF" stroke-width="2"/>
+<circle cx="199" cy="119.5" r="5" fill="black" stroke="#D9EBFF" stroke-width="2"/>
+<circle cx="265" cy="119.5" r="5" fill="black" stroke="#D9EBFF" stroke-width="2"/>
+<circle cx="428" cy="81.5" r="5" fill="black" stroke="#D9EBFF" stroke-width="2"/>
+<circle cx="446" cy="64.5" r="5" fill="black" stroke="#D9EBFF" stroke-width="2"/>
+<path d="M428 158V128.5L457.5 158H428Z" stroke="#B3BFD8" stroke-width="2"/>
+<circle cx="428" cy="128.5" r="5" fill="black" stroke="#D9EBFF" stroke-width="2"/>
+<circle cx="428" cy="158.5" r="5" fill="black" stroke="#D9EBFF" stroke-width="2"/>
+<circle cx="458" cy="158.5" r="5" fill="black" stroke="#D9EBFF" stroke-width="2"/>
+<path d="M411 158.5V128.5L382 158.5H411Z" fill="#0E4559" stroke="#B3BFD8" stroke-width="2"/>
+<circle cx="4" cy="4" r="5" transform="matrix(-1 0 0 1 415 124.5)" fill="black" stroke="#D9EBFF" stroke-width="2"/>
+<circle cx="4" cy="4" r="5" transform="matrix(-1 0 0 1 415 154.5)" fill="black" stroke="#D9EBFF" stroke-width="2"/>
+<circle cx="4" cy="4" r="5" transform="matrix(-1 0 0 1 385 154.5)" fill="black" stroke="#D9EBFF" stroke-width="2"/>
+</svg>

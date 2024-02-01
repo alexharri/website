@@ -1,0 +1,13 @@
+<svg width="700" height="204" viewBox="0 0 700 204" fill="none" xmlns="http://www.w3.org/2000/svg">
+<rect width="700" height="203" transform="translate(0 0.5)" fill="#0A0D12"/>
+<path d="M402.5 102.5H350L350 132.833L402.5 102.5Z" fill="#0E4559"/>
+<path d="M350 11.5L297.5 102.5M350 11.5L402.5 102.5M350 11.5L350 193.5M455 193.5L297.5 102.5M455 193.5H350M455 193.5L402.5 102.5M245 193.5L297.5 102.5M245 193.5H350M245 193.5L402.5 102.5M297.5 102.5H402.5M297.5 102.5L350 193.5M350 193.5L402.5 102.5" stroke="#B3BFD8" stroke-width="2"/>
+<circle cx="350" cy="11.5" r="5" fill="black" stroke="#D9EBFF" stroke-width="2"/>
+<circle cx="350" cy="193.5" r="5" fill="black" stroke="#D9EBFF" stroke-width="2"/>
+<circle cx="455" cy="193.5" r="5" fill="black" stroke="#D9EBFF" stroke-width="2"/>
+<circle cx="245" cy="193.5" r="5" fill="black" stroke="#D9EBFF" stroke-width="2"/>
+<circle cx="298" cy="102.5" r="5" fill="black" stroke="#D9EBFF" stroke-width="2"/>
+<circle cx="402" cy="102.5" r="5" fill="black" stroke="#D9EBFF" stroke-width="2"/>
+<circle cx="350" cy="102.5" r="5" fill="black" stroke="#D9EBFF" stroke-width="2"/>
+<circle cx="350" cy="132.5" r="5" fill="black" stroke="#D9EBFF" stroke-width="2"/>
+</svg>
