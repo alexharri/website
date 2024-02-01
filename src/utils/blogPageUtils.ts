@@ -45,10 +45,10 @@ export function getPopularPosts() {
   }, {} as Record<string, Post>);
 
   const popularPosts = [
-    "multi-cursor-code-editing-animated-introduction",
     "typescript-structural-typing",
+    "multi-cursor-code-editing-animated-introduction",
+    "vector-networks",
     "build-schema-language-with-infer",
-    "grid-engine-performance",
   ];
 
   for (const slug of popularPosts) {
