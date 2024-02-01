@@ -34,5 +34,9 @@ export const Note = (props: Props) => {
     return <p>{child}</p>;
   });
 
-  return <div className={s("container")}>{content}</div>;
+  return (
+    <div className="flow">
+      <div className={s("container")}>{content}</div>
+    </div>
+  );
 };

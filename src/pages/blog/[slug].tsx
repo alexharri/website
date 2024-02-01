@@ -10,7 +10,6 @@ import { SmallNote } from "../../components/SmallNote/SmallNote";
 import { Pre, StaticCodeBlock } from "../../components/StaticCodeBlock/StaticCodeBlock";
 import { FrontMatter } from "../../types/FrontMatter";
 import { usePostWatcher } from "../../utils/hooks/usePostWatcher";
-import { withMargin } from "../../utils/withMargin";
 import { MonacoProvider } from "../../components/ScriptedEditor/MonacoProvider";
 import { getPostPaths, getPostProps } from "../../utils/blogPageUtils";
 import { RenderTextCommand } from "../../components/ScriptedEditor/RenderCommand/RenderCommand";
@@ -19,6 +18,7 @@ import { Image } from "../../components/Image";
 import { SectionAnchor } from "../../components/SectionAnchor/SectionAnchor";
 import { formatDate } from "../../utils/formatDate";
 import { Note } from "../../components/Note/Note";
+import { PostLayout } from "../../components/PostLayout/PostLayout";
 
 // Custom components/renderers to pass to MDX.
 // Since the MDX files aren't loaded by webpack, they have no knowledge of how
@@ -26,13 +26,13 @@ import { Note } from "../../components/Note/Note";
 // here.
 const components = {
   a: Link,
-  pre: withScriptedEditor(withMargin([32, -24], Pre), (props) => {
+  pre: withScriptedEditor(Pre, (props) => {
     const language = props.children.props.className?.split("-")[1] ?? "text";
     return { code: props.children.props.children, language };
   }),
   img: Image,
   Image,
-  StaticCodeBlock: withScriptedEditor(withMargin([32, -24], StaticCodeBlock), (props) => ({
+  StaticCodeBlock: withScriptedEditor(StaticCodeBlock, (props) => ({
     code: props.children,
     language: props.language,
   })),
@@ -71,13 +71,15 @@ export default function PostPage(props: Props) {
         pathName={`/blog/${props.slug}`}
       />
       <Layout>
-        <main>
-          <div style={{ marginBottom: 40 }}>
+        <PostLayout>
+          <div className="flow" style={{ marginBottom: 40 }}>
             <h1 style={{ marginBottom: 8 }}>{scope.title}</h1>
             {scope.publishedAt && (
-              <time dateTime={scope.publishedAt} style={{ fontSize: 20 }}>
-                {formatDate(scope.publishedAt)}
-              </time>
+              <div className="flow">
+                <time dateTime={scope.publishedAt} style={{ fontSize: 20 }}>
+                  {formatDate(scope.publishedAt)}
+                </time>
+              </div>
             )}
           </div>
           <FocusedScriptProvider>
@@ -85,7 +87,7 @@ export default function PostPage(props: Props) {
               <MDXRemote {...(source as any)} components={components} />
             </MonacoProvider>
           </FocusedScriptProvider>
-        </main>
+        </PostLayout>
       </Layout>
     </>
   );

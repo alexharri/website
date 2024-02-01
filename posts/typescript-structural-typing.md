@@ -170,7 +170,7 @@ function validateUser(user: User) {
 }
 ```
 
-<SmallNote moveCloserUpBy={24}>There are type errors in this code block which I'm hiding for now. We'll get to them later.</SmallNote>
+<SmallNote>There are type errors in this code block which I'm hiding for now. We'll get to them later.</SmallNote>
 
 The problem with this approach is that the `user` object might contain properties not present in `validators`.
 

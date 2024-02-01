@@ -8,14 +8,13 @@ import { SnippetList } from "../../components/SnippetList/SnippetList";
 import { Snippet } from "../../types/Snippet";
 import { snippetFileNames, SNIPPETS_PATH } from "../../utils/mdxUtils";
 
-
 interface Props {
   snippets: Snippet[];
 }
 
 export default function Page(props: Props) {
   return (
-    <Layout>
+    <Layout constrainWidth>
       <h1>Snippets</h1>
       <SnippetList>
         {props.snippets.map((snippet) => (

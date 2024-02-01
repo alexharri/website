@@ -41,7 +41,7 @@ With that out of the way, let's get started!
 [ true, false, false, true, false, false, false, false ]
 ```
 
-<SmallNote label="" moveCloserUpBy={24}>Binary numbers are read right-to-left, following [bit ordering][bit_ordering] from least-significant to most-significant</SmallNote>
+<SmallNote label="">Binary numbers are read right-to-left, following [bit ordering][bit_ordering] from least-significant to most-significant</SmallNote>
 
 Each bit in the bit mask corresponds to a single boolean — 1 representing true, and 0 representing false.
 
@@ -256,7 +256,7 @@ We can map each bit to an absolute index:
   └───────  7 └─────── 15 └─────── 23 └─────── 31
 ```
 
-<SmallNote label="" moveCloserUpBy={24}>Each word is indexed right-to-left, following [bit ordering][bit_ordering] from least-significant to most-significant</SmallNote>
+<SmallNote label="">Each word is indexed right-to-left, following [bit ordering][bit_ordering] from least-significant to most-significant</SmallNote>
 
 [bit_ordering]: https://en.wikipedia.org/wiki/Bit_numbering
 

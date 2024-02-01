@@ -5,11 +5,15 @@ import { LayoutStyles } from "./Layout.styles";
 import { Footer } from "./Footer/Footer";
 
 interface Props {
+  constrainWidth?: boolean;
   children: React.ReactNode;
 }
 
 export const Layout = (props: Props) => {
   const s = useStyles(LayoutStyles);
+
+  const { constrainWidth = false } = props;
+
   return (
     <>
       <header className={s("header")}>
@@ -30,7 +34,7 @@ export const Layout = (props: Props) => {
         </div>
       </header>
       <div className={s("headerBorder")} />
-      <div className={s("content")}>{props.children}</div>
+      <div className={s("content", { constrainWidth })}>{props.children}</div>
       <Footer />
     </>
   );

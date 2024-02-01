@@ -4,12 +4,13 @@ import { ImageStyles } from "./Image.styles";
 
 interface Props {
   src?: string;
-  wide?: boolean;
+  maxWidth?: number;
+  noMargin?: boolean;
   plain?: boolean;
-  width?: number;
+  width?: number | "auto";
 }
 
-export const Image = ({ wide, plain, width, ...props }: Props) => {
+export const Image = ({ maxWidth, noMargin, plain, width, ...props }: Props) => {
   const s = useStyles(ImageStyles);
   const router = useRouter();
 
@@ -25,15 +26,24 @@ export const Image = ({ wide, plain, width, ...props }: Props) => {
     }
   }
 
+  let flow = true;
+  let widthProp: string | number | undefined;
+
+  // if (fullWidth) width = "auto";
+
+  if (typeof width === "number") {
+    widthProp = width;
+    flow = false;
+  } else if (width === "auto") {
+    flow = false;
+  }
+
+  let containerClassName = ["image", s("container", { plain, noMargin })].join(" ");
+  if (flow) containerClassName += " flow";
+
   return (
-    <div className={s("container", { wide, plain })}>
-      <img
-        {...props}
-        src={src}
-        width="100%"
-        className={s("image", { plain })}
-        style={{ maxWidth: width }}
-      />
+    <div className={containerClassName}>
+      <img {...props} src={src} width={widthProp} className={s("image", { plain })} />
     </div>
   );
 };

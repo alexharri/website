@@ -10,7 +10,7 @@ interface Props {
 
 export default function Page(props: Props) {
   return (
-    <Layout>
+    <Layout constrainWidth>
       <h1>Drafts</h1>
       {props.posts.map((post) => (
         <BlogPost post={post} key={post.slug} />

@@ -1,8 +1,9 @@
+import { cssVariables } from "../utils/cssVariables";
 import { StyleOptions } from "../utils/styles";
 
 export const ImageStyles = ({ styled }: StyleOptions) => ({
   container: styled.css`
-    margin: 32px 0 40px;
+    margin: 40px 0 40px;
     position: relative;
 
     &:before {
@@ -19,20 +20,16 @@ export const ImageStyles = ({ styled }: StyleOptions) => ({
       border: 2px solid #1a364d;
     }
 
-    &--wide {
-      margin-left: -24px;
-      margin-right: -24px;
-    }
-
     &--plain {
       &:before {
         display: none;
       }
     }
 
-    @media (max-width: 800px) {
-      margin-left: 0;
-      margin-right: 0;
+    &--fullWidth,
+    &--noMargin {
+      margin-left: -${cssVariables.contentPadding}px;
+      margin-right: -${cssVariables.contentPadding}px;
     }
   `,
 
@@ -40,6 +37,7 @@ export const ImageStyles = ({ styled }: StyleOptions) => ({
     border-radius: 8px;
     border: 2px solid #1f4f76;
     margin: 0 auto;
+    max-width: 100%;
     display: block;
 
     &--plain {

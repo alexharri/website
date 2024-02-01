@@ -5,7 +5,7 @@ interface Props {
 
 export const SectionAnchor = (props: Props) => {
   return (
-    <div style={{ position: "relative" }}>
+    <div style={{ position: "relative" }} className="flow">
       <span
         id={props.id}
         style={{

@@ -27,7 +27,7 @@ export default function Page(props: Props) {
   const s = useStyles(Styles);
 
   return (
-    <Layout>
+    <Layout constrainWidth>
       <Head>
         <title>Blog | Alex Harri Jónsson</title>
       </Head>

@@ -35,9 +35,9 @@ export const LazyScriptedEditorStyles = ({ styled, theme }: StyleOptions) => ({
 
   placeholder: styled.css`
     position: absolute;
-    top: 16px;
-    left: 0;
-    right: 0;
+    top: 0;
+    left: -24px;
+    right: -24px;
     bottom: 0;
     background: ${theme.background300};
     display: flex;

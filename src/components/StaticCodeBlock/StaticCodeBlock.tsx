@@ -215,26 +215,33 @@ export const StaticCodeBlock = (props: StaticCodeBlockProps) => {
     .replaceAll(/@info {.*} /g, "Info: ");
 
   return (
-    <div className={s("outerWrapper")}>
-      <CopyButton text={textToCopy} />
-      <div className={s("wrapper")} style={{ marginBottom, padding, paddingRight }}>
-        <Highlight {...defaultProps} code={children} language={language as any} theme={prismTheme}>
-          {({ className, style, tokens: lines, getLineProps, getTokenProps }) => (
-            <pre className={[className, s("pre")].join(" ")} style={{ ...style, fontSize }}>
-              {lines.map((line, i) => {
-                return (
-                  <Line
-                    key={i}
-                    getLineProps={() => getLineProps({ line, key: i })}
-                    getTokenProps={getTokenProps}
-                    last={i === lines.length - 1}
-                    line={line}
-                  />
-                );
-              })}
-            </pre>
-          )}
-        </Highlight>
+    <div className="pre">
+      <div className={s("outerWrapper")}>
+        <CopyButton text={textToCopy} />
+        <div className={s("wrapper")} style={{ marginBottom, padding, paddingRight }}>
+          <Highlight
+            {...defaultProps}
+            code={children}
+            language={language as any}
+            theme={prismTheme}
+          >
+            {({ className, style, tokens: lines, getLineProps, getTokenProps }) => (
+              <pre className={[className, s("pre")].join(" ")} style={{ ...style, fontSize }}>
+                {lines.map((line, i) => {
+                  return (
+                    <Line
+                      key={i}
+                      getLineProps={() => getLineProps({ line, key: i })}
+                      getTokenProps={getTokenProps}
+                      last={i === lines.length - 1}
+                      line={line}
+                    />
+                  );
+                })}
+              </pre>
+            )}
+          </Highlight>
+        </div>
       </div>
     </div>
   );

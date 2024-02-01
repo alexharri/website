@@ -29,7 +29,7 @@ Spreadsheets have _a lot_ of use cases, ranging from budget management and atten
 
 <Image src="~/mortgage-calculator.png" plain width={400} />
 
-<SmallNote label="" center moveCloserUpBy={24}>An example of what the inputs to a mortgage calculator might look like</SmallNote>
+<SmallNote label="" center>An example of what the inputs to a mortgage calculator might look like</SmallNote>
 
 Different scenarios are modeled by adjusting the inputs and seeing how the model reacts.
 

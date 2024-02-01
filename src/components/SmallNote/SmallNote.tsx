@@ -8,12 +8,16 @@ const SmallNoteStyles = ({ styled, theme }: StyleOptions) => ({
     &--center {
       text-align: center;
     }
+
+    a {
+      color: inherit;
+      text-decoration: underline;
+    }
   `,
 });
 
 interface Props {
   children: React.ReactNode;
-  moveCloserUpBy?: number;
   label?: string;
   center?: boolean;
 }
@@ -22,7 +26,7 @@ export const SmallNote = (props: Props) => {
   const s = useStyles(SmallNoteStyles);
   const { label = "Note", center } = props;
   return (
-    <p className={s("p", { center })} style={{ marginTop: -(props.moveCloserUpBy ?? 0) }}>
+    <p className={["note", s("p", { center })].join(" ")}>
       {label ? label + ": " : null}
       {props.children}
     </p>

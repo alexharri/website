@@ -53,15 +53,21 @@ export const LayoutStyles = ({ styled, theme }: StyleOptions) => ({
   `,
 
   content: styled.css`
-    width: ${cssVariables.contentWidth}px;
-    max-width: 100%;
-    margin: 0 auto;
-    padding: 128px ${cssVariables.contentPadding}px 64px;
+    width: 100%;
+    padding: 128px 0 64px;
     min-height: calc(100vh - 24px);
 
     @media (max-width: 800px) {
       padding-top: 80px;
       width: auto;
+    }
+
+    &--constrainWidth {
+      width: ${cssVariables.contentWidth}px;
+      margin: 0 auto;
+      max-width: 100%;
+      padding-left: ${cssVariables.contentPadding}px;
+      padding-right: ${cssVariables.contentPadding}px;
     }
   `,
 });

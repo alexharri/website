@@ -8,13 +8,13 @@ import path from "path";
 import { Layout } from "../../../components/Layout";
 import { Link } from "../../../components/Link";
 import { Meta } from "../../../components/Meta/Meta";
+import { PostLayout } from "../../../components/PostLayout/PostLayout";
 import { SmallNote } from "../../../components/SmallNote/SmallNote";
 import { SnippetTitle } from "../../../components/SnippetTitle/SnippetTitle";
 import { Pre, StaticCodeBlock } from "../../../components/StaticCodeBlock/StaticCodeBlock";
 import { FrontMatter } from "../../../types/FrontMatter";
 import { usePostWatcher } from "../../../utils/hooks/usePostWatcher";
 import { snippetFileNames, SNIPPETS_PATH } from "../../../utils/mdxUtils";
-import { withMargin } from "../../../utils/withMargin";
 
 // Custom components/renderers to pass to MDX.
 // Since the MDX files aren't loaded by webpack, they have no knowledge of how
@@ -22,8 +22,8 @@ import { withMargin } from "../../../utils/withMargin";
 // here.
 const components = {
   a: Link,
-  pre: withMargin([32, -24], Pre),
-  StaticCodeBlock: withMargin([32, -24], StaticCodeBlock),
+  pre: Pre,
+  StaticCodeBlock,
   SmallNote,
   // ExampleComponent: dynamic(() => import("../../src/components/ExampleComponent")),
   Head,
@@ -36,7 +36,7 @@ interface Props {
   category: string;
 }
 
-export default function PostPage(props: Props) {
+export default function SnippetPage(props: Props) {
   const source = usePostWatcher(props);
   const scope = source.scope! as unknown as FrontMatter;
 
@@ -48,10 +48,10 @@ export default function PostPage(props: Props) {
         pathName={`/snippets/${props.category}/${props.slug}`}
       />
       <Layout>
-        <main>
+        <PostLayout>
           <SnippetTitle title={scope.title} />
           <MDXRemote {...(source as any)} components={components} />
-        </main>
+        </PostLayout>
       </Layout>
     </>
   );

@@ -52,7 +52,7 @@ Running this emits:
 Ran in 49.8 ms
 ```
 
-<SmallNote moveCloserUpBy={24}>I'm running these benchmarks on my M2 Macbook Air using Node 20</SmallNote>
+<SmallNote>I'm running these benchmarks on my M2 Macbook Air using Node 20</SmallNote>
 
 So running AND on 10 million booleans takes 50ms. Let's see how long that takes for 10 million integers.
 
@@ -140,7 +140,7 @@ I benchmarked performing OR on two `Set`s and two bit sets. In both cases, we cr
   </tbody>
 </table>}
 
-<SmallNote label="" moveCloserUpBy={24}>Every element is a random number between 0 and 100,000,000</SmallNote>
+<SmallNote label="">Every element is a random number between 0 and 100,000,000</SmallNote>
 
 For `Set`, the time it takes to perform the OR operation increases with N. In contrast, the set operation performance for bit set stays constant since the range size determines performance.
 
@@ -185,7 +185,7 @@ We see similar results for AND:
   </tbody>
 </table>}
 
-<SmallNote moveCloserUpBy={24}>I couldn't go above 8M elements because I started running into the [maximum size limit for `Set`][max_set_size]</SmallNote>
+<SmallNote>I couldn't go above 8M elements because I started running into the [maximum size limit for `Set`][max_set_size]</SmallNote>
 
 [max_set_size]: https://blog.xdumaine.com/maximum-set-size-in-node-js/
 

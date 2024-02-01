@@ -55,7 +55,7 @@ export default function Page(props: Props) {
   const s = useStyles(Styles);
 
   return (
-    <Layout>
+    <Layout constrainWidth>
       <div className={s("header")}>
         <h1>Popular posts</h1>
         <div>

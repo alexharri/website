@@ -70,7 +70,7 @@ for (let i = 0; i < WORD_LEN; i++) {
 }
 ```
 
-<SmallNote label="" moveCloserUpBy={24}>`WORD_LEN` is set to 32: the number of bits in each `word`</SmallNote>
+<SmallNote label="">`WORD_LEN` is set to 32: the number of bits in each `word`</SmallNote>
 
 We can check whether the bit is set via `(word & (1 << i)) !== 0`:
 
@@ -96,7 +96,7 @@ We can compute the bit's `index` in the bit set like so:
 const index = (wordIndex << WORD_LOG) + i;
 ```
 
-<SmallNote label="" moveCloserUpBy={24}>`WORD_LOG` is set to 5: the base 2 logarithm of 32</SmallNote>
+<SmallNote label="">`WORD_LOG` is set to 5: the base 2 logarithm of 32</SmallNote>
 
 The expression `wordIndex << WORD_LOG` is equivalent to `wordIndex * WORD_LEN` because left shifting by one is equivalent to multiplying by 2 (and `2 ** WORD_LOG` equals `WORD_LEN`).
 
@@ -298,7 +298,7 @@ Let's put this into a table and compare the performance:
   </tbody>
 </table>}
 
-<SmallNote label="" moveCloserUpBy={24}>* Speed compared to baseline</SmallNote>
+<SmallNote label="">* Speed compared to baseline</SmallNote>
 
 We observe no significant difference in performance for densities above 10%, but once we reach densities of ≤5% we start to see significant performance improvements: __>2x faster__ at 1% density and __>10x faster__ at 0.1% density.
 
@@ -464,7 +464,7 @@ Let's see the difference this makes:
   </tbody>
 </table>}
 
-<SmallNote label="" moveCloserUpBy={24}>* Speed compared to baseline</SmallNote>
+<SmallNote label="">* Speed compared to baseline</SmallNote>
 
 We receive a tiny performance penalty for high-density sets, but we see a slight performance boost for sets at a sweet spot of roughly 1% density.
 
@@ -635,7 +635,7 @@ The two's complement of an integer is computed by:
 11101101 // -19
 ```
 
-<SmallNote moveCloserUpBy={24}>This also works in the opposite direction (from negative to positive)</SmallNote>
+<SmallNote>This also works in the opposite direction (from negative to positive)</SmallNote>
 
 The binary representation of `19` has a 1 as the least-significant bit. Inverting makes the least significant bit become 0, so adding one will always make the first bit 1. This makes `x & -x` yield the 1st set bit for any number where the least-significant bit is 1.
 
@@ -717,7 +717,7 @@ function hammingWeight(n: number): number {
 }
 ```
 
-<SmallNote label="" moveCloserUpBy={24}>How this works, precisely, is something that we won't get into. We'll just trust that this works.</SmallNote>
+<SmallNote label="">How this works, precisely, is something that we won't get into. We'll just trust that this works.</SmallNote>
 
 We now have all the pieces we need.
 
@@ -870,7 +870,7 @@ But how fast is this optimized version? Let's run our benchmark and compare.
   </tbody>
 </table>}
 
-<SmallNote label="" moveCloserUpBy={24}>* Speed compared to baseline</SmallNote>
+<SmallNote label="">* Speed compared to baseline</SmallNote>
 
 For densities of 5-50%, we receive a __~5x increase in performance__. Higher densities of 75% and above receive a notable speedup of >2x, while the densities below 5% see a __5-17x increase in performance__.
 

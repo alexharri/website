@@ -3,6 +3,7 @@ import { StyleOptions } from "../../utils/styles";
 export const StaticCodeBlockStyles = ({ styled, theme }: StyleOptions) => ({
   outerWrapper: styled.css`
     position: relative;
+    margin: 0 -24px;
   `,
 
   wrapper: styled.css`

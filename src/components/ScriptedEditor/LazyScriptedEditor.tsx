@@ -3,7 +3,6 @@ import { RunContext } from "./run/RunContext";
 import { __ScriptedEditor } from "./ScriptedEditor";
 import { ScriptedEditorControls } from "./ScriptedEditorControls";
 import { MonacoContext } from "./MonacoProvider";
-import { withMargin } from "../../utils/withMargin";
 import { useStyles } from "../../utils/styles";
 import { LazyScriptedEditorStyles } from "./LazyScriptedEditor.styles";
 
@@ -69,8 +68,12 @@ function LazyScriptedEditor(props: Props) {
   }, []);
 
   return (
-    <>
-      <div ref={ref} className={s("outerWrapper")} data-scripted-editor={props.scriptId}>
+    <div className="pre">
+      <div
+        ref={ref}
+        className={[s("outerWrapper")].join(" ")}
+        data-scripted-editor={props.scriptId}
+      >
         <div className={s("lineWrapper")}>
           {Array.from({ length: lines }).map((_, i) => (
             <div key={i} className={s("line")} />
@@ -96,7 +99,7 @@ function LazyScriptedEditor(props: Props) {
         runContext={runContext}
         loop={props.loop}
       />
-    </>
+    </div>
   );
 }
 
@@ -104,7 +107,7 @@ export function withScriptedEditor<T extends { children: any }>(
   Component: React.ComponentType<T>,
   getProps: (props: T) => { code: string; language: string },
 ) {
-  return withMargin([40, 0], (props: T) => {
+  return (props: T) => {
     const { code, language } = getProps(props);
     const searchStr = "// @script ";
 
@@ -140,5 +143,5 @@ export function withScriptedEditor<T extends { children: any }>(
         loop={loop}
       />
     );
-  });
+  };
 }
