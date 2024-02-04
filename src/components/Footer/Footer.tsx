@@ -3,6 +3,7 @@ import { useStyles } from "../../utils/styles";
 import { GitHubIcon20 } from "../Icon/GitHubIcon20";
 import { LinkedInIcon20 } from "../Icon/LinkedInIcon20";
 import { MediumIcon20 } from "../Icon/MediumIcon20";
+import { RSSIcon20 } from "../Icon/RSSIcon20";
 import { Link } from "../Link";
 import { FooterStyles } from "./Footer.styles";
 
@@ -29,6 +30,12 @@ export const Footer = () => {
               <Link href={LINKS.LinkedIn}>
                 <LinkedInIcon20 />
                 LinkedIn
+              </Link>
+            </p>
+            <p className={s("link")}>
+              <Link href="/rss.xml" target="_blank">
+                <RSSIcon20 />
+                RSS
               </Link>
             </p>
             <p className={s("link")}>

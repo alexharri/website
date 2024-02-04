@@ -27,6 +27,7 @@ const nextConfig = {
   webpack: (config, { isServer }) => {
     if (isServer) {
       execSync("npm run generate-sitemap");
+      execSync("npm run generate-rss");
     }
 
     const rule = config.module.rules
