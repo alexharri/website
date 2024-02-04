@@ -12,6 +12,7 @@
 /.next/
 /out/
 /public/sitemap.xml
+/public/rss.xml
 
 # production
 /build
