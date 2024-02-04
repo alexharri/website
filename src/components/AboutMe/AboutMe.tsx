@@ -24,7 +24,7 @@ export const AboutMe = () => {
         <p>
           I'm currently working as a Senior Software Engineer at{" "}
           <Link href="https://arkio.is">Arkio</Link>, where I'm developing Arkio's modeling core.
-          Arkio is a VR/AR-native volumetric 3D modeler and review tool for architects supporting
+          Arkio is a VR/AR-native solid modeler and model reviewer for architects supporting
           real-time collaboration.
         </p>
       </div>
