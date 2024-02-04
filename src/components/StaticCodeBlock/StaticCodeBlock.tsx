@@ -42,6 +42,7 @@ export interface StaticCodeBlockProps {
   children: string;
   small?: boolean;
   marginBottom?: number;
+  noFlowOutside?: boolean;
 }
 
 const CopyButton = (props: { text: string }) => {
@@ -204,7 +205,7 @@ const Line = (props: LineProps) => {
 export const StaticCodeBlock = (props: StaticCodeBlockProps) => {
   const s = useStyles(StaticCodeBlockStyles);
 
-  const { language, children, marginBottom, small } = props;
+  const { language, children, marginBottom, small, noFlowOutside } = props;
 
   const padding = small ? 16 : 24;
   const fontSize = small ? 14 : 16;
@@ -216,7 +217,7 @@ export const StaticCodeBlock = (props: StaticCodeBlockProps) => {
 
   return (
     <div className="pre">
-      <div className={s("outerWrapper")}>
+      <div className={s("outerWrapper", { noFlowOutside })}>
         <CopyButton text={textToCopy} />
         <div className={s("wrapper")} style={{ marginBottom, padding, paddingRight }}>
           <Highlight

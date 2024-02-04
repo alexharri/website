@@ -20,7 +20,7 @@ export const SnippetLink = (props: Props) => {
         {snippet.description && <p>{snippet.description}</p>}
       </Link>
       {snippet.snippet && (
-        <StaticCodeBlock language={snippet.snippet.language} small>
+        <StaticCodeBlock language={snippet.snippet.language} small noFlowOutside>
           {snippet.snippet.text}
         </StaticCodeBlock>
       )}

@@ -4,6 +4,11 @@ export const StaticCodeBlockStyles = ({ styled, theme }: StyleOptions) => ({
   outerWrapper: styled.css`
     position: relative;
     margin: 0 -24px;
+
+    &--noFlowOutside {
+      margin-left: 0;
+      margin-right: 0;
+    }
   `,
 
   wrapper: styled.css`

@@ -1,15 +1,24 @@
 import { StyleOptions, useStyles } from "../../utils/styles";
 
-const SnippetListStyles = ({ styled }: StyleOptions) => ({
+const SnippetListStyles = ({ styled, theme }: StyleOptions) => ({
   container: styled.css`
-    display: flex;
-    gap: 24px;
-    flex-wrap: wrap;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
 
-    & > * {
-      flex-basis: 0;
-      flex-grow: 1;
-      max-width: calc(50% - 12px);
+    @media (max-width: 670px) {
+      grid-template-columns: repeat(1, 1fr);
+    }
+
+    & > article {
+      h2 {
+        margin-top: 0;
+      }
+
+      background: ${theme.background100};
+      border: 1px solid ${theme.darkBlue400};
+      border-radius: 4px;
+      padding: 24px;
     }
   `,
 });
