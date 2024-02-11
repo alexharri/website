@@ -6,6 +6,7 @@ import React, { useEffect, useState } from "react";
 import { squiggleIcon10x7Base64Blue, squiggleIcon10x7Base64Red } from "../Icon/SquiggleIcon10x7";
 import { useStyles } from "../../utils/styles";
 import { StaticCodeBlockStyles } from "./StaticCodeBlock.styles";
+import { colors } from "../../utils/cssVariables";
 
 /**
  * A markdown code block like so:
@@ -137,6 +138,79 @@ interface Token {
   empty?: boolean;
 }
 
+const jsDocRegex =
+  /^(?<pre>\s*(\*|\/)+\s*)(?<keyword>@param|@type|@returns|@typedef)\s{(?<typeExpr>.*)}(\s(?<name>[a-z]+))?(?<post>.*)/i;
+
+const JSDocLine = (props: TokenProps) => {
+  const { token, getTokenProps } = props;
+
+  const match = jsDocRegex.exec(token.content);
+  const { pre, keyword, typeExpr, name, post } = match!.groups!;
+
+  const expr = (
+    <Highlight
+      {...defaultProps}
+      code={`type X=${typeExpr}`}
+      language={"typescript" as any}
+      theme={prismTheme}
+    >
+      {({ tokens: lines, getLineProps, getTokenProps }) => (
+        <>
+          {lines.map((tokens, i) => {
+            tokens = tokens.slice(4);
+            return (
+              <span {...getLineProps({ line: tokens, key: i })}>
+                {tokens.map((token, i) => (
+                  <Token token={token} getTokenProps={getTokenProps} key={i} />
+                ))}
+              </span>
+            );
+          })}
+        </>
+      )}
+    </Highlight>
+  );
+
+  return (
+    <>
+      <span {...getTokenProps({ token: { ...token, content: pre }, key: 1000 })} />
+
+      <span style={{ color: colors.blue }}>{keyword}</span>
+      <span style={{ color: colors.token.comment }}>&nbsp;{"{"}</span>
+      <span>{expr}</span>
+      <span style={{ color: colors.token.comment }}>{"}"}</span>
+      {name && <span style={{ color: colors.text800 }}>&nbsp;{name}</span>}
+
+      {post && <span {...getTokenProps({ token: { ...token, content: post }, key: 1001 })} />}
+    </>
+  );
+};
+
+interface TokenProps {
+  token: Token;
+  getTokenProps: (options: { token: Token; key: number }) => any;
+}
+
+const Token = (props: TokenProps) => {
+  const { token, getTokenProps } = props;
+  if (props.token.types.join(",") === "comment" && jsDocRegex.test(props.token.content)) {
+    return <JSDocLine {...props} />;
+  }
+
+  let { children, ...tokenProps } = getTokenProps({ token, key: 0 });
+  if (typeof children === "string" && children.startsWith("//=>")) {
+    children = (
+      // I really don't like the //=> ligature in Fira Code
+      <span>
+        <span style={{ fontVariantLigatures: "none" }}>//</span>
+        <span>{"=>"}</span>
+        {children.slice(4)}
+      </span>
+    );
+  }
+  return <span {...tokenProps} children={children} />;
+};
+
 interface LineProps {
   line: Token[];
   last: boolean;
@@ -180,24 +254,15 @@ const Line = (props: LineProps) => {
     }
   }
 
+  // if (jsDocRegex.test(content)) return <JSDocLine {...props} />;
+
   const isEmpty = content === "\n";
   if (props.last && isEmpty) return null;
   return (
     <div {...getLineProps()}>
-      {line.map((token, key) => {
-        let { children, ...tokenProps } = getTokenProps({ token, key });
-        if (typeof children === "string" && children.startsWith("//=>")) {
-          children = (
-            // I really don't like the //=> ligature in Fira Code
-            <span>
-              <span style={{ fontVariantLigatures: "none" }}>//</span>
-              <span>{"=>"}</span>
-              {children.slice(4)}
-            </span>
-          );
-        }
-        return <span {...tokenProps} children={children} />;
-      })}
+      {line.map((token, key) => (
+        <Token token={token} getTokenProps={getTokenProps} key={key} />
+      ))}
     </div>
   );
 };
