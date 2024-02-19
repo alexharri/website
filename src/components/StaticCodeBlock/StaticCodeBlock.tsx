@@ -139,15 +139,15 @@ interface Token {
 }
 
 const jsDocRegex =
-  /^(?<pre>\s*(\*|\/)+\s*)(?<keyword>@param|@type|@returns|@typedef)\s{(?<typeExpr>.*)}(\s(?<name>[a-z]+))?(?<post>.*)/i;
+  /^(?<pre>\s*(\*|\/)+\s*)(?<keyword>@[a-z]+)(\s{(?<typeExpr>.*)})?(\s(?<name>[a-z\.]+))?(?<post>.*)/i;
 
 const JSDocLine = (props: TokenProps) => {
   const { token, getTokenProps } = props;
 
   const match = jsDocRegex.exec(token.content);
-  const { pre, keyword, typeExpr, name, post } = match!.groups!;
+  let { pre, keyword, typeExpr, name, post } = match!.groups!;
 
-  const expr = (
+  const expr = typeExpr && (
     <Highlight
       {...defaultProps}
       code={`type X=${typeExpr}`}
@@ -175,10 +175,17 @@ const JSDocLine = (props: TokenProps) => {
     <>
       <span {...getTokenProps({ token: { ...token, content: pre }, key: 1000 })} />
 
-      <span style={{ color: colors.blue }}>{keyword}</span>
-      <span style={{ color: colors.token.comment }}>&nbsp;{"{"}</span>
-      <span>{expr}</span>
-      <span style={{ color: colors.token.comment }}>{"}"}</span>
+      <span style={{ color: colors.blue }}>
+        {keyword}
+        {expr ? <>&nbsp;</> : null}
+      </span>
+      {expr ? (
+        <>
+          <span style={{ color: colors.blue }}>{"{"}</span>
+          <span>{expr}</span>
+          <span style={{ color: colors.blue }}>{"}"}</span>
+        </>
+      ) : null}
       {name && <span style={{ color: colors.text800 }}>&nbsp;{name}</span>}
 
       {post && <span {...getTokenProps({ token: { ...token, content: post }, key: 1001 })} />}
