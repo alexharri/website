@@ -1,6 +1,6 @@
 ---
 title: "JSDoc as an alternative TypeScript syntax"
-description: "How to type your JavaScript code base using JSDoc comments."
+description: "How to type your JavaScript code base without writing a single TypeScript file."
 publishedAt: ""
 ---
 
