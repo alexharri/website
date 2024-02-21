@@ -4,7 +4,7 @@ description: ""
 publishedAt: ""
 ---
 
-As web development has embraced static typing during the past decade, TypeScript has become the default language of choice. I think this is great — I love working with TypeScript!
+As web development has embraced static typing during the past decade, TypeScript has become the default language of choice. I think this is great—I love working with TypeScript!
 
 But what if you can't use TypeScript? You may encounter circumstances where you need to work in plain JavaScript, be it tooling constraints or a team member who does not like static typing.
 
@@ -23,11 +23,11 @@ function add(a, b) {
 
 I was surprised when I learned that the TypeScript compiler actually understands JSDoc comments. This fact allows you to type your entire codebase without creating a single `.ts` file.
 
-Think of this post as your crash course in using JSDoc as an alternative syntax for TypeScript. We'll cover all the important TypeScript-related features JSDoc has to offer — and their limitations.
+Think of this post as your crash course in using JSDoc as an alternative syntax for TypeScript. We'll cover all the important TypeScript-related features JSDoc has to offer—and their limitations.
 
 ## JSDoc
 
-JSDoc is expressed through block comments in the form `/** */`, which may contain "block tags" such as `@param` and `@type`. Normal `//` and `/* */` comments don't work:
+JSDoc is expressed through block comments in the form `/** */`, which may contain _block tags_ such as `@param` and `@type`. Normal `//` and `/* */` comments don't work:
 
 ```tsx
 // @type {number}
@@ -43,9 +43,7 @@ let c; // Doesn't work
 let c; // Works!
 ```
 
-<SmallNote label="">JSDoc has loads of features, but we'll only explore the features that enable us to use TypeScript features using JSDoc syntax.</SmallNote>
-
-The majority of your JSDoc comments will be used for typing variables, function arguments, and return types. This is done using `@type`, `@param`, and `@returns`.
+The majority of your JSDoc block tags will be used for typing variables, arguments, and return types. The block tags for those are `@type`, `@param`, and `@returns`.
 
 ```js
 /**
@@ -87,7 +85,7 @@ function example(arg) {
 }
 ```
 
-The parentheses are required. If they are missing the cast will fail silently:
+The parentheses are required. If they are missing the cast will not work:
 
 ```js
 /** @param {number} num */
@@ -101,7 +99,7 @@ function example(arg) {
 }
 ```
 
-Missing parentheses are a really easy mistake to make which can easily lead to bugs when casting from `any`. Be careful with casts in JSDoc!
+Missing parentheses are a really easy mistake to make, which can easily lead to bugs when casting from `any`. Be careful with casts in JSDoc!
 
 #### Const assertions
 
@@ -122,7 +120,7 @@ resize(b);
 
 [const_assertions]: https://www.typescriptlang.org/docs/handbook/release-notes/typescript-3-4.html#const-assertions
 
-You can also use const assertions in JSDoc, just like any other type cast:
+You can also use const assertions in JSDoc, they're just a type cast:
 
 ```js
 /**
@@ -142,7 +140,7 @@ resize(b);
 
 ### Declaring types
 
-In TypeScript, you can define types using the `type` or `interface` keywords:
+In TypeScript, you can declare types using the `type` or `interface` keywords:
 
 ```tsx
 type Value = string | number;
@@ -153,7 +151,7 @@ interface Store {
 }
 ```
 
-In JSDoc, types are defined using the `@typedef` keyword:
+In JSDoc, types are declared using the `@typedef` keyword:
 
 ```js
 /**
@@ -165,7 +163,7 @@ In JSDoc, types are defined using the `@typedef` keyword:
  */
 ```
 
-Having defined a type with `@typedef`, you can reference it like any other TypeScript type:
+Having declared a type with `@typedef`, you can reference it like any other TypeScript type:
 
 ```js
 /** @type {Value} */
@@ -190,7 +188,7 @@ An alternative way to declare the properties of an object type is using `@proper
  */
 ```
 
-Nested properties can be declared using `@property` like so:
+Nested properties can be specified using `.` as a separator:
 
 ```js
 /**
@@ -209,9 +207,13 @@ const user = {
 };
 ```
 
-### Exporting types
+<SectionAnchor id="exporting-types">
+  <h3>Exporting types</h3>
+</SectionAnchor>
 
 There's no syntax for exporting types in JSDoc. Instead, types defined using `@typedef` are __exported by default__. This auto-exporting applies to all types declared at the top level of a module.
+
+As someone who cares a lot about the interfaces of modules, I strongly dislike this feature.
 
 You can avoid the auto-exporting by declaring types in the scope that they're needed in:
 
@@ -221,23 +223,23 @@ You can avoid the auto-exporting by declaring types in the scope that they're ne
 /** @typedef {string} Foo */
 
 {
-  // 'Bar' is declared in a block scope and cannot be imported by
+  // 'Bar' is declared in a block scope: it cannot be imported by
   // other modules.
   /** @typedef {string} Bar */
 }
 
-function x() {
-  // 'Baz' is declared in a function and cannot be imported by
+function example() {
+  // 'Baz' is declared in a function: it cannot be imported by
   // other modules.
   /** @typedef {string} Baz */
 }
 ```
 
-Types declared in JavaScript files using JSDoc can be imported from TypeScript files.
+One thing worth mentioning is that types declared in JavaScript modules using JSDoc can be imported from TypeScript modules.
 
 ### Importing types
 
-In TypeScript, you can reference types from other modules in two ways: using `import("./path")` and normal `import` statements:
+In TypeScript, you can reference types from other modules via `import` statements or `import("./path").Type`:
 
 ```tsx
 import { Foo } from "./module";
@@ -246,16 +248,16 @@ let foo: Foo;
 let bar: import("./module").Bar;
 ```
 
-<SmallNote>You can specify type-only import in TypeScript via `import type { Foo }` and `import { type Foo }`</SmallNote>
+<SmallNote>In TypeScript modules you can declare that the import is for a type via `import type { Foo }` or `import { type Foo }`</SmallNote>
 
-JSDoc only allows you to use `import("./path")` style type imports:
+JSDoc only allows you to use `import("./path")`:
 
 ```ts
 /** @type {import("./module").Foo} */
 let foo;
 ```
 
-This can get quite verbose, so you can "fake" normal imports by using `@typedef`:
+This can get quite verbose for long module paths and type names, so you can "fake" normal imports using `@typedef`:
 
 ```ts
 /** @typedef {import("./module").Foo} Foo */
@@ -279,7 +281,7 @@ export { Foo } from "./module";
 
 We've arrived at my largest gripe with JSDoc: __it doesn't support non-null assertions__.
 
-Take the `Map<K, V>` data structure as an example. The return type of `Map<K, V>.get` is `V | undefined`, which can be frustrating when you know for certain that the value is non-null.
+Take the `Map<K, V>` data structure as an example. The return type of `Map<K, V>.get` is `V | undefined`, which can be frustrating when you know for certain that a value is non-null.
 
 ```tsx
 const map = new Map<string, number>([
@@ -316,7 +318,7 @@ const map = new Map([ ... ]);
 const a = /** @type {number} */ (map.get("a"));
 ```
 
-Type casting `string | number | null` to `number` is valid, so we get no type error. __The type cast masks the type error__, which would have not happened using non-null assertions.
+Type casting `string | number | undefined` to `number` is valid, so we get no type error. __The type cast masks the type error__, which would have not happened using non-null assertions.
 
 ```tsx
 const map = new Map<string, number | string>([ ... ]);
@@ -343,7 +345,7 @@ const aNullable = map.get("a");
 const a = /** @type {NonNullable<typeof aNullable>} */ (aNullable);
 ```
 
-This is so noisy! This would be much cleaner if `@nonnull` were supported:
+But this is still terribly noisy! This would be much cleaner if `@nonnull` were supported:
 
 ```tsx
 /** @type {number} */
@@ -390,6 +392,8 @@ A parameter can also be implicitly marked as optional by providing a default arg
 function foo(a, b = false) {
   // ...
 }
+
+foo(1); // OK
 ```
 
 There is an alternative syntax for marking parameters as optional where `=` is placed after the type:
@@ -406,7 +410,7 @@ function foo(a, b) {
 foo(1); // OK
 ```
 
-I find it a bit weird, but it's supported.
+<SmallNote label="">I find this syntax a bit weird, but hey, it's supported.</SmallNote>
 
 ### Generic type parameters
 
@@ -446,10 +450,10 @@ function box<T extends string | number>(value: T): { value: T } {
 }
 ```
 
-The `@template` tag can also be used with type definitions, classes, methods, and more:
+The `@template` block tag can also be used for type definitions, classes, methods, and more.
 
 ```js
-// Defining a generic type
+// Declaring a generic type
 /**
  * @template T
  * @typedef {{ value: T }} Box
@@ -475,19 +479,19 @@ class Box {
 
 ### Class properties
 
-In TypeScript, you can declare class properties using the `public`/`private` keywords for constructor arguments, or by explicitly declaring the properties.
+In TypeScript, you can declare class properties using the `public`/`private` keywords for constructor arguments or by explicitly declaring the properties.
 
 ```tsx
 class Vector2 {
-  // Use 'public' keyword to declare 'x' and 'y' and
+  // Use 'public' keyword to declare 'x', 'y' and
   // automatically assign them.
   constructor(public x: number, public y: number) {}
 }
 
 class Vector2 {
   // Explicitly declare properties
-  x: number;
-  y: number;
+  public x: number;
+  public y: number;
   
   constructor(x: number, y: number) {
     // Manually assign to properties
@@ -512,13 +516,7 @@ class Vector2 {
 }
 ```
 
-Unlike TypeScript, we don't need to explicitly declare `x` and `y` as properties in `.js` files. They are implicitly declared by assigning to them in the constructor.
-
-```ts
-const vec = new Vector2(0, 0);
-
-type X = typeof vec.x; // number
-```
+Unlike TypeScript, we don't need to explicitly declare `x` and `y` as properties in JavaScript modules. They are implicitly declared by assigning to them in the constructor.
 
 However, I would argue that it's good practice to explicitly declare the types of class properties to avoid possible implicit `any`s.
 
@@ -543,7 +541,7 @@ class Vector2 {
 
 ### Class `implements`
 
-Using TypeScript you can explicitly declare that a class `implements` a certain interface:
+In TypeScript you can declare that a class `implements` a certain interface:
 
 ```ts
 interface IEventEmitter {
@@ -556,7 +554,7 @@ class EventEmitter implements IEventEmitter {
 }
 ```
 
-JSDoc has `@implements` for this:
+It won't come as a surprise to hear that JSDoc has `@implements` for this purpose:
 
 ```js
 /**
@@ -574,9 +572,34 @@ class EventEmitter {
 ```
 
 
+### Public and private properties and methods
+
+Properties and methods can be declared as `public` and `private` via `@public` and `@private`:
+
+```ts
+class Example {
+  /**
+   * @public
+   * @type {number}
+   */
+  foo;
+  /**
+   * @private
+   * @type {string}
+   */
+  bar;
+}
+
+// Equivalent TypeScript
+class Example {
+  public foo: number;
+  private bar: string;
+}
+```
+
 ### Typing `this`
 
-TypeScript enables you to type the `this` argument for a function:
+TypeScript enables you to type the `this` argument for a function or method:
 
 ```tsx
 interface Context {
@@ -614,7 +637,13 @@ All of your normal `@ts-*` comments, such as `@ts-ignore`, work as expected:
 let x = 5;
 ```
 
-## Configuring JSDoc
+## Practical matters
+
+We've now gone through all the major (in my opinion) TypeScript-related features in JSDoc. They should cover the vast majority of TypeScript features you'll ever need in JSDoc.
+
+We'll now cover some practical things to know if you intend to use JSDoc with TypeScript.
+
+### Enable `checkJs`
 
 As we've seen, type annotations in JSDoc comments are used as type information in `.js` files.
 
@@ -630,18 +659,20 @@ log(12);
     // @error {w=2} Argument of type 'number' is not assignable to parameter of type 'string'.
 ```
 
-However, `checkJs` needs to be enabled in your `tsconfig.json` for type errors to be emitted. If you don't enable `checkJs`, your JSDoc comments will only be used for IDE annotations — not type checking. Be sure to enable it!
+However, `checkJs` needs to be enabled in your `tsconfig.json` for type errors to be emitted. If you don't enable `checkJs`, your JSDoc comments will only be used for IDE annotations—not type checking. Be sure to enable it!
 
-## TypeScript interop
+### TypeScript interop
 
-If you type a function in a `.js` module using JSDoc, you can import that function in a `.ts` module without any issues. This also works the other way: you can import from `.ts` modules and use them in `.js` modules.
+If you type a function using JSDoc in a `.js` module, you can import that function in a `.ts` module without any issues. This also works the other way: you can import things from `.ts` modules and use them in `.js` modules.
 
 Generally, interop between `.js` modules using JSDoc and `.ts` modules "just works".
 
-However, you can't use JSDoc for type annotations in `.ts` modules. This can make migrating from JSDoc to TypeScript a bit frustrating, especially for larger modules.
+### JSDoc does not work in TypeScript modules
+
+You can't use JSDoc for type annotations in `.ts` modules. This can make migrating from JSDoc to TypeScript a bit frustrating, especially for larger modules.
 
 ## Conclusion
 
-I worked in a JSDoc codebase for a significant amount of time, and have gone through the process of migrating a lot of that codebase to TypeScript. JSDoc has flaws, such as its clunky and verbose syntax, but it's still a perfectly viable way to go about typing your codebase.
+I worked in a JSDoc codebase for a significant amount of time, and have gone through the process of migrating a lot of that codebase to TypeScript. JSDoc definitely has flaws, such as its clunky and verbose syntax, but it's still a perfectly viable way to go about typing your codebase.
 
 If you're not able to use TypeScript for some reason, then consider giving JSDoc a shot. It's better than no types.

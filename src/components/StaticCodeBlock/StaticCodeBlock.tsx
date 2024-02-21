@@ -139,7 +139,7 @@ interface Token {
 }
 
 const jsDocRegex =
-  /^(?<pre>\s*(\*|\/)+\s*)(?<keyword>@[a-z]+)(\s{(?<typeExpr>.*)})?(\s(?<name>[a-z\.]+))?(?<post>.*)/i;
+  /^(?<pre>\s*(\*|\/)+\s*)(?<keyword>@[a-z\-]+)(\s{(?<typeExpr>.*)})?(\s(?<name>\[?[a-z\.]+\]?))?(?<post>.*)/i;
 
 const JSDocLine = (props: TokenProps) => {
   const { token, getTokenProps } = props;
