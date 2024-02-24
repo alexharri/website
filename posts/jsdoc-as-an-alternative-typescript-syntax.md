@@ -41,7 +41,7 @@ let b; // Doesn't work
 let c; // Doesn't work
 
 /** @type {number} */
-let c; // Works!
+let d; // Works!
 ```
 
 The majority of your JSDoc block tags will be used for typing variables, arguments, and return types. The block tags for those are `@type`, `@param`, and `@returns`.
