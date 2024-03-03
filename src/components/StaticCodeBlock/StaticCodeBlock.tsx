@@ -7,6 +7,20 @@ import { squiggleIcon10x7Base64Blue, squiggleIcon10x7Base64Red } from "../Icon/S
 import { useStyles } from "../../utils/styles";
 import { StaticCodeBlockStyles } from "./StaticCodeBlock.styles";
 import { colors } from "../../utils/cssVariables";
+import { TypeAnnotation } from "./TypeAnnotation";
+
+interface TypeAnnotation {
+  start: number;
+  end: number;
+  prefix: string;
+  type: string;
+}
+
+interface TypeAnnotations {
+  lines: Partial<{
+    [lineIndex: number]: TypeAnnotation[];
+  }>;
+}
 
 /**
  * A markdown code block like so:
@@ -196,10 +210,11 @@ const JSDocLine = (props: TokenProps) => {
 interface TokenProps {
   token: Token;
   getTokenProps: (options: { token: Token; key: number }) => any;
+  typeAnnotation?: TypeAnnotation | null;
 }
 
 const Token = (props: TokenProps) => {
-  const { token, getTokenProps } = props;
+  const { token, getTokenProps, typeAnnotation } = props;
   if (props.token.types.join(",") === "comment" && jsDocRegex.test(props.token.content)) {
     return <JSDocLine {...props} />;
   }
@@ -208,25 +223,43 @@ const Token = (props: TokenProps) => {
   if (typeof children === "string" && children.startsWith("//=>")) {
     children = (
       // I really don't like the //=> ligature in Fira Code
-      <span>
+      <>
         <span style={{ fontVariantLigatures: "none" }}>//</span>
         <span>{"=>"}</span>
         {children.slice(4)}
-      </span>
+      </>
     );
   }
-  return <span {...tokenProps} children={children} />;
+  let content = <span {...tokenProps} children={children} />;
+
+  if (typeAnnotation) {
+    return (
+      <TypeAnnotation type={typeAnnotation.type} prefix={typeAnnotation.prefix}>
+        {content}
+      </TypeAnnotation>
+    );
+  }
+
+  return content;
 };
 
 interface LineProps {
   line: Token[];
+  index: number;
   last: boolean;
   getLineProps: () => any;
   getTokenProps: (options: { token: Token; key: number }) => any;
+  typeAnnotations: TypeAnnotations;
+}
+
+function leadingSpaces(s: string) {
+  let i = 0;
+  for (; i < s.length && s[i] === " "; i++);
+  return i;
 }
 
 const Line = (props: LineProps) => {
-  const { line, getLineProps, getTokenProps } = props;
+  const { line, index, getLineProps, getTokenProps } = props;
   const content = line.map((token) => token.content).join("");
 
   for (const type of ["error", "info"] as const) {
@@ -261,15 +294,37 @@ const Line = (props: LineProps) => {
     }
   }
 
-  // if (jsDocRegex.test(content)) return <JSDocLine {...props} />;
-
   const isEmpty = content === "\n";
   if (props.last && isEmpty) return null;
+
+  const annotationByIndex: Partial<Record<number, TypeAnnotation>> = {};
+  for (const annotation of props.typeAnnotations.lines[index] || []) {
+    annotationByIndex[annotation.start] = annotation;
+  }
+
+  const typeAnnotations: Array<TypeAnnotation | null> = [];
+  let tokenIndex = 0;
+  for (const token of line) {
+    const adjustedIndex = tokenIndex + leadingSpaces(token.content);
+    typeAnnotations.push(
+      token.content.length > 0 ? annotationByIndex[adjustedIndex] || null : null,
+    );
+    tokenIndex += token.content.length;
+  }
+
   return (
     <div {...getLineProps()}>
-      {line.map((token, key) => (
-        <Token token={token} getTokenProps={getTokenProps} key={key} />
-      ))}
+      {line.map((token, i) => {
+        const typeAnnotation = typeAnnotations[i];
+        return (
+          <Token
+            token={token}
+            getTokenProps={getTokenProps}
+            typeAnnotation={typeAnnotation}
+            key={i}
+          />
+        );
+      })}
     </div>
   );
 };
@@ -277,7 +332,17 @@ const Line = (props: LineProps) => {
 export const StaticCodeBlock = (props: StaticCodeBlockProps) => {
   const s = useStyles(StaticCodeBlockStyles);
 
-  const { language, children, marginBottom, small, noFlowOutside } = props;
+  const { language, marginBottom, small, noFlowOutside } = props;
+  let { children } = props;
+
+  const lines = children.trim().split("\n");
+  let typeAnnotations: TypeAnnotations = { lines: {} };
+  const typeAnnotationMarker = "// @type_annotations ";
+  if (lines[lines.length - 1].startsWith(typeAnnotationMarker)) {
+    const typeAnnotationsStr = lines.splice(lines.length - 1, 1)[0].split(typeAnnotationMarker)[1];
+    typeAnnotations = JSON.parse(typeAnnotationsStr.replaceAll("/newline", "\n"));
+    children = lines.join("\n");
+  }
 
   const padding = small ? 16 : 24;
   const fontSize = small ? 14 : 16;
@@ -307,7 +372,9 @@ export const StaticCodeBlock = (props: StaticCodeBlockProps) => {
                       getLineProps={() => getLineProps({ line, key: i })}
                       getTokenProps={getTokenProps}
                       last={i === lines.length - 1}
+                      index={i}
                       line={line}
+                      typeAnnotations={typeAnnotations}
                     />
                   );
                 })}

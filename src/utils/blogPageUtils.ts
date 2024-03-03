@@ -4,6 +4,7 @@ import matter from "gray-matter";
 import { postFileNames, POSTS_PATH } from "./mdxUtils";
 import { GetStaticPropsContext } from "next";
 import { Post } from "../types/Post";
+import { injectTypeAnnotations } from "../ts/ts-util";
 
 export const getPosts = (type: "published" | "draft") => {
   const posts: Post[] = [];
@@ -95,7 +96,9 @@ export const getPostProps = async (ctx: GetStaticPropsContext<Params>) => {
 
   const fileContent = fs.readFileSync(filePath);
 
-  const { content, data } = matter(fileContent);
+  let { content, data } = matter(fileContent);
+
+  content = injectTypeAnnotations(content);
 
   const serialize = (await import("next-mdx-remote/serialize")).serialize;
   const source = await serialize(content, {
