@@ -19,6 +19,7 @@ import { SectionAnchor } from "../../components/SectionAnchor/SectionAnchor";
 import { formatDate } from "../../utils/formatDate";
 import { Note } from "../../components/Note/Note";
 import { PostLayout } from "../../components/PostLayout/PostLayout";
+import { Scene } from "../../threejs/scenes";
 
 // Custom components/renderers to pass to MDX.
 // Since the MDX files aren't loaded by webpack, they have no knowledge of how
@@ -50,6 +51,7 @@ const components = {
   // ExampleComponent: dynamic(() => import("../../src/components/ExampleComponent")),
   Head,
   Note,
+  Scene,
 };
 
 interface Props {

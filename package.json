@@ -15,6 +15,8 @@
     "@emotion/css": "^11.11.2",
     "@emotion/server": "^11.11.0",
     "@monaco-editor/react": "^4.4.6",
+    "@react-three/drei": "^9.101.0",
+    "@react-three/fiber": "^8.15.19",
     "@types/node": "18.11.9",
     "@types/react": "18.0.24",
     "@types/react-dom": "18.0.8",
@@ -28,10 +30,12 @@
     "react": "18.2.0",
     "react-dom": "18.2.0",
     "rss": "^1.2.2",
-    "sass": "^1.55.0"
+    "sass": "^1.55.0",
+    "three": "^0.162.0"
   },
   "devDependencies": {
     "@types/rss": "^0.0.32",
+    "@types/three": "^0.162.0",
     "monaco-editor-webpack-plugin": "^7.0.1",
     "next-transpile-modules": "^10.0.0",
     "prettier": "^2.8.0",
