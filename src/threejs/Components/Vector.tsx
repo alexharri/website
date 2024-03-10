@@ -1,37 +1,20 @@
 import { useMemo } from "react";
 import * as THREE from "three";
-import { MeshPhongMaterial, Quaternion, Vector3 } from "three";
-
-type IVector3 = { x: number; y: number; z: number } | [number, number, number];
-
-function makeVector(vec?: IVector3) {
-  if (!vec) return new Vector3(0, 0, 0);
-  if (Array.isArray(vec)) return new Vector3(vec[0], vec[1], vec[2]);
-  return new Vector3(vec.x, vec.y, vec.z);
-}
+import { Quaternion } from "three";
+import { getMaterial, IColor, IVector3, parseVector } from "../utils";
 
 let coneGeometry: THREE.ConeGeometry | null = null;
 let cylinderGeometry: THREE.CylinderGeometry | null = null;
 
-const colors = {
-  red: 0xff1919,
-  green: 0x15cf53,
-  blue: 0x1370f2,
-};
-
 interface Props {
   from?: IVector3;
   to: IVector3;
-  color?: number | "red" | "blue" | "green";
+  color: IColor;
 }
 
 export const Vector: React.FC<Props> = (props) => {
-  let { color } = props;
-
-  if (typeof color === "string") color = colors[color];
-
-  const from = makeVector(props.from);
-  const to = makeVector(props.to);
+  const from = parseVector(props.from);
+  const to = parseVector(props.to);
 
   const distance = useMemo(() => to.distanceTo(from), []);
   const half = useMemo(() => to.clone().sub(from).multiplyScalar(0.5), []);
@@ -45,7 +28,7 @@ export const Vector: React.FC<Props> = (props) => {
     [],
   );
 
-  const material = useMemo(() => new MeshPhongMaterial({ color }), []);
+  const material = getMaterial(props.color);
 
   return (
     <>
