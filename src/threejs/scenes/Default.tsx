@@ -5,7 +5,9 @@ import { createScene } from "../createScene";
 export default createScene(() => {
   return (
     <>
-      <Vector to={[1, 1, 0]} />
+      <Vector to={[1, 0, 0]} color="red" />
+      <Vector to={[0, 1, 0]} color="green" />
+      <Vector to={[0, 0, 1]} color="blue" />
       <Grid size={10} />
     </>
   );
