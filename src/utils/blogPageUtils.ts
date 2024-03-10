@@ -98,7 +98,7 @@ export const getPostProps = async (ctx: GetStaticPropsContext<Params>) => {
 
   let { content, data } = matter(fileContent);
 
-  content = injectTypeAnnotations(content);
+  content = await injectTypeAnnotations(content);
 
   const serialize = (await import("next-mdx-remote/serialize")).serialize;
   const source = await serialize(content, {

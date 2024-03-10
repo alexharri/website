@@ -1,5 +1,5 @@
 import Highlight, { defaultProps } from "prism-react-renderer";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { useIsomorphicLayoutEffect } from "../../utils/hooks/useIsomorphicLayoutEffect";
 import { useStyles } from "../../utils/styles";
@@ -7,7 +7,6 @@ import { prismTheme } from "./prismTheme";
 import { TypeAnnotationStyles } from "./TypeAnnotation.styles";
 
 interface Props {
-  prefix: string;
   type: string;
   children: React.ReactNode;
 }
@@ -50,20 +49,14 @@ export const TypeAnnotation: React.FC<Props> = (props) => {
       {hover &&
         createPortal(
           <div ref={popupRef} className={s("popup")} {...hoverProps}>
-            <Highlight
-              {...defaultProps}
-              code={(props.prefix || "type _TYPE_=") + props.type}
-              language="typescript"
-              theme={prismTheme}
-            >
+            <Highlight {...defaultProps} code={props.type} language="typescript" theme={prismTheme}>
               {({ className, style, tokens: lines, getLineProps, getTokenProps }) => (
                 <pre className={[className, s("pre")].join(" ")} style={{ ...style, fontSize: 16 }}>
                   {lines.map((line, i) => {
-                    const offset = props.prefix ? 0 : 4;
                     return (
                       <div {...getLineProps({ line, key: i })}>
-                        {line.slice(offset).map((token, i) => (
-                          <span {...getTokenProps({ token, i: i + offset })} key={i + offset} />
+                        {line.map((token, i) => (
+                          <span {...getTokenProps({ token, i })} key={i} />
                         ))}
                       </div>
                     );

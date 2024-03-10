@@ -12,7 +12,6 @@ import { TypeAnnotation } from "./TypeAnnotation";
 interface TypeAnnotation {
   start: number;
   end: number;
-  prefix: string;
   type: string;
 }
 
@@ -233,11 +232,7 @@ const Token = (props: TokenProps) => {
   let content = <span {...tokenProps} children={children} />;
 
   if (typeAnnotation) {
-    return (
-      <TypeAnnotation type={typeAnnotation.type} prefix={typeAnnotation.prefix}>
-        {content}
-      </TypeAnnotation>
-    );
+    return <TypeAnnotation type={typeAnnotation.type}>{content}</TypeAnnotation>;
   }
 
   return content;
