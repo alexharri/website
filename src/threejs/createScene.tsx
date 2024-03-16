@@ -12,13 +12,13 @@ export const createScene = (Component: React.FC<SceneProps>) => () => {
 
   const camera = useMemo(() => {
     const camera = new THREE.PerspectiveCamera(40);
-    camera.position.set(0, 5, -10);
+    camera.position.set(0, 7.5, -15);
     return camera;
   }, []);
 
   return (
     <Canvas
-      style={{ height: 300, userSelect: "none", cursor: down ? "grabbing" : "grab" }}
+      style={{ height: 500, userSelect: "none", cursor: down ? "grabbing" : "grab" }}
       camera={camera}
       onMouseDown={() => setDown(true)}
       onMouseUp={() => setDown(false)}

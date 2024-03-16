@@ -16,9 +16,9 @@ export const Vector: React.FC<Props> = (props) => {
   const from = parseVector(props.from);
   const to = parseVector(props.to);
 
-  const distance = useMemo(() => to.distanceTo(from), []);
-  const half = useMemo(() => to.clone().sub(from).multiplyScalar(0.5), []);
-  const normal = useMemo(() => half.clone().normalize(), []);
+  const distance = to.distanceTo(from);
+  const half = to.clone().add(from).multiplyScalar(0.5);
+  const normal = half.clone().normalize();
 
   coneGeometry ||= new THREE.ConeGeometry(0.15, 0.3, 20);
   cylinderGeometry ||= new THREE.CylinderGeometry(0.05, 0.05, 1, 20);
