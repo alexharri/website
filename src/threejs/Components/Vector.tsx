@@ -6,21 +6,27 @@ import { getMaterial, IColor, IVector3, parseVector } from "../utils";
 let coneGeometry: THREE.ConeGeometry | null = null;
 let cylinderGeometry: THREE.CylinderGeometry | null = null;
 
+const CONE_HEIGHT = 0.3;
+
 interface Props {
   from?: IVector3;
   to: IVector3;
   color: IColor;
+  strictEnd?: boolean;
 }
 
 export const Vector: React.FC<Props> = (props) => {
   const from = parseVector(props.from);
-  const to = parseVector(props.to);
+  let to = parseVector(props.to);
 
-  const distance = to.distanceTo(from);
-  const half = to.clone().add(from).multiplyScalar(0.5);
-  const normal = half.clone().normalize();
+  const normal = to.clone().sub(from).normalize();
 
-  coneGeometry ||= new THREE.ConeGeometry(0.15, 0.3, 20);
+  if (props.strictEnd) to.sub(normal.clone().multiplyScalar(CONE_HEIGHT / 2));
+
+  let distance = to.distanceTo(from);
+  let half = to.clone().add(from).multiplyScalar(0.5);
+
+  coneGeometry ||= new THREE.ConeGeometry(0.15, CONE_HEIGHT, 20);
   cylinderGeometry ||= new THREE.CylinderGeometry(0.05, 0.05, 1, 20);
 
   const quat = useMemo(

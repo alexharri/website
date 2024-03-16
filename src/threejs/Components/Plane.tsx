@@ -10,10 +10,11 @@ interface Props {
   color: IColor;
   showCenter?: boolean;
   showNormal?: boolean;
+  showOriginLine?: boolean;
 }
 
 export const Plane: React.FC<Props> = (props) => {
-  const { showCenter, showNormal } = props;
+  const { showCenter, showNormal, showOriginLine } = props;
 
   const normal = parseVector(props.normal);
   const planePosition = normal.multiplyScalar(props.distance);
@@ -51,6 +52,7 @@ export const Plane: React.FC<Props> = (props) => {
       {showNormal && (
         <Vector color={props.color} from={planePosition} to={planePosition.clone().add(normal)} />
       )}
+      {showOriginLine && <Vector color={props.color} to={planePosition} strictEnd />}
       <mesh
         geometry={planeGeometry}
         position={planePosition}
