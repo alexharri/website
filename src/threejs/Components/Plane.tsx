@@ -1,4 +1,4 @@
-import { BoxGeometry, CylinderGeometry, Euler, Mesh, MeshBasicMaterial } from "three";
+import { BoxGeometry, CylinderGeometry, Euler, Mesh, MeshPhysicalMaterial } from "three";
 import { getColor, getMaterial, IColor, IVector3, parseVector } from "../utils";
 import { Vector } from "./Vector";
 
@@ -6,7 +6,9 @@ let cylinderGeometry: CylinderGeometry | null = null;
 
 interface Props {
   normal: IVector3;
-  distance: number;
+  position?: IVector3;
+  width?: number;
+  distance?: number;
   color: IColor;
   showCenter?: boolean;
   showNormal?: boolean;
@@ -17,21 +19,26 @@ export const Plane: React.FC<Props> = (props) => {
   const { showCenter, showNormal, showOriginLine } = props;
 
   const normal = parseVector(props.normal);
-  const planePosition = normal.multiplyScalar(props.distance);
+  const planePosition = props.position
+    ? parseVector(props.position)
+    : normal.clone().multiplyScalar(props.distance ?? 0);
 
-  const W = 5;
+  const W = props.width ?? 5;
   const HALF = W / 2;
 
   const mesh = new Mesh();
   mesh.lookAt(normal);
 
-  const planeGeometry = new BoxGeometry(W, W, 0.0001);
+  const planeGeometry = new BoxGeometry(W, W, 0.01);
 
   const color = getColor(props.color);
-  const planeMaterial = new MeshBasicMaterial({
+
+  const planeMaterial = new MeshPhysicalMaterial({
     color,
-    opacity: 0.5,
+    opacity: 0.35,
     transparent: true,
+    roughness: 0,
+    transmission: 1,
   });
 
   cylinderGeometry ||= new CylinderGeometry(0.015, 0.015, 1, 20);

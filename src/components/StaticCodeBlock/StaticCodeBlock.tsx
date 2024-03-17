@@ -1,4 +1,4 @@
-import Highlight, { defaultProps } from "prism-react-renderer";
+import Highlight, { defaultProps, Prism } from "prism-react-renderer";
 import { CopyIcon18 } from "../Icon/CopyIcon18";
 import { prismTheme } from "./prismTheme";
 import { copyTextToClipboard } from "../../utils/clipboard";
@@ -7,6 +7,10 @@ import { squiggleIcon10x7Base64Blue, squiggleIcon10x7Base64Red } from "../Icon/S
 import { useStyles } from "../../utils/styles";
 import { StaticCodeBlockStyles } from "./StaticCodeBlock.styles";
 import { colors } from "../../utils/cssVariables";
+
+// Add C# syntax highlighting
+(typeof global !== "undefined" ? global : (window as any)).Prism = Prism;
+require("prismjs/components/prism-csharp");
 
 /**
  * A markdown code block like so:

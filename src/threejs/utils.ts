@@ -10,6 +10,7 @@ export function parseVector(vec?: IVector3) {
 
 const colors = {
   red: 0xff1919,
+  darkred: 0xc20808,
   green: 0x15cf53,
   blue: 0x1370f2,
 } as const;
@@ -20,7 +21,9 @@ export function getColor(color: IColor): number {
   return color;
 }
 
+const materialCache: Partial<Record<number, MeshPhongMaterial>> = {};
+
 export function getMaterial(color: IColor) {
   if (typeof color === "string") color = colors[color];
-  return new MeshPhongMaterial({ color });
+  return (materialCache[color] ||= new MeshPhongMaterial({ color }));
 }
