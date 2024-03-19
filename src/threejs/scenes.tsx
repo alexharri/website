@@ -12,6 +12,8 @@ export const threeJsScenes: Partial<Record<string, React.ComponentType>> = {
   "three-points": dynamic(() => import("./scenes/three-points"), { loading }),
   "three-points-normal": dynamic(() => import("./scenes/three-points-normal"), { loading }),
   "three-points-plane": dynamic(() => import("./scenes/three-points-plane"), { loading }),
+  "plane-perpendicular": dynamic(() => import("./scenes/plane-perpendicular"), { loading }),
+  "constant-normal-form": dynamic(() => import("./scenes/constant-normal-form"), { loading }),
 };
 
 interface SceneProps {
@@ -23,6 +25,8 @@ export const Scene: React.FC<SceneProps> = (props) => {
   const { scene, height } = props;
   const containerRef = useRef<HTMLDivElement>(null);
   const visible = useVisible(containerRef);
+
+  console.log(props);
 
   if (typeof height !== "number") throw new Error("'height' is a required prop for <Scene>");
   const S = threeJsScenes[scene];

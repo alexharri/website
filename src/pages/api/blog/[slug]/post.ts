@@ -4,11 +4,9 @@ import path from "path";
 import { POSTS_PATH } from "../../../../utils/mdxUtils";
 import matter from "gray-matter";
 import { serialize } from "next-mdx-remote/serialize";
+import { getMdxOptions } from "../../../../utils/mdx";
 
-export default async function getPost(
-  req: NextApiRequest,
-  res: NextApiResponse
-) {
+export default async function getPost(req: NextApiRequest, res: NextApiResponse) {
   const slug = req.query.slug as string;
 
   let fileContent: string | undefined;
@@ -29,10 +27,7 @@ export default async function getPost(
 
   const source = await serialize(content, {
     scope: data,
-    mdxOptions: {
-      remarkPlugins: [],
-      rehypePlugins: [],
-    },
+    mdxOptions: await getMdxOptions(),
   });
 
   res.status(200).json({ source });

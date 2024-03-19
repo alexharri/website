@@ -12,9 +12,9 @@ export default createScene(() => {
 
   return (
     <>
-      <Vector color="red" from={from} to={to} />
-      <Point color="red" position={from} />
-      <Plane color="red" position={from} normal={normal} />
+      <Vector color="blue" from={from} to={to} />
+      <Point color="blue" position={from} />
+      <Plane color="blue" position={from} normal={normal} />
       <Grid size={10} />
     </>
   );

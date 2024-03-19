@@ -11,8 +11,8 @@ export default createScene(() => {
 
   return (
     <>
-      <Vector color="red" from={from} to={to} />
-      <Point color="red" position={from} />
+      <Vector color="blue" from={from} to={to} />
+      <Point color="blue" position={from} />
       <Grid size={10} />
     </>
   );

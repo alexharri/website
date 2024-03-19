@@ -28,9 +28,9 @@ export default createScene(() => {
   return (
     <>
       {points.map((p, i) => (
-        <Point key={i} color="red" position={p} />
+        <Point key={i} color="blue" position={p} />
       ))}
-      <Plane position={avg} normal={normal} color="red" width={7} />
+      <Plane position={avg} normal={normal} color="blue" width={7} />
       <Grid size={10} />
     </>
   );

@@ -29,11 +29,11 @@ export default createScene(() => {
   return (
     <>
       {points.map((p, i) => (
-        <Point key={i} color="red" position={p} />
+        <Point key={i} color="blue" position={p} />
       ))}
       <Vector color="red" from={avg} to={avg.clone().add(normal)} />
       <Vector color="blue" from={avg} to={avg.clone().add(normal.clone().multiplyScalar(-1))} />
-      <Triangle points={points} color="red" />
+      <Triangle points={points} color="blue" />
       <Grid size={10} />
     </>
   );

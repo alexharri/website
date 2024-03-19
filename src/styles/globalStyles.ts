@@ -220,4 +220,12 @@ blockquote {
     box-sizing: content-box;
   }
 }
+
+mjx-container svg {
+  overflow: visible;
+}
+
+[data-varlabel] {
+  display: none;
+}
 `;

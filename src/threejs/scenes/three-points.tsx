@@ -13,13 +13,10 @@ export default createScene(() => {
   return (
     <>
       {points.map((p, i) => (
-        <Point key={i} color="red" position={p} />
+        <Point key={i} color="blue" position={p} />
       ))}
-      <Triangle points={points} color="red" />
+      <Triangle points={points} color="blue" />
       <Grid size={10} />
     </>
   );
 });
-// var dir = Vector3.Cross(b - a, c - a);
-//             var norm = Vector3.Normalize(dir);
-//             return norm;
