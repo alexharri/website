@@ -1,7 +1,7 @@
 import { useMemo } from "react";
 import * as THREE from "three";
 import { Quaternion } from "three";
-import { getMaterial, IColor, IVector3, parseVector } from "../utils";
+import { getBasicMaterial, getPhongMaterial, IColor, IVector3, parseVector } from "../utils";
 import { Line } from "./Line";
 
 let coneGeometry: THREE.ConeGeometry | null = null;
@@ -13,6 +13,7 @@ interface Props {
   to: IVector3;
   color: IColor;
   strictEnd?: boolean;
+  basicMaterial?: boolean;
 }
 
 export const Vector: React.FC<Props> = (props) => {
@@ -27,17 +28,19 @@ export const Vector: React.FC<Props> = (props) => {
 
   const quaternion = useMemo(
     () => new Quaternion().setFromUnitVectors(new THREE.Vector3(0, 1, 0), normal),
-    [],
+    [normal],
   );
 
   return (
     <>
-      <Line from={from} to={to} color={props.color} />
+      <Line from={from} to={to} color={props.color} basicMaterial={props.basicMaterial} />
       <mesh
         geometry={coneGeometry}
         quaternion={quaternion}
         position={to}
-        material={getMaterial(props.color)}
+        material={
+          props.basicMaterial ? getBasicMaterial(props.color) : getPhongMaterial(props.color)
+        }
       />
     </>
   );

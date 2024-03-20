@@ -1,5 +1,5 @@
 import { BoxGeometry, CylinderGeometry, Euler, Mesh, MeshPhysicalMaterial } from "three";
-import { getColor, getMaterial, IColor, IVector3, parseVector } from "../utils";
+import { getColor, getPhongMaterial, IColor, IVector3, parseVector } from "../utils";
 import { Vector } from "./Vector";
 
 let cylinderGeometry: CylinderGeometry | null = null;
@@ -42,7 +42,7 @@ export const Plane: React.FC<Props> = (props) => {
   });
 
   cylinderGeometry ||= new CylinderGeometry(0.015, 0.015, 1, 20);
-  const lineMaterial = getMaterial(color);
+  const lineMaterial = getPhongMaterial(color);
 
   const boxGeometry = new BoxGeometry(0.1, 0.1, 0.1);
 
@@ -51,7 +51,7 @@ export const Plane: React.FC<Props> = (props) => {
       {showCenter && (
         <mesh
           geometry={boxGeometry}
-          material={getMaterial(color)}
+          material={getPhongMaterial(color)}
           position={planePosition}
           quaternion={mesh.quaternion}
         />

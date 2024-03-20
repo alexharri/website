@@ -1,4 +1,4 @@
-import { MeshPhongMaterial, Vector3 } from "three";
+import { MeshBasicMaterial, MeshPhongMaterial, Vector3 } from "three";
 
 export type IVector3 = { x: number; y: number; z: number } | [number, number, number];
 
@@ -21,9 +21,16 @@ export function getColor(color: IColor): number {
   return color;
 }
 
-const materialCache: Partial<Record<number, MeshPhongMaterial>> = {};
+const phongMaterialCache: Partial<Record<number, MeshPhongMaterial>> = {};
 
-export function getMaterial(color: IColor) {
+export function getPhongMaterial(color: IColor) {
   if (typeof color === "string") color = colors[color];
-  return (materialCache[color] ||= new MeshPhongMaterial({ color }));
+  return (phongMaterialCache[color] ||= new MeshPhongMaterial({ color }));
+}
+
+const basicMaterialCache: Partial<Record<number, MeshBasicMaterial>> = {};
+
+export function getBasicMaterial(color: IColor) {
+  if (typeof color === "string") color = colors[color];
+  return (basicMaterialCache[color] ||= new MeshBasicMaterial({ color }));
 }

@@ -1,7 +1,7 @@
 import { useMemo } from "react";
 import * as THREE from "three";
 import { Quaternion } from "three";
-import { getMaterial, IColor, IVector3, parseVector } from "../utils";
+import { getBasicMaterial, getPhongMaterial, IColor, IVector3, parseVector } from "../utils";
 
 interface Props {
   from: IVector3;
@@ -9,6 +9,7 @@ interface Props {
   color: IColor;
   radius?: number;
   thin?: boolean;
+  basicMaterial?: boolean;
 }
 
 export const Line: React.FC<Props> = (props) => {
@@ -34,7 +35,7 @@ export const Line: React.FC<Props> = (props) => {
   return (
     <mesh
       geometry={cylinderGeometry}
-      material={getMaterial(props.color)}
+      material={props.basicMaterial ? getBasicMaterial(props.color) : getPhongMaterial(props.color)}
       position={half}
       quaternion={quaternion}
       scale={[1, distance, 1]}

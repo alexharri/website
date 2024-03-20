@@ -1,5 +1,5 @@
 import { SphereGeometry } from "three";
-import { getMaterial, IColor, IVector3, parseVector } from "../utils";
+import { getPhongMaterial, IColor, IVector3, parseVector } from "../utils";
 
 interface Props {
   position: IVector3;
@@ -9,6 +9,6 @@ interface Props {
 export const Point: React.FC<Props> = (props) => {
   const radius = 0.1;
   const geometry = new SphereGeometry(radius, 10, 10);
-  const material = getMaterial(props.color);
+  const material = getPhongMaterial(props.color);
   return <mesh geometry={geometry} material={material} position={parseVector(props.position)} />;
 };

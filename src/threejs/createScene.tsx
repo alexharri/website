@@ -1,16 +1,18 @@
-import React, { useMemo, useState } from "react";
+import React, { useLayoutEffect, useMemo, useRef, useState } from "react";
 import { Canvas } from "@react-three/fiber";
 import { OrbitControls } from "@react-three/drei";
 import * as THREE from "three";
 import { Vector3 } from "three";
-import { NumberVariable, NumberVariableSpec } from "./Variable";
+import { NormalVariable, NumberVariable, NumberVariableSpec } from "./Variable";
 import { StyleOptions, useStyles } from "../utils/styles";
+import { useDidUpdate } from "../utils/hooks/useDidUpdate";
 
-const styles = ({ styled, theme }: StyleOptions) => ({
+const styles = ({ styled }: StyleOptions) => ({
   variablesWrapper: styled.css`
     display: flex;
     justify-content: center;
     gap: 16px;
+    overflow: hidden;
   `,
 });
 
@@ -43,7 +45,9 @@ export function createScene<V extends VariablesOptions>(
   Component: React.FC<SceneProps<V>>,
   options: Options<V> = {},
 ) {
-  return () => {
+  return ({ onLoad }: { onLoad: () => void }) => {
+    useLayoutEffect(onLoad, []);
+
     const s = useStyles(styles);
 
     const [down, setDown] = useState(false);
@@ -64,6 +68,15 @@ export function createScene<V extends VariablesOptions>(
         return obj;
       }, {} as Variables<V>),
     );
+
+    const [rotate, setRotate] = useState(false);
+
+    const timeoutRef = useRef<number>();
+    useDidUpdate(() => {
+      window.clearTimeout(timeoutRef.current);
+      setRotate(false);
+      timeoutRef.current = window.setTimeout(() => setRotate(true), 500);
+    }, [variables]);
 
     const setVariableValue = (key: string, value: unknown) => {
       setVariables((obj) => ({ ...obj, [key]: value }));
@@ -87,7 +100,13 @@ export function createScene<V extends VariablesOptions>(
           />
           <pointLight position={[-10, -10, -10]} decay={0} intensity={Math.PI} />
 
-          <OrbitControls rotateSpeed={0.3} autoRotate enablePan={false} enableZoom={false} />
+          <OrbitControls
+            rotateSpeed={0.3}
+            enableRotate={rotate}
+            autoRotate={false}
+            enablePan={false}
+            enableZoom={false}
+          />
 
           <Component camera={camera} variables={variables} />
         </Canvas>
@@ -106,7 +125,17 @@ export function createScene<V extends VariablesOptions>(
                   spec={spec}
                 />
               );
-
+            if (spec.type === "normal") {
+              return (
+                <NormalVariable
+                  key={key}
+                  dataKey={key}
+                  value={value}
+                  onValueChange={(value) => setVariableValue(key, value)}
+                  spec={spec}
+                />
+              );
+            }
             return null;
           })}
         </div>
