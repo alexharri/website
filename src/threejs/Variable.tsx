@@ -1,7 +1,7 @@
 import { Cone, Sphere, Torus } from "@react-three/drei";
 import { Canvas } from "@react-three/fiber";
-import { useMemo, useRef } from "react";
-import { Euler, Matrix4, PerspectiveCamera, Vector3 } from "three";
+import { useEffect, useMemo, useRef } from "react";
+import { Matrix4, Mesh, PerspectiveCamera, Vector3, Camera } from "three";
 import { StyleOptions, useStyles } from "../utils/styles";
 import { Line } from "./Components/Line";
 import { getBasicMaterial } from "./utils";
@@ -82,10 +82,24 @@ interface NormalVariableProps {
   value: Vector3;
   onValueChange: (value: Vector3) => void;
   spec: NormalVariableSpec;
+  visible: boolean;
+  addRotationCallback: (callback: (rotation: Camera) => void) => void;
+  removeRotationCallback: (callback: (rotation: Camera) => void) => void;
+}
+
+function parseHAngle(normal: Vector3) {
+  const horizontal = normal.clone();
+  horizontal.y = 0;
+  let out = new Vector3(0, 0, 1).angleTo(horizontal);
+  if (normal.x < 0) out *= -1;
+  return out;
+}
+function parseVAngle(normal: Vector3) {
+  return new Vector3(0, 1, 0).angleTo(normal);
 }
 
 export const NormalVariable: React.FC<NormalVariableProps> = (props) => {
-  const { dataKey, spec, value, onValueChange } = props;
+  const { dataKey, spec, value, onValueChange, visible } = props;
 
   const s = useStyles(styles);
 
@@ -98,15 +112,8 @@ export const NormalVariable: React.FC<NormalVariableProps> = (props) => {
 
   const hAngleRef = useRef(NaN);
   const vAngleRef = useRef(NaN);
-  if (Number.isNaN(hAngleRef.current)) {
-    const horizontal = value.clone();
-    horizontal.y = 0;
-    hAngleRef.current = new Vector3(0, 0, 1).angleTo(horizontal);
-    if (value.x < 0) hAngleRef.current *= -1;
-  }
-  if (Number.isNaN(vAngleRef.current)) {
-    vAngleRef.current = new Vector3(0, 1, 0).angleTo(value);
-  }
+  if (Number.isNaN(hAngleRef.current)) hAngleRef.current = parseHAngle(value);
+  if (Number.isNaN(vAngleRef.current)) vAngleRef.current = parseVAngle(value);
 
   const onMouseDown = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -120,8 +127,11 @@ export const NormalVariable: React.FC<NormalVariableProps> = (props) => {
       const x = e.clientX - startX;
       const y = e.clientY - startY;
 
-      hAngleRef.current = hAngle + x / 100;
-      vAngleRef.current = vAngle + y / 100;
+      hAngleRef.current = hAngle - x / 100;
+      vAngleRef.current = vAngle + y / 170;
+
+      const epsilon = 0.00001;
+      vAngleRef.current = Math.max(epsilon, Math.min(Math.PI - epsilon, vAngleRef.current));
 
       const ry = new Matrix4().makeRotationX(vAngleRef.current);
       const rx = new Matrix4().makeRotationY(hAngleRef.current);
@@ -137,14 +147,34 @@ export const NormalVariable: React.FC<NormalVariableProps> = (props) => {
     window.addEventListener("mouseup", onMouseUp);
   };
 
-  const euler = new Euler(Math.PI / 2 - vAngleRef.current, hAngleRef.current, 0, "YXZ");
-
   const camera = useMemo(() => {
-    const camera = new PerspectiveCamera(30);
-    camera.position.set(0, 0, 11);
+    const camera = new PerspectiveCamera(35);
+    camera.position.set(0, 0, 9);
     camera.lookAt(new Vector3(0, 0, 0));
     return camera;
   }, []);
+
+  const meshRef = useRef<Mesh>(null);
+
+  useEffect(() => {
+    const callback = (_camera: Camera) => {
+      const mesh = meshRef.current;
+      if (!mesh) return;
+
+      const scalar = camera.position.length() / _camera.position.length();
+      const nextPos = _camera.position.clone().multiplyScalar(scalar);
+      camera.position.set(nextPos.x, nextPos.y, nextPos.z);
+      camera.lookAt(0, 0, 0);
+    };
+    props.addRotationCallback(callback);
+    return () => {
+      props.removeRotationCallback(callback);
+    };
+  }, []);
+
+  const TORUS_R = 1.8;
+  const TORUS_OFF = 0.05;
+  const TORUS_W = 0.05;
 
   return (
     <label>
@@ -155,27 +185,33 @@ export const NormalVariable: React.FC<NormalVariableProps> = (props) => {
       )}
       <div className={s("normal")} onMouseDown={onMouseDown}>
         <Canvas style={{ width: 100, height: 100 }} camera={camera}>
-          <mesh rotation={euler}>
-            <Cone
-              args={[0.3, 0.5, 10]}
-              position={[0, 0, -2.5]}
-              material={getBasicMaterial("red")}
-              rotation={[-Math.PI / 2, 0, 0]}
-            />
-            <Line from={[0, 0, 0]} to={[0, 0, -2.5]} radius={0.1} color="red" basicMaterial />
-            <Torus args={[2, 0.05]} material={getBasicMaterial(0x008000)} />
-            <Sphere material={getBasicMaterial("red")} args={[0.14]} />
-            <Torus
-              args={[1.95, 0.05]}
-              material={getBasicMaterial(0x990000)}
-              rotation={[0, Math.PI / 2, 0]}
-            />
-            <Torus
-              args={[1.9, 0.05]}
-              material={getBasicMaterial(0x0068ad)}
-              rotation={[Math.PI / 2, 0, 0]}
-            />
-          </mesh>
+          {visible && (
+            <mesh ref={meshRef}>
+              <mesh
+                rotation={[Math.PI / 2 - vAngleRef.current, hAngleRef.current + Math.PI, 0, "YXZ"]}
+              >
+                <Cone
+                  args={[0.3, 0.5, 10]}
+                  position={[0, 0, -2.5]}
+                  material={getBasicMaterial("red")}
+                  rotation={[-Math.PI / 2, 0, 0]}
+                />
+                <Line from={[0, 0, 0]} to={[0, 0, -2.5]} radius={0.1} color="red" basicMaterial />
+                <Torus args={[TORUS_R, TORUS_W]} material={getBasicMaterial(0x008000)} />
+                <Sphere material={getBasicMaterial("red")} args={[0.14]} />
+                <Torus
+                  args={[TORUS_R - TORUS_OFF, TORUS_W]}
+                  material={getBasicMaterial(0x990000)}
+                  rotation={[0, Math.PI / 2, 0]}
+                />
+                <Torus
+                  args={[TORUS_R - TORUS_OFF * 2, TORUS_W]}
+                  material={getBasicMaterial(0x0068ad)}
+                  rotation={[Math.PI / 2, 0, 0]}
+                />
+              </mesh>
+            </mesh>
+          )}
         </Canvas>
       </div>
     </label>

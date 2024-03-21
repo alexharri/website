@@ -1,11 +1,19 @@
 import dynamic from "next/dynamic";
 import { useRef, useState } from "react";
+import { useMounted } from "../utils/hooks/useMounted";
 import { useVisible } from "../utils/hooks/useVisible";
 
 const loading = () => <p>Loading</p>;
 
+interface SceneProps {
+  visible: boolean;
+  onLoad: () => void;
+  height: number;
+  yOffset?: number;
+}
+
 // prettier-ignore
-export const threeJsScenes: Partial<Record<string, React.ComponentType<{ onLoad: () => void }>>> = {
+export const threeJsScenes: Partial<Record<string, React.ComponentType<SceneProps>>> = {
   "what-is-a-plane": dynamic(() => import("./scenes/what-is-a-plane"), { loading }),
   "point-and-normal": dynamic(() => import("./scenes/point-and-normal"), { loading }),
   "point-and-normal-with-plane": dynamic(() => import("./scenes/point-and-normal-with-plane"), { loading }),
@@ -16,15 +24,17 @@ export const threeJsScenes: Partial<Record<string, React.ComponentType<{ onLoad:
   "constant-normal-form": dynamic(() => import("./scenes/constant-normal-form"), { loading }),
 };
 
-interface SceneProps {
+interface Props {
   scene: string;
   height: number;
+  yOffset?: number;
 }
 
-export const Scene: React.FC<SceneProps> = (props) => {
-  const { scene, height } = props;
+export const Scene: React.FC<Props> = (props) => {
+  const { scene, height, yOffset } = props;
   const containerRef = useRef<HTMLDivElement>(null);
   const visible = useVisible(containerRef);
+  const mounted = useMounted();
 
   const [loaded, setLoaded] = useState(false);
 
@@ -33,8 +43,10 @@ export const Scene: React.FC<SceneProps> = (props) => {
   if (!S) throw new Error(`No such scene '${scene}'`);
 
   return (
-    <div ref={containerRef} style={loaded ? {} : { height }}>
-      {visible && <S onLoad={() => setLoaded(true)} />}
+    <div ref={containerRef} style={loaded ? {} : { height }} className="scene">
+      {mounted && (
+        <S visible={visible} onLoad={() => setLoaded(true)} height={height} yOffset={yOffset} />
+      )}
     </div>
   );
 };
