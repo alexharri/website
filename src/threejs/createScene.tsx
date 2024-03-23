@@ -32,6 +32,7 @@ const styles = ({ styled, theme }: StyleOptions) => ({
     right: 0;
     height: 80px;
     background: linear-gradient(${theme.background}, rgba(${theme.backgroundRgb}, 0));
+    pointer-events: none;
 
     &--upper {
       top: 0;

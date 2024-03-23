@@ -99,20 +99,40 @@ bool IsPointOnPlane(Plane plane, Vector3 x) {
 ```
 </Section> */}
 
-Now that we've learned about the point-normal form of planes, let's take a look at the better form.
-
 
 ## Constant-normal form
 
-We've covered the point-normal form of planes, and how we can find the point-normal form using three points in 3D space. This is great, but there's a better way to describe planes: using a normal $\vec{n}$ and a distance $d$.
+We've covered the point-normal form of planes, and how we can derive the point-normal from three points in 3D space.
 
-This looks like so:
+There's one form we've yet to cover, which is a more canonical way to describe planes: using a normal $\vec{n}$ and a distance $d$. This is called the _constant-normal form_ of a plane.
 
 <Scene scene="constant-normal-form" height={400} />
+
+In the constant-normal form, the distance $d$ denotes how close the plane gets to the origin. Thought of another way: multiplying the normal $\vec{n}$ by $d$ yields the point on the plane that's closest to the origin.
+
+This is still a bit abstract, so here's an example that demonstrates the relationship between the point-normal and constant-normal forms:
+
+<Scene scene="point-normal-and-constant-normal-form" height={400} />
+
+The green arrow represents $d$ times $\vec{n}$ from the constant-normal form, while the blue point and arrow represent the point $p$ and normal $\vec{n}$ from the point-normal form.
+
+Translating from the point-normal to the constant-normal form is very easy: the distance $d$ is the dot product of $\vec{n}$ and $p$.
+
+<p align="center">$$\vec{n} \cdot p = d$$</p>
+
+The normal $\vec{n}$ stays the same across both forms.
+
+I find the constant-normal form less natural to think about when compared to the point-normal form, but it simplifies many plane operations.
+
+
+
+
+
+
+
 
 {/** todo better system for this */}
 <span data-varlabel="d">$d$</span>
 <span data-varlabel="vec_n">$\vec{n}$</span>
 <span data-varlabel="n">$n$</span>
 
-Since the vector $p - x$ for any point $x$ on the plane is perpendicular to $n$, we can ask if a point is on the plane by checking if $\vec{n} \cdot (p - x) = 0$. If $x$ is not on the plane, then $\vec{n} \cdot (p - x) \neq 0$.

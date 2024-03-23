@@ -24,6 +24,7 @@ export const threeJsScenes: Partial<Record<string, React.ComponentType<SceneProp
   "three-points-plane": dynamic(() => import("./scenes/three-points-plane"), { loading }),
   "plane-perpendicular": dynamic(() => import("./scenes/plane-perpendicular"), { loading }),
   "constant-normal-form": dynamic(() => import("./scenes/constant-normal-form"), { loading }),
+  "point-normal-and-constant-normal-form": dynamic(() => import("./scenes/point-normal-and-constant-normal-form"), { loading }),
 };
 
 interface Props {
