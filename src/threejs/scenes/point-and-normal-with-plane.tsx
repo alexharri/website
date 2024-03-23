@@ -21,7 +21,7 @@ export default createScene(
   },
   {
     variables: {
-      normal: { type: "normal", value: parseVector([1, -1, 0.3]).normalize() },
+      normal: { label: "vec_n", type: "normal", value: parseVector([1, -1, 0.3]).normalize() },
     },
   },
 );

@@ -20,16 +20,16 @@ There are many ways to describe planes:
 
 Normals can be thought of as vectors representing a direction. A normal is just a vector with a magnitude (length) of 1, or more formally, a vector $\vec{n}$ where $|\vec{n}| = 1$.
 
-Let's look at the point and normal case first. Given a point in 3D space $\boldsymbol p$ and a normal $\boldsymbol n$:
+Let's look at the point and normal case first. Given a point in 3D space $\boldsymbol p$ and a normal $\boldsymbol{\vec{n}}$:
 
 <Scene scene="point-and-normal" height={300} yOffset={0.5} />
 
-<SmallNote center label="">The sphere represents the point $\boldsymbol p$ and the arrow represents the normal $\boldsymbol n$.</SmallNote>
+<SmallNote center label="">The sphere represents the point $\boldsymbol p$ and the arrow represents the normal $\boldsymbol{\vec{n}}$.</SmallNote>
 
 the plane can be described in terms of two constraints:
 
  1. The plane must intersect the point $\boldsymbol p$.
- 2. The plane must face in the same direction as the normal $\boldsymbol n$.
+ 2. The plane must be perpendicular to the normal $\boldsymbol{\vec{n}}$.
 
 <Scene scene="point-and-normal-with-plane" height={400} yOffset={0} />
 
@@ -37,20 +37,35 @@ This way of describing a plane—in terms of a point and a normal—is the [poin
 
 [point_normal_form]: https://en.wikipedia.org/wiki/Euclidean_planes_in_three-dimensional_space#Point%E2%80%93normal_form_and_general_form_of_the_equation_of_a_plane
 
-We can also describe a plane using three points in 3D space forming a triangle (i.e. not in a line). We'll call these points $a$, $b$, and $c$:
+We can also describe a plane using three points in 3D space forming a triangle. We'll call these points $a$, $b$, and $c$:
 
-<Scene scene="three-points" height={400} />
+<Scene scene="three-points" height={380} yOffset={-0.3} />
 
-We can find the triangle surface's direction $\vec{d}$ through the cross product of $b - a$ and $c - a$:
+Creating two edge vectors defined by $b - a$ and $c - a$ gives us two vectors that lie on the plane:
 
+<Scene scene="three-points-edge-vectors" height={380} yOffset={-0.3} />
+
+The cross product of two vectors yields a perpendicular vectors, which we can use to get a vector $\vec{d}$ that's perpendicular to the plane formed by the triangle.
 
 <p align="center">$$\vec{d} = (b - a) × (c - a)$$</p>
+
+<Scene scene="three-points-cross-product" height={400} yOffset={-0.3} />
+
+<SmallNote label="" center>$d$ has been scaled down to a third of its real length for clarity</SmallNote>
 
 $\vec{d}$ represents a direction, but it's not normalized yet. We can normalize $\vec{d}$ to $\vec{n}$ by dividing $\vec{d}$ by its magnitude $|\vec{d}|$:
 
 <p align="center">$$\vec{n} = \dfrac{\vec{d}}{|\vec{d}|}$$</p>
 
-We can write this in C# like so:
+<Scene scene="three-points-normal" height={360} yOffset={-0.3} />
+
+Having computed the normal $\vec{n}$ we can use it and any of the points $a$, $b$, $c$ to describe the plane intersecting the three points in its point-normal form.
+
+<Scene scene="three-points-plane" height={400} yOffset={-1} />
+
+It doesn't matter which of $a$, $b$, $c$ we use to define the plane; we always get the same unique plane.
+
+This can be written in C# like so:
 
 ```cs
 Vector3 NormalFromThreePoints(Vector3 a, Vector3 b, Vector3 c) {
@@ -58,19 +73,11 @@ Vector3 NormalFromThreePoints(Vector3 a, Vector3 b, Vector3 c) {
 }
 ```
 
-<Scene scene="three-points-normal" height={400} />
-
-Whether or not we get the red or blue normal depends on the order that we plug the points in (see [Calculating a Surface Normal][calc_surface_normal]).
+<SmallNote center label="Further reading">[Calculating a Surface Normal][calc_surface_normal]</SmallNote>
 
 [calc_surface_normal]: https://www.khronos.org/opengl/wiki/Calculating_a_Surface_Normal#Algorithm
 
-Having computed the normal $\vec{n}$ we can use it and any of the points $a$, $b$, $c$ to describe the plane intersecting the three points in its point-normal form.
-
-<Scene scene="three-points-plane" height={400} />
-
-It doesn't matter which of $a$, $b$, $c$ we plug in to find the plane; we always get the same unique plane. Still, there's one and only one normal which yields this plane.
-
-<Section title="Checking whether a point lies on a plane" heading="h3">
+{/* <Section title="Checking whether a point lies on a plane" heading="h3">
 Given a point-normal plane described by a point $p$ and a normal $\vec{n}$, for any point $x$ on the plane the vector described by $p - x$ is perpendicular to $\vec{n}$:
 
 <Scene scene="plane-perpendicular" height={400} />
@@ -90,7 +97,7 @@ bool IsPointOnPlane(Plane plane, Vector3 x) {
   return Mathf.Abs(d) < EPSILON;
 }
 ```
-</Section>
+</Section> */}
 
 Now that we've learned about the point-normal form of planes, let's take a look at the better form.
 
@@ -105,6 +112,7 @@ This looks like so:
 
 {/** todo better system for this */}
 <span data-varlabel="d">$d$</span>
+<span data-varlabel="vec_n">$\vec{n}$</span>
 <span data-varlabel="n">$n$</span>
 
 Since the vector $p - x$ for any point $x$ on the plane is perpendicular to $n$, we can ask if a point is on the plane by checking if $\vec{n} \cdot (p - x) = 0$. If $x$ is not on the plane, then $\vec{n} \cdot (p - x) \neq 0$.

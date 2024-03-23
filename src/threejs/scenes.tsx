@@ -18,6 +18,8 @@ export const threeJsScenes: Partial<Record<string, React.ComponentType<SceneProp
   "point-and-normal": dynamic(() => import("./scenes/point-and-normal"), { loading }),
   "point-and-normal-with-plane": dynamic(() => import("./scenes/point-and-normal-with-plane"), { loading }),
   "three-points": dynamic(() => import("./scenes/three-points"), { loading }),
+  "three-points-edge-vectors": dynamic(() => import("./scenes/three-points-edge-vectors"), { loading }),
+  "three-points-cross-product": dynamic(() => import("./scenes/three-points-cross-product"), { loading }),
   "three-points-normal": dynamic(() => import("./scenes/three-points-normal"), { loading }),
   "three-points-plane": dynamic(() => import("./scenes/three-points-plane"), { loading }),
   "plane-perpendicular": dynamic(() => import("./scenes/plane-perpendicular"), { loading }),

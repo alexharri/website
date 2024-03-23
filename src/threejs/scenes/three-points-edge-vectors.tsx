@@ -1,6 +1,5 @@
 import { Grid } from "../Components/Grid";
 import { MathLabel } from "../Components/MathLabel";
-import { Point } from "../Components/Point";
 import { Triangle } from "../Components/Triangle";
 import { Vector } from "../Components/Vector";
 import { createScene } from "../createScene";
@@ -16,19 +15,21 @@ export default createScene(() => {
   const vectors = points.map(parseVector);
   const [a, b, c] = vectors;
 
-  const bsuba = b.clone().sub(a);
-  const csuba = c.clone().sub(a);
-  const cross = bsuba.clone().cross(csuba);
-  const normal = cross.clone().normalize();
-
   return (
     <>
-      {points.map((p, i) => (
-        <Point key={i} color="blue" position={p} />
-      ))}
-      <Vector color="blue" from={a} to={a.clone().add(normal)} />
       <Triangle points={points} color="blue" />
-      <MathLabel label="vec_n" position={a.clone().add(normal)} offset={[0.2, 0.9, 0]} />
+      <Vector from={a} to={b} color="red" />
+      <Vector from={a} to={c} color="green" />
+      <MathLabel label="b_sub_a" position={a.clone().lerp(b, 0.5)} offset={[0, 1, 0]} scale={0.8} />
+      <MathLabel
+        label="c_sub_a"
+        position={a.clone().lerp(c, 0.5)}
+        offset={[0.5, 0, 0]}
+        scale={0.8}
+      />
+      <MathLabel label="a" position={points[0]} offset={[0.25, 0.2, 0]} scale={0.8} />
+      <MathLabel label="b" position={points[1]} offset={[-0.7, 0.5, 0]} scale={0.8} />
+      <MathLabel label="c" position={points[2]} offset={[0, -0.2, 0]} scale={0.8} />
       <Grid size={10} />
     </>
   );

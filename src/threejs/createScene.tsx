@@ -180,37 +180,39 @@ export function createScene<V extends VariablesOptions>(
           </Canvas>
         </div>
 
-        <div className={s("variablesWrapper", { hasNormal })}>
-          {variableKeys.map((key) => {
-            const spec = variablesSpec[key];
-            const value = variables[key] as any;
-            if (spec.type === "number")
-              return (
-                <NumberVariable
-                  key={key}
-                  dataKey={key}
-                  value={value}
-                  onValueChange={(value) => setVariableValue(key, value)}
-                  spec={spec}
-                />
-              );
-            if (spec.type === "normal") {
-              return (
-                <NormalVariable
-                  key={key}
-                  dataKey={key}
-                  value={value}
-                  onValueChange={(value) => setVariableValue(key, value)}
-                  spec={spec}
-                  visible={visible}
-                  addRotationCallback={(fn) => rotationCallbacks.current.add(fn)}
-                  removeRotationCallback={(fn) => rotationCallbacks.current.delete(fn)}
-                />
-              );
-            }
-            return null;
-          })}
-        </div>
+        {variableKeys.length > 0 && (
+          <div className={s("variablesWrapper", { hasNormal })}>
+            {variableKeys.map((key) => {
+              const spec = variablesSpec[key];
+              const value = variables[key] as any;
+              if (spec.type === "number")
+                return (
+                  <NumberVariable
+                    key={key}
+                    dataKey={key}
+                    value={value}
+                    onValueChange={(value) => setVariableValue(key, value)}
+                    spec={spec}
+                  />
+                );
+              if (spec.type === "normal") {
+                return (
+                  <NormalVariable
+                    key={key}
+                    dataKey={key}
+                    value={value}
+                    onValueChange={(value) => setVariableValue(key, value)}
+                    spec={spec}
+                    visible={visible}
+                    addRotationCallback={(fn) => rotationCallbacks.current.add(fn)}
+                    removeRotationCallback={(fn) => rotationCallbacks.current.delete(fn)}
+                  />
+                );
+              }
+              return null;
+            })}
+          </div>
+        )}
       </>
     );
   };

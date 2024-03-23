@@ -2,6 +2,7 @@ import { Vector3 } from "three";
 import { Grid } from "../Components/Grid";
 import { Plane } from "../Components/Plane";
 import { Point } from "../Components/Point";
+import { Vector } from "../Components/Vector";
 import { createScene } from "../createScene";
 import { parseVector } from "../utils";
 
@@ -30,6 +31,7 @@ export default createScene(() => {
       {points.map((p, i) => (
         <Point key={i} color="blue" position={p} />
       ))}
+      <Vector color="blue" from={avg} to={avg.clone().add(normal)} />
       <Plane position={avg} normal={normal} color="blue" width={7} />
       <Grid size={10} />
     </>
