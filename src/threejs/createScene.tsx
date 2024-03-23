@@ -2,17 +2,27 @@ import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from "re
 import { Canvas } from "@react-three/fiber";
 import { OrbitControls } from "@react-three/drei";
 import * as THREE from "three";
-import { Camera, Vector3 } from "three";
-import { NormalVariable, NumberVariable, NumberVariableSpec } from "./Variable";
+import { Camera } from "three";
+import { NumberVariable, NumberVariableSpec } from "./NumberVariable";
+import { NormalVariable, NormalVariableSpec } from "./NormalVariable";
 import { StyleOptions, useStyles } from "../utils/styles";
 import { useDidUpdate } from "../utils/hooks/useDidUpdate";
 
 const styles = ({ styled, theme }: StyleOptions) => ({
   variablesWrapper: styled.css`
+    position: relative;
+    z-index: 1;
     display: flex;
     justify-content: center;
-    gap: 16px;
-    overflow: hidden;
+    gap: 48px;
+    height: 56px;
+    align-items: center;
+    margin-top: -16px;
+
+    &--hasNormal {
+      height: 72px;
+      padding-bottom: 16px;
+    }
   `,
 
   fade: styled.css`
@@ -34,13 +44,7 @@ const styles = ({ styled, theme }: StyleOptions) => ({
 });
 
 type VariablesOptions = {
-  [key: string]:
-    | NumberVariableSpec
-    | {
-        label?: string;
-        type: "normal";
-        value: Vector3;
-      };
+  [key: string]: NumberVariableSpec | NormalVariableSpec;
 };
 
 type Variables<V extends VariablesOptions> = {
@@ -131,6 +135,8 @@ export function createScene<V extends VariablesOptions>(
       };
     }, [camera, visible]);
 
+    const hasNormal = variableKeys.some((key) => variablesSpec[key].type === "normal");
+
     return (
       <>
         <div style={{ position: "relative", height }}>
@@ -160,7 +166,7 @@ export function createScene<V extends VariablesOptions>(
                   rotateSpeed={0.3}
                   enableRotate
                   autoRotate={rotate}
-                  autoRotateSpeed={1}
+                  autoRotateSpeed={0.7}
                   enablePan={false}
                   enableZoom={false}
                   ref={orbitRef}
@@ -174,7 +180,7 @@ export function createScene<V extends VariablesOptions>(
           </Canvas>
         </div>
 
-        <div className={s("variablesWrapper")}>
+        <div className={s("variablesWrapper", { hasNormal })}>
           {variableKeys.map((key) => {
             const spec = variablesSpec[key];
             const value = variables[key] as any;

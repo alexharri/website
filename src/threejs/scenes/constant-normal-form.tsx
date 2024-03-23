@@ -19,7 +19,7 @@ export default createScene(
   {
     variables: {
       distance: { label: "d", type: "number", range: [0.5, 10], value: 2 },
-      normal: { type: "normal", value: new Vector3(2, 1, 0.5).normalize() },
+      normal: { label: "n", type: "normal", value: new Vector3(2, 1, 0.5).normalize() },
     },
   },
 );

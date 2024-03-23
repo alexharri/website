@@ -105,3 +105,6 @@ This looks like so:
 
 {/** todo better system for this */}
 <span data-varlabel="d">$d$</span>
+<span data-varlabel="n">$n$</span>
+
+Since the vector $p - x$ for any point $x$ on the plane is perpendicular to $n$, we can ask if a point is on the plane by checking if $\vec{n} \cdot (p - x) = 0$. If $x$ is not on the plane, then $\vec{n} \cdot (p - x) \neq 0$.

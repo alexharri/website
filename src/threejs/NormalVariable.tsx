@@ -2,80 +2,18 @@ import { Cone, Sphere, Torus } from "@react-three/drei";
 import { Canvas } from "@react-three/fiber";
 import { useEffect, useMemo, useRef } from "react";
 import { Matrix4, Mesh, PerspectiveCamera, Vector3, Camera } from "three";
-import { StyleOptions, useStyles } from "../utils/styles";
+import { useStyles } from "../utils/styles";
 import { Line } from "./Components/Line";
+import NormalVariableStyles from "./NormalVariable.styles";
 import { getBasicMaterial } from "./utils";
 
 const firstUpper = (s: string) => s[0].toUpperCase() + s.slice(1);
-
-export type NumberVariableSpec = {
-  label?: string;
-  type: "number";
-  range: [number, number];
-  value: number;
-};
 
 export type NormalVariableSpec = {
   label?: string;
   type: "normal";
   value: Vector3;
 };
-
-interface NumberVariableProps {
-  dataKey: string;
-  value: number;
-  onValueChange: (value: number) => void;
-  spec: NumberVariableSpec;
-}
-
-export const NumberVariable: React.FC<NumberVariableProps> = (props) => {
-  const { dataKey, spec, value, onValueChange } = props;
-  const [min, max] = spec.range;
-
-  let svgLabel: string | undefined;
-
-  if (spec.label) {
-    const el = document.querySelector(`[data-varlabel="${spec.label}"]`);
-    if (el) svgLabel = el.innerHTML;
-  }
-
-  return (
-    <label>
-      {svgLabel ? (
-        <span style={{ fontSize: 24 }} dangerouslySetInnerHTML={{ __html: svgLabel }} />
-      ) : (
-        firstUpper(dataKey)
-      )}
-      <input
-        type="range"
-        min={min}
-        max={max}
-        value={value as number}
-        onChange={(e) => onValueChange(Number(e.target.value))}
-        step={0.1}
-      />
-    </label>
-  );
-};
-
-const W = 100;
-
-const styles = ({ styled }: StyleOptions) => ({
-  normal: styled.css`
-    width: ${W}px;
-    height: ${W}px;
-  `,
-
-  axis: styled.css`
-    width: ${W}px;
-    height: ${W}px;
-    border-radius: 50%;
-
-    &--red {
-      background: red;
-    }
-  `,
-});
 
 interface NormalVariableProps {
   dataKey: string;
@@ -101,7 +39,7 @@ function parseVAngle(normal: Vector3) {
 export const NormalVariable: React.FC<NormalVariableProps> = (props) => {
   const { dataKey, spec, value, onValueChange, visible } = props;
 
-  const s = useStyles(styles);
+  const s = useStyles(NormalVariableStyles);
 
   let svgLabel: string | undefined;
 
@@ -177,14 +115,14 @@ export const NormalVariable: React.FC<NormalVariableProps> = (props) => {
   const TORUS_W = 0.05;
 
   return (
-    <label>
+    <label className={s("normalLabel")}>
       {svgLabel ? (
         <span style={{ fontSize: 24 }} dangerouslySetInnerHTML={{ __html: svgLabel }} />
       ) : (
         firstUpper(dataKey)
       )}
       <div className={s("normal")} onMouseDown={onMouseDown}>
-        <Canvas style={{ width: 100, height: 100 }} camera={camera}>
+        <Canvas camera={camera}>
           {visible && (
             <mesh ref={meshRef}>
               <mesh
