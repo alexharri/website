@@ -1,9 +1,8 @@
-import { Canvas } from "@react-three/fiber";
 import { useContext, useEffect, useMemo, useRef } from "react";
 import type THREE from "three";
 import { useStyles } from "../utils/styles";
 import { Line } from "./Components/primitives/Line";
-import { DreiContext, ThreeContext } from "./Components/ThreeProvider";
+import { DreiContext, FiberContext, ThreeContext } from "./Components/ThreeProvider";
 import NormalVariableStyles from "./NormalVariable.styles";
 import { Three } from "./types";
 import { getBasicMaterial } from "./utils";
@@ -42,6 +41,7 @@ export const NormalVariable: React.FC<NormalVariableProps> = (props) => {
 
   const THREE = useContext(ThreeContext);
   const DREI = useContext(DreiContext);
+  const FIBER = useContext(FiberContext);
   const s = useStyles(NormalVariableStyles);
 
   let svgLabel: string | undefined;
@@ -125,7 +125,7 @@ export const NormalVariable: React.FC<NormalVariableProps> = (props) => {
         firstUpper(dataKey)
       )}
       <div className={s("normal")} onMouseDown={onMouseDown}>
-        <Canvas camera={camera}>
+        <FIBER.Canvas camera={camera}>
           {visible && (
             <mesh ref={meshRef}>
               <mesh
@@ -156,7 +156,7 @@ export const NormalVariable: React.FC<NormalVariableProps> = (props) => {
               </mesh>
             </mesh>
           )}
-        </Canvas>
+        </FIBER.Canvas>
       </div>
     </label>
   );

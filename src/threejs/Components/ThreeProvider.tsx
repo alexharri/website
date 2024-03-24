@@ -1,8 +1,9 @@
 import React, { useMemo, useRef, useState } from "react";
-import { Drei, Three } from "../types";
+import { Drei, Fiber, Three } from "../types";
 
 export const ThreeContext = React.createContext<Three>(null!);
 export const DreiContext = React.createContext<Drei>(null!);
+export const FiberContext = React.createContext<Fiber>(null!);
 export const LoadThreeContext = React.createContext<{ load: () => void; loaded: boolean }>({
   load: () => {
     throw new Error("Missing LoadThreeContext provider");
@@ -13,6 +14,7 @@ export const LoadThreeContext = React.createContext<{ load: () => void; loaded: 
 export const ThreeProvider: React.FC<{ children: React.ReactNode }> = (props) => {
   const [three, setThree] = useState<Three | null>(null);
   const [drei, setDrei] = useState<Drei | null>(null);
+  const [fiber, setFiber] = useState<Fiber | null>(null);
   const [loading, setLoading] = useState(false);
   const loadingRef = useRef(loading);
   loadingRef.current = loading;
@@ -25,10 +27,15 @@ export const ThreeProvider: React.FC<{ children: React.ReactNode }> = (props) =>
         setLoading(true);
 
         try {
-          const [three, drei] = await Promise.all([import("three"), import("@react-three/drei")]);
+          const [three, drei, fiber] = await Promise.all([
+            import("three"),
+            import("@react-three/drei"),
+            import("@react-three/fiber"),
+          ]);
 
           setThree(three);
           setDrei(drei);
+          setFiber(fiber);
         } catch (e) {
           // TODO: better error handling
           console.error("Failed to import ThreeJS");
@@ -47,7 +54,9 @@ export const ThreeProvider: React.FC<{ children: React.ReactNode }> = (props) =>
   return (
     <LoadThreeContext.Provider value={loadContext}>
       <ThreeContext.Provider value={three!}>
-        <DreiContext.Provider value={drei!}>{props.children}</DreiContext.Provider>
+        <DreiContext.Provider value={drei!}>
+          <FiberContext.Provider value={fiber!}>{props.children}</FiberContext.Provider>
+        </DreiContext.Provider>
       </ThreeContext.Provider>
     </LoadThreeContext.Provider>
   );

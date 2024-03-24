@@ -1,11 +1,10 @@
 import React, { useContext, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
-import { Canvas } from "@react-three/fiber";
 import type THREE from "three";
 import { NumberVariable, NumberVariableSpec } from "./NumberVariable";
 import { NormalVariable, NormalVariableSpec } from "./NormalVariable";
 import { StyleOptions, useStyles } from "../utils/styles";
 import { useDidUpdate } from "../utils/hooks/useDidUpdate";
-import { DreiContext, ThreeContext } from "./Components/ThreeProvider";
+import { DreiContext, FiberContext, ThreeContext } from "./Components/ThreeProvider";
 
 const styles = ({ styled, theme }: StyleOptions) => ({
   variablesWrapper: styled.css`
@@ -80,6 +79,7 @@ export function createScene<V extends VariablesOptions>(
     useLayoutEffect(onLoad, []);
     const THREE = useContext(ThreeContext);
     const DREI = useContext(DreiContext);
+    const FIBER = useContext(FiberContext);
 
     const s = useStyles(styles);
 
@@ -151,7 +151,7 @@ export function createScene<V extends VariablesOptions>(
           <div className={s("fade", { upper: true })} />
           <div className={s("fade", { lower: true })} />
 
-          <Canvas
+          <FIBER.Canvas
             key={height}
             style={{ height, userSelect: "none", cursor: down ? "grabbing" : "grab" }}
             camera={camera}
@@ -185,7 +185,7 @@ export function createScene<V extends VariablesOptions>(
                 </mesh>
               </>
             )}
-          </Canvas>
+          </FIBER.Canvas>
         </div>
 
         {variableKeys.length > 0 && (
