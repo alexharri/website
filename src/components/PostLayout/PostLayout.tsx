@@ -43,7 +43,7 @@ const Styles = ({ styled }: StyleOptions) => ({
     }
 
     & > .scene {
-      margin: 24px -${cssVariables.contentWidth}px;
+      margin: 24px -${cssVariables.contentPadding}px;
 
       & + .note {
         margin-top: -24px;
