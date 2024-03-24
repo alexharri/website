@@ -13,6 +13,7 @@ export default ({ styled }: StyleOptions) => ({
     canvas {
       width: ${W}px;
       height: ${W}px;
+      touch-action: none;
     }
   `,
 

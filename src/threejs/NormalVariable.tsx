@@ -58,6 +58,7 @@ export const NormalVariable: React.FC<NormalVariableProps> = (props) => {
 
   const onMouseDown = (e: React.MouseEvent | React.TouchEvent) => {
     e.preventDefault();
+
     const startX = "touches" in e ? e.touches[0].clientX : e.clientX;
     const startY = "touches" in e ? e.touches[0].clientY : e.clientY;
 
