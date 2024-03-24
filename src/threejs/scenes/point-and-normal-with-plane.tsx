@@ -1,13 +1,16 @@
-import { Grid } from "../Components/Grid";
-import { Plane } from "../Components/Plane";
-import { Point } from "../Components/Point";
-import { Vector } from "../Components/Vector";
+import { useContext } from "react";
+import { Grid } from "../Components/primitives/Grid";
+import { Plane } from "../Components/primitives/Plane";
+import { Point } from "../Components/primitives/Point";
+import { Vector } from "../Components/primitives/Vector";
+import { ThreeContext } from "../Components/ThreeProvider";
 import { createScene } from "../createScene";
 import { parseVector } from "../utils";
 
 export default createScene(
   ({ variables: { normal } }) => {
-    const from = parseVector([1, 2, 0]);
+    const THREE = useContext(ThreeContext);
+    const from = parseVector(THREE, [1, 2, 0]);
     const to = from.clone().add(normal);
 
     return (
@@ -21,7 +24,7 @@ export default createScene(
   },
   {
     variables: {
-      normal: { label: "vec_n", type: "normal", value: parseVector([1, -1, 0.3]).normalize() },
+      normal: { label: "vec_n", type: "normal", value: [1, -1, 0.3] },
     },
   },
 );

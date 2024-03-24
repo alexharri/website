@@ -1,8 +1,10 @@
-import { BoxGeometry, CylinderGeometry, Euler, Mesh, MeshPhysicalMaterial } from "three";
-import { getColor, getPhongMaterial, IColor, IVector3, parseVector } from "../utils";
+import { useContext } from "react";
+import type THREE from "three";
+import { getColor, getPhongMaterial, IColor, IVector3, parseVector } from "../../utils";
+import { ThreeContext } from "../ThreeProvider";
 import { Vector } from "./Vector";
 
-let cylinderGeometry: CylinderGeometry | null = null;
+let cylinderGeometry: THREE.CylinderGeometry | null = null;
 
 interface Props {
   normal: IVector3;
@@ -18,22 +20,24 @@ interface Props {
 export const Plane: React.FC<Props> = (props) => {
   const { showCenter, showNormal, showOriginLine } = props;
 
-  const normal = parseVector(props.normal);
+  const THREE = useContext(ThreeContext);
+
+  const normal = parseVector(THREE, props.normal);
   const planePosition = props.position
-    ? parseVector(props.position)
+    ? parseVector(THREE, props.position)
     : normal.clone().multiplyScalar(props.distance ?? 0);
 
   const W = props.width ?? 5;
   const HALF = W / 2;
 
-  const mesh = new Mesh();
+  const mesh = new THREE.Mesh();
   mesh.lookAt(normal);
 
-  const planeGeometry = new BoxGeometry(W, W, 0.01);
+  const planeGeometry = new THREE.BoxGeometry(W, W, 0.01);
 
   const color = getColor(props.color);
 
-  const planeMaterial = new MeshPhysicalMaterial({
+  const planeMaterial = new THREE.MeshPhysicalMaterial({
     color,
     opacity: 0.35,
     transparent: true,
@@ -41,17 +45,17 @@ export const Plane: React.FC<Props> = (props) => {
     transmission: 1,
   });
 
-  cylinderGeometry ||= new CylinderGeometry(0.015, 0.015, 1, 20);
-  const lineMaterial = getPhongMaterial(color);
+  cylinderGeometry ||= new THREE.CylinderGeometry(0.015, 0.015, 1, 20);
+  const lineMaterial = getPhongMaterial(THREE, color);
 
-  const boxGeometry = new BoxGeometry(0.1, 0.1, 0.1);
+  const boxGeometry = new THREE.BoxGeometry(0.1, 0.1, 0.1);
 
   return (
     <>
       {showCenter && (
         <mesh
           geometry={boxGeometry}
-          material={getPhongMaterial(color)}
+          material={getPhongMaterial(THREE, color)}
           position={planePosition}
           quaternion={mesh.quaternion}
         />
@@ -68,29 +72,29 @@ export const Plane: React.FC<Props> = (props) => {
       >
         <mesh
           geometry={cylinderGeometry}
-          position={parseVector({ x: HALF, y: 0, z: 0 })}
+          position={parseVector(THREE, { x: HALF, y: 0, z: 0 })}
           material={lineMaterial}
           scale={[1, W, 1]}
         />
         <mesh
           geometry={cylinderGeometry}
-          position={parseVector({ x: -HALF, y: 0, z: 0 })}
+          position={parseVector(THREE, { x: -HALF, y: 0, z: 0 })}
           material={lineMaterial}
           scale={[1, W, 1]}
         />
         <mesh
           geometry={cylinderGeometry}
-          position={parseVector({ x: 0, y: HALF, z: 0 })}
+          position={parseVector(THREE, { x: 0, y: HALF, z: 0 })}
           material={lineMaterial}
           scale={[1, W, 1]}
-          rotation={new Euler(0, 0, Math.PI / 2)}
+          rotation={new THREE.Euler(0, 0, Math.PI / 2)}
         />
         <mesh
           geometry={cylinderGeometry}
-          position={parseVector({ x: 0, y: -HALF, z: 0 })}
+          position={parseVector(THREE, { x: 0, y: -HALF, z: 0 })}
           material={lineMaterial}
           scale={[1, W, 1]}
-          rotation={new Euler(0, 0, Math.PI / 2)}
+          rotation={new THREE.Euler(0, 0, Math.PI / 2)}
         />
       </mesh>
     </>

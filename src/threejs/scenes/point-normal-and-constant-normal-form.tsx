@@ -1,15 +1,17 @@
-import { Vector3 } from "three";
-import { Grid } from "../Components/Grid";
-import { Plane } from "../Components/Plane";
-import { Point } from "../Components/Point";
-import { Vector } from "../Components/Vector";
+import { useContext } from "react";
+import { Grid } from "../Components/primitives/Grid";
+import { Plane } from "../Components/primitives/Plane";
+import { Point } from "../Components/primitives/Point";
+import { Vector } from "../Components/primitives/Vector";
+import { ThreeContext } from "../Components/ThreeProvider";
 import { createScene } from "../createScene";
 
 export default createScene(
   ({ variables }) => {
     const { normal } = variables;
 
-    const point = new Vector3(3, 2, 1);
+    const THREE = useContext(ThreeContext);
+    const point = new THREE.Vector3(3, 2, 1);
     const distance = normal.clone().dot(point);
     const dPoint = normal.clone().multiplyScalar(distance);
     const midPoint = point.clone().lerp(dPoint, 0.5);
@@ -28,7 +30,7 @@ export default createScene(
   {
     variables: {
       // distance: { label: "d", type: "number", range: [0.5, 10], value: 2 },
-      normal: { label: "vec_n", type: "normal", value: new Vector3(2, 0.5, 1).normalize() },
+      normal: { label: "vec_n", type: "normal", value: [2, 0.5, 1] },
     },
   },
 );

@@ -1,7 +1,8 @@
-import { useMemo } from "react";
-import * as THREE from "three";
+import { useContext, useMemo } from "react";
+
 import { Quaternion } from "three";
-import { getBasicMaterial, getPhongMaterial, IColor, IVector3, parseVector } from "../utils";
+import { getBasicMaterial, getPhongMaterial, IColor, IVector3, parseVector } from "../../utils";
+import { ThreeContext } from "../ThreeProvider";
 
 interface Props {
   from: IVector3;
@@ -13,6 +14,8 @@ interface Props {
 }
 
 export const Line: React.FC<Props> = (props) => {
+  const THREE = useContext(ThreeContext);
+
   const cylinderGeometry = useMemo(() => {
     let radius = props.radius ?? 0.05;
     if (props.thin) radius = 0.015;
@@ -20,8 +23,8 @@ export const Line: React.FC<Props> = (props) => {
   }, [props.radius, props.thin]);
 
   const { half, distance, quaternion } = useMemo(() => {
-    const from = parseVector(props.from);
-    const to = parseVector(props.to);
+    const from = parseVector(THREE, props.from);
+    const to = parseVector(THREE, props.to);
 
     const distance = to.distanceTo(from);
     const half = to.clone().add(from).multiplyScalar(0.5);
@@ -35,7 +38,11 @@ export const Line: React.FC<Props> = (props) => {
   return (
     <mesh
       geometry={cylinderGeometry}
-      material={props.basicMaterial ? getBasicMaterial(props.color) : getPhongMaterial(props.color)}
+      material={
+        props.basicMaterial
+          ? getBasicMaterial(THREE, props.color)
+          : getPhongMaterial(THREE, props.color)
+      }
       position={half}
       quaternion={quaternion}
       scale={[1, distance, 1]}

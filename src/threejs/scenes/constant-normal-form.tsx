@@ -1,7 +1,6 @@
-import { Vector3 } from "three";
-import { Grid } from "../Components/Grid";
-import { Plane } from "../Components/Plane";
-import { Vector } from "../Components/Vector";
+import { Grid } from "../Components/primitives/Grid";
+import { Plane } from "../Components/primitives/Plane";
+import { Vector } from "../Components/primitives/Vector";
 import { createScene } from "../createScene";
 
 export default createScene(
@@ -19,7 +18,7 @@ export default createScene(
   {
     variables: {
       distance: { label: "d", type: "number", range: [0.5, 10], value: 2 },
-      normal: { label: "vec_n", type: "normal", value: new Vector3(2, 1, 0.5).normalize() },
+      normal: { label: "vec_n", type: "normal", value: [2, 1, 0.5] },
     },
   },
 );

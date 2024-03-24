@@ -1,8 +1,9 @@
-import { Vector3 } from "three";
-import { Grid } from "../Components/Grid";
-import { Plane } from "../Components/Plane";
-import { Point } from "../Components/Point";
-import { Vector } from "../Components/Vector";
+import { useContext } from "react";
+import { Grid } from "../Components/primitives/Grid";
+import { Plane } from "../Components/primitives/Plane";
+import { Point } from "../Components/primitives/Point";
+import { Vector } from "../Components/primitives/Vector";
+import { ThreeContext } from "../Components/ThreeProvider";
 import { createScene } from "../createScene";
 import { parseVector } from "../utils";
 
@@ -13,14 +14,15 @@ export default createScene(() => {
     [1, -1, 2],
   ];
 
-  const vectors = points.map(parseVector);
+  const THREE = useContext(ThreeContext);
+  const vectors = points.map((p) => parseVector(THREE, p));
   const [a, b, c] = vectors;
 
   const bsuba = b.clone().sub(a);
   const csuba = c.clone().sub(a);
   const cross = bsuba.clone().cross(csuba);
   const normal = cross.clone().normalize();
-  const avg = new Vector3()
+  const avg = new THREE.Vector3()
     .add(a)
     .add(b)
     .add(c)

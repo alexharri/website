@@ -1,8 +1,10 @@
-import { Grid } from "../Components/Grid";
-import { MathLabel } from "../Components/MathLabel";
-import { Point } from "../Components/Point";
-import { Triangle } from "../Components/Triangle";
-import { Vector } from "../Components/Vector";
+import { useContext } from "react";
+import { Grid } from "../Components/primitives/Grid";
+import { MathLabel } from "../Components/primitives/MathLabel";
+import { Point } from "../Components/primitives/Point";
+import { Triangle } from "../Components/primitives/Triangle";
+import { Vector } from "../Components/primitives/Vector";
+import { ThreeContext } from "../Components/ThreeProvider";
 import { createScene } from "../createScene";
 import { parseVector } from "../utils";
 
@@ -13,7 +15,8 @@ export default createScene(() => {
     [1, -1, 2],
   ];
 
-  const vectors = points.map(parseVector);
+  const THREE = useContext(ThreeContext);
+  const vectors = points.map((p) => parseVector(THREE, p));
   const [a, b, c] = vectors;
 
   const bsuba = b.clone().sub(a);

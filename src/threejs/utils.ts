@@ -1,11 +1,12 @@
-import { MeshBasicMaterial, MeshPhongMaterial, Vector3 } from "three";
+import type THREE from "three";
+import { Three } from "./types";
 
 export type IVector3 = { x: number; y: number; z: number } | [number, number, number];
 
-export function parseVector(vec?: IVector3) {
-  if (!vec) return new Vector3(0, 0, 0);
-  if (Array.isArray(vec)) return new Vector3(vec[0], vec[1], vec[2]);
-  return new Vector3(vec.x, vec.y, vec.z);
+export function parseVector(THREE: Three, vec?: IVector3) {
+  if (!vec) return new THREE.Vector3(0, 0, 0);
+  if (Array.isArray(vec)) return new THREE.Vector3(vec[0], vec[1], vec[2]);
+  return new THREE.Vector3(vec.x, vec.y, vec.z);
 }
 
 const colors = {
@@ -21,16 +22,16 @@ export function getColor(color: IColor): number {
   return color;
 }
 
-const phongMaterialCache: Partial<Record<number, MeshPhongMaterial>> = {};
+const phongMaterialCache: Partial<Record<number, THREE.MeshPhongMaterial>> = {};
 
-export function getPhongMaterial(color: IColor) {
+export function getPhongMaterial(THREE: Three, color: IColor) {
   if (typeof color === "string") color = colors[color];
-  return (phongMaterialCache[color] ||= new MeshPhongMaterial({ color }));
+  return (phongMaterialCache[color] ||= new THREE.MeshPhongMaterial({ color }));
 }
 
-const basicMaterialCache: Partial<Record<number, MeshBasicMaterial>> = {};
+const basicMaterialCache: Partial<Record<number, THREE.MeshBasicMaterial>> = {};
 
-export function getBasicMaterial(color: IColor) {
+export function getBasicMaterial(THREE: Three, color: IColor) {
   if (typeof color === "string") color = colors[color];
-  return (basicMaterialCache[color] ||= new MeshBasicMaterial({ color }));
+  return (basicMaterialCache[color] ||= new THREE.MeshBasicMaterial({ color }));
 }

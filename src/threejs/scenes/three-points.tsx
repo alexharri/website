@@ -1,7 +1,7 @@
-import { Grid } from "../Components/Grid";
-import { MathLabel } from "../Components/MathLabel";
-import { Point } from "../Components/Point";
-import { Triangle } from "../Components/Triangle";
+import { Grid } from "../Components/primitives/Grid";
+import { MathLabel } from "../Components/primitives/MathLabel";
+import { Point } from "../Components/primitives/Point";
+import { Triangle } from "../Components/primitives/Triangle";
 import { createScene } from "../createScene";
 
 export default createScene(() => {

@@ -1,6 +1,6 @@
-import { Line } from "@react-three/drei";
-import { Color } from "three";
-import { lerp } from "../../utils/lerp";
+import { useContext } from "react";
+import { lerp } from "../../../utils/lerp";
+import { DreiContext, ThreeContext } from "../ThreeProvider";
 
 interface Props {
   size: number;
@@ -10,10 +10,13 @@ export const Grid: React.FC<Props> = (props) => {
   const N = props.size;
   const HALF = N / 2;
 
+  const THREE = useContext(ThreeContext);
+  const DREI = useContext(DreiContext);
+
   const color = (i: number) => {
     const dist = Math.abs(i);
     const l = lerp(0.15, 0.1, dist / HALF);
-    return new Color(l, l, l);
+    return new THREE.Color(l, l, l);
   };
 
   return (
@@ -25,7 +28,7 @@ export const Grid: React.FC<Props> = (props) => {
         const z0 = HALF;
         const z1 = -HALF;
         return (
-          <Line
+          <DREI.Line
             key={i}
             points={[
               [x, y, z0],
@@ -43,7 +46,7 @@ export const Grid: React.FC<Props> = (props) => {
         const x0 = HALF;
         const x1 = -HALF;
         return (
-          <Line
+          <DREI.Line
             key={i}
             points={[
               [x0, y, z],

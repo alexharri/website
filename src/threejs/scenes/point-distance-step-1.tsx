@@ -1,14 +1,16 @@
-import { Vector3 } from "three";
-import { Grid } from "../Components/Grid";
-import { Plane } from "../Components/Plane";
-import { Point } from "../Components/Point";
-import { Vector } from "../Components/Vector";
+import { useContext } from "react";
+import { Grid } from "../Components/primitives/Grid";
+import { Plane } from "../Components/primitives/Plane";
+import { Point } from "../Components/primitives/Point";
+import { Vector } from "../Components/primitives/Vector";
+import { ThreeContext } from "../Components/ThreeProvider";
 import { createScene } from "../createScene";
 
 export default createScene(() => {
-  const normal = new Vector3(2, 1, 0.5).normalize();
+  const THREE = useContext(ThreeContext);
+  const normal = new THREE.Vector3(2, 1, 0.5).normalize();
   const distance = 3;
-  const point = new Vector3(1, 1.5, 1);
+  const point = new THREE.Vector3(1, 1.5, 1);
 
   return (
     <>

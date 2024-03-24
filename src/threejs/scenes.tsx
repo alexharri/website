@@ -1,7 +1,7 @@
 import dynamic from "next/dynamic";
-import { useRef, useState } from "react";
-import { useMounted } from "../utils/hooks/useMounted";
+import { useContext, useEffect, useRef, useState } from "react";
 import { useVisible } from "../utils/hooks/useVisible";
+import { LoadThreeContext } from "./Components/ThreeProvider";
 
 const loading = () => <p>Loading</p>;
 
@@ -41,17 +41,25 @@ export const Scene: React.FC<Props> = (props) => {
   const { scene, height, yOffset } = props;
   const containerRef = useRef<HTMLDivElement>(null);
   const visible = useVisible(containerRef);
-  const mounted = useMounted();
 
-  const [loaded, setLoaded] = useState(false);
+  const [loaded0, setLoaded] = useState(false);
 
   if (typeof height !== "number") throw new Error("'height' is a required prop for <Scene>");
   const S = threeJsScenes[scene];
   if (!S) throw new Error(`No such scene '${scene}'`);
 
+  const { load, loaded } = useContext(LoadThreeContext);
+
+  useEffect(() => {
+    if (!loaded) load();
+    if (loaded) {
+      console.log("Loaded ThreeJS!");
+    }
+  }, [loaded]);
+
   return (
-    <div ref={containerRef} style={loaded ? {} : { height }} className="scene">
-      {mounted && (
+    <div ref={containerRef} style={loaded0 ? {} : { height }} className="scene">
+      {loaded && (
         <S visible={visible} onLoad={() => setLoaded(true)} height={height} yOffset={yOffset} />
       )}
     </div>

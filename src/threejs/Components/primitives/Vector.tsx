@@ -1,7 +1,8 @@
-import { useMemo } from "react";
-import * as THREE from "three";
+import { useContext, useMemo } from "react";
+import type THREE from "three";
 import { Quaternion } from "three";
-import { getBasicMaterial, getPhongMaterial, IColor, IVector3, parseVector } from "../utils";
+import { getBasicMaterial, getPhongMaterial, IColor, IVector3, parseVector } from "../../utils";
+import { ThreeContext } from "../ThreeProvider";
 import { Line } from "./Line";
 
 let coneGeometry: THREE.ConeGeometry | null = null;
@@ -17,8 +18,9 @@ interface Props {
 }
 
 export const Vector: React.FC<Props> = (props) => {
-  const from = parseVector(props.from);
-  let to = parseVector(props.to);
+  const THREE = useContext(ThreeContext);
+  const from = parseVector(THREE, props.from);
+  let to = parseVector(THREE, props.to);
 
   const normal = to.clone().sub(from).normalize();
 
@@ -39,7 +41,9 @@ export const Vector: React.FC<Props> = (props) => {
         quaternion={quaternion}
         position={to}
         material={
-          props.basicMaterial ? getBasicMaterial(props.color) : getPhongMaterial(props.color)
+          props.basicMaterial
+            ? getBasicMaterial(THREE, props.color)
+            : getPhongMaterial(THREE, props.color)
         }
       />
     </>

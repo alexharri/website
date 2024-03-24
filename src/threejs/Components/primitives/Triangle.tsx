@@ -1,6 +1,7 @@
-import * as THREE from "three";
+import { useContext } from "react";
 import { MeshBasicMaterial } from "three";
-import { getColor, IColor, IVector3, parseVector } from "../utils";
+import { getColor, IColor, IVector3, parseVector } from "../../utils";
+import { ThreeContext } from "../ThreeProvider";
 import { Line } from "./Line";
 
 interface Props {
@@ -9,7 +10,8 @@ interface Props {
 }
 
 export const Triangle: React.FC<Props> = (props) => {
-  const points = props.points.map(parseVector);
+  const THREE = useContext(ThreeContext);
+  const points = props.points.map((p) => parseVector(THREE, p));
   const [a, b, c] = points;
 
   const geom = new THREE.BufferGeometry();

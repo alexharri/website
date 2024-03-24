@@ -1,12 +1,11 @@
-import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import React, { useContext, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { Canvas } from "@react-three/fiber";
-import { OrbitControls } from "@react-three/drei";
-import * as THREE from "three";
-import { Camera } from "three";
+import type THREE from "three";
 import { NumberVariable, NumberVariableSpec } from "./NumberVariable";
 import { NormalVariable, NormalVariableSpec } from "./NormalVariable";
 import { StyleOptions, useStyles } from "../utils/styles";
 import { useDidUpdate } from "../utils/hooks/useDidUpdate";
+import { DreiContext, ThreeContext } from "./Components/ThreeProvider";
 
 const styles = ({ styled, theme }: StyleOptions) => ({
   variablesWrapper: styled.css`
@@ -49,7 +48,7 @@ type VariablesOptions = {
 };
 
 type Variables<V extends VariablesOptions> = {
-  [K in keyof V]: V[K]["value"];
+  [K in keyof V]: V[K]["value"] extends [number, number, number] ? THREE.Vector3 : V[K]["value"];
 };
 
 interface SceneProps<V extends VariablesOptions> {
@@ -79,6 +78,8 @@ export function createScene<V extends VariablesOptions>(
     yOffset?: number;
   }) => {
     useLayoutEffect(onLoad, []);
+    const THREE = useContext(ThreeContext);
+    const DREI = useContext(DreiContext);
 
     const s = useStyles(styles);
 
@@ -98,7 +99,13 @@ export function createScene<V extends VariablesOptions>(
     const [variables, setVariables] = useState(() =>
       variableKeys.reduce((obj, _key) => {
         const key = _key as keyof V;
-        obj[key] = variablesSpec[key].value;
+        obj[key] = (
+          Array.isArray(variablesSpec[key].value)
+            ? new THREE.Vector3(
+                ...(variablesSpec[key].value as [number, number, number]),
+              ).normalize()
+            : (variablesSpec[key].value as number)
+        ) as Variables<V>[typeof key];
         return obj;
       }, {} as Variables<V>),
     );
@@ -118,7 +125,7 @@ export function createScene<V extends VariablesOptions>(
 
     const orbitRef = useRef<any>(null);
 
-    const rotationCallbacks = useRef(new Set<(vec: Camera) => void>());
+    const rotationCallbacks = useRef(new Set<(vec: THREE.Camera) => void>());
 
     useEffect(() => {
       if (!visible) return;
@@ -163,7 +170,7 @@ export function createScene<V extends VariablesOptions>(
                 />
                 <pointLight position={[-10, -10, -10]} decay={0} intensity={Math.PI} />
 
-                <OrbitControls
+                <DREI.OrbitControls
                   rotateSpeed={0.3}
                   enableRotate
                   autoRotate={rotate}

@@ -1,18 +1,21 @@
-import { Mesh, Quaternion, Vector3 } from "three";
-import { Grid } from "../Components/Grid";
-import { Plane } from "../Components/Plane";
-import { Point } from "../Components/Point";
-import { Vector } from "../Components/Vector";
+import type THREE from "three";
+import { useContext } from "react";
+import { Grid } from "../Components/primitives/Grid";
+import { Plane } from "../Components/primitives/Plane";
+import { Point } from "../Components/primitives/Point";
+import { Vector } from "../Components/primitives/Vector";
+import { ThreeContext } from "../Components/ThreeProvider";
 import { createScene } from "../createScene";
 import { parseVector } from "../utils";
 
 export default createScene(() => {
-  const position = parseVector([1, 2, 0]);
-  const normal = parseVector([1, -1, 0.3]).normalize();
+  const THREE = useContext(ThreeContext);
+  const position = parseVector(THREE, [1, 2, 0]);
+  const normal = parseVector(THREE, [1, -1, 0.3]).normalize();
 
-  const forward = () => new Vector3(0, 0, 1);
+  const forward = () => new THREE.Vector3(0, 0, 1);
 
-  const mesh = new Mesh();
+  const mesh = new THREE.Mesh();
   mesh.lookAt(normal);
   mesh.rotateY(Math.PI / 2);
   const q0 = mesh.quaternion.clone();
@@ -25,9 +28,9 @@ export default createScene(() => {
   const n2 = forward().applyQuaternion(q1);
   const n3 = forward().applyQuaternion(q1).multiplyScalar(-1);
 
-  const vecStart = (n: Vector3) => position.clone().add(n.clone().multiplyScalar(0.2));
-  const vecEnd = (n: Vector3) => position.clone().add(n);
-  const point = (n: Vector3) => position.clone().add(n.clone().multiplyScalar(1.2));
+  const vecStart = (n: THREE.Vector3) => position.clone().add(n.clone().multiplyScalar(0.2));
+  const vecEnd = (n: THREE.Vector3) => position.clone().add(n);
+  const point = (n: THREE.Vector3) => position.clone().add(n.clone().multiplyScalar(1.2));
 
   return (
     <>

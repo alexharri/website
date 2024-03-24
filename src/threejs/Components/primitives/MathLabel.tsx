@@ -1,8 +1,9 @@
 import { useFrame } from "@react-three/fiber";
-import { useMemo, useRef } from "react";
-import { ExtrudeGeometry, Group, Vector3 } from "three";
+import { useContext, useMemo, useRef } from "react";
+import type THREE from "three";
 import { SVGLoader } from "three/examples/jsm/loaders/SVGLoader";
-import { getBasicMaterial, IVector3, parseVector } from "../utils";
+import { getBasicMaterial, IVector3, parseVector } from "../../utils";
+import { ThreeContext } from "../ThreeProvider";
 
 const aSvg =
   '<svg width="7" height="8" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M0.449707 4.85383C0.449707 3.94013 0.793476 3.07166 1.48102 2.24842C2.16855 1.42518 2.94204 1.00904 3.80146 0.999995C4.26283 0.999995 4.66993 1.22164 5.02274 1.66492C5.16749 1.39352 5.37556 1.25782 5.64696 1.25782C5.76456 1.25782 5.8686 1.29401 5.95906 1.36638C6.04953 1.43875 6.09476 1.52922 6.09476 1.63778C6.09476 1.75538 5.9274 2.47911 5.59268 3.80895C5.25796 5.1388 5.08607 5.88966 5.07702 6.06155C5.07702 6.28771 5.10869 6.43698 5.17201 6.50935C5.23534 6.58172 5.33033 6.62243 5.45698 6.63148C5.5384 6.62243 5.62886 6.58172 5.72838 6.50935C5.91835 6.32842 6.10381 5.89419 6.28474 5.20665C6.33902 5.02572 6.38425 4.93073 6.42044 4.92168C6.43853 4.91263 6.48376 4.90811 6.55614 4.90811H6.61042C6.7823 4.90811 6.86824 4.94882 6.86824 5.03024C6.86824 5.08452 6.84563 5.20665 6.80039 5.39662C6.75516 5.5866 6.6647 5.83086 6.529 6.1294C6.3933 6.42793 6.24855 6.6541 6.09476 6.80789C5.97716 6.92549 5.83241 7.02048 5.66053 7.09286C5.58815 7.11095 5.4796 7.12 5.33485 7.12C5.02727 7.12 4.76944 7.05215 4.56137 6.91645C4.3533 6.78075 4.2176 6.64053 4.15427 6.49578L4.07286 6.29223C4.06381 6.28319 4.04572 6.28771 4.01858 6.3058C4.00048 6.3239 3.98239 6.34199 3.9643 6.36008C3.43055 6.86669 2.88776 7.12 2.33592 7.12C1.83835 7.12 1.3996 6.93906 1.01964 6.5772C0.639685 6.21534 0.449707 5.64088 0.449707 4.85383ZM4.76492 2.53339C4.76492 2.47911 4.7423 2.3796 4.69707 2.23485C4.65184 2.09011 4.5478 1.93179 4.38496 1.75991C4.22212 1.58802 4.01405 1.49756 3.76075 1.48851C3.44412 1.48851 3.14106 1.62873 2.85157 1.90917C2.56208 2.18962 2.33592 2.556 2.17308 3.00833C1.91073 3.72301 1.72527 4.46483 1.61671 5.23379C1.61671 5.26093 1.61671 5.31068 1.61671 5.38305C1.61671 5.45543 1.61219 5.50971 1.60314 5.54589C1.60314 5.95299 1.68456 6.23343 1.8474 6.38722C2.01024 6.54102 2.20474 6.62243 2.4309 6.63148C2.77467 6.63148 3.11392 6.48221 3.44864 6.18368C3.78337 5.88514 3.98239 5.65445 4.04572 5.49161C4.06381 5.45543 4.18594 4.97144 4.4121 4.03964C4.63827 3.10784 4.75587 2.60576 4.76492 2.53339Z" fill="white"/></svg>';
@@ -39,6 +40,8 @@ interface Props {
 export const MathLabel: React.FC<Props> = (props) => {
   const userScale = props.scale ?? 1;
 
+  const THREE = useContext(ThreeContext);
+
   const geometries = useMemo(() => {
     const svg = labels[props.label];
     if (!svg) {
@@ -54,11 +57,11 @@ export const MathLabel: React.FC<Props> = (props) => {
     const loader = new SVGLoader();
     const svgData = loader.parse(svg!);
 
-    const geometries: ExtrudeGeometry[] = [];
+    const geometries: THREE.ExtrudeGeometry[] = [];
 
     for (const path of svgData.paths) {
       for (const shape of path.toShapes(true)) {
-        const geometry = new ExtrudeGeometry(shape, {
+        const geometry = new THREE.ExtrudeGeometry(shape, {
           depth: 0.1,
           bevelEnabled: false,
         });
@@ -68,16 +71,16 @@ export const MathLabel: React.FC<Props> = (props) => {
     return geometries;
   }, [props.label]);
 
-  const groupRef = useRef<Group>(null);
+  const groupRef = useRef<THREE.Group>(null);
   useFrame((state) => {
-    const { x, y, z } = parseVector(props.position);
+    const { x, y, z } = parseVector(THREE, props.position);
     const group = groupRef.current;
     if (!group) return;
 
     const cameraPos = state.camera.position.clone();
 
     // This offset fixes the look-at rotation when looking straight up/down
-    const vec = new Vector3(0, cameraPos.y > 0 ? -10 : 10, 100).applyQuaternion(
+    const vec = new THREE.Vector3(0, cameraPos.y > 0 ? -10 : 10, 100).applyQuaternion(
       state.camera.quaternion,
     );
     cameraPos.add(vec);
@@ -89,7 +92,7 @@ export const MathLabel: React.FC<Props> = (props) => {
 
     group.lookAt(cameraPos);
     group.position.set(x, y, z);
-    const offset = parseVector(props.offset)
+    const offset = parseVector(THREE, props.offset)
       .applyQuaternion(state.camera.quaternion)
       .multiplyScalar(scale * 18);
     group.position.add(offset);
@@ -101,7 +104,7 @@ export const MathLabel: React.FC<Props> = (props) => {
         <mesh
           key={i}
           geometry={geometry}
-          material={getBasicMaterial(0xffffff)}
+          material={getBasicMaterial(THREE, 0xffffff)}
           rotation={[Math.PI, 0, 0]}
         />
       ))}
