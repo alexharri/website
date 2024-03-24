@@ -1,5 +1,5 @@
 import dynamic from "next/dynamic";
-import { useContext, useEffect, useRef, useState } from "react";
+import { useContext, useEffect, useRef } from "react";
 import { useVisible } from "../utils/hooks/useVisible";
 import { LoadThreeContext } from "./Components/ThreeProvider";
 
@@ -7,7 +7,6 @@ const loading = () => <p>Loading</p>;
 
 interface SceneProps {
   visible: boolean;
-  onLoad: () => void;
   height: number;
   yOffset?: number;
 }
@@ -42,8 +41,6 @@ export const Scene: React.FC<Props> = (props) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const visible = useVisible(containerRef);
 
-  const [loaded0, setLoaded] = useState(false);
-
   if (typeof height !== "number") throw new Error("'height' is a required prop for <Scene>");
   const S = threeJsScenes[scene];
   if (!S) throw new Error(`No such scene '${scene}'`);
@@ -58,10 +55,8 @@ export const Scene: React.FC<Props> = (props) => {
   }, [loaded]);
 
   return (
-    <div ref={containerRef} style={loaded0 ? {} : { height }} className="scene">
-      {loaded && (
-        <S visible={visible} onLoad={() => setLoaded(true)} height={height} yOffset={yOffset} />
-      )}
+    <div ref={containerRef} style={loaded ? {} : { height }} className="scene">
+      {loaded && <S visible={visible} height={height} yOffset={yOffset} />}
     </div>
   );
 };

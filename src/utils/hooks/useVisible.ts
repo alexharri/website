@@ -18,7 +18,7 @@ export function useVisible(ref: React.RefObject<HTMLElement>) {
     };
     const observer = new IntersectionObserver(callback, {
       root: document,
-      rootMargin: "64px",
+      rootMargin: "100px",
     });
     observer.observe(el);
     return () => observer.unobserve(el);

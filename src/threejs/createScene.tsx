@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import React, { useContext, useEffect, useMemo, useRef, useState } from "react";
 import type THREE from "three";
 import { NumberVariable, NumberVariableSpec } from "./NumberVariable";
 import { NormalVariable, NormalVariableSpec } from "./NormalVariable";
@@ -67,16 +67,13 @@ export function createScene<V extends VariablesOptions>(
 ) {
   return ({
     visible,
-    onLoad,
     height,
     yOffset = 0,
   }: {
     visible: boolean;
-    onLoad: () => void;
     height: number;
     yOffset?: number;
   }) => {
-    useLayoutEffect(onLoad, []);
     const THREE = useContext(ThreeContext);
     const DREI = useContext(DreiContext);
     const FIBER = useContext(FiberContext);
@@ -91,7 +88,7 @@ export function createScene<V extends VariablesOptions>(
       const camera = new THREE.PerspectiveCamera(fov);
       camera.position.set(0, scale * 7.5, scale * -15);
       return camera;
-    }, []);
+    }, [visible]);
 
     const variablesSpec = options.variables ?? (EMPTY_OBJ as V);
     const variableKeys = useMemo(() => Object.keys(variablesSpec), [variablesSpec]);
@@ -145,47 +142,49 @@ export function createScene<V extends VariablesOptions>(
 
     const hasNormal = variableKeys.some((key) => variablesSpec[key].type === "normal");
 
+    const ref = useRef<HTMLDivElement>(null);
+
     return (
       <>
         <div style={{ position: "relative", height }}>
           <div className={s("fade", { upper: true })} />
           <div className={s("fade", { lower: true })} />
 
-          <FIBER.Canvas
-            key={height}
-            style={{ height, userSelect: "none", cursor: down ? "grabbing" : "grab" }}
-            camera={camera}
-            onMouseDown={() => setDown(true)}
-            onMouseUp={() => setDown(false)}
-          >
-            {visible && (
-              <>
-                <ambientLight intensity={Math.PI / 2} />
-                <spotLight
-                  position={[10, 10, 10]}
-                  angle={0.15}
-                  penumbra={1}
-                  decay={0}
-                  intensity={Math.PI}
-                />
-                <pointLight position={[-10, -10, -10]} decay={0} intensity={Math.PI} />
+          <div ref={ref} />
 
-                <DREI.OrbitControls
-                  rotateSpeed={0.3}
-                  enableRotate
-                  autoRotate={rotate}
-                  autoRotateSpeed={0.7}
-                  enablePan={false}
-                  enableZoom={false}
-                  ref={orbitRef}
-                />
+          {visible && (
+            <FIBER.Canvas
+              style={{ height, userSelect: "none", cursor: down ? "grabbing" : "grab" }}
+              camera={camera}
+              onMouseDown={() => setDown(true)}
+              onMouseUp={() => setDown(false)}
+              resize={{ scroll: false }}
+            >
+              <ambientLight intensity={Math.PI / 2} />
+              <spotLight
+                position={[10, 10, 10]}
+                angle={0.15}
+                penumbra={1}
+                decay={0}
+                intensity={Math.PI}
+              />
+              <pointLight position={[-10, -10, -10]} decay={0} intensity={Math.PI} />
 
-                <mesh position={[0, yOffset, 0]}>
-                  <Component camera={camera} variables={variables} />
-                </mesh>
-              </>
-            )}
-          </FIBER.Canvas>
+              <DREI.OrbitControls
+                rotateSpeed={0.3}
+                enableRotate
+                autoRotate={rotate}
+                autoRotateSpeed={0.7}
+                enablePan={false}
+                enableZoom={false}
+                ref={orbitRef}
+              />
+
+              <mesh position={[0, yOffset, 0]}>
+                <Component camera={camera} variables={variables} />
+              </mesh>
+            </FIBER.Canvas>
+          )}
         </div>
 
         {variableKeys.length > 0 && (
