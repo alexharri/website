@@ -143,16 +143,15 @@ export function createScene<V extends VariablesOptions>(
 
     const hasNormal = variableKeys.some((key) => variablesSpec[key].type === "normal");
 
-    const [width, setWidth] = useState(innerWidth / devicePixelRatio);
+    const [width, setWidth] = useState(window.innerWidth);
     const widthRef = useRef(width);
     widthRef.current = width;
 
     useLayoutEffect(() => {
       if (!visible) return;
       const onResize = () => {
-        const width = innerWidth / devicePixelRatio;
-        if (widthRef.current > 600 && width > 600) return; // No value in rerendering
-        setWidth(width);
+        if (widthRef.current > 600 && window.innerWidth > 600) return; // No value in rerendering
+        setWidth(window.innerWidth);
       };
       window.addEventListener("resize", onResize);
       onResize();
