@@ -25,6 +25,10 @@ export const threeJsScenes: Partial<Record<string, React.ComponentType<SceneProp
   "plane-perpendicular": dynamic(() => import("./scenes/plane-perpendicular"), { loading }),
   "constant-normal-form": dynamic(() => import("./scenes/constant-normal-form"), { loading }),
   "point-normal-and-constant-normal-form": dynamic(() => import("./scenes/point-normal-and-constant-normal-form"), { loading }),
+  "point-and-plane": dynamic(() => import("./scenes/point-and-plane"), { loading }),
+  "point-distance-step-1": dynamic(() => import("./scenes/point-distance-step-1"), { loading }),
+  "point-distance-step-2": dynamic(() => import("./scenes/point-distance-step-2"), { loading }),
+  "point-distance-step-3": dynamic(() => import("./scenes/point-distance-step-3"), { loading }),
 };
 
 interface Props {

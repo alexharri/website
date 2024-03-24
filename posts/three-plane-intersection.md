@@ -45,7 +45,7 @@ Creating two edge vectors defined by $b - a$ and $c - a$ gives us two vectors th
 
 <Scene scene="three-points-edge-vectors" height={380} yOffset={-0.3} />
 
-The cross product of two vectors yields a perpendicular vectors, which we can use to get a vector $\vec{d}$ that's perpendicular to the plane formed by the triangle.
+The cross product of two vectors yields a perpendicular vector, which we can use to get a vector $\vec{d}$ that's perpendicular to the plane formed by the triangle.
 
 <p align="center">$$\vec{d} = (b - a) × (c - a)$$</p>
 
@@ -125,8 +125,31 @@ The normal $\vec{n}$ stays the same across both forms.
 I find the constant-normal form less natural to think about when compared to the point-normal form, but it simplifies many plane operations.
 
 
+## Distance from plane
 
+Given an arbitrary point $x$ and a plane $P_1$ in constant-normal form, we may want to ask how far away the point is from the plane. In other words, what is the minimum distance $x$ needs to travel to lie on the plane?
 
+<Scene scene="point-and-plane" height={400} />
+
+We can frame this differently if we construct a plane $P_2$ intersecting $x$ that is parallel to $P_1$, which we can do in point-normal form using $x$ as the point and $P_1$'s normal $\vec{n}$ as the normal:
+
+<Scene scene="point-distance-step-1" height={400} />
+
+With two parallel planes, we can frame the problem as finding the distance between the two planes. This becomes trivial using their constant-normal forms since it allows us to take the difference between their distances.
+
+So let's find $P_2$'s distance using the $d = \vec{n} \cdot p$ formula we learned about:
+
+<Scene scene="point-distance-step-2" height={400} />
+
+With two distances $d_1$, $d_2$ from the planes $P_1$, $P_2$ the solution becomes $d_2 - d_1$.
+
+<Scene scene="point-distance-step-3" height={400} />
+
+So, given a point $x$ and plane $P$ in constant-normal form having a normal $\vec{n}$ and distance $d$, we can define a function $dist(P, x)$ as:
+
+<p align="center">$$dist(P, x) = \vec{n} \cdot x - d $$</p>
+
+The distance may be positive or negative depending on which side of the plane the point is on. In either case, $x + \vec{n}\,\,dist(P, x)$ projects $x$ onto the plane along the normal's direction.
 
 
 
