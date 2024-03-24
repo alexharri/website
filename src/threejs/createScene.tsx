@@ -1,10 +1,12 @@
-import React, { useContext, useEffect, useMemo, useRef, useState } from "react";
+import React, { useContext, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import type THREE from "three";
 import { NumberVariable, NumberVariableSpec } from "./NumberVariable";
 import { NormalVariable, NormalVariableSpec } from "./NormalVariable";
 import { StyleOptions, useStyles } from "../utils/styles";
 import { useDidUpdate } from "../utils/hooks/useDidUpdate";
 import { DreiContext, FiberContext, ThreeContext } from "./Components/ThreeProvider";
+
+const FADE_HEIGHT = 80;
 
 const styles = ({ styled, theme }: StyleOptions) => ({
   variablesWrapper: styled.css`
@@ -28,7 +30,6 @@ const styles = ({ styled, theme }: StyleOptions) => ({
     position: absolute;
     left: 0;
     right: 0;
-    height: 80px;
     background: linear-gradient(${theme.background}, rgba(${theme.backgroundRgb}, 0));
     pointer-events: none;
 
@@ -67,7 +68,7 @@ export function createScene<V extends VariablesOptions>(
 ) {
   return ({
     visible,
-    height,
+    height: targetHeight,
     yOffset = 0,
   }: {
     visible: boolean;
@@ -83,8 +84,8 @@ export function createScene<V extends VariablesOptions>(
     const [down, setDown] = useState(false);
 
     const camera = useMemo(() => {
-      const scale = 1 - (height / 500) * 0.13;
-      const fov = height / 10;
+      const scale = 1 - (targetHeight / 500) * 0.13;
+      const fov = targetHeight / 10;
       const camera = new THREE.PerspectiveCamera(fov);
       camera.position.set(0, scale * 7.5, scale * -15);
       return camera;
@@ -107,7 +108,7 @@ export function createScene<V extends VariablesOptions>(
       }, {} as Variables<V>),
     );
 
-    const [rotate, setRotate] = useState(false);
+    const [rotate, setRotate] = useState(true);
 
     const timeoutRef = useRef<number>();
     useDidUpdate(() => {
@@ -142,19 +143,38 @@ export function createScene<V extends VariablesOptions>(
 
     const hasNormal = variableKeys.some((key) => variablesSpec[key].type === "normal");
 
-    const ref = useRef<HTMLDivElement>(null);
+    const [width, setWidth] = useState(window.innerWidth);
+    const widthRef = useRef(width);
+    widthRef.current = width;
+
+    useLayoutEffect(() => {
+      if (!visible) return;
+      const onResize = () => {
+        if (widthRef.current > 600 && window.innerWidth > 600) return; // No value in rerendering
+        setWidth(window.innerWidth);
+      };
+      window.addEventListener("resize", onResize);
+      onResize();
+      return () => window.removeEventListener("resize", onResize);
+    }, [visible]);
+
+    const scale = Math.min(1, width / 600);
+    const height = Math.round(targetHeight * scale);
+    const fadeHeight = Math.round(FADE_HEIGHT * scale);
 
     return (
       <>
         <div style={{ position: "relative", height }}>
-          <div className={s("fade", { upper: true })} />
-          <div className={s("fade", { lower: true })} />
-
-          <div ref={ref} />
+          <div className={s("fade", { upper: true })} style={{ height: fadeHeight }} />
+          <div className={s("fade", { lower: true })} style={{ height: fadeHeight }} />
 
           {visible && (
             <FIBER.Canvas
-              style={{ height, userSelect: "none", cursor: down ? "grabbing" : "grab" }}
+              style={{
+                height,
+                userSelect: "none",
+                cursor: down ? "grabbing" : "grab",
+              }}
               camera={camera}
               onMouseDown={() => setDown(true)}
               onMouseUp={() => setDown(false)}

@@ -43,7 +43,7 @@ const Styles = ({ styled }: StyleOptions) => ({
     }
 
     & > .scene {
-      margin: 24px 0;
+      margin: 24px -${cssVariables.contentWidth}px;
 
       & + .note {
         margin-top: -24px;
@@ -51,9 +51,6 @@ const Styles = ({ styled }: StyleOptions) => ({
         position: relative;
         z-index: 1;
       }
-    }
-
-    .scene {
     }
 
     & > .pre {
