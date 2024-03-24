@@ -56,17 +56,17 @@ export const NormalVariable: React.FC<NormalVariableProps> = (props) => {
   if (Number.isNaN(hAngleRef.current)) hAngleRef.current = parseHAngle(THREE, value);
   if (Number.isNaN(vAngleRef.current)) vAngleRef.current = parseVAngle(THREE, value);
 
-  const onMouseDown = (e: React.MouseEvent) => {
+  const onMouseDown = (e: React.MouseEvent | React.TouchEvent) => {
     e.preventDefault();
-    const startX = e.clientX;
-    const startY = e.clientY;
+    const startX = "touches" in e ? e.touches[0].clientX : e.clientX;
+    const startY = "touches" in e ? e.touches[0].clientY : e.clientY;
 
     const hAngle = hAngleRef.current;
     const vAngle = vAngleRef.current;
 
-    const onMouseMove = (e: MouseEvent) => {
-      const x = e.clientX - startX;
-      const y = e.clientY - startY;
+    const onMouseMove = (e: MouseEvent | TouchEvent) => {
+      const x = ("touches" in e ? e.touches[0].clientX : e.clientX) - startX;
+      const y = ("touches" in e ? e.touches[0].clientY : e.clientY) - startY;
 
       hAngleRef.current = hAngle - x / 100;
       vAngleRef.current = vAngle + y / 170;
@@ -82,10 +82,14 @@ export const NormalVariable: React.FC<NormalVariableProps> = (props) => {
 
     const onMouseUp = () => {
       window.removeEventListener("mousemove", onMouseMove);
+      window.removeEventListener("touchmove", onMouseMove);
       window.removeEventListener("mouseup", onMouseUp);
+      window.removeEventListener("touchend", onMouseUp);
     };
     window.addEventListener("mousemove", onMouseMove);
+    window.addEventListener("touchmove", onMouseMove);
     window.addEventListener("mouseup", onMouseUp);
+    window.addEventListener("touchend", onMouseUp);
   };
 
   const camera = useMemo(() => {
@@ -124,7 +128,7 @@ export const NormalVariable: React.FC<NormalVariableProps> = (props) => {
       ) : (
         firstUpper(dataKey)
       )}
-      <div className={s("normal")} onMouseDown={onMouseDown}>
+      <div className={s("normal")} onMouseDown={onMouseDown} onTouchStart={onMouseDown}>
         <FIBER.Canvas camera={camera}>
           {visible && (
             <mesh ref={meshRef}>
