@@ -8,6 +8,7 @@ const loading = () => <p>Loading</p>;
 interface SceneProps {
   visible: boolean;
   height: number;
+  zoom?: number;
   yOffset?: number;
 }
 
@@ -28,16 +29,22 @@ export const threeJsScenes: Partial<Record<string, React.ComponentType<SceneProp
   "point-distance-step-1": dynamic(() => import("./scenes/point-distance-step-1"), { loading }),
   "point-distance-step-2": dynamic(() => import("./scenes/point-distance-step-2"), { loading }),
   "point-distance-step-3": dynamic(() => import("./scenes/point-distance-step-3"), { loading }),
+  "parallel-planes": dynamic(() => import("./scenes/parallel-planes"), { loading }),
+  "intersecting-planes": dynamic(() => import("./scenes/intersecting-planes"), { loading }),
+  "intersecting-planes-point-and-normal": dynamic(() => import("./scenes/intersecting-planes-point-and-normal"), { loading }),
+  "intersecting-planes-virtual-plane": dynamic(() => import("./scenes/intersecting-planes-virtual-plane"), { loading }),
+  "intersecting-planes-offset": dynamic(() => import("./scenes/intersecting-planes-offset"), { loading }),
 };
 
 interface Props {
   scene: string;
   height: number;
+  zoom?: number;
   yOffset?: number;
 }
 
 export const Scene: React.FC<Props> = (props) => {
-  const { scene, height, yOffset } = props;
+  const { scene, height, zoom, yOffset } = props;
   const containerRef = useRef<HTMLDivElement>(null);
   const visible = useVisible(containerRef);
 
@@ -56,7 +63,7 @@ export const Scene: React.FC<Props> = (props) => {
 
   return (
     <div ref={containerRef} style={loaded ? {} : { height }} className="scene">
-      {loaded && <S visible={visible} height={height} yOffset={yOffset} />}
+      {loaded && <S visible={visible} height={height} yOffset={yOffset} zoom={zoom} />}
     </div>
   );
 };

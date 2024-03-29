@@ -41,7 +41,7 @@ export const NumberVariable: React.FC<NumberVariableProps> = (props) => {
       {svgLabel ? (
         <span style={{ fontSize: 24 }} dangerouslySetInnerHTML={{ __html: svgLabel }} />
       ) : (
-        firstUpper(dataKey)
+        firstUpper(spec.label ?? dataKey)
       )}
       <input
         type="range"
@@ -49,7 +49,7 @@ export const NumberVariable: React.FC<NumberVariableProps> = (props) => {
         max={max}
         value={value as number}
         onChange={(e) => onValueChange(Number(e.target.value))}
-        step={0.1}
+        step={0.001}
       />
     </label>
   );

@@ -2,6 +2,11 @@
 title: "Three-plane intersections"
 ---
 
+{/** todo better system for this */}
+<span data-varlabel="d">$d$</span>
+<span data-varlabel="vec_n">$\vec{n}$</span>
+<span data-varlabel="n">$n$</span>
+
 I want to explore an interesting algorithm I applied at work the other day. It has to do with computing the point intersection of three planes in 3D space.
 
 ## Planes
@@ -152,10 +157,137 @@ So, given a point $x$ and plane $P$ in constant-normal form having a normal $\ve
 The distance may be positive or negative depending on which side of the plane the point is on. In either case, $x + \vec{n}\,\,dist(P, x)$ projects $x$ onto the plane along the normal's direction.
 
 
+## Plane-plane intersections
+
+Two parallel planes with a common normal will never intersect.
+
+<Scene scene="parallel-planes" height={340} />
+
+However, two planes whose normals differ will intersect at some point; we are dealing with infinite planes after all.
+
+<Scene scene="intersecting-planes" height={340} />
+
+The intersection $I$ of two infinite planes in 3D space forms an infinite line comprised of a point $p_I$ and normal $\vec{n_I}$.
+
+Let's define two planes $P_1$, $P_2$ whose normals are $\vec{n_1}$, $\vec{n_2}$ having distances $d_0$, $d_1$. The direction $\vec{d_I}$ of the intersection $I$ will be the cross product of two the plane normals:
+
+<p align="center">$$\vec{d_I} = \vec{n_1} × \vec{n_2}$$</p>
+
+The cross product does not yield a normalized vector, so we'll normalize $\vec{d_I}$ to $\vec{n_I}$:
+
+<p align="center">$$\vec{n_I} = \dfrac{\vec{d_I}}{|\vec{d_I}|}$$</p>
+
+Let's zoom in and see this in action.
+
+<Scene scene="intersecting-planes-point-and-normal" height={380} zoom={2} />
+
+### Handling parallel planes
+
+If the two plane normals were perfectly equal (parallel) we'd get a $\vec{d_I}$ of $(0, 0, 0)$—not a valid normal. However, numerical precision and noisy inputs mean we often need to deal with _roughly_ parallel normals.
+
+This means that our plane-plane intersection code should yield a result of "no intersection" when the magnitude of $\vec{d_I}$ is less than some epsilon.
+
+```cs
+Line PlanePlaneIntersection(Plane p1, Plane p2) {
+  Vector3 direction = Vector3.cross(p1.normal, p2.normal);
+  if (direction.magnitude < EPSILON) {
+    return null; // Roughly parallel planes
+  }
+  // ...
+}
+```
+
+But what should this epsilon be?
+
+Given two normals $\vec{n_1}$, $\vec{n_2}$ where the angle between $\vec{n_1}$ and $\vec{n_2}$ is $\theta$, we can find a reasonable epsilon by charting $|\vec{n_1} × \vec{n_2}|$ for different values of $\theta$:
+
+<Image src="~/cross-product-magnitude-by-angle.png" plain width={840} />
+
+The relationship is linear. As the difference in angles halves, so does the magnitude. A difference of 1° yields a magnitude 0.01745, and a difference of 1/2° yields half of that.
+
+So to determine the epsilon, we can just ask: how low does the angle in degrees need to become for us to consider two planes parallel? Given an angle $\theta°$, we can find the epsilon $e$ via
+
+<p align="center">$$e = \dfrac{0.01745}{\theta°}$$</p>
+
+If that angle is 1/256°, then we get:
+
+<p align="center">$$\dfrac{0.01745}{256} \approx 0.000068 $$</p>
+
+Which epsilon you ultimately choose will depend on your use case.
+
+### Finding the point of intersection
+
+We've computed the normal and handled parallel planes. Next up we need to compute a point along the line of intersection.
+
+Since the line describing the plane-plane intersection is infinite, there are infinitely many points we could compute.
+
+However, with the restriction that we only travel along the directions of the plane normals, there is one and only one point on the line we can possibly hit. Note how the white parallelogram formed by the plane normals intersects the line at a single point.
+
+<Scene scene="intersecting-planes-virtual-plane" height={360} yOffset={-1} />
+
+This lets us reframe the problem to finding finding two scaling factors $k_1$, $k_2$ which applied to our plane normals $\vec{n_1}$, $\vec{n_2}$ yields a paralellogram whose tip is a point along the line-of-intersection.
+
+These scaling factors can be computed like so:
+
+```cs
+float d11 = Vector3.Dot(p1.normal, p1.normal);
+float d12 = Vector3.Dot(p1.normal, p2.normal);
+float d22 = Vector3.Dot(p2.normal, p2.normal);
+
+float denom = d11 * d22 - d12 * d12;
+
+float k1 = (p1.distance * d22 - p2.distance * d12) / denom;
+float k2 = (p2.distance * d11 - p1.distance * d12) / denom;
+
+Vector3 point = p1.normal * k1 + p2.normal * k2;
+```
+
+<SmallNote label="" center>Based on code from [Real-Time Collision Detection by Christer Ericson][book_ref]</SmallNote>
+
+Applying $k_1$, $k_2$ to our plane normals, we find our point-of-intersection:
+
+<Scene scene="intersecting-planes-offset" height={500} />
+
+Through some mathematical magic, this can be optimized down to:
+
+```cs
+Vector3 direction = Vector3.cross(p1.normal, p2.normal);
+
+float denom = Vector3.Dot(direction, direction);
+Vector3 a = p1.distance * p2.normal;
+Vector3 b = p2.distance * p1.normal;
+Vector3 point = Vector3.Cross(a - b, direction) / denom;
+```
+
+<SmallNote label="" center>How this optimization works can be found in chapter 5.4.4 of [Real-Time Collision Detection by Christer Ericson][book_ref].</SmallNote>
+
+Which completes our plane-plane intersection implementation:
+
+```cs
+Line PlanePlaneIntersection(Plane p1, Plane p2) {
+  Vector3 direction = Vector3.cross(p1.normal, p2.normal);
+  if (direction.magnitude < EPSILON) {
+    return null; // Roughly parallel planes
+  }
+
+  float denom = Vector3.Dot(direction, direction);
+  Vector3 a = p1.distance * p2.normal;
+  Vector3 b = p2.distance * p1.normal;
+  Vector3 point = Vector3.Cross(a - b, direction) / denom;
+
+  Vector3 normal = direction.normalized;
+
+  return new Line(point, normal);
+}
+```
 
 
-{/** todo better system for this */}
-<span data-varlabel="d">$d$</span>
-<span data-varlabel="vec_n">$\vec{n}$</span>
-<span data-varlabel="n">$n$</span>
 
+
+
+
+
+
+
+
+[book_ref]: #real-time-collision-detection

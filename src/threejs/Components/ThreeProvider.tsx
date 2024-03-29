@@ -22,7 +22,7 @@ export const ThreeProvider: React.FC<{ children: React.ReactNode }> = (props) =>
   const loadContext = useMemo(
     () => ({
       async load() {
-        if (loadingRef.current) return;
+        if (loadingRef.current || three) return;
 
         setLoading(true);
 
@@ -36,6 +36,7 @@ export const ThreeProvider: React.FC<{ children: React.ReactNode }> = (props) =>
           setThree(three);
           setDrei(drei);
           setFiber(fiber);
+          setLoading(false);
         } catch (e) {
           // TODO: better error handling
           console.error("Failed to import ThreeJS");
@@ -46,10 +47,8 @@ export const ThreeProvider: React.FC<{ children: React.ReactNode }> = (props) =>
       loaded: !!three,
       loading,
     }),
-    [three, drei],
+    [three, drei, fiber],
   );
-
-  console.log({ three, drei, loading });
 
   return (
     <LoadThreeContext.Provider value={loadContext}>

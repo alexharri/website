@@ -4,6 +4,7 @@ import { DreiContext, ThreeContext } from "../ThreeProvider";
 
 interface Props {
   size: number;
+  light?: boolean;
 }
 
 export const Grid: React.FC<Props> = (props) => {
@@ -15,7 +16,7 @@ export const Grid: React.FC<Props> = (props) => {
 
   const color = (i: number) => {
     const dist = Math.abs(i);
-    const l = lerp(0.15, 0.1, dist / HALF);
+    const l = props.light ? lerp(0.08, 0.06, dist / HALF) : lerp(0.15, 0.1, dist / HALF);
     return new THREE.Color(l, l, l);
   };
 

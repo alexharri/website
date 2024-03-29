@@ -27,7 +27,7 @@ export const prismTheme: PrismTheme = {
       style: { color: colors.token.comment, fontStyle: "italic" },
     },
     {
-      types: ["builtin", "constant"],
+      types: ["builtin", "constant", "class-name"],
       style: { color: colors.green },
     },
   ],

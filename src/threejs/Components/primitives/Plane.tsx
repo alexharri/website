@@ -15,10 +15,11 @@ interface Props {
   showCenter?: boolean;
   showNormal?: boolean;
   showOriginLine?: boolean;
+  transparent?: boolean;
 }
 
 export const Plane: React.FC<Props> = (props) => {
-  const { showCenter, showNormal, showOriginLine } = props;
+  const { showCenter, showNormal, showOriginLine, transparent = false } = props;
 
   const THREE = useContext(ThreeContext);
 
@@ -39,7 +40,7 @@ export const Plane: React.FC<Props> = (props) => {
 
   const planeMaterial = new THREE.MeshPhysicalMaterial({
     color,
-    opacity: 0.35,
+    opacity: 0.2,
     transparent: true,
     roughness: 0,
     transmission: 1,
@@ -64,12 +65,8 @@ export const Plane: React.FC<Props> = (props) => {
         <Vector color={props.color} from={planePosition} to={planePosition.clone().add(normal)} />
       )}
       {showOriginLine && <Vector color={props.color} to={planePosition} strictEnd />}
-      <mesh
-        geometry={planeGeometry}
-        position={planePosition}
-        material={planeMaterial}
-        quaternion={mesh.quaternion}
-      >
+      <mesh position={planePosition} quaternion={mesh.quaternion}>
+        {!transparent && <mesh geometry={planeGeometry} material={planeMaterial} />}
         <mesh
           geometry={cylinderGeometry}
           position={parseVector(THREE, { x: HALF, y: 0, z: 0 })}

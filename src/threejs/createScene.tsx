@@ -70,9 +70,11 @@ export function createScene<V extends VariablesOptions>(
     visible,
     height: targetHeight,
     yOffset = 0,
+    zoom = 1,
   }: {
     visible: boolean;
     height: number;
+    zoom?: number;
     yOffset?: number;
   }) => {
     const THREE = useContext(ThreeContext);
@@ -87,7 +89,8 @@ export function createScene<V extends VariablesOptions>(
       const scale = 1 - (targetHeight / 500) * 0.13;
       const fov = targetHeight / 10;
       const camera = new THREE.PerspectiveCamera(fov);
-      camera.position.set(0, scale * 7.5, scale * -15);
+      const pos = new THREE.Vector3(0, scale * 7.5, scale * -15).multiplyScalar(1 / zoom);
+      camera.position.set(pos.x, pos.y, pos.z);
       return camera;
     }, [visible]);
 

@@ -10,6 +10,7 @@ export function parseVector(THREE: Three, vec?: IVector3) {
 }
 
 const colors = {
+  white: 0xffffff,
   red: 0xff1919,
   darkred: 0xc20808,
   green: 0x15cf53,
