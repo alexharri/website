@@ -3,11 +3,13 @@ import type THREE from "three";
 import { getColor, getPhongMaterial, IColor, IVector3, parseVector } from "../../utils";
 import { ThreeContext } from "../ThreeProvider";
 import { Vector } from "./Vector";
+import { Plane as PlaneClass } from "../../../math/Plane";
 
 let cylinderGeometry: THREE.CylinderGeometry | null = null;
 
 interface Props {
-  normal: IVector3;
+  plane?: PlaneClass;
+  normal?: IVector3;
   position?: IVector3;
   width?: number;
   distance?: number;
@@ -16,17 +18,18 @@ interface Props {
   showNormal?: boolean;
   showOriginLine?: boolean;
   transparent?: boolean;
+  opacity?: number;
 }
 
 export const Plane: React.FC<Props> = (props) => {
-  const { showCenter, showNormal, showOriginLine, transparent = false } = props;
+  const { showCenter, showNormal, showOriginLine, transparent = false, opacity = 0.2 } = props;
 
   const THREE = useContext(ThreeContext);
 
-  const normal = parseVector(THREE, props.normal);
+  const normal = parseVector(THREE, props.plane?.normal ?? props.normal);
   const planePosition = props.position
     ? parseVector(THREE, props.position)
-    : normal.clone().multiplyScalar(props.distance ?? 0);
+    : normal.clone().multiplyScalar(props.plane?.distance ?? props.distance ?? 0);
 
   const W = props.width ?? 5;
   const HALF = W / 2;
@@ -40,7 +43,7 @@ export const Plane: React.FC<Props> = (props) => {
 
   const planeMaterial = new THREE.MeshPhysicalMaterial({
     color,
-    opacity: 0.2,
+    opacity,
     transparent: true,
     roughness: 0,
     transmission: 1,

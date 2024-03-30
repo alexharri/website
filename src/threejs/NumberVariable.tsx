@@ -15,6 +15,7 @@ export type NumberVariableSpec = {
   type: "number";
   range: [number, number];
   value: number;
+  step?: number;
 };
 
 interface NumberVariableProps {
@@ -49,7 +50,7 @@ export const NumberVariable: React.FC<NumberVariableProps> = (props) => {
         max={max}
         value={value as number}
         onChange={(e) => onValueChange(Number(e.target.value))}
-        step={0.001}
+        step={spec.step ?? 0.001}
       />
     </label>
   );

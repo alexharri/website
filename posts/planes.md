@@ -6,6 +6,9 @@ title: "Three-plane intersections"
 <span data-varlabel="d">$d$</span>
 <span data-varlabel="vec_n">$\vec{n}$</span>
 <span data-varlabel="n">$n$</span>
+<span data-varlabel="P_1">$P_1$</span>
+<span data-varlabel="P_2">$P_2$</span>
+<span data-varlabel="P_3">$P_3$</span>
 
 I want to explore an interesting algorithm I applied at work the other day. It has to do with computing the point intersection of three planes in 3D space.
 
@@ -205,7 +208,7 @@ Given two normals $\vec{n_1}$, $\vec{n_2}$ where the angle between $\vec{n_1}$ a
 
 The relationship is linear. As the difference in angles halves, so does the magnitude. A difference of 1° yields a magnitude 0.01745, and a difference of 1/2° yields half of that.
 
-So to determine the epsilon, we can just ask: how low does the angle in degrees need to become for us to consider two planes parallel? Given an angle $\theta°$, we can find the epsilon $e$ via
+So to determine the epsilon, we can just ask: how low does the angle in degrees need to become for us to consider two planes parallel? Given an angle $\theta°$, we can find the epsilon $E$ via
 
 <p align="center">$$e = \dfrac{0.01745}{\theta°}$$</p>
 
@@ -282,12 +285,59 @@ Line PlanePlaneIntersection(Plane p1, Plane p2) {
 ```
 
 
+## Three plane intersection
 
+Given three planes $P_1$, $P_2$, $P_3$, there are five possible configurations:
 
+ 1. All three planes are parallel, with none of them intersecting each other.
+ 2. Two planes are parallel, and the third plane intersects the ther two.
+ 3. All three planes intersect along a single line.
+ 4. The three planes intersect each other in pairs, forming three lines of intersection.
+ 5. The planes intersect at a point.
 
+<Scene scene="three-plane-intersection-configurations" height={400} yOffset={-1} zoom={1.1} />
 
+When finding the point-of-intersection for three planes, we'll first need to see whether the three planes all intersect.
 
+Given that $\vec{n_1}$, $\vec{n_2}$, $\vec{n_3}$ are the plane normals for $P_1$, $P_2$, $P_3$, we can determine whether the planes intersect at a point with the formula:
 
+<p align="center">$$ \vec{n_1} \cdot (\vec{n_2} × \vec{n_3}) \neq 0 $$</p>
+
+<SmallNote label="" center>The order in which we plug in the planes does not matter.</SmallNote>
+
+Let's work through some examples. If $\vec{n_2}$ and $\vec{n_3}$ are parallel then $\vec{n_2} × \vec{n_3}$ yields a vector whose magnitude is zero.
+
+<p align="center">$$|\vec{n_2} × \vec{n_3}| = 0$$</p>
+
+And since the dot product is a multiple of the magnitudes of its component vectors:
+
+<p align="center">$$a \cdot b = |a|\,|b|\,cos\,\theta$$</p>
+
+the final result is zero whenever $\vec{n_2}$ and $\vec{n_3}$ are parallel.
+
+<p align="center">$$\vec{n_1} \cdot (\vec{n_2} × \vec{n_3}) = 0$$</p>
+
+This takes care the configurations where $\vec{n_2}$ and $\vec{n_3}$ are parallel.
+
+<Scene scene="three-planes-n2-n3-parallel" height={400} />
+
+With that, let's consider the case where $\vec{n_1}$ is parallel to either $\vec{n_2}$ or $\vec{n_3}$ but $\vec{n_2}$ and $\vec{n_3}$ are not parallel to each other.
+
+Let's take the example where $\vec{n_1}$ is parallel to $\vec{n_2}$ ($\vec{n_3}$ is parallel to neither).
+
+<Scene scene="three-planes-n1-n2-parallel" height={400} />
+
+The cross product $\vec{n_2} × \vec{n_3}$ yields a vector that's perpendicular to both $\vec{n_2}$ and $\vec{n_3}$.
+
+<Scene scene="three-planes-n1-n2-parallel-cross" height={400} />
+
+Since $\vec{n_1}$ is parallel to $\vec{n_2}$, that means that $\vec{n_2} × \vec{n_3}$ is also perpendicular to $\vec{n_1}$.
+
+As we learned, the dot product of two perpendicular is zero, meaning that:
+
+<p align="center">$$\vec{n_1} \cdot (\vec{n_2} × \vec{n_3}) = 0$$</p>
+
+Which also holds in the case where $\vec{n_1}$ is parallel to $\vec{n_3}$.
 
 
 [book_ref]: #real-time-collision-detection

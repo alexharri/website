@@ -11,6 +11,8 @@ export function parseVector(THREE: Three, vec?: IVector3) {
 
 const colors = {
   white: 0xffffff,
+  background: 0x090d13,
+  gray: 0xcccccc,
   red: 0xff1919,
   darkred: 0xc20808,
   green: 0x15cf53,
@@ -35,4 +37,15 @@ const basicMaterialCache: Partial<Record<number, THREE.MeshBasicMaterial>> = {};
 export function getBasicMaterial(THREE: Three, color: IColor) {
   if (typeof color === "string") color = colors[color];
   return (basicMaterialCache[color] ||= new THREE.MeshBasicMaterial({ color }));
+}
+
+const transparentMaterialCache: Partial<Record<number, THREE.MeshBasicMaterial>> = {};
+
+export function getTransparentBasicMaterial(THREE: Three, color: IColor) {
+  if (typeof color === "string") color = colors[color];
+  return (transparentMaterialCache[color] ||= new THREE.MeshBasicMaterial({
+    color,
+    transparent: true,
+    opacity: 0.5,
+  }));
 }

@@ -34,6 +34,10 @@ export const threeJsScenes: Partial<Record<string, React.ComponentType<SceneProp
   "intersecting-planes-point-and-normal": dynamic(() => import("./scenes/intersecting-planes-point-and-normal"), { loading }),
   "intersecting-planes-virtual-plane": dynamic(() => import("./scenes/intersecting-planes-virtual-plane"), { loading }),
   "intersecting-planes-offset": dynamic(() => import("./scenes/intersecting-planes-offset"), { loading }),
+  "three-plane-intersection-configurations": dynamic(() => import("./scenes/three-plane-intersection-configurations"), { loading }),
+  "three-planes-n2-n3-parallel": dynamic(() => import("./scenes/three-planes-n2-n3-parallel"), { loading }),
+  "three-planes-n1-n2-parallel": dynamic(() => import("./scenes/three-planes-n1-n2-parallel"), { loading }),
+  "three-planes-n1-n2-parallel-cross": dynamic(() => import("./scenes/three-planes-n1-n2-parallel-cross"), { loading }),
 };
 
 interface Props {
