@@ -331,13 +331,23 @@ The cross product $\vec{n_2} × \vec{n_3}$ yields a vector that's perpendicular 
 
 <Scene scene="three-planes-n1-n2-parallel-cross" height={400} />
 
-Since $\vec{n_1}$ is parallel to $\vec{n_2}$, that means that $\vec{n_2} × \vec{n_3}$ is also perpendicular to $\vec{n_1}$.
-
-As we learned, the dot product of two perpendicular is zero, meaning that:
+Since $\vec{n_1}$ is parallel to $\vec{n_2}$, that means that $\vec{n_2} × \vec{n_3}$ is also perpendicular to $\vec{n_1}$. As we learned, the dot product of two perpendicular is zero, meaning that:
 
 <p align="center">$$\vec{n_1} \cdot (\vec{n_2} × \vec{n_3}) = 0$$</p>
 
 Which also holds in the case where $\vec{n_1}$ is parallel to $\vec{n_3}$.
+
+We've demonstrated that two of the three normals being parallel results in $\vec{n_1} \cdot (\vec{n_2} × \vec{n_3}) = 0$. But what about the configurations where the three planes intersect along parallel lines? Those configurations have no parallel normals.
+
+<Scene scene="three-planes-three-lines" height={400} />
+
+As we learned when looking at plane-plane intersections, the cross product of the two plane normals yields the direction of the intersection line.
+
+<Scene scene="three-planes-three-lines-cross" height={400} />
+
+When all of the lines of intersection are parallel, the plane normals defining those lines must be perpendicular to them.
+
+Yet again, because the dot product of perpendicular vectors is 0 we can conclude that $\vec{n_1} \cdot (\vec{n_2} × \vec{n_3}) = 0$ for these configurations.
 
 
 [book_ref]: #real-time-collision-detection

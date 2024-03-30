@@ -32,11 +32,13 @@ export default createScene(
     const i2 = planePlaneIntersection(plane2, plane3)!;
     const i3 = planePlaneIntersection(plane3, plane1)!;
 
-    const OFF = 16.5;
+    const OFF = 12;
 
     const meshRef = useRef<Mesh | null>(null);
-    const t0Ref = useRef<Mesh | null>(null);
-    const t1Ref = useRef<Mesh | null>(null);
+    const occludePlane0Ref = useRef<Mesh | null>(null);
+    const occludePlane1Ref = useRef<Mesh | null>(null);
+
+    const configurationRefs = Array.from({ length: 5 }).map(() => useRef<Mesh | null>(null));
 
     const posRef = useRef(variables.pos);
     posRef.current = variables.pos;
@@ -56,26 +58,48 @@ export default createScene(
       mesh.position.setX(x);
     });
 
-    FIBER.useFrame(() => {
+    const lastOffsetsRef = useRef([0, 0, 0, 0, 0]);
+
+    FIBER.useFrame((state) => {
       const mesh = meshRef.current;
       if (!mesh) return;
 
       const curr = xRef.current;
       const dest = OFF * posRef.current;
 
-      const x = lerp(curr, dest, 0.15);
-      mesh.position.setX(x);
-      xRef.current = x;
+      const xShift = lerp(curr, dest, 0.15);
+      mesh.position.setX(xShift);
+      xRef.current = xShift;
+
+      lastOffsetsRef.current;
+
+      const lastOffsets = lastOffsetsRef.current;
+      const cx = state.camera.position.x;
+      for (const [i, ref] of configurationRefs.entries()) {
+        if (!ref.current) continue;
+        const x = -OFF * i;
+        let xOff = 0;
+        if (cx > 0 && i < posRef.current) {
+          if (cx + 3.5 > x + xShift) xOff = cx + 3.5 - (x + xShift);
+        } else if (i > posRef.current) {
+          if (cx - 3.5 < x + xShift) xOff = cx - 3.5 - (x + xShift);
+        }
+        if (lastOffsets[i] !== xOff) {
+          xOff = lerp(lastOffsets[i], xOff, 0.15);
+          ref.current.position.setX(x + xOff);
+          lastOffsets[i] = xOff;
+        }
+      }
     });
 
     FIBER.useFrame((state) => {
-      const t0 = t0Ref.current;
-      if (!t0) return;
-      const t1 = t1Ref.current;
-      if (!t1) return;
+      const occludePlane0 = occludePlane0Ref.current;
+      if (!occludePlane0) return;
+      const occludePlane1 = occludePlane1Ref.current;
+      if (!occludePlane1) return;
 
-      t0.position.setX(Math.min(-OFF / 2, state.camera.position.x - 1));
-      t1.position.setX(Math.max(OFF / 2, state.camera.position.x + 1));
+      occludePlane0.position.setX(Math.min(-OFF / 2, state.camera.position.x - 0.3));
+      occludePlane1.position.setX(Math.max(OFF / 2, state.camera.position.x + 0.3));
     });
 
     return (
@@ -84,33 +108,33 @@ export default createScene(
           position={[OFF / 2, 0, 0]}
           geometry={new THREE.BoxGeometry(0.01, 100, 100)}
           material={getTransparentBasicMaterial(THREE, "background")}
-          ref={t0Ref}
+          ref={occludePlane0Ref}
         />
         <mesh
           position={[OFF / 2, 0, 0]}
           geometry={new THREE.BoxGeometry(0.01, 100, 100)}
           material={getTransparentBasicMaterial(THREE, "background")}
-          ref={t1Ref}
+          ref={occludePlane1Ref}
         />
         <mesh
-          position={[0, 0, OFF]}
+          position={[0, 0, OFF * 2]}
           geometry={new THREE.BoxGeometry(100, 100, 0.01)}
           material={getTransparentBasicMaterial(THREE, "background")}
         />
         <mesh
-          position={[0, 0, -OFF]}
+          position={[0, 0, -OFF * 2]}
           geometry={new THREE.BoxGeometry(100, 100, 0.01)}
           material={getTransparentBasicMaterial(THREE, "background")}
         />
 
         <mesh ref={meshRef}>
-          <mesh>
+          <mesh ref={configurationRefs[0]}>
             <Plane normal={[0, 1, 0]} distance={3} color={0x888888} opacity={0.3} />
             <Plane normal={[0, 1, 0]} distance={2} color={0x888888} opacity={0.3} />
             <Plane normal={[0, 1, 0]} distance={1} color={0x888888} opacity={0.3} />
           </mesh>
 
-          <mesh position={[-OFF, 0, 0]}>
+          <mesh ref={configurationRefs[1]} position={[-OFF, 0, 0]}>
             <Plane normal={[1, 0, 0]} position={[0, 1.75, 0]} color={0x888888} opacity={0.3} />
             <Plane normal={[0, 1, 0]} distance={2.5} color={0x888888} opacity={0.3} />
             <Plane normal={[0, 1, 0]} distance={1} color={0x888888} opacity={0.3} />
@@ -118,14 +142,14 @@ export default createScene(
             <Line from={[0, 2.5, -4]} to={[0, 2.5, 4]} color={0xff4444} radius={0.03} />
           </mesh>
 
-          <mesh position={[-OFF * 2, 0, 0]}>
+          <mesh ref={configurationRefs[2]} position={[-OFF * 2, 0, 0]}>
             <Plane normal={[1.3, 1, 0]} position={[0, 1.5, 0]} color={0x888888} opacity={0.3} />
             <Plane normal={[-1.3, 1, 0]} position={[0, 1.5, 0]} color={0x888888} opacity={0.3} />
             <Plane normal={[0, -1, 0]} position={[0, 1.5, 0]} color={0x888888} opacity={0.3} />
             <Line from={[0, 1.5, -4]} to={[0, 1.5, 4]} color={0xff4444} radius={0.03} />
           </mesh>
 
-          <mesh position={[-OFF * 3, 0, 0]}>
+          <mesh ref={configurationRefs[3]} position={[-OFF * 3, 0, 0]}>
             <Plane normal={n1} position={p1} color={0x888888} opacity={0.3} />
             <Plane normal={n2} position={p2} color={0x888888} opacity={0.3} />
             <Plane normal={n3} position={p3} color={0x888888} opacity={0.3} />
@@ -140,7 +164,7 @@ export default createScene(
             ))}
           </mesh>
 
-          <mesh position={[-OFF * 4, 0, 0]}>
+          <mesh ref={configurationRefs[4]} position={[-OFF * 4, 0, 0]}>
             <Plane normal={[1, 0, 0]} position={[0, 2, 0]} color={0x888888} opacity={0.3} />
             <Plane normal={[0, 1, 0]} position={[0, 2, 0]} color={0x888888} opacity={0.3} />
             <Plane normal={[0, 0, 1]} position={[0, 2, 0]} color={0x888888} opacity={0.3} />

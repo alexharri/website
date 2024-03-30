@@ -50,6 +50,14 @@ const xOffsets: Record<string, number> = {
   P_2: 7,
   P_3: 7,
 };
+const yOffsets: Record<string, number> = {
+  a: 4,
+  b: 5.5,
+  c: 4,
+  P_1: 6.5,
+  P_2: 6.5,
+  P_3: 6.5,
+};
 
 interface Props {
   label: string;
@@ -95,7 +103,12 @@ export const MathLabel: React.FC<Props> = (props) => {
   }, [props.label]);
 
   const orgMesh = new THREE.Mesh();
+  orgMesh.position.set(0, 0, 0.00001);
   if (props.normal) orgMesh.lookAt(parseVector(THREE, props.normal));
+
+  const invMesh = new THREE.Mesh();
+  invMesh.position.set(0, 0, 0.00001);
+  if (props.normal) invMesh.lookAt(parseVector(THREE, props.normal).multiplyScalar(-1));
 
   const groupRef = useRef<THREE.Group>(null);
   FIBER.useFrame((state) => {
@@ -115,15 +128,11 @@ export const MathLabel: React.FC<Props> = (props) => {
     const distance = group.position.distanceTo(state.camera.position);
     const scale = distance * userScale * scaleFac;
     group.scale.set(scale, scale, scale);
-
-    // if (props.normal) orgMesh.lookAt(parseVector(THREE, props.normal));
-
     group.position.set(x, y, z);
 
     if (props.normal) {
       const mesh = new THREE.Mesh();
       mesh.position.set(group.position.x, group.position.y, group.position.z);
-      mesh.quaternion;
 
       const cpos = state.camera.position;
       mesh.position.set(cpos.x, cpos.y, cpos.z);
@@ -134,10 +143,14 @@ export const MathLabel: React.FC<Props> = (props) => {
       const normal = parseVector(THREE, props.normal);
       const angle = normal.angleTo(lookNormal);
 
-      const quat = angle > Math.PI / 2 ? orgMesh.quaternion : orgMesh.quaternion.clone().invert();
+      const quat = angle > Math.PI / 2 ? orgMesh.quaternion : invMesh.quaternion;
       group.quaternion.set(quat.x, quat.y, quat.z, quat.w);
 
-      const offset = new THREE.Vector3(xOffsets[props.label] * -scale, 0, 0)
+      const offset = new THREE.Vector3(
+        xOffsets[props.label] * -scale,
+        yOffsets[props.label] * scale,
+        0,
+      )
         .applyQuaternion(quat)
         .add(parseVector(THREE, props.offset).applyQuaternion(orgMesh.quaternion));
       group.position.add(offset);
