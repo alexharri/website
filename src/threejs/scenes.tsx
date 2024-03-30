@@ -40,6 +40,7 @@ export const threeJsScenes: Partial<Record<string, React.ComponentType<SceneProp
   "three-planes-n1-n2-parallel-cross": dynamic(() => import("./scenes/three-planes-n1-n2-parallel-cross"), { loading }),
   "three-planes-three-lines": dynamic(() => import("./scenes/three-planes-three-lines"), { loading }),
   "three-planes-three-lines-cross": dynamic(() => import("./scenes/three-planes-three-lines-cross"), { loading }),
+  "three-planes-some-parallel": dynamic(() => import("./scenes/three-planes-some-parallel"), { loading }),
 };
 
 interface Props {

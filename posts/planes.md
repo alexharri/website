@@ -297,15 +297,21 @@ Given three planes $P_1$, $P_2$, $P_3$, there are five possible configurations:
 
 <Scene scene="three-plane-intersection-configurations" height={400} yOffset={-1} zoom={1.1} />
 
-When finding the point-of-intersection for three planes, we'll first need to see whether the three planes all intersect.
+When finding the point-of-intersection, we'll first need to determine whether the three planes all intersect each other—which for configurations 1 through 4, they don't.
 
-Given that $\vec{n_1}$, $\vec{n_2}$, $\vec{n_3}$ are the plane normals for $P_1$, $P_2$, $P_3$, we can determine whether the planes intersect at a point with the formula:
+Given that $\vec{n_1}$, $\vec{n_2}$, $\vec{n_3}$ are the plane normals for $P_1$, $P_2$, $P_3$, we can determine whether the planes intersect at a single point with the formula:
 
 <p align="center">$$ \vec{n_1} \cdot (\vec{n_2} × \vec{n_3}) \neq 0 $$</p>
 
-<SmallNote label="" center>The order in which we plug in the planes does not matter.</SmallNote>
+When I first saw this, I found it hard to believe this would work for all cases. Still, it does! Let's take a deep dive to better understand what's happening.
 
-Let's work through some examples. If $\vec{n_2}$ and $\vec{n_3}$ are parallel then $\vec{n_2} × \vec{n_3}$ yields a vector whose magnitude is zero.
+### Two or more planes are parallel
+
+We'll start off with the configurations where two or more planes are parallel:
+
+<Scene scene="three-planes-some-parallel" height={400} />
+
+If $\vec{n_2}$ and $\vec{n_3}$ are parallel then $\vec{n_2} × \vec{n_3}$ yields a vector whose magnitude is zero.
 
 <p align="center">$$|\vec{n_2} × \vec{n_3}| = 0$$</p>
 
@@ -317,13 +323,13 @@ the final result is zero whenever $\vec{n_2}$ and $\vec{n_3}$ are parallel.
 
 <p align="center">$$\vec{n_1} \cdot (\vec{n_2} × \vec{n_3}) = 0$$</p>
 
-This takes care the configurations where $\vec{n_2}$ and $\vec{n_3}$ are parallel.
+This takes care of the "all-planes-parallel" configuration, and the configuration where $\vec{n_2}$ and $\vec{n_3}$ are parallel
 
 <Scene scene="three-planes-n2-n3-parallel" height={400} />
 
 With that, let's consider the case where $\vec{n_1}$ is parallel to either $\vec{n_2}$ or $\vec{n_3}$ but $\vec{n_2}$ and $\vec{n_3}$ are not parallel to each other.
 
-Let's take the example where $\vec{n_1}$ is parallel to $\vec{n_2}$ ($\vec{n_3}$ is parallel to neither).
+Let's take the example where $\vec{n_1}$ is parallel to $\vec{n_2}$ but $\vec{n_3}$ is parallel to neither.
 
 <Scene scene="three-planes-n1-n2-parallel" height={400} />
 
@@ -331,11 +337,13 @@ The cross product $\vec{n_2} × \vec{n_3}$ yields a vector that's perpendicular 
 
 <Scene scene="three-planes-n1-n2-parallel-cross" height={400} />
 
-Since $\vec{n_1}$ is parallel to $\vec{n_2}$, that means that $\vec{n_2} × \vec{n_3}$ is also perpendicular to $\vec{n_1}$. As we learned, the dot product of two perpendicular is zero, meaning that:
+Since $\vec{n_1}$ is parallel to $\vec{n_2}$, that means that $\vec{n_2} × \vec{n_3}$ is also perpendicular to $\vec{n_1}$. As we've learned, the dot product of two perpendicular is zero, meaning that:
 
 <p align="center">$$\vec{n_1} \cdot (\vec{n_2} × \vec{n_3}) = 0$$</p>
 
 Which also holds in the case where $\vec{n_1}$ is parallel to $\vec{n_3}$.
+
+### Parallel lines of intersection
 
 We've demonstrated that two of the three normals being parallel results in $\vec{n_1} \cdot (\vec{n_2} × \vec{n_3}) = 0$. But what about the configurations where the three planes intersect along parallel lines? Those configurations have no parallel normals.
 
@@ -345,9 +353,12 @@ As we learned when looking at plane-plane intersections, the cross product of th
 
 <Scene scene="three-planes-three-lines-cross" height={400} />
 
-When all of the lines of intersection are parallel, the plane normals defining those lines must be perpendicular to them.
+When all of the lines of intersection are parallel, all of the plane normals defining those lines are perpendicular them.
 
 Yet again, because the dot product of perpendicular vectors is 0 we can conclude that $\vec{n_1} \cdot (\vec{n_2} × \vec{n_3}) = 0$ for these configurations.
+
+
+## Computing the point intersection
 
 
 [book_ref]: #real-time-collision-detection
