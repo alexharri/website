@@ -5,7 +5,6 @@ import { Grid } from "../Components/primitives/Grid";
 import { Line } from "../Components/primitives/Line";
 import { MathLabel } from "../Components/primitives/MathLabel";
 import { Plane } from "../Components/primitives/Plane";
-import { Point } from "../Components/primitives/Point";
 import { Vector } from "../Components/primitives/Vector";
 import { ThreeContext } from "../Components/ThreeProvider";
 import { createScene } from "../createScene";
@@ -26,19 +25,7 @@ export default createScene(
     const p2 = PlaneClass.fromPointAndNormal(point2, n2);
     const p3 = PlaneClass.fromPointAndNormal(point3, n3);
 
-    const d22 = p2.normal.dot(p2.normal);
-    const d23 = p2.normal.dot(p3.normal);
-    const d33 = p3.normal.dot(p3.normal);
-
-    const denom_old = d22 * d33 - d23 * d23;
-
-    const k2 = (p2.distance * d33 - p3.distance * d23) / denom_old;
-    const k3 = (p3.distance * d22 - p2.distance * d23) / denom_old;
-
-    const first = p2.normal.multiplyScalar(k2).add(p3.normal.multiplyScalar(k3));
-
     const u = p2.normal.cross(p3.normal);
-    const u_x_p1 = u.clone().multiplyScalar(p1.distance);
     const denom = p1.normal.dot(u);
 
     const a = p2.normal.multiplyScalar(p3.distance);
@@ -46,7 +33,7 @@ export default createScene(
     const asubb = a.clone().sub(b);
     const cross = p1.normal.cross(asubb);
 
-    const p2p3intersection = planePlaneIntersection(p2, p3)!;
+    const line = planePlaneIntersection(p2, p3)!;
 
     console.log(denom);
 
@@ -56,27 +43,22 @@ export default createScene(
         <Plane position={point2} normal={n2} color="white" transparent />
         <Plane position={point3} normal={n3} color="white" transparent />
 
-        <MathLabel label="P_1" position={point1} offset={[-1.4, 1.2, 0]} normal={n1} />
+        {/* <MathLabel label="P_1" position={point1} offset={[-1.4, 1.2, 0]} normal={n1} />
         <MathLabel label="P_2" position={point2} offset={[-1.4, -1.4, 0]} normal={n2} />
-        <MathLabel label="P_3" position={point3} offset={[-1.2, 1.2, 0]} normal={n3} />
+        <MathLabel label="P_3" position={point3} offset={[-1.2, 1.2, 0]} normal={n3} /> */}
 
-        {/* <Vector color="red" to={u.clone().multiplyScalar(denom)} strictEnd /> */}
         <Vector color="red" to={cross} strictEnd />
-        {/* <Point color="white" position={first.clone()} /> */}
-        {/* <Vector color="white" from={first} to={cross.clone().divideScalar(denom)} strictEnd /> */}
+
+        <MathLabel label="vec_v1" position={p1.normal} offset={[-0.3, 0.9, 0]} />
+        <MathLabel label="vec_v2" position={asubb} offset={[-0.5, -0.2, 0]} />
+
         <Vector color="green" to={asubb} strictEnd />
         <Vector color="blue" to={p1.normal} strictEnd />
-        <Vector color="blue" from={point1} to={point1.clone().add(p1.normal)} strictEnd />
-        {/* <Vector color="green" to={u_x_p1.clone().divideScalar(denom)} /> */}
-        {/* <Point color="white" position={ip} /> */}
+        {/* <Vector color="blue" from={point1} to={point1.clone().add(p1.normal)} strictEnd /> */}
 
         <Line
-          from={p2p3intersection.point
-            .clone()
-            .add(p2p3intersection.normal.clone().multiplyScalar(10))}
-          to={p2p3intersection.point
-            .clone()
-            .add(p2p3intersection.normal.clone().multiplyScalar(-10))}
+          from={line.point.clone().add(line.normal.clone().multiplyScalar(10))}
+          to={line.point.clone().add(line.normal.clone().multiplyScalar(-10))}
           color={0x777777}
           radius={0.01}
         />

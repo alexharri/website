@@ -1,6 +1,7 @@
 import { useContext } from "react";
 import { Plane as PlaneClass } from "../../math/Plane";
 import { planePlaneIntersection } from "../../math/PlanePlaneIntersection";
+import { lerp } from "../../utils/lerp";
 import { Grid } from "../Components/primitives/Grid";
 import { Line } from "../Components/primitives/Line";
 import { MathLabel } from "../Components/primitives/MathLabel";
@@ -11,14 +12,15 @@ import { ThreeContext } from "../Components/ThreeProvider";
 import { createScene } from "../createScene";
 
 export default createScene(
-  ({}) => {
+  ({ variables }) => {
+    const { t } = variables;
     const THREE = useContext(ThreeContext);
 
     const point1 = new THREE.Vector3(-2, 1, 0);
     const point2 = new THREE.Vector3(0, 1, 0);
     const point3 = new THREE.Vector3(0, 1.5, 0.5);
 
-    const n1 = new THREE.Vector3(-1, 0.5, 0).normalize();
+    const n1 = new THREE.Vector3(-1, lerp(1, 0, t), 0).normalize();
     const n2 = new THREE.Vector3(0, 1, -0.5).normalize();
     const n3 = new THREE.Vector3(0, 0, -1).normalize();
 
@@ -35,9 +37,7 @@ export default createScene(
     const asubb = a.clone().sub(b);
     const cross = p1.normal.cross(asubb);
 
-    const p2p3intersection = planePlaneIntersection(p2, p3)!;
-
-    console.log(denom);
+    const line = planePlaneIntersection(p2, p3)!;
 
     return (
       <>
@@ -62,12 +62,8 @@ export default createScene(
         />
 
         <Line
-          from={p2p3intersection.point
-            .clone()
-            .add(p2p3intersection.normal.clone().multiplyScalar(10))}
-          to={p2p3intersection.point
-            .clone()
-            .add(p2p3intersection.normal.clone().multiplyScalar(-10))}
+          from={line.point.clone().add(line.normal.clone().multiplyScalar(10))}
+          to={line.point.clone().add(line.normal.clone().multiplyScalar(-10))}
           color={0x777777}
           radius={0.01}
         />
@@ -77,6 +73,8 @@ export default createScene(
     );
   },
   {
-    variables: {},
+    variables: {
+      t: { label: "P1's rotation", type: "number", value: 0.5, range: [0, 1] },
+    },
   },
 );

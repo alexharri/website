@@ -9,6 +9,8 @@ title: "Three-plane intersections"
 <span data-varlabel="P_1">$P_1$</span>
 <span data-varlabel="P_2">$P_2$</span>
 <span data-varlabel="P_3">$P_3$</span>
+<span data-varlabel="vec_v1">$\vec{v_1}$</span>
+<span data-varlabel="vec_v2">$\vec{v_2}$</span>
 
 I want to explore an interesting algorithm I applied at work the other day. It has to do with computing the point intersection of three planes in 3D space.
 
@@ -251,6 +253,8 @@ Applying $k_1$, $k_2$ to our plane normals, we find our point-of-intersection:
 
 <Scene scene="intersecting-planes-offset" height={500} />
 
+An interesting property of this point is that it's the closest point on the line of intersection to the origin.
+
 Through some mathematical magic, this can be optimized down to:
 
 ```cs
@@ -375,73 +379,148 @@ We want to find the point at which our three planes $P_1$, $P_2$, $P_3$ intersec
 
 <Scene scene="three-intersecting-planes-point" height={400} />
 
-We'll use what we already learned about two plane intersections. Let's start by taking the line of intersection for $P_2$ and $P_3$, and the vector yielded by the parallelogram of the plane normals from $P_2$ and $P_3$:
+Some of what we learned about two plane intersections will come into play here. Let's start by taking the line of intersection for $P_2$ and $P_3$ and varying the position of $P_1$. You'll notice that the point of intersection is the point at which $P_1$ intersects the line.
 
 <Scene scene="three-intersecting-planes" height={400} />
 
-Let's call the red vector $\vec{U}$. We'll want to shift $\vec{U}$ along the line of intersection so that it becomes is parallel to $P_1$. Let's call this shifted vector $\vec{V}$.
+When $P_1$'s distance from the origin is 0, the vector pointing from the origin to the point of intersection is parallel to $P_1$ (and perpendicular to $P_1$'s normal).
 
-<Scene scene="three-intersecting-planes-2" height={400} />
+<Scene scene="three-intersecting-planes-10" height={400} />
 
-We can create the red direction vector via the cross product of two other vectors:
+This vector—let's call it $\vec{V}$—will play a large role in computing the point of intersection.
 
- * $P_1$'s normal $\vec{n_1}$, which we already have
- * A vector perpendicular to the vector pointing to the intersection point of $P_2$ and $P_3$, which we'll call $d$.
+We can find $\vec{V}$ through the cross product of two other vectors $\vec{v_1}$, $\vec{v_2}$. The first of those, $\vec{v_1}$, is just $P_1$'s normal.
 
-The cross product of those two vectors yields a vector pointing in the same direction as the red vector.
+<p align="center">$$\vec{v_1} = \vec{n_1}$$</p>
 
-It turns out that we can find $\vec{d}$ via:
+The latter vector can be found via the formula
 
-<p align="center">$$(\vec{n_3} \cdot d_2) - (\vec{n_2} \cdot d_3)$$</p>
+<p align="center">$$\vec{v_2} = (\vec{n_2} \cdot d_3) - (\vec{n_3} \cdot d_2)$$</p>
 
-Where $d_2$ and $d_3$ are the distances in the constant-normal form of planes $P_2$ and $P_3$.
+where $d_2$ and $d_3$ are the distances in the constant-normal form of planes $P_2$ and $P_3$.
+
+We saw this earlier in the optimized plane-plane intersection implementation:
+
+```cs
+Vector3 a = p1.distance * p2.normal;
+Vector3 b = p2.distance * p1.normal;
+Vector3 point = Vector3.Cross(a - b, direction) / denom;
+```
+
+<SmallNote>$P_2$ corresponds to `p1` and $P_3$ to `p2`</SmallNote>
+
+With $\vec{v_1}$ and $\vec{v_2}$ defined, let's see what their cross product yields:
 
 <Scene scene="three-intersecting-planes-3" height={400} />
 
-To make $\vec{d}$'s tip lie on the line of intersection, we need to compute some scaling factor.
+Hmm, not quite long enough. The cross product certainly points in the correct direction, but to make $\vec{V}$'s tip lie on the line of intersection, we need to compute some scaling factor for $\vec{V}$.
 
-But it turns out that we've already computed this scaling factor:
+As it turns out, we've already computed this scaling factor:
 
 <p align="center">$$\vec{n_1} \cdot (\vec{n_2} × \vec{n_3})$$</p>
 
 The product of $\vec{n_1} \cdot (\vec{n_2} × \vec{n_3})$—let's call that $D$—can be thought to represent how parallel $\vec{P_1}$'s normal is to the line intersection of $P_2$ and $P_3$.
 
-Dividing $\vec{d}$ by $D$ scales $\vec{d}$ such that its tip lies on the intersection line.
+$D$ gets closer to 1 as $P_1$'s normal becomes parallel to the line of intersection $\vec{n_2} × \vec{n_3}$, and approaches 0 as they become perpendicular.
+
+We want the $\vec{V}$'s magnitude to increase as $D$ decreases, so we'll make $\dfrac{1}{D}$ the scaling factor for $\vec{V}$.
+
+<p align="center">$$\vec{V} = \dfrac{\vec{v_1} × \vec{v_2}}{D}$$</p>
 
 <Scene scene="three-intersecting-planes-4" height={400} />
 
-The problem is now reduced to traveling along the direction of the line intersection $\vec{n_2} × \vec{n_3}$ until we intersect with $P_1$.
+Fully expanded, the formula for $\vec{V}$ becomes:
+
+<p align="center">$$\vec{V} = \dfrac{\vec{v_1} × \vec{v_2}}{D} = \dfrac{\vec{n_1} × ((\vec{n_2} \cdot d_3) - (\vec{n_3} \cdot d_2))}{\vec{n_1} \cdot (\vec{n_2} × \vec{n_3})}$$</p>
+
+<SmallNote label="" center>Quite a mouthful!</SmallNote>
+
+Bam! The problem is now reduced to traveling along the direction of the line intersection until we intersect with $P_1$.
 
 <Scene scene="three-intersecting-planes-5" height={400} />
 
-We now need to find some scaling factor for $\vec{n_2} × \vec{n_3}$ scales it to end at $P_1$.
+Our next step is find some scaling factor for the direction vector $\vec{n_2} × \vec{n_3}$ that scales it such that it's tip ends at $P_1$. Let's call this direction vector $\vec{U}$.
 
-There's one observation we can make that simplifies that. Since $\vec{d}$ is perpendicular to $P_1$'s normal, the distance from $\vec{d}$'s tip to $P_1$ along the direction $\vec{n_2} × \vec{n_3}$ is the same as the distance from the origin to $P_1$ along that same direction.
+There's one observation we can make that simplifies that. Since $\vec{V}$ is perpendicular to $P_1$'s normal, the distance from $\vec{V}$'s tip to $P_1$ along the direction vector $\vec{U}$ is the same as the distance from the origin to $P_1$ along that same direction.
 
 <Scene scene="three-intersecting-planes-6" height={400} />
 
-With that, consider the vector $\vec{n_1} \cdot d_1$:
+With that, consider the vector $\vec{n_1} \cdot d_1$ where $\vec{n_1}$ and $d_1$ are the normal and the distance of the constant normal form of $P_1$.
 
 <Scene scene="three-intersecting-planes-7" height={400} />
 
-If $\vec{n_1}$ were parallel to $\vec{n_2} × \vec{n_3}$, then $d_1$ would be the scaling factor we need. Let's see what happens with $d_1 \cdot (\vec{n_2} × \vec{n_3})$
+If $\vec{n_1}$ were parallel to $\vec{U}$ then $d_1$ would be the scaling factor we need, but let's see what happens with $\vec{U} \cdot d_1$:
 
 <Scene scene="three-intersecting-planes-8" height={400} />
 
-As $\vec{n_1}$ and $\vec{n_2} × \vec{n_3}$ become less parallel, $d_1$ becomes increasingly too short.
+As $\vec{n_1}$ and $\vec{U}$ become less parallel, $U \cdot d_1$ becomes increasingly too short.
 
-However, consider what happens to $D$ where $D = \vec{n_1} \cdot (\vec{n_2} × \vec{n_3})$.
+One thing to note as well is that even when $\vec{n_1}$ and $\vec{U}$ are completely parallel, $\vec{U} \cdot d_1$ is still too short. That is due to $\vec{U}$ being the cross product $\vec{n_2} × \vec{n_3}$ where $\vec{n_2}$ and $\vec{n_3}$ are not perpendicular. If we normalize $\vec{U}$ prior to multiplying with $d_1$ that problem goes away.
 
-$D$ gets closer to 1 as $\vec{n_1}$ becomes parallel to the line of intersection $\vec{n_2} × \vec{n_3}$, and gets closer to 0 as they become perpendicular.
+<Scene scene="three-intersecting-planes-11" height={400} />
 
-We want $d_1 \cdot (\vec{n_2} × \vec{n_3})$ to get longer as $D$ decreases, so let's make $\dfrac{1}{D}$ our scaling factor.
+But we're getting ahead of ourselves—we won't need to normalize $\vec{U}$. Let's take a fresh look at how $D$ is defined:
 
-<p align="center">$$\dfrac{d_1 \cdot (\vec{n_2} × \vec{n_3})}{D}$$</p>
+<p align="center">$$D = \vec{n_1} \cdot (\vec{n_2} × \vec{n_3})$$</p>
 
-This yields the point of intersection!
+Having defined $\vec{U}$ as $\vec{n_2} × \vec{n_3}$, we can simplify this to
+
+<p align="center">$$D = \vec{n_1} \cdot \vec{U}$$</p>
+
+Earlier I mentioned that we could think of $D$ as a measure of how parallel $P_1$'s normal $n_1$ is to $\vec{U}$ (the line intersection of $P_2$ and $P_3$).
+
+That's completely correct! But since the dot product multiplies the magnitudes of its component vectors, $D$ also encodes the magnitude of $\vec{U}$. Hence, dividing $\vec{U}$ by $D$ does two things:
+
+ * it normalizes $\vec{U}$, and
+ * it increases the length of $\vec{U}$ as it becomes less parallel with $n_1$.
+
+So $D$ is both the scaling factor we need for $\vec{U} \cdot d_1$—as well as $\vec{V}$:
 
 <Scene scene="three-intersecting-planes-9" height={400} />
 
-This works for all configurations!
+We've got our solution! Let's do a quick overview.
+
+We define $\vec{V}$ as
+
+<p align="center">$$\vec{V} = \vec{n_1} × ((\vec{n_2} \cdot d_3) - (\vec{n_3} \cdot d_2))$$</p>
+
+We'll simplify by including $d_1$ in our definition for $\vec{U}$:
+
+<p align="center">$$\vec{U} = (\vec{n_2} × \vec{n_3}) \cdot d_1$$</p>
+
+Our scalar for $D$ remains defined as
+
+<p align="center">$$D = \vec{n_1} \cdot (\vec{n_2} × \vec{n_3})$$</p>
+
+With this, we find our point of intersection $P$ by adding $\vec{V}$ and $\vec{U}$ together and dividing them by $D$:
+
+<p align="center">$$P = \dfrac{\vec{V} + \vec{U}}{D}$$</p>
+
+Which fully expanded becomes:
+
+<p align="center">$$P = \dfrac{(\vec{n_1} × ((\vec{n_2} \cdot d_3) - (\vec{n_3} \cdot d_2))) + ((\vec{n_2} × \vec{n_3}) \cdot d_1)}{\vec{n_1} \cdot (\vec{n_2} × \vec{n_3})}$$</p>
+
+Putting this into code, we get:
+
+```cs
+Vector3 ThreePlaneIntersection(Plane p1, Plane p2, Plane p3) {
+  Vector3 dir = Vector3.Cross(p2.normal, p3.normal);
+  
+  float denom = Vector3.Dot(u);
+  if (Mathf.Abs(denom) < EPSILON) {
+    return null; // Planes do not intersect at a single point
+  }
+
+  Vector3 a = p2.normal * p3.distance;
+  Vector3 b = p3.normal * p2.distance;
+  Vector3 v = Vector3.Cross(p1.normal, a - b);
+  Vector3 u = dir * p1.distance;
+
+  return (v + u) / d;
+}
+```
+
+
+
 
 [book_ref]: #real-time-collision-detection
