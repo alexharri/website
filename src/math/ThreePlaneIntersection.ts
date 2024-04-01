@@ -7,7 +7,6 @@ export function ThreePlaneIntersection(p1: Plane, p2: Plane, p3: Plane) {
 
   const denom = p1.normal.dot(u);
 
-  console.log({ u, p1n: p1.normal, denom });
   if (Math.abs(denom) < EPSILON) {
     return null; // Planes do not intersect at a single point
   }

@@ -41,6 +41,16 @@ export const threeJsScenes: Partial<Record<string, React.ComponentType<SceneProp
   "three-planes-three-lines": dynamic(() => import("./scenes/three-planes-three-lines"), { loading }),
   "three-planes-three-lines-cross": dynamic(() => import("./scenes/three-planes-three-lines-cross"), { loading }),
   "three-planes-some-parallel": dynamic(() => import("./scenes/three-planes-some-parallel"), { loading }),
+  "three-intersecting-planes-point": dynamic(() => import("./scenes/three-intersecting-planes-point"), { loading }),
+  "three-intersecting-planes": dynamic(() => import("./scenes/three-intersecting-planes"), { loading }),
+  "three-intersecting-planes-2": dynamic(() => import("./scenes/three-intersecting-planes-2"), { loading }),
+  "three-intersecting-planes-3": dynamic(() => import("./scenes/three-intersecting-planes-3"), { loading }),
+  "three-intersecting-planes-4": dynamic(() => import("./scenes/three-intersecting-planes-4"), { loading }),
+  "three-intersecting-planes-5": dynamic(() => import("./scenes/three-intersecting-planes-5"), { loading }),
+  "three-intersecting-planes-6": dynamic(() => import("./scenes/three-intersecting-planes-6"), { loading }),
+  "three-intersecting-planes-7": dynamic(() => import("./scenes/three-intersecting-planes-7"), { loading }),
+  "three-intersecting-planes-8": dynamic(() => import("./scenes/three-intersecting-planes-8"), { loading }),
+  "three-intersecting-planes-9": dynamic(() => import("./scenes/three-intersecting-planes-9"), { loading }),
 };
 
 interface Props {
@@ -63,9 +73,6 @@ export const Scene: React.FC<Props> = (props) => {
 
   useEffect(() => {
     if (!loaded) load();
-    if (loaded) {
-      console.log("Loaded ThreeJS!");
-    }
   }, [loaded]);
 
   return (

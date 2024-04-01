@@ -355,10 +355,93 @@ As we learned when looking at plane-plane intersections, the cross product of th
 
 When all of the lines of intersection are parallel, all of the plane normals defining those lines are perpendicular them.
 
-Yet again, because the dot product of perpendicular vectors is 0 we can conclude that $\vec{n_1} \cdot (\vec{n_2} × \vec{n_3}) = 0$ for these configurations.
+Yet again, because the dot product of perpendicular vectors is 0 we can conclude that $\vec{n_1} \cdot (\vec{n_2} × \vec{n_3}) = 0$ for these configurations as well.
 
+We can now begin our implementation:
+
+```cs
+Vector3 ThreePlaneIntersection(Plane p1, Plane p2, Plane p3) {
+  Vector3 p2CrossP3 = Vector3.Cross(p2.normal, p3.normal);
+  if (Mathf.Abs(Vector3.Dot(p1.normal, p2CrossP3)) < EPSILON) {
+    return null; // Planes do not intersect at a single point
+  }
+  // ...
+}
+```
 
 ## Computing the point intersection
 
+We want to find the point at which our three planes $P_1$, $P_2$, $P_3$ intersect:
+
+<Scene scene="three-intersecting-planes-point" height={400} />
+
+We'll use what we already learned about two plane intersections. Let's start by taking the line of intersection for $P_2$ and $P_3$, and the vector yielded by the parallelogram of the plane normals from $P_2$ and $P_3$:
+
+<Scene scene="three-intersecting-planes" height={400} />
+
+Let's call the red vector $\vec{U}$. We'll want to shift $\vec{U}$ along the line of intersection so that it becomes is parallel to $P_1$. Let's call this shifted vector $\vec{V}$.
+
+<Scene scene="three-intersecting-planes-2" height={400} />
+
+We can create the red direction vector via the cross product of two other vectors:
+
+ * $P_1$'s normal $\vec{n_1}$, which we already have
+ * A vector perpendicular to the vector pointing to the intersection point of $P_2$ and $P_3$, which we'll call $d$.
+
+The cross product of those two vectors yields a vector pointing in the same direction as the red vector.
+
+It turns out that we can find $\vec{d}$ via:
+
+<p align="center">$$(\vec{n_3} \cdot d_2) - (\vec{n_2} \cdot d_3)$$</p>
+
+Where $d_2$ and $d_3$ are the distances in the constant-normal form of planes $P_2$ and $P_3$.
+
+<Scene scene="three-intersecting-planes-3" height={400} />
+
+To make $\vec{d}$'s tip lie on the line of intersection, we need to compute some scaling factor.
+
+But it turns out that we've already computed this scaling factor:
+
+<p align="center">$$\vec{n_1} \cdot (\vec{n_2} × \vec{n_3})$$</p>
+
+The product of $\vec{n_1} \cdot (\vec{n_2} × \vec{n_3})$—let's call that $D$—can be thought to represent how parallel $\vec{P_1}$'s normal is to the line intersection of $P_2$ and $P_3$.
+
+Dividing $\vec{d}$ by $D$ scales $\vec{d}$ such that its tip lies on the intersection line.
+
+<Scene scene="three-intersecting-planes-4" height={400} />
+
+The problem is now reduced to traveling along the direction of the line intersection $\vec{n_2} × \vec{n_3}$ until we intersect with $P_1$.
+
+<Scene scene="three-intersecting-planes-5" height={400} />
+
+We now need to find some scaling factor for $\vec{n_2} × \vec{n_3}$ scales it to end at $P_1$.
+
+There's one observation we can make that simplifies that. Since $\vec{d}$ is perpendicular to $P_1$'s normal, the distance from $\vec{d}$'s tip to $P_1$ along the direction $\vec{n_2} × \vec{n_3}$ is the same as the distance from the origin to $P_1$ along that same direction.
+
+<Scene scene="three-intersecting-planes-6" height={400} />
+
+With that, consider the vector $\vec{n_1} \cdot d_1$:
+
+<Scene scene="three-intersecting-planes-7" height={400} />
+
+If $\vec{n_1}$ were parallel to $\vec{n_2} × \vec{n_3}$, then $d_1$ would be the scaling factor we need. Let's see what happens with $d_1 \cdot (\vec{n_2} × \vec{n_3})$
+
+<Scene scene="three-intersecting-planes-8" height={400} />
+
+As $\vec{n_1}$ and $\vec{n_2} × \vec{n_3}$ become less parallel, $d_1$ becomes increasingly too short.
+
+However, consider what happens to $D$ where $D = \vec{n_1} \cdot (\vec{n_2} × \vec{n_3})$.
+
+$D$ gets closer to 1 as $\vec{n_1}$ becomes parallel to the line of intersection $\vec{n_2} × \vec{n_3}$, and gets closer to 0 as they become perpendicular.
+
+We want $d_1 \cdot (\vec{n_2} × \vec{n_3})$ to get longer as $D$ decreases, so let's make $\dfrac{1}{D}$ our scaling factor.
+
+<p align="center">$$\dfrac{d_1 \cdot (\vec{n_2} × \vec{n_3})}{D}$$</p>
+
+This yields the point of intersection!
+
+<Scene scene="three-intersecting-planes-9" height={400} />
+
+This works for all configurations!
 
 [book_ref]: #real-time-collision-detection
