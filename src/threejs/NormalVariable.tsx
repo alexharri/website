@@ -127,7 +127,7 @@ export const NormalVariable: React.FC<NormalVariableProps> = (props) => {
       {svgLabel ? (
         <span style={{ fontSize: 24 }} dangerouslySetInnerHTML={{ __html: svgLabel }} />
       ) : (
-        firstUpper(dataKey)
+        firstUpper(spec.label ?? dataKey)
       )}
       <div className={s("normal")} onMouseDown={onMouseDown} onTouchStart={onMouseDown}>
         <FIBER.Canvas camera={camera}>
