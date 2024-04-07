@@ -191,6 +191,31 @@ So, given a plane $P$ with a normal of $\vec{n}$ and distance $d$, we can calcul
 The distance may be positive or negative depending on which side of the plane the point is on.
 
 
+## Projecting onto planes
+
+In the last chapter, we learned how to compute a point's distance to a plane. A case where that becomes useful is, for example, if you want to project the point onto the plane.
+
+Given a point $x$ which we want to project onto plane $P$ whose normal is $\vec{n}$ and distance is $d$, we can do that fairly easily. First, compute the point's distance $D$ from the plane:
+
+<p align="center">$$D = (\vec{n} \cdot x) - d$$</p>
+
+Multiplying the plane's normal $\vec{n}$ by $D$ gives us a vector which projects $x$ onto the plane. Let's call that final position $S$:
+
+<p align="center">$$S = x + (\vec{n} \cdot D)$$</p>
+
+This projection happens along the plane's normal, which can be useful, but you may want to project a point onto a plane along a different direction. For that, we'll need to perform a line-plane intersection.
+
+
+## Line-plane intersections
+
+TODO
+
+
+
+
+In either case, $x + \vec{n}\,\,dist(P, x)$ projects $x$ onto the plane along the normal's direction.
+
+
 ## Plane-plane intersections
 
 Two parallel planes with a common normal will never intersect.
