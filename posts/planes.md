@@ -4,6 +4,9 @@ title: "Planes in 3D space"
 
 {/** todo better system for this */}
 <span data-varlabel="d">$d$</span>
+<span data-varlabel="x">$x$</span>
+<span data-varlabel="D">$D$</span>
+<span data-varlabel="S">$S$</span>
 <span data-varlabel="vec_n">$\vec{n}$</span>
 <span data-varlabel="n">$n$</span>
 <span data-varlabel="P_1">$P_1$</span>
@@ -191,7 +194,7 @@ So, given a plane $P$ with a normal of $\vec{n}$ and distance $d$, we can calcul
 The distance may be positive or negative depending on which side of the plane the point is on.
 
 
-## Projecting onto planes
+## Projecting point onto plane
 
 In the last chapter, we learned how to compute a point's distance to a plane. A case where that becomes useful is, for example, if you want to project the point onto the plane.
 
@@ -199,26 +202,20 @@ Given a point $x$ which we want to project onto plane $P$ whose normal is $\vec{
 
 <p align="center">$$D = (\vec{n} \cdot x) - d$$</p>
 
-Multiplying the plane's normal $\vec{n}$ by $D$ gives us a vector which projects $x$ onto the plane. Let's call that final position $S$:
+Multiplying the plane's normal $\vec{n}$ by $D$ gives us a vector which projects $x$ onto the plane when $S$ is subtracted from $x$. Let's call the projected point $S$:
 
-<p align="center">$$S = x + (\vec{n} \cdot D)$$</p>
+<p align="center">$$S = x - (\vec{n} \cdot D)$$</p>
 
-This projection happens along the plane's normal, which can be useful, but you may want to project a point onto a plane along a different direction. For that, we'll need to perform a line-plane intersection.
+<Scene scene="project-point-onto-plane-along-normal" height={400} />
 
+This projection occurs along the plane's normal, though you'll often want to perform such a projection along an arbitrary normal (direction). We'll dive into that later in the post. 
 
-## Line-plane intersections
-
-TODO
-
-
-
-
-In either case, $x + \vec{n}\,\,dist(P, x)$ projects $x$ onto the plane along the normal's direction.
+For now, let's look at some planar intersections!
 
 
 ## Plane-plane intersections
 
-Two parallel planes with a common normal will never intersect.
+Two planes whose normals are parallel will never intersect.
 
 <Scene scene="parallel-planes" height={340} />
 
@@ -226,15 +223,19 @@ However, two planes whose normals differ will intersect at some point; we are de
 
 <Scene scene="intersecting-planes" height={340} />
 
-The intersection $I$ of two infinite planes in 3D space forms an infinite line comprised of a point $p_I$ and normal $\vec{n_I}$.
+The intersection of two planes is an infinite line, which we'll call $L$. We can describe infinite lines in 3D space through a point $p$ and normal $\vec{n}$.
 
-Let's define two planes $P_1$, $P_2$ whose normals are $\vec{n_1}$, $\vec{n_2}$ having distances $d_0$, $d_1$. The direction $\vec{d_I}$ of the intersection $I$ will be the cross product of two the plane normals:
+The normal $\vec{n}$ of a line describes the line's orientation, while the point $p$ describes a point which the line intersects (passes through).
 
-<p align="center">$$\vec{d_I} = \vec{n_1} × \vec{n_2}$$</p>
+<Scene scene="line" height={340} zoom={1.5} />
 
-The cross product does not yield a normalized vector, so we'll normalize $\vec{d_I}$ to $\vec{n_I}$:
+Let's take two planes $P_1$ and $P_2$ whose normals are $\vec{n_1}$ and $\vec{n_2}$. The direction $\vec{d}$ of the line intersection $L$ is the cross product of two the plane normals.
 
-<p align="center">$$\vec{n_I} = \dfrac{\vec{d_I}}{|\vec{d_I}|}$$</p>
+<p align="center">$$\vec{d} = \vec{n_1} × \vec{n_2}$$</p>
+
+The cross product does not yield a normalized vector, so normalizing $\vec{d}$ to $\vec{n}$ gives us the line's normal.
+
+<p align="center">$$\vec{n} = \dfrac{\vec{d}}{|\vec{d}|}$$</p>
 
 Let's zoom in and see this in action.
 
@@ -242,9 +243,9 @@ Let's zoom in and see this in action.
 
 ### Handling parallel planes
 
-If the two plane normals were perfectly equal (parallel) we'd get a $\vec{d_I}$ of $(0, 0, 0)$—not a valid normal. However, numerical precision and noisy inputs mean we often need to deal with _roughly_ parallel normals.
+When finding the intersections of planes, the case where the planes do not intersects need to be handled. In the case where the two plane normals are parallel, the cross product yields the vector $(0, 0, 0)$. So if $|\vec{d}| = 0$ the planes do not intersect.
 
-This means that our plane-plane intersection code should yield a result of "no intersection" when the magnitude of $\vec{d_I}$ is less than some epsilon.
+For many applications, we'll want to treat planes that are _almost_ parallel as actually being parallel. This means that our plane-plane intersection procedure should yield a result of "no intersection" when the magnitude of $\vec{d}$ is less than some epsilon.
 
 ```cs
 Line PlanePlaneIntersection(Plane p1, Plane p2) {
@@ -258,7 +259,7 @@ Line PlanePlaneIntersection(Plane p1, Plane p2) {
 
 But what should this epsilon be?
 
-Given two normals $\vec{n_1}$, $\vec{n_2}$ where the angle between $\vec{n_1}$ and $\vec{n_2}$ is $\theta$, we can find a reasonable epsilon by charting $|\vec{n_1} × \vec{n_2}|$ for different values of $\theta$:
+Given two normals $\vec{n_1}$ and $\vec{n_2}$ where the angle between $\vec{n_1}$ and $\vec{n_2}$ is $\theta$, we can find a reasonable epsilon by charting $|\vec{n_1} × \vec{n_2}|$ for different values of $\theta$:
 
 <Image src="~/cross-product-magnitude-by-angle.png" plain width={840} />
 
@@ -266,13 +267,13 @@ The relationship is linear. As the difference in angles halves, so does the magn
 
 So to determine the epsilon, we can just ask: how low does the angle in degrees need to become for us to consider two planes parallel? Given an angle $\theta°$, we can find the epsilon $E$ via
 
-<p align="center">$$e = \dfrac{0.01745}{\theta°}$$</p>
+<p align="center">$$E = 0.01745 \cdot \theta°$$</p>
 
 If that angle is 1/256°, then we get:
 
 <p align="center">$$\dfrac{0.01745}{256} \approx 0.000068 $$</p>
 
-Which epsilon you ultimately choose will depend on your use case.
+Which epsilon you choose will depend on your use case.
 
 ### Finding the point of intersection
 
