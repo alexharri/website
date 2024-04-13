@@ -33,7 +33,12 @@ export const threeJsScenes: Partial<Record<string, React.ComponentType<SceneProp
   "point-distance-step-3": dynamic(() => import("./scenes/point-distance-step-3"), { loading }),
   "project-point-onto-plane-along-normal": dynamic(() => import("./scenes/project-point-onto-plane-along-normal"), { loading }),
   "parallel-planes": dynamic(() => import("./scenes/parallel-planes"), { loading }),
+  "project-point-onto-plane": dynamic(() => import("./scenes/project-point-onto-plane"), { loading }),
+  "project-point-onto-plane-2": dynamic(() => import("./scenes/project-point-onto-plane-2"), { loading }),
+  "ray-and-line": dynamic(() => import("./scenes/ray-and-line"), { loading }),
+  "ray-and-line-plane-intersection": dynamic(() => import("./scenes/ray-and-line-plane-intersection"), { loading }),
   "intersecting-planes": dynamic(() => import("./scenes/intersecting-planes"), { loading }),
+  "intersecting-planes-points": dynamic(() => import("./scenes/intersecting-planes-points"), { loading }),
   "line": dynamic(() => import("./scenes/line"), { loading }),
   "intersecting-planes-point-and-normal": dynamic(() => import("./scenes/intersecting-planes-point-and-normal"), { loading }),
   "intersecting-planes-virtual-plane": dynamic(() => import("./scenes/intersecting-planes-virtual-plane"), { loading }),
@@ -81,9 +86,21 @@ export const Scene: React.FC<Props> = (props) => {
     if (!loaded) load();
   }, [loaded]);
 
+  const heightRef = useRef(height);
+
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container) return;
+    heightRef.current = container.clientHeight;
+  }, [loaded, visible]);
+
   return (
-    <div ref={containerRef} style={loaded ? {} : { height }} className="scene">
-      {loaded && <S visible={visible} height={height} yOffset={yOffset} zoom={zoom} />}
+    <div ref={containerRef} className="scene">
+      {loaded && visible ? (
+        <S visible={visible} height={height} yOffset={yOffset} zoom={zoom} />
+      ) : (
+        <div style={{ minHeight: heightRef.current }} />
+      )}
     </div>
   );
 };

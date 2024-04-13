@@ -3,13 +3,13 @@ import { Plane } from "./Plane";
 
 const EPSILON = 0.0000001;
 
-export function linePlaneIntersection(
+export function rayPlaneIntersection(
   plane: Plane,
   lineNormal: THREE.Vector3,
   linePoint: THREE.Vector3,
 ) {
   const denom = plane.normal.dot(lineNormal);
-  if (Math.abs(denom) < EPSILON) {
+  if (denom < EPSILON) {
     return null; // Line and plane are parallel
   }
 

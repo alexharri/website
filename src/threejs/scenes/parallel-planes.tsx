@@ -10,8 +10,8 @@ export default createScene(() => {
 
   return (
     <>
-      <Plane position={[1, 0, 0]} normal={normal} color="blue" />
-      <Plane position={[-1, 0, 0]} normal={normal} color="red" />
+      <Plane position={[1, 1, 0]} normal={normal} color="blue" />
+      <Plane position={[-1, 1, 0]} normal={normal} color="red" />
       <Grid size={10} light />
     </>
   );
