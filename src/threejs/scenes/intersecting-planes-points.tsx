@@ -31,7 +31,7 @@ export default createScene(
         const pos = new THREE.Vector3(0, 0, off / 1.4);
         const radius = 0.05 - Math.abs(off / 1500);
         if (radius < 0) continue;
-        out.push(<Point color="white" position={pos} radius={radius} />);
+        out.push(<Point color="white" position={pos} radius={radius} key={i} />);
       }
       return out;
     }, []);
@@ -62,7 +62,7 @@ export default createScene(
   },
   {
     variables: {
-      n1: { label: "n1", type: "normal", value: [0.5, 1, -0.1] },
+      n1: { label: "vec_n", type: "normal", value: [0.5, 1, -0.1] },
     },
   },
 );

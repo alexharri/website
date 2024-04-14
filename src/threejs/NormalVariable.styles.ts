@@ -14,6 +14,7 @@ export default ({ styled }: StyleOptions) => ({
       width: ${W}px;
       height: ${W}px;
       touch-action: none;
+      cursor: grab;
     }
   `,
 

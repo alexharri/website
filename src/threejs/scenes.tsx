@@ -1,16 +1,21 @@
 import dynamic from "next/dynamic";
-import { useContext, useEffect, useRef } from "react";
+import { createContext, useContext, useEffect, useRef } from "react";
 import { useVisible } from "../utils/hooks/useVisible";
 import { LoadThreeContext } from "./Components/ThreeProvider";
+import { SceneSkeleton } from "./SceneSkeleton";
 
-const loading = () => <p>Loading</p>;
+const loading = SceneSkeleton;
 
-interface SceneProps {
+export interface SceneProps {
+  scene: string;
   visible: boolean;
   height: number;
+  usesVariables?: boolean;
   zoom?: number;
   yOffset?: number;
 }
+
+export const ScenePropsContext = createContext<SceneProps>(null!);
 
 // prettier-ignore
 export const threeJsScenes: Partial<Record<string, React.ComponentType<SceneProps>>> = {
@@ -67,14 +72,16 @@ export const threeJsScenes: Partial<Record<string, React.ComponentType<SceneProp
 interface Props {
   scene: string;
   height: number;
+  usesVariables?: boolean;
   zoom?: number;
   yOffset?: number;
 }
 
 export const Scene: React.FC<Props> = (props) => {
-  const { scene, height, zoom, yOffset } = props;
+  const { scene, height, usesVariables, zoom, yOffset } = props;
   const containerRef = useRef<HTMLDivElement>(null);
-  const visible = useVisible(containerRef);
+  const visible = useVisible(containerRef, "350px");
+  const render = useVisible(containerRef, "50px");
 
   if (typeof height !== "number") throw new Error("'height' is a required prop for <Scene>");
   const S = threeJsScenes[scene];
@@ -94,13 +101,13 @@ export const Scene: React.FC<Props> = (props) => {
     heightRef.current = container.clientHeight;
   }, [loaded, visible]);
 
+  const sceneProps: SceneProps = { scene, visible: render, height, usesVariables, yOffset, zoom };
+
   return (
-    <div ref={containerRef} className="scene">
-      {loaded && visible ? (
-        <S visible={visible} height={height} yOffset={yOffset} zoom={zoom} />
-      ) : (
-        <div style={{ minHeight: heightRef.current }} />
-      )}
-    </div>
+    <ScenePropsContext.Provider value={sceneProps}>
+      <div ref={containerRef} className="scene">
+        {loaded && visible ? <S {...sceneProps} /> : <SceneSkeleton />}
+      </div>
+    </ScenePropsContext.Provider>
   );
 };

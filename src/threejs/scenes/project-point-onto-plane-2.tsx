@@ -42,9 +42,9 @@ export default createScene(
     const planePos = end ? planePoint.clone().lerp(end, 0.5) : planePoint;
 
     const denom = planeNormal.dot(lineNormal);
-    const D0 = planeDistance - planeNormal.dot(linePoint);
-    const D1 = (planeDistance - planeNormal.dot(linePoint)) / denom;
-    const p = linePoint.clone().add(lineNormal.clone().multiplyScalar(D1));
+    const Dp = planeDistance - planeNormal.dot(linePoint);
+    const D = Dp / denom;
+    const p = linePoint.clone().add(lineNormal.clone().multiplyScalar(D));
 
     return (
       <>
@@ -61,11 +61,11 @@ export default createScene(
           <>
             <Point position={p} color="white" />
             <Point
-              position={linePoint.clone().add(lineNormal.clone().multiplyScalar(D0))}
+              position={linePoint.clone().add(lineNormal.clone().multiplyScalar(Dp))}
               color="red"
             />
             <MathLabel
-              position={linePoint.clone().add(lineNormal.clone().multiplyScalar(D0))}
+              position={linePoint.clone().add(lineNormal.clone().multiplyScalar(Dp))}
               label="P"
               offset={[0.2, 0.1, 0]}
             />

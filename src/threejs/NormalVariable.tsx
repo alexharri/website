@@ -58,6 +58,7 @@ export const NormalVariable: React.FC<NormalVariableProps> = (props) => {
 
   const onMouseDown = (e: React.MouseEvent | React.TouchEvent) => {
     e.preventDefault();
+    document.body.classList.add("grabbing");
 
     const startX = "touches" in e ? e.touches[0].clientX : e.clientX;
     const startY = "touches" in e ? e.touches[0].clientY : e.clientY;
@@ -82,6 +83,7 @@ export const NormalVariable: React.FC<NormalVariableProps> = (props) => {
     };
 
     const onMouseUp = () => {
+      document.body.classList.remove("grabbing");
       window.removeEventListener("mousemove", onMouseMove);
       window.removeEventListener("touchmove", onMouseMove);
       window.removeEventListener("mouseup", onMouseUp);

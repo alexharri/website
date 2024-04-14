@@ -38,6 +38,9 @@ body {
   width: 100vw;
 }
 
+body.grabbing * {
+  cursor: grabbing !important;
+}
 
 h1, h2, h3, h4, h5, h6 {
   font-weight: 700;

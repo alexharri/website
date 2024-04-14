@@ -1,10 +1,12 @@
-import React, { useContext, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import React, { useContext, useEffect, useMemo, useRef, useState } from "react";
 import type THREE from "three";
 import { NumberVariable, NumberVariableSpec } from "./NumberVariable";
 import { NormalVariable, NormalVariableSpec } from "./NormalVariable";
 import { StyleOptions, useStyles } from "../utils/styles";
 import { useDidUpdate } from "../utils/hooks/useDidUpdate";
 import { DreiContext, FiberContext, ThreeContext } from "./Components/ThreeProvider";
+import { useSceneHeight } from "./hooks";
+import { SceneProps } from "./scenes";
 
 const FADE_HEIGHT = 80;
 
@@ -51,7 +53,7 @@ type Variables<V extends VariablesOptions> = {
   [K in keyof V]: V[K]["value"] extends [number, number, number] ? THREE.Vector3 : V[K]["value"];
 };
 
-interface SceneProps<V extends VariablesOptions> {
+interface SceneComponentProps<V extends VariablesOptions> {
   camera: THREE.PerspectiveCamera;
   variables: Variables<V>;
 }
@@ -63,23 +65,29 @@ interface Options<V extends VariablesOptions> {
 const EMPTY_OBJ = {};
 
 export function createScene<V extends VariablesOptions>(
-  Component: React.FC<SceneProps<V>>,
+  Component: React.FC<SceneComponentProps<V>>,
   options: Options<V> = {},
 ) {
   return ({
+    scene,
     visible,
     height: targetHeight,
+    usesVariables,
     yOffset = 0,
     zoom = 1,
-  }: {
-    visible: boolean;
-    height: number;
-    zoom?: number;
-    yOffset?: number;
-  }) => {
+  }: SceneProps) => {
     const THREE = useContext(ThreeContext);
     const DREI = useContext(DreiContext);
     const FIBER = useContext(FiberContext);
+
+    useEffect(() => {
+      const variableKeys = Object.keys(options.variables || {});
+      if (variableKeys.length > 0 && !usesVariables) {
+        console.log(`Scene '${scene}' uses variables`);
+      } else if (variableKeys.length === 0 && usesVariables) {
+        console.log(`Scene '${scene}' does not use variables`);
+      }
+    }, []);
 
     const s = useStyles(styles);
 
@@ -146,23 +154,7 @@ export function createScene<V extends VariablesOptions>(
 
     const hasNormal = variableKeys.some((key) => variablesSpec[key].type === "normal");
 
-    const [width, setWidth] = useState(window.innerWidth);
-    const widthRef = useRef(width);
-    widthRef.current = width;
-
-    useLayoutEffect(() => {
-      if (!visible) return;
-      const onResize = () => {
-        if (widthRef.current > 600 && window.innerWidth > 600) return; // No value in rerendering
-        setWidth(window.innerWidth);
-      };
-      window.addEventListener("resize", onResize);
-      onResize();
-      return () => window.removeEventListener("resize", onResize);
-    }, [visible]);
-
-    const scale = Math.min(1, width / 600);
-    const height = Math.round(targetHeight * scale);
+    const { height, scale } = useSceneHeight(targetHeight);
     const fadeHeight = Math.round(FADE_HEIGHT * scale);
 
     return (

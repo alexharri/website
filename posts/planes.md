@@ -19,7 +19,7 @@ title: "Planes in 3D space"
 
 A plane in 3D space can be thought of as flat surface that stretches infinitely far, splitting 3D space into two halves.
 
-<Scene scene="what-is-a-plane" height={340} yOffset={0.5} />
+<Scene scene="what-is-a-plane" height={340} yOffset={0.5} usesVariables />
 
 There are lots of uses for planes. I've mostly been working with them in the context of an architectural modeler, where geometry is defined in terms of planes and their intersections.
 
@@ -35,45 +35,41 @@ There are many ways to describe planes, such as via
  2. three points in 3D space, forming a triangle, or
  3. a normal and a distance from an origin.
 
-<SmallNote label="">[Normals][normals] can be thought of as vectors representing a direction. A normal is a vector with a magnitude (length) of 1 (a vector $\vec{n}$ where $|\vec{n}| = 1$)</SmallNote>
+<Note>
+  Throughout this post, the term _normal_ will refer to a _normalized_ direction vector (unit vector) whose magnitude (length) is equal to 1.
+</Note>
 
-[normals]: https://en.wikipedia.org/wiki/Normal_(geometry)
+Starting with the point-and-normal case, here's an example of a plane described by a point in 3D space $p$ and a normal $\vec{n}$:
 
-Let's look at the point and normal case first.
-
-Here's an example of a plane described by a point in 3D space $p$ and a normal $\vec{n}$:
-
-<Scene scene="point-and-normal-with-plane" height={400} yOffset={-1} />
+<Scene scene="point-and-normal-with-plane" height={400} yOffset={-1} usesVariables />
 
 The normal $\vec{n}$ describes the plane's orientation, where the surface of the plane is perpendicular to $\vec{n}$, while the point $p$ describes _a_ point which the plane intersects.
 
-We described the plane in term of a single point $p$, but keep in mind that the plane $P$ intersects infinitely many points.
+We described this plane in terms of a single point $p$, but keep in mind that this plane—let's call it $P$—intersects infinitely many points.
 
-<Scene scene="plane-intersecting-points" height={400} yOffset={-1} />
+<Scene scene="plane-intersecting-points" height={400} yOffset={-1} usesVariables />
 
-If $P$ were described by one of those other points intersecting $P$, we would be describing the same plane. This is a result of the infinite nature of planes.
+If $P$ were described by one of those other points intersecting $P$, we would be describing the exact same plane. This is a result of the infinite nature of planes.
 
-This way of describing a plane—in terms of a point and a normal—is the [point-normal form][point_normal_form] of the plane.
+This way of describing a plane—in terms of a point and a normal—is the [point-normal form][point_normal_form] of planes.
 
 [point_normal_form]: https://en.wikipedia.org/wiki/Euclidean_planes_in_three-dimensional_space#Point%E2%80%93normal_form_and_general_form_of_the_equation_of_a_plane
-
-<ThreeDots />
 
 We can also describe a plane using three points in 3D space $a$, $b$, $c$ forming a triangle:
 
 <Scene scene="three-points" height={380} yOffset={-0.3} />
 
-The triangle forms a plane, but for us to be able to do anything useful with the plane we'll need to calculate it's normal $\vec{n}$. Once we've calculated the plane's normal, we can use any of the triangle's three points to describe the plane in point-normal form.
+The triangle forms a plane, but for us to be able to do anything useful with the plane we'll need to calculate it's normal $\vec{n}$. Once we've calculated the plane's normal, we can use it along with one of the triangle's three points to describe the plane in point-normal form.
 
 <Scene scene="three-points-normal-centered" height={380} yOffset={-0.3} />
 
-<SmallNote label="" center>As mentioned earlier, the normal $\vec{n}$ describing a plane is a unit vector ($|\vec{n}|=1$) perpendicular to the plane.</SmallNote>
+<SmallNote label="" center>As mentioned earlier, the normal $\vec{n}$ describing a plane is a unit vector ($\|\vec{n}\|=1$) perpendicular to the plane.</SmallNote>
 
-Taking $b - a$ and $c - a$ gives us two vectors that are parallel to the plane.
+We can use $b - a$ and $c - a$ as two edge vectors that are parallel to the plane's surface.
 
 <Scene scene="three-points-edge-vectors" height={380} yOffset={-0.3} />
 
-By virtue of being parallel to the plane, the vectors $b - a$ and $c - a$ are perpendicular to the plane's normal. This is where the cross product becomes useful to us.
+By virtue of being parallel to the plane's surface, the vectors $b - a$ and $c - a$ are perpendicular to the plane's normal. This is where the cross product becomes useful to us.
 
 The [cross product][cross_product] takes in two vectors $\vec{a}$ and $\vec{b}$ and returns a vector $\vec{c}$ that is perpendicular to both of them.
 
@@ -81,7 +77,7 @@ The [cross product][cross_product] takes in two vectors $\vec{a}$ and $\vec{b}$ 
 
 [cross_product]: https://en.wikipedia.org/wiki/Cross_product
 
-A vector perpendicular to the triangle's edge vectors $(b - a)$ and $(c - a)$ will also be perpendicular to the triangle's plane. Let's call this vector $\vec{d}$.
+A vector perpendicular to the triangle's edge vectors $b - a$ and $c - a$ will also be perpendicular to the triangle's surface. Let's call this vector $\vec{d}$.
 
 <p align="center">$$\vec{d} = (b - a) × (c - a)$$</p>
 
@@ -91,71 +87,34 @@ A vector perpendicular to the triangle's edge vectors $(b - a)$ and $(c - a)$ wi
 
 $\vec{d}$ points in the right direction, but it's not a normal. For $\vec{d}$ to be a normal, it's magnitude needs to  equal 1.
 
-We can normalize $\vec{d}$ to $\vec{n}$ by dividing $\vec{d}$ by its magnitude $|\vec{d}|$:
+We can normalize $\vec{d}$ to $\vec{n}$ by dividing $\vec{d}$ by its magnitude $\|\vec{d}\|$:
 
-<p align="center">$$\vec{n} = \dfrac{\vec{d}}{|\vec{d}|}$$</p>
+<p align="center">$$\vec{n} = \dfrac{\vec{d}}{\|\vec{d}\|}$$</p>
 
-This yields a normal $\vec{n}$ where $|\vec{n}| = 1$:
+This yields a normal $\vec{n}$ where $\|\vec{n}\| = 1$:
 
 <Scene scene="three-points-normal" height={360} yOffset={-0.3} />
 
-Having computed the normal $\vec{n}$ we can use it and any of the points $a$, $b$, $c$ to describe the plane intersecting the three points in point-normal form.
+Having found the normal $\vec{n}$ we can use it and any of the points $a$, $b$, $c$ to describe the plane intersecting the three points in point-normal form.
 
 <Scene scene="three-points-plane" height={400} yOffset={-1} />
 
-<SmallNote center>Normals can also be referred to</SmallNote>
-
 It doesn't matter which of $a$, $b$, $c$ we use as the point in the point-normal form; we always get the same plane.
-
-Inferring the normal of three points can be written like so:
-
-```cs
-Vector3 NormalFromThreePoints(Vector3 a, Vector3 b, Vector3 c) {
-  return Vector3.Cross(b - a, c - a).normalized;
-}
-```
-
-<SmallNote center label="Further reading">[Calculating a Surface Normal][calc_surface_normal]</SmallNote>
-
-[calc_surface_normal]: https://www.khronos.org/opengl/wiki/Calculating_a_Surface_Normal#Algorithm
-
-
-{/* <Section title="Checking whether a point lies on a plane" heading="h3">
-Given a point-normal plane described by a point $p$ and a normal $\vec{n}$, for any point $x$ on the plane the vector described by $p - x$ is perpendicular to $\vec{n}$:
-
-<Scene scene="plane-perpendicular" height={400} />
-
-<SmallNote label="" center>The red points represent $x$ while the red arrows represent the vector $p - x$</SmallNote>
-
-The dot product for two vectors $\vec{a}$, $\vec{b}$ is defined as $\vec{a} \cdot \vec{b} = |\vec{a}|\,|\vec{b}|\,cos(\theta)$ where $\theta$ is the angle between $\vec{a}$ and $\vec{b}$. There are then two facts we can use to our advantage:
-
- 1. for perpendicular vectors $\theta = \dfrac{\pi}{2}$
- 2. $cos(\dfrac{\pi}{2}) = 0$
-
-Since the vector $p - x$ for any point $x$ on the plane is perpendicular to $n$, we can ask if a point is on the plane by checking if $\vec{n} \cdot (p - x) = 0$. If $x$ is not on the plane, then $\vec{n} \cdot (p - x) \neq 0$.
-
-```cs
-bool IsPointOnPlane(Plane plane, Vector3 x) {
-  float d = Vector3.Dot(plane.normal, plane.point - x);
-  return Mathf.Abs(d) < EPSILON;
-}
-```
-</Section> */}
 
 
 ### Constant-normal form
 
-There's one way to describe planes we've yet to cover, which is through a normal $\vec{n}$ and a distance $d$.
+There's one more way to describe a plane which we'll cover, which is also the most important: through a normal $\vec{n}$ and a distance $d$.
 
-<Scene scene="constant-normal-form" height={400} />
+<Scene scene="constant-normal-form" height={400} usesVariables />
 
-This is called the _constant-normal form_. It makes lots of calculations using planes much simpler.
+This is the _constant-normal form_ of planes. It makes lots of calculations using planes much simpler.
 
 In the constant-normal form, the distance $d$ denotes how close the plane gets to the origin. Thought of another way: multiplying the normal $\vec{n}$ by $d$ yields the point on the plane that's closest to the origin.
 
-This is still a bit abstract, so here's an example that demonstrates the relationship between the point-normal and constant-normal forms:
+In getting a feel for the difference between the point-normal and constant-normal forms, take this example which describes the same plane in both forms:
 
-<Scene scene="point-normal-and-constant-normal-form" height={400} />
+<Scene scene="point-normal-and-constant-normal-form" height={400} usesVariables />
 
 The green arrow represents $d$ times $\vec{n}$ from the constant-normal form, while the blue point and arrow represent the point $p$ and normal $\vec{n}$ from the point-normal form.
 
@@ -165,76 +124,82 @@ Translating from the point-normal to the constant-normal form is very easy: the 
 
 <SmallNote label="" center>If you're not familiar with the dot product, don't worry. We'll cover it thoroughly later on.</SmallNote>
 
-The normal $\vec{n}$ stays the same across both forms, though in the example above you can observe the normal "flipping" when $d$ becomes negative.
+The normal $\vec{n}$ stays the same across both forms, though in the example above you can observe the normal "flipping" visually when $d$ becomes negative.
 
 
 ## Distance from plane
 
-Given an arbitrary point $x$ and a plane $P_1$ in constant-normal form, we may want to ask how far away the point is from the plane. In other words, what is the minimum distance $x$ needs to travel to lie on the plane?
+Given an arbitrary point $x$ and a plane $P$ in constant-normal form, we may want to ask how far away the point is from the plane. In other words, what is the minimum distance $x$ needs to travel to lie on the plane?
 
 <Scene scene="point-and-plane" height={400} />
 
-We can frame this differently if we construct a plane $P_2$ intersecting $x$ that is parallel to $P_1$, which we can do in point-normal form using $x$ as the point and $P_1$'s normal $\vec{n}$ as the normal:
+We can frame this differently if we construct a plane $P_x$ intersecting $x$ that is parallel to $P$, which we can do in point-normal form using $x$ as the point and $P$'s normal $\vec{n}$ as the normal:
 
 <Scene scene="point-distance-step-1" height={400} />
 
 With two parallel planes, we can frame the problem as finding the distance between the two planes. This becomes trivial using their constant-normal forms since it allows us to take the difference between their distance components $d_1$ and $d_2$.
 
-So let's find $P_2$'s distance using the $d = \vec{n} \cdot p$ formula we learned about:
+So let's find $P_x$'s distance using the $d = \vec{n} \cdot p$ formula we learned about:
 
 <Scene scene="point-distance-step-2" height={400} />
 
-With two distances $d_1$, $d_2$ from the planes $P_1$, $P_2$ the solution becomes $d_2 - d_1$.
+With two distances $d_1$ and $d_2$ from the planes $P$ and $P_x$ the solution simply becomes:
+
+<p align="center">$$ d_1 - d_2 $$</p>
 
 <Scene scene="point-distance-step-3" height={400} />
 
-So, given a plane $P$ with a normal of $\vec{n}$ and distance $d$, we can calculate a point $x$'s distance from $P$ like so:
+So, to simplify, given a plane $P$ having a normal $\vec{n}$ and distance $d$, we can calculate a point $x$'s distance from $P$ like so:
 
-<p align="center">$$(\vec{n} \cdot x) - d $$</p>
+<p align="center">$$ d - (\vec{n} \cdot x) $$</p>
 
 The distance may be positive or negative depending on which side of the plane the point is on.
 
 
-## Projecting point onto plane
+### Projecting a point onto a plane
 
-In the last chapter, we learned how to compute a point's distance to a plane. A case where that becomes useful is, for example, if you want to project the point onto the plane.
+We just looked at finding a point's distance to a plane. A case where that becomes useful is, for example, if you want to project a point onto a plane.
 
-Given a point $x$ which we want to project onto plane $P$ whose normal is $\vec{n}$ and distance is $d$, we can do that fairly easily. First, compute the point's distance $D$ from the plane:
+Given a point $x$ which we want to project onto plane $P$ whose normal is $\vec{n}$ and distance is $d$, we can do that fairly easily. First, let's assign the point's distance from the plane to $D$:
 
-<p align="center">$$D = (\vec{n} \cdot x) - d$$</p>
+<p align="center">$$ D = d - (\vec{n} \cdot x) $$</p>
 
-Multiplying the plane's normal $\vec{n}$ by $D$ gives us a vector which projects $x$ onto the plane when $S$ is subtracted from $x$. Let's call the projected point $S$:
+Multiplying the plane's normal $\vec{n}$ by $D$ gives us a vector which when added to $x$ projects it onto the plane. Let's call the projected point $S$:
 
-<p align="center">$$S = x - (\vec{n} \cdot D)$$</p>
+<p align="center">$$ S = x + (\vec{n} \times D) $$</p>
 
 <Scene scene="project-point-onto-plane-along-normal" height={400} />
 
-This projection occurs along the plane's normal, though you'll often want to perform such a projection along an arbitrary normal (direction). We'll dive into that later in the post. 
-
-For now, let's look at some planar intersections!
+The projection occurs along the plane's normal, which is sometimes useful. However, you'll often want to perform such a projection along an arbitrary direction, which we'll dive into later in the post. 
 
 
 ## Plane-plane intersection
 
 The intersection of two planes forms an infinite line.
 
-<Scene scene="intersecting-planes" height={340} />
+<Scene scene="intersecting-planes" height={340} usesVariables />
 
 We can describe infinite lines in 3D space using a point $p$ and normal $\vec{n}$. The normal $\vec{n}$ describes the line's orientation, while the point $p$ describes a point which the line intersects (passes through).
 
-<Scene scene="line" height={340} zoom={1.5} />
+<Scene scene="line" height={340} zoom={1.5} usesVariables />
 
-Let's take two planes $P_1$ and $P_2$ whose normals are $\vec{n_1}$ and $\vec{n_2}$. The direction $\vec{d}$ of the line intersection is the cross product of two the plane normals.
+Let's take two planes $P_1$ and $P_2$ whose normals are $\vec{n_1}$ and $\vec{n_2}$.
+
+Finding the normal of $P_1$ and $P_2$'s intersection is deceptively simple. It's just the cross product of two the plane normals, which we'll assign to $\vec{d}$.
 
 <p align="center">$$\vec{d} = \vec{n_1} × \vec{n_2}$$</p>
 
-The cross product does not always yield a unit vector, so we normalize $\vec{d}$ to $\vec{n}$, giving us the line's normal $\vec{n}$.
+Because the cross product does not yield a unit vector, we'll normalize $\vec{d}$ and assign the normalized direction vector to $\vec{n}$.
 
-<p align="center">$$\vec{n} = \dfrac{\vec{d}}{|\vec{d}|}$$</p>
+<p align="center">$$\vec{n} = \dfrac{\vec{d}}{\|\vec{d}\|}$$</p>
 
-Let's zoom in and see this in action.
+This gives us the intersection's normal $\vec{n}$. Let's zoom in and see it in action.
 
 <Scene scene="intersecting-planes-point-and-normal" height={380} zoom={2} />
+
+This is all we have to do for two planes whose distance components are 0—we can just use $(0, 0, 0)$ as the intersection point and call it a day.
+
+But for planes with non-zero distance components, we'll need to find the point of intersection. We'll take a look at how to do just that, right after we discuss the no-intersection case.
 
 ### Handling parallel planes
 
@@ -242,7 +207,7 @@ Two planes whose normals are parallel will never intersect, which is a case that
 
 <Scene scene="parallel-planes" height={340} yOffset={-0.5} />
 
-The cross product of two parallel normals is $(0, 0, 0)$. So if $|\vec{d}| = 0$, the planes do not intersect.
+The cross product of two parallel normals is $(0, 0, 0)$. So if $\|\vec{d}\| = 0$, the planes do not intersect.
 
 For many applications, we'll want to treat planes that are _almost_ parallel as being parallel. This means that our plane-plane intersection procedure should yield a result of "no intersection" when the magnitude of $\vec{d}$ is less than some epsilon.
 
@@ -258,15 +223,15 @@ Line PlanePlaneIntersection(Plane p1, Plane p2) {
 
 But what should this epsilon be?
 
-Given two normals $\vec{n_1}$ and $\vec{n_2}$ where the angle between $\vec{n_1}$ and $\vec{n_2}$ is $\theta$, we can find a reasonable epsilon by charting $|\vec{n_1} × \vec{n_2}|$ for different values of $\theta$:
+Given two normals $\vec{n_1}$ and $\vec{n_2}$ where the angle between $\vec{n_1}$ and $\vec{n_2}$ is $\theta$, we can find a reasonable epsilon by charting $\|\vec{n_1} × \vec{n_2}\|$ for different values of $\theta$:
 
 <Image src="~/cross-product-magnitude-by-angle.png" plain width={840} />
 
 The relationship is linear. As the difference in angles halves, so does the magnitude. A difference of 1° yields a magnitude 0.01745, and a difference of 1/2° yields half of that.
 
-So to determine the epsilon, we can just ask: how low does the angle in degrees need to become for us to consider two planes parallel? Given an angle $\theta°$, we can find the epsilon $\epsilon$ via
+So to determine the epsilon, we can just ask: how low does the angle in degrees need to become for us to consider two planes parallel? Given an angle $\theta°$, we can find the epsilon $\epsilon$ via:
 
-<p align="center">$$\epsilon = 0.01745 \cdot \theta°$$</p>
+<p align="center">$$\epsilon = 0.01745 \times \theta°$$</p>
 
 If that angle is 1/256°, then we get:
 
@@ -276,27 +241,27 @@ Which epsilon you choose will depend on your use case.
 
 ### Finding the point of intersection
 
-Having computed the normal and handled parallel planes, we now need to compute a point along the line of intersection to serve as $p$.
+Having computed the normal and handled parallel planes, we can move onto finding a point $p$ along the line of intersection.
 
 Since the line describing a plane-plane intersection is infinite, there are infinitely many points we could choose as $p$.
 
-<Scene scene="intersecting-planes-points" height={380} zoom={1.3} />
+<Scene scene="intersecting-planes-points" height={380} zoom={1.3} usesVariables />
 
-We can narrow the problem down by taking the plane formed by the two plane normals $\vec{n_1}$, $\vec{n_2}$ and observing that it intersects the line at a single point.
+We can narrow the problem down by taking the plane parallel by the two plane normals $\vec{n_1}$, $\vec{n_2}$ and observing that it intersects the line at a single point.
 
-<Scene scene="intersecting-planes-virtual-plane" height={360} yOffset={-1} />
+<Scene scene="intersecting-planes-virtual-plane" height={360} yOffset={-1} usesVariables />
 
-Since the point lies on the plane formed by the two plane normals, we can find it by traveling along those normals.
+Since the point lies on the plane parallel to the two plane normals, we can find it by exclusively traveling along those normals.
 
-This restrictions allows us to reframe the problem as finding finding two scaling factors $k_1$, $k_2$ which when applied to our plane normals $\vec{n_1}$, $\vec{n_2}$ yields a paralellogram whose tip is a point along the line of intersection.
+This restrictions allows us to reframe the problem as finding finding two scaling factors $k_1$, $k_2$ which when applied to our plane normals $\vec{n_1}$, $\vec{n_2}$ yields a paralellogram whose tip is at the point of intersection.
 
-<Scene scene="intersecting-planes-offset" height={500} />
+<Scene scene="intersecting-planes-offset" height={500} usesVariables />
 
 An interesting property of only traveling along the plane normals is that it yields the point on the line of intersection that is closest to the origin.
 
-Anyway, once $k_1$ and $k_2$ are found, our solution for the point $p$ is:
+Anyway, once $k_1$ and $k_2$ are found, our solution for the point $p$ becomes:
 
-<p align="center">$$p = \vec{n_1} \cdot k_1 + \vec{n_2} \cdot k_2 $$</p>
+<p align="center">$$p = \vec{n_1} \times k_1 + \vec{n_2} \times k_2 $$</p>
 
 The scaling factors $k_1$, $k_2$ can be computed like so:
 
@@ -315,7 +280,7 @@ Vector3 point = p1.normal * k1 + p2.normal * k2;
 
 <SmallNote label="" center>Based on code from [Real-Time Collision Detection by Christer Ericson][book_ref]</SmallNote>
 
-I'm sorry for just throwing the answer for $k_1$ and $k_2$ out there like this. I've tried to find a good geometric way to explain what's happening here, but I've been unsuccessful so far.
+I'm sorry for just throwing the answer for $k_1$ and $k_2$ out there like this. I've tried to find a good geometric way to visualize what's happening here, but I've been unsuccessful so far.
 
 Through some mathematical magic, this code can be optimized down to:
 
@@ -353,15 +318,15 @@ Line PlanePlaneIntersection(Plane p1, Plane p2) {
 
 ## Line-plane intersection
 
-Earlier, we covered projecting a point onto a line along the planes normal. However, in many circumstances you will want to project a point onto a plane along an arbitrary direction given by a normal $\vec{n}$.
+Earlier, we covered projecting a point onto a plane along the plane's normal.
 
-<Scene scene="project-point-onto-plane" height={500} />
+However, it is generally more useful to be able to project a point onto a plane along an arbitrary direction given by a normal $\vec{n}$. Doing that boils down to finding the point of intersection for a line and a plane.
 
-Projecting a point onto a plane along a normal boils down to a finding the intersection point of a plane and a line.
+<Scene scene="project-point-onto-plane" height={420} yOffset={-1} usesVariables />
 
-The line will be composed of the point $x$ and a normal $\vec{n}$. Our goal will be to find a distance $D$ that $x$ needs to travel along the normal $\vec{n}$ so that it lies on the plane.
+The line will be composed of the point $x$ and normal $\vec{n}$. Our goal will be to find a distance $D$ that $x$ needs to travel along $\vec{n}$ such that it lies on the plane.
 
-But first, we'll need to check if the line will intersect the plane at all:
+But first we'll need to check if the line will intersect the plane at all, which we know how to do:
 
 ```cs
 Vector3 LinePlaneIntersection(Line line, Plane plane) {
@@ -374,33 +339,35 @@ Vector3 LinePlaneIntersection(Line line, Plane plane) {
 }
 ```
 
-Given in constant-normal form, the plane has a normal of $\vec{n_p}$ and a distance of $d_p$.
+<SmallNote label="" center>See if you can figure why Mathf.Abs is used here. We'll cover it later, so you'll see if you're right.</SmallNote>
 
-First, we can figure out the distance $D_p$ that we'd need to travel if $\vec{n}$ and $\vec{n_p}$ were parallel, which is what we did when projecting along the plane normal.
+Given in constant-normal form, the plane has a normal $\vec{n_p}$ and a distance $d_p$.
 
-<p align="center">$$ D_p = (\vec{n_p} \cdot x) - d_p $$</p>
+First, we can figure out the distance $D_p$ that we'd need to travel if $\vec{n}$ and $\vec{n_p}$ were parallel, which is what we did when projecting along the plane's normal.
 
-We'll project $x$ using $D_p$ like so:
+<p align="center">$$ D_p = d_p - (\vec{n_p} \cdot x) $$</p>
 
-<p align="center">$$ P = x + \vec{n} \cdot D_p $$</p>
+Let's try projecting $x$ along $\vec{n}$ using $D_p$ like so:
 
-Where $P$ is represented by the red dot.
+<p align="center">$$ P = x + \vec{n} \times D_p $$</p>
 
-<Scene scene="project-point-onto-plane-2" height={500} />
+We'll visualize $P$ as a red point:
 
-When $\vec{n}$ and $\vec{n_p}$ are close to parallel, $D_p$ gets us quite close to the correct solution, but as their angle increases, $D_p$ becomes increasingly too small.
+<Scene scene="project-point-onto-plane-2" height={500} usesVariables />
+
+As $\vec{n}$ and $\vec{n_p}$ become parallel, $D_p$ gets us closer and closer to the correct solution. However, as the angle between $\vec{n}$ and $\vec{n_p}$ increases, $D_p$ becomes increasingly too small.
 
 Here, the dot product comes in handy. Let's do a refresher.
 
 For two vectors $\vec{a}$ and $\vec{b}$, the dot product is defined as
 
-<p align="center">$$\vec{a} \cdot \vec{b} = |\vec{a}|\,|\vec{b}|\,cos\,\theta$$</p>
+<p align="center">$$\vec{a} \cdot \vec{b} = \|\vec{a}\|\,\|\vec{b}\|\,cos\,\theta$$</p>
 
 where $\theta$ is the angle between $\vec{a}$ and $\vec{b}$.
 
 Consider the dot product of $\vec{n}$ and $\vec{n_p}$. Since both normals are unit vectors whose magnitudes are 1
 
-<p align="center">$$|\vec{n}| = |\vec{n_p}| = 1$$</p>
+<p align="center">$$\|\vec{n}\| = \|\vec{n_p}\| = 1$$</p>
 
 we can remove their magnitudes from the equation,
 
@@ -410,7 +377,7 @@ making the dot product of $\vec{n}$ and $\vec{n_p}$ the cosine of the angle betw
 
 For two vectors, the cosine of their angles approaches 1 as the vectors become increasingly parallel, and approaches 0 as they become perpendicular.
 
-Since $D_p$ becomes increasingly too small as $\vec{n}$ and $\vec{n_p}$ become more perpendicular, we can use $\vec{n} \cdot \vec{n_p}$ as a denominator. We'll assign this scaled-up version of $D_p$ to $D$:
+Since $D_p$ becomes increasingly too small as $\vec{n}$ and $\vec{n_p}$ become more perpendicular, we can use $\vec{n} \cdot \vec{n_p}$ as a denominator for $D_p$. We'll assign this scaled-up version of $D_p$ to $D$:
 
 <p align="center">$$ D = \dfrac{D_p}{\vec{n} \cdot \vec{n_p}} $$</p>
 
@@ -418,11 +385,11 @@ With $D$ as our scaled-up distance, we find the point of intersection $P$ via:
 
 <p align="center">$$ P = x + \vec{n} \times D $$</p>
 
-<Scene scene="project-point-onto-plane" height={500} />
+<Scene scene="project-point-onto-plane" height={500} usesVariables />
 
-We can now get rid of $D_p$, which was defined as $(\vec{n_p} \cdot x) - d$, giving us the full equation for $D$:
+We can now get rid of $D_p$, which was defined as $d_p - (\vec{n_p} \cdot x)$, giving us the full equation for $D$:
 
-<p align="center">$$ D = \dfrac{(\vec{n_p} \cdot x) - d}{\vec{n} \cdot \vec{n_p}} $$</p>
+<p align="center">$$ D = \dfrac{d_p - (\vec{n_p} \cdot x)}{\vec{n} \cdot \vec{n_p}} $$</p>
 
 Putting this into code, we get:
 
@@ -444,17 +411,17 @@ Vector3 LinePlaneIntersection(Line line, Plane plane) {
 
 We've been talking about a line-plane intersection, but I've been visualizing a ray-plane intersection.
 
-<Scene scene="project-point-onto-plane" height={500} />
+<Scene scene="project-point-onto-plane" height={500} usesVariables />
 
 A ray and a line are quite similar; they're both represented through a normal $\vec{n}$ and a point $p$.
 
 The core difference is that a ray (colored red) extends in the direction of $\vec{n}$ away from $p$, while a line (colored green) extends in the other direction as well:
 
-<Scene scene="ray-and-line" height={500} />
+<Scene scene="ray-and-line" height={500} usesVariables />
 
 What this means for intersections is that a ray will not intersect planes when traveling backwards along it's normal:
 
-<Scene scene="ray-and-line-plane-intersection" height={500} />
+<Scene scene="ray-and-line-plane-intersection" height={500} usesVariables />
 
 Our implementation for ray-plane intersections will differ from our existing line-plane implementation only in that it should yield a result of "no intersection" when the ray's normal $\vec{n}$ is pointing "away" from the plane's normal $\vec{n_p}$ at an obtuse angle.
 
@@ -507,7 +474,7 @@ Given three planes $P_1$, $P_2$, $P_3$, there are five possible configurations:
  4. The three planes intersect each other in pairs, forming three lines of intersection.
  5. The planes intersect at a point.
 
-<Scene scene="three-plane-intersection-configurations" height={400} yOffset={-1} zoom={1.1} />
+<Scene scene="three-plane-intersection-configurations" height={400} yOffset={-1} zoom={1.1} usesVariables />
 
 When finding the point-of-intersection, we'll first need to determine whether the three planes all intersect each other—which for configurations 1 through 4, they don't.
 
@@ -525,11 +492,11 @@ We'll start off with the configurations where two or more planes are parallel:
 
 If $\vec{n_2}$ and $\vec{n_3}$ are parallel then $\vec{n_2} × \vec{n_3}$ yields a vector whose magnitude is zero.
 
-<p align="center">$$|\vec{n_2} × \vec{n_3}| = 0$$</p>
+<p align="center">$$\|\vec{n_2} × \vec{n_3}\| = 0$$</p>
 
 And since the dot product is a multiple of the magnitudes of its component vectors:
 
-<p align="center">$$a \cdot b = |a|\,|b|\,cos\,\theta$$</p>
+<p align="center">$$a \cdot b = \|a\|\,\|b\|\,cos\,\theta$$</p>
 
 the final result is zero whenever $\vec{n_2}$ and $\vec{n_3}$ are parallel.
 
@@ -589,7 +556,7 @@ We want to find the point at which our three planes $P_1$, $P_2$, $P_3$ intersec
 
 Some of what we learned about two plane intersections will come into play here. Let's start by taking the line of intersection for $P_2$ and $P_3$ and varying the position of $P_1$. You'll notice that the point of intersection is the point at which $P_1$ intersects the line.
 
-<Scene scene="three-intersecting-planes" height={400} />
+<Scene scene="three-intersecting-planes" height={400} usesVariables />
 
 When $P_1$'s distance from the origin is 0, the vector pointing from the origin to the point of intersection is parallel to $P_1$ (and perpendicular to $P_1$'s normal).
 
@@ -659,13 +626,13 @@ With that, consider the vector $\vec{n_1} \cdot d_1$ where $\vec{n_1}$ and $d_1$
 
 If $\vec{n_1}$ were parallel to $\vec{U}$ then $d_1$ would be the scaling factor we need, but let's see what happens with $\vec{U} \cdot d_1$:
 
-<Scene scene="three-intersecting-planes-8" height={400} />
+<Scene scene="three-intersecting-planes-8" height={400} usesVariables />
 
 As $\vec{n_1}$ and $\vec{U}$ become less parallel, $U \cdot d_1$ becomes increasingly too short.
 
 One thing to note as well is that even when $\vec{n_1}$ and $\vec{U}$ are completely parallel, $\vec{U} \cdot d_1$ is still too short. That is due to $\vec{U}$ being the cross product $\vec{n_2} × \vec{n_3}$ where $\vec{n_2}$ and $\vec{n_3}$ are not perpendicular. If we normalize $\vec{U}$ prior to multiplying with $d_1$ that problem goes away.
 
-<Scene scene="three-intersecting-planes-11" height={400} />
+<Scene scene="three-intersecting-planes-11" height={400} usesVariables />
 
 But we're getting ahead of ourselves—we won't need to normalize $\vec{U}$. Let's take a fresh look at how $D$ is defined:
 

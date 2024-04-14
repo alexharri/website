@@ -15,8 +15,8 @@ export default createScene(() => {
   const point = new THREE.Vector3(-1, 0.7, -1);
   const pointDistance = normal.dot(point);
 
-  const D = pointDistance - planeDistance;
-  const S = point.clone().sub(normal.clone().multiplyScalar(D));
+  const D = planeDistance - pointDistance;
+  const S = point.clone().add(normal.clone().multiplyScalar(D));
 
   const end = S;
   const mid = end.clone().lerp(point, 0.66);

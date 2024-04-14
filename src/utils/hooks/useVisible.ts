@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 
-export function useVisible(ref: React.RefObject<HTMLElement>) {
+export function useVisible(ref: React.RefObject<HTMLElement>, margin: string) {
   const [visible, setVisible] = useState(false);
   const visibleRef = useRef(visible);
   visibleRef.current = visible;
@@ -18,7 +18,7 @@ export function useVisible(ref: React.RefObject<HTMLElement>) {
     };
     const observer = new IntersectionObserver(callback, {
       root: document,
-      rootMargin: "100px",
+      rootMargin: margin,
     });
     observer.observe(el);
     return () => observer.unobserve(el);
