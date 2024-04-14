@@ -278,7 +278,7 @@ float k2 = (p2.distance * d11 - p1.distance * d12) / denom;
 Vector3 point = p1.normal * k1 + p2.normal * k2;
 ```
 
-<SmallNote label="" center>Based on code from [Real-Time Collision Detection by Christer Ericson][book_ref]</SmallNote>
+<SmallNote label="" center>Based on code from [Real-Time Collision Detection by Christer Ericson][further_reading]</SmallNote>
 
 I'm sorry for just throwing the answer for $k_1$ and $k_2$ out there like this. I've tried to find a good geometric way to visualize what's happening here, but I've been unsuccessful so far.
 
@@ -293,7 +293,7 @@ Vector3 b = p2.distance * p1.normal;
 Vector3 point = Vector3.Cross(a - b, direction) / denom;
 ```
 
-<SmallNote label="" center>How this optimization works can be found in chapter 5.4.4 of [Real-Time Collision Detection by Christer Ericson][book_ref].</SmallNote>
+<SmallNote label="" center>How this optimization works can be found in chapter 5.4.4 of [Real-Time Collision Detection by Christer Ericson][further_reading].</SmallNote>
 
 Which completes our plane-plane intersection implementation:
 
@@ -691,6 +691,32 @@ Vector3 ThreePlaneIntersection(Plane p1, Plane p2, Plane p3) {
 ```
 
 
+## Parting words
 
+Thanks for reading!
 
-[book_ref]: #real-time-collision-detection
+A whole lot of hours went into building and writing this post, so I hope it achieved its goal of helping you build an intuitive mental model of planes.
+
+If you're interested in knowing how these examples were built, this website is [open source on GitHub][website].
+
+[website]: https://github.com/alexharri/website
+
+<SectionAnchor id="further-reading">
+  <h2>Further reading</h2>
+</SectionAnchor>
+
+[further_reading]: #further-reading
+
+I highly recommend checking out [Real-Time Collision Detection by Christer Ericson][book_ref]. If you're building applications using 3D geometry, it will prove to be an incredibly useful resource.
+
+[book_ref]: https://www.amazon.com/Real-Time-Collision-Detection-Interactive-Technology/dp/1558607323
+
+I recently analysed the edit performance in [Arkio][arkio] and noticed that a method for solving three-plane intersections took around half of the total compute time when recalculating geometry. By implementing the more efficient method described in the book, we made the method __~500% faster__, increasing Arkio's edit performance by over __1.6x__. Crazy stuff!
+
+[arkio]: https://www.arkio.is/
+
+I started writing this post with the intention of understanding how the three plane intersection method worked. However, I felt that readers would need a better foundation and understanding of planes for this post to be of any value. In building that foundation, this post ended up quite a bit longer than I intended.
+
+Anyway, it's a great book. [Check it out!][book_ref]
+
+— Alex Harri
