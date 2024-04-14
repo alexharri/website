@@ -19,11 +19,13 @@ title: "Planes in 3D space"
 
 A plane in 3D space can be thought of as flat surface that stretches infinitely far, splitting 3D space into two halves.
 
-<Scene scene="what-is-a-plane" height={340} yOffset={0.5} usesVariables />
+<Scene scene="what-is-a-plane" height={450} yOffset={-0.5} angle={10} usesVariables />
 
-There are lots of uses for planes. I've mostly been working with them in the context of an architectural modeler, where geometry is defined in terms of planes and their intersections.
+Planes have loads of uses in application which deal with 3D geometry. I've mostly been working with them in the context of an architectural modeler, where geometry is defined in terms of planes and their intersections.
 
-This post can be thought of as a _"getting started with planes"_ type of article. The intent is to create the resource I wish I had when learning about planes.
+When I was learning about planes, they felt quite abstract and non-intuitive, so it took some time for me to build an intuition for how to reason about and work with them.
+
+In writing this, I want to provide you with an introduction to planes that focuses on building a practical, intuitive understanding for working with planes. I hope to achieve through the use of visual and interactive explanations, which will accompany us as we work through progressively more complex problems.
 
 With that out of the way, let's get to it!
 
@@ -104,7 +106,7 @@ It doesn't matter which of $a$, $b$, $c$ we use as the point in the point-normal
 
 ### Constant-normal form
 
-There's one more way to describe a plane which we'll cover, which is also the most important: through a normal $\vec{n}$ and a distance $d$.
+There's one more way to describe a plane to cover, which is also the most important: through a normal $\vec{n}$ and a distance $d$.
 
 <Scene scene="constant-normal-form" height={400} usesVariables />
 
@@ -118,7 +120,9 @@ In getting a feel for the difference between the point-normal and constant-norma
 
 The green arrow represents $d$ times $\vec{n}$ from the constant-normal form, while the blue point and arrow represent the point $p$ and normal $\vec{n}$ from the point-normal form.
 
-Translating from the point-normal to the constant-normal form is very easy: the distance $d$ is the dot product of $\vec{n}$ and $p$.
+Translating from the point-normal to the constant-normal form is very easy: the distance $d$ is the [dot product][dot_product] of $\vec{n}$ and $p$.
+
+[dot_product]: https://en.wikipedia.org/wiki/Dot_product
 
 <p class="mathblock">$$\vec{n} \cdot p = d$$</p>
 

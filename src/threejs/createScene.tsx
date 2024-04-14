@@ -64,6 +64,8 @@ interface Options<V extends VariablesOptions> {
 
 const EMPTY_OBJ = {};
 
+const DEG_TO_RAD = Math.PI / 180;
+
 export function createScene<V extends VariablesOptions>(
   Component: React.FC<SceneComponentProps<V>>,
   options: Options<V> = {},
@@ -73,6 +75,7 @@ export function createScene<V extends VariablesOptions>(
     visible,
     height: targetHeight,
     usesVariables,
+    angle = 20,
     yOffset = 0,
     zoom = 1,
   }: SceneProps) => {
@@ -97,7 +100,13 @@ export function createScene<V extends VariablesOptions>(
       const scale = 1 - (targetHeight / 500) * 0.13;
       const fov = targetHeight / 10;
       const camera = new THREE.PerspectiveCamera(fov);
-      const pos = new THREE.Vector3(0, scale * 7.5, scale * -15).multiplyScalar(1 / zoom);
+
+      const dist = -16.8;
+      const angleRad = angle * DEG_TO_RAD;
+      const pos = new THREE.Vector3(0, Math.sin(-angleRad) * dist, Math.cos(-angleRad) * dist);
+      pos.multiplyScalar(scale);
+      pos.multiplyScalar(1 / zoom);
+
       camera.position.set(pos.x, pos.y, pos.z);
       return camera;
     }, [visible]);

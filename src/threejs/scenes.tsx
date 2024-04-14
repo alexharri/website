@@ -10,6 +10,7 @@ export interface SceneProps {
   scene: string;
   visible: boolean;
   height: number;
+  angle?: number;
   usesVariables?: boolean;
   zoom?: number;
   yOffset?: number;
@@ -72,13 +73,14 @@ export const threeJsScenes: Partial<Record<string, React.ComponentType<SceneProp
 interface Props {
   scene: string;
   height: number;
+  angle?: number;
   usesVariables?: boolean;
   zoom?: number;
   yOffset?: number;
 }
 
 export const Scene: React.FC<Props> = (props) => {
-  const { scene, height, usesVariables, zoom, yOffset } = props;
+  const { scene, height, usesVariables, angle, zoom, yOffset } = props;
   const containerRef = useRef<HTMLDivElement>(null);
   const visible = useVisible(containerRef, "350px");
   const render = useVisible(containerRef, "50px");
@@ -101,7 +103,15 @@ export const Scene: React.FC<Props> = (props) => {
     heightRef.current = container.clientHeight;
   }, [loaded, visible]);
 
-  const sceneProps: SceneProps = { scene, visible: render, height, usesVariables, yOffset, zoom };
+  const sceneProps: SceneProps = {
+    scene,
+    visible: render,
+    angle,
+    height,
+    usesVariables,
+    yOffset,
+    zoom,
+  };
 
   return (
     <ScenePropsContext.Provider value={sceneProps}>

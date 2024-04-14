@@ -16,8 +16,8 @@ export const Grid: React.FC<Props> = (props) => {
 
   const color = (i: number) => {
     const dist = Math.abs(i);
-    const l = props.light ? lerp(0.08, 0.06, dist / HALF) : lerp(0.15, 0.1, dist / HALF);
-    return new THREE.Color(l, l, l);
+    const l = props.light ? lerp(0.08, 0.06, dist / HALF) : lerp(0.1, 0.07, dist / HALF);
+    return new THREE.Color(l * 1, l * 1.15, l * 1.5);
   };
 
   return (
