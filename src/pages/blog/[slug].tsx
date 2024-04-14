@@ -20,9 +20,7 @@ import { formatDate } from "../../utils/formatDate";
 import { Note } from "../../components/Note/Note";
 import { PostLayout } from "../../components/PostLayout/PostLayout";
 import { Scene } from "../../threejs/scenes";
-import { Section } from "../../components/Section/Section";
 import { ThreeProvider } from "../../threejs/Components/ThreeProvider";
-import { ThreeDots } from "../../components/ThreeDots/ThreeDots";
 
 // Custom components/renderers to pass to MDX.
 // Since the MDX files aren't loaded by webpack, they have no knowledge of how
@@ -55,8 +53,6 @@ const components = {
   Head,
   Note,
   Scene,
-  Section,
-  ThreeDots,
 };
 
 interface Props {
