@@ -105,6 +105,11 @@ p, li {
   font-size: 18px;
 }
 
+p.mathblock {
+  text-align: center;
+  overflow-x: auto;
+}
+
 ul, ol, p {
   margin: 8px 0 24px;
 }

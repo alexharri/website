@@ -73,13 +73,13 @@ By virtue of being parallel to the plane's surface, the vectors $b - a$ and $c -
 
 The [cross product][cross_product] takes in two vectors $\vec{a}$ and $\vec{b}$ and returns a vector $\vec{c}$ that is perpendicular to both of them.
 
-<p align="center">$$\vec{c} = \vec{a} × \vec{b}$$</p>
+<p class="mathblock">$$\vec{c} = \vec{a} × \vec{b}$$</p>
 
 [cross_product]: https://en.wikipedia.org/wiki/Cross_product
 
 A vector perpendicular to the triangle's edge vectors $b - a$ and $c - a$ will also be perpendicular to the triangle's surface. Let's call this vector $\vec{d}$.
 
-<p align="center">$$\vec{d} = (b - a) × (c - a)$$</p>
+<p class="mathblock">$$\vec{d} = (b - a) × (c - a)$$</p>
 
 <Scene scene="three-points-cross-product" height={400} yOffset={-0.3} />
 
@@ -89,7 +89,7 @@ $\vec{d}$ points in the right direction, but it's not a normal. For $\vec{d}$ to
 
 We can normalize $\vec{d}$ to $\vec{n}$ by dividing $\vec{d}$ by its magnitude $\|\vec{d}\|$:
 
-<p align="center">$$\vec{n} = \dfrac{\vec{d}}{\|\vec{d}\|}$$</p>
+<p class="mathblock">$$\vec{n} = \dfrac{\vec{d}}{\|\vec{d}\|}$$</p>
 
 This yields a normal $\vec{n}$ where $\|\vec{n}\| = 1$:
 
@@ -120,7 +120,7 @@ The green arrow represents $d$ times $\vec{n}$ from the constant-normal form, wh
 
 Translating from the point-normal to the constant-normal form is very easy: the distance $d$ is the dot product of $\vec{n}$ and $p$.
 
-<p align="center">$$\vec{n} \cdot p = d$$</p>
+<p class="mathblock">$$\vec{n} \cdot p = d$$</p>
 
 <SmallNote label="" center>If you're not familiar with the dot product, don't worry. We'll cover it thoroughly later on.</SmallNote>
 
@@ -139,19 +139,19 @@ We can frame this differently if we construct a plane $P_x$ intersecting $x$ tha
 
 With two parallel planes, we can frame the problem as finding the distance between the two planes. This becomes trivial using their constant-normal forms since it allows us to take the difference between their distance components $d_1$ and $d_2$.
 
-So let's find $P_x$'s distance using the $d = \vec{n} \cdot p$ formula we learned about:
+So let's find $P_x$'s distance using the $d = \vec{n} \cdot p$ equation we learned about:
 
 <Scene scene="point-distance-step-2" height={400} />
 
 With two distances $d_1$ and $d_2$ from the planes $P$ and $P_x$ the solution simply becomes:
 
-<p align="center">$$ d_1 - d_2 $$</p>
+<p class="mathblock">$$ d_1 - d_2 $$</p>
 
 <Scene scene="point-distance-step-3" height={400} />
 
 So, to simplify, given a plane $P$ having a normal $\vec{n}$ and distance $d$, we can calculate a point $x$'s distance from $P$ like so:
 
-<p align="center">$$ d - (\vec{n} \cdot x) $$</p>
+<p class="mathblock">$$ d - (\vec{n} \cdot x) $$</p>
 
 The distance may be positive or negative depending on which side of the plane the point is on.
 
@@ -162,11 +162,11 @@ We just looked at finding a point's distance to a plane. A case where that becom
 
 Given a point $x$ which we want to project onto plane $P$ whose normal is $\vec{n}$ and distance is $d$, we can do that fairly easily. First, let's assign the point's distance from the plane to $D$:
 
-<p align="center">$$ D = d - (\vec{n} \cdot x) $$</p>
+<p class="mathblock">$$ D = d - (\vec{n} \cdot x) $$</p>
 
 Multiplying the plane's normal $\vec{n}$ by $D$ gives us a vector which when added to $x$ projects it onto the plane. Let's call the projected point $S$:
 
-<p align="center">$$ S = x + (\vec{n} \times D) $$</p>
+<p class="mathblock">$$ S = x + (\vec{n} \times D) $$</p>
 
 <Scene scene="project-point-onto-plane-along-normal" height={400} />
 
@@ -187,11 +187,11 @@ Let's take two planes $P_1$ and $P_2$ whose normals are $\vec{n_1}$ and $\vec{n_
 
 Finding the normal of $P_1$ and $P_2$'s intersection is deceptively simple. It's just the cross product of two the plane normals, which we'll assign to $\vec{d}$.
 
-<p align="center">$$\vec{d} = \vec{n_1} × \vec{n_2}$$</p>
+<p class="mathblock">$$\vec{d} = \vec{n_1} × \vec{n_2}$$</p>
 
 Because the cross product does not yield a unit vector, we'll normalize $\vec{d}$ and assign the normalized direction vector to $\vec{n}$.
 
-<p align="center">$$\vec{n} = \dfrac{\vec{d}}{\|\vec{d}\|}$$</p>
+<p class="mathblock">$$\vec{n} = \dfrac{\vec{d}}{\|\vec{d}\|}$$</p>
 
 This gives us the intersection's normal $\vec{n}$. Let's zoom in and see it in action.
 
@@ -231,11 +231,11 @@ The relationship is linear. As the difference in angles halves, so does the magn
 
 So to determine the epsilon, we can just ask: how low does the angle in degrees need to become for us to consider two planes parallel? Given an angle $\theta°$, we can find the epsilon $\epsilon$ via:
 
-<p align="center">$$\epsilon = 0.01745 \times \theta°$$</p>
+<p class="mathblock">$$\epsilon = 0.01745 \times \theta°$$</p>
 
 If that angle is 1/256°, then we get:
 
-<p align="center">$$\dfrac{0.01745}{256} \approx 0.000068 $$</p>
+<p class="mathblock">$$\dfrac{0.01745}{256} \approx 0.000068 $$</p>
 
 Which epsilon you choose will depend on your use case.
 
@@ -261,7 +261,7 @@ An interesting property of only traveling along the plane normals is that it yie
 
 Anyway, once $k_1$ and $k_2$ are found, our solution for the point $p$ becomes:
 
-<p align="center">$$p = \vec{n_1} \times k_1 + \vec{n_2} \times k_2 $$</p>
+<p class="mathblock">$$p = \vec{n_1} \times k_1 + \vec{n_2} \times k_2 $$</p>
 
 The scaling factors $k_1$, $k_2$ can be computed like so:
 
@@ -345,11 +345,11 @@ Given in constant-normal form, the plane has a normal $\vec{n_p}$ and a distance
 
 First, we can figure out the distance $D_p$ that we'd need to travel if $\vec{n}$ and $\vec{n_p}$ were parallel, which is what we did when projecting along the plane's normal.
 
-<p align="center">$$ D_p = d_p - (\vec{n_p} \cdot x) $$</p>
+<p class="mathblock">$$ D_p = d_p - (\vec{n_p} \cdot x) $$</p>
 
 Let's try projecting $x$ along $\vec{n}$ using $D_p$ like so:
 
-<p align="center">$$ P = x + \vec{n} \times D_p $$</p>
+<p class="mathblock">$$ P = x + \vec{n} \times D_p $$</p>
 
 We'll visualize $P$ as a red point:
 
@@ -361,17 +361,17 @@ Here, the dot product comes in handy. Let's do a refresher.
 
 For two vectors $\vec{a}$ and $\vec{b}$, the dot product is defined as
 
-<p align="center">$$\vec{a} \cdot \vec{b} = \|\vec{a}\|\,\|\vec{b}\|\,cos\,\theta$$</p>
+<p class="mathblock">$$\vec{a} \cdot \vec{b} = \|\vec{a}\|\,\|\vec{b}\|\,cos\,\theta$$</p>
 
 where $\theta$ is the angle between $\vec{a}$ and $\vec{b}$.
 
 Consider the dot product of $\vec{n}$ and $\vec{n_p}$. Since both normals are unit vectors whose magnitudes are 1
 
-<p align="center">$$\|\vec{n}\| = \|\vec{n_p}\| = 1$$</p>
+<p class="mathblock">$$\|\vec{n}\| = \|\vec{n_p}\| = 1$$</p>
 
 we can remove their magnitudes from the equation,
 
-<p align="center">$$\vec{n} \cdot \vec{n_p} = cos\,\theta$$</p>
+<p class="mathblock">$$\vec{n} \cdot \vec{n_p} = cos\,\theta$$</p>
 
 making the dot product of $\vec{n}$ and $\vec{n_p}$ the cosine of the angle between them.
 
@@ -379,17 +379,17 @@ For two vectors, the cosine of their angles approaches 1 as the vectors become i
 
 Since $D_p$ becomes increasingly too small as $\vec{n}$ and $\vec{n_p}$ become more perpendicular, we can use $\vec{n} \cdot \vec{n_p}$ as a denominator for $D_p$. We'll assign this scaled-up version of $D_p$ to $D$:
 
-<p align="center">$$ D = \dfrac{D_p}{\vec{n} \cdot \vec{n_p}} $$</p>
+<p class="mathblock">$$ D = \dfrac{D_p}{\vec{n} \cdot \vec{n_p}} $$</p>
 
 With $D$ as our scaled-up distance, we find the point of intersection $P$ via:
 
-<p align="center">$$ P = x + \vec{n} \times D $$</p>
+<p class="mathblock">$$ P = x + \vec{n} \times D $$</p>
 
 <Scene scene="project-point-onto-plane" height={500} usesVariables />
 
 We can now get rid of $D_p$, which was defined as $d_p - (\vec{n_p} \cdot x)$, giving us the full equation for $D$:
 
-<p align="center">$$ D = \dfrac{d_p - (\vec{n_p} \cdot x)}{\vec{n} \cdot \vec{n_p}} $$</p>
+<p class="mathblock">$$ D = \dfrac{d_p - (\vec{n_p} \cdot x)}{\vec{n} \cdot \vec{n_p}} $$</p>
 
 Putting this into code, we get:
 
@@ -409,7 +409,7 @@ Vector3 LinePlaneIntersection(Line line, Plane plane) {
 
 ### Rays and lines
 
-We've been talking about a line-plane intersection, but I've been visualizing a ray-plane intersection.
+We've been talking about line-plane intersections, but I've been lying a bit by visualizing ray-plane intersections instead for visual clarity.
 
 <Scene scene="project-point-onto-plane" height={500} usesVariables />
 
@@ -423,7 +423,7 @@ What this means for intersections is that a ray will not intersect planes when t
 
 <Scene scene="ray-and-line-plane-intersection" height={500} usesVariables />
 
-Our implementation for ray-plane intersections will differ from our existing line-plane implementation only in that it should yield a result of "no intersection" when the ray's normal $\vec{n}$ is pointing "away" from the plane's normal $\vec{n_p}$ at an obtuse angle.
+Our implementation for ray-plane intersections will differ from our existing line-plane intersection implementation only in that it should yield a result of "no intersection" when the ray's normal $\vec{n}$ is pointing "away" from the plane's normal $\vec{n_p}$ at an obtuse angle.
 
 Since $D$ represents how far to travel along the normal to reach the point of intersection, we could yield "no intersection" when $D$ becomes negative:
 
@@ -449,7 +449,7 @@ Vector3 LinePlaneIntersection(Line line, Plane plane) {
 }
 ```
 
-To the following:
+To this:
 
 ```cs
 Vector3 RayPlaneIntersection(Line line, Plane plane) {
@@ -461,26 +461,26 @@ Vector3 RayPlaneIntersection(Line line, Plane plane) {
 }
 ```
 
-The $\vec{n} \cdot \vec{n_p} < \epsilon$ check covers both the line-parallel-to-plane case _and_ the case where the two normal vectors are at an obtuse angle.
+The $\vec{n} \cdot \vec{n_p} < \epsilon$ check covers both the _"line parallel to plane"_ case _and_ the case where the two normal vectors are at an obtuse angle.
 
 
 ## Three plane intersection
 
-Given three planes $P_1$, $P_2$, $P_3$, there are five possible configurations:
+Given three planes $P_1$, $P_2$, $P_3$, there are five possible configurations in which they intersect or don't intersect:
 
  1. All three planes are parallel, with none of them intersecting each other.
- 2. Two planes are parallel, and the third plane intersects the ther two.
+ 2. Two planes are parallel, and the third plane intersects the other two.
  3. All three planes intersect along a single line.
- 4. The three planes intersect each other in pairs, forming three lines of intersection.
- 5. The planes intersect at a point.
+ 4. The three planes intersect each other in pairs, forming three parallel lines of intersection.
+ 5. All three planes intersect each other at a single point.
 
 <Scene scene="three-plane-intersection-configurations" height={400} yOffset={-1} zoom={1.1} usesVariables />
 
-When finding the point-of-intersection, we'll first need to determine whether the three planes all intersect each other—which for configurations 1 through 4, they don't.
+When finding the point-of-intersection, we'll first need to determine whether all three planes intersect at a single point—which for configurations 1 through 4, they don't.
 
-Given that $\vec{n_1}$, $\vec{n_2}$, $\vec{n_3}$ are the plane normals for $P_1$, $P_2$, $P_3$, we can determine whether the planes intersect at a single point with the formula:
+Given $\vec{n_1}$, $\vec{n_2}$, $\vec{n_3}$ as the plane normals for $P_1$, $P_2$, $P_3$, we can determine whether the planes intersect at a single point with the formula:
 
-<p align="center">$$ \vec{n_1} \cdot (\vec{n_2} × \vec{n_3}) \neq 0 $$</p>
+<p class="mathblock">$$ \vec{n_1} \cdot (\vec{n_2} × \vec{n_3}) \neq 0 $$</p>
 
 When I first saw this, I found it hard to believe this would work for all cases. Still, it does! Let's take a deep dive to better understand what's happening.
 
@@ -492,15 +492,15 @@ We'll start off with the configurations where two or more planes are parallel:
 
 If $\vec{n_2}$ and $\vec{n_3}$ are parallel then $\vec{n_2} × \vec{n_3}$ yields a vector whose magnitude is zero.
 
-<p align="center">$$\|\vec{n_2} × \vec{n_3}\| = 0$$</p>
+<p class="mathblock">$$\|\vec{n_2} × \vec{n_3}\| = 0$$</p>
 
 And since the dot product is a multiple of the magnitudes of its component vectors:
 
-<p align="center">$$a \cdot b = \|a\|\,\|b\|\,cos\,\theta$$</p>
+<p class="mathblock">$$a \cdot b = \|a\|\,\|b\|\,cos\,\theta$$</p>
 
 the final result is zero whenever $\vec{n_2}$ and $\vec{n_3}$ are parallel.
 
-<p align="center">$$\vec{n_1} \cdot (\vec{n_2} × \vec{n_3}) = 0$$</p>
+<p class="mathblock">$$\vec{n_1} \cdot (\vec{n_2} × \vec{n_3}) = 0$$</p>
 
 This takes care of the "all-planes-parallel" configuration, and the configuration where $\vec{n_2}$ and $\vec{n_3}$ are parallel
 
@@ -512,15 +512,15 @@ Let's take the example where $\vec{n_1}$ is parallel to $\vec{n_2}$ but $\vec{n_
 
 <Scene scene="three-planes-n1-n2-parallel" height={400} />
 
-The cross product $\vec{n_2} × \vec{n_3}$ yields a vector that's perpendicular to both $\vec{n_2}$ and $\vec{n_3}$.
+The cross product $\vec{n_2} × \vec{n_3}$ yields a vector (colored red) that's perpendicular to both $\vec{n_2}$ and $\vec{n_3}$.
 
 <Scene scene="three-planes-n1-n2-parallel-cross" height={400} />
 
 Since $\vec{n_1}$ is parallel to $\vec{n_2}$, that means that $\vec{n_2} × \vec{n_3}$ is also perpendicular to $\vec{n_1}$. As we've learned, the dot product of two perpendicular is zero, meaning that:
 
-<p align="center">$$\vec{n_1} \cdot (\vec{n_2} × \vec{n_3}) = 0$$</p>
+<p class="mathblock">$$\vec{n_1} \cdot (\vec{n_2} × \vec{n_3}) = 0$$</p>
 
-Which also holds in the case where $\vec{n_1}$ is parallel to $\vec{n_3}$.
+Which also holds in the case where $\vec{n_1}$ is parallel to $\vec{n_3}$ instead of $\vec{n_2}$.
 
 ### Parallel lines of intersection
 
@@ -536,12 +536,13 @@ When all of the lines of intersection are parallel, all of the plane normals def
 
 Yet again, because the dot product of perpendicular vectors is 0 we can conclude that $\vec{n_1} \cdot (\vec{n_2} × \vec{n_3}) = 0$ for these configurations as well.
 
-We can now begin our implementation:
+We can now begin our implementation. As usual, we'll use an epsilon to handle the _"roughly parallel"_ case:
 
 ```cs
 Vector3 ThreePlaneIntersection(Plane p1, Plane p2, Plane p3) {
-  Vector3 p2CrossP3 = Vector3.Cross(p2.normal, p3.normal);
-  if (Mathf.Abs(Vector3.Dot(p1.normal, p2CrossP3)) < EPSILON) {
+  Vector3 cross = Vector3.Cross(p2.normal, p3.normal);
+  float dot = Vector3.Dot(p1.normal, cross);
+  if (Mathf.Abs(dot) < EPSILON) {
     return null; // Planes do not intersect at a single point
   }
   // ...
@@ -566,114 +567,108 @@ This vector—let's call it $\vec{V}$—will play a large role in computing the 
 
 We can find $\vec{V}$ through the cross product of two other vectors $\vec{v_1}$, $\vec{v_2}$. The first of those, $\vec{v_1}$, is just $P_1$'s normal.
 
-<p align="center">$$\vec{v_1} = \vec{n_1}$$</p>
+<p class="mathblock">$$\vec{v_1} = \vec{n_1}$$</p>
 
-The latter vector can be found via the formula
+The latter vector can be found via the equation
 
-<p align="center">$$\vec{v_2} = (\vec{n_2} \cdot d_3) - (\vec{n_3} \cdot d_2)$$</p>
+<p class="mathblock">$$\vec{v_2} = \vec{n_2} \times d_3 - \vec{n_3} \times d_2$$</p>
 
 where $d_2$ and $d_3$ are the distances in the constant-normal form of planes $P_2$ and $P_3$.
 
-We saw this earlier in the optimized plane-plane intersection implementation:
+With $\vec{v_1}$ and $\vec{v_2}$ defined, we assign their cross product to $\vec{V}$:
 
-```cs
-Vector3 a = p1.distance * p2.normal;
-Vector3 b = p2.distance * p1.normal;
-Vector3 point = Vector3.Cross(a - b, direction) / denom;
-```
+<p class="mathblock">$$ \vec{V} = \vec{v_1} × \vec{v_2} $$</p>
 
-<SmallNote>$P_2$ corresponds to `p1` and $P_3$ to `p2`</SmallNote>
-
-With $\vec{v_1}$ and $\vec{v_2}$ defined, let's see what their cross product yields:
+Let's see what it looks like:
 
 <Scene scene="three-intersecting-planes-3" height={400} />
 
-Hmm, not quite long enough. The cross product certainly points in the correct direction, but to make $\vec{V}$'s tip lie on the line of intersection, we need to compute some scaling factor for $\vec{V}$.
+Hmm, not quite long enough. $\vec{V}$ certainly points in the right direction, but to make $\vec{V}$'s tip lie on the line of intersection, we need to compute some scaling factor for $\vec{V}$.
 
 As it turns out, we've already computed this scaling factor:
 
-<p align="center">$$\vec{n_1} \cdot (\vec{n_2} × \vec{n_3})$$</p>
+<p class="mathblock">$$\vec{n_1} \cdot (\vec{n_2} × \vec{n_3})$$</p>
 
 The product of $\vec{n_1} \cdot (\vec{n_2} × \vec{n_3})$—let's call that $D$—can be thought to represent how parallel $\vec{P_1}$'s normal is to the line intersection of $P_2$ and $P_3$.
 
-$D$ gets closer to 1 as $P_1$'s normal becomes parallel to the line of intersection $\vec{n_2} × \vec{n_3}$, and approaches 0 as they become perpendicular.
+$D$ approaches $\|\vec{n_2} × \vec{n_3}\|$ as $P_1$'s normal becomes parallel to the line of intersection $\vec{n_2} × \vec{n_3}$, and approaches 0 as they become perpendicular.
 
 We want the $\vec{V}$'s magnitude to increase as $D$ decreases, so we'll make $\dfrac{1}{D}$ the scaling factor for $\vec{V}$.
 
-<p align="center">$$\vec{V} = \dfrac{\vec{v_1} × \vec{v_2}}{D}$$</p>
+<p class="mathblock">$$\vec{V} = \dfrac{\vec{v_1} × \vec{v_2}}{D}$$</p>
 
 <Scene scene="three-intersecting-planes-4" height={400} />
 
-Fully expanded, the formula for $\vec{V}$ becomes:
+Fully expanded, the equation for $\vec{V}$ becomes:
 
-<p align="center">$$\vec{V} = \dfrac{\vec{v_1} × \vec{v_2}}{D} = \dfrac{\vec{n_1} × ((\vec{n_2} \cdot d_3) - (\vec{n_3} \cdot d_2))}{\vec{n_1} \cdot (\vec{n_2} × \vec{n_3})}$$</p>
-
-<SmallNote label="" center>Quite a mouthful!</SmallNote>
+<p class="mathblock">$$\vec{V} = \dfrac{\vec{v_1} × \vec{v_2}}{D} = \dfrac{\vec{n_1} × ((\vec{n_2} \times d_3) - (\vec{n_3} \times d_2))}{\vec{n_1} \cdot (\vec{n_2} × \vec{n_3})}$$</p>
 
 Bam! The problem is now reduced to traveling along the direction of the line intersection until we intersect with $P_1$.
 
 <Scene scene="three-intersecting-planes-5" height={400} />
 
-Our next step is find some scaling factor for the direction vector $\vec{n_2} × \vec{n_3}$ that scales it such that it's tip ends at $P_1$. Let's call this direction vector $\vec{U}$.
+We could use our knowledge of line-plane intersections to solve this, but there is a more efficient approach I want to demonstrate.
+
+It involves finding a scaling factor for the direction vector $\vec{n_2} × \vec{n_3}$ that scales it such that it's tip ends at $P_1$. Let's call this direction vector $\vec{U}$.
 
 There's one observation we can make that simplifies that. Since $\vec{V}$ is perpendicular to $P_1$'s normal, the distance from $\vec{V}$'s tip to $P_1$ along the direction vector $\vec{U}$ is the same as the distance from the origin to $P_1$ along that same direction.
 
 <Scene scene="three-intersecting-planes-6" height={400} />
 
-With that, consider the vector $\vec{n_1} \cdot d_1$ where $\vec{n_1}$ and $d_1$ are the normal and the distance of the constant normal form of $P_1$.
+With that, consider the vector $\vec{n_1} \times d_1$ where $\vec{n_1}$ and $d_1$ are the normal and distance of $P_1$.
 
 <Scene scene="three-intersecting-planes-7" height={400} />
 
-If $\vec{n_1}$ were parallel to $\vec{U}$ then $d_1$ would be the scaling factor we need, but let's see what happens with $\vec{U} \cdot d_1$:
+If $\vec{n_1}$ were parallel to $\vec{U}$, then $d_1$ would be the scaling factor we need, but let's see what happens with $\vec{U} \times d_1$:
 
 <Scene scene="three-intersecting-planes-8" height={400} usesVariables />
 
-As $\vec{n_1}$ and $\vec{U}$ become less parallel, $U \cdot d_1$ becomes increasingly too short.
+As $\vec{n_1}$ and $\vec{U}$ become less parallel, $U \times d_1$ becomes increasingly too short.
 
-One thing to note as well is that even when $\vec{n_1}$ and $\vec{U}$ are completely parallel, $\vec{U} \cdot d_1$ is still too short. That is due to $\vec{U}$ being the cross product $\vec{n_2} × \vec{n_3}$ where $\vec{n_2}$ and $\vec{n_3}$ are not perpendicular. If we normalize $\vec{U}$ prior to multiplying with $d_1$ that problem goes away.
+One thing to note as well is that even when $\vec{n_1}$ and $\vec{U}$ are completely parallel, $\vec{U} \times d_1$ is still too short, which is due to $\vec{U}$ not being a unit vector. If we normalize $\vec{U}$ prior to multiplying with $d_1$ that problem goes away.
 
 <Scene scene="three-intersecting-planes-11" height={400} usesVariables />
 
 But we're getting ahead of ourselves—we won't need to normalize $\vec{U}$. Let's take a fresh look at how $D$ is defined:
 
-<p align="center">$$D = \vec{n_1} \cdot (\vec{n_2} × \vec{n_3})$$</p>
+<p class="mathblock">$$D = \vec{n_1} \cdot (\vec{n_2} × \vec{n_3})$$</p>
 
 Having defined $\vec{U}$ as $\vec{n_2} × \vec{n_3}$, we can simplify this to
 
-<p align="center">$$D = \vec{n_1} \cdot \vec{U}$$</p>
+<p class="mathblock">$$D = \vec{n_1} \cdot \vec{U}$$</p>
 
-Earlier I mentioned that we could think of $D$ as a measure of how parallel $P_1$'s normal $n_1$ is to $\vec{U}$ (the line intersection of $P_2$ and $P_3$).
+Earlier I mentioned that we could think of $D$ as a measure of how parallel $P_1$'s normal $n_1$ is to $\vec{U}$ (the line intersection of $P_2$ and $P_3$). That's correct, but it's not the whole truth!
 
-That's completely correct! But since the dot product multiplies the magnitudes of its component vectors, $D$ also encodes the magnitude of $\vec{U}$. Hence, dividing $\vec{U}$ by $D$ does two things:
+Since the dot product is a multiple of the magnitudes of its component vectors, $D$ also encodes the magnitude of $\vec{U}$. Hence, scaling $\vec{U}$ by $\dfrac{1}{D}$ does two things:
 
- * it normalizes $\vec{U}$, and
- * it increases the length of $\vec{U}$ as it becomes less parallel with $n_1$.
+ 1. it normalizes $\vec{U}$, and
+ 2. it increases the length of $\vec{U}$ as it becomes less parallel with $n_1$.
 
-So $D$ is both the scaling factor we need for $\vec{U} \cdot d_1$—as well as $\vec{V}$:
+So $D$ is both the scaling factor we need for $\vec{U} \times d_1$, as well as $\vec{V}$:
 
 <Scene scene="three-intersecting-planes-9" height={400} />
 
 We've got our solution! Let's do a quick overview.
 
-We define $\vec{V}$ as
+We define $\vec{V}$ as:
 
-<p align="center">$$\vec{V} = \vec{n_1} × ((\vec{n_2} \cdot d_3) - (\vec{n_3} \cdot d_2))$$</p>
+<p class="mathblock">$$\vec{V} = \vec{n_1} × ((\vec{n_2} \times d_3) - (\vec{n_3} \times d_2))$$</p>
 
-We'll simplify by including $d_1$ in our definition for $\vec{U}$:
+We'll redefine $\vec{U}$ to include $d_1$:
 
-<p align="center">$$\vec{U} = (\vec{n_2} × \vec{n_3}) \cdot d_1$$</p>
+<p class="mathblock">$$\vec{U} = (\vec{n_2} × \vec{n_3}) \cdot d_1$$</p>
 
-Our scalar for $D$ remains defined as
+Our scalar, $D$, remains defined the same:
 
-<p align="center">$$D = \vec{n_1} \cdot (\vec{n_2} × \vec{n_3})$$</p>
+<p class="mathblock">$$D = \vec{n_1} \cdot (\vec{n_2} × \vec{n_3})$$</p>
 
-With this, we find our point of intersection $P$ by adding $\vec{V}$ and $\vec{U}$ together and dividing them by $D$:
+With this, we find our point of intersection $P$ by adding $\vec{V}$ and $\vec{U}$ together and scaling them by $\dfrac{1}{D}$:
 
-<p align="center">$$P = \dfrac{\vec{V} + \vec{U}}{D}$$</p>
+<p class="mathblock">$$P = \dfrac{\vec{V} + \vec{U}}{D}$$</p>
 
 Which fully expanded becomes:
 
-<p align="center">$$P = \dfrac{(\vec{n_1} × ((\vec{n_2} \cdot d_3) - (\vec{n_3} \cdot d_2))) + ((\vec{n_2} × \vec{n_3}) \cdot d_1)}{\vec{n_1} \cdot (\vec{n_2} × \vec{n_3})}$$</p>
+<p class="mathblock">$$P = \dfrac{(\vec{n_1} × ((\vec{n_2} \times d_3) - (\vec{n_3} \times d_2))) + ((\vec{n_2} × \vec{n_3}) \cdot d_1)}{\vec{n_1} \cdot (\vec{n_2} × \vec{n_3})}$$</p>
 
 Putting this into code, we get:
 
@@ -688,10 +683,10 @@ Vector3 ThreePlaneIntersection(Plane p1, Plane p2, Plane p3) {
 
   Vector3 a = p2.normal * p3.distance;
   Vector3 b = p3.normal * p2.distance;
-  Vector3 v = Vector3.Cross(p1.normal, a - b);
-  Vector3 u = dir * p1.distance;
+  Vector3 V = Vector3.Cross(p1.normal, a - b);
+  Vector3 U = dir * p1.distance;
 
-  return (v + u) / d;
+  return (V + U) / denom;
 }
 ```
 

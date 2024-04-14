@@ -1,9 +1,12 @@
-import { useContext } from "react";
+import React, { useContext } from "react";
 import { Grid } from "../Components/primitives/Grid";
+import { Plane as PlaneClass } from "../../math/Plane";
 import { Plane } from "../Components/primitives/Plane";
 import { ThreeContext } from "../Components/ThreeProvider";
 import { createScene } from "../createScene";
 import { Vector } from "../Components/primitives/Vector";
+import { planePlaneIntersection } from "../../math/PlanePlaneIntersection";
+import { Line } from "../Components/primitives/Line";
 
 export default createScene(
   ({}) => {
@@ -17,7 +20,17 @@ export default createScene(
     const point2 = n2.clone().multiplyScalar(1);
     const point3 = n3.clone().multiplyScalar(1);
 
-    const cross = n1.clone().cross(n2);
+    // const cross = n1.clone().cross(n2);
+
+    const plane1 = PlaneClass.fromPointAndNormal(point1, n1);
+    const plane2 = PlaneClass.fromPointAndNormal(point2, n2);
+    const plane3 = PlaneClass.fromPointAndNormal(point3, n3);
+
+    const pairs = [
+      [plane1, plane2],
+      [plane1, plane3],
+      [plane2, plane3],
+    ] as const;
 
     return (
       <>
@@ -25,9 +38,36 @@ export default createScene(
         <Plane position={point2} normal={n2} color="white" transparent />
         <Plane position={point3} normal={n3} color="white" transparent />
 
-        <Vector color="white" to={n1} />
-        <Vector color="white" to={n2} />
-        <Vector color="red" to={cross} />
+        {pairs.map(([p1, p2], i) => {
+          const cross = p1.normal.cross(p2.normal).normalize();
+          const intersection = planePlaneIntersection(p1, p2)!;
+
+          return (
+            <React.Fragment key={i}>
+              <Vector
+                color="white"
+                from={intersection.point}
+                to={intersection.point.clone().add(p1.normal)}
+              />
+              <Vector
+                color="white"
+                from={intersection.point}
+                to={intersection.point.clone().add(p2.normal)}
+              />
+              <Vector
+                color="red"
+                from={intersection.point}
+                to={intersection.point.clone().add(cross)}
+              />
+              <Line
+                from={intersection.point.clone().add(cross.clone().multiplyScalar(3.3))}
+                to={intersection.point.clone().add(cross.clone().multiplyScalar(-3.3))}
+                color={0xeb4034}
+                radius={0.01}
+              />
+            </React.Fragment>
+          );
+        })}
 
         <Grid size={10} light />
       </>

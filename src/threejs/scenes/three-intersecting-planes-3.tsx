@@ -25,9 +25,6 @@ export default createScene(
     const p2 = PlaneClass.fromPointAndNormal(point2, n2);
     const p3 = PlaneClass.fromPointAndNormal(point3, n3);
 
-    const u = p2.normal.cross(p3.normal);
-    const denom = p1.normal.dot(u);
-
     const a = p2.normal.multiplyScalar(p3.distance);
     const b = p3.normal.multiplyScalar(p2.distance);
     const asubb = a.clone().sub(b);
@@ -35,17 +32,11 @@ export default createScene(
 
     const line = planePlaneIntersection(p2, p3)!;
 
-    console.log(denom);
-
     return (
       <>
         <Plane position={point1} normal={n1} color="white" transparent />
         <Plane position={point2} normal={n2} color="white" transparent />
         <Plane position={point3} normal={n3} color="white" transparent />
-
-        {/* <MathLabel label="P_1" position={point1} offset={[-1.4, 1.2, 0]} normal={n1} />
-        <MathLabel label="P_2" position={point2} offset={[-1.4, -1.4, 0]} normal={n2} />
-        <MathLabel label="P_3" position={point3} offset={[-1.2, 1.2, 0]} normal={n3} /> */}
 
         <Vector color="red" to={cross} strictEnd />
 
@@ -54,7 +45,6 @@ export default createScene(
 
         <Vector color="green" to={asubb} strictEnd />
         <Vector color="blue" to={p1.normal} strictEnd />
-        {/* <Vector color="blue" from={point1} to={point1.clone().add(p1.normal)} strictEnd /> */}
 
         <Line
           from={line.point.clone().add(line.normal.clone().multiplyScalar(10))}
@@ -62,10 +52,6 @@ export default createScene(
           color={0x777777}
           radius={0.01}
         />
-        {/* <Point color="red" position={d} /> */}
-        {/* <Vector to={v} color="red" />
-        <Vector to={d} color="blue" />
-        <Vector to={u} color="green" /> */}
 
         <Grid size={10} light />
       </>
