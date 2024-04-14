@@ -5,7 +5,7 @@ import { Plane } from "../Components/primitives/Plane";
 import { ThreeContext } from "../Components/ThreeProvider";
 import { createScene } from "../createScene";
 import { Vector } from "../Components/primitives/Vector";
-import { planePlaneIntersection } from "../../math/PlanePlaneIntersection";
+import { planePlaneIntersection } from "../../math/planePlaneIntersection";
 import { Line } from "../Components/primitives/Line";
 
 export default createScene(

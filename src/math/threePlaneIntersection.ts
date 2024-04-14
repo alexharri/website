@@ -2,7 +2,7 @@ import { Plane } from "./Plane";
 
 const EPSILON = 1e-5;
 
-export function ThreePlaneIntersection(p1: Plane, p2: Plane, p3: Plane) {
+export function threePlaneIntersection(p1: Plane, p2: Plane, p3: Plane) {
   const u = p2.normal.cross(p3.normal);
 
   const denom = p1.normal.dot(u);

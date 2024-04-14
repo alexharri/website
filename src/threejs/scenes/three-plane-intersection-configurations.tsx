@@ -1,7 +1,7 @@
 import { useContext, useRef } from "react";
 import type { Mesh } from "three";
 import { Plane as PlaneClass } from "../../math/Plane";
-import { planePlaneIntersection } from "../../math/PlanePlaneIntersection";
+import { planePlaneIntersection } from "../../math/planePlaneIntersection";
 import { lerp } from "../../utils/lerp";
 import { Grid } from "../Components/primitives/Grid";
 import { Line } from "../Components/primitives/Line";

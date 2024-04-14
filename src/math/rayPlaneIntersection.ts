@@ -10,7 +10,7 @@ export function rayPlaneIntersection(
 ) {
   const denom = plane.normal.dot(lineNormal);
   if (denom < EPSILON) {
-    return null; // Line and plane are parallel
+    return null; // Ray and plane are parallel, or ray does not hit plane
   }
 
   const D = (plane.distance - plane.normal.dot(linePoint)) / denom;

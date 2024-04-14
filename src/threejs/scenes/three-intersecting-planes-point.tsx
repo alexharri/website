@@ -1,7 +1,7 @@
 import { useContext } from "react";
 import { Plane as PlaneClass } from "../../math/Plane";
-import { planePlaneIntersection } from "../../math/PlanePlaneIntersection";
-import { ThreePlaneIntersection } from "../../math/ThreePlaneIntersection";
+import { planePlaneIntersection } from "../../math/planePlaneIntersection";
+import { threePlaneIntersection } from "../../math/threePlaneIntersection";
 import { Grid } from "../Components/primitives/Grid";
 import { Line } from "../Components/primitives/Line";
 import { MathLabel } from "../Components/primitives/MathLabel";
@@ -40,7 +40,7 @@ export default createScene(
         <MathLabel label="P_2" position={point2} offset={[-1.4, -1.4, 0]} normal={n2} />
         <MathLabel label="P_3" position={point3} offset={[1.2, 1.2, 0]} normal={n3} />
 
-        <Point color="white" position={ThreePlaneIntersection(p1, p2, p3)!} />
+        <Point color="white" position={threePlaneIntersection(p1, p2, p3)!} />
 
         {[l1, l2, l3].map((l, i) => (
           <Line
