@@ -7,18 +7,30 @@ import { ScenePropsContext } from "./scenes";
 
 const styles = ({ styled }: StyleOptions) => ({
   scene: styled.css`
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
     display: flex;
     align-items: center;
     justify-content: center;
     border-radius: 32px;
     margin: 0 auto;
     width: ${cssVariables.contentWidth}px;
-    position: relative;
+    max-width: 100%;
     overflow: hidden;
+
+    @media (max-width: 800px) {
+      width: 100%;
+      border-radius: 0;
+    }
 
     p {
       position: relative;
       z-index: 3;
+      padding: 0 32px;
+      text-align: center;
     }
   `,
 
@@ -85,7 +97,11 @@ function cycler(cycle: number, duration: number, elapsed: number) {
 }
 
 export const SceneSkeleton: React.FC = () => {
-  const { height, usesVariables } = useContext(ScenePropsContext);
+  const {
+    height: targetHeight,
+    usesVariables,
+    errorLoadingThreeJs,
+  } = useContext(ScenePropsContext);
   const s = useStyles(styles);
 
   const variablesHeight = usesVariables ? 56 : 0;
@@ -128,21 +144,22 @@ export const SceneSkeleton: React.FC = () => {
     };
   }, [visible]);
 
-  const actualHeight = height + variablesHeight;
-  const bottomPadding = 16;
-
   return (
-    <div style={{ height: actualHeight }}>
-      <div
-        className={s("scene")}
-        style={{ height: actualHeight - bottomPadding }}
-        ref={containerRef}
-      >
+    <div style={{ position: "relative" }}>
+      <div style={{ margin: "0 auto", width: "600px", maxWidth: "100%" }}>
+        <div style={{ paddingBottom: `${(targetHeight / 600) * 100}%` }} />
+        <div style={{ height: variablesHeight }} />
+      </div>
+      <div className={s("scene")} ref={containerRef}>
         <div className={s("shadeContainer")} ref={shadeContainerRef}>
           <div className={s("shade2")} ref={ref1} />
           <div className={s("shade3")} ref={ref2} />
         </div>
-        <p>Loading 3D scene</p>
+        <p>
+          {errorLoadingThreeJs
+            ? "Error loading three.js, please reload the page"
+            : "Loading 3D scene"}
+        </p>
       </div>
     </div>
   );

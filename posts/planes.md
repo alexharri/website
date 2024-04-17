@@ -75,13 +75,13 @@ By virtue of being parallel to the plane's surface, the vectors $b - a$ and $c -
 
 The [cross product][cross_product] takes in two vectors $\vec{a}$ and $\vec{b}$ and returns a vector $\vec{c}$ that is perpendicular to both of them.
 
-<p class="mathblock">$$\vec{c} = \vec{a} × \vec{b}$$</p>
+<p className="mathblock">$$\vec{c} = \vec{a} × \vec{b}$$</p>
 
 [cross_product]: https://en.wikipedia.org/wiki/Cross_product
 
 A vector perpendicular to the triangle's edge vectors $b - a$ and $c - a$ will also be perpendicular to the triangle's surface. Let's call this vector $\vec{d}$.
 
-<p class="mathblock">$$\vec{d} = (b - a) × (c - a)$$</p>
+<p className="mathblock">$$\vec{d} = (b - a) × (c - a)$$</p>
 
 <Scene scene="three-points-cross-product" height={400} yOffset={-0.3} />
 
@@ -91,7 +91,7 @@ $\vec{d}$ points in the right direction, but it's not a normal. For $\vec{d}$ to
 
 We can normalize $\vec{d}$ to $\vec{n}$ by dividing $\vec{d}$ by its magnitude $\|\vec{d}\|$:
 
-<p class="mathblock">$$\vec{n} = \dfrac{\vec{d}}{\|\vec{d}\|}$$</p>
+<p className="mathblock">$$\vec{n} = \dfrac{\vec{d}}{\|\vec{d}\|}$$</p>
 
 This yields a normal $\vec{n}$ where $\|\vec{n}\| = 1$:
 
@@ -124,7 +124,7 @@ Translating from the point-normal to the constant-normal form is very easy: the 
 
 [dot_product]: https://en.wikipedia.org/wiki/Dot_product
 
-<p class="mathblock">$$\vec{n} \cdot p = d$$</p>
+<p className="mathblock">$$\vec{n} \cdot p = d$$</p>
 
 <SmallNote label="" center>If you're not familiar with the dot product, don't worry. We'll cover it thoroughly later on.</SmallNote>
 
@@ -149,13 +149,13 @@ So let's find $P_x$'s distance using the $d = \vec{n} \cdot p$ equation we learn
 
 With two distances $d_1$ and $d_2$ from the planes $P$ and $P_x$ the solution simply becomes:
 
-<p class="mathblock">$$ d_1 - d_2 $$</p>
+<p className="mathblock">$$ d_1 - d_2 $$</p>
 
 <Scene scene="point-distance-step-3" height={400} />
 
 So, to simplify, given a plane $P$ having a normal $\vec{n}$ and distance $d$, we can calculate a point $x$'s distance from $P$ like so:
 
-<p class="mathblock">$$ d - (\vec{n} \cdot x) $$</p>
+<p className="mathblock">$$ d - (\vec{n} \cdot x) $$</p>
 
 The distance may be positive or negative depending on which side of the plane the point is on.
 
@@ -166,11 +166,11 @@ We just looked at finding a point's distance to a plane. A case where that becom
 
 Given a point $x$ which we want to project onto plane $P$ whose normal is $\vec{n}$ and distance is $d$, we can do that fairly easily. First, let's assign the point's distance from the plane to $D$:
 
-<p class="mathblock">$$ D = d - (\vec{n} \cdot x) $$</p>
+<p className="mathblock">$$ D = d - (\vec{n} \cdot x) $$</p>
 
 Multiplying the plane's normal $\vec{n}$ by $D$ gives us a vector which when added to $x$ projects it onto the plane. Let's call the projected point $S$:
 
-<p class="mathblock">$$ S = x + (\vec{n} \times D) $$</p>
+<p className="mathblock">$$ S = x + (\vec{n} \times D) $$</p>
 
 <Scene scene="project-point-onto-plane-along-normal" height={400} />
 
@@ -191,15 +191,15 @@ Let's take two planes $P_1$ and $P_2$ whose normals are $\vec{n_1}$ and $\vec{n_
 
 Finding the normal of $P_1$ and $P_2$'s intersection is deceptively simple. It's just the cross product of two the plane normals, which we'll assign to $\vec{d}$.
 
-<p class="mathblock">$$\vec{d} = \vec{n_1} × \vec{n_2}$$</p>
+<p className="mathblock">$$\vec{d} = \vec{n_1} × \vec{n_2}$$</p>
 
 Because the cross product does not yield a unit vector, we'll normalize $\vec{d}$ and assign the normalized direction vector to $\vec{n}$.
 
-<p class="mathblock">$$\vec{n} = \dfrac{\vec{d}}{\|\vec{d}\|}$$</p>
+<p className="mathblock">$$\vec{n} = \dfrac{\vec{d}}{\|\vec{d}\|}$$</p>
 
 This gives us the intersection's normal $\vec{n}$. Let's zoom in and see it in action.
 
-<Scene scene="intersecting-planes-point-and-normal" height={380} zoom={2} />
+<Scene scene="intersecting-planes-point-and-normal" height={380} zoom={2} usesVariables />
 
 This is all we have to do for two planes whose distance components are 0—we can just use $(0, 0, 0)$ as the intersection point and call it a day.
 
@@ -235,11 +235,11 @@ The relationship is linear. As the difference in angles halves, so does the magn
 
 So to determine the epsilon, we can just ask: how low does the angle in degrees need to become for us to consider two planes parallel? Given an angle $\theta°$, we can find the epsilon $\epsilon$ via:
 
-<p class="mathblock">$$\epsilon = 0.01745 \times \theta°$$</p>
+<p className="mathblock">$$\epsilon = 0.01745 \times \theta°$$</p>
 
 If that angle is 1/256°, then we get:
 
-<p class="mathblock">$$\dfrac{0.01745}{256} \approx 0.000068 $$</p>
+<p className="mathblock">$$\dfrac{0.01745}{256} \approx 0.000068 $$</p>
 
 Which epsilon you choose will depend on your use case.
 
@@ -265,7 +265,7 @@ An interesting property of only traveling along the plane normals is that it yie
 
 Anyway, once $k_1$ and $k_2$ are found, our solution for the point $p$ becomes:
 
-<p class="mathblock">$$p = \vec{n_1} \times k_1 + \vec{n_2} \times k_2 $$</p>
+<p className="mathblock">$$p = \vec{n_1} \times k_1 + \vec{n_2} \times k_2 $$</p>
 
 The scaling factors $k_1$, $k_2$ can be computed like so:
 
@@ -349,11 +349,11 @@ Given in constant-normal form, the plane has a normal $\vec{n_p}$ and a distance
 
 First, we can figure out the distance $D_p$ that we'd need to travel if $\vec{n}$ and $\vec{n_p}$ were parallel, which is what we did when projecting along the plane's normal.
 
-<p class="mathblock">$$ D_p = d_p - (\vec{n_p} \cdot x) $$</p>
+<p className="mathblock">$$ D_p = d_p - (\vec{n_p} \cdot x) $$</p>
 
 Let's try projecting $x$ along $\vec{n}$ using $D_p$ like so:
 
-<p class="mathblock">$$ P = x + \vec{n} \times D_p $$</p>
+<p className="mathblock">$$ P = x + \vec{n} \times D_p $$</p>
 
 We'll visualize $P$ as a red point:
 
@@ -365,17 +365,17 @@ Here, the dot product comes in handy. Let's do a refresher.
 
 For two vectors $\vec{a}$ and $\vec{b}$, the dot product is defined as
 
-<p class="mathblock">$$\vec{a} \cdot \vec{b} = \|\vec{a}\|\,\|\vec{b}\|\,cos\,\theta$$</p>
+<p className="mathblock">$$\vec{a} \cdot \vec{b} = \|\vec{a}\|\,\|\vec{b}\|\,cos\,\theta$$</p>
 
 where $\theta$ is the angle between $\vec{a}$ and $\vec{b}$.
 
 Consider the dot product of $\vec{n}$ and $\vec{n_p}$. Since both normals are unit vectors whose magnitudes are 1
 
-<p class="mathblock">$$\|\vec{n}\| = \|\vec{n_p}\| = 1$$</p>
+<p className="mathblock">$$\|\vec{n}\| = \|\vec{n_p}\| = 1$$</p>
 
 we can remove their magnitudes from the equation,
 
-<p class="mathblock">$$\vec{n} \cdot \vec{n_p} = cos\,\theta$$</p>
+<p className="mathblock">$$\vec{n} \cdot \vec{n_p} = cos\,\theta$$</p>
 
 making the dot product of $\vec{n}$ and $\vec{n_p}$ the cosine of the angle between them.
 
@@ -383,17 +383,17 @@ For two vectors, the cosine of their angles approaches 1 as the vectors become i
 
 Since $D_p$ becomes increasingly too small as $\vec{n}$ and $\vec{n_p}$ become more perpendicular, we can use $\vec{n} \cdot \vec{n_p}$ as a denominator for $D_p$. We'll assign this scaled-up version of $D_p$ to $D$:
 
-<p class="mathblock">$$ D = \dfrac{D_p}{\vec{n} \cdot \vec{n_p}} $$</p>
+<p className="mathblock">$$ D = \dfrac{D_p}{\vec{n} \cdot \vec{n_p}} $$</p>
 
 With $D$ as our scaled-up distance, we find the point of intersection $P$ via:
 
-<p class="mathblock">$$ P = x + \vec{n} \times D $$</p>
+<p className="mathblock">$$ P = x + \vec{n} \times D $$</p>
 
 <Scene scene="project-point-onto-plane" height={500} usesVariables />
 
 We can now get rid of $D_p$, which was defined as $d_p - (\vec{n_p} \cdot x)$, giving us the full equation for $D$:
 
-<p class="mathblock">$$ D = \dfrac{d_p - (\vec{n_p} \cdot x)}{\vec{n} \cdot \vec{n_p}} $$</p>
+<p className="mathblock">$$ D = \dfrac{d_p - (\vec{n_p} \cdot x)}{\vec{n} \cdot \vec{n_p}} $$</p>
 
 Putting this into code, we get:
 
@@ -484,7 +484,7 @@ When finding the point-of-intersection, we'll first need to determine whether al
 
 Given $\vec{n_1}$, $\vec{n_2}$, $\vec{n_3}$ as the plane normals for $P_1$, $P_2$, $P_3$, we can determine whether the planes intersect at a single point with the formula:
 
-<p class="mathblock">$$ \vec{n_1} \cdot (\vec{n_2} × \vec{n_3}) \neq 0 $$</p>
+<p className="mathblock">$$ \vec{n_1} \cdot (\vec{n_2} × \vec{n_3}) \neq 0 $$</p>
 
 When I first saw this, I found it hard to believe this would work for all cases. Still, it does! Let's take a deep dive to better understand what's happening.
 
@@ -496,15 +496,15 @@ We'll start off with the configurations where two or more planes are parallel:
 
 If $\vec{n_2}$ and $\vec{n_3}$ are parallel then $\vec{n_2} × \vec{n_3}$ yields a vector whose magnitude is zero.
 
-<p class="mathblock">$$\|\vec{n_2} × \vec{n_3}\| = 0$$</p>
+<p className="mathblock">$$\|\vec{n_2} × \vec{n_3}\| = 0$$</p>
 
 And since the dot product is a multiple of the magnitudes of its component vectors:
 
-<p class="mathblock">$$a \cdot b = \|a\|\,\|b\|\,cos\,\theta$$</p>
+<p className="mathblock">$$a \cdot b = \|a\|\,\|b\|\,cos\,\theta$$</p>
 
 the final result is zero whenever $\vec{n_2}$ and $\vec{n_3}$ are parallel.
 
-<p class="mathblock">$$\vec{n_1} \cdot (\vec{n_2} × \vec{n_3}) = 0$$</p>
+<p className="mathblock">$$\vec{n_1} \cdot (\vec{n_2} × \vec{n_3}) = 0$$</p>
 
 This takes care of the "all-planes-parallel" configuration, and the configuration where $\vec{n_2}$ and $\vec{n_3}$ are parallel
 
@@ -522,7 +522,7 @@ The cross product $\vec{n_2} × \vec{n_3}$ yields a vector (colored red) that's 
 
 Since $\vec{n_1}$ is parallel to $\vec{n_2}$, that means that $\vec{n_2} × \vec{n_3}$ is also perpendicular to $\vec{n_1}$. As we've learned, the dot product of two perpendicular is zero, meaning that:
 
-<p class="mathblock">$$\vec{n_1} \cdot (\vec{n_2} × \vec{n_3}) = 0$$</p>
+<p className="mathblock">$$\vec{n_1} \cdot (\vec{n_2} × \vec{n_3}) = 0$$</p>
 
 Which also holds in the case where $\vec{n_1}$ is parallel to $\vec{n_3}$ instead of $\vec{n_2}$.
 
@@ -571,17 +571,17 @@ This vector—let's call it $\vec{V}$—will play a large role in computing the 
 
 We can find $\vec{V}$ through the cross product of two other vectors $\vec{v_1}$, $\vec{v_2}$. The first of those, $\vec{v_1}$, is just $P_1$'s normal.
 
-<p class="mathblock">$$\vec{v_1} = \vec{n_1}$$</p>
+<p className="mathblock">$$\vec{v_1} = \vec{n_1}$$</p>
 
 The latter vector can be found via the equation
 
-<p class="mathblock">$$\vec{v_2} = \vec{n_2} \times d_3 - \vec{n_3} \times d_2$$</p>
+<p className="mathblock">$$\vec{v_2} = \vec{n_2} \times d_3 - \vec{n_3} \times d_2$$</p>
 
 where $d_2$ and $d_3$ are the distances in the constant-normal form of planes $P_2$ and $P_3$.
 
 With $\vec{v_1}$ and $\vec{v_2}$ defined, we assign their cross product to $\vec{V}$:
 
-<p class="mathblock">$$ \vec{V} = \vec{v_1} × \vec{v_2} $$</p>
+<p className="mathblock">$$ \vec{V} = \vec{v_1} × \vec{v_2} $$</p>
 
 Let's see what it looks like:
 
@@ -591,7 +591,7 @@ Hmm, not quite long enough. $\vec{V}$ certainly points in the right direction, b
 
 As it turns out, we've already computed this scaling factor:
 
-<p class="mathblock">$$\vec{n_1} \cdot (\vec{n_2} × \vec{n_3})$$</p>
+<p className="mathblock">$$\vec{n_1} \cdot (\vec{n_2} × \vec{n_3})$$</p>
 
 The product of $\vec{n_1} \cdot (\vec{n_2} × \vec{n_3})$—let's call that $D$—can be thought to represent how parallel $\vec{P_1}$'s normal is to the line intersection of $P_2$ and $P_3$.
 
@@ -599,13 +599,13 @@ $D$ approaches $\|\vec{n_2} × \vec{n_3}\|$ as $P_1$'s normal becomes parallel t
 
 We want the $\vec{V}$'s magnitude to increase as $D$ decreases, so we'll make $\dfrac{1}{D}$ the scaling factor for $\vec{V}$.
 
-<p class="mathblock">$$\vec{V} = \dfrac{\vec{v_1} × \vec{v_2}}{D}$$</p>
+<p className="mathblock">$$\vec{V} = \dfrac{\vec{v_1} × \vec{v_2}}{D}$$</p>
 
 <Scene scene="three-intersecting-planes-4" height={400} />
 
 Fully expanded, the equation for $\vec{V}$ becomes:
 
-<p class="mathblock">$$\vec{V} = \dfrac{\vec{v_1} × \vec{v_2}}{D} = \dfrac{\vec{n_1} × ((\vec{n_2} \times d_3) - (\vec{n_3} \times d_2))}{\vec{n_1} \cdot (\vec{n_2} × \vec{n_3})}$$</p>
+<p className="mathblock">$$\vec{V} = \dfrac{\vec{v_1} × \vec{v_2}}{D} = \dfrac{\vec{n_1} × ((\vec{n_2} \times d_3) - (\vec{n_3} \times d_2))}{\vec{n_1} \cdot (\vec{n_2} × \vec{n_3})}$$</p>
 
 Bam! The problem is now reduced to traveling along the direction of the line intersection until we intersect with $P_1$.
 
@@ -635,11 +635,11 @@ One thing to note as well is that even when $\vec{n_1}$ and $\vec{U}$ are comple
 
 But we're getting ahead of ourselves—we won't need to normalize $\vec{U}$. Let's take a fresh look at how $D$ is defined:
 
-<p class="mathblock">$$D = \vec{n_1} \cdot (\vec{n_2} × \vec{n_3})$$</p>
+<p className="mathblock">$$D = \vec{n_1} \cdot (\vec{n_2} × \vec{n_3})$$</p>
 
 Having defined $\vec{U}$ as $\vec{n_2} × \vec{n_3}$, we can simplify this to
 
-<p class="mathblock">$$D = \vec{n_1} \cdot \vec{U}$$</p>
+<p className="mathblock">$$D = \vec{n_1} \cdot \vec{U}$$</p>
 
 Earlier I mentioned that we could think of $D$ as a measure of how parallel $P_1$'s normal $n_1$ is to $\vec{U}$ (the line intersection of $P_2$ and $P_3$). That's correct, but it's not the whole truth!
 
@@ -656,23 +656,23 @@ We've got our solution! Let's do a quick overview.
 
 We define $\vec{V}$ as:
 
-<p class="mathblock">$$\vec{V} = \vec{n_1} × ((\vec{n_2} \times d_3) - (\vec{n_3} \times d_2))$$</p>
+<p className="mathblock">$$\vec{V} = \vec{n_1} × ((\vec{n_2} \times d_3) - (\vec{n_3} \times d_2))$$</p>
 
 We'll redefine $\vec{U}$ to include $d_1$:
 
-<p class="mathblock">$$\vec{U} = (\vec{n_2} × \vec{n_3}) \cdot d_1$$</p>
+<p className="mathblock">$$\vec{U} = (\vec{n_2} × \vec{n_3}) \cdot d_1$$</p>
 
 Our scalar, $D$, remains defined the same:
 
-<p class="mathblock">$$D = \vec{n_1} \cdot (\vec{n_2} × \vec{n_3})$$</p>
+<p className="mathblock">$$D = \vec{n_1} \cdot (\vec{n_2} × \vec{n_3})$$</p>
 
 With this, we find our point of intersection $P$ by adding $\vec{V}$ and $\vec{U}$ together and scaling them by $\dfrac{1}{D}$:
 
-<p class="mathblock">$$P = \dfrac{\vec{V} + \vec{U}}{D}$$</p>
+<p className="mathblock">$$P = \dfrac{\vec{V} + \vec{U}}{D}$$</p>
 
 Which fully expanded becomes:
 
-<p class="mathblock">$$P = \dfrac{(\vec{n_1} × ((\vec{n_2} \times d_3) - (\vec{n_3} \times d_2))) + ((\vec{n_2} × \vec{n_3}) \cdot d_1)}{\vec{n_1} \cdot (\vec{n_2} × \vec{n_3})}$$</p>
+<p className="mathblock">$$P = \dfrac{(\vec{n_1} × ((\vec{n_2} \times d_3) - (\vec{n_3} \times d_2))) + ((\vec{n_2} × \vec{n_3}) \cdot d_1)}{\vec{n_1} \cdot (\vec{n_2} × \vec{n_3})}$$</p>
 
 Putting this into code, we get:
 

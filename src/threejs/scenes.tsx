@@ -14,6 +14,7 @@ export interface SceneProps {
   usesVariables?: boolean;
   zoom?: number;
   yOffset?: number;
+  errorLoadingThreeJs: boolean;
 }
 
 export const ScenePropsContext = createContext<SceneProps>(null!);
@@ -89,7 +90,7 @@ export const Scene: React.FC<Props> = (props) => {
   const S = threeJsScenes[scene];
   if (!S) throw new Error(`No such scene '${scene}'`);
 
-  const { load, loaded } = useContext(LoadThreeContext);
+  const { load, loaded, error } = useContext(LoadThreeContext);
 
   useEffect(() => {
     if (!loaded) load();
@@ -111,6 +112,7 @@ export const Scene: React.FC<Props> = (props) => {
     usesVariables,
     yOffset,
     zoom,
+    errorLoadingThreeJs: error,
   };
 
   return (

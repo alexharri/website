@@ -3,3 +3,5 @@ export const LINKS = {
   LinkedIn: "https://www.linkedin.com/in/alex-harri-j%C3%B3nsson-b1273613b/",
   Medium: "https://alexharri.medium.com/",
 };
+
+export const IS_SERVER = typeof window === "undefined";
