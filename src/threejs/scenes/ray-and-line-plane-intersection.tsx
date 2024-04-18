@@ -105,7 +105,7 @@ export default createScene(
   },
   {
     variables: {
-      n: { label: "vec_n", type: "normal", value: [-0.84, -0.38, -0.39] },
+      n: { label: "math:vec_n", type: "normal", value: [-0.84, -0.38, -0.39] },
     },
   },
 );

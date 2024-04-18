@@ -29,8 +29,7 @@ export default createScene(
   },
   {
     variables: {
-      // distance: { label: "d", type: "number", range: [0.5, 10], value: 2 },
-      normal: { label: "vec_n", type: "normal", value: [2, 0.5, 1] },
+      normal: { label: "math:vec_n", type: "normal", value: [2, 0.5, 1] },
     },
   },
 );

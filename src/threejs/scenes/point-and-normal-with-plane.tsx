@@ -24,8 +24,8 @@ export default createScene(
   },
   {
     variables: {
-      normal: { label: "vec_n", type: "normal", value: [1, -1, 0.3] },
-      x: { label: "p_x", type: "number", value: 1, range: [-3, 3] },
+      normal: { label: "math:vec_n", type: "normal", value: [1, -1, 0.3] },
+      x: { label: "math:p_x", type: "number", value: 1, range: [-3, 3] },
     },
   },
 );

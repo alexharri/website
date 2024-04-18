@@ -3,6 +3,8 @@ import type THREE from "three";
 import { useStyles } from "../utils/styles";
 import { Line } from "./Components/primitives/Line";
 import { DreiContext, FiberContext, ThreeContext } from "./Components/ThreeProvider";
+import { getMathSvg, getMathSvgDimensions, getMathSvgOffset } from "./math-svg";
+import { MathSVG } from "./MathSVG";
 import NormalVariableStyles from "./NormalVariable.styles";
 import { Three } from "./types";
 import { getBasicMaterial } from "./utils";
@@ -44,11 +46,11 @@ export const NormalVariable: React.FC<NormalVariableProps> = (props) => {
   const FIBER = useContext(FiberContext);
   const s = useStyles(NormalVariableStyles);
 
-  let svgLabel: string | undefined;
+  let svgLabel: React.ReactNode = null;
 
-  if (spec.label) {
-    const el = document.querySelector(`[data-varlabel="${spec.label}"]`);
-    if (el) svgLabel = el.innerHTML;
+  if (spec.label && spec.label.startsWith("math:")) {
+    const [_, label] = spec.label.split("math:");
+    svgLabel = <MathSVG label={label} />;
   }
 
   const hAngleRef = useRef(NaN);
@@ -126,11 +128,7 @@ export const NormalVariable: React.FC<NormalVariableProps> = (props) => {
 
   return (
     <label className={s("normalLabel")}>
-      {svgLabel ? (
-        <span style={{ fontSize: 24 }} dangerouslySetInnerHTML={{ __html: svgLabel }} />
-      ) : (
-        firstUpper(spec.label ?? dataKey)
-      )}
+      {svgLabel ? svgLabel : firstUpper(spec.label ?? dataKey)}
       <div className={s("normal")} onMouseDown={onMouseDown} onTouchStart={onMouseDown}>
         <FIBER.Canvas camera={camera}>
           {visible && (

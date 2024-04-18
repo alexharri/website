@@ -1,4 +1,5 @@
 import { StyleOptions, useStyles } from "../utils/styles";
+import { getMathSvg } from "./math-svg";
 
 const firstUpper = (s: string) => s[0].toUpperCase() + s.slice(1);
 
@@ -31,10 +32,11 @@ export const NumberVariable: React.FC<NumberVariableProps> = (props) => {
 
   const s = useStyles(styles);
 
-  let svgLabel: string | undefined;
-  if (spec.label) {
-    const el = document.querySelector(`[data-varlabel="${spec.label}"]`);
-    if (el) svgLabel = el.innerHTML;
+  let svgLabel: string | null = null;
+
+  if (spec.label && spec.label.startsWith("math:")) {
+    const [_, label] = spec.label.split("math:");
+    svgLabel = getMathSvg(label);
   }
 
   return (
