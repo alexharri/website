@@ -1,5 +1,6 @@
 ---
 title: "Planes in 3D space"
+image: "/images/og-planes.png"
 ---
 
 A plane in 3D space can be thought of as a flat surface that stretches infinitely far, splitting 3D space into two halves.
