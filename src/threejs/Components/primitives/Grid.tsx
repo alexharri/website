@@ -1,5 +1,5 @@
 import { useContext } from "react";
-import { lerp } from "../../../utils/lerp";
+import { lerp } from "../../../math/lerp";
 import { DreiContext, ThreeContext } from "../ThreeProvider";
 
 interface Props {

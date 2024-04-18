@@ -9,7 +9,7 @@ import { Vector } from "../Components/primitives/Vector";
 import { ThreeContext } from "../Components/ThreeProvider";
 import { createScene } from "../createScene";
 import { linePlaneIntersection } from "../../math/linePlaneIntersection";
-import { lerp } from "../../utils/lerp";
+import { lerp } from "../../math/lerp";
 
 export default createScene(
   ({ variables }) => {

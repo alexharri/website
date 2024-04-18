@@ -1,7 +1,7 @@
 import { useContext, useEffect, useRef } from "react";
 import { cssVariables } from "../utils/cssVariables";
 import { useVisible } from "../utils/hooks/useVisible";
-import { lerp } from "../utils/lerp";
+import { lerp } from "../math/lerp";
 import { StyleOptions, useStyles } from "../utils/styles";
 import { SCENE_BASELINE_WIDTH } from "./constants";
 import { ScenePropsContext } from "./scenes";

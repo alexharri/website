@@ -2,7 +2,7 @@ import { useContext, useMemo, useRef } from "react";
 import type THREE from "three";
 import { Plane as PlaneClass } from "../../math/Plane";
 import { planePlaneIntersection } from "../../math/planePlaneIntersection";
-import { lerp } from "../../utils/lerp";
+import { lerp } from "../../math/lerp";
 import { Grid } from "../Components/primitives/Grid";
 import { Line } from "../Components/primitives/Line";
 import { Plane } from "../Components/primitives/Plane";
