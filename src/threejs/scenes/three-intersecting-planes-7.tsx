@@ -36,8 +36,6 @@ export default createScene(({}) => {
 
   const p2p3intersection = planePlaneIntersection(p2, p3)!;
 
-  console.log(denom);
-
   return (
     <>
       <Plane position={point1} normal={n1} color="white" transparent />
@@ -49,27 +47,8 @@ export default createScene(({}) => {
       <MathLabel label="P_3" position={point3} offset={[-1.2, 1.2, 0]} normal={n3} />
 
       <Vector color="red" to={cross.clone().divideScalar(denom)} strictEnd />
-      {/* <Vector
-          color="green"
-          from={cross.clone().divideScalar(denom)}
-          to={cross.clone().divideScalar(denom).add(u_x_p1.clone().divideScalar(denom))}
-          strictEnd
-        />
-        <Vector color="green" to={u_x_p1.clone().divideScalar(denom)} strictEnd /> */}
       <Vector color="blue" to={p1.normal.multiplyScalar(p1.distance)} strictEnd />
-      {/* <Vector
-          color="red"
-          from={u_x_p1.clone().divideScalar(denom)}
-          to={u_x_p1.clone().divideScalar(denom).add(cross.clone().divideScalar(denom))}
-          strictEnd
-        /> */}
 
-      {/* <Vector color="red" to={u.clone().multiplyScalar(denom)} strictEnd /> */}
-      {/* <Point color="white" position={first.clone()} /> */}
-      {/* <Vector color="white" from={first} to={cross.clone().divideScalar(denom)} strictEnd /> */}
-      {/* <Vector color="blue" to={p1.normal} strictEnd /> */}
-      {/* <Vector color="blue" from={point1} to={point1.clone().add(p1.normal)} strictEnd /> */}
-      {/* <Vector color="green" to={u} /> */}
       <Point
         color="white"
         position={u_x_p1.clone().divideScalar(denom).add(cross.clone().divideScalar(denom))}

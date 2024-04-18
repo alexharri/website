@@ -28,10 +28,10 @@ export default createScene(({}) => {
   const d23 = p2.normal.dot(p3.normal);
   const d33 = p3.normal.dot(p3.normal);
 
-  const denom_old = d22 * d33 - d23 * d23;
+  const denom = d22 * d33 - d23 * d23;
 
-  const k2 = (p2.distance * d33 - p3.distance * d23) / denom_old;
-  const k3 = (p3.distance * d22 - p2.distance * d23) / denom_old;
+  const k2 = (p2.distance * d33 - p3.distance * d23) / denom;
+  const k3 = (p3.distance * d22 - p2.distance * d23) / denom;
 
   const first = p2.normal.multiplyScalar(k2).add(p3.normal.multiplyScalar(k3));
 

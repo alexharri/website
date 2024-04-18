@@ -34,8 +34,6 @@ export default createScene(({}) => {
 
   const p2p3intersection = planePlaneIntersection(p2, p3)!;
 
-  console.log(denom);
-
   return (
     <>
       <Plane position={point1} normal={n1} color="white" transparent />
@@ -46,15 +44,7 @@ export default createScene(({}) => {
       <MathLabel label="P_2" position={point2} offset={[-1.4, -1.4, 0]} normal={n2} />
       <MathLabel label="P_3" position={point3} offset={[-1.2, 1.2, 0]} normal={n3} />
 
-      {/* <Vector color="red" to={u.clone().multiplyScalar(denom)} strictEnd /> */}
       <Vector color="red" to={cross.clone().divideScalar(denom)} strictEnd />
-      {/* <Point color="white" position={first.clone()} /> */}
-      {/* <Vector color="white" from={first} to={cross.clone().divideScalar(denom)} strictEnd /> */}
-      {/* <Vector color="green" to={asubb} strictEnd /> */}
-      {/* <Vector color="blue" to={p1.normal} strictEnd /> */}
-      {/* <Vector color="blue" from={point1} to={point1.clone().add(p1.normal)} strictEnd /> */}
-      {/* <Vector color="green" to={u} /> */}
-      {/* <Point color="white" position={ip} /> */}
 
       <Line
         from={p2p3intersection.point
@@ -64,10 +54,6 @@ export default createScene(({}) => {
         color={0x777777}
         radius={0.01}
       />
-      {/* <Point color="red" position={d} /> */}
-      {/* <Vector to={v} color="red" />
-        <Vector to={d} color="blue" />
-        <Vector to={u} color="green" /> */}
 
       <Grid size={10} light />
     </>

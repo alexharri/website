@@ -36,8 +36,6 @@ export default createScene(({}) => {
 
   const p2p3intersection = planePlaneIntersection(p2, p3)!;
 
-  console.log(denom);
-
   return (
     <>
       <Plane position={point1} normal={n1} color="white" transparent />

@@ -18,7 +18,7 @@ export default createScene(
     const linePoint = new THREE.Vector3(-1, 0.7, -1);
     const lineNormal = variables.n;
 
-    let end = rayPlaneIntersection(
+    const end = rayPlaneIntersection(
       new PlaneClass(planeDistance, planeNormal),
       lineNormal,
       linePoint,
