@@ -19,13 +19,13 @@ export const MathSVG: React.FC<Props> = (props) => {
 
   const { label, scale = 2 } = props;
   const svgHtml = getMathSvg(label) || "";
-  const dimensions = getMathSvgDimensions(label) || [0, 0];
+  const [w, h] = getMathSvgDimensions(label) || [0, 0];
 
   return (
     <span
       className={s("span")}
-      style={{ width: dimensions[0] * scale, height: dimensions[1] * scale }}
+      style={{ width: w * scale, height: h * scale }}
       dangerouslySetInnerHTML={{ __html: svgHtml }}
-    ></span>
+    />
   );
 };
