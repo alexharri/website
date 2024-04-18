@@ -13,18 +13,14 @@ const FADE_HEIGHT = 80;
 const styles = ({ styled, theme }: StyleOptions) => ({
   variablesWrapper: styled.css`
     position: relative;
-    z-index: 1;
+    z-index: 2;
     display: flex;
     justify-content: center;
     gap: 48px;
-    height: 56px;
+    height: 72px;
+    padding-bottom: 16px;
     align-items: center;
     margin-top: -16px;
-
-    &--hasNormal {
-      height: 72px;
-      padding-bottom: 16px;
-    }
   `,
 
   fade: styled.css`
@@ -215,13 +211,13 @@ export function createScene<V extends VariablesOptions>(
           <div className={s("variablesWrapper", { hasNormal })}>
             {variableKeys.map((key) => {
               const spec = variablesSpec[key];
-              const value = variables[key] as any;
+              const value = variables[key];
               if (spec.type === "number")
                 return (
                   <NumberVariable
                     key={key}
                     dataKey={key}
-                    value={value}
+                    value={value as number}
                     onValueChange={(value) => setVariableValue(key, value)}
                     spec={spec}
                   />
@@ -231,7 +227,7 @@ export function createScene<V extends VariablesOptions>(
                   <NormalVariable
                     key={key}
                     dataKey={key}
-                    value={value}
+                    value={value as THREE.Vector3}
                     onValueChange={(value) => setVariableValue(key, value)}
                     spec={spec}
                     visible={visible}
