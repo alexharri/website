@@ -1,5 +1,6 @@
 ---
 title: "Planes in 3D space"
+description: "Visual and interactive explanation of 2D planes in 3D space."
 image: "/images/og-planes.png"
 ---
 
