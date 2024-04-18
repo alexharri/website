@@ -6,6 +6,8 @@ import { StyleOptions, useStyles } from "../utils/styles";
 import { SCENE_BASELINE_WIDTH } from "./constants";
 import { ScenePropsContext } from "./scenes";
 
+const SHADE_W = 1000;
+
 const styles = ({ styled }: StyleOptions) => ({
   scene: styled.css`
     position: absolute;
@@ -45,7 +47,7 @@ const styles = ({ styled }: StyleOptions) => ({
     top: 0;
     left: 0;
     bottom: 0;
-    width: 1000px;
+    width: ${SHADE_W}px;
     z-index: 1;
     background: linear-gradient(
       90deg,
@@ -71,7 +73,7 @@ const styles = ({ styled }: StyleOptions) => ({
     top: 0;
     left: 0;
     bottom: 0;
-    width: 1000px;
+    width: ${SHADE_W}px;
     z-index: 1;
     background: linear-gradient(
       90deg,
@@ -136,16 +138,9 @@ export const SceneSkeleton: React.FC = () => {
       const t1 = cycler(4000, 3000, elapsed);
       const t2 = cycler(4000, 3000, elapsed + 2300);
 
-      shade1.style.transform = `translateX(${lerp(
-        -shade1.clientWidth - 100,
-        container.clientWidth + 100,
-        t1,
-      )}px)`;
-      shade2.style.transform = `translateX(${lerp(
-        -shade2.clientWidth - 100,
-        container.clientWidth + 100,
-        t2,
-      )}px)`;
+      const contWidth = container.clientWidth;
+      shade1.style.transform = `translateX(${lerp(-(SHADE_W + 100), contWidth + 100, t1)}px)`;
+      shade2.style.transform = `translateX(${lerp(-(SHADE_W + 100), contWidth + 100, t2)}px)`;
     };
     tick();
     return () => {
