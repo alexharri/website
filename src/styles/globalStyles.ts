@@ -38,6 +38,9 @@ body {
   width: 100vw;
 }
 
+body.grabbing * {
+  cursor: grabbing !important;
+}
 
 h1, h2, h3, h4, h5, h6 {
   font-weight: 700;
@@ -100,6 +103,11 @@ a {
 
 p, li {
   font-size: 18px;
+}
+
+p.mathblock {
+  text-align: center;
+  overflow-x: auto;
 }
 
 ul, ol, p {
@@ -219,5 +227,9 @@ blockquote {
     padding-right: 12px;
     box-sizing: content-box;
   }
+}
+
+mjx-container svg {
+  overflow: visible;
 }
 `;

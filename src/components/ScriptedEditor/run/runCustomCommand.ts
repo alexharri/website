@@ -80,7 +80,7 @@ async function pasteHandler(runContext: RunContext, _command: PasteCommand) {
     const text = clipboard.join("\n");
     editor.executeEdits(
       null,
-      selections.map((range, i) => ({ range, text, forceMoveMarkers: true })),
+      selections.map((range) => ({ range, text, forceMoveMarkers: true })),
     );
   }
 }

@@ -6,7 +6,7 @@ const space = cssVariables.contentWidth - cssVariables.contentPadding * 2;
 export const postCarouselItemGap = 16;
 export const postCarouselItemWidth = space / 2 - postCarouselItemGap / 2;
 
-export const PostCarouselStyles = ({ styled, theme }: StyleOptions) => ({
+export const PostCarouselStyles = ({ styled }: StyleOptions) => ({
   container: styled.css``,
 
   inner: styled.css`

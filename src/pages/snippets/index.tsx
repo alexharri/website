@@ -25,7 +25,7 @@ export default function Page(props: Props) {
   );
 }
 
-export const getStaticProps: GetStaticProps<Props> = async (ctx) => {
+export const getStaticProps: GetStaticProps<Props> = async () => {
   const snippets: Snippet[] = [];
 
   for (const fileName of snippetFileNames) {

@@ -39,3 +39,6 @@ next-env.d.ts
 
 # custom
 /posts/.version
+
+# posts not tracked in git yet
+posts/encoding-icelandic-language-rules.md

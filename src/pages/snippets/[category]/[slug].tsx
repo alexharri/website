@@ -14,6 +14,7 @@ import { SnippetTitle } from "../../../components/SnippetTitle/SnippetTitle";
 import { Pre, StaticCodeBlock } from "../../../components/StaticCodeBlock/StaticCodeBlock";
 import { FrontMatter } from "../../../types/FrontMatter";
 import { usePostWatcher } from "../../../utils/hooks/usePostWatcher";
+import { getMdxOptions } from "../../../utils/mdx";
 import { snippetFileNames, SNIPPETS_PATH } from "../../../utils/mdxUtils";
 
 // Custom components/renderers to pass to MDX.
@@ -75,10 +76,7 @@ export const getStaticProps: GetStaticProps<Props, Params> = async (ctx) => {
 
   const source = await serialize(content, {
     scope: data,
-    mdxOptions: {
-      remarkPlugins: [],
-      rehypePlugins: [],
-    },
+    mdxOptions: await getMdxOptions(),
   });
 
   let version = "0";
