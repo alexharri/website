@@ -1,4 +1,4 @@
-import { useContext, useRef } from "react";
+import { useContext, useMemo, useRef } from "react";
 import type THREE from "three";
 import { Plane as PlaneClass } from "../../math/Plane";
 import { planePlaneIntersection } from "../../math/planePlaneIntersection";
@@ -10,6 +10,8 @@ import { Point } from "../Components/primitives/Point";
 import { FiberContext, ThreeContext } from "../Components/ThreeProvider";
 import { createScene } from "../createScene";
 import { getTransparentBasicMaterial } from "../utils";
+
+const OFF = 12;
 
 export default createScene(
   ({ variables }) => {
@@ -32,11 +34,9 @@ export default createScene(
     const i2 = planePlaneIntersection(plane2, plane3)!;
     const i3 = planePlaneIntersection(plane3, plane1)!;
 
-    const OFF = 12;
-
     const meshRef = useRef<THREE.Mesh | null>(null);
-    const occludePlane0Ref = useRef<THREE.Mesh | null>(null);
-    const occludePlane1Ref = useRef<THREE.Mesh | null>(null);
+    const occludeRef0 = useRef<THREE.Mesh | null>(null);
+    const occludeRef1 = useRef<THREE.Mesh | null>(null);
 
     const configurationRefs = Array.from({ length: 5 }).map(() => useRef<THREE.Mesh | null>(null));
 
@@ -93,41 +93,32 @@ export default createScene(
     });
 
     FIBER.useFrame((state) => {
-      const occludePlane0 = occludePlane0Ref.current;
+      const occludePlane0 = occludeRef0.current;
       if (!occludePlane0) return;
-      const occludePlane1 = occludePlane1Ref.current;
+      const occludePlane1 = occludeRef1.current;
       if (!occludePlane1) return;
 
       occludePlane0.position.setX(Math.min(-OFF / 2, state.camera.position.x - 0.3));
       occludePlane1.position.setX(Math.max(OFF / 2, state.camera.position.x + 0.3));
     });
 
-    return (
-      <>
-        <mesh
-          position={[OFF / 2, 0, 0]}
-          geometry={new THREE.BoxGeometry(0.01, 100, 100)}
-          material={getTransparentBasicMaterial(THREE, "background")}
-          ref={occludePlane0Ref}
-        />
-        <mesh
-          position={[OFF / 2, 0, 0]}
-          geometry={new THREE.BoxGeometry(0.01, 100, 100)}
-          material={getTransparentBasicMaterial(THREE, "background")}
-          ref={occludePlane1Ref}
-        />
-        <mesh
-          position={[0, 0, OFF * 2]}
-          geometry={new THREE.BoxGeometry(100, 100, 0.01)}
-          material={getTransparentBasicMaterial(THREE, "background")}
-        />
-        <mesh
-          position={[0, 0, -OFF * 2]}
-          geometry={new THREE.BoxGeometry(100, 100, 0.01)}
-          material={getTransparentBasicMaterial(THREE, "background")}
-        />
+    const tints = useMemo(() => {
+      const g0 = new THREE.BoxGeometry(0.01, 100, 100);
+      const g1 = new THREE.BoxGeometry(100, 100, 0.01);
+      const material = getTransparentBasicMaterial(THREE, "background");
+      return (
+        <>
+          <mesh position={[OFF / 2, 0, 0]} geometry={g0} material={material} ref={occludeRef0} />
+          <mesh position={[OFF / 2, 0, 0]} geometry={g0} material={material} ref={occludeRef1} />
+          <mesh position={[0, 0, OFF * 2]} geometry={g1} material={material} />
+          <mesh position={[0, 0, -OFF * 2]} geometry={g1} material={material} />
+        </>
+      );
+    }, []);
 
-        <mesh ref={meshRef}>
+    const configurations = useMemo(() => {
+      return (
+        <>
           <mesh ref={configurationRefs[0]}>
             <Plane normal={[0, 1, 0]} distance={3} color={0x888888} opacity={0.3} />
             <Plane normal={[0, 1, 0]} distance={2} color={0x888888} opacity={0.3} />
@@ -170,7 +161,14 @@ export default createScene(
             <Plane normal={[0, 0, 1]} position={[0, 2, 0]} color={0x888888} opacity={0.3} />
             <Point position={[0, 2, 0]} color={0xff4444} />
           </mesh>
-        </mesh>
+        </>
+      );
+    }, []);
+
+    return (
+      <>
+        {tints}
+        <mesh ref={meshRef}>{configurations}</mesh>
         <Grid light size={10} />
       </>
     );
