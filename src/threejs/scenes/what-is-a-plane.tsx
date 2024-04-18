@@ -36,14 +36,13 @@ export default createScene(
 
     const mesh = new THREE.Mesh();
     mesh.lookAt(variables.n);
-    const quat = mesh.quaternion;
 
     const position = new THREE.Vector3(0, 1, 0);
 
     return (
       <>
         <Plane normal={variables.n} position={position} color="blue" />
-        <mesh quaternion={quat} position={position}>
+        <mesh quaternion={mesh.quaternion} position={position}>
           {points}
         </mesh>
         <Grid size={10} />

@@ -19,8 +19,6 @@ export default createScene(({}) => {
   const point2 = n2.clone().multiplyScalar(1);
   const point3 = n3.clone().multiplyScalar(1);
 
-  // const cross = n1.clone().cross(n2);
-
   const plane1 = PlaneClass.fromPointAndNormal(point1, n1);
   const plane2 = PlaneClass.fromPointAndNormal(point2, n2);
   const plane3 = PlaneClass.fromPointAndNormal(point3, n3);
