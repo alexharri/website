@@ -24,26 +24,28 @@ export default createScene(
 
     const intersection = planePlaneIntersection(plane0, plane1);
 
-    if (!intersection) throw new Error("Failed to find intersection");
-
     return (
       <>
         <RenderPlane distance={plane0.distance} normal={plane0.normal} color="blue" />
         <RenderPlane distance={plane1.distance} normal={plane1.normal} color="red" />
         <Vector color="blue" to={plane0.normal} />
         <Vector color="red" to={plane1.normal} />
-        <Vector
-          color={0xcccccc}
-          from={intersection.point}
-          to={intersection.point.clone().add(intersection.normal)}
-        />
-        <Point color={0xcccccc} position={intersection.point} />
-        <Line
-          from={intersection.point.clone().sub(intersection.normal.clone().multiplyScalar(100))}
-          to={intersection.point.clone().add(intersection.normal.clone().multiplyScalar(100))}
-          color={0x888888}
-          radius={0.01}
-        />
+        {intersection && (
+          <>
+            <Vector
+              color={0xcccccc}
+              from={intersection.point}
+              to={intersection.point.clone().add(intersection.normal)}
+            />
+            <Point color={0xcccccc} position={intersection.point} />
+            <Line
+              from={intersection.point.clone().sub(intersection.normal.clone().multiplyScalar(100))}
+              to={intersection.point.clone().add(intersection.normal.clone().multiplyScalar(100))}
+              color={0x888888}
+              radius={0.01}
+            />
+          </>
+        )}
         <Grid size={10} light />
       </>
     );
