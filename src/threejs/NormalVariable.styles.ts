@@ -7,6 +7,7 @@ export default ({ styled }: StyleOptions) => ({
     display: flex;
     align-items: center;
     gap: 3px;
+    font-size: 16px;
   `,
 
   normal: styled.css`
@@ -15,16 +16,6 @@ export default ({ styled }: StyleOptions) => ({
       height: ${W}px;
       touch-action: none;
       cursor: grab;
-    }
-  `,
-
-  axis: styled.css`
-    width: ${W}px;
-    height: ${W}px;
-    border-radius: 50%;
-
-    &--red {
-      background: red;
     }
   `,
 });

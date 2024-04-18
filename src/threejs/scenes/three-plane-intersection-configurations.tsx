@@ -1,5 +1,5 @@
 import { useContext, useRef } from "react";
-import type { Mesh } from "three";
+import type THREE from "three";
 import { Plane as PlaneClass } from "../../math/Plane";
 import { planePlaneIntersection } from "../../math/planePlaneIntersection";
 import { lerp } from "../../utils/lerp";
@@ -34,11 +34,11 @@ export default createScene(
 
     const OFF = 12;
 
-    const meshRef = useRef<Mesh | null>(null);
-    const occludePlane0Ref = useRef<Mesh | null>(null);
-    const occludePlane1Ref = useRef<Mesh | null>(null);
+    const meshRef = useRef<THREE.Mesh | null>(null);
+    const occludePlane0Ref = useRef<THREE.Mesh | null>(null);
+    const occludePlane1Ref = useRef<THREE.Mesh | null>(null);
 
-    const configurationRefs = Array.from({ length: 5 }).map(() => useRef<Mesh | null>(null));
+    const configurationRefs = Array.from({ length: 5 }).map(() => useRef<THREE.Mesh | null>(null));
 
     const posRef = useRef(variables.pos);
     posRef.current = variables.pos;

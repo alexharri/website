@@ -82,10 +82,13 @@ const dimensions: Record<string, [number, number]> = {
 export function getMathSvg(label: string, scale: number = 2): string | null {
   if (!labels[label]) {
     console.warn(`No math SVG exists for '${label}'`);
-    console.log(
-      "SVG: ",
-      (document.querySelector(`[data-varlabel="${label}"]`)?.firstChild as HTMLElement)?.innerHTML,
-    );
+
+    // Useful when adding new SVGs:
+    //
+    // console.log(
+    //   "SVG: ",
+    //   (document.querySelector(`[data-varlabel="${label}"]`)?.firstChild as HTMLElement)?.innerHTML,
+    // );
     return null;
   }
   const dimensions = getMathSvgDimensions(label) || [0, 0];

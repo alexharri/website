@@ -1,5 +1,4 @@
-import { useContext } from "react";
-import { MeshBasicMaterial } from "three";
+import { useContext, useMemo } from "react";
 import { getColor, IColor, IVector3, parseVector } from "../../utils";
 import { ThreeContext } from "../ThreeProvider";
 import { Line } from "./Line";
@@ -14,21 +13,29 @@ export const Triangle: React.FC<Props> = (props) => {
   const points = props.points.map((p) => parseVector(THREE, p));
   const [a, b, c] = points;
 
-  const geom = new THREE.BufferGeometry();
-  geom.setFromPoints([a, b, c, c, b, a]);
+  const geometry = new THREE.BufferGeometry();
+  // prettier-ignore
+  geometry.setFromPoints([
+    a, b, c,
+    c, b, a,
+  ]);
 
-  const planeMaterial = new MeshBasicMaterial({
-    color: getColor(props.color),
-    opacity: 0.2,
-    transparent: true,
-  });
+  const planeMaterial = useMemo(
+    () =>
+      new THREE.MeshBasicMaterial({
+        color: getColor(props.color),
+        opacity: 0.2,
+        transparent: true,
+      }),
+    [],
+  );
 
   return (
     <>
       <Line from={a} to={b} color={props.color} thin />
       <Line from={b} to={c} color={props.color} thin />
       <Line from={c} to={a} color={props.color} thin />
-      <mesh geometry={geom} material={planeMaterial} />
+      <mesh geometry={geometry} material={planeMaterial} />
     </>
   );
 };

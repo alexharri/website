@@ -3,6 +3,7 @@ import { cssVariables } from "../utils/cssVariables";
 import { useVisible } from "../utils/hooks/useVisible";
 import { lerp } from "../utils/lerp";
 import { StyleOptions, useStyles } from "../utils/styles";
+import { SCENE_BASELINE_WIDTH } from "./constants";
 import { ScenePropsContext } from "./scenes";
 
 const styles = ({ styled }: StyleOptions) => ({
@@ -39,7 +40,7 @@ const styles = ({ styled }: StyleOptions) => ({
     transition: opacity 2.5s;
   `,
 
-  shade2: styled.css`
+  shade1: styled.css`
     position: absolute;
     top: 0;
     left: 0;
@@ -65,7 +66,7 @@ const styles = ({ styled }: StyleOptions) => ({
     transform: skew(-15deg, 0);
   `,
 
-  shade3: styled.css`
+  shade2: styled.css`
     position: absolute;
     top: 0;
     left: 0;
@@ -135,8 +136,16 @@ export const SceneSkeleton: React.FC = () => {
       const t1 = cycler(4000, 3000, elapsed);
       const t2 = cycler(4000, 3000, elapsed + 2300);
 
-      shade1.style.left = lerp(-shade1.clientWidth - 100, container.clientWidth + 100, t1) + "px";
-      shade2.style.left = lerp(-shade2.clientWidth - 100, container.clientWidth + 100, t2) + "px";
+      shade1.style.transform = `translateX(${lerp(
+        -shade1.clientWidth - 100,
+        container.clientWidth + 100,
+        t1,
+      )}px)`;
+      shade2.style.transform = `translateX(${lerp(
+        -shade2.clientWidth - 100,
+        container.clientWidth + 100,
+        t2,
+      )}px)`;
     };
     tick();
     return () => {
@@ -146,14 +155,14 @@ export const SceneSkeleton: React.FC = () => {
 
   return (
     <div style={{ position: "relative" }}>
-      <div style={{ margin: "0 auto", width: "600px", maxWidth: "100%" }}>
-        <div style={{ paddingBottom: `${(targetHeight / 600) * 100}%` }} />
+      <div style={{ margin: "0 auto", width: SCENE_BASELINE_WIDTH, maxWidth: "100%" }}>
+        <div style={{ paddingBottom: `${(targetHeight / SCENE_BASELINE_WIDTH) * 100}%` }} />
         <div style={{ height: variablesHeight }} />
       </div>
       <div className={s("scene")} ref={containerRef}>
         <div className={s("shadeContainer")} ref={shadeContainerRef}>
-          <div className={s("shade2")} ref={ref1} />
-          <div className={s("shade3")} ref={ref2} />
+          <div className={s("shade1")} ref={ref1} />
+          <div className={s("shade2")} ref={ref2} />
         </div>
         <p>
           {errorLoadingThreeJs

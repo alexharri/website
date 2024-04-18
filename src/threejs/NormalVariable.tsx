@@ -3,7 +3,6 @@ import type THREE from "three";
 import { useStyles } from "../utils/styles";
 import { Line } from "./Components/primitives/Line";
 import { DreiContext, FiberContext, ThreeContext } from "./Components/ThreeProvider";
-import { getMathSvg, getMathSvgDimensions, getMathSvgOffset } from "./math-svg";
 import { MathSVG } from "./MathSVG";
 import NormalVariableStyles from "./NormalVariable.styles";
 import { Three } from "./types";
@@ -34,6 +33,7 @@ function parseHAngle(THREE: Three, normal: THREE.Vector3) {
   if (normal.x < 0) out *= -1;
   return out;
 }
+
 function parseVAngle(THREE: Three, normal: THREE.Vector3) {
   return new THREE.Vector3(0, 1, 0).angleTo(normal);
 }
@@ -46,12 +46,13 @@ export const NormalVariable: React.FC<NormalVariableProps> = (props) => {
   const FIBER = useContext(FiberContext);
   const s = useStyles(NormalVariableStyles);
 
-  let svgLabel: React.ReactNode = null;
-
-  if (spec.label && spec.label.startsWith("math:")) {
-    const [_, label] = spec.label.split("math:");
-    svgLabel = <MathSVG label={label} />;
-  }
+  const svgLabel = useMemo(() => {
+    if (spec.label && spec.label.startsWith("math:")) {
+      const [_, label] = spec.label.split("math:");
+      return <MathSVG label={label} />;
+    }
+    return null;
+  }, [spec.label]);
 
   const hAngleRef = useRef(NaN);
   const vAngleRef = useRef(NaN);
@@ -126,9 +127,36 @@ export const NormalVariable: React.FC<NormalVariableProps> = (props) => {
   const TORUS_OFF = 0.05;
   const TORUS_W = 0.05;
 
+  const torus = useMemo(
+    () => (
+      <>
+        <DREI.Cone
+          args={[0.3, 0.5, 10]}
+          position={[0, 0, -2.5]}
+          material={getBasicMaterial(THREE, "red")}
+          rotation={[-Math.PI / 2, 0, 0]}
+        />
+        <Line from={[0, 0, 0]} to={[0, 0, -2.5]} radius={0.1} color="red" basicMaterial />
+        <DREI.Torus args={[TORUS_R, TORUS_W]} material={getBasicMaterial(THREE, 0x008000)} />
+        <DREI.Sphere material={getBasicMaterial(THREE, "red")} args={[0.14]} />
+        <DREI.Torus
+          args={[TORUS_R - TORUS_OFF, TORUS_W]}
+          material={getBasicMaterial(THREE, 0x990000)}
+          rotation={[0, Math.PI / 2, 0]}
+        />
+        <DREI.Torus
+          args={[TORUS_R - TORUS_OFF * 2, TORUS_W]}
+          material={getBasicMaterial(THREE, 0x0068ad)}
+          rotation={[Math.PI / 2, 0, 0]}
+        />
+      </>
+    ),
+    [THREE, DREI],
+  );
+
   return (
     <label className={s("normalLabel")}>
-      {svgLabel ? svgLabel : firstUpper(spec.label ?? dataKey)}
+      {svgLabel || firstUpper(spec.label ?? dataKey)}
       <div className={s("normal")} onMouseDown={onMouseDown} onTouchStart={onMouseDown}>
         <FIBER.Canvas camera={camera}>
           {visible && (
@@ -136,28 +164,7 @@ export const NormalVariable: React.FC<NormalVariableProps> = (props) => {
               <mesh
                 rotation={[Math.PI / 2 - vAngleRef.current, hAngleRef.current + Math.PI, 0, "YXZ"]}
               >
-                <DREI.Cone
-                  args={[0.3, 0.5, 10]}
-                  position={[0, 0, -2.5]}
-                  material={getBasicMaterial(THREE, "red")}
-                  rotation={[-Math.PI / 2, 0, 0]}
-                />
-                <Line from={[0, 0, 0]} to={[0, 0, -2.5]} radius={0.1} color="red" basicMaterial />
-                <DREI.Torus
-                  args={[TORUS_R, TORUS_W]}
-                  material={getBasicMaterial(THREE, 0x008000)}
-                />
-                <DREI.Sphere material={getBasicMaterial(THREE, "red")} args={[0.14]} />
-                <DREI.Torus
-                  args={[TORUS_R - TORUS_OFF, TORUS_W]}
-                  material={getBasicMaterial(THREE, 0x990000)}
-                  rotation={[0, Math.PI / 2, 0]}
-                />
-                <DREI.Torus
-                  args={[TORUS_R - TORUS_OFF * 2, TORUS_W]}
-                  material={getBasicMaterial(THREE, 0x0068ad)}
-                  rotation={[Math.PI / 2, 0, 0]}
-                />
+                {torus}
               </mesh>
             </mesh>
           )}

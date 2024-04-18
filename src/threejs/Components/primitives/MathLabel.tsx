@@ -43,31 +43,29 @@ export const MathLabel: React.FC<Props> = (props) => {
     return geometries;
   }, [props.label]);
 
-  const orgMesh = new THREE.Mesh();
-  orgMesh.position.set(0, 0, 0.00001);
-  if (props.normal) orgMesh.lookAt(parseVector(THREE, props.normal));
+  const orgMesh = useMemo(() => {
+    const mesh = new THREE.Mesh();
+    mesh.position.set(0, 0, 0.00001);
+    if (props.normal) mesh.lookAt(parseVector(THREE, props.normal));
+    return mesh;
+  }, [props.normal]);
 
-  const invMesh = new THREE.Mesh();
-  invMesh.position.set(0, 0, 0.00001);
-  if (props.normal) invMesh.lookAt(parseVector(THREE, props.normal).multiplyScalar(-1));
+  const invMesh = useMemo(() => {
+    const mesh = new THREE.Mesh();
+    mesh.position.set(0, 0, 0.00001);
+    if (props.normal) mesh.lookAt(parseVector(THREE, props.normal).multiplyScalar(-1));
+    return mesh;
+  }, [props.normal]);
 
   const groupRef = useRef<THREE.Group>(null);
   FIBER.useFrame((state) => {
-    const { x, y, z } = parseVector(THREE, props.position);
     const group = groupRef.current;
     if (!group) return;
-
-    const cameraPos = state.camera.position.clone();
-
-    // This offset fixes the look-at rotation when looking straight up/down
-    const vec = new THREE.Vector3(0, cameraPos.y > 0 ? -10 : 10, 100).applyQuaternion(
-      state.camera.quaternion,
-    );
-    cameraPos.add(vec);
 
     // Make label appear fixed-size
     const distance = group.position.distanceTo(state.camera.position);
     const scale = distance * userScale * scaleFac;
+    const { x, y, z } = parseVector(THREE, props.position);
     group.scale.set(scale, scale, scale);
     group.position.set(x, y, z);
 
@@ -75,8 +73,8 @@ export const MathLabel: React.FC<Props> = (props) => {
       const mesh = new THREE.Mesh();
       mesh.position.set(group.position.x, group.position.y, group.position.z);
 
-      const cpos = state.camera.position;
-      mesh.position.set(cpos.x, cpos.y, cpos.z);
+      const cameraPosition = state.camera.position;
+      mesh.position.set(cameraPosition.x, cameraPosition.y, cameraPosition.z);
       mesh.lookAt(group.position);
 
       const lookNormal = new THREE.Vector3(0, 0, 1).applyQuaternion(mesh.quaternion);
@@ -94,15 +92,21 @@ export const MathLabel: React.FC<Props> = (props) => {
         .add(parseVector(THREE, props.offset).applyQuaternion(orgMesh.quaternion));
       group.position.add(offset);
     } else {
-      group.lookAt(cameraPos);
+      const cameraPosition = state.camera.position.clone();
+
+      // This offset fixes the look-at rotation when looking straight up/down
+      const vec = new THREE.Vector3(0, cameraPosition.y > 0 ? -10 : 10, 100).applyQuaternion(
+        state.camera.quaternion,
+      );
+      cameraPosition.add(vec);
+
+      group.lookAt(cameraPosition);
       const offset = parseVector(THREE, props.offset)
         .applyQuaternion(state.camera.quaternion)
         .multiplyScalar(scale * 18);
       group.position.add(offset);
     }
   });
-
-  // console.log(userScale * scaleFac * 100);
 
   return (
     <group scale={0} ref={groupRef} quaternion={orgMesh.quaternion}>

@@ -1,6 +1,4 @@
 import { useContext, useMemo } from "react";
-
-import { Quaternion } from "three";
 import { getBasicMaterial, getPhongMaterial, IColor, IVector3, parseVector } from "../../utils";
 import { ThreeContext } from "../ThreeProvider";
 
@@ -30,7 +28,10 @@ export const Line: React.FC<Props> = (props) => {
     const half = to.clone().add(from).multiplyScalar(0.5);
 
     const normal = to.clone().sub(from).normalize();
-    const quaternion = new Quaternion().setFromUnitVectors(new THREE.Vector3(0, 1, 0), normal);
+    const quaternion = new THREE.Quaternion().setFromUnitVectors(
+      new THREE.Vector3(0, 1, 0),
+      normal,
+    );
 
     return { half, distance, quaternion };
   }, [props.from, props.to]);

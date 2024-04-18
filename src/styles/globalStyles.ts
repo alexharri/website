@@ -232,8 +232,4 @@ blockquote {
 mjx-container svg {
   overflow: visible;
 }
-
-[data-varlabel] {
-  display: none;
-}
 `;

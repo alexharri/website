@@ -1,9 +1,9 @@
 import { useContext } from "react";
-import type { SphereGeometry } from "three";
+import type THREE from "three";
 import { getBasicMaterial, getPhongMaterial, IColor, IVector3, parseVector } from "../../utils";
 import { ThreeContext } from "../ThreeProvider";
 
-const geometryByRadius: Record<number, SphereGeometry> = {};
+const geometryByRadius: Record<number, THREE.SphereGeometry> = {};
 
 interface Props {
   position: IVector3;

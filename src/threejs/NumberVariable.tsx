@@ -1,5 +1,6 @@
+import { useMemo } from "react";
 import { StyleOptions, useStyles } from "../utils/styles";
-import { getMathSvg } from "./math-svg";
+import { MathSVG } from "./MathSVG";
 
 const firstUpper = (s: string) => s[0].toUpperCase() + s.slice(1);
 
@@ -32,20 +33,17 @@ export const NumberVariable: React.FC<NumberVariableProps> = (props) => {
 
   const s = useStyles(styles);
 
-  let svgLabel: string | null = null;
-
-  if (spec.label && spec.label.startsWith("math:")) {
-    const [_, label] = spec.label.split("math:");
-    svgLabel = getMathSvg(label);
-  }
+  const svgLabel = useMemo(() => {
+    if (spec.label && spec.label.startsWith("math:")) {
+      const [_, label] = spec.label.split("math:");
+      return <MathSVG label={label} />;
+    }
+    return null;
+  }, [spec.label]);
 
   return (
     <label className={s("wrapper")}>
-      {svgLabel ? (
-        <span style={{ fontSize: 24 }} dangerouslySetInnerHTML={{ __html: svgLabel }} />
-      ) : (
-        firstUpper(spec.label ?? dataKey)
-      )}
+      {svgLabel || firstUpper(spec.label ?? dataKey)}
       <input
         type="range"
         min={min}

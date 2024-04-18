@@ -2,21 +2,6 @@
 title: "Planes in 3D space"
 ---
 
-{/** todo better system for this */}
-<span data-varlabel="d">$d$</span>
-<span data-varlabel="x">$x$</span>
-<span data-varlabel="D">$D$</span>
-<span data-varlabel="S">$S$</span>
-<span data-varlabel="vec_n">$\vec{n}$</span>
-<span data-varlabel="n">$n$</span>
-<span data-varlabel="P_1">$P_1$</span>
-<span data-varlabel="P_2">$P_2$</span>
-<span data-varlabel="P_3">$P_3$</span>
-<span data-varlabel="vec_v1">$\vec{v_1}$</span>
-<span data-varlabel="vec_v2">$\vec{v_2}$</span>
-<span data-varlabel="p_x">$p_x$</span>
-<span data-varlabel="P">$P$</span>
-
 A plane in 3D space can be thought of as flat surface that stretches infinitely far, splitting 3D space into two halves.
 
 <Scene scene="what-is-a-plane" height={450} yOffset={-0.5} angle={10} usesVariables />
