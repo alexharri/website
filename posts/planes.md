@@ -2,15 +2,15 @@
 title: "Planes in 3D space"
 ---
 
-A plane in 3D space can be thought of as flat surface that stretches infinitely far, splitting 3D space into two halves.
+A plane in 3D space can be thought of as a flat surface that stretches infinitely far, splitting 3D space into two halves.
 
 <Scene scene="what-is-a-plane" height={450} yOffset={-0.5} angle={10} usesVariables />
 
-Planes have loads of uses in application which deal with 3D geometry. I've mostly been working with them in the context of an architectural modeler, where geometry is defined in terms of planes and their intersections.
+Planes have loads of uses in applications that deal with 3D geometry. I've mostly been working with them in the context of an architectural modeler, where geometry is defined in terms of planes and their intersections.
 
 When I was learning about planes, they felt quite abstract and non-intuitive, so it took some time for me to build an intuition for how to reason about and work with them.
 
-In writing this, I want to provide you with an introduction to planes that focuses on building a practical, intuitive understanding for working with planes. I hope to achieve through the use of visual and interactive explanations, which will accompany us as we work through progressively more complex problems.
+In writing this, I want to provide you with an introduction to planes that focuses on building a practical, intuitive understanding of working with planes. I hope to achieve this through the use of visual and interactive explanations, which will accompany us as we work through progressively more complex problems.
 
 With that out of the way, let's get to it!
 
@@ -36,9 +36,9 @@ We described this plane in terms of a single point $p$, but keep in mind that th
 
 <Scene scene="plane-intersecting-points" height={400} yOffset={-1} usesVariables />
 
-If $P$ were described by one of those other points intersecting $P$, we would be describing the exact same plane. This is a result of the infinite nature of planes.
+If $P$ were described by one of those other points intersecting $P$, we would be describing the same plane. This is a result of the infinite nature of planes.
 
-This way of describing a plane—in terms of a point and a normal—is the [point-normal form][point_normal_form] of planes.
+This way of describing planes—in terms of a point and a normal—is the [point-normal form][point_normal_form] of planes.
 
 [point_normal_form]: https://en.wikipedia.org/wiki/Euclidean_planes_in_three-dimensional_space#Point%E2%80%93normal_form_and_general_form_of_the_equation_of_a_plane
 
@@ -74,7 +74,7 @@ A vector perpendicular to the triangle's edge vectors $b - a$ and $c - a$ will a
 
 $\vec{d}$ points in the right direction, but it's not a normal. For $\vec{d}$ to be a normal, it's magnitude needs to  equal 1.
 
-We can normalize $\vec{d}$ to $\vec{n}$ by dividing $\vec{d}$ by its magnitude $\|\vec{d}\|$:
+We can normalize $\vec{d}$ to $\vec{n}$ by dividing it by its magnitude:
 
 <p className="mathblock">$$\vec{n} = \dfrac{\vec{d}}{\|\vec{d}\|}$$</p>
 
@@ -174,7 +174,7 @@ We can describe infinite lines in 3D space using a point $p$ and normal $\vec{n}
 
 Let's take two planes $P_1$ and $P_2$ whose normals are $\vec{n_1}$ and $\vec{n_2}$.
 
-Finding the normal of $P_1$ and $P_2$'s intersection is deceptively simple. It's just the cross product of two the plane normals, which we'll assign to $\vec{d}$.
+Finding the normal of $P_1$ and $P_2$'s intersection is deceptively simple. It's just the cross product of the two plane normals, which we'll assign to $\vec{d}$.
 
 <p className="mathblock">$$\vec{d} = \vec{n_1} × \vec{n_2}$$</p>
 
@@ -216,7 +216,7 @@ Given two normals $\vec{n_1}$ and $\vec{n_2}$ where the angle between $\vec{n_1}
 
 <Image src="~/cross-product-magnitude-by-angle.png" plain width={840} />
 
-The relationship is linear. As the difference in angles halves, so does the magnitude. A difference of 1° yields a magnitude 0.01745, and a difference of 1/2° yields half of that.
+The relationship is linear. As the difference in angles halves, so does the magnitude. A difference of 1° yields a magnitude of 0.01745, and a difference of 1/2° yields half of that.
 
 So to determine the epsilon, we can just ask: how low does the angle in degrees need to become for us to consider two planes parallel? Given an angle $\theta°$, we can find the epsilon $\epsilon$ via:
 
@@ -230,7 +230,7 @@ Which epsilon you choose will depend on your use case.
 
 ### Finding the point of intersection
 
-Having computed the normal and handled parallel planes, we can move onto finding a point $p$ along the line of intersection.
+Having computed the normal and handled parallel planes, we can move on to finding a point $p$ along the line of intersection.
 
 Since the line describing a plane-plane intersection is infinite, there are infinitely many points we could choose as $p$.
 
@@ -242,7 +242,7 @@ We can narrow the problem down by taking the plane parallel by the two plane nor
 
 Since the point lies on the plane parallel to the two plane normals, we can find it by exclusively traveling along those normals.
 
-This restrictions allows us to reframe the problem as finding finding two scaling factors $k_1$, $k_2$ which when applied to our plane normals $\vec{n_1}$, $\vec{n_2}$ yields a paralellogram whose tip is at the point of intersection.
+This restriction allows us to reframe the problem as finding two scaling factors $k_1$, $k_2$ which when applied to our plane normals $\vec{n_1}$, $\vec{n_2}$ yields a parallelogram whose tip is at the point of intersection.
 
 <Scene scene="intersecting-planes-offset" height={500} usesVariables />
 
@@ -315,7 +315,7 @@ However, it is generally more useful to be able to project a point onto a plane 
 
 The line will be composed of the point $x$ and normal $\vec{n}$. Our goal will be to find a distance $D$ that $x$ needs to travel along $\vec{n}$ such that it lies on the plane.
 
-But first we'll need to check if the line will intersect the plane at all, which we know how to do:
+But first, we'll need to check if the line will intersect the plane at all, which we know how to do:
 
 ```cs
 Vector3 LinePlaneIntersection(Line line, Plane plane) {
@@ -328,7 +328,7 @@ Vector3 LinePlaneIntersection(Line line, Plane plane) {
 }
 ```
 
-<SmallNote label="" center>See if you can figure why Mathf.Abs is used here. We'll cover it later, so you'll see if you're right.</SmallNote>
+<SmallNote label="" center>See if you can figure out why Mathf.Abs is used here. We'll cover it later, so you'll see if you're right.</SmallNote>
 
 Given in constant-normal form, the plane has a normal $\vec{n_p}$ and a distance $d_p$.
 
@@ -408,7 +408,7 @@ The core difference is that a ray (colored red) extends in the direction of $\ve
 
 <Scene scene="ray-and-line" height={500} usesVariables />
 
-What this means for intersections is that a ray will not intersect planes when traveling backwards along it's normal:
+What this means for intersections is that a ray will not intersect planes when traveling backward along its normal:
 
 <Scene scene="ray-and-line-plane-intersection" height={500} usesVariables />
 
@@ -422,7 +422,7 @@ if (D < 0) {
 }
 ```
 
-But for this we'd have to calculate $D$ first. That's not necessary since $D$ becomes negative as a consequence of the dot product $\vec{n} \cdot \vec{n_p}$ yielding a negative number when $\vec{n}$ and $\vec{n_p}$ are at an obtuse angle between 90° and 180°.
+But then we'd have to calculate $D$ first. That's not necessary since $D$ becomes negative as a consequence of the dot product $\vec{n} \cdot \vec{n_p}$ yielding a negative number when $\vec{n}$ and $\vec{n_p}$ are at an obtuse angle between 90° and 180°.
 
 <SmallNote label="">If this feels non-obvious, it helps to remember that the dot product encodes the cosine of the angle between its two component vectors, which is why the dot product becomes negative for obtuse angles.</SmallNote>
 
@@ -475,7 +475,7 @@ When I first saw this, I found it hard to believe this would work for all cases.
 
 ### Two or more planes are parallel
 
-We'll start off with the configurations where two or more planes are parallel:
+We'll start with the configurations where two or more planes are parallel:
 
 <Scene scene="three-planes-some-parallel" height={400} />
 
@@ -505,11 +505,11 @@ The cross product $\vec{n_2} × \vec{n_3}$ yields a vector (colored red) that's 
 
 <Scene scene="three-planes-n1-n2-parallel-cross" height={400} />
 
-Since $\vec{n_1}$ is parallel to $\vec{n_2}$, that means that $\vec{n_2} × \vec{n_3}$ is also perpendicular to $\vec{n_1}$. As we've learned, the dot product of two perpendicular is zero, meaning that:
+Since $\vec{n_1}$ is parallel to $\vec{n_2}$, that means that $\vec{n_2} × \vec{n_3}$ is also perpendicular to $\vec{n_1}$. As we've learned, the dot product of two perpendicular vectors is zero, meaning that:
 
 <p className="mathblock">$$\vec{n_1} \cdot (\vec{n_2} × \vec{n_3}) = 0$$</p>
 
-Which also holds in the case where $\vec{n_1}$ is parallel to $\vec{n_3}$ instead of $\vec{n_2}$.
+This also holds in the case where $\vec{n_1}$ is parallel to $\vec{n_3}$ instead of $\vec{n_2}$.
 
 ### Parallel lines of intersection
 
@@ -521,7 +521,7 @@ As we learned when looking at plane-plane intersections, the cross product of th
 
 <Scene scene="three-planes-three-lines-cross" height={400} />
 
-When all of the lines of intersection are parallel, all of the plane normals defining those lines are perpendicular them.
+When all of the lines of intersection are parallel, all of the plane normals defining those lines are perpendicular to them.
 
 Yet again, because the dot product of perpendicular vectors is 0 we can conclude that $\vec{n_1} \cdot (\vec{n_2} × \vec{n_3}) = 0$ for these configurations as well.
 
@@ -544,7 +544,7 @@ We want to find the point at which our three planes $P_1$, $P_2$, $P_3$ intersec
 
 <Scene scene="three-intersecting-planes-point" height={400} />
 
-Some of what we learned about two plane intersections will come into play here. Let's start by taking the line of intersection for $P_2$ and $P_3$ and varying the position of $P_1$. You'll notice that the point of intersection is the point at which $P_1$ intersects the line.
+Some of what we learned about two-plane intersections will come into play here. Let's start by taking the line of intersection for $P_2$ and $P_3$ and varying the position of $P_1$. You'll notice that the point of intersection is the point at which $P_1$ intersects the line.
 
 <Scene scene="three-intersecting-planes" height={400} usesVariables />
 
@@ -700,11 +700,11 @@ I highly recommend checking out [Real-Time Collision Detection by Christer Erics
 
 [book_ref]: https://www.amazon.com/Real-Time-Collision-Detection-Interactive-Technology/dp/1558607323
 
-I recently analysed the edit performance in [Arkio][arkio] and noticed that a method for solving three-plane intersections took around half of the total compute time when recalculating geometry. By implementing the more efficient method described in the book, we made the method __~500% faster__, increasing Arkio's edit performance by over __1.6x__. Crazy stuff!
+I recently analyzed the edit performance in [Arkio][arkio] and noticed that a method for solving three-plane intersections took around half of the total compute time when recalculating geometry. By implementing the more efficient method described in the book, we made the method __~500% faster__, increasing Arkio's edit performance by over __1.6x__. Crazy stuff!
 
 [arkio]: https://www.arkio.is/
 
-I started writing this post with the intention of understanding how the three plane intersection method worked. However, I felt that readers would need a better foundation and understanding of planes for this post to be of any value. In building that foundation, this post ended up quite a bit longer than I intended.
+I started writing this post to understand how the three-plane intersection method worked. However, I felt that readers would need a better foundation and understanding of planes for this post to be of any value. In building that foundation, this post ended up quite a bit longer than I intended.
 
 Anyway, it's a great book. [Check it out!][book_ref]
 
