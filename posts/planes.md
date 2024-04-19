@@ -4,15 +4,15 @@ description: "Visual and interactive explanation of 2D planes in 3D space."
 image: "/images/og-planes.png"
 ---
 
-A plane in 3D space can be thought of as a flat surface that stretches infinitely far, splitting 3D space into two halves.
+A plane in 3D space can be thought of as a flat surface that stretches infinitely far, splitting space into two halves.
 
 <Scene scene="what-is-a-plane" height={450} yOffset={-0.5} angle={10} usesVariables />
 
-Planes have loads of uses in applications that deal with 3D geometry. I've mostly been working with them in the context of an architectural modeler, where geometry is defined in terms of planes and their intersections.
+Planes have loads of uses in applications that deal with 3D geometry. I've mostly been working with them in the context of an [architectural modeler][arkio], where geometry is defined in terms of planes and their intersections.
 
-When I was learning about planes, they felt quite abstract and non-intuitive, so it took some time for me to build an intuition for how to reason about and work with them.
+Learning about planes felt abstract and non-intuitive to me. _“Sure, that's a plane equation, but what do I do with it? What does a plane look like?”_ It took some time for me to build an intuition for how to reason about and work with them.
 
-In writing this, I want to provide you with an introduction to planes that focuses on building a practical, intuitive understanding of working with planes. I hope to achieve this through the use of visual and interactive explanations, which will accompany us as we work through progressively more complex problems.
+In writing this, I want to provide you with an introduction that focuses on building a practical, intuitive understanding of planes. I hope to achieve this through the use of visual (and interactive!) explanations which will accompany us as we work through progressively more complex problems.
 
 With that out of the way, let's get to it!
 
@@ -25,7 +25,7 @@ There are many ways to describe planes, such as via
  3. a normal and a distance from an origin.
 
 <Note>
-  Throughout this post, the term _normal_ will refer to a _normalized_ direction vector (unit vector) whose magnitude (length) is equal to 1.
+  Throughout this post, the term _normal_ will refer to a _normalized direction vector_ (unit vector) whose magnitude (length) is equal to 1, typically denoted via $\vec{n}$ where $\|\vec{n}\| = 1$.
 </Note>
 
 Starting with the point-and-normal case, here's an example of a plane described by a point in 3D space $p$ and a normal $\vec{n}$:
@@ -38,7 +38,7 @@ We described this plane in terms of a single point $p$, but keep in mind that th
 
 <Scene scene="plane-intersecting-points" height={400} yOffset={-1} usesVariables />
 
-If $P$ were described by one of those other points intersecting $P$, we would be describing the same plane. This is a result of the infinite nature of planes.
+If $P$ were described by one of those other points intersecting $P$, we would be describing the exact same plane. This is a result of the infinite nature of planes.
 
 This way of describing planes—in terms of a point and a normal—is the [point-normal form][point_normal_form] of planes.
 
@@ -48,7 +48,7 @@ We can also describe a plane using three points in 3D space $a$, $b$, $c$ formin
 
 <Scene scene="three-points" height={380} yOffset={-0.3} />
 
-The triangle forms a plane, but for us to be able to do anything useful with the plane we'll need to calculate it's normal $\vec{n}$. Once we've calculated the plane's normal, we can use it along with one of the triangle's three points to describe the plane in point-normal form.
+The triangle forms an implicit plane, but for us to be able to do anything useful with the plane we'll need to calculate its normal $\vec{n}$. Once we've calculated the plane's normal, we can use that normal along with one of the triangle's three points to describe the plane in point-normal form.
 
 <Scene scene="three-points-normal-centered" height={380} yOffset={-0.3} />
 
@@ -60,13 +60,19 @@ We can use $b - a$ and $c - a$ as two edge vectors that are parallel to the plan
 
 By virtue of being parallel to the plane's surface, the vectors $b - a$ and $c - a$ are perpendicular to the plane's normal. This is where the cross product becomes useful to us.
 
-The [cross product][cross_product] takes in two vectors $\vec{a}$ and $\vec{b}$ and returns a vector $\vec{c}$ that is perpendicular to both of them.
-
-<p className="mathblock">$$\vec{c} = \vec{a} × \vec{b}$$</p>
+The [cross product][cross_product] takes in two vectors $\vec{v_1}$ and $\vec{v_2}$ and returns a vector $\vec{v_3}$ that is perpendicular to both of them.
 
 [cross_product]: https://en.wikipedia.org/wiki/Cross_product
 
-A vector perpendicular to the triangle's edge vectors $b - a$ and $c - a$ will also be perpendicular to the triangle's surface. Let's call this vector $\vec{d}$.
+<p className="mathblock">$$\vec{v_3} = \vec{v_1} × \vec{v_2}$$</p>
+
+For example, given two unit vectors $\vec{i} = (1, 0, 0)$ and $\vec{j} = (0, 1, 0)$, their cross product $\vec{i} × \vec{j}$ yields a vector $\vec{k}$ equal to $(0, 0, 1)$:
+
+<Scene scene="cross-product" height={300} zoom={1.7} yOffset={-0.0} />
+
+<SmallNote label="" center>This explanataion is simplified for clarity. We'll get into more detail about the cross product later on.</SmallNote>
+
+So, because the edge vectors $b - a$ and $c - a$ are both parallel to the triangle's surface, their cross product—let's assign it to $\vec{d}$—will be perpendicular to the triangle's surface.
 
 <p className="mathblock">$$\vec{d} = (b - a) × (c - a)$$</p>
 
@@ -74,9 +80,7 @@ A vector perpendicular to the triangle's edge vectors $b - a$ and $c - a$ will a
 
 <SmallNote label="" center>$\vec{d}$ has been scaled down for illustrative purposes</SmallNote>
 
-$\vec{d}$ points in the right direction, but it's not a normal. For $\vec{d}$ to be a normal, it's magnitude needs to  equal 1.
-
-We can normalize $\vec{d}$ to $\vec{n}$ by dividing it by its magnitude:
+$\vec{d}$ points in the right direction, but it's not a normal. For $\vec{d}$ to be a normal, it's magnitude needs to  equal 1. We can normalize $\vec{d}$ to $\vec{n}$ by dividing it by its magnitude:
 
 <p className="mathblock">$$\vec{n} = \dfrac{\vec{d}}{\|\vec{d}\|}$$</p>
 
@@ -84,7 +88,7 @@ This yields a normal $\vec{n}$ where $\|\vec{n}\| = 1$:
 
 <Scene scene="three-points-normal" height={360} yOffset={-0.3} />
 
-Having found the normal $\vec{n}$ we can use it and any of the points $a$, $b$, $c$ to describe the plane intersecting the three points in point-normal form.
+Having found the triangle's normal $\vec{n}$ we can use it and any of the points $a$, $b$, $c$ to describe the plane intersecting the three points in point-normal form.
 
 <Scene scene="three-points-plane" height={400} yOffset={-1} />
 
@@ -93,19 +97,22 @@ It doesn't matter which of $a$, $b$, $c$ we use as the point in the point-normal
 
 ### Constant-normal form
 
-There's one more way to describe a plane to cover, which is also the most important: through a normal $\vec{n}$ and a distance $d$.
+There's one more way to describe a plane that we'll look at, which is also the most important. That is, through a normal $\vec{n}$ and a distance $d$.
 
 <Scene scene="constant-normal-form" height={400} usesVariables />
 
 This is the _constant-normal form_ of planes. It makes lots of calculations using planes much simpler.
 
+
 In the constant-normal form, the distance $d$ denotes how close the plane gets to the origin. Thought of another way: multiplying the normal $\vec{n}$ by $d$ yields the point on the plane that's closest to the origin.
+
+<SmallNote label="">This is a simplification. More formally, given a point $P$ on a plane whose normal is $\vec{n}$, we can describe all points $X$ on the plane in two forms: the point-normal form $\vec{n} \cdot (X - P) = 0$, and the constant-normal form $\vec{n} \cdot X = d$ where $d = \vec{n} \cdot P$. See [further reading][further_reading].</SmallNote>
 
 In getting a feel for the difference between the point-normal and constant-normal forms, take this example which describes the same plane in both forms:
 
 <Scene scene="point-normal-and-constant-normal-form" height={400} usesVariables />
 
-The green arrow represents $d$ times $\vec{n}$ from the constant-normal form, while the blue point and arrow represent the point $p$ and normal $\vec{n}$ from the point-normal form.
+The green arrow represents $d \times \vec{n}$ from the constant-normal form, while the blue point and arrow represent the point $p$ and normal $\vec{n}$ from the point-normal form.
 
 Translating from the point-normal to the constant-normal form is very easy: the distance $d$ is the [dot product][dot_product] of $\vec{n}$ and $p$.
 
@@ -161,8 +168,7 @@ Multiplying the plane's normal $\vec{n}$ by $D$ gives us a vector which when add
 
 <Scene scene="project-point-onto-plane-along-normal" height={400} />
 
-The projection occurs along the plane's normal, which is sometimes useful. However, you'll often want to perform such a projection along an arbitrary direction, which we'll dive into later in the post. 
-
+The projection occurs along the plane's normal, which is sometimes useful. However, you'll often want to project points along an arbitrary direction, which we'll dive into later in the post. 
 
 ## Plane-plane intersection
 

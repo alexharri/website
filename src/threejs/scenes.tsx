@@ -28,6 +28,7 @@ export const threeJsScenes: Partial<Record<string, React.ComponentType<SceneProp
   "three-points": dynamic(() => import("./scenes/three-points"), { loading }),
   "three-points-edge-vectors": dynamic(() => import("./scenes/three-points-edge-vectors"), { loading }),
   "three-points-cross-product": dynamic(() => import("./scenes/three-points-cross-product"), { loading }),
+  "cross-product": dynamic(() => import("./scenes/cross-product"), { loading }),
   "three-points-normal": dynamic(() => import("./scenes/three-points-normal"), { loading }),
   "three-points-normal-centered": dynamic(() => import("./scenes/three-points-normal-centered"), { loading }),
   "three-points-plane": dynamic(() => import("./scenes/three-points-plane"), { loading }),

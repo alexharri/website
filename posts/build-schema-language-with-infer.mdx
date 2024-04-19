@@ -464,7 +464,7 @@ type SplitProperties<T> =
   T extends `${infer A}{${infer Content}};${infer B}`
   //                                     ^
   ? [`${A}{${Content}}`, ...SplitProperties<B>]
-  : // ...;
+  : /* ... */;
 
 type T1 = Equals<
   SplitProperties<`a:string;b:{c:number;d:boolean}`>,
