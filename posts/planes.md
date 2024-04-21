@@ -32,13 +32,13 @@ Starting with the point-and-normal case, here's an example of a plane described 
 
 <Scene scene="point-and-normal-with-plane" height={400} yOffset={-1} usesVariables />
 
-The normal $\vec{n}$ describes the plane's orientation, where the surface of the plane is perpendicular to $\vec{n}$, while the point $p$ describes _a_ point which the plane intersects.
+The normal $\vec{n}$ describes the plane's orientation, where the surface of the plane is perpendicular to $\vec{n}$, while the point $p$ describes _a_ point on the plane.
 
-We described this plane in terms of a single point $p$, but keep in mind that this plane—let's call it $P$—intersects infinitely many points.
+We described this plane in terms of a single point $p$, but keep in mind that this plane—let's call it $P$—contains infinitely many points.
 
 <Scene scene="plane-intersecting-points" height={400} yOffset={-1} usesVariables />
 
-If $P$ were described by one of those other points intersecting $P$, we would be describing the exact same plane. This is a result of the infinite nature of planes.
+If $P$ were described by one of those other points contained by $P$, we would be describing the exact same plane. This is a result of the infinite nature of planes.
 
 This way of describing planes—in terms of a point and a normal—is the [point-normal form][point_normal_form] of planes.
 
@@ -60,19 +60,19 @@ We can use $b - a$ and $c - a$ as two edge vectors that are parallel to the plan
 
 By virtue of being parallel to the plane's surface, the vectors $b - a$ and $c - a$ are perpendicular to the plane's normal. This is where the cross product becomes useful to us.
 
-The [cross product][cross_product] takes in two vectors $\vec{v_1}$ and $\vec{v_2}$ and returns a vector $\vec{v_3}$ that is perpendicular to both of them.
+The [cross product][cross_product] takes in two vectors $\vec{a}$ and $\vec{b}$ and returns a vector $\vec{c}$ that is perpendicular to both of them.
 
 [cross_product]: https://en.wikipedia.org/wiki/Cross_product
 
-<p className="mathblock">$$\vec{v_3} = \vec{v_1} × \vec{v_2}$$</p>
+<p className="mathblock">$$\vec{c} = \vec{a} × \vec{b}$$</p>
 
-For example, given two unit vectors $\vec{i} = (1, 0, 0)$ and $\vec{j} = (0, 1, 0)$, their cross product $\vec{i} × \vec{j}$ yields a vector $\vec{k}$ equal to $(0, 0, 1)$:
+For example, given the vectors $\vec{i} = (1, 0, 0)$ and $\vec{j} = (0, 1, 0)$, their cross product yields the vector $(0, 0, 1)$, which we'll label $\vec{k}$:
 
 <Scene scene="cross-product" height={300} zoom={1.7} yOffset={-0.0} />
 
-<SmallNote label="" center>This explanataion is simplified for clarity. We'll get into more detail about the cross product later on.</SmallNote>
+<SmallNote label="" center>This explanation is simple on purpose. We'll get into more detail about the cross product later on.</SmallNote>
 
-So, because the edge vectors $b - a$ and $c - a$ are both parallel to the triangle's surface, their cross product—let's assign it to $\vec{d}$—will be perpendicular to the triangle's surface.
+Because the edge vectors of the triangle, $b - a$ and $c - a$, are both parallel to the triangle's surface, their cross product—let's call it $\vec{d}$—will be perpendicular to the triangle's surface.
 
 <p className="mathblock">$$\vec{d} = (b - a) × (c - a)$$</p>
 
@@ -80,7 +80,7 @@ So, because the edge vectors $b - a$ and $c - a$ are both parallel to the triang
 
 <SmallNote label="" center>$\vec{d}$ has been scaled down for illustrative purposes</SmallNote>
 
-$\vec{d}$ points in the right direction, but it's not a normal. For $\vec{d}$ to be a normal, it's magnitude needs to  equal 1. We can normalize $\vec{d}$ to $\vec{n}$ by dividing it by its magnitude:
+$\vec{d}$ points in the right direction, but it's not a normal. For $\vec{d}$ to be a normal, its magnitude needs to  equal 1. We can normalize $\vec{d}$ by dividing it by its magnitude, the result of which we'll assign to $\vec{n}$:
 
 <p className="mathblock">$$\vec{n} = \dfrac{\vec{d}}{\|\vec{d}\|}$$</p>
 
@@ -88,7 +88,7 @@ This yields a normal $\vec{n}$ where $\|\vec{n}\| = 1$:
 
 <Scene scene="three-points-normal" height={360} yOffset={-0.3} />
 
-Having found the triangle's normal $\vec{n}$ we can use it and any of the points $a$, $b$, $c$ to describe the plane intersecting the three points in point-normal form.
+Having found the triangle's normal $\vec{n}$ we can use it and any of the points $a$, $b$, $c$ to describe the plane containing the three points in point-normal form.
 
 <Scene scene="three-points-plane" height={400} yOffset={-1} />
 
@@ -102,7 +102,6 @@ There's one more way to describe a plane that we'll look at, which is also the m
 <Scene scene="constant-normal-form" height={400} usesVariables />
 
 This is the _constant-normal form_ of planes. It makes lots of calculations using planes much simpler.
-
 
 In the constant-normal form, the distance $d$ denotes how close the plane gets to the origin. Thought of another way: multiplying the normal $\vec{n}$ by $d$ yields the point on the plane that's closest to the origin.
 
@@ -118,11 +117,13 @@ Translating from the point-normal to the constant-normal form is very easy: the 
 
 [dot_product]: https://en.wikipedia.org/wiki/Dot_product
 
-<p className="mathblock">$$\vec{n} \cdot p = d$$</p>
+<p className="mathblock">$$ d = \vec{n} \cdot p $$</p>
 
-<SmallNote label="" center>If you're not familiar with the dot product, don't worry. We'll cover it thoroughly later on.</SmallNote>
+<SmallNote label="" center>If you're not familiar with the dot product, don't worry. We'll cover it later on.</SmallNote>
 
-The normal $\vec{n}$ stays the same across both forms, though in the example above you can observe the normal "flipping" visually when $d$ becomes negative.
+<Note><p>The notation for $\vec{n}$ and $p$ might seem to indicate that they're of different types, but they're both vectors. I'm differentiating between points in space (e.g. $x$ and $y$) and direction vectors (e.g. $\vec{a}$ and $\vec{b}$) by using the arrow notation for direction vectors.</p></Note>
+
+The normal $\vec{n}$ stays the same across both forms.
 
 
 ## Distance from plane
@@ -131,7 +132,7 @@ Given an arbitrary point $x$ and a plane $P$ in constant-normal form, we may wan
 
 <Scene scene="point-and-plane" height={400} />
 
-We can frame this differently if we construct a plane $P_x$ intersecting $x$ that is parallel to $P$, which we can do in point-normal form using $x$ as the point and $P$'s normal $\vec{n}$ as the normal:
+We can frame this differently if we construct a plane $P_x$ containing $x$ that is parallel to $P$, which we can do in point-normal form using $x$ as the point and $P$'s normal $\vec{n}$ as the normal:
 
 <Scene scene="point-distance-step-1" height={400} />
 
@@ -176,17 +177,19 @@ The intersection of two planes forms an infinite line.
 
 <Scene scene="intersecting-planes" height={340} usesVariables />
 
-We can describe infinite lines in 3D space using a point $p$ and normal $\vec{n}$. The normal $\vec{n}$ describes the line's orientation, while the point $p$ describes a point which the line intersects (passes through).
+We can describe infinite lines in 3D space using a point $p$ and normal $\vec{n}$. The normal $\vec{n}$ describes the line's orientation, while the point $p$ describes a point which the line passes through.
 
 <Scene scene="line" height={340} zoom={1.5} usesVariables />
 
 Let's take two planes $P_1$ and $P_2$ whose normals are $\vec{n_1}$ and $\vec{n_2}$.
 
-Finding the normal of $P_1$ and $P_2$'s intersection is deceptively simple. It's just the cross product of the two plane normals, which we'll assign to $\vec{d}$.
+Finding the direction vector of $P_1$ and $P_2$'s intersection is deceptively simple. It's just the cross product of the two plane normals, which we'll assign to $\vec{d}$.
 
 <p className="mathblock">$$\vec{d} = \vec{n_1} × \vec{n_2}$$</p>
 
-Because the cross product does not yield a unit vector, we'll normalize $\vec{d}$ and assign the normalized direction vector to $\vec{n}$.
+The magnitude of the cross product is equal to the [area of the parallelogram][area_parallelogram] formed by the two component vectors. This means that we can't expect the cross product to yield a unit vector, so we'll normalize $\vec{d}$ and assign the normalized direction vector to $\vec{n}$.
+
+[area_parallelogram]: https://en.wikipedia.org/wiki/Cross_product#/media/File:Cross_product_parallelogram.svg
 
 <p className="mathblock">$$\vec{n} = \dfrac{\vec{d}}{\|\vec{d}\|}$$</p>
 
@@ -194,9 +197,8 @@ This gives us the intersection's normal $\vec{n}$. Let's zoom in and see it in a
 
 <Scene scene="intersecting-planes-point-and-normal" height={380} zoom={2} usesVariables />
 
-This is all we have to do for two planes whose distance components are 0—we can just use $(0, 0, 0)$ as the intersection point and call it a day.
+But this is only half of the puzzle! We'll also need to find a point in space to represent the line of intersection (i.e. a point which the line passes through). We'll take a look at how to do just that, right after we discuss the no-intersection case.
 
-But for planes with non-zero distance components, we'll need to find the point of intersection. We'll take a look at how to do just that, right after we discuss the no-intersection case.
 
 ### Handling parallel planes
 
@@ -206,7 +208,7 @@ Two planes whose normals are parallel will never intersect, which is a case that
 
 The cross product of two parallel normals is $(0, 0, 0)$. So if $\|\vec{d}\| = 0$, the planes do not intersect.
 
-For many applications, we'll want to treat planes that are _almost_ parallel as being parallel. This means that our plane-plane intersection procedure should yield a result of "no intersection" when the magnitude of $\vec{d}$ is less than some epsilon.
+However, for many applications we'll want to treat planes that are _almost_ parallel as being parallel. This means that our plane-plane intersection procedure should yield a result of "no intersection" when the magnitude of $\vec{d}$ is less than some very small number—customarily called epsilon.
 
 ```cs
 Line PlanePlaneIntersection(Plane p1, Plane p2) {
@@ -218,13 +220,17 @@ Line PlanePlaneIntersection(Plane p1, Plane p2) {
 }
 ```
 
-But what should this epsilon be?
+But what should the value of epsilon be?
 
-Given two normals $\vec{n_1}$ and $\vec{n_2}$ where the angle between $\vec{n_1}$ and $\vec{n_2}$ is $\theta$, we can find a reasonable epsilon by charting $\|\vec{n_1} × \vec{n_2}\|$ for different values of $\theta$:
+Given two normals $\vec{n_1}$ and $\vec{n_2}$ where the angle between $\vec{n_1}$ and $\vec{n_2}$ is $\theta°$, we can find a reasonable epsilon by charting $\|\vec{n_1} × \vec{n_2}\|$ for different values of $\theta°$:
 
 <Image src="~/cross-product-magnitude-by-angle.png" plain width={840} />
 
-The relationship is linear. As the difference in angles halves, so does the magnitude. A difference of 1° yields a magnitude of 0.01745, and a difference of 1/2° yields half of that.
+<SmallNote label="" center>Both of the axes are [logarithmic][log_chart].</SmallNote>
+
+[log_chart]: https://en.wikipedia.org/wiki/Logarithmic_scale
+
+The relationship is linear. As the angle halves, so does the magnitude. A $\theta$ of 1° yields a magnitude of 0.01745, and a $\theta$ of 1/2° yields half of that.
 
 So to determine the epsilon, we can just ask: how low does the angle in degrees need to become for us to consider two planes parallel? Given an angle $\theta°$, we can find the epsilon $\epsilon$ via:
 
@@ -473,7 +479,7 @@ Given three planes $P_1$, $P_2$, $P_3$, there are five possible configurations i
 
 <Scene scene="three-plane-intersection-configurations" height={400} yOffset={-1} zoom={1.1} usesVariables />
 
-When finding the point-of-intersection, we'll first need to determine whether all three planes intersect at a single point—which for configurations 1 through 4, they don't.
+When finding the point of intersection, we'll first need to determine whether all three planes intersect at a single point—which for configurations 1 through 4, they don't.
 
 Given $\vec{n_1}$, $\vec{n_2}$, $\vec{n_3}$ as the plane normals for $P_1$, $P_2$, $P_3$, we can determine whether the planes intersect at a single point with the formula:
 

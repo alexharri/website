@@ -15,8 +15,8 @@ export default createScene(
 
     return (
       <>
-        <Point color="white" position={point} />
-        <Vector color="white" from={point} to={point.clone().add(normal)} />
+        <Point color={0xbbbbbb} position={point} />
+        <Vector color={0xbbbbbb} from={point} to={point.clone().add(normal)} />
         <Line
           from={point.clone().sub(normal.clone().multiplyScalar(100))}
           to={point.clone().add(normal.clone().multiplyScalar(100))}
