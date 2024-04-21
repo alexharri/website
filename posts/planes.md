@@ -230,9 +230,9 @@ Given two normals $\vec{n_1}$ and $\vec{n_2}$ where the angle between $\vec{n_1}
 
 [log_chart]: https://en.wikipedia.org/wiki/Logarithmic_scale
 
-The relationship is linear. As the angle halves, so does the magnitude. A $\theta$ of 1° yields a magnitude of 0.01745, and a $\theta$ of 1/2° yields half of that.
+The relationship is linear: as the angle between the planes halves, so does the magnitude of the cross product of their normals. $\theta° = 1$ yields a magnitude of 0.01745, and $\theta° = 0.5$ yields half of that.
 
-So to determine the epsilon, we can just ask: how low does the angle in degrees need to become for us to consider two planes parallel? Given an angle $\theta°$, we can find the epsilon $\epsilon$ via:
+So to determine the epsilon, we can ask: how low does the angle in degrees need to become for us to consider two planes parallel? Given an angle $\theta°$, we can find the epsilon $\epsilon$ via:
 
 <p className="mathblock">$$\epsilon = 0.01745 \times \theta°$$</p>
 
@@ -240,7 +240,7 @@ If that angle is 1/256°, then we get:
 
 <p className="mathblock">$$\dfrac{0.01745}{256} \approx 0.000068 $$</p>
 
-Which epsilon you choose will depend on your use case.
+With this you can determine the appropriate epsilon based on how small the angle between planes needs to be for you to consider them parallel. That will depend on your use case.
 
 ### Finding the point of intersection
 
