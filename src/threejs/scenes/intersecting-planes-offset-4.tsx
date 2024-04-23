@@ -22,9 +22,6 @@ export default createScene(
     const p1 = new Plane(1, n0);
     const p2 = new Plane(2, n1);
 
-    const dot = p1.normal.dot(p2.normal);
-    const denom = 1 - dot * dot;
-
     const k1 = p1.distance - p2.distance * 0;
     const k2 = p2.distance - p1.distance * 0;
 

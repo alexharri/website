@@ -314,21 +314,21 @@ The result of this looks like so:
 
 Using $1 - D$ as the denominator certainly increases the length of the vectors, but it does so by too much.
 
-<p align="center">$$ k_1 = (d_1 - d_2 \times D) \,/\, (1 - D^2) $$<br />$$ k_2 = (d_2 - d_1 \times D) \,/\, (1 - D^2) $$</p>
+We can see _exactly_ by how much by charting the distance from the tip of the parallelogram when using $1 - D$ as the denominator to the actual point of intersection as the planes become more parallel:
 
-Let's see what this changes gives us:
+<Image src="~/n1-n2-angle-distance-chart.png" plain width={840} />
+
+The exponential growth in the distance hints at the solution, which is to square $D$ in our denominator $1 - D$.
+
+Using $1 - D^2$ as the denominator scales the parallelogram such that its tip lies on the point of intersection:
 
 <Scene scene="intersecting-planes-offset-6" height={500} zoom={1.3} usesVariables />
 
-Bam! $1 - D^2$ is exactly the denominator we need!
+With this, our formula for $k_1$ and $k_2$ becomes:
 
-An interesting property of only traveling along the plane normals is that it yields the point on the line of intersection that is closest to the origin.
+<p align="center">$$ k_1 = (d_1 - d_2 \times D) \,/\, (1 - D^2) $$<br />$$ k_2 = (d_2 - d_1 \times D) \,/\, (1 - D^2) $$</p>
 
-Anyway, once $k_1$ and $k_2$ are found, our solution for the point $p$ becomes:
-
-<p className="mathblock">$$p = \vec{n_1} \times k_1 + \vec{n_2} \times k_2 $$</p>
-
-The scaling factors $k_1$, $k_2$ can be computed like so:
+Which put into code, looks like so:
 
 ```cs
 float dot = Vector3.Dot(p1.normal, p2.normal);
@@ -341,8 +341,6 @@ Vector3 point = p1.normal * k1 + p2.normal * k2;
 ```
 
 <SmallNote label="" center>Based on code from [Real-Time Collision Detection by Christer Ericson][further_reading]</SmallNote>
-
-<Scene scene="intersecting-planes-offset-2" height={500} zoom={1.3} usesVariables />
 
 Which through some mathematical magic can be optimized down to:
 
@@ -376,6 +374,8 @@ Line PlanePlaneIntersection(Plane p1, Plane p2) {
   return new Line(point, normal);
 }
 ```
+
+By the way, an interesting property of only traveling along the plane normals is that it yields the point on the line of intersection that is closest to the origin. Cool stuff!
 
 
 ## Line-plane intersection

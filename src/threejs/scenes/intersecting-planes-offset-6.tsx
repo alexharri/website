@@ -24,9 +24,6 @@ export default createScene(
 
     const dot = p1.normal.dot(p2.normal);
     const denom = 1 - dot * dot;
-    const denom2 = 1 - Math.abs(dot) / 2;
-
-    console.log({ denom, denom2 });
 
     const k1 = (p1.distance - p2.distance * dot) / denom;
     const k2 = (p2.distance - p1.distance * dot) / denom;
