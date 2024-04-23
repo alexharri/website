@@ -15,7 +15,7 @@ export default createScene(
     const THREE = useContext(ThreeContext);
 
     const n0 = new THREE.Vector3(-0.5, 2, 0).normalize();
-    const n1_1 = new THREE.Vector3(2, -0.2);
+    const n1_1 = new THREE.Vector3(2, 0.5);
     const n1_2 = new THREE.Vector3(2, -2);
     const n1 = n1_1.clone().lerp(n1_2, rot).normalize();
 
@@ -25,8 +25,8 @@ export default createScene(
     const dot = p1.normal.dot(p2.normal);
     const denom = 1 - dot * dot;
 
-    const k1 = (p1.distance - p2.distance * dot) / denom;
-    const k2 = (p2.distance - p1.distance * dot) / denom;
+    const k1 = p1.distance - p2.distance * 0;
+    const k2 = p2.distance - p1.distance * 0;
 
     const intersection = planePlaneIntersection(p1, p2);
 
@@ -62,13 +62,13 @@ export default createScene(
         />
         {intersection && (
           <>
-            <Point color={0xcccccc} position={intersection.point} />
             <Line
-              from={intersection.point.clone().sub(intersection.normal.clone().multiplyScalar(100))}
-              to={intersection.point.clone().add(intersection.normal.clone().multiplyScalar(100))}
+              from={intersection.point.clone().multiplyScalar(10)}
+              to={intersection.point.clone().multiplyScalar(-10)}
               color={0x888888}
               radius={0.01}
             />
+            <Point color={0xcccccc} position={intersection.point} />
           </>
         )}
         <Grid size={10} light />
@@ -77,7 +77,7 @@ export default createScene(
   },
   {
     variables: {
-      rot: { label: "Angle of red plane", type: "number", value: 0.3, range: [0, 1] },
+      rot: { label: "Angle of red plane", type: "number", value: 0, range: [0, 1] },
     },
   },
 );

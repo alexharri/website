@@ -15,18 +15,15 @@ export default createScene(
     const THREE = useContext(ThreeContext);
 
     const n0 = new THREE.Vector3(-0.5, 2, 0).normalize();
-    const n1_1 = new THREE.Vector3(2, -0.2);
+    const n1_1 = new THREE.Vector3(2, 0.5);
     const n1_2 = new THREE.Vector3(2, -2);
     const n1 = n1_1.clone().lerp(n1_2, rot).normalize();
 
     const p1 = new Plane(1, n0);
     const p2 = new Plane(2, n1);
 
-    const dot = p1.normal.dot(p2.normal);
-    const denom = 1 - dot * dot;
-
-    const k1 = (p1.distance - p2.distance * dot) / denom;
-    const k2 = (p2.distance - p1.distance * dot) / denom;
+    const k1 = p1.distance;
+    const k2 = p2.distance;
 
     const intersection = planePlaneIntersection(p1, p2);
 
@@ -44,8 +41,6 @@ export default createScene(
       <>
         <RenderPlane position={p1mid} normal={p1.normal} color="blue" width={p1W} />
         <RenderPlane position={p2mid} normal={p2.normal} color="red" width={p2W} />
-        <Point color="blue" position={p1org} />
-        <Point color="red" position={p2org} />
         <Vector strictEnd color="blue" to={p1.normal.multiplyScalar(k1)} />
         <Vector strictEnd color="red" to={p2.normal.multiplyScalar(k2)} />
         <Vector
@@ -77,7 +72,7 @@ export default createScene(
   },
   {
     variables: {
-      rot: { label: "Angle of red plane", type: "number", value: 0.3, range: [0, 1] },
+      rot: { label: "Angle of red plane", type: "number", value: 0, range: [0, 1] },
     },
   },
 );

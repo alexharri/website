@@ -242,7 +242,7 @@ If that angle is 1/256°, then we get:
 
 With this you can determine the appropriate epsilon based on how small the angle between planes needs to be for you to consider them parallel. That will depend on your use case.
 
-### Finding the point of intersection
+### Finding a point of intersection
 
 Having computed the normal and handled parallel planes, we can move on to finding a point $p$ along the line of intersection.
 
@@ -250,15 +250,77 @@ Since the line describing a plane-plane intersection is infinite, there are infi
 
 <Scene scene="intersecting-planes-points" height={380} zoom={1.3} usesVariables />
 
-We can narrow the problem down by taking the plane parallel by the two plane normals $\vec{n_1}$, $\vec{n_2}$ and observing that it intersects the line at a single point.
+We can narrow the problem down by taking the plane parallel to the two plane normals $\vec{n_1}$, $\vec{n_2}$ and observing that it intersects the line at a single point.
 
-<Scene scene="intersecting-planes-virtual-plane" height={360} yOffset={-1} usesVariables />
+<Scene scene="intersecting-planes-virtual-plane" height={470} zoom={1.3} yOffset={-1} usesVariables />
 
 Since the point lies on the plane parallel to the two plane normals, we can find it by exclusively traveling along those normals.
 
-This restriction allows us to reframe the problem as finding two scaling factors $k_1$, $k_2$ which when applied to our plane normals $\vec{n_1}$, $\vec{n_2}$ yields a parallelogram whose tip is at the point of intersection.
+The simplest case is the one where $P_1$ and $P_2$ are perpendicular. In that case, the solution is just $n_1 \times d_1 + n_2 \times d_2$. Here's what that looks like visually:
 
-<Scene scene="intersecting-planes-offset" height={500} usesVariables />
+<Scene scene="intersecting-planes-offset-2" height={500} zoom={1.3} usesVariables />
+
+When dragging the slider, notice how the tip of the parallelogram gets further away from the point of intersection as the planes become more parallel.
+
+We can also observe that as we get further away from the point of intersection, the longer of the two vectors (colored red) pushes us further away from the point of intersection than the shorter (blue) vector does. This is easier to observe if we draw a line from the origin to the point of intersection:
+
+<Scene scene="intersecting-planes-offset-4" height={500} zoom={1.3} usesVariables />
+
+Let's define $k_1$ and $k_2$ as the scaling factors that we apply to $\vec{n_1}$ and $\vec{n_2}$ (the red and blue vectors). Right now we're using the distance components $d_1$ and $d_2$ of the planes as the scaling factors:
+
+<p align="center">$$ k_1 = d_1 $$<br />$$ k_2 = d_2 $$</p>
+
+To solve this asymmetric pushing effect, we need to travel less in the direction of the longer vector as the planes become more parallel. We need some sort of "pulling factor" that adjusts the vectors such that their tip stays on the line as the planes become parallel. 
+
+Here our friend the dot product comes in handy yet again. When the planes are perpendicular the dot product of $\vec{n_1}$ and $\vec{n_2}$ equals 0, but as the planes become increasingly parallel, it approaches 1. We can use this to gradually increase our yet-to-be-defined pulling factor.
+
+<p align="center">$$ k_1 = d_1 + pull_1 \times (\vec{n_1} \cdot \vec{n_2}) $$<br />$$ k_2 = d_2 + pull_2 \times (\vec{n_1} \cdot \vec{n_2}) $$</p>
+
+Let's assign the dot product $\vec{n_1} \cdot \vec{n_2}$ to the name $D$ to get rid of the repetition:
+
+<p align="center">$$ k_1 = d_1 + pull_1 \times D $$<br />$$ k_2 = d_2 + pull_2 \times D $$</p>
+
+The perfect pulling factors happen to be the distance components $d_1$ and $d_2$ used as counterweights against each other!
+
+<p align="center">$$ k_1 = d_1 - d_2 \times D $$<br />$$ k_2 = d_2 - d_1 \times D $$</p>
+
+Consider why this might be. When $\vec{n_1}$ and $\vec{n_2}$ are perpendicular, their dot product equals 0, which results in:
+
+<p align="center">$$ k_1 = d_1 $$<br />$$ k_2 = d_2 $$</p>
+
+Which we know yields the correct solution. In the case where $\vec{n_1}$ and $\vec{n_2}$ are parallel, their dot product equals 1, which results in:
+
+<p align="center">$$ k_1 = d_1 - d_2 $$<br />$$ k_2 = d_2 - d_1 $$</p>
+
+Because the absolute values of $d_1 - d_2$ and $d_2 - d_1$ are equal, it means that the magnitude of the two vectors—defined as $\vec{n_1} \times k_1$ and $\vec{n_2} \times k_2$—is equal:
+
+<p align="center">$$ \|\vec{n_1} \times k_1\| = \|\vec{n_2} \times k_2\| $$</p>
+
+This means that the magnitude of our vectors will become more equal as the planes become parallel, which is what we want!
+
+Let's see this in action:
+
+<Scene scene="intersecting-planes-offset-3" height={500} zoom={1.3} usesVariables />
+
+The vectors stay on the line, but they become increasingly too short as $\vec{n_1}$ and $\vec{n_2}$ become parallel.
+
+Yet again, we can use the dot product. Since we want the length of the vectors to increase as the planes become parallel, we can divide our scalars $k_1$ and $k_2$ by $1 - abs(D)$ where $D$ is the dot product of $\vec{n_1}$ and $\vec{n_2}$ and $abs(D)$ is the absolute value of $D$.
+
+<p align="center">$$ k_1 = (d_1 - d_2 \times D) \,/\, (1 - abs(D)) $$<br />$$ k_2 = (d_2 - d_1 \times D) \,/\, (1 - abs(D)) $$</p>
+
+The result of this looks like so:
+
+<Scene scene="intersecting-planes-offset-5" height={500} zoom={1.3} usesVariables />
+
+Using $1 - D$ as the denominator certainly increases the length of the vectors, but it does so by too much.
+
+<p align="center">$$ k_1 = (d_1 - d_2 \times D) \,/\, (1 - D^2) $$<br />$$ k_2 = (d_2 - d_1 \times D) \,/\, (1 - D^2) $$</p>
+
+Let's see what this changes gives us:
+
+<Scene scene="intersecting-planes-offset-6" height={500} zoom={1.3} usesVariables />
+
+Bam! $1 - D^2$ is exactly the denominator we need!
 
 An interesting property of only traveling along the plane normals is that it yields the point on the line of intersection that is closest to the origin.
 
@@ -269,23 +331,20 @@ Anyway, once $k_1$ and $k_2$ are found, our solution for the point $p$ becomes:
 The scaling factors $k_1$, $k_2$ can be computed like so:
 
 ```cs
-float d11 = Vector3.Dot(p1.normal, p1.normal);
-float d12 = Vector3.Dot(p1.normal, p2.normal);
-float d22 = Vector3.Dot(p2.normal, p2.normal);
+float dot = Vector3.Dot(p1.normal, p2.normal);
+float denom = 1 - dot * dot;
 
-float denom = d11 * d22 - d12 * d12;
-
-float k1 = (p1.distance * d22 - p2.distance * d12) / denom;
-float k2 = (p2.distance * d11 - p1.distance * d12) / denom;
+float k1 = (p1.distance - p2.distance * dot) / denom;
+float k2 = (p2.distance - p1.distance * dot) / denom;
 
 Vector3 point = p1.normal * k1 + p2.normal * k2;
 ```
 
 <SmallNote label="" center>Based on code from [Real-Time Collision Detection by Christer Ericson][further_reading]</SmallNote>
 
-I'm sorry for just throwing the answer for $k_1$ and $k_2$ out there like this. I've tried to find a good geometric way to visualize what's happening here, but I've been unsuccessful so far.
+<Scene scene="intersecting-planes-offset-2" height={500} zoom={1.3} usesVariables />
 
-Through some mathematical magic, this code can be optimized down to:
+Which through some mathematical magic can be optimized down to:
 
 ```cs
 Vector3 direction = Vector3.cross(p1.normal, p2.normal);
