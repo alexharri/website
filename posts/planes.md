@@ -314,7 +314,7 @@ The result of this looks like so:
 
 Using $1 - D$ as the denominator certainly increases the length of the vectors, but it does so by too much.
 
-We can see _exactly_ by how much by charting the distance from the tip of the parallelogram when using $1 - D$ as the denominator to the actual point of intersection as the planes become more parallel:
+We can see _exactly_ how much by charting the distance from the tip of the parallelogram when using $1 - D$ as the denominator to the actual point of intersection as the planes become more parallel:
 
 <Image src="~/n1-n2-angle-distance-chart.png" plain width={840} />
 
