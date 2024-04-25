@@ -34,7 +34,7 @@ export default createScene(
             radius={0.02}
           />
         )}
-        <Grid size={10} light />
+        <Grid size={6} light />
       </>
     );
   },

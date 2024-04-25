@@ -70,7 +70,7 @@ export default createScene(
             <Point color={0xcccccc} position={intersection.point} />
           </>
         )}
-        <Grid size={10} light />
+        <Grid size={8} light />
       </mesh>
     );
   },

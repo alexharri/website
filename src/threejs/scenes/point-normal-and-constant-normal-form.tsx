@@ -23,7 +23,7 @@ export default createScene(
         <Point position={point} color="blue" />
         <Vector to={dPoint} color="green" strictEnd />
         <Plane width={width} position={midPoint} normal={normal} color="blue" />
-        <Grid size={10} />
+        <Grid size={6} />
       </>
     );
   },

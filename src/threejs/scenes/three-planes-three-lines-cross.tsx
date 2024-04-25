@@ -60,7 +60,7 @@ export default createScene(({}) => {
               from={intersection.point.clone().add(cross.clone().multiplyScalar(3.3))}
               to={intersection.point.clone().add(cross.clone().multiplyScalar(-3.3))}
               color={0xeb4034}
-              radius={0.015}
+              radius={0.02}
             />
           </React.Fragment>
         );

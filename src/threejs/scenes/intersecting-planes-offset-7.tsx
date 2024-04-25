@@ -85,7 +85,7 @@ export default createScene(
             </>
           )}
 
-          <Grid size={10} light />
+          <Grid size={8} light />
         </mesh>
       </>
     );

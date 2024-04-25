@@ -29,7 +29,7 @@ export default createScene(({}) => {
         const i2 = planePlaneIntersection(plane2, plane3)!;
         const i3 = planePlaneIntersection(plane3, plane1)!;
         return (
-          <mesh position={[3.5 * n, 0, 0]} scale={0.8} key={n}>
+          <mesh position={[3 * n, n === 1 ? 0 : 0.5, 0]} scale={0.8} key={n}>
             <Plane position={point1} normal={n1} color="white" transparent />
             <Plane position={point2} normal={n2} color="white" transparent />
             <Plane position={point3} normal={n3} color="white" transparent />
@@ -47,7 +47,9 @@ export default createScene(({}) => {
         );
       })}
 
-      <Grid size={10} light />
+      <mesh position={[0, -1.35, 0]}>
+        <Grid size={8} light />
+      </mesh>
     </>
   );
 });

@@ -68,6 +68,7 @@ export default createScene(
               position={linePoint.clone().add(lineNormal.clone().multiplyScalar(Dp))}
               label="P"
               offset={[0.2, 0.1, 0]}
+              scale={1.3}
             />
           </>
         )}

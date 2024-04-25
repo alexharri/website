@@ -47,7 +47,7 @@ export default createScene(
         {end && (
           <>
             <Point position={end} color="white" />
-            <MathLabel position={end} label="P" offset={[0.2, 0.1, 0]} />
+            <MathLabel position={end} scale={1.3} label="P" offset={[0.2, 0.1, 0]} />
           </>
         )}
         <Line
@@ -68,7 +68,7 @@ export default createScene(
   },
   {
     variables: {
-      n: { label: "math:vec_n_l", type: "normal", value: [1.5, 0.5, 0.1] },
+      n: { label: "math:vec_n_l", type: "normal", value: [0.61, 0.28, 0.74] },
     },
   },
 );

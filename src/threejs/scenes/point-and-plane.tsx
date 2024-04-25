@@ -23,12 +23,12 @@ export default createScene(() => {
         position={normal.clone().multiplyScalar(distance)}
         normal={normal}
         offset={[1.25, 1.25, 0]}
-        scale={1.3}
+        scale={1.4}
       />
-      <MathLabel label="x" position={point} offset={[0.33, 0.23, 0]} />
+      <MathLabel label="x" scale={1.4} position={point} offset={[0.33, 0.23, 0]} />
 
       <Vector color="blue" to={normal.clone().multiplyScalar(distance)} strictEnd />
-      <Grid size={10} />
+      <Grid size={8} />
     </>
   );
 });

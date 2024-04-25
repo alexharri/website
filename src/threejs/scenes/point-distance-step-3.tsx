@@ -25,14 +25,14 @@ export default createScene(() => {
         position={normal.clone().multiplyScalar(d1)}
         normal={normal}
         offset={[1.25, 1.25, 0]}
-        scale={1.3}
+        scale={1.4}
       />
       <MathLabel
         label="P_x"
         position={point}
         normal={normal}
         offset={[-1.25, 1.25, 0]}
-        scale={1.3}
+        scale={1.4}
       />
 
       <Point position={point} color="red" />
@@ -40,7 +40,7 @@ export default createScene(() => {
       <Plane position={point} normal={normal} color="red" />
       <Vector color="green" from={half} to={p0} strictEnd />
       <Vector color="green" from={half} to={p1} strictEnd />
-      <Grid size={10} />
+      <Grid size={8} />
     </>
   );
 });

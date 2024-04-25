@@ -20,21 +20,21 @@ export default createScene(() => {
         position={normal.clone().multiplyScalar(distance)}
         normal={normal}
         offset={[1.25, 1.25, 0]}
-        scale={1.3}
+        scale={1.4}
       />
       <MathLabel
         label="P_x"
         position={point}
         normal={normal}
         offset={[-1.25, 1.25, 0]}
-        scale={1.3}
+        scale={1.4}
       />
 
       <Point position={point} color="red" />
       <Plane distance={distance} normal={normal} color="blue" />
       <Plane position={point} normal={normal} color="red" />
       <Vector color="blue" to={normal.clone().multiplyScalar(distance)} strictEnd />
-      <Grid size={10} />
+      <Grid size={8} />
     </>
   );
 });

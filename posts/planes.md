@@ -99,7 +99,7 @@ It doesn't matter which of $a$, $b$, $c$ we use as the point in the point-normal
 
 There's one more way to describe a plane that we'll look at, which is through a normal $\vec{n}$ and a distance $d$.
 
-<Scene scene="constant-normal-form" height={400} usesVariables />
+<Scene scene="constant-normal-form" height={480} zoom={1.3} usesVariables />
 
 This is the _constant-normal form_ of planes. It makes lots of calculations using planes much simpler.
 
@@ -109,7 +109,7 @@ In the constant-normal form, the distance $d$ denotes how close the plane gets t
 
 In getting a feel for the difference between the point-normal and constant-normal forms, take this example which describes the same plane in both forms:
 
-<Scene scene="point-normal-and-constant-normal-form" height={400} usesVariables />
+<Scene scene="point-normal-and-constant-normal-form" height={460} zoom={1.4} usesVariables />
 
 The green arrow represents $d \times \vec{n}$ from the constant-normal form, while the blue point and arrow represent the point $p$ and normal $\vec{n}$ from the point-normal form.
 
@@ -130,23 +130,23 @@ The normal $\vec{n}$ stays the same across both forms.
 
 Given an arbitrary point $x$ and a plane $P$ in constant-normal form, we may want to ask how far away the point is from the plane. In other words, what is the minimum distance $x$ needs to travel to lie on the plane?
 
-<Scene scene="point-and-plane" height={400} />
+<Scene scene="point-and-plane" height={440} zoom={1.3} yOffset={-0.5} />
 
 We can frame this differently if we construct a plane $P_x$ containing $x$ that is parallel to $P$, which we can do in point-normal form using $x$ as the point and $P$'s normal $\vec{n}$ as the normal:
 
-<Scene scene="point-distance-step-1" height={400} />
+<Scene scene="point-distance-step-1" height={440} zoom={1.3} yOffset={-0.5} />
 
 With two parallel planes, we can frame the problem as finding the distance between the two planes. This becomes trivial using their constant-normal forms since it allows us to take the difference between their distance components $d_1$ and $d_2$.
 
 So let's find $P_x$'s distance using the $d = \vec{n} \cdot p$ equation we learned about:
 
-<Scene scene="point-distance-step-2" height={400} />
+<Scene scene="point-distance-step-2" height={440} zoom={1.3} yOffset={-0.5} />
 
 With two distances $d_1$ and $d_2$ from the planes $P$ and $P_x$ the solution simply becomes:
 
 <p className="mathblock">$$ d_1 - d_2 $$</p>
 
-<Scene scene="point-distance-step-3" height={400} />
+<Scene scene="point-distance-step-3" height={440} zoom={1.3} yOffset={-0.5} />
 
 So, to simplify, given a plane $P$ having a normal $\vec{n}$ and distance $d$, we can calculate a point $x$'s distance from $P$ like so:
 
@@ -167,7 +167,7 @@ Multiplying the plane's normal $\vec{n}$ by $D$ gives us a vector which when add
 
 <p className="mathblock">$$ S = x + (\vec{n} \times D) $$</p>
 
-<Scene scene="project-point-onto-plane-along-normal" height={400} />
+<Scene scene="project-point-onto-plane-along-normal" height={440} zoom={1.3} yOffset={-0.5} />
 
 The projection occurs along the plane's normal, which is sometimes useful. However, you'll often want to project points along an arbitrary direction, which we'll dive into later in the post. 
 
@@ -175,7 +175,7 @@ The projection occurs along the plane's normal, which is sometimes useful. Howev
 
 The intersection of two planes forms an infinite line.
 
-<Scene scene="intersecting-planes" height={340} usesVariables />
+<Scene scene="intersecting-planes" height={500} yOffset={0.5} zoom={1.4} usesVariables />
 
 We can describe lines in 3D space using a point $p$ and normal $\vec{n}$. The normal $\vec{n}$ describes the line's orientation, while the point $p$ describes a point which the line passes through.
 
@@ -204,7 +204,7 @@ But this is only half of the puzzle! We'll also need to find a point in space to
 
 Two planes whose normals are parallel will never intersect, which is a case that we'll have to handle.
 
-<Scene scene="parallel-planes" height={340} yOffset={-0.5} />
+<Scene scene="parallel-planes" height={480} zoom={1.3} yOffset={-0.5} />
 
 The cross product of two parallel normals is $(0, 0, 0)$. So if $\|\vec{d}\| = 0$, the planes do not intersect.
 
@@ -248,7 +248,7 @@ Having computed the normal and handled parallel planes, we can move on to findin
 
 Since the line describing a plane-plane intersection is infinite, there are infinitely many points we could choose as $p$.
 
-<Scene scene="intersecting-planes-points" height={380} zoom={1.3} usesVariables />
+<Scene scene="intersecting-planes-points" height={400} zoom={1.3} yOffset={0.5} usesVariables />
 
 We can narrow the problem down by taking the plane parallel to the two plane normals $\vec{n_1}$, $\vec{n_2}$ and observing that it intersects the line at a single point.
 
@@ -607,7 +607,7 @@ This also holds in the case where $\vec{n_1}$ is parallel to $\vec{n_3}$ instead
 
 We've demonstrated that two of the three normals being parallel results in $\vec{n_1} \cdot (\vec{n_2} × \vec{n_3}) = 0$. But what about the configurations where the three planes intersect along parallel lines? Those configurations have no parallel normals.
 
-<Scene scene="three-planes-three-lines" height={400} />
+<Scene scene="three-planes-three-lines" height={430} zoom={1.2} yOffset={0.5} />
 
 As we learned when looking at plane-plane intersections, the cross product of the two plane normals yields the direction of the intersection line.
 
