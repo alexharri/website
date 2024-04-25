@@ -16,7 +16,7 @@ export default createScene(
 
     const n0 = new THREE.Vector3(-0.5, 2, 0).normalize();
     const n1_1 = new THREE.Vector3(2, 0.5);
-    const n1_2 = new THREE.Vector3(2, -2);
+    const n1_2 = new THREE.Vector3(2, -1.2);
     const n1 = n1_1.clone().lerp(n1_2, rot).normalize();
 
     const p1 = new Plane(1, n0);
@@ -37,8 +37,10 @@ export default createScene(
     const p2mid = p2org.clone().lerp(end, 0.5);
     const p2W = p2org.distanceTo(end) + 1.5;
 
+    const scale = 1.5;
+
     return (
-      <>
+      <mesh scale={scale}>
         <RenderPlane position={p1mid} normal={p1.normal} color="blue" width={p1W} />
         <RenderPlane position={p2mid} normal={p2.normal} color="red" width={p2W} />
         <Point color="blue" position={p1org} />
@@ -69,7 +71,7 @@ export default createScene(
           </>
         )}
         <Grid size={10} light />
-      </>
+      </mesh>
     );
   },
   {

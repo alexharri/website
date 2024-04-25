@@ -41,7 +41,7 @@ export default createScene(
     const p2W = p2org.distanceTo(end) + 1.5;
 
     const dist = end.length();
-    const scale = Math.min(1.3, 3 / dist);
+    const scale = 3.5 / dist;
 
     return (
       <mesh scale={scale}>

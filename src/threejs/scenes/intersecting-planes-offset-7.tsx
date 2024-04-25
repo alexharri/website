@@ -41,9 +41,7 @@ export default createScene(
     const p2W = p2org.distanceTo(end) + 1.5;
 
     const dist = end.length();
-    const scale = Math.min(1.3, 3 / dist);
-
-    const mid = p1.normal.multiplyScalar(k1).add(p2.normal.multiplyScalar(k2)).multiplyScalar(0.5);
+    const scale = 3.5 / dist;
 
     return (
       <>

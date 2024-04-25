@@ -40,8 +40,11 @@ export default createScene(
     const p2mid = p2org.clone().lerp(end, 0.5);
     const p2W = p2org.distanceTo(end) + 1.5;
 
+    const dist = end.length();
+    const scale = Math.min(1.6, 4 / dist);
+
     return (
-      <>
+      <mesh scale={scale}>
         <RenderPlane position={p1mid} normal={p1.normal} color="blue" width={p1W} />
         <RenderPlane position={p2mid} normal={p2.normal} color="red" width={p2W} />
         <Point color="blue" position={p1org} />
@@ -68,11 +71,11 @@ export default createScene(
               color={0x888888}
               radius={0.01}
             />
-            <Point color={0xcccccc} position={intersection.point} />
+            <Point color={0xcccccc} position={intersection.point} radius={0.15 / scale} />
           </>
         )}
         <Grid size={10} light />
-      </>
+      </mesh>
     );
   },
   {

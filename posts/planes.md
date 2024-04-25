@@ -258,13 +258,13 @@ Since the point lies on the plane parallel to the two plane normals, we can find
 
 The simplest case is the one where $P_1$ and $P_2$ are perpendicular. In that case, the solution is just $n_1 \times d_1 + n_2 \times d_2$. Here's what that looks like visually:
 
-<Scene scene="intersecting-planes-offset-2" height={500} zoom={1.1} usesVariables />
+<Scene scene="intersecting-planes-offset-2" height={470} yOffset={-0.5} usesVariables />
 
 When dragging the slider, notice how the tip of the parallelogram gets further away from the point of intersection as the planes become more parallel.
 
 We can also observe that as we get further away from the point of intersection, the longer of the two vectors (colored red) pushes us further away from the point of intersection than the shorter (blue) vector does. This is easier to observe if we draw a line from the origin to the point of intersection:
 
-<Scene scene="intersecting-planes-offset-4" height={500} zoom={1.1} usesVariables />
+<Scene scene="intersecting-planes-offset-4" height={470} yOffset={-0.5} usesVariables />
 
 Let's define $k_1$ and $k_2$ as the scaling factors that we apply to $\vec{n_1}$ and $\vec{n_2}$ (the result of which are the red and blue vectors). Right now we're using the distance components $d_1$ and $d_2$ of the planes as the scaling factors:
 
@@ -302,7 +302,7 @@ This means that the magnitude of our vectors will become _more_ equal as the pla
 
 Let's see this in action:
 
-<Scene scene="intersecting-planes-offset-3" height={500} zoom={1.1} usesVariables />
+<Scene scene="intersecting-planes-offset-3" height={470} yOffset={-0.5} usesVariables />
 
 The vectors stay on the line, but they become increasingly too short as $\vec{n_1}$ and $\vec{n_2}$ become parallel.
 
@@ -312,13 +312,13 @@ Yet again, we can use the dot product. Since we want the length of the vectors t
 
 The result of this looks like so:
 
-<Scene scene="intersecting-planes-offset-5" height={500} usesVariables />
+<Scene scene="intersecting-planes-offset-5" height={440} usesVariables />
 
 Using $1 - abs(dot)$ as the denominator certainly increases the size of the parallelogram, but by too much.
 
 However, notice what happens when we visualize the quadrants of the paralellogram:
 
-<Scene scene="intersecting-planes-offset-7" height={500} angle={25} usesVariables />
+<Scene scene="intersecting-planes-offset-7" height={440} angle={25} usesVariables />
 
 As the planes become more parallel, the point of intersection approaches the center of the parallelogram.
 
@@ -346,7 +346,7 @@ With this, our scalars $k_1$ and $k_2$ become:
 
 Which gives us our final solution:
 
-<Scene scene="intersecting-planes-offset-6" height={500} zoom={1.1} usesVariables />
+<Scene scene="intersecting-planes-offset-6" height={400} yOffset={-1} usesVariables />
 
 Putting all of this into code, we get:
 
