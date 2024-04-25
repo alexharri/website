@@ -25,7 +25,7 @@ There are many ways to describe planes, such as via
  3. a normal and a distance from an origin.
 
 <Note>
-  Throughout this post, the term _normal_ will refer to a _normalized direction vector_ (unit vector) whose magnitude (length) is equal to 1, typically denoted via $\vec{n}$ where $\|\vec{n}\| = 1$.
+  Throughout this post, the term _normal_ will refer to a _normalized direction vector_ (unit vector) whose magnitude (length) is equal to 1, typically denoted by $\vec{n}$ where $\|\vec{n}\| = 1$.
 </Note>
 
 Starting with the point-and-normal case, here's an example of a plane described by a point in 3D space $p$ and a normal $\vec{n}$:
@@ -66,7 +66,7 @@ The [cross product][cross_product] takes in two vectors $\vec{a}$ and $\vec{b}$ 
 
 <p className="mathblock">$$\vec{c} = \vec{a} × \vec{b}$$</p>
 
-For example, given the vectors $\vec{i} = (1, 0, 0)$ and $\vec{j} = (0, 1, 0)$, their cross product yields the vector $(0, 0, 1)$, which we'll label $\vec{k}$:
+For example, given the vectors $\vec{i} = (1, 0, 0)$ and $\vec{j} = (0, 1, 0)$, their cross product is the vector $(0, 0, 1)$, which we'll label $\vec{k}$:
 
 <Scene scene="cross-product" height={300} zoom={1.7} yOffset={-0.0} />
 
@@ -97,7 +97,7 @@ It doesn't matter which of $a$, $b$, $c$ we use as the point in the point-normal
 
 ### Constant-normal form
 
-There's one more way to describe a plane that we'll look at, which is also the most important. That is, through a normal $\vec{n}$ and a distance $d$.
+There's one more way to describe a plane that we'll look at, which is through a normal $\vec{n}$ and a distance $d$.
 
 <Scene scene="constant-normal-form" height={400} usesVariables />
 
@@ -159,7 +159,7 @@ The distance may be positive or negative depending on which side of the plane th
 
 We just looked at finding a point's distance to a plane. A case where that becomes useful is, for example, if you want to project a point onto a plane.
 
-Given a point $x$ which we want to project onto plane $P$ whose normal is $\vec{n}$ and distance is $d$, we can do that fairly easily. First, let's assign the point's distance from the plane to $D$:
+Given a point $x$ which we want to project onto plane $P$ whose normal is $\vec{n}$ and distance is $d$, we can do that fairly easily. First, let's define $D$ as the point's distance from the plane:
 
 <p className="mathblock">$$ D = d - (\vec{n} \cdot x) $$</p>
 
@@ -177,7 +177,7 @@ The intersection of two planes forms an infinite line.
 
 <Scene scene="intersecting-planes" height={340} usesVariables />
 
-We can describe infinite lines in 3D space using a point $p$ and normal $\vec{n}$. The normal $\vec{n}$ describes the line's orientation, while the point $p$ describes a point which the line passes through.
+We can describe lines in 3D space using a point $p$ and normal $\vec{n}$. The normal $\vec{n}$ describes the line's orientation, while the point $p$ describes a point which the line passes through.
 
 <Scene scene="line" height={340} zoom={1.5} usesVariables />
 
@@ -211,8 +211,8 @@ The cross product of two parallel normals is $(0, 0, 0)$. So if $\|\vec{d}\| = 0
 However, for many applications we'll want to treat planes that are _almost_ parallel as being parallel. This means that our plane-plane intersection procedure should yield a result of "no intersection" when the magnitude of $\vec{d}$ is less than some very small number—customarily called epsilon.
 
 ```cs
-Line PlanePlaneIntersection(Plane p1, Plane p2) {
-  Vector3 direction = Vector3.cross(p1.normal, p2.normal);
+Line PlanePlaneIntersection(Plane P1, Plane P2) {
+  Vector3 direction = Vector3.cross(P1.normal, P2.normal);
   if (direction.magnitude < EPSILON) {
     return null; // Roughly parallel planes
   }
@@ -351,13 +351,13 @@ Which gives us our final solution:
 Putting all of this into code, we get:
 
 ```cs
-float dot = Vector3.Dot(p1.normal, p2.normal);
+float dot = Vector3.Dot(P1.normal, P2.normal);
 float denom = 1 - dot * dot;
 
-float k1 = (p1.distance - p2.distance * dot) / denom;
-float k2 = (p2.distance - p1.distance * dot) / denom;
+float k1 = (P1.distance - P2.distance * dot) / denom;
+float k2 = (P2.distance - P1.distance * dot) / denom;
 
-Vector3 point = p1.normal * k1 + p2.normal * k2;
+Vector3 point = P1.normal * k1 + P2.normal * k2;
 ```
 
 <SmallNote label="" center>Based on code from [Real-Time Collision Detection by Christer Ericson][further_reading]</SmallNote>
@@ -365,11 +365,11 @@ Vector3 point = p1.normal * k1 + p2.normal * k2;
 Which through some mathematical magic can be optimized down to:
 
 ```cs
-Vector3 direction = Vector3.cross(p1.normal, p2.normal);
+Vector3 direction = Vector3.cross(P1.normal, P2.normal);
 
 float denom = Vector3.Dot(direction, direction);
-Vector3 a = p1.distance * p2.normal;
-Vector3 b = p2.distance * p1.normal;
+Vector3 a = P1.distance * P2.normal;
+Vector3 b = P2.distance * P1.normal;
 Vector3 point = Vector3.Cross(a - b, direction) / denom;
 ```
 
@@ -378,15 +378,15 @@ Vector3 point = Vector3.Cross(a - b, direction) / denom;
 This completes our plane-plane intersection implementation:
 
 ```cs
-Line PlanePlaneIntersection(Plane p1, Plane p2) {
-  Vector3 direction = Vector3.cross(p1.normal, p2.normal);
+Line PlanePlaneIntersection(Plane P1, Plane P2) {
+  Vector3 direction = Vector3.cross(P1.normal, P2.normal);
   if (direction.magnitude < EPSILON) {
     return null; // Roughly parallel planes
   }
 
   float denom = Vector3.Dot(direction, direction);
-  Vector3 a = p1.distance * p2.normal;
-  Vector3 b = p2.distance * p1.normal;
+  Vector3 a = P1.distance * P2.normal;
+  Vector3 b = P2.distance * P1.normal;
   Vector3 point = Vector3.Cross(a - b, direction) / denom;
 
   Vector3 normal = direction.normalized;
@@ -402,7 +402,7 @@ By the way, an interesting property of only traveling along the plane normals is
 
 Earlier, we covered projecting a point onto a plane along the plane's normal.
 
-However, it is generally more useful to be able to project a point onto a plane along an arbitrary direction given by a normal $\vec{n}$. Doing that boils down to finding the point of intersection for a line and a plane.
+However, it is generally more useful to be able to project a point onto a plane along an arbitrary direction described by a normal $\vec{n}$. Doing that boils down to finding the point of intersection for a line and a plane.
 
 <Scene scene="project-point-onto-plane" height={420} yOffset={-1} usesVariables />
 
@@ -497,7 +497,7 @@ We've been talking about line-plane intersections, but I've been lying a bit by 
 
 A ray and a line are quite similar; they're both represented through a normal $\vec{n}$ and a point $p$.
 
-The core difference is that a ray (colored red) extends in the direction of $\vec{n}$ away from $p$, while a line (colored green) extends in the other direction as well:
+The difference is that a ray (colored red) extends in the direction of $\vec{n}$ away from $p$, while a line (colored green) extends in the other direction as well:
 
 <Scene scene="ray-and-line" height={500} usesVariables />
 
@@ -621,9 +621,9 @@ Yet again, because the dot product of perpendicular vectors is 0 we can conclude
 We can now begin our implementation. As usual, we'll use an epsilon to handle the _"roughly parallel"_ case:
 
 ```cs
-Vector3 ThreePlaneIntersection(Plane p1, Plane p2, Plane p3) {
-  Vector3 cross = Vector3.Cross(p2.normal, p3.normal);
-  float dot = Vector3.Dot(p1.normal, cross);
+Vector3 ThreePlaneIntersection(Plane P1, Plane P2, Plane P3) {
+  Vector3 cross = Vector3.Cross(P2.normal, P3.normal);
+  float dot = Vector3.Dot(P1.normal, cross);
   if (Mathf.Abs(dot) < EPSILON) {
     return null; // Planes do not intersect at a single point
   }
@@ -755,18 +755,18 @@ Which fully expanded becomes:
 Putting this into code, we get:
 
 ```cs
-Vector3 ThreePlaneIntersection(Plane p1, Plane p2, Plane p3) {
-  Vector3 dir = Vector3.Cross(p2.normal, p3.normal);
+Vector3 ThreePlaneIntersection(Plane P1, Plane P2, Plane P3) {
+  Vector3 dir = Vector3.Cross(P2.normal, P3.normal);
   
   float denom = Vector3.Dot(u);
   if (Mathf.Abs(denom) < EPSILON) {
     return null; // Planes do not intersect at a single point
   }
 
-  Vector3 a = p2.normal * p3.distance;
-  Vector3 b = p3.normal * p2.distance;
-  Vector3 V = Vector3.Cross(p1.normal, a - b);
-  Vector3 U = dir * p1.distance;
+  Vector3 a = P2.normal * P3.distance;
+  Vector3 b = P3.normal * P2.distance;
+  Vector3 V = Vector3.Cross(P1.normal, a - b);
+  Vector3 U = dir * P1.distance;
 
   return (V + U) / denom;
 }
