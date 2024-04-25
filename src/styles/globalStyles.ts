@@ -36,6 +36,10 @@ body {
   font-family: ${cssVariables.fontFamily};
   overflow-x: hidden;
   width: 100vw;
+
+  & > div {
+    overflow-x: hidden;
+  }
 }
 
 body.grabbing * {
