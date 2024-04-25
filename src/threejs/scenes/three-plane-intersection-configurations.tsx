@@ -156,10 +156,13 @@ export default createScene(
           </mesh>
 
           <mesh ref={configurationRefs[4]} position={[-OFF * 4, 0, 0]}>
+            <Line from={[0, 2, 4]} to={[0, 2, -4]} color={0xff4444} radius={0.02} />
+            <Line from={[4, 2, 0]} to={[-4, 2, 0]} color={0xff4444} radius={0.02} />
+            <Line from={[0, 6, 0]} to={[0, -2, 0]} color={0xff4444} radius={0.02} />
             <Plane normal={[1, 0, 0]} position={[0, 2, 0]} color={0x888888} opacity={0.3} />
             <Plane normal={[0, 1, 0]} position={[0, 2, 0]} color={0x888888} opacity={0.3} />
             <Plane normal={[0, 0, 1]} position={[0, 2, 0]} color={0x888888} opacity={0.3} />
-            <Point position={[0, 2, 0]} color={0xff4444} />
+            <Point position={[0, 2, 0]} color={0xff4444} radius={0.15} />
           </mesh>
         </>
       );
