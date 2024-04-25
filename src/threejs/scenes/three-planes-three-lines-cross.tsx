@@ -66,7 +66,7 @@ export default createScene(({}) => {
         );
       })}
 
-      <Grid size={10} light />
+      <Grid size={6} light />
     </>
   );
 });

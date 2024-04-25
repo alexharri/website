@@ -585,17 +585,17 @@ the final result is zero whenever $\vec{n_2}$ and $\vec{n_3}$ are parallel.
 
 This takes care of the "all-planes-parallel" configuration, and the configuration where $\vec{n_2}$ and $\vec{n_3}$ are parallel
 
-<Scene scene="three-planes-n2-n3-parallel" height={400} />
+<Scene scene="three-planes-n2-n3-parallel" height={440} zoom={1.4} />
 
 With that, let's consider the case where $\vec{n_1}$ is parallel to either $\vec{n_2}$ or $\vec{n_3}$ but $\vec{n_2}$ and $\vec{n_3}$ are not parallel to each other.
 
 Let's take the example where $\vec{n_1}$ is parallel to $\vec{n_2}$ but $\vec{n_3}$ is parallel to neither.
 
-<Scene scene="three-planes-n1-n2-parallel" height={400} />
+<Scene scene="three-planes-n1-n2-parallel" height={440} zoom={1.4} />
 
 The cross product $\vec{n_2} × \vec{n_3}$ yields a vector (colored red) that's perpendicular to both $\vec{n_2}$ and $\vec{n_3}$.
 
-<Scene scene="three-planes-n1-n2-parallel-cross" height={400} />
+<Scene scene="three-planes-n1-n2-parallel-cross" height={440} zoom={1.4} />
 
 Since $\vec{n_1}$ is parallel to $\vec{n_2}$, that means that $\vec{n_2} × \vec{n_3}$ is also perpendicular to $\vec{n_1}$. As we've learned, the dot product of two perpendicular vectors is zero, meaning that:
 
@@ -611,7 +611,7 @@ We've demonstrated that two of the three normals being parallel results in $\vec
 
 As we learned when looking at plane-plane intersections, the cross product of the two plane normals yields the direction of the intersection line.
 
-<Scene scene="three-planes-three-lines-cross" height={400} />
+<Scene scene="three-planes-three-lines-cross" height={460} zoom={1.4} />
 
 When all of the lines of intersection are parallel, all of the plane normals defining those lines are perpendicular to them.
 
@@ -634,15 +634,15 @@ Vector3 ThreePlaneIntersection(Plane P1, Plane P2, Plane P3) {
 
 We want to find the point at which our three planes $P_1$, $P_2$, $P_3$ intersect:
 
-<Scene scene="three-intersecting-planes-point" height={400} />
+<Scene scene="three-intersecting-planes-point" height={520} zoom={1.25} yOffset={-1} />
 
 Some of what we learned about two-plane intersections will come into play here. Let's start by taking the line of intersection for $P_2$ and $P_3$ and varying the position of $P_1$. You'll notice that the point of intersection is the point at which $P_1$ intersects the line.
 
-<Scene scene="three-intersecting-planes" height={400} usesVariables />
+<Scene scene="three-intersecting-planes" height={450} zoom={1.25} yOffset={-0.5} usesVariables />
 
 When $P_1$'s distance from the origin is 0, the vector pointing from the origin to the point of intersection is parallel to $P_1$ (and perpendicular to $P_1$'s normal).
 
-<Scene scene="three-intersecting-planes-10" height={400} />
+<Scene scene="three-intersecting-planes-10" height={450} zoom={1.25} yOffset={-0.5} />
 
 This vector—let's call it $\vec{V}$—will play a large role in computing the point of intersection.
 
@@ -662,7 +662,7 @@ With $\vec{v_1}$ and $\vec{v_2}$ defined, we assign their cross product to $\vec
 
 Let's see what it looks like:
 
-<Scene scene="three-intersecting-planes-3" height={400} />
+<Scene scene="three-intersecting-planes-3" height={450} zoom={1.25} yOffset={-0.5} />
 
 Hmm, not quite long enough. $\vec{V}$ certainly points in the right direction, but to make $\vec{V}$'s tip lie on the line of intersection, we need to compute some scaling factor for $\vec{V}$.
 
@@ -678,7 +678,7 @@ We want the $\vec{V}$'s magnitude to increase as $D$ decreases, so we'll make $\
 
 <p className="mathblock">$$\vec{V} = \dfrac{\vec{v_1} × \vec{v_2}}{D}$$</p>
 
-<Scene scene="three-intersecting-planes-4" height={400} />
+<Scene scene="three-intersecting-planes-4" height={450} zoom={1.25} yOffset={-0.5} />
 
 Fully expanded, the equation for $\vec{V}$ becomes:
 
@@ -686,7 +686,7 @@ Fully expanded, the equation for $\vec{V}$ becomes:
 
 Bam! The problem is now reduced to traveling along the direction of the line intersection until we intersect with $P_1$.
 
-<Scene scene="three-intersecting-planes-5" height={400} />
+<Scene scene="three-intersecting-planes-5" height={450} zoom={1.25} yOffset={-0.5} />
 
 We could use our knowledge of line-plane intersections to solve this, but there is a more efficient approach I want to demonstrate.
 
@@ -694,21 +694,21 @@ It involves finding a scaling factor for the direction vector $\vec{n_2} × \vec
 
 There's one observation we can make that simplifies that. Since $\vec{V}$ is perpendicular to $P_1$'s normal, the distance from $\vec{V}$'s tip to $P_1$ along the direction vector $\vec{U}$ is the same as the distance from the origin to $P_1$ along that same direction.
 
-<Scene scene="three-intersecting-planes-6" height={400} />
+<Scene scene="three-intersecting-planes-6" height={450} zoom={1.25} yOffset={-0.5} />
 
 With that, consider the vector $\vec{n_1} \times d_1$ where $\vec{n_1}$ and $d_1$ are the normal and distance of $P_1$.
 
-<Scene scene="three-intersecting-planes-7" height={400} />
+<Scene scene="three-intersecting-planes-7" height={450} zoom={1.25} yOffset={-0.5} />
 
 If $\vec{n_1}$ were parallel to $\vec{U}$, then $d_1$ would be the scaling factor we need, but let's see what happens with $\vec{U} \times d_1$:
 
-<Scene scene="three-intersecting-planes-8" height={400} usesVariables />
+<Scene scene="three-intersecting-planes-8" height={450} zoom={1.25} yOffset={-0.5} usesVariables />
 
 As $\vec{n_1}$ and $\vec{U}$ become less parallel, $U \times d_1$ becomes increasingly too short.
 
 One thing to note as well is that even when $\vec{n_1}$ and $\vec{U}$ are completely parallel, $\vec{U} \times d_1$ is still too short, which is due to $\vec{U}$ not being a unit vector. If we normalize $\vec{U}$ prior to multiplying with $d_1$ that problem goes away.
 
-<Scene scene="three-intersecting-planes-11" height={400} usesVariables />
+<Scene scene="three-intersecting-planes-11" height={450} zoom={1.25} yOffset={-0.5} usesVariables />
 
 But we're getting ahead of ourselves—we won't need to normalize $\vec{U}$. Let's take a fresh look at how $D$ is defined:
 
@@ -727,7 +727,7 @@ Since the dot product is a multiple of the magnitudes of its component vectors, 
 
 So $D$ is both the scaling factor we need for $\vec{U} \times d_1$, as well as $\vec{V}$:
 
-<Scene scene="three-intersecting-planes-9" height={400} />
+<Scene scene="three-intersecting-planes-9" height={450} zoom={1.25} yOffset={-0.5} />
 
 We've got our solution! Let's do a quick overview.
 

@@ -39,8 +39,8 @@ export default createScene(({}) => {
 
       <Vector color="red" to={cross} strictEnd />
 
-      <MathLabel label="vec_v1" position={p1.normal} offset={[-0.3, 0.9, 0]} />
-      <MathLabel label="vec_v2" position={asubb} offset={[-0.5, -0.2, 0]} />
+      <MathLabel label="vec_v1" scale={1.2} position={p1.normal} offset={[-0.3, 0.9, 0]} />
+      <MathLabel label="vec_v2" scale={1.2} position={asubb} offset={[-0.5, -0.2, 0]} />
 
       <Vector color="green" to={asubb} strictEnd />
       <Vector color="blue" to={p1.normal} strictEnd />
@@ -52,7 +52,7 @@ export default createScene(({}) => {
         radius={0.015}
       />
 
-      <Grid size={10} light />
+      <Grid size={6} light />
     </>
   );
 });

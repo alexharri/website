@@ -25,15 +25,15 @@ export default createScene(({}) => {
       <Plane position={point2} normal={n2} color="white" transparent />
       <Plane position={point3} normal={n3} color="white" transparent />
 
-      <MathLabel label="P_1" position={point1} offset={[1.4, 1.2, 0]} normal={n1} />
-      <MathLabel label="P_2" position={point2} offset={[1.4, -0.5, 0]} normal={n2} />
-      <MathLabel label="P_3" position={point3} offset={[1.2, 1.2, 0]} normal={n3} />
+      <MathLabel label="P_1" scale={1.4} position={point1} offset={[1.4, 1.2, 0]} normal={n1} />
+      <MathLabel label="P_2" scale={1.4} position={point2} offset={[1.4, -0.5, 0]} normal={n2} />
+      <MathLabel label="P_3" scale={1.4} position={point3} offset={[1.2, 1.2, 0]} normal={n3} />
 
       <Vector to={cross} color="red" />
       <Vector to={n2} color="white" />
       <Vector to={n3} color="white" />
 
-      <Grid size={10} light />
+      <Grid size={6} light />
     </>
   );
 });
