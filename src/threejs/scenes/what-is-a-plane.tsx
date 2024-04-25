@@ -27,7 +27,7 @@ export default createScene(
         .map(([x, y], i) => {
           const pos = new THREE.Vector3(x * 1.25, y * 1.25);
           const distance = Math.abs(x) + Math.abs(y);
-          const radius = 0.039 - distance / 900;
+          const radius = 0.05 - distance / 800;
           if (radius < 0) return null;
           return <Point key={i} color={0x2e6db0} basicMaterial radius={radius} position={pos} />;
         })
