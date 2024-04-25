@@ -6,7 +6,7 @@ image: "/images/og-planes.png"
 
 A plane in 3D space can be thought of as a flat surface that stretches infinitely far, splitting space into two halves.
 
-<Scene scene="what-is-a-plane" height={450} yOffset={-0.5} angle={10} usesVariables />
+<Scene scene="what-is-a-plane" height={480} yOffset={-0.5} zoom={1.3} angle={10} usesVariables />
 
 Planes have loads of uses in applications that deal with 3D geometry. I've mostly been working with them in the context of an [architectural modeler][arkio], where geometry is defined in terms of planes and their intersections.
 
@@ -30,13 +30,13 @@ There are many ways to describe planes, such as via
 
 Starting with the point-and-normal case, here's an example of a plane described by a point in 3D space $p$ and a normal $\vec{n}$:
 
-<Scene scene="point-and-normal-with-plane" height={400} yOffset={-1} usesVariables />
+<Scene scene="point-and-normal-with-plane" height={440} yOffset={-1} zoom={1.35} usesVariables />
 
 The normal $\vec{n}$ describes the plane's orientation, where the surface of the plane is perpendicular to $\vec{n}$, while the point $p$ describes _a_ point on the plane.
 
 We described this plane in terms of a single point $p$, but keep in mind that this plane—let's call it $P$—contains infinitely many points.
 
-<Scene scene="plane-intersecting-points" height={400} yOffset={-1} usesVariables />
+<Scene scene="plane-intersecting-points" height={440} yOffset={-1} zoom={1.3} usesVariables />
 
 If $P$ were described by one of those other points contained by $P$, we would be describing the exact same plane. This is a result of the infinite nature of planes.
 

@@ -45,7 +45,7 @@ export default createScene(
         <mesh quaternion={mesh.quaternion} position={position}>
           {points}
         </mesh>
-        <Grid size={10} />
+        <Grid size={8} />
       </>
     );
   },

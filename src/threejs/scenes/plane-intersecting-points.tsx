@@ -36,9 +36,9 @@ export default createScene(
         .map(([x, y], i) => {
           const pos = new THREE.Vector3(x * 2, y * 1.7);
           const distance = Math.abs(x) + Math.abs(y);
-          const radius = 0.07 - distance / 250;
+          const radius = 0.06 - distance / 250;
           if (radius < 0) return null;
-          return <Point key={i} color={0xaaaaaa} basicMaterial radius={radius} position={pos} />;
+          return <Point key={i} color={0x999999} basicMaterial radius={radius} position={pos} />;
         })
         .filter(Boolean);
     }, []);
@@ -53,7 +53,7 @@ export default createScene(
         </mesh>
 
         <Plane color="blue" position={from} normal={normal} />
-        <Grid size={10} />
+        <Grid size={6} />
       </>
     );
   },
