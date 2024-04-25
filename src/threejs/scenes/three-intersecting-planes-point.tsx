@@ -47,7 +47,7 @@ export default createScene(({}) => {
           from={l.point.clone().add(l.normal.clone().multiplyScalar(100))}
           to={l.point.clone().add(l.normal.clone().multiplyScalar(-100))}
           color={0x777777}
-          radius={0.01}
+          radius={0.015}
         />
       ))}
 

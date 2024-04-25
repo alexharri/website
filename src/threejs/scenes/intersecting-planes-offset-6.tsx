@@ -69,7 +69,7 @@ export default createScene(
               from={intersection.point.clone().sub(intersection.normal.clone().multiplyScalar(100))}
               to={intersection.point.clone().add(intersection.normal.clone().multiplyScalar(100))}
               color={0x888888}
-              radius={0.01}
+              radius={0.02 / scale}
             />
             <Point color={0xcccccc} position={intersection.point} radius={0.15 / scale} />
           </>

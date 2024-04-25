@@ -65,7 +65,7 @@ export default createScene(({}) => {
         from={line.point.clone().add(line.normal.clone().multiplyScalar(10))}
         to={line.point.clone().add(line.normal.clone().multiplyScalar(-10))}
         color={0x777777}
-        radius={0.01}
+        radius={0.015}
       />
 
       <Grid size={10} light />

@@ -23,7 +23,7 @@ export default createScene(
           color={0x777777}
           radius={0.015}
         />
-        <Grid size={10} light />
+        <Grid size={6} light />
       </>
     );
   },

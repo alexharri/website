@@ -49,7 +49,7 @@ export default createScene(
           from={linePoint.clone().add(lineNormal.clone().multiplyScalar(100))}
           to={linePoint}
           basicMaterial
-          radius={0.01}
+          radius={0.015}
         />
 
         <Vector from={linePoint} to={linePoint.clone().add(lineNormal)} color="red" strictEnd />

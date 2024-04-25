@@ -81,7 +81,7 @@ export default createScene(
           from={lp1.clone().add(lineNormal.clone().multiplyScalar(100))}
           to={lp1}
           basicMaterial
-          radius={0.01}
+          radius={0.015}
         />
         {e1 && <Point position={e1} color="red" />}
 
@@ -92,7 +92,7 @@ export default createScene(
           from={lp2.clone().add(lineNormal.clone().multiplyScalar(100))}
           to={lp2.clone().add(lineNormal.clone().multiplyScalar(-100))}
           basicMaterial
-          radius={0.01}
+          radius={0.015}
         />
         {e2 && <Point position={e2} color="green" />}
 

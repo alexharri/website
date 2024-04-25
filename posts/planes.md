@@ -179,7 +179,7 @@ The intersection of two planes forms an infinite line.
 
 We can describe lines in 3D space using a point $p$ and normal $\vec{n}$. The normal $\vec{n}$ describes the line's orientation, while the point $p$ describes a point which the line passes through.
 
-<Scene scene="line" height={340} zoom={1.5} usesVariables />
+<Scene scene="line" height={380} zoom={1.6} yOffset={-0.6} usesVariables />
 
 Let's take two planes $P_1$ and $P_2$ whose normals are $\vec{n_1}$ and $\vec{n_2}$.
 

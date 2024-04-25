@@ -66,7 +66,7 @@ export default createScene(({}) => {
           .add(p2p3intersection.normal.clone().multiplyScalar(10))}
         to={p2p3intersection.point.clone().add(p2p3intersection.normal.clone().multiplyScalar(-10))}
         color={0x777777}
-        radius={0.01}
+        radius={0.015}
       />
 
       <Grid size={10} light />
