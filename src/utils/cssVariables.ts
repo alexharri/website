@@ -24,6 +24,7 @@ export const colors = {
   background200: "#0e1824",
   background100: "#051420",
   codeBackground: "#192535",
+  medium700: "#4c606f",
   medium500: "#293946",
   medium400: "#1f2d38",
   token: {

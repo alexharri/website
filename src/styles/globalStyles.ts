@@ -232,4 +232,26 @@ blockquote {
 mjx-container svg {
   overflow: visible;
 }
+
+input[type="range"] {
+  -webkit-appearance: none;
+
+  cursor: pointer;
+  width: 120px;
+  height: 4px;
+  background: ${theme.medium700};
+  border-radius: 3px;
+}
+
+input[type="range"]::-webkit-slider-thumb,
+input[type="range"]::-moz-range-thumb {
+  -webkit-appearance: none;
+  
+  height: 22px;
+  width: 22px;
+  box-sizing: border-box;
+  border-radius: 50%;
+  background: ${theme.text};
+  border: 3px solid ${theme.background};
+}
 `;
