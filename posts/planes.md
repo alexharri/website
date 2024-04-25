@@ -334,15 +334,15 @@ that has the effect of scaling the area of the parallelogram by
 
 <p align="center">$$ (\dfrac{1}{1 - abs(dot)})^2 $$</p>
 
-In order to actually scale the area of the parallelogram by $1 \,/\, (1 - abs(D))$, we can square $D$ in the denominator:
+In order to actually scale the area of the parallelogram by $1 \,/\, (1 - abs(dot))$, we can square $dot$ in the denominator:
 
-<p align="center">$$ \dfrac{1}{1 - D^2} $$</p>
+<p align="center">$$ \dfrac{1}{1 - dot^2} $$</p>
 
 <SmallNote label="" center>Squaring allows us to remove $abs()$, since squaring a negative number makes it positive.</SmallNote>
 
 With this, our scalars $k_1$ and $k_2$ become:
 
-<p align="center">$$ k_1 = (d_1 - d_2 \times D) \,/\, (1 - D^2) $$<br />$$ k_2 = (d_2 - d_1 \times D) \,/\, (1 - D^2) $$</p>
+<p align="center">$$ k_1 = (d_1 - d_2 \times dot) \,/\, (1 - dot^2) $$<br />$$ k_2 = (d_2 - d_1 \times dot) \,/\, (1 - dot^2) $$</p>
 
 Which gives us our final solution:
 
