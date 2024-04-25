@@ -30,7 +30,7 @@ There are many ways to describe planes, such as via
 
 Starting with the point-and-normal case, here's an example of a plane described by a point in 3D space $p$ and a normal $\vec{n}$:
 
-<Scene scene="point-and-normal-with-plane" height={440} yOffset={-1} zoom={1.35} usesVariables />
+<Scene scene="point-and-normal-with-plane" height={460} yOffset={-1.2} zoom={1.35} usesVariables />
 
 The normal $\vec{n}$ describes the plane's orientation, where the surface of the plane is perpendicular to $\vec{n}$, while the point $p$ describes _a_ point on the plane.
 
