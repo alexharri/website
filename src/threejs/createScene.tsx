@@ -16,7 +16,7 @@ const styles = ({ styled, theme }: StyleOptions) => ({
     z-index: 2;
     display: flex;
     justify-content: center;
-    gap: 48px;
+    gap: 32px;
     height: 72px;
     padding-bottom: 16px;
     align-items: center;

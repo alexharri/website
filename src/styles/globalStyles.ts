@@ -241,6 +241,10 @@ input[type="range"] {
   height: 4px;
   background: ${theme.medium700};
   border-radius: 3px;
+
+  @media (max-width: 500px) {
+    width: 96px;
+  }
 }
 
 input[type="range"]::-webkit-slider-thumb,
