@@ -13,7 +13,7 @@ export default createScene(
   ({ variables }) => {
     const THREE = useContext(ThreeContext);
     const planeNormal = new THREE.Vector3(2, 1, 0.5).normalize();
-    const planeDistance = 3;
+    const planeDistance = 2.4;
 
     const linePoint = new THREE.Vector3(-1, 0.7, -1);
     const lineNormal = variables.n;
@@ -37,7 +37,7 @@ export default createScene(
     const leftDist = end ? Math.abs(left.dot(planePoint.clone().sub(end))) : 0;
     const upDist = end ? Math.abs(up.dot(planePoint.clone().sub(end))) : 0;
 
-    const W = Math.max(5, Math.max(leftDist, upDist) + 3);
+    const W = Math.max(4, Math.max(leftDist, upDist) + 2);
     const planePos = end ? planePoint.clone().lerp(end, 0.5) : planePoint;
 
     return (
@@ -56,7 +56,7 @@ export default createScene(
 
         <Plane position={planePos} normal={planeNormal} width={W} color="blue" />
         <Vector from={planePoint} to={planeNormalEnd} color="blue" />
-        <Grid size={10} />
+        <Grid size={6} />
       </>
     );
   },

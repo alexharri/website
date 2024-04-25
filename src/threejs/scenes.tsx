@@ -42,6 +42,7 @@ export const threeJsScenes: Partial<Record<string, React.ComponentType<SceneProp
   "parallel-planes": dynamic(() => import("./scenes/parallel-planes"), { loading }),
   "project-point-onto-plane": dynamic(() => import("./scenes/project-point-onto-plane"), { loading }),
   "project-point-onto-plane-2": dynamic(() => import("./scenes/project-point-onto-plane-2"), { loading }),
+  "project-point-onto-plane-3": dynamic(() => import("./scenes/project-point-onto-plane-3"), { loading }),
   "ray-and-line": dynamic(() => import("./scenes/ray-and-line"), { loading }),
   "ray-and-line-plane-intersection": dynamic(() => import("./scenes/ray-and-line-plane-intersection"), { loading }),
   "intersecting-planes": dynamic(() => import("./scenes/intersecting-planes"), { loading }),

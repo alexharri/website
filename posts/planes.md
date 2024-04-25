@@ -404,7 +404,7 @@ Earlier, we covered projecting a point onto a plane along the plane's normal.
 
 However, it is generally more useful to be able to project a point onto a plane along an arbitrary direction described by a normal $\vec{n_l}$. Doing that boils down to finding the point of intersection for a line and a plane.
 
-<Scene scene="project-point-onto-plane" height={420} yOffset={-1} usesVariables />
+<Scene scene="project-point-onto-plane" height={420} yOffset={-1} zoom={1.5} usesVariables />
 
 The line will be composed of the point $p_l$ and normal $\vec{n_l}$, while the plane—given in constant-normal form—has a normal $\vec{n_p}$ and a distance $d_p$.
 
@@ -433,7 +433,7 @@ Let's try projecting $p_l$ along $\vec{n_l}$ using $D_p$ as a scalar like so:
 
 We'll visualize $P$ as a red point:
 
-<Scene scene="project-point-onto-plane-2" height={500} usesVariables />
+<Scene scene="project-point-onto-plane-2" height={450} yOffset={-1} zoom={1.5} usesVariables />
 
 As $\vec{n_l}$ and $\vec{n_p}$ become parallel, $D_p$ gets us closer and closer to the correct solution. However, as the angle between $\vec{n_l}$ and $\vec{n_p}$ increases, $D_p$ becomes increasingly too small.
 
@@ -465,7 +465,7 @@ With $D$ as our scaled-up distance, we find the point of intersection $P$ via:
 
 <p className="mathblock">$$ P = p_l + \vec{n_l} \times D $$</p>
 
-<Scene scene="project-point-onto-plane" height={500} usesVariables />
+<Scene scene="project-point-onto-plane-3" height={450} yOffset={-1} zoom={1.5} usesVariables />
 
 We can now get rid of $D_p$, which was defined as $d_p - (\vec{n_p} \cdot p_l)$, giving us the full equation for $D$:
 
@@ -491,17 +491,17 @@ Vector3 LinePlaneIntersection(Line line, Plane plane) {
 
 We've been talking about line-plane intersections, but I've been lying a bit by visualizing ray-plane intersections instead for visual clarity.
 
-<Scene scene="project-point-onto-plane" height={500} usesVariables />
+<Scene scene="project-point-onto-plane" height={450} yOffset={-1} zoom={1.5} usesVariables />
 
 A ray and a line are very similar; they're both represented through a normal $\vec{n_l}$ and a point $p_l$.
 
 The difference is that a ray (colored red) extends in the direction of $\vec{n_l}$ away from $p_l$, while a line (colored green) extends in the other direction as well:
 
-<Scene scene="ray-and-line" height={500} usesVariables />
+<Scene scene="ray-and-line" height={450} yOffset={-1} zoom={1.5} usesVariables />
 
 What this means for intersections is that a ray will not intersect planes when traveling backward along its normal:
 
-<Scene scene="ray-and-line-plane-intersection" height={500} usesVariables />
+<Scene scene="ray-and-line-plane-intersection" height={450} yOffset={-1} zoom={1.5} usesVariables />
 
 Our implementation for ray-plane intersections will differ from our existing line-plane intersection implementation only in that it should yield a result of "no intersection" when the ray's normal $\vec{n_l}$ is pointing "away" from the plane's normal $\vec{n_p}$ at an obtuse angle.
 

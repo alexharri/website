@@ -16,7 +16,7 @@ export default createScene(
     const THREE = useContext(ThreeContext);
 
     const planeNormal = new THREE.Vector3(2, 1, 0.5).normalize();
-    const planeDistance = 3;
+    const planeDistance = 2.4;
     const planePoint = planeNormal.clone().multiplyScalar(planeDistance);
     const planeNormalEnd = planePoint.clone().add(planeNormal);
 
@@ -99,7 +99,7 @@ export default createScene(
         <Plane position={planePos} normal={planeNormal} width={W} color="blue" />
         <Vector from={planePoint} to={planeNormalEnd} color="blue" />
 
-        <Grid size={10} />
+        <Grid size={6} />
       </>
     );
   },

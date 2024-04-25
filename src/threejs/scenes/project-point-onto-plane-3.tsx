@@ -19,7 +19,7 @@ export default createScene(
     const linePoint = new THREE.Vector3(-1, 0.7, -1);
     const lineNormal = variables.n;
 
-    let end = rayPlaneIntersection(
+    const end = rayPlaneIntersection(
       new PlaneClass(planeDistance, planeNormal),
       lineNormal,
       linePoint,
@@ -38,17 +38,18 @@ export default createScene(
     const leftDist = end ? Math.abs(left.dot(planePoint.clone().sub(end))) : 0;
     const upDist = end ? Math.abs(up.dot(planePoint.clone().sub(end))) : 0;
 
-    const W = Math.max(5, Math.max(leftDist, upDist) + 3);
+    const W = Math.max(4, Math.max(leftDist, upDist) + 2);
     const planePos = end ? planePoint.clone().lerp(end, 0.5) : planePoint;
-
-    const denom = planeNormal.dot(lineNormal);
-    const Dp = planeDistance - planeNormal.dot(linePoint);
-    const D = Dp / denom;
-    const p = linePoint.clone().add(lineNormal.clone().multiplyScalar(D));
 
     return (
       <>
         <Point position={linePoint} color="red" />
+        {end && (
+          <>
+            <Point position={end} color="white" />
+            <MathLabel position={end} label="P" offset={[0.2, 0.1, 0]} />
+          </>
+        )}
         <Line
           color={0x888888}
           from={linePoint.clone().add(lineNormal.clone().multiplyScalar(100))}
@@ -57,20 +58,6 @@ export default createScene(
           radius={0.015}
         />
 
-        {end && (
-          <>
-            <Point position={p} color="white" />
-            <Point
-              position={linePoint.clone().add(lineNormal.clone().multiplyScalar(Dp))}
-              color="red"
-            />
-            <MathLabel
-              position={linePoint.clone().add(lineNormal.clone().multiplyScalar(Dp))}
-              label="P"
-              offset={[0.2, 0.1, 0]}
-            />
-          </>
-        )}
         <Vector from={linePoint} to={linePoint.clone().add(lineNormal)} color="red" strictEnd />
 
         <Plane position={planePos} normal={planeNormal} width={W} color="blue" />
@@ -81,11 +68,7 @@ export default createScene(
   },
   {
     variables: {
-      n: {
-        label: "math:vec_n_l",
-        type: "normal",
-        value: [0.61, 0.28, 0.74],
-      },
+      n: { label: "math:vec_n_l", type: "normal", value: [1.5, 0.5, 0.1] },
     },
   },
 );
