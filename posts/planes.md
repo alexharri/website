@@ -68,7 +68,7 @@ The [cross product][cross_product] takes in two vectors $\vec{a}$ and $\vec{b}$ 
 
 For example, given the vectors $\vec{i} = (1, 0, 0)$ and $\vec{j} = (0, 1, 0)$, their cross product is the vector $(0, 0, 1)$, which we'll label $\vec{k}$:
 
-<Scene scene="cross-product" height={300} zoom={1.7} yOffset={-0.0} />
+<Scene scene="cross-product" height={370} zoom={1.7} yOffset={-0.0} />
 
 <SmallNote label="" center>This explanation is simple on purpose. We'll get into more detail about the cross product later on.</SmallNote>
 
