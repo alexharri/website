@@ -36,7 +36,7 @@ The normal $\vec{n}$ describes the plane's orientation, where the surface of the
 
 We described this plane in terms of a single point $p$, but keep in mind that this plane—let's call it $P$—contains infinitely many points.
 
-<Scene scene="plane-intersecting-points" height={440} yOffset={-1} zoom={1.3} usesVariables />
+<Scene scene="plane-intersecting-points" height={500} yOffset={-1} zoom={1.3} usesVariables />
 
 If $P$ were described by one of those other points contained by $P$, we would be describing the exact same plane. This is a result of the infinite nature of planes.
 
