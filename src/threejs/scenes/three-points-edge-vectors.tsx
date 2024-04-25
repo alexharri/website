@@ -23,16 +23,16 @@ export default createScene(() => {
       <Triangle points={points} color="blue" />
       <Vector from={a} to={b} color="red" />
       <Vector from={a} to={c} color="green" />
-      <MathLabel label="b_sub_a" position={a.clone().lerp(b, 0.5)} offset={[0, 1, 0]} scale={0.8} />
+      <MathLabel label="b_sub_a" position={a.clone().lerp(b, 0.5)} offset={[0, 1, 0]} scale={1.2} />
       <MathLabel
         label="c_sub_a"
         position={a.clone().lerp(c, 0.5)}
         offset={[0.5, 0, 0]}
-        scale={0.8}
+        scale={1.2}
       />
-      <MathLabel label="a" position={points[0]} offset={[0.25, 0.2, 0]} scale={0.8} />
-      <MathLabel label="b" position={points[1]} offset={[-0.7, 0.5, 0]} scale={0.8} />
-      <MathLabel label="c" position={points[2]} offset={[0, -0.2, 0]} scale={0.8} />
+      <MathLabel label="a" position={points[0]} offset={[0.25, 0.2, 0]} scale={1.2} />
+      <MathLabel label="b" position={points[1]} offset={[-0.7, 0.5, 0]} scale={1.2} />
+      <MathLabel label="c" position={points[2]} offset={[0, -0.2, 0]} scale={1.2} />
       <Grid size={6} />
     </>
   );

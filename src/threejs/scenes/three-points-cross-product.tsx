@@ -28,10 +28,15 @@ export default createScene(() => {
       <Vector from={a} to={a.clone().add(bsuba)} color="red" />
       <Vector from={a} to={a.clone().add(csuba)} color="green" />
       <Vector from={a} to={a.clone().add(cross)} color="blue" />
-      <MathLabel label="a" position={points[0]} offset={[0.25, 0.2, 0]} />
-      <MathLabel label="b" position={points[1]} offset={[-0.7, 0.5, 0]} />
-      <MathLabel label="c" position={points[2]} offset={[0, -0.2, 0]} />
-      <MathLabel label="vec_d" position={a.clone().add(cross)} offset={[-0.15, 1.3, 0]} />
+      <MathLabel label="a" scale={1.3} position={points[0]} offset={[0.25, 0.2, 0]} />
+      <MathLabel label="b" scale={1.3} position={points[1]} offset={[-0.7, 0.5, 0]} />
+      <MathLabel label="c" scale={1.3} position={points[2]} offset={[0, -0.2, 0]} />
+      <MathLabel
+        label="vec_d"
+        scale={1.3}
+        position={a.clone().add(cross)}
+        offset={[-0.15, 1.3, 0]}
+      />
       <Grid size={6} />
     </>
   );

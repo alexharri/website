@@ -17,9 +17,9 @@ export default createScene(() => {
         <Point key={i} color="blue" position={p} />
       ))}
       <Triangle points={points} color="blue" />
-      <MathLabel label="a" position={points[0]} offset={[0.25, 0.2, 0]} />
-      <MathLabel label="b" position={points[1]} offset={[-0.7, 0.5, 0]} />
-      <MathLabel label="c" position={points[2]} offset={[0, -0.2, 0]} />
+      <MathLabel label="a" scale={1.3} position={points[0]} offset={[0.25, 0.2, 0]} />
+      <MathLabel label="b" scale={1.3} position={points[1]} offset={[-0.7, 0.5, 0]} />
+      <MathLabel label="c" scale={1.3} position={points[2]} offset={[0, -0.2, 0]} />
       <Grid size={6} />
     </>
   );

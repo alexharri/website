@@ -36,7 +36,12 @@ export default createScene(() => {
       ))}
       <Vector color="blue" from={avg} to={avg.clone().add(normal)} />
       <Triangle points={points} color="blue" />
-      <MathLabel label="vec_n" position={avg.clone().add(normal)} offset={[-0.6, -0.2, 0]} />
+      <MathLabel
+        label="vec_n"
+        scale={1.3}
+        position={avg.clone().add(normal)}
+        offset={[-0.6, -0.2, 0]}
+      />
       <Grid size={6} />
     </>
   );

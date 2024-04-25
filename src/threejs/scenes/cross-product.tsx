@@ -18,9 +18,19 @@ export default createScene(() => {
       <Vector to={j} color="red" />
       <Vector to={k} color="green" />
 
-      <MathLabel label="vec_i" position={i.clone().multiplyScalar(1.5)} offset={[0, 0.5, 0]} />
-      <MathLabel label="vec_j" position={j} offset={[0.4, 0.7, 0]} />
-      <MathLabel label="vec_k" position={k.clone().multiplyScalar(1.5)} offset={[0, 0.5, 0]} />
+      <MathLabel
+        label="vec_i"
+        scale={1.3}
+        position={i.clone().multiplyScalar(1.5)}
+        offset={[0, 0.5, 0]}
+      />
+      <MathLabel label="vec_j" scale={1.3} position={j} offset={[0.4, 0.7, 0]} />
+      <MathLabel
+        label="vec_k"
+        scale={1.3}
+        position={k.clone().multiplyScalar(1.5)}
+        offset={[-0.2, 0.5, 0]}
+      />
 
       <Grid size={6} />
     </>

@@ -56,7 +56,7 @@ The triangle forms an implicit plane, but for us to be able to do anything usefu
 
 We can use $b - a$ and $c - a$ as two edge vectors that are parallel to the plane's surface.
 
-<Scene scene="three-points-edge-vectors" height={440} zoom={1.4} yOffset={-0.8} />
+<Scene scene="three-points-edge-vectors" height={400} zoom={1.4} yOffset={-0.8} />
 
 By virtue of being parallel to the plane's surface, the vectors $b - a$ and $c - a$ are perpendicular to the plane's normal. This is where the cross product becomes useful to us.
 
@@ -268,35 +268,35 @@ We can also observe that as we get further away from the point of intersection, 
 
 Let's define $k_1$ and $k_2$ as the scaling factors that we apply to $\vec{n_1}$ and $\vec{n_2}$ (the result of which are the red and blue vectors). Right now we're using the distance components $d_1$ and $d_2$ of the planes as the scaling factors:
 
-<p align="center">$$ k_1 = d_1 $$<br />$$ k_2 = d_2 $$</p>
+<p className="mathblock">$$ k_1 = d_1 $$<br />$$ k_2 = d_2 $$</p>
 
 To solve this asymmetric pushing effect, we need to travel less in the direction of the longer vector as the planes become more parallel. We need some sort of "pulling factor" that adjusts the vectors such that their tip stays on the line as the planes become parallel. 
 
 Here our friend the dot product comes in handy yet again. When the planes are perpendicular the dot product of $\vec{n_1}$ and $\vec{n_2}$ equals 0, but as the planes become increasingly parallel, it approaches 1. We can use this to gradually increase our yet-to-be-defined pulling factor.
 
-<p align="center">$$ k_1 = d_1 + pull_1 \times (\vec{n_1} \cdot \vec{n_2}) $$<br />$$ k_2 = d_2 + pull_2 \times (\vec{n_1} \cdot \vec{n_2}) $$</p>
+<p className="mathblock">$$ k_1 = d_1 + pull_1 \times (\vec{n_1} \cdot \vec{n_2}) $$<br />$$ k_2 = d_2 + pull_2 \times (\vec{n_1} \cdot \vec{n_2}) $$</p>
 
 Let's give the dot product $\vec{n_1} \cdot \vec{n_2}$ the name $dot$ to make this a bit less noisy:
 
-<p align="center">$$ k_1 = d_1 + pull_1 \times dot $$<br />$$ k_2 = d_2 + pull_2 \times dot $$</p>
+<p className="mathblock">$$ k_1 = d_1 + pull_1 \times dot $$<br />$$ k_2 = d_2 + pull_2 \times dot $$</p>
 
 The perfect pulling factors happen to be the distance components $d_1$ and $d_2$ used as counterweights against each other!
 
-<p align="center">$$ k_1 = d_1 - d_2 \times dot $$<br />$$ k_2 = d_2 - d_1 \times dot $$</p>
+<p className="mathblock">$$ k_1 = d_1 - d_2 \times dot $$<br />$$ k_2 = d_2 - d_1 \times dot $$</p>
 
 Consider why this might be. When $\vec{n_1}$ and $\vec{n_2}$ are perpendicular, their dot product equals 0, which results in
 
-<p align="center">$$ k_1 = d_1 $$<br />$$ k_2 = d_2 $$</p>
+<p className="mathblock">$$ k_1 = d_1 $$<br />$$ k_2 = d_2 $$</p>
 
 which we know yields the correct solution.
 
 In the case where $\vec{n_1}$ and $\vec{n_2}$ are parallel, their dot product equals 1, which results in:
 
-<p align="center">$$ k_1 = d_1 - d_2 $$<br />$$ k_2 = d_2 - d_1 $$</p>
+<p className="mathblock">$$ k_1 = d_1 - d_2 $$<br />$$ k_2 = d_2 - d_1 $$</p>
 
 Because the absolute values of $d_1 - d_2$ and $d_2 - d_1$ are equal, it means that the magnitude of the two vectors—defined as $\vec{n_1} \times k_1$ and $\vec{n_2} \times k_2$—is equal:
 
-<p align="center">$$ \|\vec{n_1} \times k_1\| = \|\vec{n_2} \times k_2\| $$</p>
+<p className="mathblock">$$ \|\vec{n_1} \times k_1\| = \|\vec{n_2} \times k_2\| $$</p>
 
 This means that the magnitude of our vectors will become _more_ equal as the planes become parallel, which is what we want!
 
@@ -308,7 +308,7 @@ The vectors stay on the line, but they become increasingly too short as $\vec{n_
 
 Yet again, we can use the dot product. Since we want the length of the vectors to increase as the planes become parallel, we can divide our scalars $k_1$ and $k_2$ by $1 - abs(dot)$ where $dot$ is the dot product of $\vec{n_1}$ and $\vec{n_2}$ and $abs(dot)$ is the absolute value of $dot$.
 
-<p align="center">$$ k_1 = (d_1 - d_2 \times dot) \,/\, (1 - abs(dot)) $$<br />$$ k_2 = (d_2 - d_1 \times dot) \,/\, (1 - abs(dot)) $$</p>
+<p className="mathblock">$$ k_1 = (d_1 - d_2 \times dot) \,/\, (1 - abs(dot)) $$<br />$$ k_2 = (d_2 - d_1 \times dot) \,/\, (1 - abs(dot)) $$</p>
 
 The result of this looks like so:
 
@@ -328,21 +328,21 @@ In understanding why that is, consider the effect that our denominator $1 - abs(
 
 This means that when we scale the component vectors of the parallelogram by
 
-<p align="center">$$ \dfrac{1}{1 - abs(dot)} $$</p>
+<p className="mathblock">$$ \dfrac{1}{1 - abs(dot)} $$</p>
 
 that has the effect of scaling the area of the parallelogram by
 
-<p align="center">$$ (\dfrac{1}{1 - abs(dot)})^2 $$</p>
+<p className="mathblock">$$ (\dfrac{1}{1 - abs(dot)})^2 $$</p>
 
 In order to actually scale the area of the parallelogram by $1 \,/\, (1 - abs(dot))$, we can square $dot$ in the denominator:
 
-<p align="center">$$ \dfrac{1}{1 - dot^2} $$</p>
+<p className="mathblock">$$ \dfrac{1}{1 - dot^2} $$</p>
 
 <SmallNote label="" center>Squaring allows us to remove $abs()$, since squaring a negative number makes it positive.</SmallNote>
 
 With this, our scalars $k_1$ and $k_2$ become:
 
-<p align="center">$$ k_1 = (d_1 - d_2 \times dot) \,/\, (1 - dot^2) $$<br />$$ k_2 = (d_2 - d_1 \times dot) \,/\, (1 - dot^2) $$</p>
+<p className="mathblock">$$ k_1 = (d_1 - d_2 \times dot) \,/\, (1 - dot^2) $$<br />$$ k_2 = (d_2 - d_1 \times dot) \,/\, (1 - dot^2) $$</p>
 
 Which gives us our final solution:
 
