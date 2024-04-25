@@ -258,15 +258,15 @@ Since the point lies on the plane parallel to the two plane normals, we can find
 
 The simplest case is the one where $P_1$ and $P_2$ are perpendicular. In that case, the solution is just $n_1 \times d_1 + n_2 \times d_2$. Here's what that looks like visually:
 
-<Scene scene="intersecting-planes-offset-2" height={500} zoom={1.3} usesVariables />
+<Scene scene="intersecting-planes-offset-2" height={500} zoom={1.1} usesVariables />
 
 When dragging the slider, notice how the tip of the parallelogram gets further away from the point of intersection as the planes become more parallel.
 
 We can also observe that as we get further away from the point of intersection, the longer of the two vectors (colored red) pushes us further away from the point of intersection than the shorter (blue) vector does. This is easier to observe if we draw a line from the origin to the point of intersection:
 
-<Scene scene="intersecting-planes-offset-4" height={500} zoom={1.3} usesVariables />
+<Scene scene="intersecting-planes-offset-4" height={500} zoom={1.1} usesVariables />
 
-Let's define $k_1$ and $k_2$ as the scaling factors that we apply to $\vec{n_1}$ and $\vec{n_2}$ (the red and blue vectors). Right now we're using the distance components $d_1$ and $d_2$ of the planes as the scaling factors:
+Let's define $k_1$ and $k_2$ as the scaling factors that we apply to $\vec{n_1}$ and $\vec{n_2}$ (the result of which are the red and blue vectors). Right now we're using the distance components $d_1$ and $d_2$ of the planes as the scaling factors:
 
 <p align="center">$$ k_1 = d_1 $$<br />$$ k_2 = d_2 $$</p>
 
@@ -276,19 +276,21 @@ Here our friend the dot product comes in handy yet again. When the planes are pe
 
 <p align="center">$$ k_1 = d_1 + pull_1 \times (\vec{n_1} \cdot \vec{n_2}) $$<br />$$ k_2 = d_2 + pull_2 \times (\vec{n_1} \cdot \vec{n_2}) $$</p>
 
-Let's assign the dot product $\vec{n_1} \cdot \vec{n_2}$ to the name $D$ to get rid of the repetition:
+Let's give the dot product $\vec{n_1} \cdot \vec{n_2}$ the name $dot$ to make this a bit less noisy:
 
-<p align="center">$$ k_1 = d_1 + pull_1 \times D $$<br />$$ k_2 = d_2 + pull_2 \times D $$</p>
+<p align="center">$$ k_1 = d_1 + pull_1 \times dot $$<br />$$ k_2 = d_2 + pull_2 \times dot $$</p>
 
 The perfect pulling factors happen to be the distance components $d_1$ and $d_2$ used as counterweights against each other!
 
-<p align="center">$$ k_1 = d_1 - d_2 \times D $$<br />$$ k_2 = d_2 - d_1 \times D $$</p>
+<p align="center">$$ k_1 = d_1 - d_2 \times dot $$<br />$$ k_2 = d_2 - d_1 \times dot $$</p>
 
-Consider why this might be. When $\vec{n_1}$ and $\vec{n_2}$ are perpendicular, their dot product equals 0, which results in:
+Consider why this might be. When $\vec{n_1}$ and $\vec{n_2}$ are perpendicular, their dot product equals 0, which results in
 
 <p align="center">$$ k_1 = d_1 $$<br />$$ k_2 = d_2 $$</p>
 
-Which we know yields the correct solution. In the case where $\vec{n_1}$ and $\vec{n_2}$ are parallel, their dot product equals 1, which results in:
+which we know yields the correct solution.
+
+In the case where $\vec{n_1}$ and $\vec{n_2}$ are parallel, their dot product equals 1, which results in:
 
 <p align="center">$$ k_1 = d_1 - d_2 $$<br />$$ k_2 = d_2 - d_1 $$</p>
 
@@ -296,39 +298,57 @@ Because the absolute values of $d_1 - d_2$ and $d_2 - d_1$ are equal, it means t
 
 <p align="center">$$ \|\vec{n_1} \times k_1\| = \|\vec{n_2} \times k_2\| $$</p>
 
-This means that the magnitude of our vectors will become more equal as the planes become parallel, which is what we want!
+This means that the magnitude of our vectors will become _more_ equal as the planes become parallel, which is what we want!
 
 Let's see this in action:
 
-<Scene scene="intersecting-planes-offset-3" height={500} zoom={1.3} usesVariables />
+<Scene scene="intersecting-planes-offset-3" height={500} zoom={1.1} usesVariables />
 
 The vectors stay on the line, but they become increasingly too short as $\vec{n_1}$ and $\vec{n_2}$ become parallel.
 
-Yet again, we can use the dot product. Since we want the length of the vectors to increase as the planes become parallel, we can divide our scalars $k_1$ and $k_2$ by $1 - abs(D)$ where $D$ is the dot product of $\vec{n_1}$ and $\vec{n_2}$ and $abs(D)$ is the absolute value of $D$.
+Yet again, we can use the dot product. Since we want the length of the vectors to increase as the planes become parallel, we can divide our scalars $k_1$ and $k_2$ by $1 - abs(dot)$ where $dot$ is the dot product of $\vec{n_1}$ and $\vec{n_2}$ and $abs(dot)$ is the absolute value of $dot$.
 
-<p align="center">$$ k_1 = (d_1 - d_2 \times D) \,/\, (1 - abs(D)) $$<br />$$ k_2 = (d_2 - d_1 \times D) \,/\, (1 - abs(D)) $$</p>
+<p align="center">$$ k_1 = (d_1 - d_2 \times dot) \,/\, (1 - abs(dot)) $$<br />$$ k_2 = (d_2 - d_1 \times dot) \,/\, (1 - abs(dot)) $$</p>
 
 The result of this looks like so:
 
-<Scene scene="intersecting-planes-offset-5" height={500} zoom={1.3} usesVariables />
+<Scene scene="intersecting-planes-offset-5" height={500} usesVariables />
 
-Using $1 - D$ as the denominator certainly increases the length of the vectors, but it does so by too much.
+Using $1 - abs(dot)$ as the denominator certainly increases the size of the parallelogram, but by too much.
 
-We can see _exactly_ how much by charting the distance from the tip of the parallelogram when using $1 - D$ as the denominator to the actual point of intersection as the planes become more parallel:
+However, notice what happens when we visualize the quadrants of the paralellogram:
 
-<Image src="~/n1-n2-angle-distance-chart.png" plain width={840} />
+<Scene scene="intersecting-planes-offset-7" height={500} angle={25} usesVariables />
 
-The exponential growth in the distance hints at the solution, which is to square $D$ in our denominator $1 - D$.
+As the planes become more parallel, the point of intersection approaches the center of the parallelogram.
 
-Using $1 - D^2$ as the denominator scales the parallelogram such that its tip lies on the point of intersection:
+In understanding why that is, consider the effect that our denominator $1 - abs(dot)$ actually has on the area of the parallelogram. When $1 - abs(dot) = 0.5$, each vector in the parallelogram doubles in length. This has the effect of quadrupling the area of the parallelogram.
 
-<Scene scene="intersecting-planes-offset-6" height={500} zoom={1.3} usesVariables />
+<Image src="~/area-of-parallelogram.svg" plain width={600} />
 
-With this, our formula for $k_1$ and $k_2$ becomes:
+This means that when we scale the component vectors of the parallelogram by
+
+<p align="center">$$ \dfrac{1}{1 - abs(dot)} $$</p>
+
+that has the effect of scaling the area of the parallelogram by
+
+<p align="center">$$ (\dfrac{1}{1 - abs(dot)})^2 $$</p>
+
+In order to actually scale the area of the parallelogram by $1 \,/\, (1 - abs(D))$, we can square $D$ in the denominator:
+
+<p align="center">$$ \dfrac{1}{1 - D^2} $$</p>
+
+<SmallNote label="" center>Squaring allows us to remove $abs()$, since squaring a negative number makes it positive.</SmallNote>
+
+With this, our scalars $k_1$ and $k_2$ become:
 
 <p align="center">$$ k_1 = (d_1 - d_2 \times D) \,/\, (1 - D^2) $$<br />$$ k_2 = (d_2 - d_1 \times D) \,/\, (1 - D^2) $$</p>
 
-Which put into code, looks like so:
+Which gives us our final solution:
+
+<Scene scene="intersecting-planes-offset-6" height={500} zoom={1.1} usesVariables />
+
+Putting all of this into code, we get:
 
 ```cs
 float dot = Vector3.Dot(p1.normal, p2.normal);
@@ -355,7 +375,7 @@ Vector3 point = Vector3.Cross(a - b, direction) / denom;
 
 <SmallNote label="" center>How this optimization works can be found in chapter 5.4.4 of [Real-Time Collision Detection by Christer Ericson][further_reading].</SmallNote>
 
-Which completes our plane-plane intersection implementation:
+This completes our plane-plane intersection implementation:
 
 ```cs
 Line PlanePlaneIntersection(Plane p1, Plane p2) {

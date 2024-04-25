@@ -55,6 +55,7 @@ export const threeJsScenes: Partial<Record<string, React.ComponentType<SceneProp
   "intersecting-planes-offset-4": dynamic(() => import("./scenes/intersecting-planes-offset-4"), { loading }),
   "intersecting-planes-offset-5": dynamic(() => import("./scenes/intersecting-planes-offset-5"), { loading }),
   "intersecting-planes-offset-6": dynamic(() => import("./scenes/intersecting-planes-offset-6"), { loading }),
+  "intersecting-planes-offset-7": dynamic(() => import("./scenes/intersecting-planes-offset-7"), { loading }),
   "three-plane-intersection-configurations": dynamic(() => import("./scenes/three-plane-intersection-configurations"), { loading }),
   "three-planes-n2-n3-parallel": dynamic(() => import("./scenes/three-planes-n2-n3-parallel"), { loading }),
   "three-planes-n1-n2-parallel": dynamic(() => import("./scenes/three-planes-n1-n2-parallel"), { loading }),

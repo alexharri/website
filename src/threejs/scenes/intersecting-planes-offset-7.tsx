@@ -16,7 +16,7 @@ export default createScene(
 
     const n0 = new THREE.Vector3(-0.5, 2, 0).normalize();
     const n1_1 = new THREE.Vector3(2, 0.5);
-    const n1_2 = new THREE.Vector3(2, -2);
+    const n1_2 = new THREE.Vector3(2, -3);
     const n1 = n1_1.clone().lerp(n1_2, rot).normalize();
 
     const p1 = new Plane(1, n0);
@@ -43,39 +43,53 @@ export default createScene(
     const dist = end.length();
     const scale = Math.min(1.3, 3 / dist);
 
+    const mid = p1.normal.multiplyScalar(k1).add(p2.normal.multiplyScalar(k2)).multiplyScalar(0.5);
+
     return (
-      <mesh scale={scale}>
-        <RenderPlane position={p1mid} normal={p1.normal} color="blue" width={p1W} />
-        <RenderPlane position={p2mid} normal={p2.normal} color="red" width={p2W} />
-        <Point color="blue" position={p1org} />
-        <Point color="red" position={p2org} />
-        <Vector strictEnd color="blue" to={p1.normal.multiplyScalar(k1)} />
-        <Vector strictEnd color="red" to={p2.normal.multiplyScalar(k2)} />
-        <Vector
-          strictEnd
-          color="red"
-          from={p1.normal.multiplyScalar(k1)}
-          to={p1.normal.multiplyScalar(k1).add(p2.normal.multiplyScalar(k2))}
-        />
-        <Vector
-          strictEnd
-          color="blue"
-          from={p2.normal.multiplyScalar(k2)}
-          to={p1.normal.multiplyScalar(k1).add(p2.normal.multiplyScalar(k2))}
-        />
-        {intersection && (
-          <>
-            <Line
-              from={intersection.point.clone().multiplyScalar(10)}
-              to={intersection.point.clone().multiplyScalar(-10)}
-              color={0x888888}
-              radius={0.01}
-            />
-            <Point color={0xcccccc} position={intersection.point} radius={0.15 / scale} />
-          </>
-        )}
-        <Grid size={10} light />
-      </mesh>
+      <>
+        <mesh scale={scale}>
+          <RenderPlane position={p1mid} normal={p1.normal} color="blue" width={p1W} />
+          <RenderPlane position={p2mid} normal={p2.normal} color="red" width={p2W} />
+          <Point color="blue" position={p1org} />
+          <Point color="red" position={p2org} />
+
+          <Vector strictEnd color="blue" to={p1.normal.multiplyScalar(k1)} />
+          <Vector strictEnd color="red" to={p2.normal.multiplyScalar(k2)} />
+          <Vector
+            strictEnd
+            color="red"
+            from={p1.normal.multiplyScalar(k1)}
+            to={p1.normal.multiplyScalar(k1).add(p2.normal.multiplyScalar(k2))}
+          />
+          <Vector
+            strictEnd
+            color="blue"
+            from={p2.normal.multiplyScalar(k2)}
+            to={p1.normal.multiplyScalar(k1).add(p2.normal.multiplyScalar(k2))}
+          />
+
+          <Line
+            color={0xdddddd}
+            from={p2.normal.multiplyScalar(k2 * 0.5)}
+            to={p1.normal.multiplyScalar(k1).add(p2.normal.multiplyScalar(k2 * 0.5))}
+            radius={0.02 / scale}
+          />
+          <Line
+            color={0xdddddd}
+            from={p1.normal.multiplyScalar(k1 * 0.5)}
+            to={p1.normal.multiplyScalar(k1 * 0.5).add(p2.normal.multiplyScalar(k2))}
+            radius={0.02 / scale}
+          />
+
+          {intersection && (
+            <>
+              <Point color={0xcccccc} position={intersection.point} radius={0.15 / scale} />
+            </>
+          )}
+
+          <Grid size={10} light />
+        </mesh>
+      </>
     );
   },
   {
