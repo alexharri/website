@@ -46,17 +46,17 @@ This way of describing planes—in terms of a point and a normal—is the [point
 
 We can also describe a plane using three points in 3D space $a$, $b$, $c$ forming a triangle:
 
-<Scene scene="three-points" height={380} yOffset={-0.3} />
+<Scene scene="three-points" height={440} zoom={1.4} yOffset={-0.8} />
 
 The triangle forms an implicit plane, but for us to be able to do anything useful with the plane we'll need to calculate its normal $\vec{n}$. Once we've calculated the plane's normal, we can use that normal along with one of the triangle's three points to describe the plane in point-normal form.
 
-<Scene scene="three-points-normal-centered" height={380} yOffset={-0.3} />
+<Scene scene="three-points-normal-centered" height={420} zoom={1.4} yOffset={-0.8} />
 
 <SmallNote label="" center>As mentioned earlier, the normal $\vec{n}$ describing a plane is a unit vector ($\|\vec{n}\|=1$) perpendicular to the plane.</SmallNote>
 
 We can use $b - a$ and $c - a$ as two edge vectors that are parallel to the plane's surface.
 
-<Scene scene="three-points-edge-vectors" height={380} yOffset={-0.3} />
+<Scene scene="three-points-edge-vectors" height={440} zoom={1.4} yOffset={-0.8} />
 
 By virtue of being parallel to the plane's surface, the vectors $b - a$ and $c - a$ are perpendicular to the plane's normal. This is where the cross product becomes useful to us.
 
@@ -76,7 +76,7 @@ Because the edge vectors of the triangle, $b - a$ and $c - a$, are both parallel
 
 <p className="mathblock">$$\vec{d} = (b - a) × (c - a)$$</p>
 
-<Scene scene="three-points-cross-product" height={400} yOffset={-0.3} />
+<Scene scene="three-points-cross-product" height={440} zoom={1.4} yOffset={-0.8} />
 
 <SmallNote label="" center>$\vec{d}$ has been scaled down for illustrative purposes</SmallNote>
 
@@ -86,11 +86,11 @@ $\vec{d}$ points in the right direction, but it's not a normal. For $\vec{d}$ to
 
 This yields a normal $\vec{n}$ where $\|\vec{n}\| = 1$:
 
-<Scene scene="three-points-normal" height={360} yOffset={-0.3} />
+<Scene scene="three-points-normal" height={420} zoom={1.4} yOffset={-0.8} />
 
 Having found the triangle's normal $\vec{n}$ we can use it and any of the points $a$, $b$, $c$ to describe the plane containing the three points in point-normal form.
 
-<Scene scene="three-points-plane" height={400} yOffset={-1} />
+<Scene scene="three-points-plane" height={460} zoom={1.1} yOffset={-1.6} />
 
 It doesn't matter which of $a$, $b$, $c$ we use as the point in the point-normal form; we always get the same plane.
 

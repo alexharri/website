@@ -35,7 +35,7 @@ export default createScene(() => {
       ))}
       <Vector color="blue" from={avg} to={avg.clone().add(normal)} />
       <Plane position={avg} normal={normal} color="blue" width={7} />
-      <Grid size={10} />
+      <Grid size={6} />
     </>
   );
 });

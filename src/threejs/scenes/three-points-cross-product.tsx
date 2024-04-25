@@ -20,7 +20,7 @@ export default createScene(() => {
 
   const bsuba = b.clone().sub(a);
   const csuba = c.clone().sub(a);
-  const cross = bsuba.clone().cross(csuba).multiplyScalar(0.333);
+  const cross = bsuba.clone().cross(csuba).multiplyScalar(0.2);
 
   return (
     <>
@@ -32,7 +32,7 @@ export default createScene(() => {
       <MathLabel label="b" position={points[1]} offset={[-0.7, 0.5, 0]} />
       <MathLabel label="c" position={points[2]} offset={[0, -0.2, 0]} />
       <MathLabel label="vec_d" position={a.clone().add(cross)} offset={[-0.15, 1.3, 0]} />
-      <Grid size={10} />
+      <Grid size={6} />
     </>
   );
 });

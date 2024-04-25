@@ -32,7 +32,7 @@ export default createScene(() => {
       <Vector color="blue" from={a} to={a.clone().add(normal)} />
       <Triangle points={points} color="blue" />
       <MathLabel label="vec_n" position={a.clone().add(normal)} offset={[0.2, 0.9, 0]} />
-      <Grid size={10} />
+      <Grid size={6} />
     </>
   );
 });
