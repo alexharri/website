@@ -316,13 +316,13 @@ The result of this looks like so:
 
 Using $1 - abs(dot)$ as the denominator certainly increases the size of the parallelogram, but by too much.
 
-However, notice what happens when we visualize the quadrants of the paralellogram:
+However, notice what happens when we visualize the quadrants of the parallelogram:
 
 <Scene scene="intersecting-planes-offset-7" height={440} angle={25} usesVariables />
 
 As the planes become more parallel, the point of intersection approaches the center of the parallelogram.
 
-In understanding why that is, consider the effect that our denominator $1 - abs(dot)$ actually has on the area of the parallelogram. When $1 - abs(dot) = 0.5$, each vector in the parallelogram doubles in length. This has the effect of quadrupling the area of the parallelogram.
+In understanding why that is, consider the effect that our denominator $1 - abs(dot)$ has on the area of the parallelogram. When $1 - abs(dot) = 0.5$, each vector in the parallelogram doubles in length, which has the effect of quadrupling the area of the parallelogram.
 
 <Image src="~/area-of-parallelogram.svg" plain width={600} />
 
@@ -330,21 +330,21 @@ This means that when we scale the component vectors of the parallelogram by
 
 <p className="mathblock">$$ \dfrac{1}{1 - abs(dot)} $$</p>
 
-that has the effect of scaling the area of the parallelogram by
+it has the effect of scaling the area of the parallelogram by:
 
 <p className="mathblock">$$ (\dfrac{1}{1 - abs(dot)})^2 $$</p>
 
-In order to actually scale the area of the parallelogram by $1 \,/\, (1 - abs(dot))$, we can square $dot$ in the denominator:
+To instead scale the _area_ of the parallelogram by $1 \,/\, (1 - abs(dot))$, we need to square $dot$ in the denominator:
 
 <p className="mathblock">$$ \dfrac{1}{1 - dot^2} $$</p>
 
-<SmallNote label="" center>Squaring allows us to remove $abs()$, since squaring a negative number makes it positive.</SmallNote>
+<SmallNote label="" center>Squaring allows us to remove $abs()$ because the square of a negative number is positive.</SmallNote>
 
 With this, our scalars $k_1$ and $k_2$ become:
 
 <p className="mathblock">$$ k_1 = (d_1 - d_2 \times dot) \,/\, (1 - dot^2) $$<br />$$ k_2 = (d_2 - d_1 \times dot) \,/\, (1 - dot^2) $$</p>
 
-Which gives us our final solution:
+Which scales the parallelogram such that its tip lies at the point of intersection:
 
 <Scene scene="intersecting-planes-offset-6" height={400} yOffset={-1} usesVariables />
 
