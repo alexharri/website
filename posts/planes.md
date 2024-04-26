@@ -18,7 +18,7 @@ With that out of the way, let's get to it!
 
 ## Describing planes
 
-There are many ways to describe planes, such as via
+There are many ways to describe planes, such as through
 
  1. a point in 3D space and a normal,
  2. three points in 3D space, forming a triangle, or
@@ -72,7 +72,7 @@ For example, given the vectors $\vec{i} = (1, 0, 0)$ and $\vec{j} = (0, 1, 0)$, 
 
 <SmallNote label="" center>This explanation is simple on purpose. We'll get into more detail about the cross product later on.</SmallNote>
 
-Because the edge vectors of the triangle, $b - a$ and $c - a$, are both parallel to the triangle's surface, their cross product—let's call it $\vec{d}$—will be perpendicular to the triangle's surface.
+Because the edge vectors of the triangle, $b - a$ and $c - a$, are both parallel to the triangle's surface, their cross product will be perpendicular to the triangle's surface. Let's name the cross product of our two edge vectors $\vec{d}$:
 
 <p className="mathblock">$$\vec{d} = (b - a) × (c - a)$$</p>
 
@@ -84,7 +84,7 @@ $\vec{d}$ points in the right direction, but it's not a normal. For $\vec{d}$ to
 
 <p className="mathblock">$$\vec{n} = \dfrac{\vec{d}}{\|\vec{d}\|}$$</p>
 
-This yields a normal $\vec{n}$ where $\|\vec{n}\| = 1$:
+This gives us a normal $\vec{n}$ where $\|\vec{n}\| = 1$:
 
 <Scene scene="three-points-normal" height={420} zoom={1.4} yOffset={-0.8} />
 
@@ -121,7 +121,7 @@ Translating from the point-normal to the constant-normal form is very easy: the 
 
 <SmallNote label="" center>If you're not familiar with the dot product, don't worry. We'll cover it later on.</SmallNote>
 
-<Note><p>The notation for $\vec{n}$ and $p$ might seem to indicate that they're of different types, but they're both vectors. I'm differentiating between points in space (e.g. $x$ and $y$) and direction vectors (e.g. $\vec{a}$ and $\vec{b}$) by using the arrow notation for direction vectors.</p></Note>
+<Note><p>The notation for $\vec{n}$ and $p$ might seem to indicate that they're of different types, but they're both vectors. I'm differentiating between points in space (e.g. $x$ and $y$) and direction vectors (e.g. $\vec{a}$ and $\vec{b}$) by using the arrow notation only for direction vectors.</p></Note>
 
 The normal $\vec{n}$ stays the same across both forms.
 
@@ -136,7 +136,7 @@ We can frame this differently if we construct a plane $P_x$ containing $x$ that 
 
 <Scene scene="point-distance-step-1" height={440} zoom={1.3} yOffset={-0.5} />
 
-With two parallel planes, we can frame the problem as finding the distance between the two planes. This becomes trivial using their constant-normal forms since it allows us to take the difference between their distance components $d_1$ and $d_2$.
+With two parallel planes, we can frame the problem as finding the distance between the two planes. This becomes trivial using their constant-normal form since it allows us to take the difference between their distance components $d_1$ and $d_2$.
 
 So let's find $P_x$'s distance using the $d = \vec{n} \cdot p$ equation we learned about:
 
@@ -169,7 +169,7 @@ Multiplying the plane's normal $\vec{n}$ by $D$ gives us a vector which when add
 
 <Scene scene="project-point-onto-plane-along-normal" height={440} zoom={1.3} yOffset={-0.5} />
 
-The projection occurs along the plane's normal, which is sometimes useful. However, you'll often want to project points along an arbitrary direction, which we'll dive into later in the post. 
+The projection occurs along the plane's normal, which is sometimes useful. However, you'll often want to project points along an arbitrary direction instead, which we'll dive into later in the post. 
 
 ## Plane-plane intersection
 
@@ -187,13 +187,13 @@ Finding the direction vector of $P_1$ and $P_2$'s intersection is deceptively si
 
 <p className="mathblock">$$\vec{d} = \vec{n_1} × \vec{n_2}$$</p>
 
-The magnitude of the cross product is equal to the [area of the parallelogram][area_parallelogram] formed by the two component vectors. This means that we can't expect the cross product to yield a unit vector, so we'll normalize $\vec{d}$ and assign the normalized direction vector to $\vec{n}$.
+The magnitude of the cross product is equal to the [area of the parallelogram][area_parallelogram] formed by the two component vectors. This means that we can't expect the cross product to be a unit vector, so we'll normalize $\vec{d}$ and assign the normalized direction vector to $\vec{n}$.
 
 [area_parallelogram]: https://en.wikipedia.org/wiki/Cross_product#/media/File:Cross_product_parallelogram.svg
 
 <p className="mathblock">$$\vec{n} = \dfrac{\vec{d}}{\|\vec{d}\|}$$</p>
 
-This gives us the intersection's normal $\vec{n}$. Let's zoom in and see it in action.
+This gives us the intersection's normal $\vec{n}$. Let's zoom in and see this close up.
 
 <Scene scene="intersecting-planes-point-and-normal" height={380} zoom={2} usesVariables />
 
@@ -206,7 +206,7 @@ Two planes whose normals are parallel will never intersect, which is a case that
 
 <Scene scene="parallel-planes" height={480} zoom={1.3} yOffset={-0.5} />
 
-The cross product of two parallel normals is $(0, 0, 0)$. So if $\|\vec{d}\| = 0$, the planes do not intersect.
+The cross product of two parallel normals is $(0, 0, 0)$. So if $\|\vec{n_1} × \vec{n_2}\| = 0$, the planes do not intersect.
 
 However, for many applications we'll want to treat planes that are _almost_ parallel as being parallel. This means that our plane-plane intersection procedure should yield a result of "no intersection" when the magnitude of $\vec{d}$ is less than some very small number—customarily called epsilon.
 
@@ -230,7 +230,7 @@ Given two normals $\vec{n_1}$ and $\vec{n_2}$ where the angle between $\vec{n_1}
 
 [log_chart]: https://en.wikipedia.org/wiki/Logarithmic_scale
 
-The relationship is linear: as the angle between the planes halves, so does the magnitude of the cross product of their normals. $\theta° = 1$ yields a magnitude of 0.01745, and $\theta° = 0.5$ yields half of that.
+The relationship is linear: as the angle between the planes halves, so does the magnitude of the cross product of their normals. $\theta° = 1$ yields a magnitude of $0.01745$, and $\theta° = 0.5$ yields half of that.
 
 So to determine the epsilon, we can ask: how low does the angle in degrees need to become for us to consider two planes parallel? Given an angle $\theta°$, we can find the epsilon $\epsilon$ via:
 
@@ -240,7 +240,7 @@ If that angle is 1/256°, then we get:
 
 <p className="mathblock">$$\dfrac{0.01745}{256} \approx 0.000068 $$</p>
 
-With this you can determine the appropriate epsilon based on how small the angle between planes needs to be for you to consider them parallel. That will depend on your use case.
+With this you can determine the appropriate epsilon based on how small the angle between the planes needs to be for you to consider them parallel. That will depend on your use case.
 
 ### Finding a point of intersection
 
@@ -322,7 +322,7 @@ However, notice what happens when we visualize the quadrants of the parallelogra
 
 As the planes become more parallel, the point of intersection approaches the center of the parallelogram.
 
-In understanding why that is, consider the effect that our denominator $1 - abs(dot)$ has on the area of the parallelogram. When $1 - abs(dot) = 0.5$, each vector in the parallelogram doubles in length, which has the effect of quadrupling the area of the parallelogram.
+In understanding why that is, consider the effect that our denominator $1 - abs(dot)$ has on the area of the parallelogram. When $1 - abs(dot) = 0.5$, both of the vectors forming the parallelogram double in length, which has the effect of quadrupling the area of the parallelogram.
 
 <Image src="~/area-of-parallelogram.svg" plain width={600} />
 
@@ -340,11 +340,11 @@ To instead scale the _area_ of the parallelogram by $1 \,/\, (1 - abs(dot))$, we
 
 <SmallNote label="" center>Squaring allows us to remove $abs()$ because the square of a negative number is positive.</SmallNote>
 
-With this, our scalars $k_1$ and $k_2$ become:
+With this, our scalars $k_1$ and $k_2$ become
 
 <p className="mathblock">$$ k_1 = (d_1 - d_2 \times dot) \,/\, (1 - dot^2) $$<br />$$ k_2 = (d_2 - d_1 \times dot) \,/\, (1 - dot^2) $$</p>
 
-Which scales the parallelogram such that its tip lies at the point of intersection:
+which scales the parallelogram such that its tip lies at the point of intersection:
 
 <Scene scene="intersecting-planes-offset-6" height={400} yOffset={-1} usesVariables />
 
@@ -402,7 +402,7 @@ By the way, an interesting property of only traveling along the plane normals is
 
 Earlier, we covered projecting a point onto a plane along the plane's normal.
 
-However, it is generally more useful to be able to project a point onto a plane along an arbitrary direction described by a normal $\vec{n_l}$. Doing that boils down to finding the point of intersection for a line and a plane.
+However, it is generally more useful to be able to project a point onto a plane along an _arbitrary_ direction described by a normal $\vec{n_l}$. Doing that boils down to finding the point of intersection for a line and a plane.
 
 <Scene scene="project-point-onto-plane" height={420} yOffset={-1} zoom={1.5} usesVariables />
 
@@ -412,8 +412,8 @@ Our goal will be to find a distance $D$ that $p_l$ needs to travel along $\vec{n
 
 ```cs
 Vector3 LinePlaneIntersection(Line line, Plane plane) {
-  float dot = Mathf.Abs(Vector3.Dot(line.normal, plane.normal));
-  if (dot < EPSILON) {
+  float dot = Vector3.Dot(line.normal, plane.normal);
+  if (Mathf.Abs(dot) < EPSILON) {
       return null; // Line is parallel to plane's surface
   }
 
@@ -475,8 +475,8 @@ Putting this into code, we get:
 
 ```cs
 Vector3 LinePlaneIntersection(Line line, Plane plane) {
-  float denom = Mathf.Abs(Vector3.Dot(line.normal, plane.normal));
-  if (denom < EPSILON) {
+  float denom = Vector3.Dot(line.normal, plane.normal);
+  if (Mathf.Abs(denom) < EPSILON) {
       return null; // Line is parallel to plane's surface
   }
 
@@ -513,7 +513,7 @@ if (D < 0) {
 }
 ```
 
-But then we'd have to calculate $D$ first. That's not necessary since $D$ becomes negative as a consequence of the dot product $\vec{n_l} \cdot \vec{n_p}$ yielding a negative number when $\vec{n_l}$ and $\vec{n_p}$ are at an obtuse angle between 90° and 180°.
+But then we'd have to calculate $D$ first. That's not necessary since $D$ becomes negative as a consequence of the dot product $\vec{n_l} \cdot \vec{n_p}$ being a negative number when $\vec{n_l}$ and $\vec{n_p}$ are at an obtuse angle between 90° and 180°.
 
 <SmallNote label="">If this feels non-obvious, it helps to remember that the dot product encodes the cosine of the angle between its two component vectors, which is why the dot product becomes negative for obtuse angles.</SmallNote>
 
@@ -521,8 +521,8 @@ Knowing that, we can change our initial "parallel normals" test from this:
 
 ```cs
 Vector3 LinePlaneIntersection(Line line, Plane plane) {
-  float denom = Mathf.Abs(Vector3.Dot(line.normal, plane.normal));
-  if (denom < EPSILON) {
+  float denom = Vector3.Dot(line.normal, plane.normal);
+  if (Mathf.Abs(denom) < EPSILON) {
     return null; // Line is parallel to plane's surface
   }
   // ...
@@ -550,7 +550,7 @@ The $\vec{n_l} \cdot \vec{n_p} < \epsilon$ check covers both the _"line parallel
 Given three planes $P_1$, $P_2$, $P_3$, there are five possible configurations in which they intersect or don't intersect:
 
  1. All three planes are parallel, with none of them intersecting each other.
- 2. Two planes are parallel, and the third plane intersects the other two.
+ 2. Two of the planes are parallel, and the third plane intersects the other two.
  3. All three planes intersect along a single line.
  4. The three planes intersect each other in pairs, forming three parallel lines of intersection.
  5. All three planes intersect each other at a single point.
@@ -571,7 +571,7 @@ We'll start with the configurations where two or more planes are parallel:
 
 <Scene scene="three-planes-some-parallel" height={400} />
 
-If $\vec{n_2}$ and $\vec{n_3}$ are parallel then $\vec{n_2} × \vec{n_3}$ yields a vector whose magnitude is zero.
+If $\vec{n_2}$ and $\vec{n_3}$ are parallel then $\vec{n_2} × \vec{n_3}$ is a vector whose magnitude is zero.
 
 <p className="mathblock">$$\|\vec{n_2} × \vec{n_3}\| = 0$$</p>
 
@@ -589,11 +589,11 @@ This takes care of the "all-planes-parallel" configuration, and the configuratio
 
 With that, let's consider the case where $\vec{n_1}$ is parallel to either $\vec{n_2}$ or $\vec{n_3}$ but $\vec{n_2}$ and $\vec{n_3}$ are not parallel to each other.
 
-Let's take the example where $\vec{n_1}$ is parallel to $\vec{n_2}$ but $\vec{n_3}$ is parallel to neither.
+Let's take the specific case where $\vec{n_1}$ is parallel to $\vec{n_2}$ but $\vec{n_3}$ is parallel to neither.
 
 <Scene scene="three-planes-n1-n2-parallel" height={440} zoom={1.4} />
 
-The cross product $\vec{n_2} × \vec{n_3}$ yields a vector (colored red) that's perpendicular to both $\vec{n_2}$ and $\vec{n_3}$.
+Here the cross product $\vec{n_2} × \vec{n_3}$ is a vector (colored red) that's perpendicular to both $\vec{n_2}$ and $\vec{n_3}$.
 
 <Scene scene="three-planes-n1-n2-parallel-cross" height={440} zoom={1.4} />
 
@@ -609,7 +609,7 @@ We've demonstrated that two of the three normals being parallel results in $\vec
 
 <Scene scene="three-planes-three-lines" height={430} zoom={1.2} yOffset={0.5} />
 
-As we learned when looking at plane-plane intersections, the cross product of the two plane normals yields the direction of the intersection line.
+As we learned when looking at plane-plane intersections, the cross product of two plane normals gives us the direction vector of the planes' line of intersection.
 
 <Scene scene="three-planes-three-lines-cross" height={460} zoom={1.4} />
 
@@ -725,7 +725,7 @@ Since the dot product is a multiple of the magnitudes of its component vectors, 
  1. it normalizes $\vec{U}$, and
  2. it increases the length of $\vec{U}$ as it becomes less parallel with $n_1$.
 
-So $D$ is both the scaling factor we need for $\vec{U} \times d_1$, as well as $\vec{V}$:
+So $\dfrac{1}{D}$ is both the scaling factor we need for $\vec{U} \times d_1$, as well as $\vec{V}$:
 
 <Scene scene="three-intersecting-planes-9" height={450} zoom={1.25} yOffset={-0.5} />
 
@@ -737,9 +737,9 @@ We define $\vec{V}$ as:
 
 We'll redefine $\vec{U}$ to include $d_1$:
 
-<p className="mathblock">$$\vec{U} = (\vec{n_2} × \vec{n_3}) \cdot d_1$$</p>
+<p className="mathblock">$$\vec{U} = (\vec{n_2} × \vec{n_3}) \times d_1$$</p>
 
-Our scalar, $D$, remains defined the same:
+Our denominator, $D$, remains defined as :
 
 <p className="mathblock">$$D = \vec{n_1} \cdot (\vec{n_2} × \vec{n_3})$$</p>
 
