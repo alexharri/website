@@ -776,11 +776,20 @@ Vector3 ThreePlaneIntersection(Plane P1, Plane P2, Plane P3) {
 
 Thanks for reading!
 
-A whole lot of hours went into building and writing this post, so I hope it achieved its goal of helping you build an intuitive mental model of planes.
+A whole lot of hours went into writing and building the visualizations for this post, so I hope it achieved its goal of helping you build an intuitive mental model of planes.
 
-If you're interested in knowing how these examples were built, this website is [open source on GitHub][website].
+Massive thanks goes to [Gunnlaugur Þór Briem][gthb_linkedin] and [Eiríkur Fannar Torfason][eirikur_dev] for providing invaluable feedback on this post. I worked with them at [GRID][grid]; they're fantastic people to work with and be around.
+
+[gthb_linkedin]: https://www.linkedin.com/in/gunnlaugur-briem/
+[eirikur_dev]: https://eirikur.dev/
+[grid]: https://grid.is/
+
+— Alex Harri
+
+<Note><p>PS: If you're interested in taking a look at how the visualizations in this post were built, this website is [open source on GitHub][website].</p></Note>
 
 [website]: https://github.com/alexharri/website
+
 
 <SectionAnchor id="further-reading">
   <h2>Further reading</h2>
@@ -788,16 +797,14 @@ If you're interested in knowing how these examples were built, this website is [
 
 [further_reading]: #further-reading
 
-I highly recommend checking out [Real-Time Collision Detection by Christer Ericson][book_ref]. If you're building applications using 3D geometry, it will prove to be an incredibly useful resource.
+I highly recommend checking out [Real-Time Collision Detection by Christer Ericson][book_ref]. If you're building applications using 3D geometry, it will prove to be an incredibly useful resource. This post would not exist were it not for this book—especially the two chapters on the intersections of planes.
 
 [book_ref]: https://www.amazon.com/Real-Time-Collision-Detection-Interactive-Technology/dp/1558607323
 
-I recently analyzed the edit performance in [Arkio][arkio] and noticed that a method for solving three-plane intersections took around half of the total compute time when recalculating geometry. By implementing the more efficient method described in the book, we made the method __~500% faster__, increasing Arkio's edit performance by over __1.6x__. Crazy stuff!
-
-[arkio]: https://www.arkio.is/
+I recently analyzed the edit performance in [Arkio][arkio] and noticed that a method for solving three-plane intersections took around half of the total compute time when recalculating geometry. By implementing the more efficient method for three-plane intersections described in the book, we made the method __~500% faster__, increasing Arkio's edit performance by over __1.6x__. Crazy stuff!
 
 I started writing this post to understand how the three-plane intersection method worked. However, I felt that readers would need a better foundation and understanding of planes for this post to be of any value. In building that foundation, this post ended up quite a bit longer than I intended.
 
-Anyway, it's a great book. [Check it out!][book_ref]
+[arkio]: https://www.arkio.is/
 
-— Alex Harri
+Anyway, it's a great book. [Check it out][book_ref]!
