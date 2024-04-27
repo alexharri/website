@@ -7,7 +7,7 @@ publishedAt: "2024-04-27"
 
 A plane in 3D space can be thought of as a flat surface that stretches infinitely far, splitting space into two halves.
 
-<Scene scene="what-is-a-plane" height={480} yOffset={-0.5} zoom={1.2} angle={10} usesVariables />
+<Scene autoRotate scene="what-is-a-plane" height={480} yOffset={-0.5} zoom={1.2} angle={10} usesVariables />
 
 Planes have loads of uses in applications that deal with 3D geometry. I've mostly been working with them in the context of an [architectural modeler][arkio], where geometry is defined in terms of planes and their intersections.
 

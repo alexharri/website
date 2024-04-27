@@ -71,6 +71,7 @@ export function createScene<V extends VariablesOptions>(
     visible,
     height: targetHeight,
     usesVariables,
+    autoRotate,
     angle = 20,
     yOffset = 0,
     zoom = 1,
@@ -193,7 +194,7 @@ export function createScene<V extends VariablesOptions>(
               <DREI.OrbitControls
                 rotateSpeed={0.3}
                 enableRotate
-                autoRotate={rotate}
+                autoRotate={rotate && autoRotate}
                 autoRotateSpeed={0.7}
                 enablePan={false}
                 enableZoom={false}

@@ -10,6 +10,7 @@ export interface SceneProps {
   scene: string;
   visible: boolean;
   height: number;
+  autoRotate?: boolean;
   angle?: number;
   usesVariables?: boolean;
   zoom?: number;
@@ -83,13 +84,14 @@ interface Props {
   scene: string;
   height: number;
   angle?: number;
+  autoRotate?: boolean;
   usesVariables?: boolean;
   zoom?: number;
   yOffset?: number;
 }
 
 export const Scene: React.FC<Props> = (props) => {
-  const { scene, height, usesVariables, angle, zoom, yOffset } = props;
+  const { scene, height, usesVariables, angle, zoom, yOffset, autoRotate } = props;
   const containerRef = useRef<HTMLDivElement>(null);
   const visible = useVisible(containerRef, "350px");
   const render = useVisible(containerRef, "50px");
@@ -115,6 +117,7 @@ export const Scene: React.FC<Props> = (props) => {
   const sceneProps: SceneProps = {
     scene,
     visible: render,
+    autoRotate,
     angle,
     height,
     usesVariables,
