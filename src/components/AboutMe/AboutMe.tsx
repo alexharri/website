@@ -16,7 +16,7 @@ export const AboutMe = () => {
           I write about software engineering topics, such as TypeScript, monorepos, and performance.
         </p>
         <p>
-          I've been working as a software engineer in Iceland's vibrant startup scene for over 5
+          I've been working as a software engineer in Iceland's vibrant startup scene for over 6
           years. My experience spans very early-stage startups (I was the first employee at{" "}
           <Link href="https://www.taktikal.com/">Taktikal</Link>) and Series A startups like{" "}
           <Link href="https://grid.is/">GRID</Link>.
