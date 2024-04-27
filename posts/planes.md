@@ -169,7 +169,169 @@ Multiplying the plane's normal $\vec{n}$ by $D$ gives us a vector which when add
 
 <Scene scene="project-point-onto-plane-along-normal" height={440} zoom={1.3} yOffset={-0.5} />
 
-The projection occurs along the plane's normal, which is sometimes useful. However, you'll often want to project points along an arbitrary direction instead, which we'll dive into later in the post. 
+The projection occurs along the plane's normal, which is sometimes useful. However, It is much more useful to be able to project a point onto a plane along an _arbitrary_ direction instead. Doing that boils down finding the point of intersection of a line and a plane.
+
+## Line-plane intersection
+
+The line will be composed of the point $p_l$ and normal $\vec{n_l}$, while the plane—given in constant-normal form—has a normal $\vec{n_p}$ and a distance $d_p$.
+
+<Scene scene="project-point-onto-plane" height={420} yOffset={-1} zoom={1.5} usesVariables />
+
+Our goal will be to find a distance $D$ that $p_l$ needs to travel along $\vec{n_l}$ such that it lies on the plane.
+
+We can figure out the distance $D_p$ that we'd need to travel if $\vec{n_l}$ and $\vec{n_p}$ were parallel, which is what we did when projecting along the plane's normal.
+
+<p className="mathblock">$$ D_p = d_p - (\vec{n_p} \cdot p_l) $$</p>
+
+Let's try projecting $p_l$ along $\vec{n_l}$ using $D_p$ as a scalar like so:
+
+<p className="mathblock">$$ P = p_l + \vec{n_l} \times D_p $$</p>
+
+We'll visualize $P$ as a red point:
+
+<Scene scene="project-point-onto-plane-2" height={450} yOffset={-1} zoom={1.5} usesVariables />
+
+As $\vec{n_l}$ and $\vec{n_p}$ become parallel, $D_p$ gets us closer and closer to the correct solution. However, as the angle between $\vec{n_l}$ and $\vec{n_p}$ increases, $D_p$ becomes increasingly too small.
+
+Here, the dot product comes in handy. Let's do a refresher.
+
+For two vectors $\vec{a}$ and $\vec{b}$, the dot product is defined as
+
+<p className="mathblock">$$\vec{a} \cdot \vec{b} = \|\vec{a}\|\,\|\vec{b}\|\,cos\,\theta$$</p>
+
+where $\theta$ is the angle between $\vec{a}$ and $\vec{b}$.
+
+Consider the dot product of $\vec{n_l}$ and $\vec{n_p}$. Since both normals are unit vectors whose magnitudes are 1
+
+<p className="mathblock">$$\|\vec{n_l}\| = \|\vec{n_p}\| = 1$$</p>
+
+we can remove their magnitudes from the equation,
+
+<p className="mathblock">$$\vec{n_l} \cdot \vec{n_p} = cos\,\theta$$</p>
+
+making the dot product of $\vec{n_l}$ and $\vec{n_p}$ the cosine of the angle between them.
+
+For two vectors, the cosine of their angles approaches 1 as the vectors become increasingly parallel, and approaches 0 as they become perpendicular.
+
+Since $D_p$ becomes increasingly too small as $\vec{n_l}$ and $\vec{n_p}$ become more perpendicular, we can use $\vec{n_l} \cdot \vec{n_p}$ as a denominator for $D_p$. We'll assign this scaled-up version of $D_p$ to $D$:
+
+<p className="mathblock">$$ D = \dfrac{D_p}{\vec{n_l} \cdot \vec{n_p}} $$</p>
+
+With $D$ as our scaled-up distance, we find the point of intersection $P$ via:
+
+<p className="mathblock">$$ P = p_l + \vec{n_l} \times D $$</p>
+
+<Scene scene="project-point-onto-plane-3" height={450} yOffset={-1} zoom={1.5} usesVariables />
+
+We can now get rid of $D_p$, which was defined as $d_p - (\vec{n_p} \cdot p_l)$, giving us the full equation for $D$:
+
+<p className="mathblock">$$ D = \dfrac{d_p - (\vec{n_p} \cdot p_l)}{\vec{n_l} \cdot \vec{n_p}} $$</p>
+
+Putting this into code, we get:
+
+```cs
+Vector3 LinePlaneIntersection(Line line, Plane plane) {
+  float dist = Vector3.Dot(plane.normal, line.point);
+  float D = (plane.distance - dist) / denom;
+  return line.point + line.normal * D;
+}
+```
+
+However, our code is not completely yet. In the case where the line is parallel to the plane's surface, the line and plane do not intersect.
+
+<Scene scene="project-point-onto-plane-4" height={450} yOffset={-1} zoom={1.5} usesVariables />
+
+That happens when $\vec{n_l}$ and $\vec{n_p}$ are perpendicular, in which case their dot product is zero. So if $\vec{n_l} \cdot \vec{n_p} = 0$, the line and plane do not intersect. This gives us an easy test we can add to our code.
+
+However, for many applications we'll want to treat being _almost_ parallel as actually being parallel. To do that, we can check whether the dot product is smaller than some very small number—customarily called epsilon
+
+```cs
+float dot = Vector3.Dot(line.normal, plane.normal);
+if (Mathf.Abs(dot) < EPSILON) {
+    return null; // Line is parallel to plane's surface
+}
+```
+
+<SmallNote label="" center>See if you can figure out why Mathf.Abs is used here. We'll cover it later, so you'll see if you're right.</SmallNote>
+
+We'll take a look at how to select the value of epsilon in a later chapter on two plane intersections.
+
+With this, our line-plane intersection implementation becomes:
+
+```cs
+Vector3 LinePlaneIntersection(Line line, Plane plane) {
+  float dot = Vector3.Dot(line.normal, plane.normal);
+  if (Mathf.Abs(dot) < EPSILON) {
+      return null; // Line is parallel to plane's surface
+  }
+
+  float dist = Vector3.Dot(plane.normal, line.point);
+  float D = (plane.distance - dist) / denom;
+  return line.point + line.normal * D;
+}
+```
+
+
+### Rays and lines
+
+We've been talking about line-plane intersections, but I've been lying a bit by visualizing ray-plane intersections instead for visual clarity.
+
+<Scene scene="project-point-onto-plane" height={450} yOffset={-1} zoom={1.5} usesVariables />
+
+A ray and a line are very similar; they're both represented through a normal $\vec{n_l}$ and a point $p_l$.
+
+The difference is that a ray (colored red) extends in the direction of $\vec{n_l}$ away from $p_l$, while a line (colored green) extends in the other direction as well:
+
+<Scene scene="ray-and-line" height={450} yOffset={-1} zoom={1.5} usesVariables />
+
+What this means for intersections is that a ray will not intersect planes when traveling backward along its normal:
+
+<Scene scene="ray-and-line-plane-intersection" height={450} yOffset={-1} zoom={1.5} usesVariables />
+
+Our implementation for ray-plane intersections will differ from our existing line-plane intersection implementation only in that it should yield a result of "no intersection" when the ray's normal $\vec{n_l}$ is pointing "away" from the plane's normal $\vec{n_p}$ at an obtuse angle.
+
+Since $D$ represents how far to travel along the normal to reach the point of intersection, we could yield "no intersection" when $D$ becomes negative:
+
+```cs
+if (D < 0) {
+  return null;
+}
+```
+
+But then we'd have to calculate $D$ first. That's not necessary since $D$ becomes negative as a consequence of the dot product $\vec{n_l} \cdot \vec{n_p}$ being a negative number when $\vec{n_l}$ and $\vec{n_p}$ are at an obtuse angle between 90° and 180°.
+
+<SmallNote label="">If this feels non-obvious, it helps to remember that the dot product encodes the cosine of the angle between its two component vectors, which is why the dot product becomes negative for obtuse angles.</SmallNote>
+
+Knowing that, we can change our initial "parallel normals" test from this:
+
+```cs
+Vector3 LinePlaneIntersection(Line line, Plane plane) {
+  float denom = Vector3.Dot(line.normal, plane.normal);
+  if (Mathf.Abs(denom) < EPSILON) {
+    return null; // Line is parallel to plane's surface
+  }
+  // ...
+}
+```
+
+To this:
+
+```cs
+Vector3 RayPlaneIntersection(Line line, Plane plane) {
+  float denom = Vector3.Dot(line.normal, plane.normal);
+  if (denom < EPSILON) {
+    // Ray is parallel to plane's surface or pointing away from it
+    return null;
+  }
+  // ...
+}
+```
+
+The $\vec{n_l} \cdot \vec{n_p} < \epsilon$ check covers both the _"line parallel to plane"_ case _and_ the case where the two normal vectors are at an obtuse angle.
+
+<SmallNote>$\epsilon$ is the symbol for epsilon.</SmallNote>
+
+
 
 ## Plane-plane intersection
 
@@ -208,7 +370,7 @@ Two planes whose normals are parallel will never intersect, which is a case that
 
 The cross product of two parallel normals is $(0, 0, 0)$. So if $\|\vec{n_1} × \vec{n_2}\| = 0$, the planes do not intersect.
 
-However, for many applications we'll want to treat planes that are _almost_ parallel as being parallel. This means that our plane-plane intersection procedure should yield a result of "no intersection" when the magnitude of $\vec{d}$ is less than some very small number—customarily called epsilon.
+As previously mentioned, for many applications we'll want to treat planes that are _almost_ parallel as being parallel. This means that our plane-plane intersection procedure should yield a result of "no intersection" when the magnitude of $\vec{d}$ is less than some very small number called epsilon.
 
 ```cs
 Line PlanePlaneIntersection(Plane P1, Plane P2) {
@@ -396,153 +558,6 @@ Line PlanePlaneIntersection(Plane P1, Plane P2) {
 ```
 
 By the way, an interesting property of only traveling along the plane normals is that it yields the point on the line of intersection that is closest to the origin. Cool stuff!
-
-
-## Line-plane intersection
-
-Earlier, we covered projecting a point onto a plane along the plane's normal.
-
-However, it is generally more useful to be able to project a point onto a plane along an _arbitrary_ direction described by a normal $\vec{n_l}$. Doing that boils down to finding the point of intersection for a line and a plane.
-
-<Scene scene="project-point-onto-plane" height={420} yOffset={-1} zoom={1.5} usesVariables />
-
-The line will be composed of the point $p_l$ and normal $\vec{n_l}$, while the plane—given in constant-normal form—has a normal $\vec{n_p}$ and a distance $d_p$.
-
-Our goal will be to find a distance $D$ that $p_l$ needs to travel along $\vec{n_l}$ such that it lies on the plane. But first, we'll need to check if the line will intersect the plane at all, which we know how to do:
-
-```cs
-Vector3 LinePlaneIntersection(Line line, Plane plane) {
-  float dot = Vector3.Dot(line.normal, plane.normal);
-  if (Mathf.Abs(dot) < EPSILON) {
-      return null; // Line is parallel to plane's surface
-  }
-
-  // ...
-}
-```
-
-<SmallNote label="" center>See if you can figure out why Mathf.Abs is used here. We'll cover it later, so you'll see if you're right.</SmallNote>
-
-We can figure out the distance $D_p$ that we'd need to travel if $\vec{n_l}$ and $\vec{n_p}$ were parallel, which is what we did when projecting along the plane's normal.
-
-<p className="mathblock">$$ D_p = d_p - (\vec{n_p} \cdot p_l) $$</p>
-
-Let's try projecting $p_l$ along $\vec{n_l}$ using $D_p$ as a scalar like so:
-
-<p className="mathblock">$$ P = p_l + \vec{n_l} \times D_p $$</p>
-
-We'll visualize $P$ as a red point:
-
-<Scene scene="project-point-onto-plane-2" height={450} yOffset={-1} zoom={1.5} usesVariables />
-
-As $\vec{n_l}$ and $\vec{n_p}$ become parallel, $D_p$ gets us closer and closer to the correct solution. However, as the angle between $\vec{n_l}$ and $\vec{n_p}$ increases, $D_p$ becomes increasingly too small.
-
-Here, the dot product comes in handy. Let's do a refresher.
-
-For two vectors $\vec{a}$ and $\vec{b}$, the dot product is defined as
-
-<p className="mathblock">$$\vec{a} \cdot \vec{b} = \|\vec{a}\|\,\|\vec{b}\|\,cos\,\theta$$</p>
-
-where $\theta$ is the angle between $\vec{a}$ and $\vec{b}$.
-
-Consider the dot product of $\vec{n_l}$ and $\vec{n_p}$. Since both normals are unit vectors whose magnitudes are 1
-
-<p className="mathblock">$$\|\vec{n_l}\| = \|\vec{n_p}\| = 1$$</p>
-
-we can remove their magnitudes from the equation,
-
-<p className="mathblock">$$\vec{n_l} \cdot \vec{n_p} = cos\,\theta$$</p>
-
-making the dot product of $\vec{n_l}$ and $\vec{n_p}$ the cosine of the angle between them.
-
-For two vectors, the cosine of their angles approaches 1 as the vectors become increasingly parallel, and approaches 0 as they become perpendicular.
-
-Since $D_p$ becomes increasingly too small as $\vec{n_l}$ and $\vec{n_p}$ become more perpendicular, we can use $\vec{n_l} \cdot \vec{n_p}$ as a denominator for $D_p$. We'll assign this scaled-up version of $D_p$ to $D$:
-
-<p className="mathblock">$$ D = \dfrac{D_p}{\vec{n_l} \cdot \vec{n_p}} $$</p>
-
-With $D$ as our scaled-up distance, we find the point of intersection $P$ via:
-
-<p className="mathblock">$$ P = p_l + \vec{n_l} \times D $$</p>
-
-<Scene scene="project-point-onto-plane-3" height={450} yOffset={-1} zoom={1.5} usesVariables />
-
-We can now get rid of $D_p$, which was defined as $d_p - (\vec{n_p} \cdot p_l)$, giving us the full equation for $D$:
-
-<p className="mathblock">$$ D = \dfrac{d_p - (\vec{n_p} \cdot p_l)}{\vec{n_l} \cdot \vec{n_p}} $$</p>
-
-Putting this into code, we get:
-
-```cs
-Vector3 LinePlaneIntersection(Line line, Plane plane) {
-  float denom = Vector3.Dot(line.normal, plane.normal);
-  if (Mathf.Abs(denom) < EPSILON) {
-      return null; // Line is parallel to plane's surface
-  }
-
-  float dist = Vector3.Dot(plane.normal, line.point);
-  float D = (plane.distance - dist) / denom;
-  return line.point + line.normal * D;
-}
-```
-
-
-### Rays and lines
-
-We've been talking about line-plane intersections, but I've been lying a bit by visualizing ray-plane intersections instead for visual clarity.
-
-<Scene scene="project-point-onto-plane" height={450} yOffset={-1} zoom={1.5} usesVariables />
-
-A ray and a line are very similar; they're both represented through a normal $\vec{n_l}$ and a point $p_l$.
-
-The difference is that a ray (colored red) extends in the direction of $\vec{n_l}$ away from $p_l$, while a line (colored green) extends in the other direction as well:
-
-<Scene scene="ray-and-line" height={450} yOffset={-1} zoom={1.5} usesVariables />
-
-What this means for intersections is that a ray will not intersect planes when traveling backward along its normal:
-
-<Scene scene="ray-and-line-plane-intersection" height={450} yOffset={-1} zoom={1.5} usesVariables />
-
-Our implementation for ray-plane intersections will differ from our existing line-plane intersection implementation only in that it should yield a result of "no intersection" when the ray's normal $\vec{n_l}$ is pointing "away" from the plane's normal $\vec{n_p}$ at an obtuse angle.
-
-Since $D$ represents how far to travel along the normal to reach the point of intersection, we could yield "no intersection" when $D$ becomes negative:
-
-```cs
-if (D < 0) {
-  return null;
-}
-```
-
-But then we'd have to calculate $D$ first. That's not necessary since $D$ becomes negative as a consequence of the dot product $\vec{n_l} \cdot \vec{n_p}$ being a negative number when $\vec{n_l}$ and $\vec{n_p}$ are at an obtuse angle between 90° and 180°.
-
-<SmallNote label="">If this feels non-obvious, it helps to remember that the dot product encodes the cosine of the angle between its two component vectors, which is why the dot product becomes negative for obtuse angles.</SmallNote>
-
-Knowing that, we can change our initial "parallel normals" test from this:
-
-```cs
-Vector3 LinePlaneIntersection(Line line, Plane plane) {
-  float denom = Vector3.Dot(line.normal, plane.normal);
-  if (Mathf.Abs(denom) < EPSILON) {
-    return null; // Line is parallel to plane's surface
-  }
-  // ...
-}
-```
-
-To this:
-
-```cs
-Vector3 RayPlaneIntersection(Line line, Plane plane) {
-  float denom = Vector3.Dot(line.normal, plane.normal);
-  if (denom < EPSILON) {
-    // Ray is parallel to plane's surface or pointing away from it
-    return null;
-  }
-  // ...
-}
-```
-
-The $\vec{n_l} \cdot \vec{n_p} < \epsilon$ check covers both the _"line parallel to plane"_ case _and_ the case where the two normal vectors are at an obtuse angle.
 
 
 ## Three plane intersection
