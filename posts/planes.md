@@ -157,7 +157,7 @@ The distance may be positive or negative depending on which side of the plane th
 
 ### Projecting a point onto a plane
 
-We just looked at finding a point's distance to a plane. A case where that becomes useful is, for example, if you want to project a point onto a plane.
+A case where calculating a point's distance from a plane becomes useful is, for example, if you want to project a point onto a plane.
 
 Given a point $x$ which we want to project onto plane $P$ whose normal is $\vec{n}$ and distance is $d$, we can do that fairly easily. First, let's define $D$ as the point's distance from the plane:
 
@@ -169,7 +169,7 @@ Multiplying the plane's normal $\vec{n}$ by $D$ gives us a vector which when add
 
 <Scene scene="project-point-onto-plane-along-normal" height={440} zoom={1.3} yOffset={-0.5} />
 
-The projection occurs along the plane's normal, which is sometimes useful. However, It is much more useful to be able to project a point onto a plane along an _arbitrary_ direction instead. Doing that boils down finding the point of intersection of a line and a plane.
+The projection occurs along the plane's normal, which is sometimes useful. However, it is much more useful to be able to project a point onto a plane along an _arbitrary_ direction instead. Doing that boils down finding the point of intersection of a line and a plane.
 
 ## Line-plane intersection
 
@@ -193,9 +193,7 @@ We'll visualize $P$ as a red point:
 
 As $\vec{n_l}$ and $\vec{n_p}$ become parallel, $D_p$ gets us closer and closer to the correct solution. However, as the angle between $\vec{n_l}$ and $\vec{n_p}$ increases, $D_p$ becomes increasingly too small.
 
-Here, the dot product comes in handy. Let's do a refresher.
-
-For two vectors $\vec{a}$ and $\vec{b}$, the dot product is defined as
+Here, the dot product comes in handy. For two vectors $\vec{a}$ and $\vec{b}$, the dot product is defined as
 
 <p className="mathblock">$$\vec{a} \cdot \vec{b} = \|\vec{a}\|\,\|\vec{b}\|\,cos\,\theta$$</p>
 
@@ -231,6 +229,7 @@ Putting this into code, we get:
 
 ```cs
 Vector3 LinePlaneIntersection(Line line, Plane plane) {
+  float denom = Vector3.Dot(line.normal, plane.normal);
   float dist = Vector3.Dot(plane.normal, line.point);
   float D = (plane.distance - dist) / denom;
   return line.point + line.normal * D;
@@ -246,8 +245,8 @@ That happens when $\vec{n_l}$ and $\vec{n_p}$ are perpendicular, in which case t
 However, for many applications we'll want to treat being _almost_ parallel as actually being parallel. To do that, we can check whether the dot product is smaller than some very small number—customarily called epsilon
 
 ```cs
-float dot = Vector3.Dot(line.normal, plane.normal);
-if (Mathf.Abs(dot) < EPSILON) {
+float denom = Vector3.Dot(line.normal, plane.normal);
+if (Mathf.Abs(denom) < EPSILON) {
     return null; // Line is parallel to plane's surface
 }
 ```
@@ -260,8 +259,8 @@ With this, our line-plane intersection implementation becomes:
 
 ```cs
 Vector3 LinePlaneIntersection(Line line, Plane plane) {
-  float dot = Vector3.Dot(line.normal, plane.normal);
-  if (Mathf.Abs(dot) < EPSILON) {
+  float denom = Vector3.Dot(line.normal, plane.normal);
+  if (Mathf.Abs(denom) < EPSILON) {
       return null; // Line is parallel to plane's surface
   }
 
