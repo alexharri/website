@@ -173,7 +173,11 @@ The projection occurs along the plane's normal, which is sometimes useful. Howev
 
 ## Line-plane intersection
 
-The line will be composed of the point $p_l$ and normal $\vec{n_l}$, while the plane—given in constant-normal form—has a normal $\vec{n_p}$ and a distance $d_p$.
+We can describe lines in 3D space using a point $p$ and normal $\vec{n}$. The normal $\vec{n}$ describes the line's orientation, while the point $p$ describes a point which the line passes through.
+
+<Scene scene="line" height={380} zoom={1.6} yOffset={-0.6} usesVariables />
+
+In this chapter, the line will be composed of the point $p_l$ and normal $\vec{n_l}$, while the plane—given in constant-normal form—has a normal $\vec{n_p}$ and a distance $d_p$.
 
 <Scene scene="project-point-onto-plane" height={420} yOffset={-1} zoom={1.5} usesVariables />
 
@@ -240,7 +244,7 @@ However, our code is not completely yet. In the case where the line is parallel 
 
 <Scene scene="project-point-onto-plane-4" height={450} yOffset={-1} zoom={1.5} usesVariables />
 
-That happens when $\vec{n_l}$ and $\vec{n_p}$ are perpendicular, in which case their dot product is zero. So if $\vec{n_l} \cdot \vec{n_p} = 0$, the line and plane do not intersect. This gives us an easy test we can add to our code.
+That happens when $\vec{n_l}$ and $\vec{n_p}$ are perpendicular, in which case their dot product is zero. So if $\vec{n_l} \cdot \vec{n_p} = 0$, the line and plane do not intersect. This gives us an easy test we can add to our code to yield a result of "no intersection".
 
 However, for many applications we'll want to treat being _almost_ parallel as actually being parallel. To do that, we can check whether the dot product is smaller than some very small number—customarily called epsilon
 
@@ -338,13 +342,13 @@ The intersection of two planes forms an infinite line.
 
 <Scene scene="intersecting-planes" height={500} yOffset={0.5} zoom={1.4} usesVariables />
 
-We can describe lines in 3D space using a point $p$ and normal $\vec{n}$. The normal $\vec{n}$ describes the line's orientation, while the point $p$ describes a point which the line passes through.
+As a quick refresher: lines in 3D space are represented using a point $p$ and normal $\vec{n}$ where normal $\vec{n}$ describes the line's orientation, while the point $p$ describes a point which the line passes through.
 
 <Scene scene="line" height={380} zoom={1.6} yOffset={-0.6} usesVariables />
 
 Let's take two planes $P_1$ and $P_2$ whose normals are $\vec{n_1}$ and $\vec{n_2}$.
 
-Finding the direction vector of $P_1$ and $P_2$'s intersection is deceptively simple. It's just the cross product of the two plane normals, which we'll assign to $\vec{d}$.
+Finding the direction vector of $P_1$ and $P_2$'s intersection is deceptively simple. Since the line intersection of two planes lies on the surface of both planes, the line must be perpendicular to both plane normals, which means that the direction of the intersection is the cross product of the two plane normals. We'll assign it to $\vec{d}$.
 
 <p className="mathblock">$$\vec{d} = \vec{n_1} × \vec{n_2}$$</p>
 
