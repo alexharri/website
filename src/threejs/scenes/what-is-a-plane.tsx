@@ -10,7 +10,7 @@ export default createScene(
     const THREE = useContext(ThreeContext);
 
     const points = useMemo(() => {
-      const NX = 40;
+      const NX = 48;
       const NY = 32;
 
       const offsets: [number, number][] = [];
@@ -27,7 +27,7 @@ export default createScene(
         .map(([x, y], i) => {
           const pos = new THREE.Vector3(x * 1.25, y * 1.25);
           const distance = Math.abs(x) + Math.abs(y);
-          const radius = 0.05 - distance / 800;
+          const radius = 0.05 - distance / 600;
           if (radius < 0) return null;
           return <Point key={i} color={0x2e6db0} basicMaterial radius={radius} position={pos} />;
         })
