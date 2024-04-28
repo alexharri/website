@@ -200,7 +200,7 @@ As $\vec{n_l}$ and $\vec{n_p}$ become parallel, $D_p$ gets us closer and closer 
 
 Here, the dot product comes in handy. For two vectors $\vec{a}$ and $\vec{b}$, the dot product is defined as
 
-<p className="mathblock">$$\vec{a} \cdot \vec{b} = \|\vec{a}\|\,\|\vec{b}\|\,cos\,\theta$$</p>
+<p className="mathblock">$$\vec{a} \cdot \vec{b} = \|\vec{a}\|\,\|\vec{b}\|\,\cos\theta$$</p>
 
 where $\theta$ is the angle between $\vec{a}$ and $\vec{b}$.
 
@@ -210,7 +210,7 @@ Consider the dot product of $\vec{n_l}$ and $\vec{n_p}$. Since both normals are 
 
 we can remove their magnitudes from the equation,
 
-<p className="mathblock">$$\vec{n_l} \cdot \vec{n_p} = cos\,\theta$$</p>
+<p className="mathblock">$$\vec{n_l} \cdot \vec{n_p} = \cos\theta$$</p>
 
 making the dot product of $\vec{n_l}$ and $\vec{n_p}$ the cosine of the angle between them.
 
@@ -596,7 +596,7 @@ If $\vec{n_2}$ and $\vec{n_3}$ are parallel then $\vec{n_2} × \vec{n_3}$ is a v
 
 And since the dot product is a multiple of the magnitudes of its component vectors:
 
-<p className="mathblock">$$a \cdot b = \|a\|\,\|b\|\,cos\,\theta$$</p>
+<p className="mathblock">$$a \cdot b = \|a\|\,\|b\|\,\cos\theta$$</p>
 
 the final result is zero whenever $\vec{n_2}$ and $\vec{n_3}$ are parallel.
 
