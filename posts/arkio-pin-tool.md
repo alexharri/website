@@ -6,7 +6,7 @@ publishedAt: "2024-04-29"
 ---
 
 <Note>
-<p>I enjoyed the privilege of leading the design and development of Arkio's new Pin Tool, released in Arkio 1.7.</p>
+<p>I enjoyed the privilege of leading the design and development of Arkio's Pin Tool, released in Arkio 1.7.</p>
 <p>Following is an archived version of the post I wrote to announce the Pin Tool. It was originally posted on [community.arkio.is](https://community.arkio.is/t/introducing-arkio-s-pin-tool/85).</p>
 </Note>
 
