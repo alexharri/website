@@ -1,5 +1,5 @@
 ---
-title: "Iterating over Bit Sets really quickly"
+title: "Iterating over Bit Sets quickly"
 description: "Multiplying iteration speed by exploiting two's complement and Hamming weights."
 publishedAt: "2024-01-06"
 image: ""

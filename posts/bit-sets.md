@@ -608,7 +608,7 @@ We covered a lot of ground in this post!
 
 Next up in our bit set journey is iterating over bits. We'll learn how exploiting [two's complement][twos_complement] and [Hamming weights][hamming_weight] enables us to make our iteration extremely fast!
 
-See you in part 2: <a href="/blog/bit-sets-fast-foreach" target="_blank">Iterating over Bit Sets really quickly</a>
+See you in part 2: <a href="/blog/bit-sets-fast-foreach" target="_blank">Iterating over Bit Sets quickly</a>
 
 — Alex Harri
 
