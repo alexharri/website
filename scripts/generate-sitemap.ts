@@ -17,6 +17,12 @@ function generateSitemap() {
   <url>
     <loc>https://alexharri.com</loc>
   </url>
+  <url>
+    <loc>https://alexharri.com/about</loc>
+  </url>
+  <url>
+    <loc>https://alexharri.com/blog</loc>
+  </url>
   ${posts.map(postXML).join("\n  ")}
 </urlset>
 `;
