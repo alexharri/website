@@ -204,8 +204,8 @@ export default function Page() {
         </p>
         <h2 className={s("heading")}>Writing</h2>
         <p>
-          I've written a fair number of articles on topics ranging from performance and mathematics
-          to TypeScript and monorepos.
+          I've written about topics ranging from performance and mathematics to TypeScript and
+          monorepos.
         </p>
         <p>
           My first really popular post was{" "}
