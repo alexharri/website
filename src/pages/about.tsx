@@ -1,3 +1,4 @@
+import Head from "next/head";
 import { useEffect, useRef } from "react";
 import { Layout } from "../components/Layout";
 import { Link } from "../components/Link";
@@ -152,6 +153,9 @@ export default function Page() {
 
   return (
     <Layout>
+      <Head>
+        <title>About me | Alex Harri Jónsson</title>
+      </Head>
       <h1 className={s("headline")}>About me</h1>
       <PostLayout>
         <p>Hey, I'm Alex Harri.</p>
