@@ -170,8 +170,9 @@ export default function Page() {
         <p>
           As a very early employee at <Link href="https://www.taktikal.com/">Taktikal</Link>—and
           subsequently as a Tech Lead—I built our first front-end applications, their supporting web
-          services, and CI/CD pipelines. That gave me valuable experience in building applications
-          from scratch and maintaining them as they evolve. I worked at Taktikal for 4 years.
+          services, and their CI/CD pipelines. That gave me valuable experience in building
+          applications from scratch and maintaining them as they evolve. I worked at Taktikal for 4
+          years.
         </p>
         <p>
           Over the past few years, I've transitioned to lower-level work developing and optimizing
@@ -180,7 +181,7 @@ export default function Page() {
         <p>
           At <Link href="https://grid.is/">GRID</Link>, I worked on their JavaScript-based
           spreadsheet engine running in the browser, their formula parser written in Rust, and wrote
-          some Python on the back-end.{" "}
+          some Python for the back-end.{" "}
           <Link href="/blog/grid-engine-performance" target="_blank">
             See <em>"Making GRID's spreadsheet engine 10% faster"</em>
           </Link>

@@ -2,7 +2,6 @@ import { LINKS } from "../../constants";
 import { useStyles } from "../../utils/styles";
 import { GitHubIcon20 } from "../Icon/GitHubIcon20";
 import { LinkedInIcon20 } from "../Icon/LinkedInIcon20";
-import { MediumIcon20 } from "../Icon/MediumIcon20";
 import { RSSIcon20 } from "../Icon/RSSIcon20";
 import { Link } from "../Link";
 import { FooterStyles } from "./Footer.styles";
