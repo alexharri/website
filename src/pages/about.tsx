@@ -194,8 +194,8 @@ export default function Page() {
             see <em>"Planes in 3D space"</em>
           </Link>
           ). Arkio is an architectural{" "}
-          <Link href="https://en.wikipedia.org/wiki/Solid_modeling">solid modeler</Link> for VR
-          headsets, written in C#. My work has mostly been on the core geometry layer and the
+          <Link href="https://en.wikipedia.org/wiki/Solid_modeling">solid modeler</Link> running in
+          VR headsets, written in C#. My work has mostly been on the core geometry layer and the
           editing tools (
           <Link href="/blog/arkio-pin-tool" target="_blank">
             see <em>"Introducing Arkio's Pin Tool"</em>
