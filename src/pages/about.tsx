@@ -212,8 +212,8 @@ export default function Page() {
           <Link href="/blog/vector-networks" target="_blank">
             <em>"The Engineering behind Figma's Vector Networks"</em>
           </Link>
-          , which I wrote back in 2019. It's a lengthy article, containing more than 200 diagrams
-          and illustrations.
+          , which I wrote back in 2019. It's a lengthy post covering multiple topics, and it
+          contains more than 200 diagrams and illustrations.
         </p>
         <p>I've written three posts about TypeScript so far:</p>
         <ul>
