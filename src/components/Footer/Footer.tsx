@@ -15,7 +15,9 @@ export const Footer = () => {
       <div className={s("inner")}>
         <div className={s("grid")}>
           <section>
-            <p className={s("title")}>Alex Harri</p>
+            <p className={s("title")}>
+              <a href="/">Alex Harri</a>
+            </p>
             <p className={s("copyright")}>© 2024 Alex Harri Jónsson</p>
           </section>
           <section>
@@ -49,6 +51,9 @@ export const Footer = () => {
             <p className={s("sectionTitle")}>Pages</p>
             <p className={s("link")}>
               <Link href="/">Home</Link>
+            </p>
+            <p className={s("link")}>
+              <Link href="/about">About</Link>
             </p>
             <p className={s("link")}>
               <Link href="/blog">Blog</Link>

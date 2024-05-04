@@ -27,6 +27,10 @@ export const FooterStyles = ({ styled, theme }: StyleOptions) => ({
     color: ${theme.text};
     font-weight: 600;
     margin: 0 0 2px;
+
+    a {
+      color: inherit;
+    }
   `,
 
   copyright: styled.css`

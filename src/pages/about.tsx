@@ -156,7 +156,7 @@ export default function Page() {
       <PostLayout>
         <p>Hey, I'm Alex Harri.</p>
         <p>
-          I write about software engineering topics like performance, TypeScript, and mathematics.{" "}
+          I write about software engineering topics like TypeScript, performance, and mathematics.{" "}
           <Link href="/blog">View blog</Link>.
         </p>
         <div className={s("imageCarousel")} ref={imageCarouselRef}>
