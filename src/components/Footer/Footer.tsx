@@ -40,12 +40,6 @@ export const Footer = () => {
                 RSS
               </Link>
             </p>
-            <p className={s("link")}>
-              <Link href={LINKS.Medium}>
-                <MediumIcon20 />
-                Medium
-              </Link>
-            </p>
           </section>
           <section>
             <p className={s("sectionTitle")}>Pages</p>
