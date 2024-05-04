@@ -154,9 +154,10 @@ export default function Page() {
     <Layout>
       <h1 className={s("headline")}>About me</h1>
       <PostLayout>
+        <p>Hey, I'm Alex Harri.</p>
         <p>
-          Hey, I'm Alex Harri. I write about software engineering topics like TypeScript,
-          performance, and mathematics. <Link href="/blog">View blog</Link>.
+          I write about software engineering topics like performance, TypeScript, and mathematics.{" "}
+          <Link href="/blog">View blog</Link>.
         </p>
         <div className={s("imageCarousel")} ref={imageCarouselRef}>
           {images.map((image) => (

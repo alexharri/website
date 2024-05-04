@@ -24,8 +24,8 @@ export const Layout = (props: Props) => {
             </Link>
           </div>
           <div className={s("headerSection")}>
-            <Link href="/" className={s("link")}>
-              Home
+            <Link href="/about" className={s("link")}>
+              About
             </Link>
             <Link href="/blog" className={s("link")}>
               Blog
