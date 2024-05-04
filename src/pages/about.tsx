@@ -37,6 +37,7 @@ const Styles = ({ styled }: StyleOptions) => ({
 
   imageCarousel: styled.css`
     margin: 0 auto 24px;
+    height: 360px;
     display: flex;
     flex-wrap: nowrap;
     align-items: center;
