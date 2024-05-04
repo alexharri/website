@@ -2,6 +2,7 @@ import { useEffect, useRef } from "react";
 import { Layout } from "../components/Layout";
 import { Link } from "../components/Link";
 import { PostLayout } from "../components/PostLayout/PostLayout";
+import { LINKS } from "../constants";
 import { StyleOptions, useStyles } from "../utils/styles";
 
 const images = [
@@ -92,6 +93,14 @@ const Styles = ({ styled }: StyleOptions) => ({
     img {
       width: 100%;
     }
+  `,
+
+  show: styled.css`
+    display: inline;
+  `,
+
+  obfuscate: styled.css`
+    display: none;
   `,
 });
 
@@ -240,7 +249,6 @@ export default function Page() {
           . It contains over 50 interactive 3D illustrations, intended to provide a visual and
           intuitive understanding of planes.
         </p>
-
         <p>
           I've also written about{" "}
           <Link href="/blog/move-to-monorepo" target="_blank">
@@ -259,6 +267,24 @@ export default function Page() {
             bit manipulation
           </Link>
           .
+        </p>
+        <h2 className={s("heading")}>Projects</h2>
+        <p>
+          My personal projects can be found on{" "}
+          <Link href="https://github.com/alexharri">my GitHub page</Link>.
+        </p>
+        <p>
+          Notable project include an{" "}
+          <Link href="https://github.com/alexharri/animation-editor">animation editor</Link>, a
+          helper for Icelandic name declension called{" "}
+          <Link href="https://github.com/alexharri/beygla">Beygla</Link>, an experimental schema
+          builder called <Link href="https://github.com/alexharri/strema">Strema</Link>, and{" "}
+          <Link href="https://github.com/alexharri/website">this website</Link>.
+        </p>
+        <h2 className={s("heading")}>Contact</h2>
+        <p>
+          You can contact me via a message on <Link href={LINKS.LinkedIn}>LinkedIn</Link> or by
+          sending me an email (you can find my email address on my GitHub page).
         </p>
       </PostLayout>
     </Layout>
