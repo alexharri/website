@@ -2,7 +2,6 @@ import fs from "fs";
 import path from "path";
 import matter from "gray-matter";
 import { postFileNames, POSTS_PATH } from "./mdxUtils";
-import { GetStaticPropsContext } from "next";
 import { Post } from "../types/Post";
 import { getMdxOptions } from "./mdx";
 
@@ -82,7 +81,11 @@ type Params = {
   slug: string;
 };
 
-export const getPostProps = async (ctx: GetStaticPropsContext<Params>) => {
+type Context = {
+  params?: Params;
+};
+
+export const getPostProps = async (ctx: Context) => {
   const params = ctx.params!;
 
   let filePath = path.join(POSTS_PATH, `${params.slug}.mdx`);
@@ -114,3 +117,9 @@ export const getPostProps = async (ctx: GetStaticPropsContext<Params>) => {
 
   return { props: { source, slug: params.slug, version } };
 };
+
+export function getSlugFromFilePath(filePath: string) {
+  const fileName = filePath.split("/").at(-1)!;
+  const slug = fileName.split(".")[0];
+  return slug;
+}
