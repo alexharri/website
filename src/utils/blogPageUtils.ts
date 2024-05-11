@@ -61,17 +61,25 @@ export function getPopularPosts() {
 }
 
 export function getPostPaths(options: { type: "published" | "draft" }) {
+  const draft = options.type === "draft";
   const paths = postFileNames
     .filter((filePath) => {
       const fileContent = fs.readFileSync(path.resolve(POSTS_PATH, filePath));
       const { data } = matter(fileContent);
 
-      if (options.type === "draft") {
+      if (draft) {
         return !data.publishedAt;
       }
       return !!data.publishedAt;
     })
     .map((path) => path.replace(/\.mdx?$/, ""))
+    .filter((slug) => {
+      const pagePath = path.resolve(
+        process.cwd(),
+        `./src/pages/blog/${draft ? "draft/" : ""}${slug}.tsx`,
+      );
+      return !fs.existsSync(pagePath);
+    })
     .map((slug) => ({ params: { slug } }));
 
   return [...paths];
