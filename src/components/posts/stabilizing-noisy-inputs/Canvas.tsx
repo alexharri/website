@@ -32,8 +32,9 @@ const styles = ({ styled, theme }: StyleOptions) => ({
     &--shadow {
       background: ${theme.text};
       z-index: 3;
-      width: 8px;
-      height: 8px;
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
     }
 
     &--position {
@@ -158,7 +159,7 @@ export function createCanvas(createNoiseFn: CreateNoiseFn): React.FC {
         const isMobile = window.innerWidth < 500;
 
         if (isMobile) {
-          elementScaleRef.current = lerp(elementScaleRef.current, downRef.current ? 7 : 1, 0.2);
+          elementScaleRef.current = lerp(elementScaleRef.current, downRef.current ? 0.8 : 0.1, 0.2);
           elementOpacityRef.current = lerp(
             elementOpacityRef.current,
             downRef.current ? 0.3 : 1,
@@ -166,7 +167,11 @@ export function createCanvas(createNoiseFn: CreateNoiseFn): React.FC {
           );
           element.style.opacity = String(elementOpacityRef.current);
         } else {
-          elementScaleRef.current = lerp(elementScaleRef.current, downRef.current ? 2.5 : 1, 0.2);
+          elementScaleRef.current = lerp(
+            elementScaleRef.current,
+            downRef.current ? 0.25 : 0.1,
+            0.2,
+          );
         }
 
         element.style.transform = transform(
@@ -197,7 +202,7 @@ export function createCanvas(createNoiseFn: CreateNoiseFn): React.FC {
       };
     }, []);
 
-    function update(e: React.MouseEvent | React.TouchEvent | MouseEvent | TouchEvent) {
+    function update(e: MouseEvent | TouchEvent) {
       const canvas = containerRef.current;
       if (!canvas) return;
       const rect = canvas.getBoundingClientRect();
@@ -207,7 +212,9 @@ export function createCanvas(createNoiseFn: CreateNoiseFn): React.FC {
       elementTargetPosRef.current.y = clientY - rect.top;
     }
 
-    const onDown = (e: React.MouseEvent | React.TouchEvent) => {
+    const onDown = (e: MouseEvent | TouchEvent) => {
+      e.preventDefault();
+
       update(e);
       downRef.current = true;
 
@@ -225,14 +232,21 @@ export function createCanvas(createNoiseFn: CreateNoiseFn): React.FC {
       window.addEventListener("touchend", onUp);
     };
 
+    useEffect(() => {
+      const container = containerRef.current;
+      if (!container) return;
+
+      container.addEventListener("mousedown", onDown);
+      container.addEventListener("touchstart", onDown);
+
+      return () => {
+        container.removeEventListener("mousedown", onDown);
+        container.removeEventListener("touchstart", onDown);
+      };
+    }, []);
+
     return (
-      <div
-        className={s("canvas")}
-        onMouseDown={onDown}
-        onTouchStart={onDown}
-        ref={containerRef}
-        style={{ width: CANVAS_W, height: CANVAS_H }}
-      >
+      <div className={s("canvas")} ref={containerRef} style={{ width: CANVAS_W, height: CANVAS_H }}>
         <div
           className={s("element", { main: true })}
           ref={snappedRef}
