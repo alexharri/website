@@ -1,38 +1,44 @@
-import { useMemo, useRef, useState } from "react";
+import { useMemo } from "react";
 import { createWiggle } from "../../../math/wiggle";
-import { createCanvas } from "./Canvas";
+import { useStateRef } from "../../../utils/hooks/useStateRef";
+import { StyleOptions, useStyles } from "../../../utils/styles";
+import { Slider } from "../../Slider/Slider";
+import { createGridExample } from "./GridExample";
+
+const styles = ({ styled }: StyleOptions) => ({
+  wrapper: styled.css`
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    margin: 40px auto;
+  `,
+});
 
 export const SomeNoise = () => {
-  const [amplitude, setAmplitude] = useState(1);
-  const amplitudeRef = useRef(amplitude);
-  amplitudeRef.current = amplitude;
+  const s = useStyles(styles);
 
-  const Canvas = useMemo(() => {
-    return createCanvas(() => {
-      const speed = 3;
-      const wiggleX = createWiggle();
-      const wiggleY = createWiggle();
-      return () => {
-        const amplitude = amplitudeRef.current;
-        return [wiggleX(speed, amplitude), wiggleY(speed, amplitude)];
-      };
-    });
+  const [amplitude, setAmplitude, amplitudeRef] = useStateRef(1);
+
+  const GridExample = useMemo(() => {
+    return createGridExample(
+      () => {
+        const speed = 3;
+        const wiggleX = createWiggle();
+        const wiggleY = createWiggle();
+        return () => {
+          const amplitude = amplitudeRef.current;
+          return [wiggleX(speed, amplitude), wiggleY(speed, amplitude)];
+        };
+      },
+      { showBoundaries: true },
+    );
   }, []);
 
   return (
-    <div>
-      <Canvas />
-      <div style={{ margin: "0px auto", textAlign: "center" }}>
-        Amplitude
-        <input
-          type="range"
-          min={0.2}
-          max={3}
-          value={amplitude}
-          onChange={(e) => setAmplitude(Number(e.target.value))}
-          step={0.1}
-        />
-      </div>
+    <div className={s("wrapper")}>
+      <GridExample />
+      <Slider label="Amplitude" value={amplitude} setValue={setAmplitude} range={[0.2, 3]} />
     </div>
   );
 };

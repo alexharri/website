@@ -10,6 +10,7 @@ const styles = ({ styled, theme }: StyleOptions) => ({
     flex-direction: column;
     align-items: center;
     gap: 16px;
+    margin: 40px auto;
   `,
 
   canvas: styled.css`
@@ -49,7 +50,7 @@ export const NoiseComponent = () => {
 
   const elementRef = useRef<HTMLDivElement>(null);
 
-  const [amplitude, setAmplitude, amplitudeRef] = useStateRef(3);
+  const [amplitude, setAmplitude, amplitudeRef] = useStateRef(1.7);
   const [speed, setSpeed, speedRef] = useStateRef(3);
 
   useEffect(() => {

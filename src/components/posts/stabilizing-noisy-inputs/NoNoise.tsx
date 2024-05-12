@@ -1,5 +1,15 @@
-import { createCanvas } from "./Canvas";
+import { createGridExample } from "./GridExample";
 
-export const NoNoise = createCanvas(() => {
-  return () => [0, 0];
-});
+export const NoNoise = createGridExample(
+  () => {
+    return () => [0, 0];
+  },
+  { margin: true },
+);
+
+export const NoNoiseShowBoundaries = createGridExample(
+  () => {
+    return () => [0, 0];
+  },
+  { margin: true, showBoundaries: true },
+);

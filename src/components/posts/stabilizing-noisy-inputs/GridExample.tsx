@@ -3,6 +3,7 @@ type CreateNoiseFn = () => () => [number, number];
 import { useEffect, useRef } from "react";
 import { lerp } from "../../../math/lerp";
 import { distance } from "../../../math/math";
+import { colors } from "../../../utils/cssVariables";
 import { StyleOptions, useStyles } from "../../../utils/styles";
 
 const styles = ({ styled, theme }: StyleOptions) => ({
@@ -13,7 +14,12 @@ const styles = ({ styled, theme }: StyleOptions) => ({
     overflow: hidden;
     background: ${theme.background500};
     position: relative;
+    cursor: pointer;
     touch-action: none;
+
+    &--margin {
+      margin: 40px auto;
+    }
   `,
 
   element: styled.css`
@@ -38,9 +44,19 @@ const styles = ({ styled, theme }: StyleOptions) => ({
     }
 
     &--position {
-      background: ${theme.medium400};
+      background: #111a21;
+      border: 1px solid #364a5a;
       z-index: 1;
     }
+  `,
+
+  boundaries: styled.css`
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    overflow: visible;
+    pointer-events: none;
   `,
 });
 
@@ -90,7 +106,10 @@ const createInterpolateSnapped = () => {
   };
 };
 
-export function createCanvas(createNoiseFn: CreateNoiseFn): React.FC {
+export function createGridExample(
+  createNoiseFn: CreateNoiseFn,
+  { margin = false, showBoundaries = false }: { margin?: boolean; showBoundaries?: boolean } = {},
+): React.FC {
   const noise = createNoiseFn();
   const interpolateElement = createInterpolateElement();
   const interpolateSnapped = createInterpolateSnapped();
@@ -245,8 +264,19 @@ export function createCanvas(createNoiseFn: CreateNoiseFn): React.FC {
       };
     }, []);
 
+    const boundaryStyle = {
+      strokeDasharray: "8 18",
+      strokeDashoffset: 21,
+      strokeWidth: 2,
+      stroke: colors.medium700,
+    };
+
     return (
-      <div className={s("canvas")} ref={containerRef} style={{ width: CANVAS_W, height: CANVAS_H }}>
+      <div
+        className={s("canvas", { margin })}
+        ref={containerRef}
+        style={{ width: CANVAS_W, height: CANVAS_H }}
+      >
         <div
           className={s("element", { main: true })}
           ref={snappedRef}
@@ -272,6 +302,36 @@ export function createCanvas(createNoiseFn: CreateNoiseFn): React.FC {
             />
           );
         })}
+        {showBoundaries && (
+          <svg
+            className={s("boundaries")}
+            width={W * 3 + GAP * 2}
+            height={W * 2 + GAP}
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <line
+              x1={W + GAP * 0.5}
+              x2={W + GAP * 0.5}
+              y1={-16}
+              y2={W * 2 + GAP + 16}
+              {...boundaryStyle}
+            />
+            <line
+              x1={W * 2 + GAP * 1.5}
+              x2={W * 2 + GAP * 1.5}
+              y1={-16}
+              y2={W * 2 + GAP + 16}
+              {...boundaryStyle}
+            />
+            <line
+              x1={-16}
+              x2={W * 3 + GAP * 2 + 16}
+              y1={W + GAP * 0.5}
+              y2={W + GAP * 0.5}
+              {...boundaryStyle}
+            />
+          </svg>
+        )}
       </div>
     );
   };

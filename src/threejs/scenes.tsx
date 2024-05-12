@@ -78,6 +78,8 @@ export const threeJsScenes: Partial<Record<string, React.ComponentType<SceneProp
   "three-intersecting-planes-9": dynamic(() => import("./scenes/three-intersecting-planes-9"), { loading }),
   "three-intersecting-planes-10": dynamic(() => import("./scenes/three-intersecting-planes-10"), { loading }),
   "three-intersecting-planes-11": dynamic(() => import("./scenes/three-intersecting-planes-11"), { loading }),
+
+  "vr-controller": dynamic(() => import("./scenes/vr-controller"), { loading }),
 };
 
 interface Props {
