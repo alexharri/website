@@ -1,10 +1,10 @@
 type CreateNoiseFn = () => () => [number, number];
 
 import { useEffect, useRef } from "react";
-import { lerp } from "../../../math/lerp";
-import { distance } from "../../../math/math";
-import { colors } from "../../../utils/cssVariables";
-import { StyleOptions, useStyles } from "../../../utils/styles";
+import { lerp } from "../../../../math/lerp";
+import { distance } from "../../../../math/math";
+import { colors } from "../../../../utils/cssVariables";
+import { StyleOptions, useStyles } from "../../../../utils/styles";
 
 const styles = ({ styled, theme }: StyleOptions) => ({
   canvas: styled.css`

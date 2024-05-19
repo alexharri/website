@@ -1,4 +1,4 @@
-import { createGridExample } from "./GridExample";
+import { createGridExample } from "./generators/GridExample";
 
 export const NoNoise = createGridExample(
   () => {

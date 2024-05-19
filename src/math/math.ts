@@ -22,3 +22,7 @@ export function manhattanDistance(p1: IVector2, p2: IVector2) {
   const dy = p2.y - p1.y;
   return Math.abs(dx) + Math.abs(dy);
 }
+
+export function clamp(min: number, max: number, value: number) {
+  return Math.max(min, Math.min(max, value));
+}

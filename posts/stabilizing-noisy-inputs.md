@@ -1,5 +1,5 @@
 ---
-title: "Stabilizing noisy input devices"
+title: "Sticky option scoring"
 description: ""
 image: ""
 publishedAt: ""
@@ -13,9 +13,11 @@ When the input is at the boundaries, the difference between picking one position
 
 <NoNoiseShowBoundaries />
 
-As soon as the input crosses the boundary, the element switches positions. This means that a small amount of noise in the input could cause the input to intermittently cross the boundary, making the element jitter.
+As soon as the input crosses the boundary, the element switches positions. This means that a small amount of noise in the input could cause the input to cross the boundary, changing the result.
 
-On precise input devices like trackpads, mice and smartphones we don't really get any observable noise. In those cases, this is a non-issue. However, less precise input devices like VR controllers suffer from jitter and wobbliness. And in the case of VR controllers, the degree of instability only increases as the target element gets further away.
+On precise input devices like trackpads, mice and smartphones we don't really get any observable noise. In those cases, this is a non-issue. However, less precise input devices like VR controllers suffer from jitter and wobbliness.
+
+And in the case of VR controllers, the degree of instability only increases as the target element gets further away. In the example below the amount of controller wobble stays the same but the resulting noise at the target destination increases significantly as the controller gets further away.
 
 <Scene scene="vr-controller" height={430} zoom={1.4} yOffset={-0.5} usesVariables />
 
@@ -29,12 +31,12 @@ Take a look what happens at the boundaries in the grid example when we apply noi
 
 <SomeNoise />
 
-We observe the element jumping between positions at random, yet somewhat regular intervals.
+At the boundaries the element tends to jump between positions, resulting in somewhat of an unstable feeling.
 
 
 ## Option scoring
 
-This general problem comes up in lots of applications where the software needs to make a choice between two or more options based on some input. Take the example of building a guide system like the ones found in design software like Figma or Photoshop.
+This general problem comes up in lots of applications where software needs to make a choice between two or more options based on an input. Take the example of building a guide system like the ones found in design software like Figma or Photoshop.
 
 When moving an element towards a guide, at some point the guide becomes close enough to the edge of the element that the software decides that the element should snap to the guide. But what if there are more than one guides which the element is close enough to snap to?
 
@@ -47,7 +49,7 @@ function bestGuide(element: Element, guides: Guide[]) {
 
   for (const guide of guides) {
     const score = guide.distanceTo(element);
-    if (score < SNAP_THRESHOLD && score < bestScore) {
+    if (score < bestScore) {
       bestScore = score;
       bestGuide = guide;
     }
@@ -57,4 +59,63 @@ function bestGuide(element: Element, guides: Guide[]) {
 }
 ```
 
-However, this implementation suffers from the jittering problem described above. Take a look:
+This naive implementation faces the same issue as our grid component above. When the element is roughly the same distance away from two guides, tiny nudges in either direction change which guide is picked. Let's see what this looks like:
+
+<Guides />
+
+Again, we see instability at the boundary.
+
+This naive method of option scoring—always picking the best score—can result in applications that feel finnicky. Even unstable.
+
+---
+
+Let's simplify this even further. We'll just consider two options—left and right.
+
+Like before, the input will be represented by a white dot. Our two options will be in the form of two lines at each side of the canvas.
+
+<Options />
+
+Our method of scoring will be to subtract the horizontal distance from the input to the line from a constant.
+
+```ts
+function score(inputX: number, lineX: number): number {
+  const distance = Math.abs(inputX - lineX);
+  return CONSTANT - distance;
+}
+```
+
+We want the "better" option to be the one which is closer to the input, so we'll consider a higher score to be better.
+
+Let's see what this looks like when we visualize the scores.
+
+<OptionsWithScore />
+
+This gives us a very clear view of what's happening. As soon as the score for one option overtakes as the best score, that option is immediately picked.
+
+Let's see how we can remedy the instability by introducing stickiness to our scoring.
+
+
+## Sticky option scoring
+
+The instability arises from us picking a new option when the scores have not changed by enough to warrant picking a new option.
+
+To combat this, we can adjust our scoring mechanism to inflate the score of the last picked option by some amount.
+
+```ts
+for (const option of options) {
+  let score = guide.calculateScore(input);
+
+  if (options === lastPickedOption) {
+    score *= 1.2; // Increase score by 20%
+  }
+  
+  if (score > bestScore) {
+    bestScore = score;
+    bestOption = guide;
+  }
+}
+```
+
+Increasing the score of the last picked option by 20% means that another option needs to be at least 20% better than it to take over its position as the best option. Let's see this in action.
+
+This can be a very effective method of eliminating the influence that noise in the input has on the picked option, since the noise would need to constitute a very large part of the score for it to cause a new option to be picked.

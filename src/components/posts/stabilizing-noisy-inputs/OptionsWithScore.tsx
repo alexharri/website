@@ -3,7 +3,7 @@ import { createWiggle } from "../../../math/wiggle";
 import { useStateRef } from "../../../utils/hooks/useStateRef";
 import { StyleOptions, useStyles } from "../../../utils/styles";
 import { Slider } from "../../Slider/Slider";
-import { createGridExample } from "./generators/GridExample";
+import { createOptionExample } from "./generators/OptionExample";
 
 const styles = ({ styled }: StyleOptions) => ({
   wrapper: styled.css`
@@ -15,13 +15,13 @@ const styles = ({ styled }: StyleOptions) => ({
   `,
 });
 
-export const SomeNoise = () => {
+export const OptionsWithScore = () => {
   const s = useStyles(styles);
 
   const [amplitude, setAmplitude, amplitudeRef] = useStateRef(1);
 
-  const GridExample = useMemo(() => {
-    return createGridExample(
+  const OptionExample = useMemo(() => {
+    return createOptionExample(
       () => {
         const speed = 3;
         const wiggleX = createWiggle();
@@ -31,14 +31,14 @@ export const SomeNoise = () => {
           return [wiggleX(speed, amplitude), wiggleY(speed, amplitude)];
         };
       },
-      { showBoundaries: true },
+      { showScores: true },
     );
   }, []);
 
   return (
     <div className={s("wrapper")}>
-      <GridExample />
       <Slider label="Amplitude" value={amplitude} setValue={setAmplitude} range={[0.2, 3]} />
+      <OptionExample />
     </div>
   );
 };
