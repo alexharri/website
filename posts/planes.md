@@ -243,7 +243,7 @@ Vector3 LinePlaneIntersection(Line line, Plane plane) {
 
 However, our code is not completely yet. In the case where the line is parallel to the plane's surface, the line and plane do not intersect.
 
-<Scene scene="project-point-onto-plane-4" height={450} yOffset={-1} zoom={1.5} usesVariables />
+<Scene scene="project-point-onto-plane-4" height={450} yOffset={-1} zoom={1.5} />
 
 That happens when $\vec{n_l}$ and $\vec{n_p}$ are perpendicular, in which case their dot product is zero. So if $\vec{n_l} \cdot \vec{n_p} = 0$, the line and plane do not intersect. This gives us an easy test we can add to our code to yield a result of "no intersection".
 
@@ -746,7 +746,7 @@ Since the dot product is a multiple of the magnitudes of its component vectors, 
 
 So $\dfrac{1}{D}$ is both the scaling factor we need for $\vec{U} \times d_1$, as well as $\vec{V}$:
 
-<Scene scene="three-intersecting-planes-9" height={450} zoom={1.25} yOffset={-0.5} />
+<Scene scene="three-intersecting-planes-9" height={450} zoom={1.25} yOffset={-0.5} usesVariables />
 
 We've got our solution! Let's do a quick overview.
 
