@@ -99,7 +99,7 @@ Let's see how we can remedy the instability by introducing stickiness to our sco
 
 The instability arises from us picking a new option when the scores have not changed by enough to warrant picking a new option.
 
-To combat this, we can adjust our scoring mechanism to inflate the score of the last picked option by some amount.
+To combat this, we can adjust our scoring mechanism to inflate the score of the last picked option by some amount, like 20%.
 
 ```ts
 for (const option of options) {
@@ -116,6 +116,33 @@ for (const option of options) {
 }
 ```
 
-Increasing the score of the last picked option by 20% means that another option needs to be at least 20% better than it to take over its position as the best option. Let's see this in action.
+Increasing the score of the last picked option by 20% means that another option needs to be at least 20% better for it to overtake as the best option.
 
-This can be a very effective method of eliminating the influence that noise in the input has on the picked option, since the noise would need to constitute a very large part of the score for it to cause a new option to be picked.
+Let's take a look at our example again with the 20% boost specifically highlighted to show its impact.
+
+<OptionsSticky />
+
+As we can see, the influence of noise has been greatly diminished because the change needed to cause an option to overtake is greater than the amount of noise.
+
+I call this method of inflating the score of the last picked option _sticky option scoring_, and the amount we inflate the score by is the _stickiness factor_. For example, multiplying the score of the last picked option by 1.2 corresponds to a stickiness factor of 20%.
+
+
+---
+
+A side effect of boosting the score of the last picked option is the switch between options no longer occurs at the midpoint between said options. The boundary between the options is still at the middle, but it has been widened.
+
+<OptionsStickyGap />
+
+This, in effect, creates two points-of-change. The boundary is no longer a single pixel. Rather, it is a proportion of the distance between the options.
+
+In the case where the scores between two options change linearly and symmetrically, like in our example where the score is a function of distance, we can calculate these points of change. Let's give the distance between the options the name $D$ and we'll give the stickiness factor the name $S$. The width of the boundary $W$ then becomes:
+
+<p className="mathblock">$$ W = D \times \dfrac{S}{2 + S} $$</p>
+
+With that, our two points of change $P_1$ and $P_2$ become the midpoint between the options $\pm$ half the width of the boundary $W$:
+
+<p className="mathblock">$$ P_1 = D \times 0.5 - (W \times 0.5) $$<br />$$ P_2 = D \times 0.5 + (W \times 0.5) $$</p>
+
+The example below allows you to change the stickiness factor between 0% and 100%.
+
+<OptionsStickyGapDynamic />

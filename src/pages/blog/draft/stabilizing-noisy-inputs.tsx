@@ -9,6 +9,9 @@ import { NoiseComponent } from "../../../components/posts/stabilizing-noisy-inpu
 import { Guides } from "../../../components/posts/stabilizing-noisy-inputs/Guides";
 import { Options } from "../../../components/posts/stabilizing-noisy-inputs/Options";
 import { OptionsWithScore } from "../../../components/posts/stabilizing-noisy-inputs/OptionsWithScore";
+import { OptionsSticky } from "../../../components/posts/stabilizing-noisy-inputs/OptionsSticky";
+import { OptionsStickyGap } from "../../../components/posts/stabilizing-noisy-inputs/OptionsStickyGap";
+import { OptionsStickyGapDynamic } from "../../../components/posts/stabilizing-noisy-inputs/OptionsStickyGapDynamic";
 
 export default createPage({
   NoNoise,
@@ -18,6 +21,9 @@ export default createPage({
   Guides,
   Options,
   OptionsWithScore,
+  OptionsSticky,
+  OptionsStickyGap,
+  OptionsStickyGapDynamic,
 });
 
 export const getStaticProps = async () => {

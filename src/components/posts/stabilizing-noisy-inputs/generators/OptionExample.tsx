@@ -47,23 +47,80 @@ const styles = ({ styled, theme }: StyleOptions) => ({
   `,
 
   score: styled.css`
+    position: relative;
     width: 0px;
     height: 28px;
     display: flex;
     align-items: center;
     white-space: nowrap;
     border-radius: 4px;
+    transition: border-radius 0.3s, border 0.3s;
 
     &--left {
       background: #0368ca;
+      &[data-active="true"] {
+        border-right: 1px solid #b5eaff;
+      }
     }
     &--right {
       background: #c12b13;
+      &[data-active="true"] {
+        border-right: 1px solid #ffbe9d;
+      }
     }
 
     span {
       display: block;
       padding: 0 8px;
+    }
+
+    &[data-active="true"] {
+      border-top-right-radius: 0;
+      border-bottom-right-radius: 0;
+
+      & [data-highlight] {
+        opacity: 1;
+      }
+    }
+  `,
+
+  scoreBoost: styled.css`
+    position: absolute;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    width: 100%;
+    border-radius: 4px;
+    z-index: -1;
+    transition: border-width 0.3s;
+
+    &--left {
+      background: #3890e8;
+      border: 0px solid #b5eaff;
+      &[data-active="true"] {
+        border-width: 1px;
+      }
+    }
+    &--right {
+      background: #e7553e;
+      border: 0px solid #ffbe9d;
+      &[data-active="true"] {
+        border-width: 1px;
+      }
+    }
+
+    & > [data-highlight] {
+      position: absolute;
+      top: 0;
+      right: 0;
+      bottom: 0;
+      /* box-shadow: 0 0 0 1px #b5eaff, 0 0 0 3px #4c82b1, 0 0 0 5px #1c355a; */
+      z-index: -5;
+      border-radius: 4px;
+      border-top-left-radius: 1px;
+      border-bottom-left-radius: 1px;
+      opacity: 0;
+      transition: opacity 0.3s;
     }
   `,
 
@@ -141,6 +198,10 @@ const styles = ({ styled, theme }: StyleOptions) => ({
         hsl(200deg 94% 51%) 100%
       );
     }
+
+    &--showGap {
+      border-right: 3px solid ${theme.background};
+    }
   `,
 
   right: styled.css`
@@ -175,6 +236,10 @@ const styles = ({ styled, theme }: StyleOptions) => ({
         hsl(25deg 89% 50%) 90%,
         hsl(27deg 95% 52%) 100%
       );
+    }
+
+    &--showGap {
+      border-left: 3px solid ${theme.background};
     }
   `,
 
@@ -212,8 +277,10 @@ const createInterpolateX = () => {
 
 export function createOptionExample(
   createNoiseFn: CreateNoiseFn,
-  { margin = false, showScores = false }: { margin?: boolean; showScores?: boolean } = {},
-): React.FC {
+  options: { margin?: boolean; showScores?: boolean; stickiness?: number; showGap?: boolean } = {},
+) {
+  const { margin = false, showScores = false, showGap = false } = options;
+
   const noise = createNoiseFn();
   const interpolateX = createInterpolateX();
 
@@ -221,17 +288,24 @@ export function createOptionExample(
     return `translate(${x}px, ${y}px) translate(-50%, -50%) scale(${scale})`;
   }
 
-  const CANVAS_H = showScores ? 128 : 96;
-  const DOT_Y = CANVAS_H * (showScores ? 0.6 : 0.5);
+  const CANVAS_H = 96;
+  const DOT_Y = CANVAS_H * 0.5;
 
-  const Component = () => {
+  const Component: React.FC<{ stickiness?: number }> = (props) => {
     const s = useStyles(styles);
+
+    const stickiness = props.stickiness ?? options.stickiness ?? 0;
+    const stickinessRef = useRef(stickiness);
+    stickinessRef.current = stickiness;
 
     const leftRef = useRef<HTMLDivElement>(null);
     const rightRef = useRef<HTMLDivElement>(null);
 
     const leftScoreRef = useRef<HTMLDivElement>(null);
     const rightScoreRef = useRef<HTMLDivElement>(null);
+
+    const leftScoreBoostRef = useRef<HTMLDivElement>(null);
+    const rightScoreBoostRef = useRef<HTMLDivElement>(null);
 
     const elementCurrPosRef = useRef(CANVAS_W * CLAMP_FAC);
     const elementTargetPosRef = useRef(CANVAS_W * CLAMP_FAC);
@@ -242,11 +316,16 @@ export function createOptionExample(
     const containerRef = useRef<HTMLDivElement>(null);
     const elementRef = useRef<HTMLDivElement>(null);
 
+    const lastBetterRef = useRef<"left" | "right" | undefined>(undefined);
+    const tBetterRef = useRef(0);
+
     useRAF(() => {
       const element = elementRef.current;
       const left = leftRef.current;
       const right = rightRef.current;
       if (!element || !left || !right) return;
+
+      const stickiness = stickinessRef.current;
 
       elementCurrPosRef.current = interpolateX(elementTargetPosRef.current);
 
@@ -269,12 +348,7 @@ export function createOptionExample(
         elementScaleRef.current,
       );
 
-      const [active, notActive] =
-        elementCurrPosRef.current < CANVAS_W / 2 ? [left, right] : [right, left];
-      active.setAttribute("data-active", "true");
-      notActive.removeAttribute("data-active");
-
-      const totalScore = 100;
+      const totalScore = 100 * (1 / (1 + stickiness));
       let rightScore =
         totalScore -
         (1 - (elementCurrPosRef.current - TARGET_X) / (CANVAS_W - TARGET_X * 2)) * totalScore;
@@ -283,12 +357,48 @@ export function createOptionExample(
       leftScore = Math.max(leftScore, 0);
       rightScore = Math.max(rightScore, 0);
 
+      // Visualize pre-boost
       const leftScoreEl = leftScoreRef.current;
       const rightScoreEl = rightScoreRef.current;
       if (leftScoreEl && rightScoreEl) {
         leftScoreEl.style.width = `${leftScore}%`;
         rightScoreEl.style.width = `${rightScore}%`;
       }
+
+      if (lastBetterRef.current === "left") leftScore *= 1 + stickiness;
+      else if (lastBetterRef.current === "right") rightScore *= 1 + stickiness;
+
+      const better = leftScore > rightScore ? "left" : "right";
+      lastBetterRef.current = better;
+
+      tBetterRef.current = lerp(tBetterRef.current, better === "left" ? 0 : 1, 0.15);
+
+      if (leftScoreEl && rightScoreEl) {
+        const [activeScore, notActiveScore] =
+          better === "left" ? [leftScoreEl, rightScoreEl] : [rightScoreEl, leftScoreEl];
+        activeScore.setAttribute("data-active", "true");
+        notActiveScore.removeAttribute("data-active");
+      }
+
+      const leftScoreBoostEl = leftScoreBoostRef.current;
+      const rightScoreBoostEl = rightScoreBoostRef.current;
+      if (leftScoreBoostEl && rightScoreBoostEl) {
+        leftScoreBoostEl.style.width = `${(1 + stickiness * (1 - tBetterRef.current)) * 100}%`;
+        rightScoreBoostEl.style.width = `${(1 + stickiness * tBetterRef.current) * 100}%`;
+      }
+
+      if (leftScoreBoostEl && rightScoreBoostEl) {
+        const [activeScoreBoost, notActiveScoreBoost] =
+          better === "left"
+            ? [leftScoreBoostEl, rightScoreBoostEl]
+            : [rightScoreBoostEl, leftScoreBoostEl];
+        activeScoreBoost.setAttribute("data-active", "true");
+        notActiveScoreBoost.removeAttribute("data-active");
+      }
+
+      const [active, notActive] = better === "left" ? [left, right] : [right, left];
+      active.setAttribute("data-active", "true");
+      notActive.removeAttribute("data-active");
     });
 
     function update(e: MouseEvent | TouchEvent) {
@@ -337,6 +447,11 @@ export function createOptionExample(
       };
     }, []);
 
+    const boundaryT = stickiness / (2 + stickiness);
+    const fac = (CANVAS_W - CANVAS_W * CLAMP_FAC * 2) / CANVAS_W;
+    const tAdj = boundaryT * fac;
+    const sidePercentage = showGap ? 50 + 50 * tAdj : 50;
+
     return (
       <div>
         <div
@@ -344,8 +459,16 @@ export function createOptionExample(
           ref={containerRef}
           style={{ width: CANVAS_W, height: CANVAS_H }}
         >
-          <div className={[s("side"), s("left")].join(" ")} ref={leftRef} />
-          <div className={[s("side"), s("right")].join(" ")} ref={rightRef} />
+          <div
+            className={[s("side"), s("left", { showGap })].join(" ")}
+            style={{ right: sidePercentage + "%" }}
+            ref={leftRef}
+          />
+          <div
+            className={[s("side"), s("right", { showGap })].join(" ")}
+            style={{ left: sidePercentage + "%" }}
+            ref={rightRef}
+          />
 
           <div className={s("line", { left: true })} style={{ left: TARGET_X }} />
           <div className={s("line", { right: true })} style={{ right: TARGET_X }} />
@@ -364,9 +487,21 @@ export function createOptionExample(
           <div className={s("scoreContainer")}>
             <div className={s("score", { left: true })} ref={leftScoreRef}>
               <span>Left score</span>
+              <div className={s("scoreBoost", { left: true })} ref={leftScoreBoostRef}>
+                <div
+                  data-highlight
+                  style={{ width: (1 / (1 + stickiness)) * stickiness * 100 + "%" }}
+                />
+              </div>
             </div>
             <div className={s("score", { right: true })} ref={rightScoreRef}>
               <span>Right score</span>
+              <div className={s("scoreBoost", { right: true })} ref={rightScoreBoostRef}>
+                <div
+                  data-highlight
+                  style={{ width: (1 / (1 + stickiness)) * stickiness * 100 + "%" }}
+                />
+              </div>
             </div>
           </div>
         )}
