@@ -139,10 +139,39 @@ In the case where the scores between two options change linearly and symmetrical
 
 <p className="mathblock">$$ W = D \times \dfrac{S}{2 + S} $$</p>
 
-With that, our two points of change $P_1$ and $P_2$ become the midpoint between the options $\pm$ half the width of the boundary $W$:
+With that, our two points of change $P_1$ and $P_2$ become the midpoint between the options plus/minus half the width of the boundary $W$:
 
-<p className="mathblock">$$ P_1 = D \times 0.5 - (W \times 0.5) $$<br />$$ P_2 = D \times 0.5 + (W \times 0.5) $$</p>
+<p className="mathblock">$$ P_1 = D \times 0.5 - W \times 0.5 $$<br />$$ P_2 = D \times 0.5 + W \times 0.5 $$</p>
 
 The example below allows you to change the stickiness factor between 0% and 100%.
 
 <OptionsStickyGapDynamic />
+
+
+## Picking a stickiness factor
+
+Picking an appropriate stickiness factor for your application is a mix of an art and a science, though I've typically picked stickiness factors between 10-50%. That range tends to feel great.
+
+There's nothing preventing you from using larger stickiness factors, such as 200% or 500%. The example below allows you to pick stickiness factors from 0% to 1,000% in 100% increments.
+
+<LargeStickinessFactors />
+
+Larger stickiness factors mean that the input needs to move _really far_ for it to have an effect on the picked option, which just feels off. The application should responds much quicker to the change.
+
+The 10-50% range I mentioned is pretty broad. There are two variables I've found to be good heuristics for determining which part of the range to use, which are
+
+ 1. the input's relative scale, and
+ 2. the amount of noise in your input.
+
+ The latter point regarding noise is more immediately obvious. More noise in the input warrants a larger stickiness factor to combat its effect. But what "relative scale of input" means is less obvious, so let's take a better look. 
+
+
+### Relative scale of input
+
+The most obvious example to use to demonstrate this idea is a canvas based editor like Figma.
+
+If the users level of zoom is 500%, each pixel of change in the input—the users mouse position—corresponds to just 0.2px of change in the document. And if the user is zoomed out to 25%, each pixel of change in the input corresponds to 4px of change in the document. As the users scale decreases or increases, so does the relative scale of the input.
+
+When the input's scale is small, such as when the user is zoomed in, the input is inherently more stable since more change is needed from the user to produce the same change. The increased stability means a lower need for stickiness.
+
+It's important to highlight the fact that a lower stickiness factor is desirable since it increases the responsiveness of the application. Using a higher stickiness factor increases stability _at the expense_ of responsiveness, so be mindful when picking the stickiness factor.
