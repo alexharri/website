@@ -3,6 +3,7 @@ type CreateNoiseFn = () => () => [number, number];
 import { useEffect, useRef } from "react";
 import { lerp } from "../../../../math/lerp";
 import { clamp } from "../../../../math/math";
+import { colors } from "../../../../utils/cssVariables";
 import { useRAF } from "../../../../utils/hooks/useRAF";
 import { StyleOptions, useStyles } from "../../../../utils/styles";
 
@@ -373,7 +374,7 @@ export function createOptionExample(
 
       tBetterRef.current = lerp(tBetterRef.current, better === "left" ? 0 : 1, 0.15);
 
-      if (leftScoreEl && rightScoreEl) {
+      if (stickiness > 0 && leftScoreEl && rightScoreEl) {
         const [activeScore, notActiveScore] =
           better === "left" ? [leftScoreEl, rightScoreEl] : [rightScoreEl, leftScoreEl];
         activeScore.setAttribute("data-active", "true");
@@ -387,7 +388,7 @@ export function createOptionExample(
         rightScoreBoostEl.style.width = `${(1 + stickiness * tBetterRef.current) * 100}%`;
       }
 
-      if (leftScoreBoostEl && rightScoreBoostEl) {
+      if (stickiness > 0 && leftScoreBoostEl && rightScoreBoostEl) {
         const [activeScoreBoost, notActiveScoreBoost] =
           better === "left"
             ? [leftScoreBoostEl, rightScoreBoostEl]
@@ -451,6 +452,8 @@ export function createOptionExample(
     const fac = (CANVAS_W - CANVAS_W * CLAMP_FAC * 2) / CANVAS_W;
     const tAdj = boundaryT * fac;
     const sidePercentage = showGap ? 50 + 50 * tAdj : 50;
+    const boundaryW = CANVAS_W * tAdj;
+    const borderW = showGap ? Math.max(1, Math.min(3, boundaryW / 5)) : 1;
 
     return (
       <div>
@@ -460,13 +463,19 @@ export function createOptionExample(
           style={{ width: CANVAS_W, height: CANVAS_H }}
         >
           <div
-            className={[s("side"), s("left", { showGap })].join(" ")}
-            style={{ right: sidePercentage + "%" }}
+            className={[s("side"), s("left")].join(" ")}
+            style={{
+              right: sidePercentage + "%",
+              borderRight: `${borderW}px solid ${colors.background}`,
+            }}
             ref={leftRef}
           />
           <div
-            className={[s("side"), s("right", { showGap })].join(" ")}
-            style={{ left: sidePercentage + "%" }}
+            className={[s("side"), s("right")].join(" ")}
+            style={{
+              left: sidePercentage + "%",
+              borderLeft: `${borderW}px solid ${colors.background}`,
+            }}
             ref={rightRef}
           />
 

@@ -31,8 +31,24 @@ const styles = ({ styled, theme }: StyleOptions) => ({
     pointer-events: none;
 
     &--main {
-      background: ${theme.text400};
+      background: linear-gradient(
+        180deg,
+        hsl(206deg 92% 41%) 0%,
+        hsl(206deg 92% 40%) 15%,
+        hsl(207deg 92% 39%) 25%,
+        hsl(207deg 92% 39%) 35%,
+        hsl(207deg 91% 38%) 43%,
+        hsl(208deg 91% 38%) 52%,
+        hsl(208deg 91% 37%) 61%,
+        hsl(209deg 91% 36%) 70%,
+        hsl(209deg 91% 36%) 82%,
+        hsl(209deg 91% 35%) 100%
+      );
+      border: 1px solid #59b6eb;
+      border-right-color: #3593d1;
+      border-bottom-color: #3593d1;
       z-index: 2;
+      /* border-radius: 6px; */
     }
 
     &--shadow {
@@ -41,12 +57,61 @@ const styles = ({ styled, theme }: StyleOptions) => ({
       width: 80px;
       height: 80px;
       border-radius: 50%;
+      position: relative;
     }
 
     &--position {
       background: #111a21;
-      border: 1px solid #364a5a;
+      border: 1px solid #3e5d76;
+      border-bottom-color: #2d4355;
+      border-right-color: #2d4355;
+      box-shadow: -1px -1px 1px 0px ${theme.background}, 1px 1px 1px 0px ${theme.background};
       z-index: 1;
+      background: linear-gradient(
+        345deg,
+        hsl(207deg 33% 12%) 0%,
+        hsl(207deg 34% 12%) 15%,
+        hsl(207deg 34% 11%) 25%,
+        hsl(207deg 34% 11%) 35%,
+        hsl(207deg 34% 11%) 43%,
+        hsl(207deg 35% 11%) 52%,
+        hsl(207deg 35% 10%) 61%,
+        hsl(207deg 35% 10%) 70%,
+        hsl(207deg 36% 10%) 82%,
+        hsl(207deg 36% 10%) 100%
+      );
+
+      /* &:before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        opacity: 0;
+        border-radius: 11px;
+        transition: opacity 0.3s;
+        background: radial-gradient(
+          hsl(210deg 55% 96%) 0%,
+          hsl(210deg 71% 90%) 11%,
+          hsl(210deg 75% 84%) 18%,
+          hsl(209deg 77% 79%) 24%,
+          hsl(209deg 85% 72%) 30%,
+          hsl(211deg 98% 63%) 36%,
+          hsl(209deg 100% 50%) 42%,
+          hsl(219deg 100% 52%) 50%,
+          hsl(224deg 84% 45%) 58%,
+          hsl(221deg 100% 31%) 68%,
+          hsl(222deg 100% 20%) 81%,
+          hsl(231deg 100% 11%) 100%
+        );
+      } */
+
+      /* &[data-active="true"] {
+        &:before {
+          opacity: 1;
+        }
+      } */
     }
   `,
 
@@ -165,6 +230,7 @@ export function createGridExample(
         const snappedCurrPos = snappedCurrPosRef.current;
 
         let bestPos: { x: number; y: number } | undefined;
+        let bestIndex: number = -1;
         let bestDist = Infinity;
 
         const elementPos = interpolateElement(elementTargetPos.x, elementTargetPos.y);
@@ -199,11 +265,12 @@ export function createGridExample(
           elementScaleRef.current,
         );
 
-        for (const pos of positions) {
+        for (const [i, pos] of positions.entries()) {
           const dist = distance(elementCurrPos, pos);
           if (dist < bestDist) {
             bestPos = pos;
             bestDist = dist;
+            bestIndex = i;
           }
         }
 
@@ -214,6 +281,16 @@ export function createGridExample(
         snappedCurrPos.x = snappedPos[0];
         snappedCurrPos.y = snappedPos[1];
         snapped.style.transform = transform(snappedCurrPos.x, snappedCurrPos.y);
+
+        const positionEls = containerRef.current?.querySelectorAll("[data-position]");
+        for (const positionEl of positionEls || []) {
+          const index = Number(positionEl.getAttribute("data-position"));
+          if (index === bestIndex) {
+            positionEl.setAttribute("data-active", "true");
+          } else {
+            positionEl.removeAttribute("data-active");
+          }
+        }
       };
       tick();
       return () => {
@@ -298,6 +375,7 @@ export function createGridExample(
             <div
               key={i}
               className={s("element", { position: true })}
+              data-position={i}
               style={{ transform: transform(x, y), width: W, height: W }}
             />
           );
