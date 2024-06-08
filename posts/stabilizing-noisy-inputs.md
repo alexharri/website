@@ -169,3 +169,35 @@ When the input's scale is small, such as when the user is zoomed in, the input i
 I think it's worth highlighting the fact that increasing stability through stickiness comes at the expense of responsiveness. As you add more stickiness, the application does become more stable, but it also becomes slower to respond to change.
 
 Stickiness is definitely not a silver bullet. It's a trade-off.
+
+
+## Example: Applying sticky option scoring
+
+I want to highlighting a recent example where I used sticky option scoring to improve the stability of Arkio's Move tool.
+
+For context, Arkio is an architectural modeler in VR. One of Arkio's tools, the Move tool, allows users to grab geometry and move it around. When the geometry that the user is moving overlaps with other geometry in the model, the tool performs a snap-like operation where the geometry being moved is aligned to the geometry it overlapped with.
+
+[ Add video of grabbing a cell and placing it onto another cell ]
+
+The move tool often has multiple ways to solve the overlap, which requires the tool to pick which face to align. Here is an illustration:
+
+<Image src="~/overlap.svg" plain width={500} noMargin />
+
+The box with the blue outline is the geometry being moved. The move tool can choose to solve this overlap by either
+
+ * aligning the bottom face and moving the cell up, or
+ * aligning the left face and moving the cell left.
+
+This produces two different results:
+
+<Image src="~/overlap-solutions.svg" plain width={640} noMargin />
+
+The move tool produces a score for each overlapping face. I won't get into the details of the scoring mechanism, but you can think of the score representing how "deep" the overlap is for the given face.
+
+This creates a boundary along the line where both faces are equally deep. At the boundary, a small nudge in either direction would change the result.
+
+<Image src="~/overlap-boundary.svg" plain width={640} noMargin />
+
+This resulted in the move tool often feeling unstable and jittery. Applying sticky option scoring ended up significantly improving the tool's stability and perceived. Here is a video I made showing the before and after:
+
+[ Stickiness before and after video ]

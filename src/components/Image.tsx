@@ -10,6 +10,8 @@ interface Props {
   width?: number | "auto";
 }
 
+const customPosts = new Set(["stabilizing-noisy-inputs"]);
+
 export const Image = ({ maxWidth, noMargin, plain, width, ...props }: Props) => {
   const s = useStyles(ImageStyles);
   const router = useRouter();
@@ -18,10 +20,16 @@ export const Image = ({ maxWidth, noMargin, plain, width, ...props }: Props) => 
 
   const { slug } = router.query;
 
-  if (src.startsWith("~/")) {
-    const isBlogPost = ["/blog/draft/[slug]", "/blog/[slug]"].includes(router.pathname);
-    if (typeof slug === "string" && isBlogPost) {
+  const isBlogPost = ["/blog/draft/", "/blog/"].some((path) => router.pathname.startsWith(path));
+  if (src.startsWith("~/") && isBlogPost) {
+    const parts = router.pathname.split("/");
+    const lastPart = parts[parts.length - 1];
+
+    if (typeof slug === "string") {
       const dirName = `/images/posts/${slug}/`;
+      src = dirName + src.substr(2);
+    } else if (customPosts.has(lastPart)) {
+      const dirName = `/images/posts/${lastPart}/`;
       src = dirName + src.substr(2);
     }
   }
