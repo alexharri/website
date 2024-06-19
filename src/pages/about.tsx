@@ -6,6 +6,7 @@ import { PostLayout } from "../components/PostLayout/PostLayout";
 import { LINKS } from "../constants";
 import { StyleOptions, useStyles } from "../utils/styles";
 
+const SHOW_IMAGE_CAROUSEL = false;
 const images = [
   "/images/me/iceland.jpg",
   "/images/me/yellow-house.jpg",
@@ -158,18 +159,19 @@ export default function Page() {
       </Head>
       <h1 className={s("headline")}>About me</h1>
       <PostLayout>
-        <p>Hey, I'm Alex Harri.</p>
         <p>
-          I write about software engineering topics like TypeScript, performance, and mathematics.{" "}
-          <Link href="/blog">View blog</Link>.
+          Hey, I'm Alex Harri. I write about software engineering topics like TypeScript,
+          performance, and mathematics. <Link href="/blog">View blog</Link>.
         </p>
-        <div className={s("imageCarousel")} ref={imageCarouselRef}>
-          {images.map((image) => (
-            <div key={image} className={s("imageContainer")}>
-              <img src={image} className={s("image")} />
-            </div>
-          ))}
-        </div>
+        {SHOW_IMAGE_CAROUSEL && (
+          <div className={s("imageCarousel")} ref={imageCarouselRef}>
+            {images.map((image) => (
+              <div key={image} className={s("imageContainer")}>
+                <img src={image} className={s("image")} />
+              </div>
+            ))}
+          </div>
+        )}
         <h2 className={s("heading")}>Career</h2>
         <p>
           As a very early employee at <Link href="https://www.taktikal.com/">Taktikal</Link>—and
@@ -216,8 +218,8 @@ export default function Page() {
           <Link href="/blog/vector-networks" target="_blank">
             <em>"The Engineering behind Figma's Vector Networks"</em>
           </Link>
-          , which I wrote back in 2019. It's a lengthy post covering multiple topics, and it
-          contains more than 200 diagrams and illustrations.
+          , which I wrote back in 2019. It's a lengthy post covering multiple topics and it contains
+          over 200 diagrams and illustrations.
         </p>
         <p>I've written three posts about TypeScript so far:</p>
         <ul>
@@ -245,7 +247,7 @@ export default function Page() {
           <Link href="/blog/multi-cursor-code-editing-animated-introduction" target="_blank">
             <em>"Multi-cursor code editing: An animated introduction"</em>
           </Link>
-          , which uses animated instances of the VS code editor to demonstrate uses cases and
+          , which uses animated instances of the VS code editor to demonstrate use cases and
           techniques for multi-cursor code editing.
         </p>
         <p>

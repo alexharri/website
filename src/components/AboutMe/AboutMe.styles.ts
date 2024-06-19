@@ -5,7 +5,7 @@ export const AboutMeStyles = ({ styled, theme }: StyleOptions) => ({
     display: flex;
     gap: 32px;
 
-    @media (max-width: 500px) {
+    @media (max-width: 640px) {
       flex-direction: column;
       gap: 24px;
     }
@@ -22,7 +22,7 @@ export const AboutMeStyles = ({ styled, theme }: StyleOptions) => ({
   `,
 
   image: styled.css`
-    width: 96px;
+    width: 128px;
     height: auto;
     border-radius: 50%;
   `,
