@@ -5,48 +5,46 @@ image: ""
 publishedAt: ""
 ---
 
-Below is an interactive grid component where the blue element snaps to the closest position in the grid. The white dot represents the input position—try dragging it around.
+Below is an interactive grid component where the blue element snaps to the position in the grid that's closest to the input position. The white dot represents the input position—try dragging it around.
 
 <NoNoise />
 
-When the input is at the boundaries, the difference between picking one position over another is just a single pixel[1]. Highlighting the boundaries makes this more obvious, take a look:
+At the boundaries, the difference between picking one position over another is just a single pixel[1]. Highlighting the boundaries makes this more obvious:
 
 <NoNoiseShowBoundaries />
 
-In this grid component, the element switches positions as soon as the input crosses the boundary. This makes for a very responsive application.
-
-However, consider what happens when we introduce some noise to the input.
+When the input crosses the boundary that changes the selected grid position. Makes sense, but consider what happens when we introduce some noise to the input.
 
 <NoiseComponent />
 
-When the input is close to a boundary, a small amount of noise can nudge the input over the boundary, making the element switch positions. Try out the updated grid component below with noise introduced:
+When the input is close to a boundary, a small amount of noise can nudge the input over the boundary, changing the resulting grid position. Below is the same grid component with noise introduced—see what happens at the boundaries.
 
 <SomeNoise />
 
-The noise component, especially at the boundaries, causes jittering and a feeling of instability. On precise input devices like trackpads, mice and smartphones we don't really get any observable noise. In those cases, this is a non-issue. However, less precise input devices like VR controllers suffer from jitter and wobbliness.
+The noise component causes jittering and a feeling of instability at the boundaries. On precise input devices like trackpads, mice and smartphones we don't really get any observable noise. In those cases, this is a non-issue. However, less precise input devices like VR controllers suffer from jitter and wobbliness.
 
 And in the case of VR controllers, the degree of instability only increases as the target element gets further away. In the example below the amount of controller wobble stays the same but the resulting noise at the target destination increases significantly as the controller gets further away.
 
 <Scene scene="vr-controller" height={430} zoom={1.4} yOffset={-0.5} usesVariables />
 
-Even if VR controller technology were perfect, human hand coordination introduces noise. Just try holding your hand in front of you and keeping it as still as you can. Even with great motor control, your hand will wiggle every so slightly—even if trying your best to keep it still.
+Even if VR controller technology were perfect, human hand coordination introduces noise. Just try holding your hand in front of you and keeping it as still as you can. Even with great motor control, your hand will wiggle every so slightly.
 
 ## Option scoring
 
-This general problem arises when software needs to make a choice between two or more options based on an input. Take the example of building a guide system like the ones found in design software like Figma or Photoshop.
+Take the example of building a guide system like the ones found in design software like Figma or Photoshop.
 
 When moving an element towards a guide, at some point the guide becomes close enough to the edge of the element that the software decides that the element should snap to the guide. But what if there are more than one guides which the element is close enough to snap to?
 
-In that case, we can assign scores to each guide and pick the guide with the "best" score. In the case of guides, a good scoring mechanism would be taking the distance from the guide to the edge of the element.
+In that case, we can assign scores to each guide and pick the guide with the best score. In the case of guides, a good scoring mechanism would be taking the distance from the guide to the edge of the element.
 
 ```ts
-function bestGuide(element: Element, guides: Guide[]) {
+function findBestGuide(element: Element, guides: Guide[]) {
   let bestScore = Infinity;
-  let bestGuide: Guide | undefined;
+  let bestGuide: Guide | null = null;
 
   for (const guide of guides) {
     const score = guide.distanceTo(element);
-    if (score < bestScore) {
+    if (score < bestScore) { // Lower (closer) is better
       bestScore = score;
       bestGuide = guide;
     }
@@ -56,13 +54,15 @@ function bestGuide(element: Element, guides: Guide[]) {
 }
 ```
 
-This naive implementation faces the same issue as our grid component above. When the element is roughly the same distance away from two guides, tiny nudges in either direction change which guide is picked. Let's see what this looks like:
+This method of scoring the options (guides) certainly works, but it forms a boundary at midpoint between the two guides.
 
 <Guides />
 
-Again, we see instability at the boundary. This naive method of option scoring—always picking the best score—can result in applications that feel finnicky. Even unstable.
+The boundary is infinitely thin so, just like in our grid example, a tiny nudge in either direction would change the picked guide. If any sort of noise were introduced, that would result in instability and jittering at the boundary.
 
-Let's simplify and consider the "minimal reproduction" for this problem. It just has two options: left and right. Like before, the input will be represented by a white dot. Our two options will be in the form of two lines at each side of the canvas.
+---
+
+Let's simplify and consider the "minimal reproduction" for this general problem. We'll use two options: left and right. Like before, the input will be represented by a white dot. Our two options will be in the form of two lines at each side of the canvas.
 
 <Options />
 
@@ -81,39 +81,39 @@ This creates a score that increases as the input gets closer to the line, meanin
 
 This gives us a very clear view of what's happening. The point where the scores are equal create a boundary where an infintely small nudge in either direction changes which option is picked.
 
-Let's see how we can widen this infinitely small boundary by introducing stickiness to our scoring.
+Let's see how we can widen this infinitely thin boundary by introducing stickiness.
 
 
 ## Sticky option scoring
 
-The problem results from us picking a new option when the scores have not changed by enough to warrant picking a new option.
+The jittering problem results from picking a new option when the scores have not changed by enough to warrant a new option being picked.
 
-To combat this, we can adjust our scoring mechanism to inflate the score of the last picked option by some amount, for example 20%.
+To combat this, we can adjust our scoring mechanism to inflate the scores of the last picked option by some percentage, for example 20%.
 
 ```ts
 for (const option of options) {
-  let score = guide.calculateScore(input);
+  let score = option.calculateScore(input);
 
   if (option === lastPickedOption) {
-    score *= 1.2; // Increase score by 20%
+    score *= 1.2; // Increase score of last picked option by 20%
   }
   
   if (score > bestScore) {
     bestScore = score;
-    bestOption = guide;
+    bestOption = option;
   }
 }
 ```
 
 Increasing the score of the last picked option by 20% means that another option needs to be at least 20% better for it to overtake as the best option.
 
-Let's take a look at our example again with the 20% boost specifically highlighted to show its impact.
+Let's take a look at our example again with the 20% boost highlighted to show its impact.
 
 <OptionsSticky />
 
 As we can see, the influence of noise has been greatly diminished because the amount of change needed to cause an option to overtake has been significantly increased.
 
-I call this inflating of the score of the last picked option _sticky option scoring_, and the amount we inflate the score by is the _stickiness factor_. For example, multiplying the score of the last picked option by 1.2 corresponds to a stickiness factor of 20%.
+I call this inflating of the score of the last picked option _sticky option scoring_, and the amount that the score is inflated by the _stickiness factor_. For example, multiplying the score of the last picked option by 1.2 corresponds to a stickiness factor of 20%.
 
 
 ### The widened boundary
@@ -122,15 +122,19 @@ A side effect of boosting the score of the last picked option is the switch betw
 
 <OptionsStickyGap />
 
-The boundary is no longer a single pixel. Rather, it is a proportion of the distance between the options. This, in effect, creates two points-of-change.
+When using a percentage-based stickiness factor, the boundary becomes a proportion of the distance between the options. This, in effect, creates two points-of-change.
 
-In the case where the scores between two options change linearly and symmetrically, like in our example where the score is a function of distance, we can calculate these points of change. Let's give the distance between the options the name $D$ and we'll give the stickiness factor the name $S$. The width of the boundary $W$ then becomes:
+We can calculate these points of change. Let's give the distance between the options the name $D$ and we'll give the stickiness factor the name $S$. The width of the boundary $W$ then becomes:
 
 <p className="mathblock">$$ W = D \times \dfrac{S}{2 + S} $$</p>
 
 With that, our two points of change $P_1$ and $P_2$ become the midpoint between the options plus/minus half the width of the boundary $W$:
 
 <p className="mathblock">$$ P_1 = D \times 0.5 - W \times 0.5 $$<br />$$ P_2 = D \times 0.5 + W \times 0.5 $$</p>
+
+Which we can simplify to:
+
+<p className="mathblock">$$ P_1 = (D - W) \times 0.5 $$<br />$$ P_2 = (D + W) \times 0.5 $$</p>
 
 The example below allows you to change the stickiness factor between 0% and 100%.
 
@@ -145,7 +149,7 @@ There's nothing preventing you from using larger stickiness factors, such as 200
 
 <LargeStickinessFactors />
 
-Larger stickiness factors make the change needed to pick a new option _really large_ relative to the distance between the options. This tends to feel off since it makes application slow to responds to change.
+Larger stickiness factors make the change needed to pick a new option very large relative to the distance between the options. This tends to not feel great since it makes application slow to responds to change.
 
 The 10-50% range I mentioned is pretty broad, so how can we narrow it down? There are two variables I've found to be good heuristics for determining which part of the range to use, which are
 
@@ -159,7 +163,7 @@ The 10-50% range I mentioned is pretty broad, so how can we narrow it down? Ther
 
 The most obvious example to use to demonstrate this idea is a canvas based editor like Figma.
 
-If the user's level of zoom is 500%, each pixel of change in the input—the user's mouse position—corresponds to just 0.2px of change in the document. And if the user is zoomed out to 25%, each pixel of change in the input corresponds to 4px of change in the document. As the user's scale decreases or increases, so does the relative scale of the input.
+If the user's level of zoom is 500%, each pixel of change in the input (the user's mouse position) corresponds to just 0.2px of change in the document. And if the user is zoomed out to 25%, each pixel of change in the input corresponds to 4px of change in the document. As the user's scale decreases or increases, so does the relative scale of the input.
 
 When the input's scale is small, such as when the user is zoomed in, the input is inherently more stable since more change is needed from the user to produce the same change. The increased stability means a lower _need_ for stickiness.
 
@@ -198,6 +202,8 @@ This creates a boundary along the line where both faces are equally deep. At the
 
 <Image src="~/overlap-boundary.svg" plain width={640} noMargin />
 
-This resulted in the move tool often feeling unstable and jittery. Applying sticky option scoring ended up significantly improving the tool's stability and perceived. Here is a video I made showing the before and after:
+Applying sticky option scoring widened the boundary, requiring more movement from the user to switch positions. Here is a video I made showing the before and after:
 
-[ Stickiness before and after video ]
+<Image src="~/bash-stickiness.mp4" plain width={840} noMargin />
+
+Notice how little movement was required to switch positions before, especially in contrast to how much movement is needed after adding a stickiness factor. This change significantly improved the tool's stability, and by extension made it feel much more usable.

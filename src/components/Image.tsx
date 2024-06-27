@@ -4,21 +4,26 @@ import { ImageStyles } from "./Image.styles";
 
 interface Props {
   src?: string;
-  maxWidth?: number;
   noMargin?: boolean;
   plain?: boolean;
   width?: number | "auto";
 }
 
+const videoExtensions = new Set(["mp4"]);
 const customPosts = new Set(["stabilizing-noisy-inputs"]);
 
-export const Image = ({ maxWidth, noMargin, plain, width, ...props }: Props) => {
+export const Image = (props: Props) => {
   const s = useStyles(ImageStyles);
   const router = useRouter();
 
+  const { noMargin, plain } = props;
   let src = props.src || "";
 
   const { slug } = router.query;
+
+  const srcParts = src.split(".");
+  const extension = srcParts[srcParts.length - 1];
+  const video = videoExtensions.has(extension);
 
   const isBlogPost = ["/blog/draft/", "/blog/"].some((path) => router.pathname.startsWith(path));
   if (src.startsWith("~/") && isBlogPost) {
@@ -35,23 +40,28 @@ export const Image = ({ maxWidth, noMargin, plain, width, ...props }: Props) => 
   }
 
   let flow = true;
-  let widthProp: string | number | undefined;
+  let width: string | number | undefined;
 
-  // if (fullWidth) width = "auto";
-
-  if (typeof width === "number") {
-    widthProp = width;
+  if (typeof props.width === "number") {
+    width = props.width;
     flow = false;
-  } else if (width === "auto") {
+  } else if (props.width === "auto") {
     flow = false;
   }
 
   let containerClassName = ["image", s("container", { plain, noMargin })].join(" ");
   if (flow) containerClassName += " flow";
 
+  const className = s("image", { plain });
+  const commonProps = { src, width, className };
+
   return (
     <div className={containerClassName}>
-      <img {...props} src={src} width={widthProp} className={s("image", { plain })} />
+      {video ? (
+        <video {...commonProps} autoPlay muted preload="" tabIndex={-1} loop />
+      ) : (
+        <img {...commonProps} />
+      )}
     </div>
   );
 };
