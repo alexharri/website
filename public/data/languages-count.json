@@ -1,0 +1,42 @@
+{
+  "keys": [
+    "C#",
+    "TypeScript",
+    "Python",
+    "JavaScript",
+    "Go",
+    "Java",
+    "Rust",
+    "PHP",
+    "C++",
+    "Scala",
+    "Ruby",
+    "F#",
+    "SQL",
+    "Delphi",
+    "Elixir",
+    "AL",
+    "Kotlin",
+    "Erlang",
+    "ReScript",
+    "X++",
+    "C",
+    "Objective-C",
+    "Bash",
+    "Zig",
+    "Clojure",
+    "Jai",
+    "Dart",
+    "LotusScript",
+    "VisualBasic",
+    "R",
+    "ABAP",
+    "Groovy",
+    "Lisp"
+  ],
+  "data": [
+    147, 129, 123, 104, 57, 49, 29, 22, 11, 10, 9, 5, 4, 3, 3, 3, 2, 2, 2, 2, 1, 1, 1, 1, 1, 1, 1,
+    1, 1, 1, 1, 1, 1
+  ],
+  "total": 425
+}

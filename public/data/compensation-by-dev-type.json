@@ -1,0 +1,201 @@
+{
+  "keys": ["0 - 0.8M", "0.8M - 1.0M", "1.0M - 1.2M", "1.2M - 1.4M", "1.4M - 1.6M", "Over 1.6M"],
+  "colors": ["#1988FF", "#33A0D1", "#4DB8A2", "#67CF74", "#81E745", "#9BFF17"],
+  "data": [
+    {
+      "label": "Front-end",
+      "values": {
+        "0 - 0.8M": 5,
+        "1.0M - 1.2M": 13,
+        "1.2M - 1.4M": 10,
+        "1.4M - 1.6M": 1,
+        "0.8M - 1.0M": 19,
+        "More than 1.600.000 kr.": 4,
+        "Not Applicable": 1,
+        "": 5
+      }
+    },
+    {
+      "label": "Back-end",
+      "values": {
+        "0 - 0.8M": 3,
+        "1.0M - 1.2M": 20,
+        "1.2M - 1.4M": 16,
+        "1.4M - 1.6M": 9,
+        "0.8M - 1.0M": 19,
+        "More than 1.600.000 kr.": 12,
+        "Not Applicable": 3,
+        "": 11
+      }
+    },
+    {
+      "label": "Full-stack",
+      "values": {
+        "0 - 0.8M": 25,
+        "1.0M - 1.2M": 41,
+        "1.2M - 1.4M": 42,
+        "1.4M - 1.6M": 19,
+        "0.8M - 1.0M": 52,
+        "More than 1.600.000 kr.": 17,
+        "Not Applicable": 13,
+        "": 20
+      }
+    },
+    {
+      "label": "App developer",
+      "values": {
+        "0 - 0.8M": 6,
+        "1.0M - 1.2M": 13,
+        "1.2M - 1.4M": 12,
+        "1.4M - 1.6M": 5,
+        "0.8M - 1.0M": 18,
+        "More than 1.600.000 kr.": 5,
+        "Not Applicable": 1,
+        "": 6
+      }
+    },
+    {
+      "label": "Data scientist",
+      "values": {
+        "0 - 0.8M": 3,
+        "1.0M - 1.2M": 8,
+        "1.2M - 1.4M": 8,
+        "1.4M - 1.6M": 1,
+        "0.8M - 1.0M": 8,
+        "More than 1.600.000 kr.": 4,
+        "Not Applicable": 3,
+        "": 6
+      }
+    },
+    {
+      "label": "Infra engineer",
+      "values": {
+        "0 - 0.8M": 1,
+        "1.0M - 1.2M": 19,
+        "1.2M - 1.4M": 20,
+        "1.4M - 1.6M": 10,
+        "0.8M - 1.0M": 12,
+        "More than 1.600.000 kr.": 10,
+        "Not Applicable": 2,
+        "": 7
+      }
+    },
+    {
+      "label": "Dev-ops",
+      "values": {
+        "0 - 0.8M": 3,
+        "1.0M - 1.2M": 19,
+        "1.2M - 1.4M": 18,
+        "1.4M - 1.6M": 12,
+        "0.8M - 1.0M": 19,
+        "More than 1.600.000 kr.": 15,
+        "Not Applicable": 3,
+        "": 5
+      }
+    },
+    {
+      "label": "QA engineer",
+      "values": {
+        "0 - 0.8M": 1,
+        "1.0M - 1.2M": 1,
+        "1.2M - 1.4M": 2,
+        "1.4M - 1.6M": 2,
+        "0.8M - 1.0M": 0,
+        "More than 1.600.000 kr.": 1,
+        "Not Applicable": 1,
+        "": 2
+      }
+    },
+    {
+      "label": "Game developer",
+      "values": {
+        "0 - 0.8M": 2,
+        "1.0M - 1.2M": 1,
+        "1.2M - 1.4M": 2,
+        "1.4M - 1.6M": 2,
+        "0.8M - 1.0M": 2,
+        "More than 1.600.000 kr.": 0,
+        "Not Applicable": 0,
+        "": 2
+      }
+    },
+    {
+      "label": "ML engineer",
+      "values": {
+        "0 - 0.8M": 0,
+        "1.0M - 1.2M": 0,
+        "1.2M - 1.4M": 0,
+        "1.4M - 1.6M": 0,
+        "0.8M - 1.0M": 0,
+        "More than 1.600.000 kr.": 1,
+        "Not Applicable": 0,
+        "": 0
+      }
+    },
+    {
+      "label": "Developer Experience engineer",
+      "values": {
+        "0 - 0.8M": 0,
+        "1.0M - 1.2M": 0,
+        "1.2M - 1.4M": 0,
+        "1.4M - 1.6M": 0,
+        "0.8M - 1.0M": 2,
+        "More than 1.600.000 kr.": 0,
+        "Not Applicable": 0,
+        "": 0
+      }
+    },
+    {
+      "label": "Systems/Embedded engineer",
+      "values": {
+        "0 - 0.8M": 0,
+        "1.0M - 1.2M": 3,
+        "1.2M - 1.4M": 3,
+        "1.4M - 1.6M": 0,
+        "0.8M - 1.0M": 0,
+        "More than 1.600.000 kr.": 0,
+        "Not Applicable": 0,
+        "": 0
+      }
+    },
+    {
+      "label": "Manager",
+      "values": {
+        "0 - 0.8M": 0,
+        "1.0M - 1.2M": 0,
+        "1.2M - 1.4M": 1,
+        "1.4M - 1.6M": 0,
+        "0.8M - 1.0M": 0,
+        "More than 1.600.000 kr.": 1,
+        "Not Applicable": 0,
+        "": 0
+      }
+    },
+    {
+      "label": "Student",
+      "values": {
+        "0 - 0.8M": 0,
+        "1.0M - 1.2M": 0,
+        "1.2M - 1.4M": 0,
+        "1.4M - 1.6M": 0,
+        "0.8M - 1.0M": 0,
+        "More than 1.600.000 kr.": 0,
+        "Not Applicable": 1,
+        "": 0
+      }
+    },
+    {
+      "label": "Other",
+      "values": {
+        "0 - 0.8M": 0,
+        "1.0M - 1.2M": 0,
+        "1.2M - 1.4M": 0,
+        "1.4M - 1.6M": 0,
+        "0.8M - 1.0M": 0,
+        "More than 1.600.000 kr.": 0,
+        "Not Applicable": 0,
+        "": 0
+      }
+    }
+  ]
+}

@@ -21,6 +21,7 @@ import { Note } from "../../components/Note/Note";
 import { PostLayout } from "../../components/PostLayout/PostLayout";
 import { Scene } from "../../threejs/scenes";
 import { ThreeProvider } from "../../threejs/Components/ThreeProvider";
+import { BarChart } from "../../components/BarChart/BarChart";
 
 // Custom components/renderers to pass to MDX.
 // Since the MDX files aren't loaded by webpack, they have no knowledge of how
@@ -52,6 +53,7 @@ const baseComponents = {
   Head,
   Note,
   Scene,
+  BarChart,
 };
 
 interface Props {
