@@ -5,6 +5,14 @@ publishedAt: ""
 image: ""
 ---
 
+## Cloud providers
+
+<BarChart data="cloud-providers-count" horizontal />
+
+## Cloud providers by language
+
+<BarChart data="cloud-providers-by-language" stacked horizontal />
+
 ## Languages
 
 <BarChart data="languages-count" minResponses={2} />
