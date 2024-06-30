@@ -12,4 +12,9 @@ export const BarChartStyles = ({ styled }: StyleOptions) => ({
     padding: 0 ${cssVariables.contentPadding}px;
     margin: 0 auto;
   `,
+
+  controls: styled.css`
+    display: flex;
+    justify-content: center;
+  `,
 });

@@ -5,6 +5,7 @@ import { ChartData, ChartDataset, GridLineOptions } from "chart.js";
 import { useStyles } from "../../utils/styles";
 import { BarChartStyles } from "./BarChart.styles";
 import { colors, cssVariables } from "../../utils/cssVariables";
+import { Checkbox } from "../Toggle/Toggle";
 
 interface Data2DEntry {
   label: string;
@@ -35,7 +36,7 @@ interface Props {
   horizontal?: boolean;
 }
 
-function normalize(json: Data2DJson): Data2DJson {
+function normalize2D(json: Data2DJson): Data2DJson {
   return {
     ...json,
     data: json.data.map((item) => ({ ...item, values: normalizeValues(item.values) })),
@@ -79,6 +80,7 @@ function totalResponses(values: Record<string, number>): number {
 export function BarChart(props: Props) {
   const s = useStyles(BarChartStyles);
   const [_json, setJson] = useState<Data2DJson | Data1DJson | null>(null);
+  const [normalize, setNormalize] = useState(props.normalize ?? false);
 
   useEffect(() => {
     const get = async () => {
@@ -95,8 +97,8 @@ export function BarChart(props: Props) {
 
   if (!_json) return <p>Loading</p>;
 
+  let is2D = false;
   let yStyle: string | undefined = undefined;
-  let displayLegend = false;
   let total: number | null = null;
 
   let data: ChartData<"bar">;
@@ -117,11 +119,11 @@ export function BarChart(props: Props) {
       ],
     };
   } else {
-    displayLegend = true;
+    is2D = true;
     let json = _json as Data2DJson;
     if (props.minResponses) json = minResponses2D(json, props.minResponses);
-    if (props.normalize) {
-      json = normalize(json);
+    if (normalize) {
+      json = normalize2D(json);
       yStyle = "percent";
     }
 
@@ -143,6 +145,9 @@ export function BarChart(props: Props) {
       }),
     };
   }
+
+  const displayLegend = is2D;
+  const allowNormalize = is2D;
 
   let defaultHeight = 400;
   if (props.horizontal && data.labels) {
@@ -221,6 +226,13 @@ export function BarChart(props: Props) {
           }}
         />
       </div>
+      {allowNormalize && (
+        <div className={s("controls")}>
+          <Checkbox variant="toggle" checked={normalize} onValueChange={setNormalize}>
+            Normalize
+          </Checkbox>
+        </div>
+      )}
     </div>
   );
 }
