@@ -20,6 +20,7 @@ interface Data2DJson {
 interface Data1DJson {
   keys: string[];
   data: number[];
+  colors?: string[];
   total?: number;
 }
 
@@ -111,7 +112,7 @@ export function BarChart(props: Props) {
       datasets: [
         {
           data: json.data,
-          backgroundColor: "#399ef4",
+          backgroundColor: json.colors || "#399ef4",
         },
       ],
     };
@@ -143,7 +144,12 @@ export function BarChart(props: Props) {
     };
   }
 
-  const height = props.height ?? 400;
+  let defaultHeight = 400;
+  if (props.horizontal && data.labels) {
+    defaultHeight = 80 + data.labels.length * 32;
+  }
+
+  const height = props.height ?? defaultHeight;
   const width = (props.width ?? cssVariables.contentWidth) + cssVariables.contentPadding * 2;
   const aspectRatio = width / height;
 
@@ -195,7 +201,7 @@ export function BarChart(props: Props) {
                           const item = items[0];
                           const value = item.dataset.data[item.dataIndex] as number;
                           const percent = Number(((value / total!) * 100).toFixed(1)) + "%";
-                          return `Used by ${percent} of respondents`;
+                          return `${percent} of respondents`;
                         }
                       : undefined,
                 },

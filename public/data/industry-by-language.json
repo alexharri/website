@@ -1,0 +1,346 @@
+{
+  "keys": ["Private sector", "Startup", "Public sector", "Banking/Financial", "Contractor"],
+  "colors": ["#4984F0", "#48F0E2", "#6CE241", "#E2C541", "#EB7441"],
+  "data": [
+    {
+      "label": "C#",
+      "values": {
+        "Private sector": 79,
+        "Public sector": 25,
+        "Contractor": 9,
+        "Startup": 10,
+        "Banking/Financial": 23
+      }
+    },
+    {
+      "label": "TypeScript",
+      "values": {
+        "Private sector": 77,
+        "Public sector": 7,
+        "Contractor": 8,
+        "Startup": 23,
+        "Banking/Financial": 9
+      }
+    },
+    {
+      "label": "Python",
+      "values": {
+        "Private sector": 68,
+        "Public sector": 9,
+        "Contractor": 5,
+        "Startup": 26,
+        "Banking/Financial": 10
+      }
+    },
+    {
+      "label": "JavaScript",
+      "values": {
+        "Private sector": 67,
+        "Public sector": 6,
+        "Contractor": 8,
+        "Startup": 17,
+        "Banking/Financial": 4
+      }
+    },
+    {
+      "label": "Go",
+      "values": {
+        "Private sector": 36,
+        "Public sector": 3,
+        "Contractor": 6,
+        "Startup": 9,
+        "Banking/Financial": 1
+      }
+    },
+    {
+      "label": "Java",
+      "values": {
+        "Private sector": 33,
+        "Public sector": 2,
+        "Contractor": 3,
+        "Startup": 5,
+        "Banking/Financial": 6
+      }
+    },
+    {
+      "label": "Rust",
+      "values": {
+        "Private sector": 13,
+        "Public sector": 2,
+        "Contractor": 4,
+        "Startup": 10,
+        "Banking/Financial": 0
+      }
+    },
+    {
+      "label": "PHP",
+      "values": {
+        "Private sector": 9,
+        "Public sector": 5,
+        "Contractor": 3,
+        "Startup": 4,
+        "Banking/Financial": 0
+      }
+    },
+    {
+      "label": "C++",
+      "values": {
+        "Private sector": 9,
+        "Public sector": 0,
+        "Contractor": 1,
+        "Startup": 1,
+        "Banking/Financial": 0
+      }
+    },
+    {
+      "label": "Scala",
+      "values": {
+        "Private sector": 6,
+        "Public sector": 0,
+        "Contractor": 1,
+        "Startup": 1,
+        "Banking/Financial": 1
+      }
+    },
+    {
+      "label": "Ruby",
+      "values": {
+        "Private sector": 5,
+        "Public sector": 2,
+        "Contractor": 0,
+        "Startup": 1,
+        "Banking/Financial": 0
+      }
+    },
+    {
+      "label": "F#",
+      "values": {
+        "Private sector": 1,
+        "Public sector": 1,
+        "Contractor": 0,
+        "Startup": 3,
+        "Banking/Financial": 0
+      }
+    },
+    {
+      "label": "SQL",
+      "values": {
+        "Private sector": 3,
+        "Public sector": 0,
+        "Contractor": 1,
+        "Startup": 0,
+        "Banking/Financial": 0
+      }
+    },
+    {
+      "label": "Delphi",
+      "values": {
+        "Private sector": 2,
+        "Public sector": 1,
+        "Contractor": 0,
+        "Startup": 0,
+        "Banking/Financial": 0
+      }
+    },
+    {
+      "label": "Elixir",
+      "values": {
+        "Private sector": 0,
+        "Public sector": 1,
+        "Contractor": 0,
+        "Startup": 2,
+        "Banking/Financial": 0
+      }
+    },
+    {
+      "label": "AL",
+      "values": {
+        "Private sector": 2,
+        "Public sector": 0,
+        "Contractor": 0,
+        "Startup": 1,
+        "Banking/Financial": 0
+      }
+    },
+    {
+      "label": "Kotlin",
+      "values": {
+        "Private sector": 0,
+        "Public sector": 0,
+        "Contractor": 0,
+        "Startup": 2,
+        "Banking/Financial": 0
+      }
+    },
+    {
+      "label": "Erlang",
+      "values": {
+        "Private sector": 0,
+        "Public sector": 0,
+        "Contractor": 0,
+        "Startup": 1,
+        "Banking/Financial": 1
+      }
+    },
+    {
+      "label": "ReScript",
+      "values": {
+        "Private sector": 0,
+        "Public sector": 0,
+        "Contractor": 0,
+        "Startup": 2,
+        "Banking/Financial": 0
+      }
+    },
+    {
+      "label": "X++",
+      "values": {
+        "Private sector": 2,
+        "Public sector": 0,
+        "Contractor": 0,
+        "Startup": 0,
+        "Banking/Financial": 0
+      }
+    },
+    {
+      "label": "C",
+      "values": {
+        "Private sector": 0,
+        "Public sector": 0,
+        "Contractor": 0,
+        "Startup": 1,
+        "Banking/Financial": 0
+      }
+    },
+    {
+      "label": "Objective-C",
+      "values": {
+        "Private sector": 0,
+        "Public sector": 1,
+        "Contractor": 0,
+        "Startup": 0,
+        "Banking/Financial": 0
+      }
+    },
+    {
+      "label": "Bash",
+      "values": {
+        "Private sector": 1,
+        "Public sector": 0,
+        "Contractor": 0,
+        "Startup": 0,
+        "Banking/Financial": 0
+      }
+    },
+    {
+      "label": "Zig",
+      "values": {
+        "Private sector": 1,
+        "Public sector": 0,
+        "Contractor": 0,
+        "Startup": 0,
+        "Banking/Financial": 0
+      }
+    },
+    {
+      "label": "Clojure",
+      "values": {
+        "Private sector": 1,
+        "Public sector": 0,
+        "Contractor": 0,
+        "Startup": 0,
+        "Banking/Financial": 0
+      }
+    },
+    {
+      "label": "Jai",
+      "values": {
+        "Private sector": 0,
+        "Public sector": 0,
+        "Contractor": 0,
+        "Startup": 1,
+        "Banking/Financial": 0
+      }
+    },
+    {
+      "label": "Dart",
+      "values": {
+        "Private sector": 0,
+        "Public sector": 1,
+        "Contractor": 0,
+        "Startup": 0,
+        "Banking/Financial": 0
+      }
+    },
+    {
+      "label": "LotusScript",
+      "values": {
+        "Private sector": 0,
+        "Public sector": 1,
+        "Contractor": 0,
+        "Startup": 0,
+        "Banking/Financial": 0
+      }
+    },
+    {
+      "label": "VisualBasic",
+      "values": {
+        "Private sector": 1,
+        "Public sector": 0,
+        "Contractor": 0,
+        "Startup": 0,
+        "Banking/Financial": 0
+      }
+    },
+    {
+      "label": "R",
+      "values": {
+        "Private sector": 0,
+        "Public sector": 0,
+        "Contractor": 0,
+        "Startup": 0,
+        "Banking/Financial": 1
+      }
+    },
+    {
+      "label": "ABAP",
+      "values": {
+        "Private sector": 0,
+        "Public sector": 1,
+        "Contractor": 0,
+        "Startup": 0,
+        "Banking/Financial": 0
+      }
+    },
+    {
+      "label": "Groovy",
+      "values": {
+        "Private sector": 1,
+        "Public sector": 0,
+        "Contractor": 0,
+        "Startup": 0,
+        "Banking/Financial": 0
+      }
+    },
+    {
+      "label": "Lisp",
+      "values": {
+        "Private sector": 1,
+        "Public sector": 0,
+        "Contractor": 0,
+        "Startup": 0,
+        "Banking/Financial": 0
+      }
+    },
+    {
+      "label": "Other",
+      "values": {
+        "Private sector": 0,
+        "Public sector": 0,
+        "Contractor": 0,
+        "Startup": 0,
+        "Banking/Financial": 0
+      }
+    }
+  ]
+}
