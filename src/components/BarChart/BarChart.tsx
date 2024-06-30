@@ -5,7 +5,7 @@ import { ChartData, ChartDataset, GridLineOptions } from "chart.js";
 import { useStyles } from "../../utils/styles";
 import { BarChartStyles } from "./BarChart.styles";
 import { colors, cssVariables } from "../../utils/cssVariables";
-import { Checkbox } from "../Toggle/Toggle";
+import { Toggle } from "../Toggle/Toggle";
 
 interface Data2DEntry {
   label: string;
@@ -15,6 +15,7 @@ interface Data2DEntry {
 interface Data2DJson {
   keys: string[];
   colors: string[];
+  total?: Record<string, number>;
   data: Data2DEntry[];
 }
 
@@ -39,7 +40,10 @@ interface Props {
 function normalize2D(json: Data2DJson): Data2DJson {
   return {
     ...json,
-    data: json.data.map((item) => ({ ...item, values: normalizeValues(item.values) })),
+    data: json.data.map((item) => ({
+      ...item,
+      values: normalizeValues(item.values, json.total?.[item.label]),
+    })),
   };
 }
 
@@ -59,14 +63,17 @@ function minResponses1D(json: Data1DJson, min: number) {
       data.push(json.data[i]);
     }
   }
-  console.log({ keys, data, json });
   return { ...json, data, keys };
 }
 
-function normalizeValues(values: Record<string, number>): Record<string, number> {
+function normalizeValues(values: Record<string, number>, total?: number): Record<string, number> {
   const out: Record<string, number> = {};
-  let total = 0;
-  for (const value of Object.values(values)) total += value;
+  if (typeof total !== "number") {
+    total = 0;
+    for (const value of Object.values(values)) total += value;
+  } else {
+  }
+
   for (const [key, value] of Object.entries(values)) out[key] = value / total;
   return out;
 }
@@ -150,8 +157,13 @@ export function BarChart(props: Props) {
   const allowNormalize = is2D;
 
   let defaultHeight = 400;
-  if (props.horizontal && data.labels) {
-    defaultHeight = 80 + data.labels.length * 32;
+  if (props.horizontal) {
+    const baseHeight = displayLegend ? 96 : 32;
+    if (data.labels) {
+      defaultHeight = baseHeight + data.labels.length * 32;
+    } else {
+      defaultHeight = baseHeight + data.datasets.length;
+    }
   }
 
   const height = props.height ?? defaultHeight;
@@ -184,6 +196,7 @@ export function BarChart(props: Props) {
                   format: !props.horizontal ? valueAxisFormat : undefined,
                 },
                 grid: !props.horizontal ? gridLineOptions : undefined,
+                max: !props.horizontal && normalize ? 1 : undefined,
               },
               x: {
                 stacked: props.stacked,
@@ -193,6 +206,7 @@ export function BarChart(props: Props) {
                   format: props.horizontal ? valueAxisFormat : undefined,
                 },
                 grid: props.horizontal ? gridLineOptions : undefined,
+                max: props.horizontal && normalize ? 1 : undefined,
               },
             },
             plugins: {
@@ -228,9 +242,9 @@ export function BarChart(props: Props) {
       </div>
       {allowNormalize && (
         <div className={s("controls")}>
-          <Checkbox variant="toggle" checked={normalize} onValueChange={setNormalize}>
+          <Toggle checked={normalize} onValueChange={setNormalize}>
             Normalize
-          </Checkbox>
+          </Toggle>
         </div>
       )}
     </div>

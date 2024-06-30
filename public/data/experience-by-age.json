@@ -1,0 +1,74 @@
+{
+  "keys": [
+    "< 1 year",
+    "1 - 2 years",
+    "3 - 5 years",
+    "6 - 10 years",
+    "11 - 15 years",
+    "16 - 20 years",
+    "> 20 years"
+  ],
+  "colors": ["#1988FF", "#2F9CD8", "#44B0B2", "#5AC48B", "#70D764", "#85EB3E", "#9BFF17"],
+  "data": [
+    {
+      "label": "19-24 years old",
+      "values": {
+        "< 1 year": 5,
+        "1 - 2 years": 8,
+        "3 - 5 years": 10,
+        "6 - 10 years": 0,
+        "11 - 15 years": 0,
+        "16 - 20 years": 0,
+        "> 20 years": 0
+      }
+    },
+    {
+      "label": "25-34 years old",
+      "values": {
+        "< 1 year": 3,
+        "1 - 2 years": 20,
+        "3 - 5 years": 51,
+        "6 - 10 years": 69,
+        "11 - 15 years": 15,
+        "16 - 20 years": 1,
+        "> 20 years": 0
+      }
+    },
+    {
+      "label": "35-44 years old",
+      "values": {
+        "< 1 year": 0,
+        "1 - 2 years": 0,
+        "3 - 5 years": 8,
+        "6 - 10 years": 37,
+        "11 - 15 years": 43,
+        "16 - 20 years": 34,
+        "> 20 years": 25
+      }
+    },
+    {
+      "label": "45-54 years old",
+      "values": {
+        "< 1 year": 0,
+        "1 - 2 years": 0,
+        "3 - 5 years": 0,
+        "6 - 10 years": 2,
+        "11 - 15 years": 8,
+        "16 - 20 years": 15,
+        "> 20 years": 44
+      }
+    },
+    {
+      "label": "55-64 years old",
+      "values": {
+        "< 1 year": 0,
+        "1 - 2 years": 0,
+        "3 - 5 years": 0,
+        "6 - 10 years": 0,
+        "11 - 15 years": 0,
+        "16 - 20 years": 0,
+        "> 20 years": 17
+      }
+    }
+  ]
+}

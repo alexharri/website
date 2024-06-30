@@ -7,7 +7,7 @@ interface Props {
   children: React.ReactNode;
 }
 
-export const Checkbox: React.FC<Props> = (props) => {
+export const Toggle: React.FC<Props> = (props) => {
   const { checked, onValueChange } = props;
 
   const s = useStyles(styles);

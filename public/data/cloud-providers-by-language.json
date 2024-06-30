@@ -10,6 +10,22 @@
     "#88EE38",
     "#9BFF17"
   ],
+  "total": {
+    "AWS": 223,
+    "Heroku": 21,
+    "Azure": 155,
+    "Google Cloud/Firebase": 69,
+    "1984.is": 9,
+    "Advania": 15,
+    "Origo": 26,
+    "Vercel": 97,
+    "Cloudflare": 75,
+    "Digital Ocean": 10,
+    "Fly.io": 3,
+    "Netlify": 4,
+    "Render": 6,
+    "CoreWeave": 2
+  },
   "data": [
     {
       "label": "AWS",

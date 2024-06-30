@@ -5,6 +5,32 @@ publishedAt: ""
 image: ""
 ---
 
+## Language by Years of Experience
+
+<BarChart data="language-by-experience" width={1000} />
+
+## Age and experience of respondents
+
+<BarChart data="age-count" horizontal />
+
+<BarChart data="years-of-experience-count" horizontal />
+
+Here we can see the years of experience, broken down by age:
+
+<BarChart data="experience-by-age" horizontal stacked width={800} />
+
+## Nationality
+
+Of those 396 respondents who specified their nationality, 384 were Icelandic. I would expect the real proportion of non-Icelandic software developers to be _much_ higher.
+
+## Company size
+
+<BarChart data="company-size-count" horizontal />
+
+## Gender
+
+<BarChart data="gender-count" width={500} height={300} />
+
 ## Compensation by Industry
 
 <BarChart data="compensation-by-industry" horizontal normalize stacked />
@@ -23,7 +49,7 @@ image: ""
 
 ## Cloud providers by language
 
-<BarChart data="cloud-providers-by-language" stacked horizontal />
+<BarChart data="cloud-providers-by-language" width={1000} />
 
 ## Languages
 
