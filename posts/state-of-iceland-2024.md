@@ -57,7 +57,7 @@ Of those 396 respondents who specified their nationality, 384 were Icelandic. I 
 
 ## Compensation by Years of Experience
 
-<BarChart data="compensation-by-experience" normalize minResponses={6} />
+<BarChart data="compensation-by-experience" />
 
 ## Compensation by Language
 

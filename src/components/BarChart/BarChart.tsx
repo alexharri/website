@@ -198,7 +198,6 @@ export function BarChart(props: Props) {
                   format: !props.horizontal ? valueAxisFormat : undefined,
                 },
                 grid: !props.horizontal ? gridLineOptions : undefined,
-                max: !props.horizontal && normalize ? 1 : undefined,
               },
               x: {
                 stacked: props.stacked,
@@ -208,7 +207,6 @@ export function BarChart(props: Props) {
                   format: props.horizontal ? valueAxisFormat : undefined,
                 },
                 grid: props.horizontal ? gridLineOptions : undefined,
-                max: props.horizontal && normalize ? 1 : undefined,
               },
             },
             plugins: {
