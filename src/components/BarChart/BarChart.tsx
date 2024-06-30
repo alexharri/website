@@ -179,6 +179,8 @@ export function BarChart(props: Props) {
     color: colors.medium400,
   };
 
+  console.log(data);
+
   return (
     <div className={s("container")}>
       <div className={s("inner")} style={{ height, width }}>

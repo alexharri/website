@@ -66,3 +66,11 @@ Of those 396 respondents who specified their nationality, 384 were Icelandic. I 
 ## Compensation by Developer Type
 
 <BarChart data="compensation-by-dev-type" horizontal stacked normalize minResponses={6} />
+
+## Operating system
+
+<BarChart data="os-count" width={500} height={300} />
+
+## Operating system by industry
+
+<BarChart data="os-by-industry" width={640} />

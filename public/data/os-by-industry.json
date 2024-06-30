@@ -1,0 +1,54 @@
+{
+  "keys": ["Windows", "macOS", "Linux"],
+  "colors": ["#1988FF", "#39EC4B", "#ECCB39"],
+  "total": {
+    "Private sector": 232,
+    "Public sector": 53,
+    "Contractor": 19,
+    "Startup": 66,
+    "Banking/Financial": 46,
+    "": 9
+  },
+  "data": [
+    {
+      "label": "Private sector",
+      "values": {
+        "Windows": 97,
+        "macOS": 128,
+        "Linux": 80
+      }
+    },
+    {
+      "label": "Public sector",
+      "values": {
+        "Windows": 35,
+        "macOS": 14,
+        "Linux": 15
+      }
+    },
+    {
+      "label": "Contractor",
+      "values": {
+        "Windows": 9,
+        "macOS": 13,
+        "Linux": 5
+      }
+    },
+    {
+      "label": "Startup",
+      "values": {
+        "Windows": 17,
+        "macOS": 45,
+        "Linux": 20
+      }
+    },
+    {
+      "label": "Banking/Financial",
+      "values": {
+        "Windows": 25,
+        "macOS": 18,
+        "Linux": 9
+      }
+    }
+  ]
+}
