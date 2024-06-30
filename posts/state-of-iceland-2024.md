@@ -51,6 +51,10 @@ Of those 396 respondents who specified their nationality, 384 were Icelandic. I 
 
 <BarChart data="cloud-providers-by-language" width={1000} />
 
+## Continuous integration and continuous delivery (CI/CD)
+
+<BarChart data="ci-count" horizontal minResponses={5} />
+
 ## Languages
 
 <BarChart data="languages-count" minResponses={2} />
