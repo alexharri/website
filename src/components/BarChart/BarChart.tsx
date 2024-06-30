@@ -29,6 +29,7 @@ interface Props {
   minResponses?: number;
   normalize?: boolean;
   width?: number;
+  stacked?: boolean;
 }
 
 function normalize(json: Data2DJson): Data2DJson {
@@ -147,6 +148,7 @@ export function BarChart(props: Props) {
             aspectRatio,
             scales: {
               y: {
+                stacked: props.stacked,
                 ticks: {
                   color: colors.text700,
                   font: { family: cssVariables.fontFamily, size: 13 },
@@ -161,6 +163,7 @@ export function BarChart(props: Props) {
                 },
               },
               x: {
+                stacked: props.stacked,
                 ticks: {
                   color: colors.text,
                   font: { family: cssVariables.fontFamily, size: 13 },

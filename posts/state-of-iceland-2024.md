@@ -15,4 +15,4 @@ image: ""
 
 ## Compensation by Developer Type
 
-<BarChart data="compensation-by-dev-type" normalize minResponses={6} width={960} />
+<BarChart data="compensation-by-dev-type" stacked normalize minResponses={6} width={960} />
