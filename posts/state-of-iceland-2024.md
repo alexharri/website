@@ -5,6 +5,16 @@ publishedAt: ""
 image: ""
 ---
 
+## Compensation by Years of Experience
+
+All:
+
+<BarChart data="compensation-by-experience" normalize />
+
+By gender:
+
+<BarChart data="compensation-by-experience-by-gender" width={1200} normalize />
+
 ## Language by Years of Experience
 
 <BarChart data="language-by-experience" width={1000} />
