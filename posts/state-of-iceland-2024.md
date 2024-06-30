@@ -5,6 +5,10 @@ publishedAt: ""
 image: ""
 ---
 
+## Compensation by Industry
+
+<BarChart data="compensation-by-industry" horizontal normalize stacked />
+
 ## Industry
 
 <BarChart data="industry-count" width={600} />
