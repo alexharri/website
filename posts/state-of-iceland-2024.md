@@ -13,6 +13,10 @@ image: ""
 
 <BarChart data="compensation-by-experience" normalize minResponses={6} />
 
+## Compensation by Language
+
+<BarChart data="compensation-by-language" height={550} horizontal stacked minResponses={2} />
+
 ## Compensation by Developer Type
 
-<BarChart data="compensation-by-dev-type" stacked normalize minResponses={6} width={960} />
+<BarChart data="compensation-by-dev-type" horizontal stacked normalize minResponses={6} />

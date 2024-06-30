@@ -1,7 +1,7 @@
 import "../../utils/chartjs";
 import { Bar } from "react-chartjs-2";
 import { useEffect, useState } from "react";
-import { ChartData, ChartDataset } from "chart.js";
+import { ChartData, ChartDataset, GridLineOptions } from "chart.js";
 import { useStyles } from "../../utils/styles";
 import { BarChartStyles } from "./BarChart.styles";
 import { colors, cssVariables } from "../../utils/cssVariables";
@@ -29,7 +29,9 @@ interface Props {
   minResponses?: number;
   normalize?: boolean;
   width?: number;
+  height?: number;
   stacked?: boolean;
+  horizontal?: boolean;
 }
 
 function normalize(json: Data2DJson): Data2DJson {
@@ -129,15 +131,30 @@ export function BarChart(props: Props) {
           label: key,
           data: json.data.map((item) => item.values[key]),
           backgroundColor: json.colors?.[i] ?? "red",
+          ...(props.stacked
+            ? {
+                borderWidth: 1,
+                borderColor: colors.background,
+              }
+            : {}),
         };
         return dataset;
       }),
     };
   }
 
-  const height = 400;
+  const height = props.height ?? 400;
   const width = (props.width ?? cssVariables.contentWidth) + cssVariables.contentPadding * 2;
   const aspectRatio = width / height;
+
+  const valueAxisFormat: Intl.NumberFormatOptions = {
+    style: yStyle,
+    maximumFractionDigits: 0,
+    minimumFractionDigits: 0,
+  };
+  const gridLineOptions: Partial<GridLineOptions> = {
+    color: colors.medium400,
+  };
 
   return (
     <div className={s("container")}>
@@ -146,28 +163,25 @@ export function BarChart(props: Props) {
           data={data}
           options={{
             aspectRatio,
+            indexAxis: props.horizontal ? "y" : "x",
             scales: {
               y: {
                 stacked: props.stacked,
                 ticks: {
                   color: colors.text700,
                   font: { family: cssVariables.fontFamily, size: 13 },
-                  format: {
-                    style: yStyle,
-                    maximumFractionDigits: 0,
-                    minimumFractionDigits: 0,
-                  },
+                  format: !props.horizontal ? valueAxisFormat : undefined,
                 },
-                grid: {
-                  color: colors.medium400,
-                },
+                grid: !props.horizontal ? gridLineOptions : undefined,
               },
               x: {
                 stacked: props.stacked,
                 ticks: {
                   color: colors.text,
                   font: { family: cssVariables.fontFamily, size: 13 },
+                  format: props.horizontal ? valueAxisFormat : undefined,
                 },
+                grid: props.horizontal ? gridLineOptions : undefined,
               },
             },
             plugins: {

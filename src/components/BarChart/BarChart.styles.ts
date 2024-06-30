@@ -9,9 +9,7 @@ export const BarChartStyles = ({ styled }: StyleOptions) => ({
   `,
 
   inner: styled.css`
-    height: 400px;
     padding: 0 ${cssVariables.contentPadding}px;
-    width: ${cssVariables.contentWidth + cssVariables.contentPadding * 2}px;
     margin: 0 auto;
   `,
 });
