@@ -1,0 +1,99 @@
+{
+  "keys": [
+    "1 person",
+    "2 to 5 people",
+    "6 to 10 people",
+    "11 to 20 people",
+    "21 to 50 people",
+    "51 to 100 people",
+    "101 to 300 people",
+    "Over 300 people"
+  ],
+  "colors": [
+    "#1988FF",
+    "#2C99DE",
+    "#3EAABD",
+    "#51BB9C",
+    "#63CC7A",
+    "#76DD59",
+    "#88EE38",
+    "#9BFF17"
+  ],
+  "data": [
+    {
+      "label": "Private sector",
+      "values": {
+        "1 person": 1,
+        "2 to 5 people": 11,
+        "6 to 10 people": 11,
+        "11 to 20 people": 27,
+        "21 to 50 people": 51,
+        "51 to 100 people": 29,
+        "101 to 300 people": 35,
+        "Over 300 people": 58,
+        "": 6,
+        "Not Applicable": 3
+      }
+    },
+    {
+      "label": "Startup",
+      "values": {
+        "1 person": 0,
+        "2 to 5 people": 18,
+        "6 to 10 people": 8,
+        "11 to 20 people": 17,
+        "21 to 50 people": 12,
+        "51 to 100 people": 7,
+        "101 to 300 people": 2,
+        "Over 300 people": 0,
+        "": 2,
+        "Not Applicable": 0
+      }
+    },
+    {
+      "label": "Public sector",
+      "values": {
+        "1 person": 1,
+        "2 to 5 people": 0,
+        "6 to 10 people": 1,
+        "11 to 20 people": 2,
+        "21 to 50 people": 6,
+        "51 to 100 people": 6,
+        "101 to 300 people": 14,
+        "Over 300 people": 18,
+        "": 5,
+        "Not Applicable": 0
+      }
+    },
+    {
+      "label": "Banking/Financial",
+      "values": {
+        "1 person": 0,
+        "2 to 5 people": 0,
+        "6 to 10 people": 2,
+        "11 to 20 people": 4,
+        "21 to 50 people": 7,
+        "51 to 100 people": 6,
+        "101 to 300 people": 10,
+        "Over 300 people": 15,
+        "": 2,
+        "Not Applicable": 0
+      }
+    },
+    {
+      "label": "Contractor",
+      "values": {
+        "1 person": 6,
+        "2 to 5 people": 3,
+        "6 to 10 people": 0,
+        "11 to 20 people": 1,
+        "21 to 50 people": 3,
+        "51 to 100 people": 3,
+        "101 to 300 people": 1,
+        "Over 300 people": 0,
+        "": 0,
+        "Not Applicable": 2
+      }
+    }
+  ]
+}

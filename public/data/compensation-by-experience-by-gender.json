@@ -135,7 +135,7 @@
       }
     },
     {
-      "label": "More than 20 years (M)",
+      "label": "Over 20 years (M)",
       "values": {
         "0 - 0.8M": 2,
         "1.0M - 1.2M": 10,
@@ -146,7 +146,7 @@
       }
     },
     {
-      "label": "More than 20 years (F)",
+      "label": "Over 20 years (F)",
       "values": {
         "0 - 0.8M": 0,
         "1.0M - 1.2M": 0,

@@ -35,6 +35,7 @@ interface Props {
   height?: number;
   stacked?: boolean;
   horizontal?: boolean;
+  percentage?: boolean;
 }
 
 function normalize2D(json: Data2DJson): Data2DJson {
@@ -50,7 +51,7 @@ function normalize2D(json: Data2DJson): Data2DJson {
 function minResponses2D(json: Data2DJson, min: number) {
   return {
     ...json,
-    data: json.data.filter((item) => totalResponses(item.values) > min),
+    data: json.data.filter((item) => totalResponses(item.values) >= min),
   };
 }
 
@@ -112,6 +113,9 @@ export function BarChart(props: Props) {
 
   if (typeof _json.data[0] === "number") {
     let json = _json as Data1DJson;
+    if (props.percentage) {
+      yStyle = "percent";
+    }
 
     if (props.minResponses) json = minResponses1D(json, props.minResponses);
     if (json.total != null) total = json.total;
@@ -131,6 +135,8 @@ export function BarChart(props: Props) {
     if (props.minResponses) json = minResponses2D(json, props.minResponses);
     if (normalize) {
       json = normalize2D(json);
+      yStyle = "percent";
+    } else if (props.percentage) {
       yStyle = "percent";
     }
 
@@ -154,7 +160,7 @@ export function BarChart(props: Props) {
   }
 
   const displayLegend = is2D;
-  const allowNormalize = is2D;
+  const allowNormalize = is2D && !props.percentage;
 
   let defaultHeight = 400;
   if (props.horizontal) {
@@ -172,7 +178,7 @@ export function BarChart(props: Props) {
 
   const valueAxisFormat: Intl.NumberFormatOptions = {
     style: yStyle,
-    maximumFractionDigits: 0,
+    maximumFractionDigits: 1,
     minimumFractionDigits: 0,
   };
   const gridLineOptions: Partial<GridLineOptions> = {
@@ -182,63 +188,68 @@ export function BarChart(props: Props) {
   console.log(data);
 
   return (
-    <div className={s("container")}>
-      <div className={s("inner")} style={{ height, width }}>
-        <Bar
-          data={data}
-          options={{
-            aspectRatio,
-            indexAxis: props.horizontal ? "y" : "x",
-            scales: {
-              y: {
-                stacked: props.stacked,
-                ticks: {
-                  color: colors.text700,
-                  font: { family: cssVariables.fontFamily, size: 13 },
-                  format: !props.horizontal ? valueAxisFormat : undefined,
+    <div className={[s("container"), "chart"].join(" ")}>
+      <div
+        className={s("wrapper")}
+        style={{ height, width: width + cssVariables.contentPadding * 2 }}
+      >
+        <div className={s("inner")} style={{ height, width }}>
+          <Bar
+            data={data}
+            options={{
+              aspectRatio,
+              indexAxis: props.horizontal ? "y" : "x",
+              scales: {
+                y: {
+                  stacked: props.stacked,
+                  ticks: {
+                    color: colors.text700,
+                    font: { family: cssVariables.fontFamily, size: 13 },
+                    format: !props.horizontal ? valueAxisFormat : undefined,
+                  },
+                  grid: !props.horizontal ? gridLineOptions : undefined,
                 },
-                grid: !props.horizontal ? gridLineOptions : undefined,
-              },
-              x: {
-                stacked: props.stacked,
-                ticks: {
-                  color: colors.text,
-                  font: { family: cssVariables.fontFamily, size: 13 },
-                  format: props.horizontal ? valueAxisFormat : undefined,
-                },
-                grid: props.horizontal ? gridLineOptions : undefined,
-              },
-            },
-            plugins: {
-              tooltip: {
-                enabled: true,
-                mode: "point",
-                callbacks: {
-                  footer:
-                    total != null
-                      ? (items) => {
-                          const item = items[0];
-                          const value = item.dataset.data[item.dataIndex] as number;
-                          const percent = Number(((value / total!) * 100).toFixed(1)) + "%";
-                          return `${percent} of respondents`;
-                        }
-                      : undefined,
+                x: {
+                  stacked: props.stacked,
+                  ticks: {
+                    color: colors.text,
+                    font: { family: cssVariables.fontFamily, size: 13 },
+                    format: props.horizontal ? valueAxisFormat : undefined,
+                  },
+                  grid: props.horizontal ? gridLineOptions : undefined,
                 },
               },
-              legend: {
-                display: displayLegend,
-                position: "bottom",
-                labels: {
-                  padding: 24,
-                  color: colors.text,
-                  font: { family: cssVariables.fontFamily, size: 13 },
-                  boxWidth: 16,
-                  boxHeight: 16,
+              plugins: {
+                tooltip: {
+                  enabled: true,
+                  mode: "point",
+                  callbacks: {
+                    footer:
+                      total != null
+                        ? (items) => {
+                            const item = items[0];
+                            const value = item.dataset.data[item.dataIndex] as number;
+                            const percent = Number(((value / total!) * 100).toFixed(1)) + "%";
+                            return `${percent} of respondents`;
+                          }
+                        : undefined,
+                  },
+                },
+                legend: {
+                  display: displayLegend,
+                  position: "bottom",
+                  labels: {
+                    padding: 24,
+                    color: colors.text,
+                    font: { family: cssVariables.fontFamily, size: 13 },
+                    boxWidth: 16,
+                    boxHeight: 16,
+                  },
                 },
               },
-            },
-          }}
-        />
+            }}
+          />
+        </div>
       </div>
       {allowNormalize && (
         <div className={s("controls")}>

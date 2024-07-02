@@ -3,7 +3,7 @@
   "colors": ["#1988FF", "#33A0D1", "#4DB8A2", "#67CF74", "#81E745", "#9BFF17"],
   "data": [
     {
-      "label": "Less than one year",
+      "label": "Under 1 year",
       "values": {
         "0 - 0.8M": 5,
         "1.0M - 1.2M": 0,
@@ -69,7 +69,7 @@
       }
     },
     {
-      "label": "More than 20 years",
+      "label": "Over 20 years",
       "values": {
         "0 - 0.8M": 2,
         "1.0M - 1.2M": 10,
