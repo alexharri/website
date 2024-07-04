@@ -9,48 +9,59 @@ A survey for Icelandic developers was conducted earlier this year by Kolibri. Th
 
 This post will present the results from the survey, breaking down and joining the data in various ways.
 
-## Demongraphics respondents
+## Demographics
 
-425 developers responded to the survey, which constitutes a fairly large percentage of Icelandic software developers. The majority of respondents are aged 25 to 54, with some younger and some older.
+425 developers responded to the survey. With only a few thousand software developers in Iceland, this constitutes a significant portion of Icelandic software developers. The majority of respondents were aged 25 to 54.
 
 <BarChart data="age-count" width={640} horizontal />
-
-<SmallNote>The survey was mostly targeted at working software developers so the low number of respondents aged 19 to 24 can likely be explained by that age range mostly being comprised of students.</SmallNote>
 
 Of the respondents who specified their gender (397), a large majority of the respondents were men (86.1%), with the rest being women and a small number of non-binary respondents.
 
 <BarChart data="gender-count" width={500} height={300} />
 
-Of those 396 respondents who specified their nationality, 384 were Icelandic. However, from personal experience I would estimate the real number of non-Icelandic software developers to be _much_ higher. This survey was primarily circulated through an Icelandic Facebook group, which likely limited its reach.
+Of those 396 respondents who specified their nationality, 384 were Icelandic (96.9%). This low number of non-Iceland respondents is likely due to the survey primarily being circulated through an Icelandic Facebook group for software developers. I would estimate the real proportion of non-Icelandic software developers to be much higher than just 3%.
 
 
 ## Experience
 
-Below we can see the experience of the respondents.
+The following chart shows the experience of the respondents.
 
 <BarChart data="years-of-experience-count" width={640} horizontal />
 
-More interestingly, we can split the age cohorts by experience.
+We can get more information by comparing experience across age cohorts. The below chart shows years of experience, grouped by the age cohorts.
 
 <BarChart data="experience-by-age" horizontal stacked width={660} height={300} />
 
-Most developers aged 45 or above have over 20 years of experience, indicating that most older developers started their career in their 20s. Looking at the younger age cohorts indicates that most of them started their career in their 20s, with a much smaller percentage starting in their 30s or 40s.
+Most developers aged 45 or above have over 20 years of experience, indicating that most older developers started their career in their 20s. Looking at the younger age cohorts indicates that most of them started their career in their 20s as well, with a smaller percentage starting in their 30s or 40s.
 
 
-## Programming languages
+## Developer types
 
-The top programming language in Iceland is C#, with 34.6% of Icelandic developers using it. After C#, we get TypeScript (30.4%), Python (28.9%) and JavaScript (24.5%). All subsequent languages are used by less than 15% of Icelandic developers.
+Respondents were asked which type of developer they consider themselves to be. They could pick more than one type.
+
+<BarChart data="dev-types-count" width={640} />
+
+Perhaps the most immediately obvious fact that jumps out is how many developers classify themselves as full-stack developers—definitely more than I would have expected! I made one notable change to the data which influenced that:
+
+ * If a developer classified themselves as both a front-end and back-end developer, I classified them as a full-stack developer (in case they had not done so themselves).
+ * After that, if a developer is classified as a full-stack developer, they were _not_ classified as a front-end or back-end developer.
+
+This change means that front-end, back-end and full-stack are _mutually exclusive_ developer types. I feel that this gives a better sense of the real numbers of front-end vs back-end vs full-stack developers.
+
+## Back-end programming languages
+
+The survey asked which back-end programming languages respondents had used within the last year. Only respondents that classified themselves as back-end or full-stack developers were asked this question.
 
 <BarChart data="languages-count" width={640} />
 
-<SmallNote center>Languages which were only used by 1 respondent were not included.</SmallNote>
+<SmallNote>The languages colored blue were provided as default options in the survey, while the languages colored green were typed in the "Other" field. Languages used by fewer than 3 respondents are not included.</SmallNote>
 
-The languages colored blue were provided as the default options in the survey, while the languages colored green were typed in the "Other" field.
+The top back-end programming language in Iceland is C#, with 46.1% of Icelandic developers using it. After C#, we get TypeScript (40.4%), Python (38.6%) and JavaScript (32.6%). The next two languages, Go and Java, come in at 17.9% and 15.4% respectively.
 
 Some observations:
 
- * SQL at 0.9% usage is _obviously_ not accurate. I would expect almost every single back-end and full-stack developer to have reported using it if it had been provided as a default option.
- * C++ at 2.6% is far too low as well. I would guesstimate that C++ would be in the 8-15% range had it been included as a default option.
+ * SQL at 1.3% usage is _obviously_ not accurate. I would expect most back-end and full-stack developer to have reported using it if it had been provided as a default option.
+ * C++ at 3.4% is far too low as well. I would guesstimate that C++ would be in the 8-15% range had it been included as a default option.
 
 Aside from those obvious anomalies the data seems accurate to me. C# is heavily used in Icelandic companies, with it being the go-to back-end development language for most Icelandic companies.
 
@@ -58,28 +69,35 @@ TypeScript, as the data shows, has been widely adopted in Iceland. In my experie
 
 Python being heavily used is no surprise to me, and the usage of Go and Rust are in line with what I would have expected.
 
+### Comparison to Stack Overflow's survey
+
 Let's compare this to the results of [Stack Overflow's 2023 Developer Survey][so_2023_tech]:
 
 [so_2023_tech]: https://survey.stackoverflow.co/2023/#most-popular-technologies-language-prof
 
 <BarChart data="languages-percentage-v-stackoverflow" percentage width={640} />
 
-The percentages are much higher in SO's survey, but we can still observe the relative differences. Two differences stand out to me:
+One obvious issue with this comparison is that the State of Iceland survey specifically asked about _back-end_ languages, while Stack Overflow's survey did not make that distinction. This may be part of the wide gap in usage between JavaScript in Iceland vs globally, and also why the percentages are generally higher in Stack Overflow's survey
+
+Still, a few key things stand out to me:
 
  * C# is super popular in Iceland. Perhaps as a direct consequence, Java is much less used in Iceland than globally.
- * TypeScript seems to be significantly more popular than JavaScript in Iceland, compared to globally.
+ * TypeScript is more popular than JavaScript in Iceland, which is not the case globally.
+ * PHP is much less used in Iceland than globally.
+
+
+### Years of experience by programming languages
 
 I was curious whether there would be a significant difference between the languages that experienced developers are using compared to less experienced ones, but that does not seem to be the case. The following chart shows language use by years of experience.
 
 <BarChart data="language-by-experience" width={1000} />
 
-We can observe _some_ patterns, such as Java usage being higher amongst more experienced developers, but I don't see any dramatic differences that couldn't be explained away as randomness from the small sample size.
+We can glean _some_ patterns from this data, such as Java being used more by experienced developers. Still, I don't see any dramatic differences that couldn't be explained away by the small sample size.
 
-We'll explore
 
 ## Salary
 
-Icelandic developers are compensated well. The data collected on monthly salary was split up into six brackets:
+Icelandic developers are compensated well. Respondents were asked about their monthly salary, with the possible answers being one of six salary brackets:
 
 {<table data-align="right">
 <tbody>
@@ -94,9 +112,9 @@ Icelandic developers are compensated well. The data collected on monthly salary 
 </tbody>
 </table>}
 
-<SmallNote>The EUR and USD figures are using an exchange rate of ISK 1 = EUR 0.0067 and ISK 1 = USD 0.0072 from the 2nd of July 2024.</SmallNote>
+<SmallNote>The EUR and USD figures are using an exchange rate of ISK 1 = EUR 0.0067 and ISK 1 = USD 0.0072, measured on the 2nd of July 2024.</SmallNote>
 
-In Iceland we generally generally discuss monthly salaries instead of yearly, but in the US (and other countries) yearly salary figures are more common. Here is the same table with yearly salary figures (i.e. multiplied by 12).
+In Iceland we generally generally discuss monthly salaries instead of yearly, but in the US (and other countries) yearly salary figures are more common. Here is the same table with yearly salary figures.
 
 {<table data-align="right">
 <tbody>
@@ -111,30 +129,30 @@ In Iceland we generally generally discuss monthly salaries instead of yearly, bu
 </tbody>
 </table>}
 
-The below chart shows the monthly salary figures split by age bracket.
+The below chart shows monthly salary for developers in Iceland, split by age bracket.
 
 <BarChart data="compensation-by-experience" normalize />
 
 As a freshly minted developer, you can expect to earn under or around ISK 800K. Even though the first salary bracket goes to zero, I wouldn't expect many developers to be earning less than 650K unless they're entering the field without a degree.
 
-With a few years of experience, most developers move from the &lt;800K to the 800K - 1.0M bracket. And at 6 or more years of experience, a lot of developers move into brackets above &gt;1.0M.
+With a few years of experience, most developers move from the &lt;800K to the 800K-1.0M bracket. And at 6 or more years of experience a lot of developers move into the &gt;1.0M brackets.
 
-Attempting to summarize this:
+Summarizing this:
 
- * developers starting their career can expect to earn under or around ISK 800K monthly (USD 70K yearly)
- * developers with 3-10 of experience generally earn ISK 800K to 1.2M monthly (USD 70K to 100K yearly)
- * developers with over 10 of experience generally earn ISK 1.0M to 1.4M monthly (USD 85K to 120K yearly)
- * a significant number of highly experienced developers (10 to 20+ years of experience) earn 1.4M to &gt;1.6M monthly (USD 120K to &gt;140K yearly)
+ * Developers starting their career can expect to earn under or around ISK 800K monthly (USD 70K yearly)
+ * Developers with 3-10 of experience generally earn ISK 800K to 1.2M monthly (USD 70K to 100K yearly)
+ * Developers with over 10 of experience generally earn ISK 1.0M to 1.4M monthly (USD 85K to 120K yearly)
+ * A significant number of highly experienced developers (10 to 20+ years of experience) earn 1.4M to &gt;1.6M monthly (USD 120K to &gt;140K yearly)
 
-TL;DR: the typical developer in Iceland earns from USD 85K to 120K yearly.
+TL;DR: the typical developer in Iceland earns around USD 85K to 120K yearly.
 
-Here is a different view of the same compensation data, which I feel shows the story of how developers move to higher salary brackets as their experience increases more clearly.
+Here is a different view of the same compensation data, which I feel shows the story of how developers move into the higher salary brackets as they gain more experience.
 
 <BarChart data="compensation-by-experience" stacked horizontal normalize />
 
 ### Salary by programming language
 
-Grouping salary information by language usage gives us the following chart:
+The following chart shows monthly salary grouped by language:
 
 <BarChart data="compensation-by-language" horizontal stacked />
 
@@ -142,26 +160,26 @@ There is not a great deal of difference across languages, though salaries for de
 
 ### Salary by developer type
 
-Developers were asked to select their "developer type", such as whether they're a front-end or a back-end developer. The following chart shows monthly salary, split by developer type.
+As mentioned earlier, developers were asked to select their developer type, such as whether they're a front-end or a back-end developer. The following chart shows monthly salary, grouped by developer type.
 
 <BarChart data="compensation-by-dev-type" horizontal stacked minResponses={6} />
 
-Perhaps the most immediately obvious fact that jumps out is how many developers classify themselves as full-stack developers. Way more than I would have expected.
+### Gender differences in pay
 
-I made one notable change to the raw data here:
+I was curious as to whether there would be visible disparities in salaries across genders, but no visible difference can be seen from the survey data. I would chalk this up to the very low sample size. Still, here is the salary chart from earlier split by gender as well as years of experience.
 
- * If a developer classified themselves as both a front-end and back-end developer, I classified them as a full-stack developer (in case they had not done so themselves).
- * After that, if a developer is classified as a full-stack developer, they are NOT classified as a front-end or back-end developer.
+<BarChart data="compensation-by-experience-by-gender" width={1200} normalize />
 
-This change means that front-end, back-end and full-stack are _mutually exclusive_ developer types. I feel that this gives a better sense of the real numbers of front-end, back-end and full-stack developers.
+<SmallNote>For information on the gender pay gap in Iceland, see ["Unadjusted gender pay gap 9.1% in 2022"](https://www.statice.is/publications/news-archive/wages-and-income/unadjusted-gender-pay-gap-2022/) from Statistics Iceland</SmallNote>
+
 
 ## Putting developer salaries into context
 
-The salary numbers are interesting, but there are other important factors which cannot be captured in salary numbers. The following sections will discuss taxes, employer-provided benefits and work-life balance.
+Salary numbers are interesting, but there are other important factors which cannot be captured in raw salary numbers. The following chapters will discuss taxes, employer-provided benefits and work-life balance in Iceland.
 
 ### Taxes
 
-We've been looking at gross salary, but in figuring out net salaries we need to look at Icelandic taxes. In 2024, Iceland has three tax brackets:
+We've been looking at gross salaries so far. In figuring out net salaries we need to look at Icelandic taxes. In 2024, Iceland has three tax brackets:
 
 {<table data-align="right">
 <tbody>
@@ -180,18 +198,9 @@ There is a personal tax credit of ISK 64.926 per month, which lowers the effecti
 To take a rough example, a developer earning a gross salary of ISK 1.2M is likely to have a net salary of around 780K-800K ISK. Don't take this number too seriously, it depends on a lot of factors.
 
 
-### Gender differences in pay
-
-I was curious as to whether there would be visible disparities in salaries across genders, but no visible difference can be seen from the survey data. I would chalk this up to the very low sample size. Still, here is the salary chart from earlier split by gender as well as years of experience.
-
-<BarChart data="compensation-by-experience-by-gender" width={1200} normalize />
-
-<SmallNote>For information on the gender pay gap in Iceland, see ["Unadjusted gender pay gap 9.1% in 2022"](https://www.statice.is/publications/news-archive/wages-and-income/unadjusted-gender-pay-gap-2022/) from Statistics Iceland</SmallNote>
-
-
 ### Employer provided benefits
 
-Developers in Iceland often receive other employer-provided benefits, such as:
+Developers in Iceland often receive employer-provided benefits. Common ones include:
 
  * Subsidies for physical and/or mental wellness (e.g. gym membership or counseling)
  * Home internet and phone plans paid by employer
@@ -200,7 +209,7 @@ Developers in Iceland often receive other employer-provided benefits, such as:
  * Mobile phones
  * Conferences (e.g. pick one yearly)
 
-This, of course, varies by company, but most companies provide at least some of these. Every company I've worked for in Iceland has provided me with the first three benefits listed.
+This of course varies by company, but most companies provide at least some of these. Every company I've worked for in Iceland has provided me with the first three benefits listed.
 
 
 ### Work-life balance and parental leave
@@ -216,15 +225,15 @@ Payments during parental leave are 80% of the persons salary, capped at ISK 700K
 
 ### Salaries in Iceland
 
-Salaries in Iceland are generally high. The following chart shows the distribution of total compensation in Iceland using data from Statistics Iceland:
+Icelandic developer salaries fall on the higher end of the salary spectrum. The following chart shows the distribution of total compensation in Iceland using data from Statistics Iceland:
 
 <BarChart data="avg-salary-percentage" percentage />
 
 <SmallNote label="Source">[https://statice.is/statistics/society/wages-and-income/wages/](https://statice.is/statistics/society/wages-and-income/wages/)</SmallNote>
 
-From this we can see that developer salaries fall on the higher end of the salary spectrum in Iceland.
+Converting this from monthly to yearly and from ISK to USD, we get a chart that's more easily understood by a global audience:
 
-<SmallNote>The survey did not ask about total compensation, only monthly salary.</SmallNote>
+<BarChart data="avg-salary-percentage-usd" percentage />
 
 
 ## Industries
@@ -251,7 +260,6 @@ We can see some patterns emerge:
 
  * Developers working in banking, finance and the public sector mostly use C#.
  * Rust, TypeScript, Python and Go are popular in startups.
-
 
 ### Startups
 
