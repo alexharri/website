@@ -1,5 +1,5 @@
 {
-  "keys": ["Windows", "MacOS", "Linux"],
+  "keys": ["Windows", "macOS", "Linux"],
   "colors": ["#1988FF", "#39EC4B", "#ECCB39"],
   "data": [185, 224, 133],
   "total": 425

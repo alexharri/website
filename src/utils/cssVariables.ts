@@ -12,6 +12,7 @@ export const colors = {
   text800: "#9fcff9",
   blue: "#399ef4",
   blue200: "#246eac",
+  blue400: "#2e89d6",
   blue700: "#6ac2fa",
   darkBlue400: "#032949",
   darkRed400: "#99081d",

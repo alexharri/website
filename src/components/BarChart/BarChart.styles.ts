@@ -17,6 +17,9 @@ export const BarChartStyles = ({ styled }: StyleOptions) => ({
 
   controls: styled.css`
     display: flex;
-    justify-content: center;
+    justify-content: flex-end;
+    width: ${cssVariables.contentWidth - cssVariables.contentPadding * 2}px;
+    max-width: 100%;
+    margin: 0 auto 8px;
   `,
 });

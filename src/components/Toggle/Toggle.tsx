@@ -37,7 +37,7 @@ export const Toggle: React.FC<Props> = (props) => {
       <div className={s("pill", { checked })}>
         <div className={s("circle", { checked })} />
       </div>
-      <div className={s("label")}>{props.children}</div>
+      <div className={s("label", { checked })}>{props.children}</div>
     </div>
   );
 };

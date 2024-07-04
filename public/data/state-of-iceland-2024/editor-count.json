@@ -1,0 +1,21 @@
+{
+  "keys": [
+    "VS Code",
+    "Visual Studio",
+    "Vim",
+    "IntelliJ",
+    "Sublime",
+    "Xcode",
+    "Android Studio",
+    "Rider",
+    "Eclipse",
+    "WebStorm",
+    "PyCharm",
+    "Zed",
+    "Emacs",
+    "Neovim",
+    "Atom"
+  ],
+  "data": [316, 112, 95, 72, 33, 28, 22, 20, 10, 7, 7, 6, 5, 5, 3],
+  "total": 418
+}

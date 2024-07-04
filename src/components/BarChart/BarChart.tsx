@@ -7,6 +7,8 @@ import { BarChartStyles } from "./BarChart.styles";
 import { colors, cssVariables } from "../../utils/cssVariables";
 import { Toggle } from "../Toggle/Toggle";
 import { usePostData } from "../../data/DataProvider";
+import { useViewportWidth } from "../../utils/hooks/useViewportWidth";
+import { invLerp, lerp } from "../../math/lerp";
 
 interface Data2DEntry {
   label: string;
@@ -37,6 +39,8 @@ interface Props {
   stacked?: boolean;
   horizontal?: boolean;
   percentage?: boolean;
+  minWidth?: number;
+  minHeight?: number;
 }
 
 function normalize2D(json: Data2DJson): Data2DJson {
@@ -158,8 +162,22 @@ export function BarChart(props: Props) {
     }
   }
 
-  const height = props.height ?? defaultHeight;
-  const width = (props.width ?? cssVariables.contentWidth) + cssVariables.contentPadding * 2;
+  let height = props.height ?? defaultHeight;
+  let width = (props.width ?? cssVariables.contentWidth) + cssVariables.contentPadding * 2;
+  const preferredWidth = width;
+
+  const windowWidth = useViewportWidth();
+  if (windowWidth != null && props.minWidth != null) {
+    width = Math.min(
+      width,
+      Math.max(windowWidth - cssVariables.contentPadding * 2, props.minWidth),
+    );
+    if (props.minHeight != null) {
+      const heightT = invLerp(props.minWidth, preferredWidth, width);
+      height = lerp(props.minHeight, height, heightT);
+    }
+  }
+
   const aspectRatio = width / height;
 
   const valueAxisFormat: Intl.NumberFormatOptions = {
@@ -172,69 +190,7 @@ export function BarChart(props: Props) {
   };
 
   return (
-    <div className={[s("container"), "chart"].join(" ")}>
-      <div
-        className={s("wrapper")}
-        style={{ height, width: width + cssVariables.contentPadding * 2 }}
-      >
-        <div className={s("inner")} style={{ height, width }}>
-          <Bar
-            data={data}
-            options={{
-              aspectRatio,
-              indexAxis: props.horizontal ? "y" : "x",
-              scales: {
-                y: {
-                  stacked: props.stacked,
-                  ticks: {
-                    color: colors.text700,
-                    font: { family: cssVariables.fontFamily, size: 13 },
-                    format: !props.horizontal ? valueAxisFormat : undefined,
-                  },
-                  grid: !props.horizontal ? gridLineOptions : undefined,
-                },
-                x: {
-                  stacked: props.stacked,
-                  ticks: {
-                    color: colors.text,
-                    font: { family: cssVariables.fontFamily, size: 13 },
-                    format: props.horizontal ? valueAxisFormat : undefined,
-                  },
-                  grid: props.horizontal ? gridLineOptions : undefined,
-                },
-              },
-              plugins: {
-                tooltip: {
-                  enabled: true,
-                  mode: "point",
-                  callbacks: {
-                    footer:
-                      total != null
-                        ? (items) => {
-                            const item = items[0];
-                            const value = item.dataset.data[item.dataIndex] as number;
-                            const percent = Number(((value / total!) * 100).toFixed(1)) + "%";
-                            return `${percent} of respondents`;
-                          }
-                        : undefined,
-                  },
-                },
-                legend: {
-                  display: displayLegend,
-                  position: "bottom",
-                  labels: {
-                    padding: 24,
-                    color: colors.text,
-                    font: { family: cssVariables.fontFamily, size: 13 },
-                    boxWidth: 16,
-                    boxHeight: 16,
-                  },
-                },
-              },
-            }}
-          />
-        </div>
-      </div>
+    <div className="chart">
       {allowNormalize && (
         <div className={s("controls")}>
           <Toggle checked={normalize} onValueChange={setNormalize}>
@@ -242,6 +198,70 @@ export function BarChart(props: Props) {
           </Toggle>
         </div>
       )}
+      <div className={s("container")}>
+        <div
+          className={s("wrapper")}
+          style={{ height, width: width + cssVariables.contentPadding * 2 }}
+        >
+          <div style={{ height, width }}>
+            <Bar
+              data={data}
+              options={{
+                aspectRatio,
+                indexAxis: props.horizontal ? "y" : "x",
+                scales: {
+                  y: {
+                    stacked: props.stacked,
+                    ticks: {
+                      color: colors.text700,
+                      font: { family: cssVariables.fontFamily, size: 13 },
+                      format: !props.horizontal ? valueAxisFormat : undefined,
+                    },
+                    grid: !props.horizontal ? gridLineOptions : undefined,
+                  },
+                  x: {
+                    stacked: props.stacked,
+                    ticks: {
+                      color: colors.text,
+                      font: { family: cssVariables.fontFamily, size: 13 },
+                      format: props.horizontal ? valueAxisFormat : undefined,
+                    },
+                    grid: props.horizontal ? gridLineOptions : undefined,
+                  },
+                },
+                plugins: {
+                  tooltip: {
+                    enabled: true,
+                    mode: "point",
+                    callbacks: {
+                      footer:
+                        total != null
+                          ? (items) => {
+                              const item = items[0];
+                              const value = item.dataset.data[item.dataIndex] as number;
+                              const percent = Number(((value / total!) * 100).toFixed(1)) + "%";
+                              return `${percent} of respondents`;
+                            }
+                          : undefined,
+                    },
+                  },
+                  legend: {
+                    display: displayLegend,
+                    position: "bottom",
+                    labels: {
+                      padding: 24,
+                      color: colors.text,
+                      font: { family: cssVariables.fontFamily, size: 13 },
+                      boxWidth: 16,
+                      boxHeight: 16,
+                    },
+                  },
+                },
+              }}
+            />
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
