@@ -1,6 +1,6 @@
 ---
 title: "Iceland's software industry and development practices in 2024"
-description: "Analysing compensation figures, programming languages, tech stacks and other data from Iceland's 2024 developer survey."
+description: "Analysing data from from Iceland's 2024 developer survey: compensation figures, languages and technologies used"
 publishedAt: ""
 image: ""
 ---
