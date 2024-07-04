@@ -13,8 +13,6 @@ export const BarChartStyles = ({ styled }: StyleOptions) => ({
     margin: 0 auto;
   `,
 
-  inner: styled.css``,
-
   controls: styled.css`
     display: flex;
     justify-content: flex-end;
