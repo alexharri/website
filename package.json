@@ -15,7 +15,6 @@
     "@emotion/css": "^11.11.2",
     "@emotion/server": "^11.11.0",
     "@monaco-editor/react": "^4.4.6",
-    "@nivo/bar": "^0.87.0",
     "@react-three/drei": "^9.101.0",
     "@react-three/fiber": "^8.15.19",
     "@types/node": "18.11.9",
