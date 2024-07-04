@@ -1,0 +1,40 @@
+{
+  "keys": [
+    "React",
+    "Vue.js",
+    "Angular",
+    "Angular JS",
+    "Blazor",
+    "Svelte",
+    "Flutter",
+    "Next.js",
+    "Vanilla JavaScript",
+    "Razor",
+    "Htmx",
+    "ASP.Net",
+    "jQuery",
+    "Preact",
+    "Ember",
+    "WPF .NET"
+  ],
+  "colors": [
+    "#399ef4",
+    "#399ef4",
+    "#399ef4",
+    "#399ef4",
+    "#38F5A3",
+    "#399ef4",
+    "#38F5A3",
+    "#38F5A3",
+    "#38F5A3",
+    "#38F5A3",
+    "#38F5A3",
+    "#38F5A3",
+    "#38F5A3",
+    "#399ef4",
+    "#399ef4",
+    "#38F5A3"
+  ],
+  "data": [204, 36, 29, 14, 13, 10, 7, 7, 6, 5, 5, 5, 4, 3, 2, 2],
+  "total": 425
+}

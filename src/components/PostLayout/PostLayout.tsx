@@ -32,8 +32,15 @@ const Styles = ({ styled }: StyleOptions) => ({
       margin-bottom: 40px;
     }
 
+    & > .chart {
+      display: block;
+      margin-top: 40px;
+      margin-bottom: 40px;
+    }
+
     & > .pre,
     & > .image,
+    & > .chart,
     & > table {
       & + .note,
       & + [data-script-id] + .note {

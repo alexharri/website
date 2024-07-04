@@ -2,7 +2,7 @@ import fs from "fs";
 import path from "path";
 import matter from "gray-matter";
 import { postFileNames, POSTS_PATH } from "./mdxUtils";
-import { Post } from "../types/Post";
+import { Post, PostDataStore } from "../types/Post";
 import { getMdxOptions } from "./mdx";
 
 export const getPosts = (type: "published" | "draft") => {
@@ -85,6 +85,21 @@ export function getPostPaths(options: { type: "published" | "draft" }) {
   return [...paths];
 }
 
+function getPostData(slug: string): PostDataStore {
+  const dataDir = path.resolve(process.cwd(), `./public/data/${slug}`);
+
+  if (!fs.existsSync(dataDir)) return {};
+
+  const out: PostDataStore = {};
+  for (const fileName of fs.readdirSync(dataDir)) {
+    const filePath = path.resolve(dataDir, fileName);
+    const json = JSON.parse(fs.readFileSync(filePath, "utf-8"));
+    const dataSlug = fileName.split(".")[0];
+    out[dataSlug] = json;
+  }
+  return out;
+}
+
 type Params = {
   slug: string;
 };
@@ -107,11 +122,11 @@ export const getPostProps = async (ctx: Context) => {
 
   const fileContent = fs.readFileSync(filePath);
 
-  const { content, data } = matter(fileContent);
+  const { content, data: scope } = matter(fileContent);
 
   const serialize = (await import("next-mdx-remote/serialize")).serialize;
   const source = await serialize(content, {
-    scope: data,
+    scope,
     mdxOptions: await getMdxOptions(),
   });
 
@@ -123,7 +138,9 @@ export const getPostProps = async (ctx: Context) => {
     version = fs.readFileSync(versionFilePath, "utf-8");
   }
 
-  return { props: { source, slug: params.slug, version } };
+  const data = getPostData(params.slug);
+
+  return { props: { source, slug: params.slug, data, version } };
 };
 
 export function getSlugFromFilePath(filePath: string) {

@@ -1,0 +1,28 @@
+{
+  "keys": [
+    "GitHub Actions",
+    "GitLab CI/CD",
+    "Azure Pipelines",
+    "Jenkins",
+    "Bitbucket Pipelines",
+    "AWS CodePipeline",
+    "CircleCI",
+    "TeamCity",
+    "Travis CI",
+    "Bamboo"
+  ],
+  "colors": [
+    "#399ef4",
+    "#399ef4",
+    "#399ef4",
+    "#399ef4",
+    "#399ef4",
+    "#399ef4",
+    "#399ef4",
+    "#399ef4",
+    "#399ef4",
+    "#38F5A3"
+  ],
+  "data": [223, 81, 74, 50, 34, 21, 20, 16, 5, 5],
+  "total": 425
+}

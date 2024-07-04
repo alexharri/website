@@ -1,0 +1,152 @@
+{
+  "keys": [
+    "C#",
+    "TypeScript",
+    "Python",
+    "JavaScript",
+    "Go",
+    "Java",
+    "Rust",
+    "PHP",
+    "C++",
+    "Scala",
+    "Ruby"
+  ],
+  "colors": [
+    "#1988FF",
+    "#2694E8",
+    "#33A0D1",
+    "#40ACB9",
+    "#4DB8A2",
+    "#5AC48B",
+    "#67CF74",
+    "#74DB5D",
+    "#81E745",
+    "#8EF32E",
+    "#9BFF17"
+  ],
+  "total": {
+    "Less than one year": 8,
+    "1 to 2 years": 28,
+    "3 to 5 years": 69,
+    "6 to 10 years": 109,
+    "11 to 15 years": 66,
+    "16 to 20 years": 50,
+    "More than 20 years": 86,
+    "": 9
+  },
+  "data": [
+    {
+      "label": "Less than one year",
+      "values": {
+        "C#": 5,
+        "TypeScript": 0,
+        "Python": 1,
+        "JavaScript": 1,
+        "Go": 1,
+        "Java": 0,
+        "Rust": 0,
+        "PHP": 0,
+        "C++": 0,
+        "Scala": 0,
+        "Ruby": 0
+      }
+    },
+    {
+      "label": "1 to 2 years",
+      "values": {
+        "C#": 9,
+        "TypeScript": 8,
+        "Python": 5,
+        "JavaScript": 5,
+        "Go": 3,
+        "Java": 3,
+        "Rust": 1,
+        "PHP": 3,
+        "C++": 0,
+        "Scala": 0,
+        "Ruby": 0
+      }
+    },
+    {
+      "label": "3 to 5 years",
+      "values": {
+        "C#": 15,
+        "TypeScript": 20,
+        "Python": 24,
+        "JavaScript": 19,
+        "Go": 7,
+        "Java": 5,
+        "Rust": 2,
+        "PHP": 2,
+        "C++": 3,
+        "Scala": 0,
+        "Ruby": 0
+      }
+    },
+    {
+      "label": "6 to 10 years",
+      "values": {
+        "C#": 38,
+        "TypeScript": 37,
+        "Python": 34,
+        "JavaScript": 25,
+        "Go": 14,
+        "Java": 8,
+        "Rust": 9,
+        "PHP": 4,
+        "C++": 3,
+        "Scala": 1,
+        "Ruby": 3
+      }
+    },
+    {
+      "label": "11 to 15 years",
+      "values": {
+        "C#": 24,
+        "TypeScript": 26,
+        "Python": 20,
+        "JavaScript": 15,
+        "Go": 9,
+        "Java": 7,
+        "Rust": 7,
+        "PHP": 2,
+        "C++": 1,
+        "Scala": 3,
+        "Ruby": 1
+      }
+    },
+    {
+      "label": "16 to 20 years",
+      "values": {
+        "C#": 24,
+        "TypeScript": 14,
+        "Python": 10,
+        "JavaScript": 11,
+        "Go": 5,
+        "Java": 9,
+        "Rust": 2,
+        "PHP": 0,
+        "C++": 2,
+        "Scala": 1,
+        "Ruby": 0
+      }
+    },
+    {
+      "label": "More than 20 years",
+      "values": {
+        "C#": 31,
+        "TypeScript": 19,
+        "Python": 26,
+        "JavaScript": 25,
+        "Go": 16,
+        "Java": 17,
+        "Rust": 6,
+        "PHP": 11,
+        "C++": 2,
+        "Scala": 4,
+        "Ruby": 5
+      }
+    }
+  ]
+}

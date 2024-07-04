@@ -1,0 +1,36 @@
+{
+  "keys": [
+    "AWS",
+    "Azure",
+    "Vercel",
+    "Cloudflare",
+    "Google Cloud/Firebase",
+    "Origo",
+    "Heroku",
+    "Advania",
+    "Digital Ocean",
+    "1984.is",
+    "Render",
+    "Netlify",
+    "Fly.io",
+    "CoreWeave"
+  ],
+  "colors": [
+    "#399ef4",
+    "#399ef4",
+    "#399ef4",
+    "#399ef4",
+    "#399ef4",
+    "#399ef4",
+    "#399ef4",
+    "#399ef4",
+    "#38F5A3",
+    "#399ef4",
+    "#38F5A3",
+    "#38F5A3",
+    "#38F5A3",
+    "#38F5A3"
+  ],
+  "data": [223, 155, 97, 75, 69, 26, 21, 15, 10, 9, 6, 4, 3, 2],
+  "total": 425
+}

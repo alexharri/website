@@ -1,0 +1,69 @@
+{
+  "keys": ["State of iceland 2024", "StackOverflow survey 2023"],
+  "colors": ["#399ef4", "#ff9948"],
+  "data": [
+    {
+      "label": "C#",
+      "values": {
+        "State of iceland 2024": 0.461,
+        "StackOverflow survey 2023": 0.2916
+      }
+    },
+    {
+      "label": "TypeScript",
+      "values": {
+        "State of iceland 2024": 0.404,
+        "StackOverflow survey 2023": 0.4375
+      }
+    },
+    {
+      "label": "Python",
+      "values": {
+        "State of iceland 2024": 0.386,
+        "StackOverflow survey 2023": 0.4532
+      }
+    },
+    {
+      "label": "JavaScript",
+      "values": {
+        "State of iceland 2024": 0.326,
+        "StackOverflow survey 2023": 0.6582
+      }
+    },
+    {
+      "label": "Go",
+      "values": {
+        "State of iceland 2024": 0.179,
+        "StackOverflow survey 2023": 0.1432
+      }
+    },
+    {
+      "label": "Java",
+      "values": {
+        "State of iceland 2024": 0.154,
+        "StackOverflow survey 2023": 0.3049
+      }
+    },
+    {
+      "label": "Rust",
+      "values": {
+        "State of iceland 2024": 0.091,
+        "StackOverflow survey 2023": 0.1221
+      }
+    },
+    {
+      "label": "PHP",
+      "values": {
+        "State of iceland 2024": 0.069,
+        "StackOverflow survey 2023": 0.1903
+      }
+    },
+    {
+      "label": "C++",
+      "values": {
+        "State of iceland 2024": 0.034,
+        "StackOverflow survey 2023": 0.2021
+      }
+    }
+  ]
+}

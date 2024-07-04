@@ -1,0 +1,14 @@
+{
+  "keys": [
+    "1 person",
+    "2 to 5 people",
+    "6 to 10 people",
+    "11 to 20 people",
+    "21 to 50 people",
+    "51 to 100 people",
+    "101 to 300 people",
+    "More than 300 people"
+  ],
+  "data": [8, 34, 22, 51, 79, 52, 62, 91],
+  "total": 399
+}
