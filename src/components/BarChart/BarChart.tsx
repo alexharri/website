@@ -1,11 +1,12 @@
 import "../../utils/chartjs";
 import { Bar } from "react-chartjs-2";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { ChartData, ChartDataset, GridLineOptions } from "chart.js";
 import { useStyles } from "../../utils/styles";
 import { BarChartStyles } from "./BarChart.styles";
 import { colors, cssVariables } from "../../utils/cssVariables";
 import { Toggle } from "../Toggle/Toggle";
+import { usePostData } from "../../data/DataProvider";
 
 interface Data2DEntry {
   label: string;
@@ -87,23 +88,8 @@ function totalResponses(values: Record<string, number>): number {
 
 export function BarChart(props: Props) {
   const s = useStyles(BarChartStyles);
-  const [_json, setJson] = useState<Data2DJson | Data1DJson | null>(null);
+  const _json = usePostData<Data1DJson | Data2DJson>(props.data);
   const [normalize, setNormalize] = useState(props.normalize ?? false);
-
-  useEffect(() => {
-    const get = async () => {
-      try {
-        const data = await fetch(`/data/${props.data}.json`).then((res) => res.json());
-        setJson(data);
-      } catch (e) {
-        // TODO: handle
-        console.error(e);
-      }
-    };
-    get();
-  }, []);
-
-  if (!_json) return <p>Loading</p>;
 
   let is2D = false;
   let yStyle: string | undefined = undefined;
@@ -184,8 +170,6 @@ export function BarChart(props: Props) {
   const gridLineOptions: Partial<GridLineOptions> = {
     color: colors.medium400,
   };
-
-  console.log(data);
 
   return (
     <div className={[s("container"), "chart"].join(" ")}>

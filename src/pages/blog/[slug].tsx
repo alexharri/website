@@ -22,6 +22,8 @@ import { PostLayout } from "../../components/PostLayout/PostLayout";
 import { Scene } from "../../threejs/scenes";
 import { ThreeProvider } from "../../threejs/Components/ThreeProvider";
 import { BarChart } from "../../components/BarChart/BarChart";
+import { PostDataProvider } from "../../data/DataProvider";
+import { PostDataStore } from "../../types/Post";
 
 // Custom components/renderers to pass to MDX.
 // Since the MDX files aren't loaded by webpack, they have no knowledge of how
@@ -60,6 +62,7 @@ interface Props {
   source: MDXRemoteSerializeResult;
   version: string;
   slug: string;
+  data: PostDataStore;
 }
 
 export function createPage(customComponents: Record<string, React.FC<any>>) {
@@ -91,13 +94,15 @@ export function createPage(customComponents: Record<string, React.FC<any>>) {
                 </div>
               )}
             </div>
-            <ThreeProvider>
-              <FocusedScriptProvider>
-                <MonacoProvider>
-                  <MDXRemote {...(source as any)} components={components} />
-                </MonacoProvider>
-              </FocusedScriptProvider>
-            </ThreeProvider>
+            <PostDataProvider data={props.data}>
+              <ThreeProvider>
+                <FocusedScriptProvider>
+                  <MonacoProvider>
+                    <MDXRemote {...(source as any)} components={components} />
+                  </MonacoProvider>
+                </FocusedScriptProvider>
+              </ThreeProvider>
+            </PostDataProvider>
           </PostLayout>
         </Layout>
       </>
