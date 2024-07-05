@@ -1,29 +1,17 @@
 {
-  "keys": [
-    "C#",
-    "TypeScript",
-    "Python",
-    "JavaScript",
-    "Go",
-    "Java",
-    "Rust",
-    "PHP",
-    "C++",
-    "Scala",
-    "Ruby"
-  ],
+  "keys": ["C#", "TypeScript", "Python", "JavaScript", "Go", "Java", "Rust"],
   "colors": [
-    "#1988FF",
-    "#2694E8",
-    "#33A0D1",
-    "#40ACB9",
-    "#4DB8A2",
-    "#5AC48B",
-    "#67CF74",
-    "#74DB5D",
-    "#81E745",
-    "#8EF32E",
-    "#9BFF17"
+    "#C94CDD",
+    "#198DF7",
+    "#21DA6B",
+    "#F6EE25",
+    "#22CAD5",
+    "#F4AD23",
+    "#EA5622",
+    "#ADB1F2",
+    "#2874E7",
+    "#F5988B",
+    "#C6301A"
   ],
   "total": {
     "Less than one year": 8,

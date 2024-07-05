@@ -40,9 +40,11 @@ The following chart shows the distribution of the respondents' years of experien
 
 <BarChart data="years-of-experience-count" width={640} minWidth={440} horizontal />
 
-This gets more interesting when we group the data on experience by age cohort. The below chart shows years of experience, grouped by the age.
+This gets more interesting when we group the data on experience by age cohort. The below chart shows years of experience, grouped by age.
 
 <BarChart data="experience-by-age" horizontal stacked width={660} height={300} />
+
+<SmallNote label="" center>PS: Try hitting the 'Normalize' toggle on the top-right. It allows you to switch from viewing the absolute counts to viewing percentages within each group. Every chart which groups data has this button.</SmallNote>
 
 Most developers aged 45 or above have over 20 years of experience, indicating that most older developers started their career in their 20s. Looking at the younger age cohorts indicates that most of them started their career in their 20s as well, with a smaller percentage starting in their 30s or 40s.
 
@@ -98,7 +100,7 @@ Still, a few key things stand out to me:
  * PHP is much less used in Iceland than globally.
 
 
-### Years of experience by programming language
+### Programming language use by years of experience
 
 I was curious whether there would be a significant difference between the languages that experienced developers are using compared to less experienced ones, but that does not seem to be the case. The following chart shows language use by years of experience.
 
@@ -341,7 +343,7 @@ Digital Ocean is the most notable cloud provider not included as a default optio
 
 The following chart shows the usage of programming languages by cloud providers. In other words: for developers using a given cloud provider, how many of them are using a given programming language?
 
-<BarChart data="cloud-providers-by-language" width={1000} height={340} />
+<BarChart data="cloud-providers-by-language" width={1100} height={340} />
 
 Developers using Azure, Origo and Advania are _much_ more likely to use C# than developers using other cloud providers. Developers using Azure are around 2.5 times more likely to use C# compared to developers using AWS.
 

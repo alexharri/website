@@ -1,20 +1,11 @@
 {
-  "keys": ["C#", "TypeScript", "Python", "JavaScript", "Go", "Java", "Rust", "PHP"],
-  "colors": [
-    "#1988FF",
-    "#2C99DE",
-    "#3EAABD",
-    "#51BB9C",
-    "#63CC7A",
-    "#76DD59",
-    "#88EE38",
-    "#9BFF17"
-  ],
+  "keys": ["C#", "TypeScript", "Python", "JavaScript", "Go", "Java", "Rust"],
+  "colors": ["#C557EB", "#198DF7", "#21DA6B", "#F6DF25", "#22CAD5", "#F4AD23", "#EA5622"],
   "total": {
     "AWS": 223,
     "Heroku": 21,
     "Azure": 155,
-    "Google Cloud/Firebase": 69,
+    "Google Cloud": 69,
     "1984.is": 9,
     "Advania": 15,
     "Origo": 26,
@@ -184,7 +175,7 @@
       }
     },
     {
-      "label": "Google Cloud/Firebase",
+      "label": ["Google Cloud/", "Firebase"],
       "values": {
         "TypeScript": 30,
         "C#": 19,
