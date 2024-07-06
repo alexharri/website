@@ -2,7 +2,7 @@
 title: "2024 Icelandic Developer Survey: Compensation, Technologies, and more"
 description: "Analyzing data from Iceland's 2024 developer survey: compensation figures, languages, and technologies used"
 publishedAt: ""
-image: ""
+image: "/images/og-icelandic-developer-survey-2024.png"
 ---
 
 A survey for Icelandic developers was conducted earlier this year by [Kolibri][kolibri]. This survey was comprehensive, gathering data on compensation, programming language use, CI/CD practices, company size, industry, and so on alongside demographic information such as age, experience, and gender.
