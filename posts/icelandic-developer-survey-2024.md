@@ -5,13 +5,13 @@ publishedAt: ""
 image: ""
 ---
 
-A survey for Icelandic developers was conducted earlier this year by Kolibri. This survey was comprehensive, gathering data on compensation, programming language use, CI/CD practices, company size, industry and so on alongside demographic information such as age, experience and gender.
+A survey for Icelandic developers was conducted earlier this year by Kolibri. This survey was comprehensive, gathering data on compensation, programming language use, CI/CD practices, company size, industry, and so on alongside demographic information such as age, experience, and gender.
 
 No large developer survey like this has been conducted in Iceland before—this survey is the first of its kind.
 
-The results from this survey offer us unique insights into the Icelandic software industry. Which technologies are developers are using? How are developers compensated? What cloud providers are popular? These are just some of the questions which we'll explore in this post.
+The results from this survey offer us unique insights into the Icelandic software industry. Which technologies are developers are using? How are developers compensated? What cloud providers are popular? These are just some of the questions we'll explore in this post.
 
-There's loads of data to take a look at, so let's get to it!
+There's loads of data to look at, so let's get to it!
 
 ## Demographics
 
@@ -44,9 +44,9 @@ This gets more interesting when we group the data on experience by age cohort. T
 
 <BarChart data="experience-by-age" horizontal stacked width={660} height={300} />
 
-<SmallNote label="" center>PS: Try hitting the 'Normalize' toggle on the top-right. It allows you to switch from viewing the absolute counts to viewing percentages within each group. Every chart which groups data has this button.</SmallNote>
+<SmallNote label="" center>PS: Try hitting the 'Normalize' toggle on the top right. It allows you to switch from viewing the absolute counts to viewing percentages within each group. Every chart that groups data has this button.</SmallNote>
 
-Most developers aged 45 or above have over 20 years of experience, indicating that most older developers started their career in their 20s. Looking at the younger age cohorts indicates that most of them started their career in their 20s as well, with a smaller percentage starting in their 30s or 40s.
+Most developers aged 45 or above have over 20 years of experience, indicating that most older developers started their careers in their 20s. Looking at the younger age cohorts we can see that most of them started their career in their 20s as well, with a smaller percentage starting in their 30s or 40s.
 
 
 ### Developer types
@@ -58,28 +58,28 @@ Respondents were asked which type of developer they consider themselves to be. T
 Perhaps the most immediately obvious fact that jumps out is how many developers classify themselves as full-stack developers. Definitely more than I would have expected! I made one notable change to the data which contributed to that:
 
  * If a developer classified themselves as both a front-end and back-end developer, I classified them as a full-stack developer (in case they had not done so themselves).
- * After that, if a developer is classified as a full-stack developer, they were _not_ classified as a front-end or back-end developer.
+ * After that, if a developer is classified as a full-stack developer, they are _not_ classified as a front-end or back-end developer.
 
-This change means that front-end, back-end and full-stack are _mutually exclusive_ developer types. I feel that this gives a better sense of the real numbers of front-end vs back-end vs full-stack developers.
+This change means that front-end, back-end, and full-stack are _mutually exclusive_ developer types. I feel that this gives a better sense of the real numbers of front-end vs back-end vs full-stack developers.
 
 ## Back-end programming languages
 
-The survey asked which back-end programming languages respondents had used within the last year. Only respondents that classified themselves as back-end or full-stack developers were asked this question.
+The survey asked which back-end programming languages respondents had used within the last year. Only respondents who classified themselves as back-end or full-stack developers were asked this question.
 
 <BarChart data="languages-count" width={640} minWidth={540} minHeight={340} />
 
 <SmallNote>The languages colored blue were provided as default options in the survey, while the languages colored green were typed in the "Other" field. Languages used by fewer than 3 respondents are not included.</SmallNote>
 
-The top back-end programming language in Iceland is C#, with 46.1% of Icelandic developers using it. After C#, we get TypeScript (40.4%), Python (38.6%) and JavaScript (32.6%). The next two languages, Go and Java, come in at 17.9% and 15.4% respectively.
+The top back-end programming language in Iceland is C#, with 46.1% of Icelandic developers using it. After C#, we get TypeScript (40.4%), Python (38.6%), and JavaScript (32.6%). The next two languages, Go and Java, come in at 17.9% and 15.4% respectively.
 
 Some observations:
 
- * SQL at 1.3% usage is _obviously_ not accurate. I would expect most back-end and full-stack developer to have reported using it had it been provided as a default option.
+ * SQL at 1.3% usage is _obviously_ not accurate. I would expect most back-end and full-stack developers to have reported using it had it been provided as a default option.
  * C++ at 3.4% is far too low as well. I would guesstimate that C++ would be in the 8-15% range had it been included in the default options.
 
-Aside from those obvious anomalies the data seems accurate to me. C# is heavily used in Icelandic companies, with it being the go-to back-end development language for most Icelandic companies.
+Aside from those obvious anomalies, the data seems accurate to me. C# is heavily used in Icelandic companies, with it being the go-to back-end development language for most Icelandic companies.
 
-TypeScript, as the data shows, has been widely adopted in Iceland. In my experience, TypeScript is generally strongly preferred over plain JavaScript, though not universally. In this survey, 74% of those that use JavaScript also reported using TypeScript, while 60% of those using TypeScript reported also using JavaScript.
+TypeScript, as the data shows, has been widely adopted in Iceland. In my experience, TypeScript is generally strongly preferred over plain JavaScript, though not universally. In this survey, 74% of those who use JavaScript also reported using TypeScript, while 60% of those using TypeScript reported also using JavaScript.
 
 Python being heavily used is no surprise to me, and the usage of Rust is in line with what I would have expected. Go is used more than I would have thought.
 
@@ -100,7 +100,7 @@ Still, a few key things stand out to me:
  * PHP is much less used in Iceland than globally.
 
 
-### Programming language use by years of experience
+### Programming languages used by years of experience
 
 I was curious whether there would be a significant difference between the languages that experienced developers are using compared to less experienced ones, but that does not seem to be the case. The following chart shows language use by years of experience.
 
@@ -128,7 +128,7 @@ Icelandic developers are compensated well. Respondents were asked about their mo
 
 <SmallNote>The EUR and USD figures are using an exchange rate of ISK 1 = EUR 0.0067 and ISK 1 = USD 0.0072, measured on the 2nd of July 2024.</SmallNote>
 
-In Iceland we generally generally discuss monthly salaries instead of yearly. But in the US and other countries, yearly salary figures are more common, so here is the same table with yearly salary figures.
+In Iceland, we generally generally discuss monthly salaries instead of yearly. But in the US and other countries, yearly salary figures are more common, so here is the same table with yearly salary figures.
 
 {<table data-align="right">
 <tbody>
@@ -143,17 +143,17 @@ In Iceland we generally generally discuss monthly salaries instead of yearly. Bu
 </tbody>
 </table>}
 
-The below chart shows monthly salary for developers in Iceland, split by age bracket.
+The below chart shows monthly salaries for developers in Iceland, split by age bracket.
 
 <BarChart data="compensation-by-experience" normalize height={340} />
 
 As a freshly minted developer, you can expect to earn under or around ISK 800K. Even though the first salary bracket goes to zero, I wouldn't expect many developers to be earning less than 650K unless they're entering the field without a degree.
 
-With a few years of experience, most developers move from the &lt;800K to the 800K-1.0M bracket. And at 6 or more years of experience a lot of developers move into the &gt;1.0M brackets.
+With a few years of experience, most developers move from the &lt;800K to the 800K-1.0M bracket. And at 6 or more years of experience, a lot of developers move into the &gt;1.0M brackets.
 
 Summarizing this:
 
- * Developers starting their career can expect to earn under or around ISK 800K monthly (USD 70K yearly)
+ * Developers starting their careers can expect to earn under or around ISK 800K monthly (USD 70K yearly)
  * Developers with 3-10 of experience generally earn ISK 800K to 1.2M monthly (USD 70K to 100K yearly)
  * Developers with over 10 of experience generally earn ISK 1.0M to 1.4M monthly (USD 85K to 120K yearly)
  * A significant number of highly experienced developers (10 to 20+ years of experience) earn 1.4M to &gt;1.6M monthly (USD 120K to &gt;140K yearly)
@@ -189,7 +189,7 @@ I was curious as to whether there would be visible disparities in salaries acros
 
 ## Putting context to the salary numbers
 
-Salary numbers are interesting, but there are other important factors which cannot be captured in raw salary numbers. The following chapters will discuss taxes, employer-provided benefits and work-life balance in Iceland.
+Salary numbers are interesting, but there are other important factors that cannot be captured in raw salary numbers. The following chapters will discuss taxes, employer-provided benefits, and work-life balance in Iceland.
 
 ### Taxes
 
@@ -212,12 +212,12 @@ There is a personal tax credit of ISK 64.926 per month, which lowers the effecti
 To take a rough example, a developer earning a monthly gross salary of ISK 1.2M (~104K USD, yearly) is likely to have a net salary of around 780K-800K ISK (~USD 67K-70K, yearly). Don't take this number too seriously, it depends on a lot of factors.
 
 
-### Employer provided benefits
+### Employer-provided benefits
 
 Developers in Iceland often receive employer-provided benefits. Common ones include:
 
  * Subsidies for physical and/or mental wellness (e.g. gym membership or counseling)
- * Home internet and phone plans paid by employer
+ * Home internet and phone plans
  * Lunch and snacks
  * Transportation subsidies (e.g. bus pass)
  * Mobile phones
@@ -232,7 +232,7 @@ With the obvious caveat of work-life balance varying by company, work-life balan
 
 A notable factor is Iceland's generous paid parental leave, which is 6 months for each parent with 2 of those months transferrable to the other parent. This corresponds to about 26 weeks of parental leave for each parent.
 
-Payments during parental leave are 80% of the persons salary, capped at ISK 700K. This means that payments during parental leave max out when earning ISK 875K or more, which applies to most developers in Iceland.
+Payments during parental leave are 80% of the person's salary, capped at ISK 700K. This means that payments during parental leave max out when earning ISK 875K or more, which applies to most developers in Iceland.
 
 <SmallNote>For more information on paternal leave in Iceland, see [https://island.is/en/life-events/having-a-baby](https://island.is/en/life-events/having-a-baby)</SmallNote>
 
@@ -272,14 +272,14 @@ Respondents could pick multiple languages, but they could only pick one industry
 
 We can see some patterns emerge:
 
- * Developers working in banking, finance and the public sector mostly use C#.
- * Rust, TypeScript, Python and Go are popular in startups.
+ * Developers working in banking, finance, and the public sector mostly use C#.
+ * Rust, TypeScript, Python, and Go are popular in startups.
 
 ### Startups
 
 15.9% of developers—including myself—reported working in startups. Quite a high percentage!
 
-Much of that can be attributed to Iceland's strong support system for startups. [Klak][klak] runs multiple startup accelerators like [Gulleggið][gullegg] and [Startup SuperNova][supernova]. There are many notable venture capital funds like [Brunnur][brunnur], [Frumtak][frumtak] and [Crowberry Capital][crowberry], in addition to the [Technology Development Fund][tech_dev_fund] which provides free capital for early-stage startups.
+Much of that can be attributed to Iceland's strong support system for startups. [Klak][klak] runs multiple startup accelerators like [Gulleggið][gullegg] and [Startup SuperNova][supernova]. There are many notable venture capital funds like [Brunnur][brunnur], [Frumtak][frumtak], and [Crowberry Capital][crowberry], in addition to the [Technology Development Fund][tech_dev_fund] which provides free capital for early-stage startups.
 
 In addition to that, companies may receive up to a 20% tax deduction for expenses related to research and innovation for expenses up to ISK 1,100M each year, or around USD 7.9M.
 
@@ -299,11 +299,11 @@ In addition to that, companies may receive up to a 20% tax deduction for expense
 
 With a population of around 380,000 people, Icelandic companies are generally small to medium-sized. Very few Icelandic companies, outside of municipalities and healthcare, reach over 1,000 employees.
 
-The following chart shows the distribution of company sizes which the respondents work at.
+The following chart shows the distribution of company sizes at which the respondents work.
 
 <BarChart data="company-size-count" horizontal minWidth={440} />
 
-A lot of people working in companies with more than 300 people! Here we can see the same data on company sizes, grouped by industry:
+A lot of Icelandic developers working at companies with more than 300 people! Here we can see the same data on company sizes, grouped by industry:
 
 <BarChart data="company-size-by-industry" stacked horizontal height={300} minWidth={570} />
 
@@ -311,7 +311,7 @@ As one might expect, developers working in the public sector or banking/finance 
 
 ## Technology stacks
 
-We'll now take a look at the technologies that developers use. We'll cover front-end libraries, cloud providers and CI/CD.
+We'll now take a look at the technologies that developers use. We'll cover front-end libraries, cloud providers, CI/CD, and developers' OS of choice.
 
 ### Front-end libraries
 
@@ -333,7 +333,7 @@ Some other observations:
 
 <BarChart data="cloud-providers-count" horizontal minWidth={440} minHeight={370} />
 
-<SmallNote>Default survey options are colored blue, while options typed in the "Other" field are colored green. Origo, Advania and 1984.is are local Icelandic cloud providers.</SmallNote>
+<SmallNote>Default survey options are colored blue, while options typed in the "Other" field are colored green. Origo, Advania, and 1984.is are local Icelandic cloud providers.</SmallNote>
 
 AWS at 52.5% is the most popular cloud provider in Iceland, with Azure in second at 36.5%. Vercel and Cloudflare are also used by a significant number of developers, coming in at 22.6% and 17.6% respectively. Google Cloud is relatively far behind AWS and Azure with 16.2% of Icelandic developers using GCP.
 
@@ -345,9 +345,9 @@ The following chart shows the usage of programming languages by cloud providers.
 
 <BarChart data="cloud-providers-by-language" width={1100} height={340} />
 
-Developers using Azure, Origo and Advania are _much_ more likely to use C# than developers using other cloud providers. Developers using Azure are around 2.5 times more likely to use C# compared to developers using AWS.
+Developers using Azure, Origo, and Advania are _much_ more likely to use C# than developers using other cloud providers. Developers using Azure are around 2.5 times more likely to use C# compared to developers using AWS.
 
-Usage of TypeScript and Python seems inversely correlated to usage of C#.
+Usage of TypeScript and Python seems inversely correlated to the usage of C#.
 
 ### Continuous integration and continuous delivery (CI/CD)
 
@@ -361,7 +361,7 @@ Most respondents use GitHub actions for CI/CD (52.5%). GitLab and Azure are also
 
 ### Code editors
 
-A whopping 75.6% of of Icelandic developers use Visual Studio Code for editing code.
+A whopping 75.6% of Icelandic developers use Visual Studio Code for editing code.
 
 <BarChart data="editor-count" width={560} height={340} minWidth={500} minHeight={310} />
 
@@ -373,13 +373,13 @@ Which operating systems are Icelandic developers using?
 
 <BarChart data="os-count" width={300} height={250} minWidth={280} minHeight={240} />
 
-macOS, apparently! A lot are using Linux as well. I would have definitely expected Windows to take the top spot.
+macOS, apparently! A lot are using Linux as well. I would have expected Windows to take the top spot.
 
 #### Operating system by industry
 
 <BarChart data="os-by-industry" width={640} minWidth={450} minHeight={300} />
 
-Breaking operating system use by industry, we see that Windows is most used within the public sector and finance/banking, while macOS is more popular in startups, the private sector and with contractors.
+Grouping the use of operating systems by industry, we see that Windows is most used within the public sector and finance/banking, while macOS is more popular in startups, the private sector, and with contractors.
 
 
 ## Final words
