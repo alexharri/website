@@ -1,9 +1,12 @@
-import { getPostPaths } from "../../../utils/blogPageUtils";
-import { GetStaticPaths } from "next";
-import { Params } from "../[slug]";
+import { createGetStaticPaths, createGetStaticProps, createPostPage } from "@alexharri/blog/page";
+import { components } from "../../../components";
+import { PostPageLayout } from "../../../components/PostPageLayout/PostPageLayout";
 
-export { default, getStaticProps } from "../[slug]";
+export default createPostPage({
+  components,
+  Layout: PostPageLayout,
+});
 
-export const getStaticPaths: GetStaticPaths<Params> = async () => {
-  return { paths: getPostPaths({ type: "draft" }), fallback: false };
-};
+export const getStaticProps = createGetStaticProps();
+
+export const getStaticPaths = createGetStaticPaths({ drafts: true });

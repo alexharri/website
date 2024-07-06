@@ -13,7 +13,6 @@ import { SmallNote } from "../../../components/SmallNote/SmallNote";
 import { SnippetTitle } from "../../../components/SnippetTitle/SnippetTitle";
 import { Pre, StaticCodeBlock } from "../../../components/StaticCodeBlock/StaticCodeBlock";
 import { FrontMatter } from "../../../types/FrontMatter";
-import { usePostWatcher } from "../../../utils/hooks/usePostWatcher";
 import { getMdxOptions } from "../../../utils/mdx";
 import { snippetFileNames, SNIPPETS_PATH } from "../../../utils/mdxUtils";
 
@@ -38,7 +37,7 @@ interface Props {
 }
 
 export default function SnippetPage(props: Props) {
-  const source = usePostWatcher(props);
+  const source = props.source;
   const scope = source.scope! as unknown as FrontMatter;
 
   return (

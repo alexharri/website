@@ -1,9 +1,10 @@
 import fs from "fs";
 import path from "path";
 import matter from "gray-matter";
-import { postFileNames, POSTS_PATH } from "./mdxUtils";
-import { Post, PostDataStore } from "../types/Post";
-import { getMdxOptions } from "./mdx";
+import { postFileNames, POSTS_PATH } from "../../../../src/utils/mdxUtils";
+import { getMdxOptions } from "../../../../src/utils/mdx";
+import { Post, PostDataStore } from "../../types";
+import { FrontMatter } from "../internal-types";
 
 export const getPosts = (type: "published" | "draft") => {
   const posts: Post[] = [];
@@ -18,18 +19,16 @@ export const getPosts = (type: "published" | "draft") => {
       title,
       description = "",
       publishedAt = "",
-    } = data as {
-      title: string;
-      description?: string;
-      publishedAt?: string;
-    };
+      updatedAt = "",
+      image = "",
+    } = data as FrontMatter;
 
     const slug = fileName.replace(/\.mdx?$/, "");
 
     const includePost = publishedAt ? type === "published" : type === "draft";
 
     if (includePost) {
-      posts.push({ title, description, slug, publishedAt });
+      posts.push({ title, description, slug, publishedAt, updatedAt, image });
     }
   }
 
@@ -37,28 +36,6 @@ export const getPosts = (type: "published" | "draft") => {
     return b.publishedAt.localeCompare(a.publishedAt);
   });
 };
-
-export function getPopularPosts() {
-  const postsBySlug = getPosts("published").reduce((acc, post) => {
-    acc[post.slug] = post;
-    return acc;
-  }, {} as Record<string, Post>);
-
-  const popularPosts = [
-    "planes",
-    "typescript-structural-typing",
-    "multi-cursor-code-editing-animated-introduction",
-    "vector-networks",
-  ];
-
-  for (const slug of popularPosts) {
-    if (!postsBySlug[slug]) {
-      throw new Error(`No post with slug '${slug}'`);
-    }
-  }
-
-  return popularPosts.map((slug) => postsBySlug[slug]);
-}
 
 export function getPostPaths(options: { type: "published" | "draft" }) {
   const draft = options.type === "draft";

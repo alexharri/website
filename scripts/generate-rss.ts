@@ -1,5 +1,5 @@
 import fs from "fs";
-import { getPosts } from "../src/utils/blogPageUtils";
+import { getPosts } from "@alexharri/blog/posts";
 import RSS from "rss";
 
 function generateRSS() {
