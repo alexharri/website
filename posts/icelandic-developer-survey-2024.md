@@ -5,7 +5,7 @@ publishedAt: ""
 image: ""
 ---
 
-A survey for Icelandic developers was conducted earlier this year by Kolibri. This survey was comprehensive, gathering data on compensation, programming language use, CI/CD practices, company size, industry, and so on alongside demographic information such as age, experience, and gender.
+A survey for Icelandic developers was conducted earlier this year by [Kolibri][kolibri]. This survey was comprehensive, gathering data on compensation, programming language use, CI/CD practices, company size, industry, and so on alongside demographic information such as age, experience, and gender.
 
 No large developer survey like this has been conducted in Iceland before—this survey is the first of its kind.
 
