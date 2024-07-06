@@ -1,6 +1,6 @@
 ---
-title: "Iceland's software industry and development practices in 2024"
-description: "Analyzing data from Iceland's 2024 developer survey: compensation figures, languages and technologies used"
+title: "2024 Icelandic Developer Survey: Compensation, Technologies, and more"
+description: "Analyzing data from Iceland's 2024 developer survey: compensation figures, languages, and technologies used"
 publishedAt: ""
 image: ""
 ---
@@ -384,19 +384,20 @@ Grouping the use of operating systems by industry, we see that Windows is most u
 
 ## Final words
 
-I want to thank the people at [Kolibri][kolibri] for the great initiative and work that went into conducting this survey:
+I want to thank [Telma Guðbjörg Eyþórsdóttir][telma] and [Jóhann Guðmundsson][johann] (both software developers at Kolibri) for driving this awesome initiative! Additional thanks goes to [Anna Signý Guðbjörnsdóttir][anna] (CEO at Kolibri) and the other people at [Kolibri][kolibri] that helped make this happen.
 
- * [Anna Signý Guðbjörnsdóttir][anna], CEO at Kolibri
- * [Telma Guðbjörg Eyþórsdóttir][telma], developer at Kolibri
- * TBD: more people
+Kolibri is one of Iceland's foremost digital agencies, providing services related to creating digital experiences, such as product and software development and design. I'm not formally affiliated with them any way, but I have friends there.
 
 [kolibri]: https://www.kolibri.is/en
 [anna]: https://www.linkedin.com/in/annasigny/
 [telma]: https://www.linkedin.com/in/telmag92/
+[johann]: https://www.linkedin.com/in/j%C3%B3hann-gu%C3%B0mundsson-935457b7/
 
 Kolibri held an event where they presented the results of the study, which sparked lively discussions. The house was packed and it was a blast!
 
 [ Pictures from the event go here ]
+
+Getting to write up the results of the survey has been great! I hope I have the opportunity to do so again in the future.
 
 Thanks for reading! I hope this was interesting.
 
