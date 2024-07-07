@@ -14,6 +14,7 @@ import { OptionsSticky } from "../../../components/posts/stabilizing-noisy-input
 import { OptionsStickyGap } from "../../../components/posts/stabilizing-noisy-inputs/OptionsStickyGap";
 import { OptionsStickyGapDynamic } from "../../../components/posts/stabilizing-noisy-inputs/OptionsStickyGapDynamic";
 import { LargeStickinessFactors } from "../../../components/posts/stabilizing-noisy-inputs/LargeStickinessFactors";
+import { mdxOptions } from "../../../utils/mdxOptions";
 
 const customComponents = {
   NoNoise,
@@ -37,4 +38,7 @@ export default createPostPage({
   Layout: PostPageLayout,
 });
 
-export const getStaticProps = createGetStaticProps({ slug: "stabilizing-noisy-inputs" });
+export const getStaticProps = createGetStaticProps({
+  mdxOptions,
+  slug: "stabilizing-noisy-inputs",
+});

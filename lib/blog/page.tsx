@@ -1,6 +1,6 @@
 import { MDXRemote, MDXRemoteSerializeResult } from "next-mdx-remote";
-import { PageLayoutProps, PostDataStore, Post } from "./types";
-import { usePostWatcher } from "./src/watcher";
+import { PageLayoutProps, PostDataStore, Post, MdxOptions } from "./types";
+import { usePostWatcher } from "./src/watcher-client";
 import { PostDataProvider } from "./src/data";
 import { FrontMatter } from "./src/internal-types";
 import { GetStaticPaths, GetStaticProps } from "next";
@@ -50,6 +50,7 @@ type Params = {
 };
 
 interface CreateGetStaticPropsOptions {
+  mdxOptions?: MdxOptions;
   /**
    * The slug of the post that wi
    */
@@ -67,7 +68,7 @@ export const createGetStaticProps =
       throw new Error(
         `No slug found. Either pass 'options.slug' or rename the page to '[slug].tsx'.`,
       );
-    return blogPageUtils.getPostProps(ctx);
+    return blogPageUtils.getPostProps(ctx, options.mdxOptions);
   };
 
 interface GetStaticPathsOptions {

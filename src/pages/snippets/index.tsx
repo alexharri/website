@@ -6,7 +6,6 @@ import { Layout } from "../../components/Layout";
 import { SnippetLink } from "../../components/Snippet/Snippet";
 import { SnippetList } from "../../components/SnippetList/SnippetList";
 import { Snippet } from "../../types/Snippet";
-import { snippetFileNames, SNIPPETS_PATH } from "../../utils/mdxUtils";
 
 interface Props {
   snippets: Snippet[];

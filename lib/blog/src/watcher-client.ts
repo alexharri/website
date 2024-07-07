@@ -30,22 +30,32 @@ export function usePostWatcher(options: Options) {
 
     async function poll() {
       try {
-        const versionData = await fetch(`/api/blog/${slug}/version`).then((res) => res.json());
+        const versionData = await fetch(`/api/__postwatcher?return=version&slug=${slug}`).then(
+          (res) => res.json(),
+        );
 
         if (versionData.version === versionRef.current) {
           pollAfterDelay();
           return;
         }
 
-        const sourceData = await fetch(`/api/blog/${slug}/post`).then((res) => res.json());
+        const res = await fetch(`/api/__postwatcher?return=post&slug=${slug}`);
+
+        if (res.status < 200 || res.status > 299) {
+          console.error(`[${currentTime()}] Refreshing post failed with status ${res.status}`);
+          pollAfterDelay();
+          return;
+        }
+
+        const postData = await res.json();
 
         delaySeconds = 1; // Reset delay after a successful fetch
 
         if (unmounted) return;
 
-        console.log(`[${currentTime()}] Refreshed post content at`);
+        console.log(`[${currentTime()}] Refreshed post content`);
 
-        setSource(sourceData.source);
+        setSource(postData.source);
         setVersion(versionData.version);
 
         pollAfterDelay();

@@ -1,15 +1,15 @@
 import fs from "fs";
 import path from "path";
 import matter from "gray-matter";
-import { postFileNames, POSTS_PATH } from "../../../../src/utils/mdxUtils";
-import { getMdxOptions } from "../../../../src/utils/mdx";
-import { Post, PostDataStore } from "../../types";
+import { findMdFiles } from "../md";
+import { MdxOptions, Post, PostDataStore } from "../../types";
 import { FrontMatter } from "../internal-types";
+import { POSTS_PATH } from "../constants";
 
 export const getPosts = (type: "published" | "draft") => {
   const posts: Post[] = [];
 
-  for (const fileName of postFileNames) {
+  for (const fileName of findMdFiles(POSTS_PATH)) {
     const filePath = path.join(POSTS_PATH, fileName);
     const fileContent = fs.readFileSync(filePath);
 
@@ -39,7 +39,7 @@ export const getPosts = (type: "published" | "draft") => {
 
 export function getPostPaths(options: { type: "published" | "draft" }) {
   const draft = options.type === "draft";
-  const paths = postFileNames
+  const paths = findMdFiles(POSTS_PATH)
     .filter((filePath) => {
       const fileContent = fs.readFileSync(path.resolve(POSTS_PATH, filePath));
       const { data } = matter(fileContent);
@@ -85,7 +85,7 @@ type Context = {
   params?: Params;
 };
 
-export const getPostProps = async (ctx: Context) => {
+export const getPostProps = async (ctx: Context, mdxOptions?: MdxOptions) => {
   if (!ctx.params?.slug) throw new Error(`Required context field 'params.slug' missing`);
 
   const { slug } = ctx.params!;
@@ -103,11 +103,10 @@ export const getPostProps = async (ctx: Context) => {
 
   const { content, data: scope } = matter(fileContent);
 
+  if (typeof mdxOptions === "function") mdxOptions = await mdxOptions();
+
   const serialize = (await import("next-mdx-remote/serialize")).serialize;
-  const source = await serialize(content, {
-    scope,
-    mdxOptions: await getMdxOptions(),
-  });
+  const source = await serialize(content, { scope, mdxOptions });
 
   let version = "0";
 

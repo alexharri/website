@@ -13,8 +13,7 @@ import { SmallNote } from "../../../components/SmallNote/SmallNote";
 import { SnippetTitle } from "../../../components/SnippetTitle/SnippetTitle";
 import { Pre, StaticCodeBlock } from "../../../components/StaticCodeBlock/StaticCodeBlock";
 import { FrontMatter } from "../../../types/FrontMatter";
-import { getMdxOptions } from "../../../utils/mdx";
-import { snippetFileNames, SNIPPETS_PATH } from "../../../utils/mdxUtils";
+import { mdxOptions } from "../../../utils/mdxOptions";
 
 // Custom components/renderers to pass to MDX.
 // Since the MDX files aren't loaded by webpack, they have no knowledge of how
@@ -75,7 +74,7 @@ export const getStaticProps: GetStaticProps<Props, Params> = async (ctx) => {
 
   const source = await serialize(content, {
     scope: data,
-    mdxOptions: await getMdxOptions(),
+    mdxOptions: await mdxOptions(),
   });
 
   let version = "0";

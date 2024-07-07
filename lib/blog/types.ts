@@ -1,3 +1,5 @@
+import { SerializeOptions } from "next-mdx-remote/dist/types";
+
 export interface Post {
   title: string;
   slug: string;
@@ -17,3 +19,8 @@ export interface PageLayoutProps {
   post: Post;
   children: React.ReactNode;
 }
+
+export type MdxOptions =
+  | SerializeOptions["mdxOptions"]
+  | (() => SerializeOptions["mdxOptions"])
+  | (() => Promise<SerializeOptions["mdxOptions"]>);

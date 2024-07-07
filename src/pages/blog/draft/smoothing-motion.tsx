@@ -5,6 +5,7 @@ import { NoLerp } from "../../../components/posts/smoothing-motion/NoLerp";
 import { Lerp10Percent } from "../../../components/posts/smoothing-motion/Lerp10Percent";
 import { Lerp } from "../../../components/posts/smoothing-motion/Lerp";
 import { LerpSteps } from "../../../components/posts/smoothing-motion/LerpSteps";
+import { mdxOptions } from "../../../utils/mdxOptions";
 
 const customComponents = {
   NoLerp,
@@ -21,4 +22,4 @@ export default createPostPage({
   Layout: PostPageLayout,
 });
 
-export const getStaticProps = createGetStaticProps({ slug: "smoothing-motion" });
+export const getStaticProps = createGetStaticProps({ mdxOptions, slug: "smoothing-motion" });
