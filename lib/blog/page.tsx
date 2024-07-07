@@ -63,7 +63,7 @@ export const createGetStaticProps =
     if (options.slug) {
       ctx = { ...ctx, params: { ...ctx?.params, slug: options.slug } };
     }
-    if (!options.slug)
+    if (!ctx.params?.slug)
       throw new Error(
         `No slug found. Either pass 'options.slug' or rename the page to '[slug].tsx'.`,
       );

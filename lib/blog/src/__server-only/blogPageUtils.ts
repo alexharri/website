@@ -86,11 +86,13 @@ type Context = {
 };
 
 export const getPostProps = async (ctx: Context) => {
-  const params = ctx.params!;
+  if (!ctx.params?.slug) throw new Error(`Required context field 'params.slug' missing`);
 
-  let filePath = path.join(POSTS_PATH, `${params.slug}.mdx`);
+  const { slug } = ctx.params!;
+
+  let filePath = path.join(POSTS_PATH, `${slug}.mdx`);
   if (!fs.existsSync(filePath)) {
-    filePath = path.join(POSTS_PATH, `${params.slug}.md`);
+    filePath = path.join(POSTS_PATH, `${slug}.md`);
   }
 
   if (!fs.existsSync(filePath)) {
@@ -109,15 +111,15 @@ export const getPostProps = async (ctx: Context) => {
 
   let version = "0";
 
-  const versionFilePath = path.resolve(POSTS_PATH, "./.version", params.slug);
+  const versionFilePath = path.resolve(POSTS_PATH, "./.version", slug);
 
   if (fs.existsSync(versionFilePath)) {
     version = fs.readFileSync(versionFilePath, "utf-8");
   }
 
-  const data = getPostData(params.slug);
+  const data = getPostData(slug);
 
-  return { props: { source, slug: params.slug, data, version } };
+  return { props: { source, slug, data, version } };
 };
 
 export function getSlugFromFilePath(filePath: string) {
