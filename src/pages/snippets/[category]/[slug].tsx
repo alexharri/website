@@ -1,10 +1,6 @@
-import fs from "fs";
-import matter from "gray-matter";
-import { GetStaticPaths, GetStaticProps } from "next";
+import { createGetStaticPaths, createGetStaticProps } from "@alexharri/blog/page";
 import { MDXRemote, MDXRemoteSerializeResult } from "next-mdx-remote";
-import { serialize } from "next-mdx-remote/serialize";
 import Head from "next/head";
-import path from "path";
 import { Layout } from "../../../components/Layout";
 import { Link } from "../../../components/Link";
 import { Meta } from "../../../components/Meta/Meta";
@@ -15,16 +11,11 @@ import { Pre, StaticCodeBlock } from "../../../components/StaticCodeBlock/Static
 import { FrontMatter } from "../../../types/FrontMatter";
 import { mdxOptions } from "../../../utils/mdxOptions";
 
-// Custom components/renderers to pass to MDX.
-// Since the MDX files aren't loaded by webpack, they have no knowledge of how
-// to handle import statements. Instead, you must include components in scope
-// here.
 const components = {
   a: Link,
   pre: Pre,
   StaticCodeBlock,
   SmallNote,
-  // ExampleComponent: dynamic(() => import("../../src/components/ExampleComponent")),
   Head,
 };
 
@@ -56,46 +47,13 @@ export default function SnippetPage(props: Props) {
   );
 }
 
-type Params = {
-  slug: string;
-  category: string;
-};
+const slugParts = ["category", "slug"];
+const postsPath = "snippets/";
 
-export const getStaticProps: GetStaticProps<Props, Params> = async (ctx) => {
-  const params = ctx.params!;
+export const getStaticProps = createGetStaticProps({
+  slugParts,
+  mdxOptions,
+  postsPath,
+});
 
-  let filePath = path.join(SNIPPETS_PATH, params.category, `${params.slug}.mdx`);
-  if (!fs.existsSync(filePath)) {
-    filePath = path.join(SNIPPETS_PATH, params.category, `${params.slug}.md`);
-  }
-  const fileContent = fs.readFileSync(filePath);
-
-  const { content, data } = matter(fileContent);
-
-  const source = await serialize(content, {
-    scope: data,
-    mdxOptions: await mdxOptions(),
-  });
-
-  let version = "0";
-
-  const versionFilePath = path.resolve(SNIPPETS_PATH, "./.version", params.slug);
-
-  if (fs.existsSync(versionFilePath)) {
-    version = fs.readFileSync(versionFilePath, "utf-8");
-  }
-
-  return { props: { source, slug: params.slug, category: params.category, version } };
-};
-
-export const getStaticPaths: GetStaticPaths<Params> = async () => {
-  const paths = snippetFileNames
-    .map((path) => path.replace(/\.mdx?$/, ""))
-    .map((path) => path.split("/"))
-    .map(([category, slug]) => ({ params: { category, slug } }));
-
-  return {
-    paths,
-    fallback: false,
-  };
-};
+export const getStaticPaths = createGetStaticPaths({ slugParts, postsPath });

@@ -4,6 +4,7 @@ import { usePostWatcher } from "./src/watcher-client";
 import { PostDataProvider } from "./src/data";
 import { FrontMatter } from "./src/internal-types";
 import { GetStaticPaths, GetStaticProps } from "next";
+import { DEFAULT_SLUG_PARTS } from "@alexharri/blog/src/constants";
 
 export interface CreatePageOptions {
   components: Record<string, React.ComponentType<any> | ((props: any) => React.ReactNode)>;
@@ -45,30 +46,39 @@ export function createPostPage(options: CreatePageOptions) {
   return Page;
 }
 
-type Params = {
-  slug: string;
-};
+type Params = Partial<{ [key: string]: string }>;
 
 interface CreateGetStaticPropsOptions {
   mdxOptions?: MdxOptions;
-  /**
-   * The slug of the post that wi
-   */
   slug?: string;
+  /**
+   * @default ["slug"]
+   */
+  slugParts?: string[]; // TBD: Can this be inferred from call stack?
+  /**
+   * Path to directory containing your posts as '.md' or '.mdx', relative to 'process.cwd()'
+   *
+   * @default "posts/"
+   */
+  postsPath?: string;
 }
 
 export const createGetStaticProps =
   (options: CreateGetStaticPropsOptions = {}): GetStaticProps<PageProps, Params> =>
   async (ctx) => {
     const blogPageUtils = await import("./src/__server-only/blogPageUtils");
-    if (options.slug) {
-      ctx = { ...ctx, params: { ...ctx?.params, slug: options.slug } };
+    let slug = options.slug;
+    if (!slug) {
+      const slugParts = options.slugParts || DEFAULT_SLUG_PARTS;
+      slug = slugParts
+        .map((key) => {
+          const value = ctx.params?.[key];
+          if (!value) throw new Error(`Missing context parameter '${key}'`);
+          return value;
+        })
+        .join("/");
     }
-    if (!ctx.params?.slug)
-      throw new Error(
-        `No slug found. Either pass 'options.slug' or rename the page to '[slug].tsx'.`,
-      );
-    return blogPageUtils.getPostProps(ctx, options.mdxOptions);
+    return blogPageUtils.getPostProps(slug, options);
   };
 
 interface GetStaticPathsOptions {
@@ -79,14 +89,26 @@ interface GetStaticPathsOptions {
    * @default false
    */
   drafts?: boolean;
+  /**
+   * @default ["slug"]
+   */
+  slugParts?: string[];
+  /**
+   * Path to directory containing your posts as '.md' or '.mdx', relative to 'process.cwd()'
+   *
+   * @default "posts/"
+   */
+  postsPath?: string;
 }
 
 export const createGetStaticPaths =
   (options: GetStaticPathsOptions = {}): GetStaticPaths<Params> =>
   async () => {
     const blogPageUtils = await import("./src/__server-only/blogPageUtils");
+    const { slugParts = DEFAULT_SLUG_PARTS, postsPath = "posts/" } = options;
+    const type = options.drafts ? "draft" : "published";
     return {
-      paths: blogPageUtils.getPostPaths({ type: options.drafts ? "draft" : "published" }),
+      paths: blogPageUtils.getPostPaths({ type, slugParts, postsPath }),
       fallback: false,
     };
   };

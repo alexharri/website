@@ -11,6 +11,7 @@ export interface Post {
   updatedAt: string;
   /** Empty string if not provided */
   image: string;
+  firstCodeSnippet: { text: string; language: string } | null;
 }
 
 export type PostDataStore = Partial<Record<string, unknown>>;

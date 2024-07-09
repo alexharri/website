@@ -2,16 +2,18 @@ import fs from "fs";
 import path from "path";
 import matter from "gray-matter";
 import { findMdFiles } from "../md";
-import { MdxOptions, Post, PostDataStore } from "../../types";
-import { FrontMatter } from "../internal-types";
-import { POSTS_PATH } from "../constants";
+import { Post, PostDataStore } from "../../types";
+import { FrontMatter, GetPostOptions, GetPostsOptions } from "../internal-types";
+import { DEFAULT_POSTS_PATH } from "../constants";
 
-export const getPosts = (type: "published" | "draft") => {
+export const getPosts = (options: GetPostsOptions = {}) => {
+  const { type = "published", postsPath = DEFAULT_POSTS_PATH } = options;
+
   const posts: Post[] = [];
 
-  for (const fileName of findMdFiles(POSTS_PATH)) {
-    const filePath = path.join(POSTS_PATH, fileName);
-    const fileContent = fs.readFileSync(filePath);
+  for (const fileName of findMdFiles(postsPath)) {
+    const filePath = path.join(postsPath, fileName);
+    const fileContent = fs.readFileSync(filePath, "utf-8");
 
     const { data } = matter(fileContent);
 
@@ -21,14 +23,33 @@ export const getPosts = (type: "published" | "draft") => {
       publishedAt = "",
       updatedAt = "",
       image = "",
+      include = {},
     } = data as FrontMatter;
+
+    let firstCodeSnippet: Post["firstCodeSnippet"] = null;
+    if (include.firstCodeSnippet) {
+      const lines = fileContent.split("\n");
+      const startLineIndex = lines.findIndex((line) => line.startsWith("```"));
+      let endLineIndex = -1;
+      for (let i = startLineIndex + 1; i < lines.length; i++) {
+        if (lines[i].startsWith("```")) {
+          endLineIndex = i;
+          break;
+        }
+      }
+      if (endLineIndex !== -1) {
+        const language = lines[startLineIndex].substring(3);
+        const text = lines.slice(startLineIndex + 1, endLineIndex).join("\n") + "\n";
+        firstCodeSnippet = { text, language };
+      }
+    }
 
     const slug = fileName.replace(/\.mdx?$/, "");
 
     const includePost = publishedAt ? type === "published" : type === "draft";
 
     if (includePost) {
-      posts.push({ title, description, slug, publishedAt, updatedAt, image });
+      posts.push({ title, description, slug, publishedAt, updatedAt, image, firstCodeSnippet });
     }
   }
 
@@ -37,27 +58,56 @@ export const getPosts = (type: "published" | "draft") => {
   });
 };
 
-export function getPostPaths(options: { type: "published" | "draft" }) {
-  const draft = options.type === "draft";
-  const paths = findMdFiles(POSTS_PATH)
-    .filter((filePath) => {
-      const fileContent = fs.readFileSync(path.resolve(POSTS_PATH, filePath));
-      const { data } = matter(fileContent);
+function customPageExists(slug: string, isDraftPost: boolean) {
+  const extensions = [".js", ".ts", ".jsx", ".tsx"];
+  const roots = ["./src/pages", "./pages/"];
+  const cwd = process.cwd();
+  for (const root of roots) {
+    for (const ext of extensions) {
+      const pagePath = path.resolve(
+        cwd,
+        // TBD: /blog/ shouldn't be hardcoded
+        `${root}/blog/${isDraftPost ? "draft/" : ""}${slug}${ext}`,
+      );
+      if (fs.existsSync(pagePath)) return true;
+    }
+  }
+  return false;
+}
 
-      if (draft) {
-        return !data.publishedAt;
-      }
-      return !!data.publishedAt;
+interface GetPostPathsOptions {
+  type: "published" | "draft";
+  slugParts: string[];
+  postsPath: string;
+}
+
+export function getPostPaths(options: GetPostPathsOptions) {
+  const draft = options.type === "draft";
+  const postsPath = path.resolve(process.cwd(), options.postsPath);
+
+  const paths = findMdFiles(postsPath)
+    .filter((filePath) => {
+      const fileContent = fs.readFileSync(path.resolve(postsPath, filePath));
+      const isDraftPost = !matter(fileContent).data.publishedAt;
+      if (draft) return isDraftPost;
+      return !isDraftPost;
     })
     .map((path) => path.replace(/\.mdx?$/, ""))
-    .filter((slug) => {
-      const pagePath = path.resolve(
-        process.cwd(),
-        `./src/pages/blog/${draft ? "draft/" : ""}${slug}.tsx`,
-      );
-      return !fs.existsSync(pagePath);
-    })
-    .map((slug) => ({ params: { slug } }));
+    .filter((slug) => !customPageExists(slug, draft))
+    .map((slug) => {
+      const slugParts = slug.split("/");
+      const expectedLen = options.slugParts.length;
+      if (slugParts.length !== expectedLen) {
+        throw new Error(
+          `Expected number of slug parts to equal ${expectedLen}. Got ${slugParts.length}`,
+        );
+      }
+      const params: Partial<Record<string, string>> = {};
+      for (const [i, key] of options.slugParts.entries()) {
+        params[key] = slugParts[i];
+      }
+      return { params };
+    });
 
   return [...paths];
 }
@@ -77,22 +127,11 @@ function getPostData(slug: string): PostDataStore {
   return out;
 }
 
-type Params = {
-  slug: string;
-};
-
-type Context = {
-  params?: Params;
-};
-
-export const getPostProps = async (ctx: Context, mdxOptions?: MdxOptions) => {
-  if (!ctx.params?.slug) throw new Error(`Required context field 'params.slug' missing`);
-
-  const { slug } = ctx.params!;
-
-  let filePath = path.join(POSTS_PATH, `${slug}.mdx`);
+export const getPostProps = async (slug: string, options: GetPostOptions = {}) => {
+  const { postsPath = DEFAULT_POSTS_PATH } = options;
+  let filePath = path.join(postsPath, `${slug}.mdx`);
   if (!fs.existsSync(filePath)) {
-    filePath = path.join(POSTS_PATH, `${slug}.md`);
+    filePath = path.join(postsPath, `${slug}.md`);
   }
 
   if (!fs.existsSync(filePath)) {
@@ -103,6 +142,7 @@ export const getPostProps = async (ctx: Context, mdxOptions?: MdxOptions) => {
 
   const { content, data: scope } = matter(fileContent);
 
+  let { mdxOptions } = options;
   if (typeof mdxOptions === "function") mdxOptions = await mdxOptions();
 
   const serialize = (await import("next-mdx-remote/serialize")).serialize;
@@ -110,7 +150,7 @@ export const getPostProps = async (ctx: Context, mdxOptions?: MdxOptions) => {
 
   let version = "0";
 
-  const versionFilePath = path.resolve(POSTS_PATH, "./.version", slug);
+  const versionFilePath = path.resolve(postsPath, "./.version", slug);
 
   if (fs.existsSync(versionFilePath)) {
     version = fs.readFileSync(versionFilePath, "utf-8");
