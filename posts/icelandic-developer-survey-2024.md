@@ -9,7 +9,7 @@ A survey for Icelandic developers was conducted earlier this year by [Kolibri][k
 
 No large developer survey like this has been conducted in Iceland before—this survey is the first of its kind.
 
-The results from this survey offer us unique insights into the Icelandic software industry. Which technologies are developers are using? How are developers compensated? What cloud providers are popular? These are just some of the questions we'll explore in this post.
+The results from this survey offer us unique insights into the Icelandic software industry. Which technologies are developers using? How are developers compensated? What cloud providers are popular? These are just some of the questions we'll explore in this post.
 
 There's loads of data to look at, so let's get to it!
 
@@ -25,9 +25,15 @@ Most respondents were aged 25 to 54. This chart shows the age distribution of th
 
 ### Gender
 
-Of the respondents who specified their gender (397), a large majority of the respondents were men (86.1%), with the rest being women and a small number of non-binary respondents.
+Of the respondents who specified their gender (397), 86.1% were men, 13.1% were women, and 0.8% were non-binary.
 
 <BarChart data="gender-count" width={500} minWidth={280} height={300} minHeight={200} />
+
+Despite the seemingly low proportion of women at 13.1% of respondents, this percentage is still significantly higher than in other global developer surveys I've looked at. [JetBrains' 2023 developer ecosystem survey][jetbrains_survey] respondents were 5% women, with [State of JS 2023][state_of_js_gender] at 4%, and [StackOverflow's 2022 developer survey][stackoverflow_2022_demographics] at ~5%.
+
+[jetbrains_survey]: https://www.jetbrains.com/lp/devecosystem-2023/demographics/#gender
+[state_of_js_gender]: https://2023.stateofjs.com/en-US/demographics/#gender
+[stackoverflow_2022_demographics]: https://survey.stackoverflow.co/2022/#demographics-gender
 
 ### Nationality
 
@@ -128,7 +134,7 @@ Icelandic developers are compensated well. Respondents were asked about their mo
 
 <SmallNote>The EUR and USD figures are using an exchange rate of ISK 1 = EUR 0.0067 and ISK 1 = USD 0.0072, measured on the 2nd of July 2024.</SmallNote>
 
-In Iceland, we generally generally discuss monthly salaries instead of yearly. But in the US and other countries, yearly salary figures are more common, so here is the same table with yearly salary figures.
+In Iceland, we generally discuss monthly salaries instead of yearly. But in the US and other countries, yearly salary figures are more common, so here is the same table with yearly salary figures.
 
 {<table data-align="right">
 <tbody>
@@ -207,7 +213,7 @@ We've been looking at gross salaries so far. In figuring out net salaries we nee
 
 <SmallNote label="Source">[https://www.skatturinn.is/english/individuals/tax-liability/](https://www.skatturinn.is/english/individuals/tax-liability/)</SmallNote>
 
-There is a personal tax credit of ISK 64.926 per month, which lowers the effective tax rate. There are also other factors, such as the mandatory pension fund and voluntary pension insurance premiums.
+There is a personal tax credit of ISK 64,926 per month, which lowers the effective tax rate. There are also other factors, such as the mandatory pension fund and voluntary pension insurance premiums.
 
 To take a rough example, a developer earning a monthly gross salary of ISK 1.2M (~104K USD, yearly) is likely to have a net salary of around 780K-800K ISK (~USD 67K-70K, yearly). Don't take this number too seriously, it depends on a lot of factors.
 
@@ -384,9 +390,9 @@ Grouping the use of operating systems by industry, we see that Windows is most u
 
 ## Final words
 
-I want to thank [Telma Guðbjörg Eyþórsdóttir][telma] and [Jóhann Guðmundsson][johann] (both software developers at Kolibri) for driving this awesome initiative! Additional thanks goes to [Anna Signý Guðbjörnsdóttir][anna] (CEO at Kolibri) and the other people at [Kolibri][kolibri] that helped make this happen.
+I want to thank [Telma Guðbjörg Eyþórsdóttir][telma] and [Jóhann Guðmundsson][johann] (both software developers at Kolibri) for kickstarting and driving this survey—their initiative made this all possible! Additional thanks go to [Anna Signý Guðbjörnsdóttir][anna] (CEO at Kolibri) and the other people at [Kolibri][kolibri] that helped make this happen.
 
-Kolibri is one of Iceland's foremost digital agencies, providing services related to creating digital experiences, such as product and software development and design. I'm not formally affiliated with them any way, but I have friends there.
+Kolibri is one of Iceland's foremost digital agencies, providing services related to creating digital experiences, such as product and software development and design. I'm not formally affiliated with them in any way, but I have friends there.
 
 [kolibri]: https://www.kolibri.is/en
 [anna]: https://www.linkedin.com/in/annasigny/
