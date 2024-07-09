@@ -1,3 +1,4 @@
+import { currentTime } from "./time";
 import { MDXRemoteSerializeResult } from "next-mdx-remote";
 import { useEffect, useRef, useState } from "react";
 
@@ -17,19 +18,20 @@ export function usePostWatcher(options: Options) {
   versionRef.current = version;
 
   useEffect(() => {
+    let delaySeconds = 1;
     let unmounted = false;
 
     function pollAfterDelay() {
       if (process.env.NODE_ENV === "production") return;
 
       if (unmounted) return;
-      setTimeout(poll, 1000);
+      setTimeout(poll, delaySeconds * 1000);
     }
 
     async function poll() {
       try {
-        const versionData = await fetch(`/api/blog/${slug}/version`).then(
-          (res) => res.json()
+        const versionData = await fetch(`/api/__postwatcher?return=version&slug=${slug}`).then(
+          (res) => res.json(),
         );
 
         if (versionData.version === versionRef.current) {
@@ -37,20 +39,30 @@ export function usePostWatcher(options: Options) {
           return;
         }
 
-        const sourceData = await fetch(`/api/blog/${slug}/post`).then((res) =>
-          res.json()
-        );
+        const res = await fetch(`/api/__postwatcher?return=post&slug=${slug}`);
+
+        if (res.status < 200 || res.status > 299) {
+          console.error(`[${currentTime()}] Refreshing post failed with status ${res.status}`);
+          pollAfterDelay();
+          return;
+        }
+
+        const postData = await res.json();
+
+        delaySeconds = 1; // Reset delay after a successful fetch
 
         if (unmounted) return;
 
-        console.log("Fetched post");
+        console.log(`[${currentTime()}] Refreshed post content`);
 
-        setSource(sourceData.source);
+        setSource(postData.source);
         setVersion(versionData.version);
 
         pollAfterDelay();
       } catch (e) {
-        console.log(e);
+        // Progressively make the delay longer, up to a maximum of 8 seconds
+        if (delaySeconds < 8) delaySeconds *= 2;
+        console.warn(`[${currentTime()}] Failed to refresh post. Is your dev server running?`);
         pollAfterDelay();
       }
     }

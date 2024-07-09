@@ -6,7 +6,7 @@ import { Link } from "../components/Link";
 import { PostCard } from "../components/PostCard/PostCard";
 import { PostCarousel } from "../components/PostCarousel/PostCarousel";
 import { Post } from "../types/Post";
-import { getPopularPosts } from "../utils/blogPageUtils";
+import { getPopularPosts } from "../utils/getPopularPosts";
 import { StyleOptions, useStyles } from "../utils/styles";
 
 const Styles = ({ styled }: StyleOptions) => ({

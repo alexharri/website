@@ -1,18 +1,25 @@
-import { createPage } from "../[slug]";
-import { getPostProps, getSlugFromFilePath } from "../../../utils/blogPageUtils";
+import { createGetStaticProps, createPostPage } from "@alexharri/blog/page";
+import { components } from "../../../components";
+import { PostPageLayout } from "../../../components/PostPageLayout/PostPageLayout";
 import { NoLerp } from "../../../components/posts/smoothing-motion/NoLerp";
 import { Lerp10Percent } from "../../../components/posts/smoothing-motion/Lerp10Percent";
 import { Lerp } from "../../../components/posts/smoothing-motion/Lerp";
 import { LerpSteps } from "../../../components/posts/smoothing-motion/LerpSteps";
+import { mdxOptions } from "../../../utils/mdxOptions";
 
-export default createPage({
+const customComponents = {
   NoLerp,
   Lerp10Percent,
   Lerp,
   LerpSteps,
+};
+
+export default createPostPage({
+  components: {
+    ...components,
+    ...customComponents,
+  },
+  Layout: PostPageLayout,
 });
 
-export const getStaticProps = async () => {
-  const slug = getSlugFromFilePath(import.meta.url);
-  return getPostProps({ params: { slug } });
-};
+export const getStaticProps = createGetStaticProps({ mdxOptions, slug: "smoothing-motion" });

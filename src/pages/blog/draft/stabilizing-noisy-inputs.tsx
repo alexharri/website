@@ -1,5 +1,6 @@
-import { createPage } from "../[slug]";
-import { getPostProps, getSlugFromFilePath } from "../../../utils/blogPageUtils";
+import { createGetStaticProps, createPostPage } from "@alexharri/blog/page";
+import { PostPageLayout } from "../../../components/PostPageLayout/PostPageLayout";
+import { components } from "../../../components";
 import {
   NoNoise,
   NoNoiseShowBoundaries,
@@ -13,8 +14,9 @@ import { OptionsSticky } from "../../../components/posts/stabilizing-noisy-input
 import { OptionsStickyGap } from "../../../components/posts/stabilizing-noisy-inputs/OptionsStickyGap";
 import { OptionsStickyGapDynamic } from "../../../components/posts/stabilizing-noisy-inputs/OptionsStickyGapDynamic";
 import { LargeStickinessFactors } from "../../../components/posts/stabilizing-noisy-inputs/LargeStickinessFactors";
+import { mdxOptions } from "../../../utils/mdxOptions";
 
-export default createPage({
+const customComponents = {
   NoNoise,
   NoNoiseShowBoundaries,
   SomeNoise,
@@ -26,9 +28,17 @@ export default createPage({
   OptionsStickyGap,
   OptionsStickyGapDynamic,
   LargeStickinessFactors,
+};
+
+export default createPostPage({
+  components: {
+    ...components,
+    ...customComponents,
+  },
+  Layout: PostPageLayout,
 });
 
-export const getStaticProps = async () => {
-  const slug = getSlugFromFilePath(import.meta.url);
-  return getPostProps({ params: { slug } });
-};
+export const getStaticProps = createGetStaticProps({
+  mdxOptions,
+  slug: "stabilizing-noisy-inputs",
+});

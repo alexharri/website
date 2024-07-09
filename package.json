@@ -12,6 +12,7 @@
     "generate-rss": "ts-node -T ./scripts/generate-rss.ts"
   },
   "dependencies": {
+    "@alexharri/blog": "file:/./lib/blog/",
     "@emotion/css": "^11.11.2",
     "@emotion/server": "^11.11.0",
     "@monaco-editor/react": "^4.4.6",

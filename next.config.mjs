@@ -1,6 +1,7 @@
 import MonacoEditorWebpackPlugin from "monaco-editor-webpack-plugin";
 import TM from "next-transpile-modules";
 import { execSync } from "child_process";
+import { withBlog } from "@alexharri/blog/next.config.js";
 
 const withTM = TM([
   // `monaco-editor` isn't published to npm correctly: it includes both CSS
@@ -50,4 +51,4 @@ const nextConfig = {
   },
 };
 
-export default withTM(nextConfig);
+export default withBlog(withTM(nextConfig));

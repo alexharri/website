@@ -1,10 +1,10 @@
+import { getPosts } from "@alexharri/blog/posts";
 import { GetStaticProps } from "next";
 import Head from "next/head";
 import { AboutMe } from "../../components/AboutMe/AboutMe";
 import { Layout } from "../../components/Layout";
 import { PostCard } from "../../components/PostCard/PostCard";
 import { Post } from "../../types/Post";
-import { getPosts } from "../../utils/blogPageUtils";
 import { StyleOptions, useStyles } from "../../utils/styles";
 
 interface Props {

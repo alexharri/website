@@ -1,8 +1,8 @@
+import { getPosts } from "@alexharri/blog/posts";
 import { GetStaticProps } from "next";
 import { BlogPost } from "../components/BlogPost/BlogPost";
 import { Layout } from "../components/Layout";
 import { Post } from "../types/Post";
-import { getPosts } from "../utils/blogPageUtils";
 
 interface Props {
   posts: Post[];

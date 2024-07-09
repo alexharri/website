@@ -7,5 +7,3 @@ export interface Post {
   publishedAt: string;
   updatedAt?: string;
 }
-
-export type PostDataStore = Partial<Record<string, unknown>>;

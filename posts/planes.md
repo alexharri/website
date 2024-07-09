@@ -13,7 +13,7 @@ Planes have loads of uses in applications that deal with 3D geometry. I've mostl
 
 Learning about planes felt abstract and non-intuitive to me. _“Sure, that's a plane equation, but what do I do with it? What does a plane look like?”_ It took some time for me to build an intuition for how to reason about and work with them.
 
-In writing this, I want to provide you with an introduction that focuses on building a practical, intuitive understanding of planes. I hope to achieve this through the use of visual (and interactive!) explanations which will accompany us as we work through progressively more complex problems.
+In writing this, I want to provide you with an introduction that focuses on building a practical, intuitive understanding of planes. I hope to achieve this through the use of visual (and interactive!) explanations which will accompany us as we work through progressively more complex problems foo.
 
 With that out of the way, let's get to it!
 
