@@ -121,14 +121,13 @@ Icelandic developers are compensated well. Respondents were asked about their mo
 
 {<table data-align="right">
 <tbody>
-  <tr> <th>ISK</th> <th>EUR</th> <th>USD</th> </tr>
-
-  <tr> <td>0 - 800,000</td> <td>0 - 5,360</td> <td>0 - 5,760</td> </tr>
-  <tr> <td>800,000 - 1,000,000</td> <td>5,360 - 6,700</td> <td>5,760 - 7,200</td> </tr>
-  <tr> <td>1,000,000 - 1,200,000</td> <td>6,700 - 8,040</td> <td>7,200 - 8,640</td> </tr>
-  <tr> <td>1,200,000 - 1,400,000</td> <td>8,040 - 9,380</td> <td>8,640 - 10,080</td> </tr>
-  <tr> <td>1,400,000 - 1,600,000</td> <td>9,380 - 10,720</td> <td>10,080 - 11,520</td> </tr>
-  <tr> <td>Over 1,600,000</td> <td>Over 10,720</td> <td>Over 11,520</td> </tr>
+  <tr><th>ISK</th><th>EUR</th><th>USD</th></tr>
+  <tr><td>0 - 800,000</td><td>0 - 5,360</td><td>0 - 5,760</td></tr>
+  <tr><td>800,000 - 1,000,000</td><td>5,360 - 6,700</td><td>5,760 - 7,200</td></tr>
+  <tr><td>1,000,000 - 1,200,000</td><td>6,700 - 8,040</td><td>7,200 - 8,640</td></tr>
+  <tr><td>1,200,000 - 1,400,000</td><td>8,040 - 9,380</td><td>8,640 - 10,080</td></tr>
+  <tr><td>1,400,000 - 1,600,000</td><td>9,380 - 10,720</td><td>10,080 - 11,520</td></tr>
+  <tr><td>Over 1,600,000</td><td>Over 10,720</td><td>Over 11,520</td></tr>
 </tbody>
 </table>}
 
@@ -138,14 +137,13 @@ In Iceland, we generally discuss monthly salaries instead of yearly. But in the 
 
 {<table data-align="right">
 <tbody>
-  <tr> <th>ISK</th> <th>EUR</th> <th>USD</th> </tr>
-
-  <tr> <td>0 - 9,600,000</td> <td>0 - 64,320</td> <td>0 - 69,120</td> </tr>
-  <tr> <td>9,600,000 - 12,000,000</td> <td>64,320 - 80,400</td> <td>69,120 - 86,400</td> </tr>
-  <tr> <td>12,000,000 - 14,400,000</td> <td>80,400 - 96,480</td> <td>86,400 - 103,680</td> </tr>
-  <tr> <td>14,400,000 - 16,800,000</td> <td>96,480 - 112,560</td> <td>103,680 - 120,960</td> </tr>
-  <tr> <td>16,800,000 - 19,200,000</td> <td>112,560 - 128,640</td> <td>120,960 - 138,240</td> </tr>
-  <tr> <td>Over 19,200,000</td> <td>Over 128,640</td> <td>Over 138,240</td> </tr>
+  <tr><th>ISK</th><th>EUR</th><th>USD</th></tr>
+  <tr><td>0 - 9,600,000</td><td>0 - 64,320</td><td>0 - 69,120</td></tr>
+  <tr><td>9,600,000 - 12,000,000</td><td>64,320 - 80,400</td><td>69,120 - 86,400</td></tr>
+  <tr><td>12,000,000 - 14,400,000</td><td>80,400 - 96,480</td><td>86,400 - 103,680</td></tr>
+  <tr><td>14,400,000 - 16,800,000</td><td>96,480 - 112,560</td><td>103,680 - 120,960</td></tr>
+  <tr><td>16,800,000 - 19,200,000</td><td>112,560 - 128,640</td><td>120,960 - 138,240</td></tr>
+  <tr><td>Over 19,200,000</td><td>Over 128,640</td><td>Over 138,240</td></tr>
 </tbody>
 </table>}
 
@@ -203,11 +201,10 @@ We've been looking at gross salaries so far. In figuring out net salaries we nee
 
 {<table data-align="right">
 <tbody>
-  <tr> <th>Income, per month</th> <th>Tax rate</th> </tr>
-
-  <tr> <td>ISK 0 - 446,136</td> <td>31.48%</td> </tr>
-  <tr> <td>ISK 446,137 - 1,252,501 </td> <td>37.98%</td> </tr>
-  <tr> <td>Over ISK 1,252,501</td> <td>46.28%</td> </tr>
+  <tr><th>Income, per month</th><th>Tax rate</th></tr>
+  <tr><td>ISK 0 - 446,136</td><td>31.48%</td></tr>
+  <tr><td>ISK 446,137 - 1,252,501 </td><td>37.98%</td></tr>
+  <tr><td>Over ISK 1,252,501</td><td>46.28%</td></tr>
 </tbody>
 </table>}
 
