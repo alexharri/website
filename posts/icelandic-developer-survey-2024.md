@@ -153,7 +153,7 @@ The below chart shows monthly salaries for developers in Iceland, split by age b
 
 As a freshly minted developer, you can expect to earn under or around ISK 800K. Even though the first salary bracket goes to zero, I wouldn't expect many developers to be earning less than 650K unless they're entering the field without a degree.
 
-With a few years of experience, most developers move from the &lt;800K to the 800K-1.0M bracket. And at 6 or more years of experience, a lot of developers move into the &gt;1.0M brackets.
+With a few years of experience, most developers move from the &lt;800K to the 800K-1.0M bracket. At 6 or more years of experience, a lot of developers move into the &gt;1.0M brackets.
 
 Summarizing this:
 
