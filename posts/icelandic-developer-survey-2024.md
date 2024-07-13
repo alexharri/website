@@ -324,7 +324,7 @@ The following chart shows the front-end libraries which respondents used in the 
 
 <SmallNote>Like before, front-end libraries colored blue were provided as a default option in the survey, while the front-end libraries colored green were typed in the "Other" field.</SmallNote>
 
-React completely dominates the front-end scene in Iceland, with Vue and Angular in a distant second and third place. In my experience, this data is representative—React is incredibly popular here. 
+React dominates the front-end scene in Iceland, with Vue and Angular in a distant second and third place. In my experience, this data is representative—React is incredibly popular here. 
 
 Some other observations:
 
