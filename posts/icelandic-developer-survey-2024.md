@@ -399,11 +399,11 @@ Kolibri is one of Iceland's foremost digital agencies, providing services relate
 [telma]: https://www.linkedin.com/in/telmag92/
 [johann]: https://www.linkedin.com/in/j%C3%B3hann-gu%C3%B0mundsson-935457b7/
 
-Kolibri held an event where they presented the results of the study, which sparked lively discussions. The house was packed and it was a blast!
+<Image src="~/event.jpg" width={740} plain />
 
-[ Pictures from the event go here ]
+<SmallNote label="" center>Kolibri held an event where they presented the results of the study, which sparked lively discussions. The house was packed and it was a blast!</SmallNote>
 
-Getting to write up the results of the survey has been great! I hope I have the opportunity to do so again in the future.
+Getting to write up the results of the survey has been awesome! I hope I have the opportunity to do so again in the future.
 
 Thanks for reading! I hope this was interesting.
 
