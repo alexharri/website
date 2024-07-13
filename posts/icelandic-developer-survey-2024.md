@@ -314,7 +314,7 @@ As one might expect, developers working in the public sector or banking/finance 
 
 ## Technology stacks
 
-We'll now take a look at the technologies that developers use. We'll cover front-end libraries, cloud providers, CI/CD, and developers' OS of choice.
+We'll now take a look at the technologies that Icelandic developers are using. We'll cover front-end libraries, cloud providers, CI/CD, and developers' OS of choice.
 
 ### Front-end libraries
 
