@@ -231,7 +231,7 @@ This of course varies by company, but most companies provide at least some of th
 
 ### Work-life balance and parental leave
 
-With the obvious caveat of work-life balance varying by company, work-life balance for developers in Iceland is generally good. There will be some companies with a terrible work-life balance, and some companies with really good work-life balance.
+With the obvious caveat of work-life balance varying by company, work-life balance for developers in Iceland is generally very good.
 
 A notable factor is Iceland's generous paid parental leave, which is 6 months for each parent with 2 of those months transferrable to the other parent. This corresponds to about 26 weeks of parental leave for each parent.
 
