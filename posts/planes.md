@@ -241,7 +241,7 @@ Vector3 LinePlaneIntersection(Line line, Plane plane) {
 }
 ```
 
-However, our code is not completely yet. In the case where the line is parallel to the plane's surface, the line and plane do not intersect.
+However, our code is not complete yet. In the case where the line is parallel to the plane's surface, the line and plane do not intersect.
 
 <Scene scene="project-point-onto-plane-4" height={450} yOffset={-1} zoom={1.5} />
 
