@@ -338,7 +338,7 @@ Some other observations:
 
 <SmallNote>Default survey options are colored blue, while options typed in the "Other" field are colored green. Origo, Advania, and 1984.is are local Icelandic cloud providers.</SmallNote>
 
-AWS at 52.5% is the most popular cloud provider in Iceland, with Azure in second at 36.5%. Vercel and Cloudflare are also used by a significant number of developers, coming in at 22.6% and 17.6% respectively. Google Cloud is relatively far behind AWS and Azure with 16.2% of Icelandic developers using GCP.
+AWS at 52.5% is the most popular cloud provider in Iceland, with Azure in second place at 36.5%. Vercel and Cloudflare are also used by a significant number of developers, coming in at 22.6% and 17.6% respectively. Google Cloud is relatively far behind AWS and Azure with 16.2% of Icelandic developers using GCP.
 
 Digital Ocean is the most notable cloud provider not included as a default option. Perhaps it would have ranked higher had it been one of the default options.
 
