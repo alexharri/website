@@ -74,13 +74,15 @@ export function createPage(customComponents: Record<string, React.FC<any>>) {
     const source = usePostWatcher(props);
     const scope = source.scope! as unknown as FrontMatter;
 
+    const pathName = scope.publishedAt ? `/blog/${props.slug}` : `/blog/draft/${props.slug}`;
+
     return (
       <>
         <Meta
           title={scope.title}
           description={scope.description}
           image={scope.image}
-          pathName={`/blog/${props.slug}`}
+          pathName={pathName}
         />
         <Layout>
           <PostLayout>
