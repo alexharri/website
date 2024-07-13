@@ -387,7 +387,7 @@ Grouping the use of operating systems by industry, we see that Windows is most u
 
 ## Final words
 
-I want to thank [Telma Guðbjörg Eyþórsdóttir][telma] and [Jóhann Guðmundsson][johann] (both software developers at Kolibri) for kickstarting and driving this survey—their initiative made this all possible! Additional thanks go to [Anna Signý Guðbjörnsdóttir][anna] (CEO at Kolibri) and the other people at [Kolibri][kolibri] that helped make this happen.
+I want to thank [Telma Guðbjörg Eyþórsdóttir][telma] and [Jóhann Guðmundsson][johann] (both software developers at Kolibri) for kickstarting and driving this survey! Additional thanks go to [Anna Signý Guðbjörnsdóttir][anna] (CEO at Kolibri) and the other people at [Kolibri][kolibri] that helped make this happen.
 
 Kolibri is one of Iceland's foremost digital agencies, providing services related to creating digital experiences, such as product and software development and design. I'm not formally affiliated with them in any way, but I have friends there.
 
