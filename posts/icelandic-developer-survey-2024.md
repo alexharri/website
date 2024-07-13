@@ -1,6 +1,6 @@
 ---
 title: "2024 Icelandic Developer Survey: Compensation, Technologies, and more"
-description: "Analyzing data from Iceland's 2024 developer survey: compensation figures, languages, and technologies used"
+description: "Analyzing data from Iceland's 2024 developer survey: compensation figures, programming languages, and technologies used."
 publishedAt: "2024-07-13"
 image: "/images/og-icelandic-developer-survey-2024.png"
 ---
