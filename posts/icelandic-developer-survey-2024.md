@@ -210,7 +210,7 @@ We've been looking at gross salaries so far. In figuring out net salaries we nee
 
 <SmallNote label="Source">[https://www.skatturinn.is/english/individuals/tax-liability/](https://www.skatturinn.is/english/individuals/tax-liability/)</SmallNote>
 
-There is a personal tax credit of ISK 64,926 per month, which lowers the effective tax rate. There are also other factors, such as the mandatory pension fund and voluntary pension insurance premiums.
+There is a personal tax credit of ISK 64,926 per month, which lowers the effective tax rate. There are also other factors, such as the mandatory pension fund, union membership fees, and voluntary pension insurance premiums.
 
 To take a rough example, a developer earning a monthly gross salary of ISK 1.2M (~104K USD, yearly) is likely to have a net salary of around 780K-800K ISK (~USD 67K-70K, yearly). Don't take this number too seriously, it depends on a lot of factors.
 
