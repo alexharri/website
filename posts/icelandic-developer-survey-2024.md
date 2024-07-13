@@ -133,7 +133,7 @@ Icelandic developers are compensated well. Respondents were asked about their mo
 
 <SmallNote>The EUR and USD figures are using an exchange rate of ISK 1 = EUR 0.0067 and ISK 1 = USD 0.0072, measured on the 2nd of July 2024.</SmallNote>
 
-In Iceland, we generally discuss monthly salaries instead of yearly. But in the US and other countries, yearly salary figures are more common, so here is the same table with yearly salary figures.
+In Iceland, we generally discuss monthly salaries instead of yearly. But in the US, and other countries, yearly salary figures are more common. Here is the same table with yearly salary figures.
 
 {<table data-align="right">
 <tbody>
