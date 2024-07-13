@@ -269,7 +269,7 @@ We can see that salaries in the public sector skew lower and salaries in banking
 
 ### Programming language usage by industry
 
-Respondents could pick multiple languages, but they could only pick one industry. The following chart shows, for each language, which industry the respondent using the language works in.
+Respondents could pick multiple languages, but they could only pick a single industry. The following chart shows, for each language, which industry the respondent using the language works in.
 
 <BarChart data="industry-by-language" horizontal stacked minResponses={5} minWidth={570} />
 
