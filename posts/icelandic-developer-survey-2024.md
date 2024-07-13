@@ -15,7 +15,7 @@ There's loads of data to look at, so let's get to it!
 
 ## Demographics
 
-425 developers responded to the survey. With only a few thousand software developers in Iceland, this constitutes a significant chunk of developers.
+425 developers responded to the survey. With only a few thousand software developers in Iceland, this constitutes a significant chunk of our developers.
 
 ### Age
 
@@ -48,7 +48,7 @@ The following chart shows the distribution of the respondents' years of experien
 
 This gets more interesting when we group the data on experience by age cohort. The below chart shows years of experience, grouped by age.
 
-<BarChart data="experience-by-age" horizontal stacked width={660} height={300} />
+<BarChart data="experience-by-age" horizontal stacked width={660} minWidth={520} height={300} />
 
 <SmallNote label="" center>PS: Try hitting the 'Normalize' toggle on the top right. It allows you to switch from viewing the absolute counts to viewing percentages within each group. Every chart that groups data has this button.</SmallNote>
 
