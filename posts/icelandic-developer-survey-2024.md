@@ -29,7 +29,7 @@ Of the respondents who specified their gender (397), 86.1% were men, 13.1% were 
 
 <BarChart data="gender-count" width={500} minWidth={280} height={300} minHeight={200} />
 
-Despite the seemingly low proportion of women at 13.1% of respondents, this percentage is still significantly higher than in other global developer surveys I've looked at. [JetBrains' 2023 developer ecosystem survey][jetbrains_survey] respondents were 5% women, with [State of JS 2023][state_of_js_gender] at 4%, and [StackOverflow's 2022 developer survey][stackoverflow_2022_demographics] at ~5%.
+Despite the seemingly low proportion of women at 13.1% of respondents, this percentage is still significantly higher than in other global developer surveys I've looked at. [JetBrains' 2023 developer ecosystem survey][jetbrains_survey] respondents were 5% women, with [State of JS 2023][state_of_js_gender] at 4%, and [Stack Overflow's 2022 developer survey][stackoverflow_2022_demographics] at ~5%.
 
 [jetbrains_survey]: https://www.jetbrains.com/lp/devecosystem-2023/demographics/#gender
 [state_of_js_gender]: https://2023.stateofjs.com/en-US/demographics/#gender
