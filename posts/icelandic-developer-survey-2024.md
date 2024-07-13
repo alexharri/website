@@ -157,10 +157,10 @@ With a few years of experience, most developers move from the &lt;800K to the 80
 
 Summarizing this:
 
- * Developers starting their careers can expect to earn under or around ISK 800K monthly (USD 70K yearly)
- * Developers with 3-10 of experience generally earn ISK 800K to 1.2M monthly (USD 70K to 100K yearly)
- * Developers with over 10 of experience generally earn ISK 1.0M to 1.4M monthly (USD 85K to 120K yearly)
- * A significant number of highly experienced developers (10 to 20+ years of experience) earn 1.4M to &gt;1.6M monthly (USD 120K to &gt;140K yearly)
+ * Developers starting their careers can expect to earn under or around ISK 800K monthly (USD 70K yearly).
+ * Developers with 3-10 of experience generally earn ISK 800K to 1.2M monthly (USD 70K to 100K yearly).
+ * Developers with over 10 of experience generally earn ISK 1.0M to 1.4M monthly (USD 85K to 120K yearly).
+ * A significant number of highly experienced developers (10 to 20+ years of experience) earn 1.4M to &gt;1.6M monthly (USD 120K to &gt;140K yearly).
 
 TL;DR: the typical developer in Iceland earns around USD 85K to 120K yearly.
 
