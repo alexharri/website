@@ -1,10 +1,4 @@
 import { useEffect } from "react";
-import { ClipboardUtils } from "../../../utils/clipboard";
-
-function toBlob(type: string, content: string) {
-  const bytes = new TextEncoder().encode(content);
-  return new Blob([bytes], { type });
-}
 
 export const ClipboardTest: React.FC = () => {
   // Copy
@@ -19,11 +13,11 @@ export const ClipboardTest: React.FC = () => {
       // e.clipboardData.setData("bla what", "foo bar");
     };
 
-    // document.body.addEventListener("copy", listener);
+    document.body.addEventListener("copy", listener);
 
-    // return () => {
-    //   document.body.removeEventListener("copy", listener);
-    // };
+    return () => {
+      document.body.removeEventListener("copy", listener);
+    };
   }, []);
 
   // Paste
@@ -55,22 +49,22 @@ export const ClipboardTest: React.FC = () => {
     };
   }, []);
 
-  async function onClickCopy() {
-    const textBlob = toBlob("text/plain", "Text to copy");
-    // const htmlBlob = toBlob("text/html", "<b>What's up</b> man");
-    navigator.clipboard.write([
-      new ClipboardItem({
-        [textBlob.type]: textBlob,
-        // [htmlBlob.type]: htmlBlob,
-      }),
-    ]);
-  }
+  // async function onClickCopy() {
+  //   const textBlob = toBlob("text/plain", "Text to copy");
+  //   // const htmlBlob = toBlob("text/html", "<b>What's up</b> man");
+  //   navigator.clipboard.write([
+  //     new ClipboardItem({
+  //       [textBlob.type]: textBlob,
+  //       // [htmlBlob.type]: htmlBlob,
+  //     }),
+  //   ]);
+  // }
 
-  async function copyImage() {
-    await ClipboardUtils.writeImageToClipboard(
-      "/images/posts/clipboard/copy-paste-into-vscode.png",
-    );
-  }
+  // async function copyImage() {
+  //   await ClipboardUtils.writeImageToClipboard(
+  //     "/images/posts/clipboard/copy-paste-into-vscode.png",
+  //   );
+  // }
 
   // useEffect(() => {
   //   const timeout = setTimeout(async () => {
@@ -83,7 +77,7 @@ export const ClipboardTest: React.FC = () => {
   //   return () => clearTimeout(timeout);
   // }, []);
 
-  async function test(e: React.MouseEvent) {
+  async function test(_e: React.MouseEvent) {
     // const items: ClipboardItem[] = await navigator.clipboard.read();
     // for (const item of items) {
     //   // console.log(item.types);
@@ -115,35 +109,6 @@ export const ClipboardTest: React.FC = () => {
     // }
   }
 
-  useEffect(() => {
-    const btn = window.testbtn as HTMLElement;
-    const listener = () => {
-      const input = document.createElement("input");
-      input.value = "Content";
-      document.body.appendChild(input);
-      input.select();
-
-      console.log("executed copy");
-      document.execCommand("Copy", false, undefined);
-
-      document.body.removeChild(input);
-    };
-
-    setTimeout(() => {
-      listener();
-    }, 1500);
-
-    btn.addEventListener("mouseup", listener);
-    return () => {
-      btn.removeEventListener("mouseup", listener);
-    };
-  }, []);
-
-  function paste() {
-    console.log("paste");
-    document.execCommand("paste");
-  }
-
   return (
     <p>
       {/* <button style={{ color: "white", border: "1px solid white" }} onClick={onClickCopy}>
@@ -152,11 +117,8 @@ export const ClipboardTest: React.FC = () => {
       <button style={{ color: "white", border: "1px solid white" }} onClick={copyImage}>
         Copy image
       </button> */}
-      <button id="testbtn" style={{ color: "white", border: "1px solid white" }}>
+      <button style={{ color: "white", border: "1px solid white" }} onClick={test}>
         Copy text
-      </button>
-      <button style={{ color: "white", border: "1px solid white" }} onClick={figdownload}>
-        Figdownload
       </button>
     </p>
   );
