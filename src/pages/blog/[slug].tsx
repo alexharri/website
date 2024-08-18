@@ -24,6 +24,7 @@ import { ThreeProvider } from "../../threejs/Components/ThreeProvider";
 import { BarChart } from "../../components/BarChart/BarChart";
 import { PostDataProvider } from "../../data/DataProvider";
 import { PostDataStore } from "../../types/Post";
+import { SubscribeToNewsletter } from "../../components/SubscribeToNewsletter/SubscribeToNewsletter";
 
 // Custom components/renderers to pass to MDX.
 // Since the MDX files aren't loaded by webpack, they have no knowledge of how
@@ -105,6 +106,8 @@ export function createPage(customComponents: Record<string, React.FC<any>>) {
                 </FocusedScriptProvider>
               </ThreeProvider>
             </PostDataProvider>
+
+            <SubscribeToNewsletter />
           </PostLayout>
         </Layout>
       </>
