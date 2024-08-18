@@ -6,18 +6,29 @@ export const ClipboardTest: React.FC = () => {
     const listener = (e: ClipboardEvent) => {
       console.log("copy event fired", e.isTrusted);
       e.preventDefault();
+
+      // Create JSON blob
+      const json = JSON.stringify({ message: "Hello, world" });
+      const jsonBlob = new Blob([json], { type: "application/json" });
+
+      // Write JSON blob to clipboard as a Web Custom Format
+      const clipboardItem = new ClipboardItem({
+        [`web ${jsonBlob.type}`]: jsonBlob,
+      });
+      navigator.clipboard.write([clipboardItem]);
+
       if (!e.clipboardData) return;
-      e.clipboardData.setData("text/plain", "this is text");
-      e.clipboardData.setData("text/html", "<em>5</em>");
-      e.clipboardData.setData("application/octet-stream", JSON.stringify({ type: "hello" }));
-      // e.clipboardData.setData("bla what", "foo bar");
+      e.clipboardData.setData("text/plain", "Hello, world");
+      e.clipboardData.setData("text/html", "<em>Hello, world</em>");
+      e.clipboardData.setData("application/json", JSON.stringify({ type: "Hello, world" }));
+      e.clipboardData.setData("foo bar baz", "Hello, world");
     };
 
-    document.body.addEventListener("copy", listener);
+    // document.body.addEventListener("copy", listener);
 
-    return () => {
-      document.body.removeEventListener("copy", listener);
-    };
+    // return () => {
+    //   document.body.removeEventListener("copy", listener);
+    // };
   }, []);
 
   // Paste
@@ -78,6 +89,14 @@ export const ClipboardTest: React.FC = () => {
   // }, []);
 
   async function test(_e: React.MouseEvent) {
+    const items = await navigator.clipboard.read();
+    for (const item of items) {
+      if (item.types.includes("web application/json")) {
+        const blob = await item.getType("web application/json");
+        const json = await blob.text();
+        // Do stuff with JSON...
+      }
+    }
     // const items: ClipboardItem[] = await navigator.clipboard.read();
     // for (const item of items) {
     //   // console.log(item.types);
@@ -91,8 +110,8 @@ export const ClipboardTest: React.FC = () => {
     // const jsonBlob = new Blob(["<script>alert('hacked')</script>"], {
     //   type: "text/plain",
     // });
-    console.log("execcmd");
-    document.execCommand("Copy", false, undefined);
+    // console.log("execcmd");
+    // document.execCommand("Copy", false, undefined);
 
     // Write JSON blob to clipboard
     // const clipboardItem = new ClipboardItem({ [jsonBlob.type]: jsonBlob });

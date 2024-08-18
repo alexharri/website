@@ -15,19 +15,18 @@ But if I open VS Code and paste there, only the raw text content is pasted.
 
 <Image src="~/copy-paste-into-vscode.png" />
 
-The clipboard serves these two uses cases by allowing information to be stored in multiple [_representations_][list_of_representations] associated with MIME types. The Clipboard spec [mandates][mandatory_mime_types] that for writing to and reading from the clipboard, these three data types must be supported:
+The clipboard serves these two uses cases by allowing information to be stored in multiple [_representations_][list_of_representations] associated with MIME types. The W3C Clipboard spec [mandates][mandatory_mime_types] that for writing to and reading from the clipboard, these three data types must be supported:
 
 [list_of_representations]: https://www.w3.org/TR/clipboard-apis/#list-of-representations
 [mandatory_mime_types]: https://www.w3.org/TR/clipboard-apis/#mandatory-data-types-x
 
- * `text/plain` represents plain text.
- * `text/html` represents HTML.
- * `image/png` represents PNG images.
- 
+ * `text/plain` for plain text.
+ * `text/html` for HTML.
+ * `image/png` for PNG images.
 
-So when I pasted my content, Google Docs read the `text/html` representation and used that to retain the rich text formatting. VS Code only cares about the raw text and as such read the `text/plain` representation. Makes sense.
+So when I pasted before, Google Docs read the `text/html` representation and used that to retain the rich text formatting. VS Code only cares about the raw text and as such read the `text/plain` representation. Makes sense.
 
-Reading a specific representation via async Clipboard API's `read` method is quite straightforward:
+Reading a specific representation via the async Clipboard API's `read` method is quite straightforward:
 
 ```ts
 const items = await navigator.clipboard.read();
@@ -41,7 +40,7 @@ for (const item of items) {
 }
 ```
 
-Writing multiple representations to the clipboard via `write` is bit more involved, but still relatively straightforward. First, we construct `Blob`s for each format we want to write:
+Writing multiple representations to the clipboard via `write` is bit more involved, but still relatively straightforward. First, we construct `Blob`s for each representation that we want to write to the clipboard:
 
 ```tsx
 const textBlob = new Blob(["Hello, world"], { type: "text/plain" });
@@ -67,10 +66,9 @@ Finally, we invoke `write` with our newly constructed `ClipboardItem`:
 await navigator.clipboard.write([clipboardItem]);
 ```
 
-
 ### What about other data types?
 
-HTML and images are cool, but what about general data interchange formats like JSON? If I were writing an application with copy/paste support, I can imagine wanting to write JSON or some binary data to the clipboard.
+HTML and images are cool, but what about general data interchange formats like JSON? If I were writing an application with copy-paste support, I can imagine wanting to write JSON or some binary data to the clipboard.
 
 Let's try to write JSON data to the clipboard:
 
@@ -91,7 +89,7 @@ Failed to execute 'write' on 'Clipboard':
   Type application/json not supported on write.
 ```
 
-Hmm, what's up with that? Well, the [spec][write_spec] for `Clipboard.write` tells us that data types other than `text/plain`, `text/html`, and `image/png` must be rejected:
+Hmm, what's up with that? Well, the [spec][write_spec] for `write` tells us that data types other than `text/plain`, `text/html`, and `image/png` must be rejected:
 
 [write_spec]: https://www.w3.org/TR/clipboard-apis/#dom-clipboard-write
 
@@ -107,14 +105,11 @@ This change was made after browsers opted not to support many of the mandatory t
 
 [webkit_security_concerns]: https://webkit.org/blog/8170/clipboard-api-improvements/#custom-mime-types:~:text=into%20web%20pages.-,Custom%20MIME%20Types,-Because%20the%20system
 
-[raw_clipboard_security_concerns_1]: https://github.com/WICG/raw-clipboard-access/issues/3#issuecomment-521016571
-[raw_clipboard_security_concerns_2]: https://github.com/WICG/raw-clipboard-access/blob/f58f5cedc753d55c77994aa05e75d5d2ad7344a7/explainer.md#stakeholder-feedback--opposition
-
 > Warning! The data types that untrusted scripts are allowed to write to the clipboard are limited as a security precaution.
 >
 > Untrusted scripts can attempt to exploit security vulnerabilities in local software by placing data known to trigger those vulnerabilities on the clipboard.
 
-Okay, so we can only write a limited set of data types to the clipboard. But what's that about _untrusted_ scripts? Can we somehow run code in a "trusted" script which lets us write other data types to the clipboard?
+Okay, so we can only write a limited set of data types to the clipboard. But what's that about "_untrusted_ scripts"? Can we somehow run code in a "trusted" script which lets us write other data types to the clipboard?
 
 
 ### The isTrusted property
@@ -124,7 +119,7 @@ Perhaps the "trusted" part is referring to the [`isTrusted` property on events][
 [istrusted]: https://developer.mozilla.org/en-US/docs/Web/API/Event/isTrusted
 
 ```tsx
-document.addEventListener("copy", (e: ClipboardEvent) => {
+document.addEventListener("copy", (e) => {
   if (e.isTrusted) {
     // This event was triggered by the user agent
   }
@@ -142,7 +137,7 @@ document.dispatchEvent(new ClipboardEvent("copy"));
 //=> "e.isTrusted is false"
 ```
 
-Let's take a look at clipboard events and see whether they allow us to write other data types to the clipboard.
+Let's take a look at clipboard events and see whether they allow us to write arbitrary data types to the clipboard.
 
 
 ## The Clipboard Events API
@@ -205,9 +200,9 @@ Adding both of these handlers and invoking copy-paste results in the following b
 { "type": "application/json", content: "{\"message\":\"Hello\"}" }
 ```
 
-It works! It seems that `clipboardData.setData` does not restrict data types in the same manner as `clipboard.write` does.
+It works! It seems that `clipboardData.setData` does not restrict data types in the same manner as the async `write` method does.
 
-But... why? Why can we read and write arbitrary data types using `clipboardData` but not when using the async Clipboard API? Well...
+But... why? Why can we read and write arbitrary data types using `clipboardData` but not when using the async Clipboard API?
 
 
 ### History of `clipboardData`
@@ -263,7 +258,7 @@ document.addEventListener("paste", (e) => {
 
 If you paste this code snippet into your DevTools and then copy and paste, you will see the message "Hello, world" logged to your console.
 
-So, the reasons that the Clipboard Events API (`clipboardData`) allows us to use any data types seems to be a historical one. _"Don't break the web"_.
+So, the reasons for the Clipboard Events API's `clipboardData` allowing us to use any data type seems to be a historical one. _"Don't break the web"_.
 
 
 ### Revisiting isTrusted
@@ -302,9 +297,9 @@ To summarize our findings so far:
 
 [has_focus]: https://www.w3.org/TR/clipboard-apis/#privacy-async
 
-It seems that using the Clipboard Events API is the only way forward if you want to write data to the clipboard that is not just plain text, HTML, or an image. It's much less restrictive in that regard.
+It seems that using the Clipboard Events API is the only way forward if you want to write data types to the clipboard that are not just plain text, HTML, or images. It's much less restrictive in that regard.
 
-But what if you want to build a Copy button that writes non-standard data types to your clipboard? It doesn't seem like you'd be able to use the Clipboard Events API if the user did not trigger a copy event. Right?
+But what if you want to build a Copy button that writes non-standard data types to the clipboard? It doesn't seem like you'd be able to use the Clipboard Events API if the user did not trigger a copy event. Right?
 
 
 ## Building a copy button that writes arbitrary data types
@@ -331,7 +326,7 @@ I ran the profiler, hit the copy button and inspected the results. Turns out tha
 
 This was surprising to me when I first saw this. My first thought was _"Isn't `execCommand` the old, deprecated way of copying text to the clipboard?"_.
 
-Yes it is, but Google uses it for a reason. `execCommand` is special in that it allows you to programmatically dispatch a trusted copy event as if the user invoked the copy command themselves.
+Yes it is, but Google uses it for a reason. `execCommand` is special in that it allows you to programmatically dispatch a trusted copy event _as if_ the user invoked the copy command themselves.
 
 ```ts
 document.addEventListener("copy", (e) => {
@@ -342,7 +337,7 @@ document.execCommand("copy");
 //=> "e.isTrusted is true"
 ```
 
-<SmallNote>Safari requires an active selection for `execCommand("copy")` to dispatch a copy event. That selection can be faked by adding an input to the DOM and selecting it prior to invoking `execCommand("copy")`, after which the input can be removed from the DOM.</SmallNote>
+<SmallNote>Safari requires an active selection for `execCommand("copy")` to dispatch a copy event. That selection can be faked by adding a non-empty input element to the DOM and selecting it prior to invoking `execCommand("copy")`, after which the input can be removed from the DOM.</SmallNote>
 
 Okay, so using `execCommand` allows us to write arbitrary data types to the clipboard in response to click events. Cool!
 
@@ -456,7 +451,7 @@ I then downloaded the resulting blob as a `.fig` file, uploaded that to the `.fi
 So copying in Figma works by creating a small Figma file, encoding that as a base64, placing the resulting base64 string into the `data-buffer` attribute of an empty HTML `span` element, and storing that in the user's clipboard.
 
 
-## The benefits of copy/pasting HTML
+### The benefits of copy-pasting HTML
 
 This seemed a bit silly to me at first, but there is a strong benefit to taking that approach. To understand why, consider how the web-based Clipboard API interacts with the various operating system Clipboard APIs.
 
@@ -465,11 +460,143 @@ Windows, macOS and Linux all offer different formats for writing data to the cli
 [win_html_clipboard]: https://learn.microsoft.com/en-us/windows/win32/dataxchg/html-clipboard-format
 [macos_html_clipboard]: https://developer.apple.com/documentation/appkit/nspasteboard/pasteboardtype/1529057-html
 
-All of the operating systems offer types for the lowest common demoninator formats (plain text, HTML, and PNG images). But which OS format should the browser use when the user attempts to write an arbitrary data type like `application/foo-bar` to the clipboard?
+All of the operating systems offer types for "standard" formats (plain text, HTML, and PNG images). But which OS format should the browser use when the user attempts to write an arbitrary data type like `application/foo-bar` to the clipboard?
 
 There isn't a good match, so the browser doesn't write that representation to the OS clipboard. Instead, that representation only exists within the browser. This results in being able to copy and paste arbitrary data types across browser tabs, but _not_ across applications.
 
 This is why using the common data types, `text/plain`, `text/html`, and `image/png`, is so convenient. They are mapped to OS-specific formats and as such are written to the native OS clipboard, which makes copy/paste work across applications. In Figma's case, using `text/html` enables copying a Figma element from `figma.com` in the browser and then pasting it into the native Figma app, and vice versa.
 
-<ClipboardTest/>
+## What do browsers write to the clipboard for custom data types?
 
+We've learned that we can write and read custom data types to and from the clipboard across browser tabs, but not across applications. So what are the browsers actually storing when custom data types are written to the clipboard?
+
+I ran the following in a `copy` listener in each of the major browsers on my Macbook:
+
+```ts
+document.addEventListener("copy", (e) => {
+  e.preventDefault();
+  e.clipboardData.setData("text/plain", "Hello, world");
+  e.clipboardData.setData("text/html", "<em>Hello, world</em>");
+  e.clipboardData.setData("application/json", JSON.stringify({ type: "Hello, world" }));
+  e.clipboardData.setData("foo bar baz", "Hello, world");
+});
+```
+
+I then inspected the clipboard using [Pasteboard Viewer][pasteboard_viewer]. Chrome adds four entries to the Pasteboard:
+
+[pasteboard_viewer]: https://apps.apple.com/us/app/pasteboard-viewer/id1499215709
+
+ * `public.html` contains the HTML representation.
+ * `public.utf8-plain-text` contains the plain text representation.
+ * `org.chromium.web-custom-data` contains the custom representations.
+ * `org.chromium.source-url` contains the URL of the web page where the copy was performed.
+
+Looking at the `org.chromium.web-custom-data`, we see the data we copied:
+
+<Image src="~/pasteboard-chrome.png" plain />
+
+<SmallNote label="" center>I imagine the accented "î" and inconsistent line breaks being the result of some delimiters being displayed incorrectly.</SmallNote> 
+
+Firefox writes the custom data to `org.mozilla.custom-clipdata`, but it does not store the source URL like Chrome does.
+
+Safari writes the custom data to `com.apple.WebKit.custom-pasteboard-data` and, interestingly, it also stores the full list of representations (including plain text and HTML) and source URL there.
+
+<SmallNote>Safari allows copy-pasting custom data types across browser tabs if the source URL (domain) is the same, but not across different domains. This limitation does not seem to be present in Chrome or Firefox (even though Chrome stores the source URL).</SmallNote>
+
+
+## Raw Clipboard Access for the Web
+
+A proposal for [Raw Clipboard Access][raw_clipboard_access] was created in 2019, which proposed an API for giving web applications raw read and write access to the native OS clipboards.
+
+[raw_clipboard_access]: https://github.com/WICG/raw-clipboard-access/blob/f58f5cedc753d55c77994aa05e75d5d2ad7344a7/explainer.md
+
+This excerpt from the [_Motivation_ section on chromestatus.com][motivation] for the Raw Clipboard Access feature highlights the benefits rather succinctly:
+
+[motivation]: https://chromestatus.com/feature/5682768497344512
+
+> Without Raw Clipboard Access [...] web applications are generally limited to a small subset of formats, and are unable to interoperate with the long tail of formats. For example, Figma and Photopea are unable to interoperate with most image formats.
+
+However, the Raw Clipboard Access proposal ended up not being taken further due to [security concerns][raw_clipboard_stakeholders_opposition] around exploits such as remote code execution in native applications.
+
+[raw_clipboard_stakeholders_opposition]: https://github.com/WICG/raw-clipboard-access/blob/f58f5cedc753d55c77994aa05e75d5d2ad7344a7/explainer.md#stakeholder-feedback--opposition
+
+The most recent proposal for writing custom data types to the clipboard is the Web Custom Formats proposal (often referred to as pickling).
+
+
+## Web Custom Formats (Pickling)
+
+In 2022, Chromium implemented support for [Web Custom Formats][web_custom_formats] in the async Clipboard API.
+
+[web_custom_formats]: https://developer.chrome.com/blog/web-custom-formats-for-the-async-clipboard-api
+
+It allows web applications to write custom data types via the async Clipboard API by prefixing the data type with `"web "`:
+
+```ts
+// Create JSON blob
+const json = JSON.stringify({ message: "Hello, world" });
+const jsonBlob = new Blob([json], { type: "application/json" });
+
+// Write JSON blob to clipboard as a Web Custom Format
+const clipboardItem = new ClipboardItem({
+  [`web ${jsonBlob.type}`]: jsonBlob,
+});
+navigator.clipboard.write([clipboardItem]);
+```
+
+These are read using the async Clipboard API like any other data type:
+
+```ts
+const items = await navigator.clipboard.read();
+for (const item of items) {
+  if (item.types.includes("web application/json")) {
+    const blob = await item.getType("web application/json");
+    const json = await blob.text();
+    // Do stuff with JSON...
+  }
+}
+```
+
+What's more interesting is what is written to the native clipboard. When writing web custom formats, the following is written to the native OS clipboard:
+
+ * A mapping from the data types to clipboard entry names
+ * Clipboard entries for each data type
+
+On macOS, the mapping entry key is `org.w3.web-custom-format.map` and its contents looks like so:
+
+```json
+{
+  "application/json": "org.w3.web-custom-format.type-0",
+  "application/octet-stream": "org.w3.web-custom-format.type-1"
+}
+```
+
+The `org.w3.web-custom-format.type-[index]` keys correspond to entries on the native OS clipboard containing the unsanitized data from the blobs. This allows native applications to look the mapping to see if a given representation is available, and then read the unsanitized content from the clipboard entry.
+
+<SmallNote>Windows and Linux [use a different naming convention][pickling_spec_os_naming] for the mapping and clipboard entries.</SmallNote>
+
+[pickling_spec_os_naming]: https://github.com/dway123/clipboard-pickling/blob/bce5101564d379f48f11839e2c141ee51438e13c/explainer.md#os-interaction-format-naming
+
+This avoids the security issues around raw clipboard access since web applications cannot write unsanitized data to whatever native data type they want to. That comes with an interoperability trade-off that is explicitly listed in the [Pickling for Async Clipboard API spec][pickling_spec_non_goals]:
+
+[pickling_spec_non_goals]: https://github.com/dway123/clipboard-pickling/blob/bce5101564d379f48f11839e2c141ee51438e13c/explainer.md#non-goals
+
+> #### Non-goals
+>
+> Allow interoperability with legacy native applications, without update. This was explored in a raw clipboard proposal, and may be explored further in the future, but comes with significant security challenges (remote code execution in system native applications).
+
+This means that native applications need to be updated for clipboard interop with web applications when using custom data types.
+
+Web Custom Formats have been available in Chromium-based browsers since 2022, but other browsers have not implemented this proposal yet.
+
+
+## Final words
+
+As of right now, there just isn't a good way to write custom data types to the clipboard that works across all browsers.
+
+Figma's approach of placing base64 strings into a HTML representation is crude but effective in that it avoids the plethora of limitations around the clipboard API. It seems like a good approach to take if you need to transmit custom data types via the clipboard.
+
+I hope the Web Custom Formats proposal becomes implemented by all of the major browsers. It seems like it would enable writing custom data types to the clipboard in a secure and practical manner.
+
+Thanks for reading! I hope this was interesting.
+
+— Alex Harri
