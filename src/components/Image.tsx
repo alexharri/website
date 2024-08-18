@@ -10,7 +10,7 @@ interface Props {
 }
 
 const videoExtensions = new Set(["mp4"]);
-const customPosts = new Set(["stabilizing-noisy-inputs", "clipboard"]);
+const customPosts = new Set(["stabilizing-noisy-inputs"]);
 
 export const Image = (props: Props) => {
   const s = useStyles(ImageStyles);
