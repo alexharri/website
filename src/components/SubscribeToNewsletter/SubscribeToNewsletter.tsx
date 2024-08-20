@@ -95,23 +95,31 @@ export const SubscribeToNewsletter: React.FC = () => {
     if (!emailRegex.test(email)) {
       return;
     }
+
+    const res = await fetch("/api/mailing-list/subscribe", {
+      method: "POST",
+      body: JSON.stringify({ email }),
+    });
+    console.log(`status: ${res.status}`);
   };
 
   return (
-    <div className={s("wrapper")}>
-      <div className={s("header")}>Mailing list</div>
-      <div className={s("content")}>
-        <p>To be notified of new posts, subscribe to my mailing list.</p>
-        <form onSubmit={onSubmit}>
-          <input
-            placeholder="Email address"
-            type="email"
-            required
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-          />
-          <button type="submit">Subscribe</button>
-        </form>
+    <div>
+      <div className={s("wrapper")}>
+        <div className={s("header")}>Mailing list</div>
+        <div className={s("content")}>
+          <p>To be notified of new posts, subscribe to my mailing list.</p>
+          <form onSubmit={onSubmit}>
+            <input
+              placeholder="Email address"
+              type="email"
+              required
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+            />
+            <button type="submit">Subscribe</button>
+          </form>
+        </div>
       </div>
     </div>
   );
