@@ -10,7 +10,7 @@ const styles = ({ styled, theme }: StyleOptions) => ({
     border-radius: 8px;
     overflow: hidden;
     border: 1px solid ${theme.medium500};
-    box-shadow: 0 8px 40px rgb(0 26 56);
+    box-shadow: 0 8px 40px rgba(0, 26, 56, 0.6);
   `,
 
   header: styled.css`
@@ -41,6 +41,15 @@ const styles = ({ styled, theme }: StyleOptions) => ({
       display: flex;
       align: center;
       gap: 16px;
+    }
+
+    form + p {
+      margin-top: 16px;
+      margin-bottom: 0;
+
+      &[data-success] {
+        color: #59c359;
+      }
     }
 
     input {
@@ -80,6 +89,12 @@ const styles = ({ styled, theme }: StyleOptions) => ({
       &:hover {
         background: #09426f;
       }
+
+      &[data-pending="true"] {
+        background: #162838;
+        color: ${theme.text200};
+        cursor: default;
+      }
     }
   `,
 });
@@ -88,19 +103,32 @@ export const SubscribeToNewsletter: React.FC = () => {
   const s = useStyles(styles);
 
   const [email, setEmail] = useState("");
+  const [success, setSuccess] = useState(false);
+  const [pending, setPending] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!emailRegex.test(email)) {
-      return;
-    }
+    if (!emailRegex.test(email)) return;
+    if (pending) return;
+    setPending(true);
+    setErrorMessage("");
+    setSuccess(false);
 
-    const res = await fetch("/api/mailing-list/subscribe", {
-      method: "POST",
-      body: JSON.stringify({ email }),
-    });
-    console.log(`status: ${res.status}`);
+    const onError = () => setErrorMessage("Failed to subscribe to mailing list");
+    try {
+      const res = await fetch("/api/mailing-list/subscribe", {
+        method: "POST",
+        body: JSON.stringify({ email }),
+      });
+      setPending(false);
+      if (res.status === 200) return setSuccess(true);
+      onError();
+    } catch (e) {
+      console.log(e);
+      onError();
+    }
   };
 
   return (
@@ -117,8 +145,12 @@ export const SubscribeToNewsletter: React.FC = () => {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
             />
-            <button type="submit">Subscribe</button>
+            <button type="submit" data-pending={pending}>
+              {pending ? "Subscribing..." : "Subscribe"}
+            </button>
           </form>
+          {success && <p data-success="true">You've been added to the mailing list!</p>}
+          {errorMessage && <p data-success="true">{errorMessage}</p>}
         </div>
       </div>
     </div>
