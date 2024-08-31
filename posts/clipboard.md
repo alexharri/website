@@ -7,7 +7,7 @@ publishedAt: ""
 
 If you've been using computers for a while, you probably know that the clipboard can store multiple types of data (images, rich text content, files, and so on). As a software developer, it started frustrating me that I didn't have a good understanding of how the clipboard stores and organizes data of different types.
 
-I recently decided to unveil the mystery that is the clipboard and wrote this post using my learnings. It will be focused on the web clipboard and its APIs, though we'll also take a look at how the web clipboard interacts with operating system clipboards.
+I recently decided to unveil the mystery that is the clipboard and wrote this post using my learnings. We'll focus on the web clipboard and its APIs, though we'll also take a look at how the web clipboard interacts with operating system clipboards.
 
 We'll start off exploring the web's clipboard APIs and their history. The clipboard APIs have some interesting limitations, and we'll see how some companies have worked around those limitations. We'll also look at some proposals that that aim to resolve those limitations (most notably, [Web Custom Formats][web_custom_formats]).
 
