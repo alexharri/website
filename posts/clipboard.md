@@ -1,9 +1,19 @@
 ---
-title: "Untitled post on Clipboard"
-description: ""
-image: ""
+title: "The web's clipboard, and how it stores data"
+description: "Exploring the web's clipboard APIs, their limitations, and their history."
+image: "/images/og-clipboard.png"
 publishedAt: ""
 ---
+
+If you've been using computers for a while, you probably know that the clipboard can store multiple types of data (images, rich text content, files, and so on). As a software developer, it started frustrating me that I didn't have a good understanding of how the clipboard stores and organizes data of different types.
+
+I recently decided to unveil the mystery that is the clipboard and wrote this post using my learnings. It will be focused on the web clipboard and its APIs, though we'll also take a look at how the web clipboard interacts with operating system clipboards.
+
+We'll start off exploring the web's clipboard APIs and their history. The clipboard APIs have some interesting limitations, and we'll see how some companies have worked around those limitations. We'll also look at some proposals that that aim to resolve those limitations (most notably, [Web Custom Formats][web_custom_formats]).
+
+[web_custom_formats]: https://github.com/w3c/editing/blob/gh-pages/docs/clipboard-pickling/explainer.md
+
+If you've ever wondered how the clipboard works, this post is for you.
 
 ## Using the async Clipboard API
 
@@ -426,7 +436,7 @@ But what about the big `data-buffer` property? Base64 decoding it yields the fol
 fig-kiwiF\x00\x00\x00\x1CK\x00\x00µ½\v\x9CdI[...]\x197Ü\x83\x03
 ```
 
-Looks like a binary format. After a bit of digging—using `fig-kiwi` as a clue—I discovered that this is the [Kiwi message format][kiwi] (created by Figma's co-founder and former CTO [Evan Wallace][evanw]), which is used to encode `.fig` files.
+Looks like a binary format. After a bit of digging—using `fig-kiwi` as a clue—I discovered that this is the [Kiwi message format][kiwi] (created by Figma's co-founder and former CTO, [Evan Wallace][evanw]), which is used to encode `.fig` files.
 
 Since Kiwi is a schema-based format, it seemed like we wouldn't be able to parse this data without knowing the schema. However, lucky for us, Evan created a [public `.fig` file parser][fig_file_parser]. Let's try plugging the buffer into that!
 
@@ -510,7 +520,7 @@ A proposal for [Raw Clipboard Access][raw_clipboard_access] was created in 2019,
 
 [raw_clipboard_access]: https://github.com/WICG/raw-clipboard-access/blob/f58f5cedc753d55c77994aa05e75d5d2ad7344a7/explainer.md
 
-This excerpt from the [_Motivation_ section on chromestatus.com][motivation] for the Raw Clipboard Access feature highlights the benefits rather succinctly:
+This excerpt from the [Motivation section on chromestatus.com][motivation] for the Raw Clipboard Access feature highlights the benefits rather succinctly:
 
 [motivation]: https://chromestatus.com/feature/5682768497344512
 
@@ -525,9 +535,9 @@ The most recent proposal for writing custom data types to the clipboard is the W
 
 ## Web Custom Formats (Pickling)
 
-In 2022, Chromium implemented support for [Web Custom Formats][web_custom_formats] in the async Clipboard API.
+In 2022, Chromium implemented support for [Web Custom Formats][web_custom_formats_chrome] in the async Clipboard API.
 
-[web_custom_formats]: https://developer.chrome.com/blog/web-custom-formats-for-the-async-clipboard-api
+[web_custom_formats_chrome]: https://developer.chrome.com/blog/web-custom-formats-for-the-async-clipboard-api
 
 It allows web applications to write custom data types via the async Clipboard API by prefixing the data type with `"web "`:
 
