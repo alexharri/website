@@ -50,6 +50,10 @@ const styles = ({ styled, theme }: StyleOptions) => ({
       &[data-success] {
         color: #59c359;
       }
+
+      &[data-error] {
+        color: #c35959;
+      }
     }
 
     input {
@@ -116,7 +120,7 @@ export const SubscribeToNewsletter: React.FC = () => {
     setErrorMessage("");
     setSuccess(false);
 
-    const onError = () => setErrorMessage("Failed to subscribe to mailing list");
+    const onError = () => setErrorMessage("Failed to subscribe to mailing list.");
     try {
       const res = await fetch("/api/mailing-list/subscribe", {
         method: "POST",
@@ -150,7 +154,7 @@ export const SubscribeToNewsletter: React.FC = () => {
             </button>
           </form>
           {success && <p data-success="true">You've been added to the mailing list!</p>}
-          {errorMessage && <p data-success="true">{errorMessage}</p>}
+          {errorMessage && <p data-error="true">{errorMessage}</p>}
         </div>
       </div>
     </div>
