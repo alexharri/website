@@ -39,8 +39,12 @@ const styles = ({ styled, theme }: StyleOptions) => ({
 
     form {
       display: flex;
-      align: center;
+      align-items: flex-start;
       gap: 16px;
+
+      @media (max-width: 450px) {
+        flex-direction: column;
+      }
     }
 
     form + p {
@@ -60,7 +64,7 @@ const styles = ({ styled, theme }: StyleOptions) => ({
       background: ${theme.background};
       border: 1px solid ${theme.medium400};
       color: ${theme.text};
-      flex-basis: 240px;
+      width: 240px;
       min-width: 100px;
       -webkit-appearance: none;
       outline: none;
@@ -87,6 +91,7 @@ const styles = ({ styled, theme }: StyleOptions) => ({
       padding: 8px 16px;
       border-radius: 4px;
       font-size: 14px;
+      line-height: 22px;
       letter-spacing: 0.2px;
       transition: 0.2s;
 
