@@ -465,7 +465,7 @@ So copying in Figma works by creating a small Figma file, encoding that as a bas
 
 This seemed a bit silly to me at first, but there is a strong benefit to taking that approach. To understand why, consider how the web-based Clipboard API interacts with the various operating system Clipboard APIs.
 
-Windows, macOS, and Linux all offer different formats for writing data to the clipboard. If you want to write HTML to the clipboard, [Windows has `CF_HTML`][win_html_clipboard] and [macOS has `NSPasteboard.PasteboardType.html`][macos_html_clipboard] (the answer for Linux seems less straightforward so I won't cover it).
+Windows, macOS, and Linux all offer different formats for writing data to the clipboard. If you want to write HTML to the clipboard, [Windows has `CF_HTML`][win_html_clipboard] and [macOS has `NSPasteboard.PasteboardType.html`][macos_html_clipboard].
 
 [win_html_clipboard]: https://learn.microsoft.com/en-us/windows/win32/dataxchg/html-clipboard-format
 [macos_html_clipboard]: https://developer.apple.com/documentation/appkit/nspasteboard/pasteboardtype/1529057-html
