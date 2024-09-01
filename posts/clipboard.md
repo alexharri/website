@@ -374,7 +374,7 @@ document.queryCommandSupported("paste");
 
 On my Macbook, I got `false` on Chrome and Firefox, but `true` on Safari.
 
-Safari, being privacy-conscious, required me to confirm the paste action. I think that's a really good idea—it makes it very explicit that the website will read from your clipboard.
+Safari, being privacy-conscious, required me to confirm the paste action. I think that's a really good idea. It makes it very explicit that the website will read from your clipboard.
 
 <Image src="~/google-docs-paste-confirm.png" plain width={650} />
 
