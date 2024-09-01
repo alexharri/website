@@ -380,7 +380,7 @@ Safari, being privacy-conscious, required me to confirm the paste action. I thin
 
 On my Windows laptop, I got `true` on Chrome and Edge, but `false` on Firefox. The inconsistency with Chrome is surprising. Why does Chrome allow `execCommand("paste")` on Windows but not macOS? I wasn't able to find any info on this.
 
-I find it surprising that they don't attempt to fall back to the async Clipboard API when `execCommand("paste")` is unavailable. Even though they wouldn't be able to read the `application/x-vnd.google-[...]` representation using it, the HTML representation contains internal IDs that could be used.
+I find it surprising that Google don't attempt to fall back to the async Clipboard API when `execCommand("paste")` is unavailable. Even though they wouldn't be able to read the `application/x-vnd.google-[...]` representation using it, the HTML representation contains internal IDs that could be used.
 
 ```html
 <!-- HTML representation, cleaned up -->
