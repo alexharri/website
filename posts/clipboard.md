@@ -472,9 +472,9 @@ Windows, macOS, and Linux all offer different formats for writing data to the cl
 
 All of the operating systems offer types for "standard" formats (plain text, HTML, and PNG images). But which OS format should the browser use when the user attempts to write an arbitrary data type like `application/foo-bar` to the clipboard?
 
-There isn't a good match, so the browser doesn't write that representation to the OS clipboard. Instead, that representation only exists within the browser. This results in being able to copy and paste arbitrary data types across browser tabs, but _not_ across applications.
+There isn't a good match, so the browser doesn't write that representation to common formats on the OS clipboard. Instead, that representation only exists within a custom browser-specific clipboard format on the OS clipboard. This results in being able to copy and paste arbitrary data types across browser tabs, but _not_ across applications.
 
-This is why using the common data types, `text/plain`, `text/html`, and `image/png`, is so convenient. They are mapped to OS-specific formats and as such are written to the native OS clipboard, which makes copy/paste work across applications. In Figma's case, using `text/html` enables copying a Figma element from `figma.com` in the browser and then pasting it into the native Figma app, and vice versa.
+This is why using the common data types `text/plain`, `text/html` and `image/png` is so convenient. They are mapped to common OS clipboard formats and as such can be easily read by other applications, which makes copy/paste work across applications. In Figma's case, using `text/html` enables copying a Figma element from `figma.com` in the browser and then pasting it into the native Figma app, and vice versa.
 
 ## What do browsers write to the clipboard for custom data types?
 
