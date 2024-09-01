@@ -1,5 +1,5 @@
 ---
-title: "The web's clipboard, and how it stores data"
+title: "The web's clipboard, and how it stores data of different types"
 description: "Exploring the web's clipboard APIs, their limitations, and their history."
 image: "/images/og-clipboard.png"
 publishedAt: "2024-09-01"
@@ -9,11 +9,11 @@ If you've been using computers for a while, you probably know that the clipboard
 
 I recently decided to unveil the mystery that is the clipboard and wrote this post using my learnings. We'll focus on the web clipboard and its APIs, though we'll also touch on how it interacts with operating system clipboards.
 
-We'll start by exploring the web's clipboard APIs and their history. The clipboard APIs have some interesting limitations, and we'll see how some companies have worked around those limitations. We'll also look at some proposals that aim to resolve those limitations (most notably, [Web Custom Formats][web_custom_formats]).
+We'll start by exploring the web's clipboard APIs and their history. The clipboard APIs have some interesting limitations around data types, and we'll see how some companies have worked around those limitations. We'll also look at some proposals that aim to resolve those limitations (most notably, [Web Custom Formats][web_custom_formats]).
 
 [web_custom_formats]: https://github.com/w3c/editing/blob/gh-pages/docs/clipboard-pickling/explainer.md
 
-If you've ever wondered how the clipboard works, this post is for you.
+If you've ever wondered how the web's clipboard works, this post is for you.
 
 ## Using the async Clipboard API
 
