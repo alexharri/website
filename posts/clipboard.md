@@ -507,9 +507,9 @@ Looking at the `org.chromium.web-custom-data`, we see the data we copied:
 
 <SmallNote label="" center>I imagine the accented "î" and inconsistent line breaks are the result of some delimiters being displayed incorrectly.</SmallNote> 
 
-Firefox writes the custom data to `org.mozilla.custom-clipdata`, but it does not store the source URL like Chrome does.
+Firefox creates the `public.html` and `public.utf8-plain-text` entries as well, but writes the custom data to `org.mozilla.custom-clipdata`. It does not store the source URL like Chrome does.
 
-Safari writes the custom data to `com.apple.WebKit.custom-pasteboard-data` and, interestingly, it also stores the full list of representations (including plain text and HTML) and source URL there.
+Safari, as you might expect, also creates the `public.html` and `public.utf8-plain-text` entries. It writes the custom data to `com.apple.WebKit.custom-pasteboard-data` and, interestingly, it also stores the full list of representations (including plain text and HTML) and source URL there.
 
 <SmallNote>Safari allows copy-pasting custom data types across browser tabs if the source URL (domain) is the same, but not across different domains. This limitation does not seem to be present in Chrome or Firefox (even though Chrome stores the source URL).</SmallNote>
 
@@ -571,7 +571,7 @@ What's more interesting is what is written to the native clipboard. When writing
  * A mapping from the data types to clipboard entry names
  * Clipboard entries for each data type
 
-On macOS, the mapping entry key is `org.w3.web-custom-format.map` and its content looks like so:
+On macOS, the mapping is written to `org.w3.web-custom-format.map` and its content looks like so:
 
 ```json
 {
@@ -580,13 +580,13 @@ On macOS, the mapping entry key is `org.w3.web-custom-format.map` and its conten
 }
 ```
 
-The `org.w3.web-custom-format.type-[index]` keys correspond to entries on the native OS clipboard containing the unsanitized data from the blobs. This allows native applications to look at the mapping to see if a given representation is available and then read the unsanitized content from the corresponding clipboard entry.
+The `org.w3.web-custom-format.type-[index]` keys correspond to entries on the OS clipboard containing the unsanitized data from the blobs. This allows native applications to look at the mapping to see if a given representation is available and then read the unsanitized content from the corresponding clipboard entry.
 
 <SmallNote>Windows and Linux [use a different naming convention][pickling_spec_os_naming] for the mapping and clipboard entries.</SmallNote>
 
 [pickling_spec_os_naming]: https://github.com/dway123/clipboard-pickling/blob/bce5101564d379f48f11839e2c141ee51438e13c/explainer.md#os-interaction-format-naming
 
-This avoids the security issues around raw clipboard access since web applications cannot write unsanitized data to whatever native data type they want to. That comes with an interoperability trade-off that is explicitly listed in the [Pickling for Async Clipboard API spec][pickling_spec_non_goals]:
+This avoids the security issues around raw clipboard access since web applications cannot write unsanitized data to whatever OS clipboard format they want to. That comes with an interoperability trade-off that is explicitly listed in the [Pickling for Async Clipboard API spec][pickling_spec_non_goals]:
 
 [pickling_spec_non_goals]: https://github.com/dway123/clipboard-pickling/blob/bce5101564d379f48f11839e2c141ee51438e13c/explainer.md#non-goals
 
