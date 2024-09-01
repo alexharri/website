@@ -478,7 +478,7 @@ This is why using the common data types `text/plain`, `text/html` and `image/png
 
 ## What do browsers write to the clipboard for custom data types?
 
-We've learned that we can write and read custom data types to and from the clipboard across browser tabs, but not across applications. So what are the browsers writing to the native OS clipboard when writing custom data types?
+We've learned that we can write and read custom data types to and from the clipboard across browser tabs, but not across applications. But what exactly are browsers writing to the native OS clipboard when we write custom data types to the web clipboard?
 
 I ran the following in a `copy` listener in each of the major browsers on my Macbook:
 
