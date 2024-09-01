@@ -268,7 +268,7 @@ document.addEventListener("paste", (e) => {
 
 If you paste this code snippet into your DevTools and then hit copy and paste, you will see the message "Hello, world" logged to your console.
 
-So, the reason for the Clipboard Events API's `clipboardData` allowing us to use any data type seems to be a historical one. _"Don't break the web"_.
+The reason for the Clipboard Events API's `clipboardData` allowing us to use any data type seems to be a historical one. _"Don't break the web"_.
 
 
 ### Revisiting isTrusted
@@ -303,7 +303,7 @@ So only copy and paste events dispatched by the user agent are allowed to modify
 To summarize our findings so far:
 
  * The async Clipboard API introduced in 2017 restricts which data types can be written to and read from the clipboard. However, it can read from and write to the clipboard at any time, given that the user has granted permission to do so (and the [document is focused][has_focus]).
- * The older Clipboard Events API has no real restrictions on which data types can be written to and read from the clipboard. However, it can only be used in copy and paste event handlers triggered by the user agent (when `isTrusted` is true).
+ * The older Clipboard Events API has no real restrictions on which data types can be written to and read from the clipboard. However, it can only be used in copy and paste event handlers triggered by the user agent (i.e. when `isTrusted` is true).
 
 [has_focus]: https://www.w3.org/TR/clipboard-apis/#privacy-async
 
