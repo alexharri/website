@@ -7,6 +7,7 @@ export const cssVariables = {
 
 export const colors = {
   text: "#B9DBFA",
+  text200: "#486d8c",
   text400: "#6691b5",
   text700: "#99bad5",
   text800: "#9fcff9",

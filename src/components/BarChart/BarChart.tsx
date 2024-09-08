@@ -7,7 +7,7 @@ import { useStyles } from "../../utils/styles";
 import { BarChartStyles } from "./BarChart.styles";
 import { colors, cssVariables } from "../../utils/cssVariables";
 import { Toggle } from "../Toggle/Toggle";
-import { useViewportWidth } from "../../utils/hooks/useViewportWidth";
+import { useIsomorphicViewportWidth } from "../../utils/hooks/useViewportWidth";
 import { invLerp, lerp } from "../../math/lerp";
 
 interface Data2DEntry {
@@ -166,7 +166,7 @@ export function BarChart(props: Props) {
   let width = (props.width ?? cssVariables.contentWidth) + cssVariables.contentPadding * 2;
   const preferredWidth = width;
 
-  const windowWidth = useViewportWidth();
+  const windowWidth = useIsomorphicViewportWidth();
   if (windowWidth != null && props.minWidth != null) {
     width = Math.min(
       width,

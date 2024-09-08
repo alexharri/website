@@ -1,8 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 
-export const useViewportWidth = () => {
+const createUseViewportWidth = (isomorphic: boolean) => () => {
   const [width, setWidth] = useState<number | null>(() => {
-    return typeof window === "undefined" ? null : window.innerWidth;
+    return isomorphic || typeof window === "undefined" ? null : window.innerWidth;
   });
   const widthRef = useRef(width);
   widthRef.current = width;
@@ -19,6 +19,9 @@ export const useViewportWidth = () => {
 
   return width;
 };
+
+export const useViewportWidth = createUseViewportWidth(false);
+export const useIsomorphicViewportWidth = createUseViewportWidth(true);
 
 export const useIsMobile = () => {
   const width = useViewportWidth();

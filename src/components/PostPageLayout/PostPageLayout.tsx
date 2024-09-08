@@ -6,6 +6,7 @@ import { Meta } from "../Meta/Meta";
 import { PostLayout } from "../PostLayout/PostLayout";
 import { FocusedScriptProvider } from "../ScriptedEditor/FocusedScriptContext/FocusedScriptContext";
 import { MonacoProvider } from "../ScriptedEditor/MonacoProvider";
+import { SubscribeToNewsletter } from "../SubscribeToNewsletter/SubscribeToNewsletter";
 
 export const PostPageLayout: React.FC<PageLayoutProps> = (props) => {
   const { post, children } = props;
@@ -34,6 +35,8 @@ export const PostPageLayout: React.FC<PageLayoutProps> = (props) => {
               <MonacoProvider>{children}</MonacoProvider>
             </FocusedScriptProvider>
           </ThreeProvider>
+
+          <SubscribeToNewsletter />
         </PostLayout>
       </Layout>
     </>

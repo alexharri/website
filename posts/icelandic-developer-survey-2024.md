@@ -1,7 +1,7 @@
 ---
 title: "2024 Icelandic Developer Survey: Compensation, Technologies, and more"
-description: "Analyzing data from Iceland's 2024 developer survey: compensation figures, languages, and technologies used"
-publishedAt: ""
+description: "Analyzing data from Iceland's 2024 developer survey: compensation figures, programming languages, and technologies used."
+publishedAt: "2024-07-13"
 image: "/images/og-icelandic-developer-survey-2024.png"
 ---
 
@@ -9,13 +9,13 @@ A survey for Icelandic developers was conducted earlier this year by [Kolibri][k
 
 No large developer survey like this has been conducted in Iceland before—this survey is the first of its kind.
 
-The results from this survey offer us unique insights into the Icelandic software industry. Which technologies are developers are using? How are developers compensated? What cloud providers are popular? These are just some of the questions we'll explore in this post.
+The results from this survey offer us unique insights into the Icelandic software industry. Which technologies are developers using? How are developers compensated? What cloud providers are popular? These are just some of the questions we'll explore in this post.
 
 There's loads of data to look at, so let's get to it!
 
 ## Demographics
 
-425 developers responded to the survey. With only a few thousand software developers in Iceland, this constitutes a significant chunk of developers.
+425 developers responded to the survey. With only a few thousand software developers in Iceland, this constitutes a significant chunk of our developers.
 
 ### Age
 
@@ -25,9 +25,15 @@ Most respondents were aged 25 to 54. This chart shows the age distribution of th
 
 ### Gender
 
-Of the respondents who specified their gender (397), a large majority of the respondents were men (86.1%), with the rest being women and a small number of non-binary respondents.
+Of the respondents who specified their gender (397), 86.1% were men, 13.1% were women, and 0.8% were non-binary.
 
 <BarChart data="gender-count" width={500} minWidth={280} height={300} minHeight={200} />
+
+Despite the seemingly low proportion of women at 13.1% of respondents, this percentage is still significantly higher than in other global developer surveys I've looked at. [JetBrains' 2023 developer ecosystem survey][jetbrains_survey] respondents were 5% women, with [State of JS 2023][state_of_js_gender] at 4%, and [Stack Overflow's 2022 developer survey][stackoverflow_2022_demographics] at ~5%.
+
+[jetbrains_survey]: https://www.jetbrains.com/lp/devecosystem-2023/demographics/#gender
+[state_of_js_gender]: https://2023.stateofjs.com/en-US/demographics/#gender
+[stackoverflow_2022_demographics]: https://survey.stackoverflow.co/2022/#demographics-gender
 
 ### Nationality
 
@@ -42,7 +48,7 @@ The following chart shows the distribution of the respondents' years of experien
 
 This gets more interesting when we group the data on experience by age cohort. The below chart shows years of experience, grouped by age.
 
-<BarChart data="experience-by-age" horizontal stacked width={660} height={300} />
+<BarChart data="experience-by-age" horizontal stacked width={660} minWidth={520} height={300} />
 
 <SmallNote label="" center>PS: Try hitting the 'Normalize' toggle on the top right. It allows you to switch from viewing the absolute counts to viewing percentages within each group. Every chart that groups data has this button.</SmallNote>
 
@@ -115,31 +121,29 @@ Icelandic developers are compensated well. Respondents were asked about their mo
 
 {<table data-align="right">
 <tbody>
-  <tr> <th>ISK</th> <th>EUR</th> <th>USD</th> </tr>
-
-  <tr> <td>0 - 800,000</td> <td>0 - 5,360</td> <td>0 - 5,760</td> </tr>
-  <tr> <td>800,000 - 1,000,000</td> <td>5,360 - 6,700</td> <td>5,760 - 7,200</td> </tr>
-  <tr> <td>1,000,000 - 1,200,000</td> <td>6,700 - 8,040</td> <td>7,200 - 8,640</td> </tr>
-  <tr> <td>1,200,000 - 1,400,000</td> <td>8,040 - 9,380</td> <td>8,640 - 10,080</td> </tr>
-  <tr> <td>1,400,000 - 1,600,000</td> <td>9,380 - 10,720</td> <td>10,080 - 11,520</td> </tr>
-  <tr> <td>Over 1,600,000</td> <td>Over 10,720</td> <td>Over 11,520</td> </tr>
+  <tr><th>ISK</th><th>EUR</th><th>USD</th></tr>
+  <tr><td>0 - 800,000</td><td>0 - 5,360</td><td>0 - 5,760</td></tr>
+  <tr><td>800,000 - 1,000,000</td><td>5,360 - 6,700</td><td>5,760 - 7,200</td></tr>
+  <tr><td>1,000,000 - 1,200,000</td><td>6,700 - 8,040</td><td>7,200 - 8,640</td></tr>
+  <tr><td>1,200,000 - 1,400,000</td><td>8,040 - 9,380</td><td>8,640 - 10,080</td></tr>
+  <tr><td>1,400,000 - 1,600,000</td><td>9,380 - 10,720</td><td>10,080 - 11,520</td></tr>
+  <tr><td>Over 1,600,000</td><td>Over 10,720</td><td>Over 11,520</td></tr>
 </tbody>
 </table>}
 
 <SmallNote>The EUR and USD figures are using an exchange rate of ISK 1 = EUR 0.0067 and ISK 1 = USD 0.0072, measured on the 2nd of July 2024.</SmallNote>
 
-In Iceland, we generally generally discuss monthly salaries instead of yearly. But in the US and other countries, yearly salary figures are more common, so here is the same table with yearly salary figures.
+In Iceland, we generally discuss monthly salaries instead of yearly. But in the US, and other countries, yearly salary figures are more common. Here is the same table with yearly salary figures.
 
 {<table data-align="right">
 <tbody>
-  <tr> <th>ISK</th> <th>EUR</th> <th>USD</th> </tr>
-
-  <tr> <td>0 - 9,600,000</td> <td>0 - 64,320</td> <td>0 - 69,120</td> </tr>
-  <tr> <td>9,600,000 - 12,000,000</td> <td>64,320 - 80,400</td> <td>69,120 - 86,400</td> </tr>
-  <tr> <td>12,000,000 - 14,400,000</td> <td>80,400 - 96,480</td> <td>86,400 - 103,680</td> </tr>
-  <tr> <td>14,400,000 - 16,800,000</td> <td>96,480 - 112,560</td> <td>103,680 - 120,960</td> </tr>
-  <tr> <td>16,800,000 - 19,200,000</td> <td>112,560 - 128,640</td> <td>120,960 - 138,240</td> </tr>
-  <tr> <td>Over 19,200,000</td> <td>Over 128,640</td> <td>Over 138,240</td> </tr>
+  <tr><th>ISK</th><th>EUR</th><th>USD</th></tr>
+  <tr><td>0 - 9,600,000</td><td>0 - 64,320</td><td>0 - 69,120</td></tr>
+  <tr><td>9,600,000 - 12,000,000</td><td>64,320 - 80,400</td><td>69,120 - 86,400</td></tr>
+  <tr><td>12,000,000 - 14,400,000</td><td>80,400 - 96,480</td><td>86,400 - 103,680</td></tr>
+  <tr><td>14,400,000 - 16,800,000</td><td>96,480 - 112,560</td><td>103,680 - 120,960</td></tr>
+  <tr><td>16,800,000 - 19,200,000</td><td>112,560 - 128,640</td><td>120,960 - 138,240</td></tr>
+  <tr><td>Over 19,200,000</td><td>Over 128,640</td><td>Over 138,240</td></tr>
 </tbody>
 </table>}
 
@@ -149,14 +153,14 @@ The below chart shows monthly salaries for developers in Iceland, split by age b
 
 As a freshly minted developer, you can expect to earn under or around ISK 800K. Even though the first salary bracket goes to zero, I wouldn't expect many developers to be earning less than 650K unless they're entering the field without a degree.
 
-With a few years of experience, most developers move from the &lt;800K to the 800K-1.0M bracket. And at 6 or more years of experience, a lot of developers move into the &gt;1.0M brackets.
+With a few years of experience, most developers move from the &lt;800K to the 800K-1.0M bracket. At 6 or more years of experience, a lot of developers move into the &gt;1.0M brackets.
 
 Summarizing this:
 
- * Developers starting their careers can expect to earn under or around ISK 800K monthly (USD 70K yearly)
- * Developers with 3-10 of experience generally earn ISK 800K to 1.2M monthly (USD 70K to 100K yearly)
- * Developers with over 10 of experience generally earn ISK 1.0M to 1.4M monthly (USD 85K to 120K yearly)
- * A significant number of highly experienced developers (10 to 20+ years of experience) earn 1.4M to &gt;1.6M monthly (USD 120K to &gt;140K yearly)
+ * Developers starting their careers can expect to earn under or around ISK 800K monthly (USD 70K yearly).
+ * Developers with 3-10 of experience generally earn ISK 800K to 1.2M monthly (USD 70K to 100K yearly).
+ * Developers with over 10 of experience generally earn ISK 1.0M to 1.4M monthly (USD 85K to 120K yearly).
+ * A significant number of highly experienced developers (10 to 20+ years of experience) earn 1.4M to &gt;1.6M monthly (USD 120K to &gt;140K yearly).
 
 TL;DR: the typical developer in Iceland earns around USD 85K to 120K yearly.
 
@@ -197,17 +201,16 @@ We've been looking at gross salaries so far. In figuring out net salaries we nee
 
 {<table data-align="right">
 <tbody>
-  <tr> <th>Income, per month</th> <th>Tax rate</th> </tr>
-
-  <tr> <td>ISK 0 - 446,136</td> <td>31.48%</td> </tr>
-  <tr> <td>ISK 446,137 - 1,252,501 </td> <td>37.98%</td> </tr>
-  <tr> <td>Over ISK 1,252,501</td> <td>46.28%</td> </tr>
+  <tr><th>Income, per month</th><th>Tax rate</th></tr>
+  <tr><td>ISK 0 - 446,136</td><td>31.48%</td></tr>
+  <tr><td>ISK 446,137 - 1,252,501 </td><td>37.98%</td></tr>
+  <tr><td>Over ISK 1,252,501</td><td>46.28%</td></tr>
 </tbody>
 </table>}
 
 <SmallNote label="Source">[https://www.skatturinn.is/english/individuals/tax-liability/](https://www.skatturinn.is/english/individuals/tax-liability/)</SmallNote>
 
-There is a personal tax credit of ISK 64.926 per month, which lowers the effective tax rate. There are also other factors, such as the mandatory pension fund and voluntary pension insurance premiums.
+There is a personal tax credit of ISK 64,926 per month, which lowers the effective tax rate. There are also other factors, such as the mandatory pension fund, union membership fees, and voluntary pension insurance premiums.
 
 To take a rough example, a developer earning a monthly gross salary of ISK 1.2M (~104K USD, yearly) is likely to have a net salary of around 780K-800K ISK (~USD 67K-70K, yearly). Don't take this number too seriously, it depends on a lot of factors.
 
@@ -228,7 +231,7 @@ This of course varies by company, but most companies provide at least some of th
 
 ### Work-life balance and parental leave
 
-With the obvious caveat of work-life balance varying by company, work-life balance for developers in Iceland is generally good. There will be some companies with a terrible work-life balance, and some companies with really good work-life balance.
+With the obvious caveat of work-life balance varying by company, work-life balance for developers in Iceland is generally very good.
 
 A notable factor is Iceland's generous paid parental leave, which is 6 months for each parent with 2 of those months transferrable to the other parent. This corresponds to about 26 weeks of parental leave for each parent.
 
@@ -266,7 +269,7 @@ We can see that salaries in the public sector skew lower and salaries in banking
 
 ### Programming language usage by industry
 
-Respondents could pick multiple languages, but they could only pick one industry. The following chart shows, for each language, which industry the respondent using the language works in.
+Respondents could pick multiple languages, but they could only pick a single industry. The following chart shows, for each language, which industry the respondent using the language works in.
 
 <BarChart data="industry-by-language" horizontal stacked minResponses={5} minWidth={570} />
 
@@ -311,7 +314,7 @@ As one might expect, developers working in the public sector or banking/finance 
 
 ## Technology stacks
 
-We'll now take a look at the technologies that developers use. We'll cover front-end libraries, cloud providers, CI/CD, and developers' OS of choice.
+We'll now take a look at the technologies that Icelandic developers are using. We'll cover front-end libraries, cloud providers, CI/CD, and developers' OS of choice.
 
 ### Front-end libraries
 
@@ -321,7 +324,7 @@ The following chart shows the front-end libraries which respondents used in the 
 
 <SmallNote>Like before, front-end libraries colored blue were provided as a default option in the survey, while the front-end libraries colored green were typed in the "Other" field.</SmallNote>
 
-React completely dominates the front-end scene in Iceland, with Vue and Angular in a distant second and third place. In my experience, this data is representative—React is incredibly popular here. 
+React dominates the front-end scene in Iceland, with Vue and Angular in a distant second and third place. In my experience, this data is representative—React is incredibly popular here. 
 
 Some other observations:
 
@@ -335,7 +338,7 @@ Some other observations:
 
 <SmallNote>Default survey options are colored blue, while options typed in the "Other" field are colored green. Origo, Advania, and 1984.is are local Icelandic cloud providers.</SmallNote>
 
-AWS at 52.5% is the most popular cloud provider in Iceland, with Azure in second at 36.5%. Vercel and Cloudflare are also used by a significant number of developers, coming in at 22.6% and 17.6% respectively. Google Cloud is relatively far behind AWS and Azure with 16.2% of Icelandic developers using GCP.
+AWS at 52.5% is the most popular cloud provider in Iceland, with Azure in second place at 36.5%. Vercel and Cloudflare are also used by a significant number of developers, coming in at 22.6% and 17.6% respectively. Google Cloud is relatively far behind AWS and Azure with 16.2% of Icelandic developers using GCP.
 
 Digital Ocean is the most notable cloud provider not included as a default option. Perhaps it would have ranked higher had it been one of the default options.
 
@@ -384,20 +387,20 @@ Grouping the use of operating systems by industry, we see that Windows is most u
 
 ## Final words
 
-I want to thank [Telma Guðbjörg Eyþórsdóttir][telma] and [Jóhann Guðmundsson][johann] (both software developers at Kolibri) for driving this awesome initiative! Additional thanks goes to [Anna Signý Guðbjörnsdóttir][anna] (CEO at Kolibri) and the other people at [Kolibri][kolibri] that helped make this happen.
+I want to thank [Telma Guðbjörg Eyþórsdóttir][telma] and [Jóhann Guðmundsson][johann] (both software developers at Kolibri) for kickstarting and driving this survey! Additional thanks go to [Anna Signý Guðbjörnsdóttir][anna] (CEO at Kolibri) and the other people at [Kolibri][kolibri] that helped make this happen.
 
-Kolibri is one of Iceland's foremost digital agencies, providing services related to creating digital experiences, such as product and software development and design. I'm not formally affiliated with them any way, but I have friends there.
+Kolibri is one of Iceland's foremost digital agencies, providing services related to creating digital experiences, such as product and software development and design. I'm not formally affiliated with them in any way, but I have friends there.
 
 [kolibri]: https://www.kolibri.is/en
 [anna]: https://www.linkedin.com/in/annasigny/
 [telma]: https://www.linkedin.com/in/telmag92/
 [johann]: https://www.linkedin.com/in/j%C3%B3hann-gu%C3%B0mundsson-935457b7/
 
-Kolibri held an event where they presented the results of the study, which sparked lively discussions. The house was packed and it was a blast!
+<Image src="~/event.jpg" width={740} plain />
 
-[ Pictures from the event go here ]
+<SmallNote label="" center>Kolibri held an event where they presented the results of the study, which sparked lively discussions. The house was packed and it was a blast!</SmallNote>
 
-Getting to write up the results of the survey has been great! I hope I have the opportunity to do so again in the future.
+Getting to write up the results of the survey has been awesome! I hope I have the opportunity to do so again in the future.
 
 Thanks for reading! I hope this was interesting.
 
