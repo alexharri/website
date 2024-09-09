@@ -1,7 +1,7 @@
 import fs from "fs";
 import path from "path";
 import fsPromises from "fs/promises";
-import { POSTS_PATH } from "../src/utils/mdxUtils";
+import { POSTS_PATH } from "@alexharri/blog/src/constants";
 
 console.log("Started watcher");
 

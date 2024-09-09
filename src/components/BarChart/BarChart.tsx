@@ -1,4 +1,5 @@
 import "../../utils/chartjs";
+import { usePostData } from "@alexharri/blog";
 import { Bar } from "react-chartjs-2";
 import { useState } from "react";
 import { ChartData, ChartDataset, GridLineOptions } from "chart.js";
@@ -6,7 +7,6 @@ import { useStyles } from "../../utils/styles";
 import { BarChartStyles } from "./BarChart.styles";
 import { colors, cssVariables } from "../../utils/cssVariables";
 import { Toggle } from "../Toggle/Toggle";
-import { usePostData } from "../../data/DataProvider";
 import { useIsomorphicViewportWidth } from "../../utils/hooks/useViewportWidth";
 import { invLerp, lerp } from "../../math/lerp";
 

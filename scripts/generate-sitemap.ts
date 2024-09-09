@@ -1,6 +1,6 @@
 import fs from "fs";
 import { Post } from "../src/types/Post";
-import { getPosts } from "../src/utils/blogPageUtils";
+import { getPosts } from "@alexharri/blog/posts";
 
 function generateSitemap() {
   const posts = getPosts("published");
