@@ -3,6 +3,7 @@ title: "The web's clipboard, and how it stores data of different types"
 description: "Exploring the web's clipboard APIs, their limitations, and their history."
 image: "/images/og-clipboard.png"
 publishedAt: "2024-09-01"
+updatedAt: "2024-09-14"
 ---
 
 If you've been using computers for a while, you probably know that the clipboard can store multiple types of data (images, rich text content, files, and so on). As a software developer, it started frustrating me that I didn't have a good understanding of how the clipboard stores and organizes data of different types.
@@ -608,3 +609,18 @@ I find the Web Custom Formats proposal promising, and I hope it becomes implemen
 Thanks for reading! I hope this was interesting.
 
 — Alex Harri
+
+
+## Appendix: the `unsanitized` option
+
+When reading from the clipboard via the async Clipboard API, browsers may sanitize the data. For example, browsers may strip potentially dangerous script tags from HTML, and they may re-encode PNG images to avoid [zip bomb][zip_bomb] attacks.
+
+For this reason, the async Clipboard API's `read` method contains an `unsanitized` option that allows you to request the unsanitized data. You can read more about this option and how it works in this post from [Thomas Steiner][unsanitized_option].
+
+Currently, the `unsanitized` option is only supported in Chromium-based browsers (added in late 2023). The other browsers may support this option in the future (though Safari seems unlikely to do so, see [Stakeholder Feedback/Opposition][unsanitized_feedback]).
+
+Thanks, Tom, for reaching out in regards to mentioning the `unsanitized` option! It fits well within the scope of this post.
+
+[zip_bomb]: https://en.wikipedia.org/wiki/Zip_bomb
+[unsanitized_option]: https://developer.chrome.com/docs/web-platform/unsanitized-html-async-clipboard
+[unsanitized_feedback]: https://github.com/w3c/editing/blob/gh-pages/docs/clipboard-unsanitized/explainer.md#stakeholder-feedback--opposition

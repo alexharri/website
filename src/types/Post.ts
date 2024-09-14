@@ -5,7 +5,8 @@ export interface Post {
   description: string;
   /** Empty string if not provided */
   publishedAt: string;
-  updatedAt?: string;
+  /** Empty string if not provided */
+  updatedAt: string;
 }
 
 export type PostDataStore = Partial<Record<string, unknown>>;

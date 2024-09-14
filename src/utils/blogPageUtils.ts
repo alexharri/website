@@ -18,10 +18,12 @@ export const getPosts = (type: "published" | "draft") => {
       title,
       description = "",
       publishedAt = "",
+      updatedAt = "",
     } = data as {
       title: string;
       description?: string;
       publishedAt?: string;
+      updatedAt?: string;
     };
 
     const slug = fileName.replace(/\.mdx?$/, "");
@@ -29,7 +31,7 @@ export const getPosts = (type: "published" | "draft") => {
     const includePost = publishedAt ? type === "published" : type === "draft";
 
     if (includePost) {
-      posts.push({ title, description, slug, publishedAt });
+      posts.push({ title, description, slug, publishedAt, updatedAt });
     }
   }
 
