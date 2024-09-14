@@ -1,9 +1,9 @@
 import fs from "fs";
-import { getPosts } from "@alexharri/blog/posts";
+import { getPosts } from "@alexharri/blog/posts.js";
 import RSS from "rss";
 
 function generateRSS() {
-  const posts = getPosts("published");
+  const posts = getPosts({ type: "published" });
 
   const url = "https://alexharri.com";
 

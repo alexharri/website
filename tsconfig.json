@@ -23,11 +23,12 @@
       "@alexharri/blog/*": ["./lib/blog/*"]
     }
   },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", "**/*.js"],
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", "**/*.js", "src/watcher.mjs"],
   "exclude": ["node_modules"],
   "ts-node": {
     "compilerOptions": {
-      "module": "CommonJS"
+      "module": "ESNext",
+      "target": "ESNext"
     }
   }
 }

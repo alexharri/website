@@ -1,10 +1,10 @@
 import fs from "fs";
 import path from "path";
 import matter from "gray-matter";
-import { findMdFiles } from "../md";
-import { Post, PostDataStore } from "../../types";
-import { FrontMatter, GetPostOptions, GetPostsOptions } from "../internal-types";
-import { DEFAULT_POSTS_PATH } from "../constants";
+import { findMdFiles } from "../md.js";
+import { Post, PostDataStore } from "../../types.js";
+import { FrontMatter, GetPostOptions, GetPostsOptions } from "../internal-types.js";
+import { DEFAULT_POSTS_PATH } from "../constants.js";
 
 export const getPosts = (options: GetPostsOptions = {}) => {
   const { type = "published", postsPath = DEFAULT_POSTS_PATH } = options;
@@ -158,7 +158,7 @@ export const getPostProps = async (slug: string, options: GetPostOptions = {}) =
 
   const data = getPostData(slug);
 
-  return { props: { source, slug, data, version } };
+  return { props: { source, slug, data, version, postsPath } };
 };
 
 export function getSlugFromFilePath(filePath: string) {

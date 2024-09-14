@@ -19,33 +19,22 @@ const nextConfig = {
     },
   ],
 
+  typescript: {
+    tsconfigPath: "./tsconfig.next.json",
+  },
+
   reactStrictMode: true,
   swcMinify: true,
 
   // See https://github.com/vercel/next.js/issues/31692
   outputFileTracing: false,
 
-  webpack: (config, { isServer }) => {
+  webpack: (_config, { isServer }) => {
+    const config = _config;
     if (isServer) {
       execSync("npm run generate-sitemap");
       execSync("npm run generate-rss");
     }
-
-    const rule = config.module.rules
-      .find((rule) => rule.oneOf)
-      .oneOf.find(
-        (r) =>
-          // Find the global CSS loader
-          r.issuer && r.issuer.include && r.issuer.include.includes("_app"),
-      );
-    if (rule) {
-      rule.issuer.include = [
-        rule.issuer.include,
-        // Allow `monaco-editor` to import global CSS:
-        /[\\/]node_modules[\\/]monaco-editor[\\/]/,
-      ];
-    }
-
     config.plugins.push(new MonacoEditorWebpackPlugin());
     return config;
   },

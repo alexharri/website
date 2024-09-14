@@ -1,3 +1,4 @@
+import { io } from "socket.io-client";
 import { currentTime } from "./time";
 import { MDXRemoteSerializeResult } from "next-mdx-remote";
 import { useEffect, useRef, useState } from "react";
@@ -6,9 +7,45 @@ interface Options {
   version: string;
   source: MDXRemoteSerializeResult;
   slug: string;
+  postsPath: string;
 }
 
 export function usePostWatcher(options: Options) {
+  const { postsPath, slug } = options;
+
+  const [source, setSource] = useState(options.source);
+
+  useEffect(() => {
+    if (process.env.NODE_ENV !== "development") {
+      // Disable in non-dev environments
+      return () => {};
+    }
+
+    const socket = io("http://localhost:3000", { transports: ["websocket"] });
+
+    // Tell the server which post we want updates for
+    socket.io.on("open", () => socket.emit("path", postsPath + slug));
+
+    // Add handler for post updates
+    socket.on("post", (source) => {
+      setSource(source);
+      console.log(`[${currentTime()}] Reloaded post contents`);
+    });
+
+    // Error handler
+    //
+    // TODO: Make more sophisticated?
+    socket.io.on("error", () => {
+      console.log("Failed to connect to websocket for post hot reloader.");
+    });
+
+    return () => socket.disconnect();
+  }, []);
+
+  return source;
+}
+
+export function usePostWatcherOld(options: Options) {
   const { slug } = options;
 
   const [source, setSource] = useState(options.source);

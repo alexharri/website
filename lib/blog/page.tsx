@@ -16,6 +16,7 @@ interface PageProps {
   version: string;
   slug: string;
   data: PostDataStore;
+  postsPath: string;
 }
 
 export function createPostPage(options: CreatePageOptions) {
@@ -33,6 +34,7 @@ export function createPostPage(options: CreatePageOptions) {
       publishedAt: scope.publishedAt || "",
       updatedAt: scope.updatedAt || "",
       image: scope.image || "",
+      firstCodeSnippet: null,
     };
 
     return (

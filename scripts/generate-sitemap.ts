@@ -1,9 +1,9 @@
 import fs from "fs";
-import { Post } from "../src/types/Post";
-import { getPosts } from "@alexharri/blog/posts";
+import { getPosts } from "@alexharri/blog/posts.js";
+import { Post } from "@alexharri/blog";
 
 function generateSitemap() {
-  const posts = getPosts("published");
+  const posts = getPosts({ type: "published" });
   const postXML = (post: Post) => {
     return `
   <url>

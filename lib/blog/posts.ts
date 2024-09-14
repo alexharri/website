@@ -1,1 +1,1 @@
-export { getPosts, getPostPaths } from "./src/__server-only/blogPageUtils";
+export { getPosts, getPostPaths } from "./src/__server-only/blogPageUtils.js";
