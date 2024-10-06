@@ -181,10 +181,6 @@ export default function Page() {
           years.
         </p>
         <p>
-          Over the past few years, I've transitioned to lower-level work developing and optimizing
-          complex software where performance is critical.
-        </p>
-        <p>
           At <Link href="https://grid.is/">GRID</Link>, I worked on their JavaScript-based
           spreadsheet engine running in the browser, their formula parser written in Rust, and wrote
           some Python for the back-end.{" "}
@@ -194,19 +190,13 @@ export default function Page() {
           .
         </p>
         <p>
-          In my current role at <Link href="https://www.arkio.is/">Arkio</Link> I've been working a
-          lot with 3D geometry and math (
+          Right now I'm leading the development of <Link href="https://www.arkio.is/">Arkio's</Link>{" "}
+          modelling tools. Arkio is an architectural modeler and model reviewer written in C#. My
+          work involves lots of 3D geometry, mathematics (
           <Link href="/blog/planes" target="_blank">
             see <em>"Planes in 3D space"</em>
           </Link>
-          ). Arkio is an architectural{" "}
-          <Link href="https://en.wikipedia.org/wiki/Solid_modeling">solid modeler</Link> running in
-          VR headsets, written in C#. My work has mostly been on the core geometry layer and the
-          editing tools (
-          <Link href="/blog/arkio-pin-tool" target="_blank">
-            see <em>"Introducing Arkio's Pin Tool"</em>
-          </Link>
-          ).
+          ), and some fairly low-level C# code.
         </p>
         <h2 className={s("heading")}>Writing</h2>
         <p>
