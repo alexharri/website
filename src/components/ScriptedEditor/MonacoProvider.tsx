@@ -1,9 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import loader from "@monaco-editor/loader";
-import {
-  editorBackground,
-  editorSelectionHighlight,
-} from "monaco-editor/esm/vs/platform/theme/common/colorRegistry";
 import { colors } from "../../utils/cssVariables";
 
 let themeDefined = false;
@@ -30,8 +26,8 @@ function defineTheme(monaco: ReturnType<typeof useMonaco>, theme: string) {
     base: "vs-dark",
     inherit: true,
     colors: {
-      [editorBackground]: background,
-      [editorSelectionHighlight]: "#26354b",
+      "editor.background": background,
+      "editor.selectionHighlightBackground": "#26354b",
     },
     rules: [
       { token: "", foreground: text, background },
