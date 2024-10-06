@@ -1,4 +1,4 @@
-import Three from "three";
+import type * as Three from "three";
 import { useContext, useEffect, useState } from "react";
 import { STLLoader } from "three/examples/jsm/loaders/STLLoader";
 import { getPhongMaterial, IVector3, parseVector } from "../utils";

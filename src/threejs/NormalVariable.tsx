@@ -1,5 +1,5 @@
 import { useContext, useEffect, useMemo, useRef } from "react";
-import type THREE from "three";
+import type * as THREE from "three";
 import { useStyles } from "../utils/styles";
 import { Line } from "./Components/primitives/Line";
 import { DreiContext, FiberContext, ThreeContext } from "./Components/ThreeProvider";

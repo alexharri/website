@@ -1,4 +1,4 @@
-import type THREE from "three";
+import type * as THREE from "three";
 
 type Vector3 = THREE.Vector3;
 

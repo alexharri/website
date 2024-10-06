@@ -1,4 +1,4 @@
-import type THREE from "three";
+import type * as THREE from "three";
 import { Plane } from "./Plane";
 
 const EPSILON = 0.0000001;

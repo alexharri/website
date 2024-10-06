@@ -1,5 +1,5 @@
 import { useContext, useMemo, useRef } from "react";
-import type THREE from "three";
+import type * as THREE from "three";
 import { SVGLoader } from "three/examples/jsm/loaders/SVGLoader";
 import { getMathSvg, getMathSvgOffset } from "../../math-svg";
 import { getBasicMaterial, IVector3, parseVector } from "../../utils";

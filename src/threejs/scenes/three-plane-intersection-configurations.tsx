@@ -1,5 +1,5 @@
 import { useContext, useMemo, useRef } from "react";
-import type THREE from "three";
+import type * as THREE from "three";
 import { Plane as PlaneClass } from "../../math/Plane";
 import { planePlaneIntersection } from "../../math/planePlaneIntersection";
 import { lerp } from "../../math/lerp";

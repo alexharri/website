@@ -96,7 +96,7 @@ export function BarChart(props: Props) {
   const [normalize, setNormalize] = useState(props.normalize ?? false);
 
   let is2D = false;
-  let yStyle: string | undefined = undefined;
+  let yStyle: Intl.NumberFormatOptions["style"] = undefined;
   let total: number | null = null;
 
   let data: ChartData<"bar">;

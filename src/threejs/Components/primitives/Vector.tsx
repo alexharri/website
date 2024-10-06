@@ -1,5 +1,5 @@
 import { useContext, useMemo } from "react";
-import type THREE from "three";
+import type * as THREE from "three";
 import { getBasicMaterial, getPhongMaterial, IColor, IVector3, parseVector } from "../../utils";
 import { ThreeContext } from "../ThreeProvider";
 import { Line } from "./Line";
