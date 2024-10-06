@@ -3,6 +3,7 @@ title: "Making GRID's spreadsheet engine 10% faster"
 description: "Optimizing the performance of GRID's browser-based spreadsheet engine, through the use of shared immutable objects."
 publishedAt: "2023-10-11"
 image: ""
+tags: ["Performance", "JavaScript"]
 ---
 
 GRID's product sports a feature-complete spreadsheet engine running in the browser, with advanced features such as [spilling][spilling], [iterative calculation][iterative_calculation], and the [`QUERY` function][query_func]. It's a beaut.

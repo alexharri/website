@@ -4,6 +4,7 @@ description: "Exploring the web's clipboard APIs, their limitations, and their h
 image: "/images/og-clipboard.png"
 publishedAt: "2024-09-01"
 updatedAt: "2024-09-14"
+tags: ["JavaScript"]
 ---
 
 If you've been using computers for a while, you probably know that the clipboard can store multiple types of data (images, rich text content, files, and so on). As a software developer, it started frustrating me that I didn't have a good understanding of how the clipboard stores and organizes data of different types.

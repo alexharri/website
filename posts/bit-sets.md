@@ -3,6 +3,7 @@ title: "Bit Sets: An introduction to bit manipulation"
 description: "Learn about bitwise operators and bit manipulation by implementing a BitSet class in JavaScript."
 publishedAt: "2024-01-06"
 image: ""
+tags: ["Performance", "Bit manipulation", "JavaScript"]
 ---
 
 [Bit sets][bitset] — also known as bit arrays or bit vectors — are a highly compact data structure that stores a list of bits. They are often used to represent a set of integers or an array of booleans.

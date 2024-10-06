@@ -3,6 +3,7 @@ title: "JSDoc as an alternative TypeScript syntax"
 description: "How to type your JavaScript code base without writing a single TypeScript file."
 publishedAt: "2024-02-24"
 image: ""
+tags: ["TypeScript", "JavaScript"]
 ---
 
 As web development has embraced static typing during the past decade, TypeScript has become the default language of choice. I think this is great—I love working with TypeScript!

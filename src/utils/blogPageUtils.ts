@@ -19,11 +19,13 @@ export const getPosts = (type: "published" | "draft") => {
       description = "",
       publishedAt = "",
       updatedAt = "",
+      tags = [],
     } = data as {
       title: string;
       description?: string;
       publishedAt?: string;
       updatedAt?: string;
+      tags?: string[];
     };
 
     const slug = fileName.replace(/\.mdx?$/, "");
@@ -31,7 +33,7 @@ export const getPosts = (type: "published" | "draft") => {
     const includePost = publishedAt ? type === "published" : type === "draft";
 
     if (includePost) {
-      posts.push({ title, description, slug, publishedAt, updatedAt });
+      posts.push({ title, description, slug, publishedAt, updatedAt, tags });
     }
   }
 
@@ -48,6 +50,7 @@ export function getPopularPosts() {
 
   const popularPosts = [
     "planes",
+    "clipboard",
     "typescript-structural-typing",
     "multi-cursor-code-editing-animated-introduction",
     "vector-networks",

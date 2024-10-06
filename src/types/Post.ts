@@ -7,6 +7,7 @@ export interface Post {
   publishedAt: string;
   /** Empty string if not provided */
   updatedAt: string;
+  tags: string[];
 }
 
 export type PostDataStore = Partial<Record<string, unknown>>;
