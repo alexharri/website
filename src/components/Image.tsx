@@ -56,7 +56,7 @@ export const Image = (props: Props) => {
   const commonProps = { src, width, className };
 
   return (
-    <div className={containerClassName}>
+    <div className={containerClassName} style={{ width }}>
       {video ? (
         <video {...commonProps} autoPlay muted preload="" tabIndex={-1} loop />
       ) : (

@@ -8,6 +8,10 @@ const NoteStyles = ({ styled, theme }: StyleOptions) => ({
     border-radius: 8px;
     margin: 32px -16px;
 
+    & > *:first-child {
+      margin-top: 0;
+    }
+
     p {
       font-size: 16px;
       color: ${theme.text700};
@@ -20,6 +24,8 @@ const NoteStyles = ({ styled, theme }: StyleOptions) => ({
   `,
 });
 
+const doNotWrapInP = new Set<unknown>(["p", "h1", "h2", "h3", "h4", "h5", "h6"]);
+
 interface Props {
   children: React.ReactNode;
 }
@@ -28,7 +34,7 @@ export const Note = (props: Props) => {
   const s = useStyles(NoteStyles);
 
   const content = React.Children.map(props.children, (child) => {
-    if (typeof child === "object" && child && "type" in child && child.type === "p") {
+    if (typeof child === "object" && child && "type" in child && doNotWrapInP.has(child.type)) {
       return child;
     }
     return <p>{child}</p>;

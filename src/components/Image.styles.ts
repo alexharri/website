@@ -3,7 +3,7 @@ import { StyleOptions } from "../utils/styles";
 
 export const ImageStyles = ({ styled }: StyleOptions) => ({
   container: styled.css`
-    margin: 40px 0 40px;
+    margin: 40px auto 40px;
     position: relative;
 
     &:before {

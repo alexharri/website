@@ -107,7 +107,7 @@ export function createPage(customComponents: Record<string, React.FC<any>>) {
               </ThreeProvider>
             </PostDataProvider>
 
-            <SubscribeToNewsletter />
+            {scope.publishedAt ? <SubscribeToNewsletter /> : null}
           </PostLayout>
         </Layout>
       </>
