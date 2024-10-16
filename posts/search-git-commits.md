@@ -1,30 +1,22 @@
 ---
-title: "Searching for code in Git commits"
+title: "Searching for and navigating Git commits"
 description: ""
 image: ""
 publishedAt: ""
 tags: []
 ---
 
-I sometimes encounter code that puzzles me. When that happens, it's usually because I lack some context. Perhaps the code is that way because of a bug fix that's not immediately obvious at a glance, or maybe there are constraints I'm not yet aware of.
+I sometimes encounter code that puzzles me. When that happens, it's usually because I lack some context. Perhaps the code is that way because of a bug fix that's not immediately obvious at a glance, or maybe there's some constraint I'm not aware of.
 
 To get more context, I often use [Git blame][git_blame] to view the commit (and usually, the associated pull request) that added the code.
 
 [git_blame]: https://git-scm.com/docs/git-blame
 
-Sometimes the pull request has a description (or a link to an issue with one) which clarifies the change. I love it when there are useful discussions added during code review—those are super valuable, especially if they're discussing that exact change. If both of those fail, the commit itself often contains related changes from which I can glean the intention behind the code.
+Sometimes the pull request has a description (or a link to an issue with one) which clarifies the change, or discussions added during code review—those are super valuable. Often the commit itself contains related changes that provide context to the code.
 
-However, the commit that Git blame points to is often not the change that introduced the behavior. Perhaps the commit is just a refactor, or an automated formatting change. Not useful.
+But it's not always that straightforward. Sometimes the commit that Git blame points to is not the change that introduced the behavior. Examples of such commits are refactors or formatting changes. I used to solve this by repeatedly `git blame`ing and reading diff after diff, which was _terribly_ laborious and time consuming. I recently encountered a particularly tough case and got fed up enough that I decided to do something about it.
 
-Code archeology is a big part of being a professional software engineer. To effectively reason about and change a system, you need to understand how it works and why it was made to work that way. Those sorts of non-functional commits just get in the way of that process.
-
-In this post, I want to take a good look at this problem and share an effective tool I found for digging into code. Let's get to it!
-
-{/*
-But sometimes the last commit that touched the code you're looking at is a non-functional change, like a pure formatting change or a commit just moving lines of code around. When this happens, we need go to the file prior to that change and repeat the `git blame`. When this happens multiple times in a row, it quickly becomes laborious.
-
-I recently encountered one of these long chains of non-function commits and decided to find a better way to go about code archeology. In this post, I'll share the method I found to quickly find code snippets in Git commits.
-*/}
+In this post, I'll share with you the tools I found so that you can effectively search for and navigate Git commits. You'll learn a lot about Git along the way!
 
 
 ## Running Git blame on a piece of code
@@ -53,16 +45,15 @@ c457405a 8)   doSomeFunkyStuff();
 c457405a 9) }
 ```
 
-<SmallNote>The `-s` option strips the verbose author and date information. `-L` selects specific lines.</SmallNote>
-
+<SmallNote>The `-s` option strips author and date information. `-L` selects specific lines.</SmallNote>
 
 Let's take a look at the commit for line 7, which seems to be add the `MPP_ACTIVE` check:
 
 <Image src="~/git-blame-commit-0.png" width={540} />
 
-Hmm, no, that's not it—that's just a refactoring change. We need to go further back to find the change that introduced the core behavior.
+Hmm, no, that's not it—that's just a refactoring change. We need to go further back to find the change that introduced the condition itself.
 
-To do that, we need to repeat the process and run Git blame again on the prior version of the file. Let's keep going and see what we get.
+To do that, we might repeat the process and run Git blame again on the prior version of the file. Let's keep going and see what we get.
 
 <p align="center">What we find is a refactoring change...</p>
 
@@ -76,45 +67,52 @@ To do that, we need to repeat the process and run Git blame again on the prior v
 
 <Image src="~/git-commit-3.png" width={420} />
 
-These sorts of chains can get surprisingly long. During the lifecycle of a code base, code get tweaked, refactored and moved around. Over the years, those changes snowball into long chains of indirection.
+We don't care about these changes. What we care about is the commit where the `MPP_ACTIVE` condition was introduced.
 
-What we care about is the commit where `MPP_ACTIVE` was introduced. Ideally, we'd be able to search for commits that mentions `MPP_ACTIVE` and just look at the earliest one. This is where `git log -S` comes in handy.
+Ideally, we'd be able to search for commits that mentions `MPP_ACTIVE` and just look at the earliest one. That is exactly what `git log -S` lets us do.
 
 
-## Searching for code in commits
+## Searching for commits by code
 
-By default, the `git log` command lists every commit. The `-S` option accepts a case-sensitive string used to filter out commits whose diffs don't include the input string.
+By default, `git log` lists every commit in your branch. The `-S` option lets us pass a string used to filter out commits whose diffs don't include that specific string.
 
 ```bash
-# Show commits that include "foo_bar" in the diff
-git log -S "foo_bar"
+# Show commits that include "getUser" in the diff
+git log -S "getUser"
 ```
 
-You can imagine this working like so:
+<SmallNote>The string passed to `-S` is case-sensitive. `getUser` will not match `GetUser`.</SmallNote>
+
+More specifically, the `-S` option must match some code that was added or deleted for the commit to be listed. As a mental model, you can imagine this option being implemented like so:
 
 ```ts
 if (typeof args.S === "string") {
-  commits = commits.filter(commit => commit.diff.includes(args.S));
+  commits = commits.filter(commit => (
+    commit.additions.includes(args.S) ||
+    commit.deletions.includes(args.S)
+  ));
 }
 ```
 
-So let's try running `git log -S "MPP_ACTIVE"` and see what we get:
+This means that commits that just happened to move lines of code including our search string are _not_ included—the exact code we're searching for needs to have been added/deleted in the commit for it to be shown. Very useful for our purposes! 
+
+Let's try running `git log -S "MPP_ACTIVE"` and see what we get:
 
 ```
 ▶ git log -S "MPP_ACTIVE"
 
 commit 33a8b6ea050963e452b1d16165f64a77df3ff054
-Author: johndoe42, Date: Sept 14 2022
+Author: johndoe42 <j.doe@company.com>
+Date:   Tue Sept 14 14:05:52 2022 +0000
 
     refactor
 
 commit 8fed03eadf2afc5efe91ddf0cf7a7837c8b680fe
-Author: aliceb76, Date: Jan 19 2022
+Author: aliceb76 <aliceb@company.com>
+Date:   Mon Jan 19 10:44:19 2021 +0000
 
     do funky stuff if MPP_ACTIVE is set
 ```
-
-<SmallNote label="" center>I've edited the output slightly to make it a tad more compact (2 lines instead of 3).</SmallNote>
 
 I find the default output format far too verbose, so I almost always use `--oneline` to compact it:
 
@@ -125,20 +123,24 @@ I find the default output format far too verbose, so I almost always use `--onel
 8fed03e do funky stuff if MPP_ACTIVE is set
 ```
 
-Anyway, the output is ordered from most recent to oldest, which means that `8fed03e` is the first commit in the codebase that mentioned `MPP_ACTIVE`. It turns out that commit is exactly the one we were looking for!
+<SmallNote label="" center>Much nicer!</SmallNote>
+
+The commits returned from `git log` are ordered from newest to oldest, which means that `8fed03e` is the first commit in the codebase that mentioned `MPP_ACTIVE`. It turns out that commit is exactly the one we were looking for!
 
 <Image src="~/git-commit-4.png" width={460} plain />
+<SmallNote label="" center>Hooray!</SmallNote>
 
-Let's move past this simple example and try `git log -S` on a more mature codebase. We'll use the Next.js repository as an example for the rest of this post.
+Let's move past this toy example and try `git log -S` on a larger codebase. I'll use the Next.js codebase as an example and try and finding the commit that implemented a specific feature.
 
 
 ## Using `git log -S` in larger codebases
 
-Next.js has a [`distDir` option][distdir] that allows the user to specify custom build directory. As an exercise, let's try finding the commit that added the option.
+The [vercel/next.js codebase][next_codebase] has over 25,000 commits added over 8 years, so it's a fairly large and mature codebase! Next.js has a [`distDir` option][distdir] that allows the user to specify a custom build directory. Let's try finding the commit that added this option.
 
+[next_codebase]: https://github.com/vercel/next.js
 [distdir]: https://nextjs.org/docs/pages/api-reference/next-config-js/distDir
 
-So let's run `git log -S "distDir"` and see what we get:
+As a first step, let's run `git log -S "distDir"` and see what we get:
 
 ```
 ▶ git log -S "distDir" --oneline
@@ -296,7 +298,9 @@ diff --git a/readme.md b/readme.md
 + ```
 ```
 
-Looks like `9347c8bdd0` was the commit that added this option! Opening the commit on GitHub shows us the [associated Pull Request][PR_1599], which also links to the [issue requesting the feature][issue_1513]. The issue provides us with the original motive for adding `distDir` as an option:
+Looks like `9347c8bdd0` was the commit that added this option! Opening the commit on GitHub shows us the [associated Pull Request][PR_1599], which also links to the [issue requesting the feature][issue_1513].
+
+The issue provides us with the original motive for adding `distDir` as an option:
 
 [PR_1599]: https://github.com/vercel/next.js/pull/1599
 [issue_1513]: https://github.com/vercel/next.js/issues/1513
@@ -306,4 +310,5 @@ Looks like `9347c8bdd0` was the commit that added this option! Opening the commi
 > Firebase CLI seems to ignore all hidden files, so I want to use a differently named directory.
 
 The PR itself also contains some design discussion where the option was renamed from `NextConfig.options.dest` to `NextConfig.distDir` instead.
+
 
