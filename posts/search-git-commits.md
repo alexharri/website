@@ -38,11 +38,11 @@ What does "MPP" stand for? And what does it mean for it to be active? Let's use 
 */}
 
 ```
-▶ git blame example.js -s -L 7,9
+<@text200>▶</@> <@text400>git blame example.js</@> <@cli-arg>-s -L 7,9</@>
 
-1edd8004 7) if (MPP_ACTIVE === "true") {
-c457405a 8)   doSomeFunkyStuff();
-c457405a 9) }
+<@commit>1edd8004</@> <@text200>7)</@>  <~js>if (MPP_ACTIVE === "true") {</~>
+<@commit>c457405a</@> <@text200>8)</@>  <~js>  doSomeFunkyStuff();</~>
+<@commit>c457405a</@> <@text200>9)</@>  <~js>}</~>
 ```
 
 <SmallNote>The `-s` option strips author and date information. `-L` selects specific lines.</SmallNote>
@@ -76,9 +76,9 @@ Ideally, we'd be able to search for commits that mentions `MPP_ACTIVE` and just 
 
 By default, `git log` lists every commit in your branch. The `-S` option lets us pass a string used to filter out commits whose diffs don't include that specific string.
 
-```bash
-# Show commits that include "getUser" in the diff
-git log -S "getUser"
+```
+<@token.comment># Show commits that include "getUser" in the diff</@>
+git log <@cli-arg>-S</@> <@token.string>"getUser"</@>
 ```
 
 <SmallNote>The string passed to `-S` is case-sensitive. `getUser` will not match `GetUser`.</SmallNote>
@@ -99,17 +99,17 @@ This means that commits that just happened to move lines of code including our s
 Let's try running `git log -S "MPP_ACTIVE"` and see what we get:
 
 ```
-▶ git log -S "MPP_ACTIVE"
+<@text200>▶</@> <@text400>git log</@> <@cli-arg>-S</@> <@token.string>"MPP_ACTIVE"</@>
 
-commit 33a8b6ea050963e452b1d16165f64a77df3ff054
-Author: johndoe42 <j.doe@company.com>
-Date:   Tue Sept 14 14:05:52 2022 +0000
+<@text400>commit</@> <@commit>33a8b6ea050963e452b1d16165f64a77df3ff054</@>
+<@text400>Author: johndoe42 <j.doe@company.com></@>
+<@text400>Date:   Tue Sept 14 14:05:52 2022 +0000</@>
 
     refactor
 
-commit 8fed03eadf2afc5efe91ddf0cf7a7837c8b680fe
-Author: aliceb76 <aliceb@company.com>
-Date:   Mon Jan 19 10:44:19 2021 +0000
+<@text400>commit</@> <@commit>8fed03eadf2afc5efe91ddf0cf7a7837c8b680fe</@>
+<@text400>Author: aliceb76 <aliceb@company.com></@>
+<@text400>Date:   Mon Jan 19 10:44:19 2021 +0000</@>
 
     do funky stuff if MPP_ACTIVE is set
 ```
@@ -117,10 +117,10 @@ Date:   Mon Jan 19 10:44:19 2021 +0000
 I find the default output format far too verbose, so I almost always use `--oneline` to compact it:
 
 ```
-▶ git log -S "MPP_ACTIVE" --oneline
+<@text200>▶</@> <@text400>git log</@> <@cli-arg>-S</@> <@token.string>"MPP_ACTIVE"</@> <@cli-arg>--oneline</@>
 
-33a8b6e refactor
-8fed03e do funky stuff if MPP_ACTIVE is set
+<@commit>33a8b6e</@> refactor
+<@commit>8fed03e</@> do funky stuff if MPP_ACTIVE is set
 ```
 
 <SmallNote label="" center>Much nicer!</SmallNote>
@@ -143,16 +143,16 @@ The [vercel/next.js codebase][next_codebase] has over 25,000 commits added over 
 As a first step, let's run `git log -S "distDir"` and see what we get:
 
 ```
-▶ git log -S "distDir" --oneline
+<@text200>▶</@> <@text400>git log</@> <@cli-arg>-S</@> <@token.string>"distDir"</@> <@cli-arg>--oneline</@>
 
-5c1828bdd6 Handle source map [...] chunks (#71168)
-d8c0539b08 fix: allow custom [...] conventions (#71153)
-490704430b Add source map [...] the browser (#71042)
-13f8fcbb6b [Turbopack] Implement [...] `stats.json` (#70996)
-3b9889e1d8 [Turbopack] add new backend (#69667)
-30789cc19f Auto rotate Server [...] periodically (#70516)
-0539477e7c types: improve napi binding [...] types (#69680)
-...over 400 more commits
+<@commit>5c1828bdd6</@> Handle source map <@text200>[...]</@> chunks <@text200>(#71168)</@>
+<@commit>d8c0539b08</@> fix: allow custom <@text200>[...]</@> conventions <@text200>(#71153)</@>
+<@commit>490704430b</@> Add source map <@text200>[...]</@> the browser <@text200>(#71042)</@>
+<@commit>13f8fcbb6b</@> [Turbopack] Implement <@text200>[...]</@> `stats.json` <@text200>(#70996)</@>
+<@commit>3b9889e1d8</@> [Turbopack] add new backend (#69667)
+<@commit>30789cc19f</@> Auto rotate Server <@text200>[...]</@> periodically <@text200>(#70516)</@>
+<@commit>0539477e7c</@> types: improve napi binding <@text200>[...]</@> types <@text200>(#69680)</@>
+<@text400>...over 400 more commits</@>
 ```
 
 Hmm... these are all recent commits. `git log` orders commits from most recent to oldest by default. We want to find the earliest mentions of `distDir` so we'd like the older commits to come first.
@@ -160,16 +160,16 @@ Hmm... these are all recent commits. `git log` orders commits from most recent t
 `git log` has a handy `--reverse` flag just for that purpose.
 
 ```
-▶ git log -S "distDir" --oneline --reverse
+<@text200>▶</@> <@text400>git log</@> <@cli-arg>-S</@> <@token.string>"distDir"</@> <@cli-arg>--oneline --reverse</@>
 
-acc1983f80 Don't delete `.next` folder before a replacement is built (#1139)
-141ab99888 build on tmp dir (#1150)
-9347c8bdd0 Specify a different build directory for #1513 (#1599)
-8d2bbf940d Refactor the build server to remove tie to fs (#1656)
-dec85fe6c4 Add CDN support with assetPrefix (#1700)
-cb635dd9a5 use configured distDir where required (#1816)
-ca9146c421 support custom build directory in next export (#2135)
-... over 400 more commits
+<@commit>acc1983f80</@> Don't delete <@text200>[...]</@> before a replacement is built <@text200>(#1139)</@>
+<@commit>141ab99888</@> build on tmp dir <@text200>(#1150)</@>
+<@commit>9347c8bdd0</@> Specify a different build directory for #1513 <@text200>(#1599)</@>
+<@commit>8d2bbf940d</@> Refactor the build server to remove tie to fs <@text200>(#1656)</@>
+<@commit>dec85fe6c4</@> Add CDN support with assetPrefix <@text200>(#1700)</@>
+<@commit>cb635dd9a5</@> use configured distDir where required <@text200>(#1816)</@>
+<@commit>ca9146c421</@> support custom build directory in next export <@text200>(#2135)</@>
+<@text400>...over 400 more commits</@>
 ```
 
 Nice! This gives us the first commits in `vercel/next.js` mentioning `distDir`.
@@ -182,17 +182,17 @@ It's not necessarily obvious which one we care about. Let's look at some tools a
 Reading the full diffs of the commits via `git diff` would be exhausting. One quick way to get a feel for a commit is to view the files that a commit touched, which we can do via `git show <commit> --stat`. Let's try that on the first commit in the list:
 
 ```
-▶ git show acc1983f80 --stat --oneline
+<@text200>▶</@> <@text400>git show</@> <@commit>acc1983f80</@> <@cli-arg>--stat --oneline</@>
 
-acc1983f80 Don't delete `.next` folder before a replacement is built (#1139)
- .gitignore              |  3 ++-
- server/build/clean.js   |  4 ++--
- server/build/gzip.js    |  4 ++--
- server/build/index.js   | 19 +++++++++++--------
- server/build/replace.js | 18 ++++++++++++++++++
- server/build/webpack.js |  4 ++--
- server/hot-reloader.js  |  2 +-
- 7 files changed, 38 insertions(+), 16 deletions(-)
+<@commit>acc1983f80</@> Don't delete `.next` folder before a replacement is built <@text200>(#1139)</@>
+ <@text700>.gitignore</@>              <@text200>|</@>  3 <@green>++</@><@red>-</@>
+ <@text700>server/build/clean.js</@>   <@text200>|</@>  4 <@green>++</@><@red>--</@>
+ <@text700>server/build/gzip.js</@>    <@text200>|</@>  4 <@green>++</@><@red>--</@>
+ <@text700>server/build/index.js</@>   <@text200>|</@> 19 <@green>+++++++++++</@><@red>--------</@>
+ <@text700>server/build/replace.js</@> <@text200>|</@> 18 <@green>++++++++++++++++++</@>
+ <@text700>server/build/webpack.js</@> <@text200>|</@>  4 <@green>++</@><@red>--</@>
+ <@text700>server/hot-reloader.js</@>  <@text200>|</@>  2 <@green>+</@><@red>-</@>
+ 7 files changed, 38 insertions(<@green>+</@>), 16 deletions(<@red>-</@>)
 ```
 
 <SmallNote>The `--oneline` option works the same as in `git log`, compacting the commit log.</SmallNote>
@@ -202,24 +202,24 @@ This quickly gives us a sense of which files are being changed, and how much.
 We can narrow this down even further with the `-S` option, just like in `git log`. Using `--stat` in conjuction with `-S "distDir"` will show us only those touched files whose diff includes `distDir`:
 
 ```
-▶ git show acc1983f80 --stat --oneline -S "distDir"
+<@text200>▶</@> <@text400>git show</@> <@commit>acc1983f80</@> <@cli-arg>--stat --oneline -S</@> <@token.string>"distDir"</@>
 
-acc1983f80 Don't delete `.next` folder before a replacement is built (#1139)
- server/build/replace.js | 18 ++++++++++++++++++
- 1 file changed, 18 insertions(+)
+<@commit>acc1983f80</@> Don't delete `.next` folder before a replacement is built <@text200>(#1139)</@>
+ <@text700>server/build/replace.js</@> <@text200>|</@> 18 <@green>++++++++++++++++++</@>
+ 1 file changed, 18 insertions(<@green>+</@>)
 ```
 
 That certainly narrows it down! Let's view the diff for `server/build/replace.js`, which we can do via `show <commit> -- <file>`:
 
 ```
-▶ git show acc1983f80 -- server/build/replace.js
+<@text200>▶</@> <@text400>git show</@> <@commit>acc1983f80</@> <@cli-arg>-- server/build/replace.js</@>
 
-+++ b/server/build/replace.js
-@@ -0,0 +1,18 @@
-+
-+  const distDir = path.resolve(dir, distFolder)
-+  const buildDir = path.resolve(dir, buildFolder)
-+
+<@text200>+++</@> <@text700>b/server/build/replace.js</@>
+<@text200>@@ -0,0 +1,18 @@</@>
+<@green>+</@>
+<@green>+</@>  <~js>const distDir = path.resolve(dir, distFolder);</~>
+<@green>+</@>  <~js>const buildDir = path.resolve(dir, buildFolder);</~>
+<@green>+</@>
 ```
 
 <SmallNote center>I've shortened the output for clarity.</SmallNote>
@@ -229,47 +229,44 @@ Hmm, `distDir` is just a local variable name in this commit. Let's keep looking.
 The next commit of interest seems to be `9347c8bdd0`, which talks about specifying a build directory:
 
 ```
-▶ git log -S "distDir" --oneline --reverse
+<@text200>▶</@> <@text400>git log</@> <@cli-arg>-S</@> <@token.string>"distDir"</@> <@cli-arg>--oneline --reverse</@>
 
-acc1983f80 Don't delete `.next` folder before a replacement is built (#1139)
-141ab99888 build on tmp dir (#1150)
-9347c8bdd0 Specify a different build directory for #1513 (#1599)
-# ...
+<@commit>acc1983f80</@> Don't delete `.next` folder before a replacement is built <@text200>(#1139)</@>
+<@commit>141ab99888</@> build on tmp dir <@text200>(#1150)</@>
+<@commit>9347c8bdd0</@> Specify a different build directory for #1513 <@text200>(#1599)</@>
+<@text200>...</@>
 ```
 
 As a first step, we look at a summary of which files changed via `show --stat`:
 
 ```
-▶ git show 9347c8bdd0 --stat --oneline
+<@text200>▶</@> <@text400>git show</@> <@commit>9347c8bdd0</@> <@cli-arg>--stat --oneline</@>
 
-9347c8bdd0 Specify a different build directory for #1513 (#1599)
- .gitignore                                   |  2 ++
- bin/next-build                               |  5 +++--
- bin/next-dev                                 |  5 +++--
- bin/next-start                               |  9 ++++++---
- readme.md                                    | 13 ++++++++++++-
- server/build/clean.js                        |  4 +++-
- # ...9 more files
- 15 files changed, 128 insertions(+), 34 deletions(-)
+<@commit>9347c8bdd0</@> Specify a different build directory for #1513 <@text200>(#1599)</@>
+ <@text700>.gitignore</@>            <@text200>|</@>  2 <@green>++</@>
+ <@text700>bin/next-build</@>        <@text200>|</@>  5 <@green>+++</@><@red>--</@>
+ <@text700>bin/next-dev</@>          <@text200>|</@>  5 <@green>+++</@><@red>--</@>
+ <@text700>bin/next-start</@>        <@text200>|</@>  9 <@green>++++++</@><@red>---</@>
+ <@text700>readme.md</@>             <@text200>|</@> 13 <@green>++++++++++++</@><@red>-</@>
+ <@text700>server/build/clean.js</@> <@text200>|</@>  4 <@green>+++</@><@red>-</@>
+ <@text200>...9 more files</@>
+ 15 files changed, 128 insertions(<@green>+</@>), 34 deletions(<@red>-</@>)
 ```
 
-15 files changed. We can reduce that number by only showing files whose diff includes `distDir` via the `-S` option:
+We can narrow this list of changes by only showing files whose diff includes `distDir` via the `-S` option:
 
 ```
-▶ git show 9347c8bdd0 --stat --oneline -S "distDir"
+<@text200>▶</@> <@text400>git show</@> <@commit>9347c8bdd0</@> <@cli-arg>--stat --oneline -S</@> <@token.string>"distDir"</@>
 
-9347c8bdd0 Specify a different build directory for #1513 (#1599)
- bin/next-start                           |  9 ++++++---
- readme.md                                | 13 ++++++++++++-
- server/build/clean.js                    |  4 +++-
- server/build/index.js                    | 19 ++++++++++++-------
- server/build/replace.js                  |  9 ++++++---
- server/build/webpack.js                  |  2 +-
- server/config.js                         |  3 ++-
- server/index.js                          | 15 ++++++++-------
- server/render.js                         | 17 +++++++++++------
- test/integration/dist-dir/next.config.js |  7 +++++++
- 10 files changed, 68 insertions(+), 30 deletions(-)
+<@commit>9347c8bdd0</@> Specify a different build directory for #1513 <@text200>(#1599)</@>
+ <@text700>bin/next-start</@>          <@text200>|</@>  9 <@green>++++++</@><@red>---</@>
+ <@text700>readme.md</@>               <@text200>|</@> 13 <@green>++++++++++++</@><@red>-</@>
+ <@text700>server/build/clean.js</@>   <@text200>|</@>  4 <@green>+++</@><@red>-</@>
+ <@text700>server/build/index.js</@>   <@text200>|</@> 19 <@green>++++++++++++</@><@red>-------</@>
+ <@text700>server/build/replace.js</@> <@text200>|</@>  9 <@green>++++++</@><@red>---</@>
+ <@text700>server/build/webpack.js</@> <@text200>|</@>  2 <@green>+</@><@red>-</@>
+ <@text200>...4 more files</@>
+ 10 files changed, 68 insertions(<@green>+</@>), 30 deletions(<@red>-</@>)
 ```
 
 This looks promising! Let's start looking at some diffs to see if this is the commit we're looking for. We can do that in two ways:
@@ -280,22 +277,21 @@ This looks promising! Let's start looking at some diffs to see if this is the co
 Since we don't know which file to look at, let's look at all of the files. After scrolling a bit, this addition to `readme.md` crops up:
 
 ```
-▶ git show 9347c8bdd0 -S "distDir" --oneline
+<@text200>▶</@> <@text400>git show</@> <@commit>9347c8bdd0</@> <@cli-arg>-S</@> <@token.string>"distDir"</@> <@cli-arg>--oneline</@>
 
-diff --git a/readme.md b/readme.md
-+ #### Setting a custom build directory
-+ 
-+ You can specify a name to use for a custom build directory. For
-+ example, the following config will create a `build` folder instead
-+ of a `.next` folder. If no configuration is specified then next
-+ will create a `.next` folder.
-+ 
-+ ```javascript
-+ // next.config.js
-+ module.exports = {
-+   distDir: 'build'
-+ }
-+ ```
+<@text200>+++</@> <@text700>b/readme.md</@>
+<@text200>@@ -644,6 +644,17 @@</@>
+<@green>+</@> <~md>#### Setting a custom build directory</~>
+<@green>+</@> 
+<@green>+</@> <@text400>You can specify a name to use for a custom build directory. For</@>
+<@green>+</@> <@text400>example, the following config will create a `build` folder instead</@>
+<@green>+</@> <@text400>of a `.next` folder. If no configuration is specified then next</@>
+<@green>+</@> <@text400>will create a `.next` folder.</@>
+<@green>+</@> 
+<@green>+</@>     <~js>// next.config.js</~>
+<@green>+</@>     <~js>module.exports = {</~>
+<@green>+</@>     <~js>  distDir: 'build'</~>
+<@green>+</@>     <~js>}</~>
 ```
 
 Looks like `9347c8bdd0` was the commit that added this option! Opening the commit on GitHub shows us the [associated Pull Request][PR_1599], which also links to the [issue requesting the feature][issue_1513].

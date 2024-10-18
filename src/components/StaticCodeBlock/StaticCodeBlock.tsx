@@ -7,6 +7,7 @@ import { squiggleIcon10x7Base64Blue, squiggleIcon10x7Base64Red } from "../Icon/S
 import { useStyles } from "../../utils/styles";
 import { StaticCodeBlockStyles } from "./StaticCodeBlock.styles";
 import { colors } from "../../utils/cssVariables";
+import { parseColor } from "../../utils/color";
 
 // Add C# syntax highlighting
 (typeof global !== "undefined" ? global : (window as any)).Prism = Prism;
@@ -197,6 +198,9 @@ const JSDocLine = (props: TokenProps) => {
   );
 };
 
+const tagRegex =
+  /^(?<before>.*?)<(?<command>[@~])(?<tag>.+?)>(?<content>.*?)<\/[@~]>(?<after>.*)$/i;
+
 interface TokenProps {
   token: Token;
   getTokenProps: (options: { token: Token; key: number }) => any;
@@ -209,16 +213,59 @@ const Token = (props: TokenProps) => {
   }
 
   let { children, ...tokenProps } = getTokenProps({ token, key: 0 });
-  if (typeof children === "string" && children.startsWith("//=>")) {
-    children = (
-      // I really don't like the //=> ligature in Fira Code
-      <span>
-        <span style={{ fontVariantLigatures: "none" }}>//</span>
-        <span>{"=>"}</span>
-        {children.slice(4)}
+
+  if (typeof children === "string") {
+    let s = children;
+    const toRender: React.ReactNode[] = [];
+
+    if (s.startsWith("//=>")) {
+      toRender.push(<span style={{ fontVariantLigatures: "none" }}>//</span>);
+      toRender.push("=>");
+      s = s.slice(4);
+    }
+
+    let match: RegExpExecArray | null;
+    while ((match = tagRegex.exec(s))) {
+      const { before, command, tag, content, after } = match.groups!;
+
+      toRender.push(before);
+      switch (command) {
+        case "@": // Color command
+          toRender.push(<span style={{ color: parseColor(tag) }}>{content}</span>);
+          break;
+        case "~": // Highlight language command
+          toRender.push(
+            <Highlight {...defaultProps} code={content} language={tag as any} theme={prismTheme}>
+              {({ tokens: lines, getLineProps, getTokenProps }) => (
+                <>
+                  {lines.map((tokens, i) => (
+                    <span {...getLineProps({ line: tokens, key: i })}>
+                      {tokens.map((token, i) => (
+                        <Token token={token} getTokenProps={getTokenProps} key={i} />
+                      ))}
+                    </span>
+                  ))}
+                </>
+              )}
+            </Highlight>,
+          );
+          break;
+        default:
+          throw new Error(`Unknown command '${tag}'`);
+      }
+      s = after;
+    }
+
+    toRender.push(s);
+    return (
+      <span {...tokenProps}>
+        {toRender.map((c, i) => (
+          <React.Fragment key={i}>{c}</React.Fragment>
+        ))}
       </span>
     );
   }
+
   return <span {...tokenProps} children={children} />;
 };
 
@@ -264,8 +311,6 @@ const Line = (props: LineProps) => {
       );
     }
   }
-
-  // if (jsDocRegex.test(content)) return <JSDocLine {...props} />;
 
   const isEmpty = content === "\n";
   if (props.last && isEmpty) return null;

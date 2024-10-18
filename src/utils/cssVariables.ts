@@ -5,10 +5,12 @@ export const cssVariables = {
   contentPadding: 24,
 };
 
+const text400 = "#6691b5";
+
 export const colors = {
   text: "#B9DBFA",
   text200: "#486d8c",
-  text400: "#6691b5",
+  text400,
   text700: "#99bad5",
   text800: "#9fcff9",
   blue: "#399ef4",
@@ -39,4 +41,7 @@ export const colors = {
   headerBorderBackground: "rgba(9, 13, 19, 0.8)",
   lightRgb: "255, 255, 255",
   blueRgb: "57, 157, 244",
+  commit: "#4f9fff",
+  command: "#21c5c7",
+  "cli-arg": text400,
 };
