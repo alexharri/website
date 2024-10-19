@@ -33,10 +33,6 @@ if (MPP_ACTIVE === "true") {
 
 What does "MPP" stand for? And what does it mean for it to be active? Let's use `git blame` to see the commit that added this code:
 
-{/*
-<Image src="~/git-blame-example.png" width={800} />
-*/}
-
 ```
 <@text200>▶</@> <@text400>git blame example.js</@> <@cli-arg>-s -L 7,9</@>
 
@@ -49,7 +45,7 @@ What does "MPP" stand for? And what does it mean for it to be active? Let's use 
 
 Let's take a look at `1edd8004`, the commit for line 7, which seems responsible for the `MPP_ACTIVE` check:
 
-<Image src="~/git-blame-commit-0.png" width={540} />
+<Image src="~/git-commit-0.png" width={450} />
 
 Hmm, no, that's not it <EmDash /> that's just a refactoring change. We need to go further back to find the change that introduced the condition itself.
 
@@ -125,7 +121,7 @@ I find the default output format far too verbose so I almost always use `--oneli
 
 The commits returned from `git log` are ordered from newest to oldest, which means that `8fed03e` is the first commit in the codebase that mentioned `MPP_ACTIVE`. It turns out that commit is exactly the one we were looking for!
 
-<Image src="~/git-commit-4.png" width={460} plain />
+<Image src="~/git-commit-4.png" width={460} />
 <SmallNote label="" center>Hooray!</SmallNote>
 
 Let's move past this toy example and try `git log -S` on a larger codebase. I'll use the Next.js codebase as an example and try and finding the commit that implemented a specific feature.
