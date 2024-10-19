@@ -57,6 +57,7 @@ const baseComponents = {
   Note,
   Scene,
   BarChart,
+  EmDash: () => "—",
 };
 
 interface Props {

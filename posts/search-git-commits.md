@@ -12,11 +12,11 @@ To get more context, I often use [Git blame][git_blame] to view the commit (and 
 
 [git_blame]: https://git-scm.com/docs/git-blame
 
-Sometimes the pull request has a description (or a link to an issue with one) which clarifies the change, or discussions added during code review—those are super valuable. Often the commit itself contains related changes that provide context to the code.
+Sometimes the pull request has a description (or a link to an issue with one) which clarifies the change, or discussions added during code review — those are super valuable! Often the commit itself also contains related changes that provide context to the code.
 
-But it's not always that straightforward. Sometimes the commit that Git blame points to is not the change that introduced the behavior. Examples of such commits are refactors or formatting changes. I used to solve this by repeatedly `git blame`ing and reading diff after diff, which was _terribly_ laborious and time consuming. I recently encountered a particularly tough case and got fed up enough that I decided to do something about it.
+But it's not always that straightforward. Sometimes the commit that Git blame points to is not the change that introduced the behavior. Examples of such commits are refactors or formatting changes. I used to solve this by repeatedly `git blame`ing and reading diff after diff, which was _terribly_ laborious and time consuming. I recently encountered a particularly tough case where I got fed up and decided to find a better way.
 
-In this post, I'll share with you the tools I found so that you can effectively search for and navigate Git commits. You'll learn a lot about Git along the way!
+In this post, I'll share with you the tools I found for effectively searching for and navigating through Git commits.
 
 
 ## Running Git blame on a piece of code
@@ -31,7 +31,7 @@ if (MPP_ACTIVE === "true") {
 }
 ```
 
-What does "MPP" stand for? And what does it mean for it to be active? Let's use Git blame to see the commit that introduced this:
+What does "MPP" stand for? And what does it mean for it to be active? Let's use `git blame` to see the commit that added this code:
 
 {/*
 <Image src="~/git-blame-example.png" width={800} />
@@ -47,13 +47,13 @@ What does "MPP" stand for? And what does it mean for it to be active? Let's use 
 
 <SmallNote>The `-s` option strips author and date information. `-L` selects specific lines.</SmallNote>
 
-Let's take a look at the commit for line 7, which seems to be add the `MPP_ACTIVE` check:
+Let's take a look at `1edd8004`, the commit for line 7, which seems responsible for the `MPP_ACTIVE` check:
 
 <Image src="~/git-blame-commit-0.png" width={540} />
 
-Hmm, no, that's not it—that's just a refactoring change. We need to go further back to find the change that introduced the condition itself.
+Hmm, no, that's not it <EmDash /> that's just a refactoring change. We need to go further back to find the change that introduced the condition itself.
 
-To do that, we might repeat the process and run Git blame again on the prior version of the file. Let's keep going and see what we get.
+To do that, we might repeat the process and run `git blame` again on the prior version of the file. Let's keep going and see what we get.
 
 <p align="center">What we find is a refactoring change...</p>
 
@@ -67,9 +67,9 @@ To do that, we might repeat the process and run Git blame again on the prior ver
 
 <Image src="~/git-commit-3.png" width={420} />
 
-We don't care about these changes. What we care about is the commit where the `MPP_ACTIVE` condition was introduced.
+We don't care about these changes. What we care about is the commit where the `MPP_ACTIVE` condition was introduced. Ideally, we'd be able to search for commits that mentions `MPP_ACTIVE` and just look at the earliest one.
 
-Ideally, we'd be able to search for commits that mentions `MPP_ACTIVE` and just look at the earliest one. That is exactly what `git log -S` lets us do.
+That is exactly what `git log -S` lets us do.
 
 
 ## Searching for commits by code
@@ -83,7 +83,7 @@ git log <@cli-arg>-S</@> <@token.string>"getUser"</@>
 
 <SmallNote>The string passed to `-S` is case-sensitive. `getUser` will not match `GetUser`.</SmallNote>
 
-More specifically, the `-S` option must match some code that was added or deleted for the commit to be listed. As a mental model, you can imagine this option being implemented like so:
+More specifically, the `-S` option is used to match code that was added or deleted in that commit. If no match is found, the commit is not included in the output. As a mental model, you can imagine the `-S` option being implemented like so:
 
 ```ts
 if (typeof args.S === "string") {
@@ -94,7 +94,7 @@ if (typeof args.S === "string") {
 }
 ```
 
-This means that commits that just happened to move lines of code including our search string are _not_ included—the exact code we're searching for needs to have been added/deleted in the commit for it to be shown. Very useful for our purposes! 
+It's worth noting that moving lines of code that including our search string does _not_ constitute a match. The string we searching for needs to have been added or deleted <EmDash /> not just moved <EmDash /> for the commit to be included. This filters out _"just moving things around"_ commits that would've just added noise.
 
 Let's try running `git log -S "MPP_ACTIVE"` and see what we get:
 
@@ -114,7 +114,7 @@ Let's try running `git log -S "MPP_ACTIVE"` and see what we get:
     do funky stuff if MPP_ACTIVE is set
 ```
 
-I find the default output format far too verbose, so I almost always use `--oneline` to compact it:
+I find the default output format far too verbose so I almost always use `--oneline` to compact the output:
 
 ```
 <@text200>▶</@> <@text400>git log</@> <@cli-arg>-S</@> <@token.string>"MPP_ACTIVE"</@> <@cli-arg>--oneline</@>
@@ -122,8 +122,6 @@ I find the default output format far too verbose, so I almost always use `--onel
 <@commit>33a8b6e</@> refactor
 <@commit>8fed03e</@> do funky stuff if MPP_ACTIVE is set
 ```
-
-<SmallNote label="" center>Much nicer!</SmallNote>
 
 The commits returned from `git log` are ordered from newest to oldest, which means that `8fed03e` is the first commit in the codebase that mentioned `MPP_ACTIVE`. It turns out that commit is exactly the one we were looking for!
 
@@ -155,9 +153,7 @@ As a first step, let's run `git log -S "distDir"` and see what we get:
 <@text400>...over 400 more commits</@>
 ```
 
-Hmm... these are all recent commits. `git log` orders commits from most recent to oldest by default. We want to find the earliest mentions of `distDir` so we'd like the older commits to come first.
-
-`git log` has a handy `--reverse` flag just for that purpose.
+Hmm... these are all very recent commits. As we touched on earlier, `git log` orders commits from newest to oldest by default. Since we want to find the earliest mentions of `distDir` we can use the handy `--reverse` option to get the oldest commits first:
 
 ```
 <@text200>▶</@> <@text400>git log</@> <@cli-arg>-S</@> <@token.string>"distDir"</@> <@cli-arg>--oneline --reverse</@>
@@ -172,14 +168,14 @@ Hmm... these are all recent commits. `git log` orders commits from most recent t
 <@text400>...over 400 more commits</@>
 ```
 
-Nice! This gives us the first commits in `vercel/next.js` mentioning `distDir`.
+Nice! This gives us the first commits in `vercel/next.js` mentioning `distDir`, though it's not necessarily obvious which one we care about.
 
-It's not necessarily obvious which one we care about. Let's look at some tools at our disposal to analyze these commits at a high level to quickly figure out which one of them we care about.
+We could look through the diffs, but that would be a ton of work. Instead, I'll show you some tools that we can use to analyze these commits at a high level so that we can quickly figure out which commits we care about.
 
 
 ## Commits at a glance
 
-Reading the full diffs of the commits via `git diff` would be exhausting. One quick way to get a feel for a commit is to view the files that a commit touched, which we can do via `git show <commit> --stat`. Let's try that on the first commit in the list:
+Reading the full diffs via `git diff` would be exhausting. A quick way to get a feel for a commit is to view the files that it touched, which we can do via `git show <commit> --stat`. Let's try that on the first commit in the list:
 
 ```
 <@text200>▶</@> <@text400>git show</@> <@commit>acc1983f80</@> <@cli-arg>--stat --oneline</@>
@@ -197,19 +193,19 @@ Reading the full diffs of the commits via `git diff` would be exhausting. One qu
 
 <SmallNote>The `--oneline` option works the same as in `git log`, compacting the commit log.</SmallNote>
 
-This quickly gives us a sense of which files are being changed, and how much.
+This output feels really familiar. It gives us a great overview of which files are being changed (and how much).
 
-We can narrow this down even further with the `-S` option, just like in `git log`. Using `--stat` in conjuction with `-S "distDir"` will show us only those touched files whose diff includes `distDir`:
+Still, we can narrow this down even further with the `-S` option. Using `-S "distDir"` in conjuction with `show --stat` will show us only the touched files whose diff includes `distDir`:
 
 ```
-<@text200>▶</@> <@text400>git show</@> <@commit>acc1983f80</@> <@cli-arg>--stat --oneline -S</@> <@token.string>"distDir"</@>
+<@text200>▶</@> <@text400>git show</@> <@commit>acc1983f80</@> <@cli-arg>--stat -S</@> <@token.string>"distDir"</@> <@cli-arg>--oneline</@>
 
 <@commit>acc1983f80</@> Don't delete `.next` folder before a replacement is built <@text200>(#1139)</@>
  <@text700>server/build/replace.js</@> <@text200>|</@> 18 <@green>++++++++++++++++++</@>
  1 file changed, 18 insertions(<@green>+</@>)
 ```
 
-That certainly narrows it down! Let's view the diff for `server/build/replace.js`, which we can do via `show <commit> -- <file>`:
+That certainly narrows it down! We can now view the diff for `server/build/replace.js` via `show <commit> -- <file>`:
 
 ```
 <@text200>▶</@> <@text400>git show</@> <@commit>acc1983f80</@> <@cli-arg>-- server/build/replace.js</@>
@@ -222,7 +218,7 @@ That certainly narrows it down! Let's view the diff for `server/build/replace.js
 <@green>+</@>
 ```
 
-<SmallNote center>I've shortened the output for clarity.</SmallNote>
+<SmallNote label="" center>I've shortened the output for clarity.</SmallNote>
 
 Hmm, `distDir` is just a local variable name in this commit. Let's keep looking.
 
@@ -274,7 +270,7 @@ This looks promising! Let's start looking at some diffs to see if this is the co
  1. Look at the diff for a specific file via `show <commit> -- <file>`, or
  2. look at diffs for all files that mention `distDir` via `show <commit> -S <code>`.
 
-Since we don't know which file to look at, let's look at all of the files. After scrolling a bit, this addition to `readme.md` crops up:
+Since we don't know which file to look at, let's use the latter option and browse through files mentioning `distDir`. After scrolling a bit, this addition to `readme.md` crops up:
 
 ```
 <@text200>▶</@> <@text400>git show</@> <@commit>9347c8bdd0</@> <@cli-arg>-S</@> <@token.string>"distDir"</@> <@cli-arg>--oneline</@>
@@ -305,6 +301,45 @@ The issue provides us with the original motive for adding `distDir` as an option
 >
 > Firebase CLI seems to ignore all hidden files, so I want to use a differently named directory.
 
-The PR itself also contains some design discussion where the option was renamed from `NextConfig.options.dest` to `NextConfig.distDir` instead.
+<SmallNote label="">The PR itself also contains a [design decision](https://github.com/vercel/next.js/pull/1599#discussion_r109336572) where the option was renamed from `options.dist` to `distDir`.</SmallNote>
+
+It didn't take a long time for us to track down when this option was added!
 
 
+## Effective use of `-S`
+
+Our usage of the `-S` option was quite simple in the examples above <EmDash /> we were just looking for a single term. However, you can use `-S` much more effectively, for example:
+
+  * Given a function called `createContext`, you could use `-S "createContext("` to find invocations of that function.
+  * To find code referencing a property called `numInstances`, you could do `-S ".numInstances"`.
+  * If you have a React component called `SmallNote`, you could look for usage of that component via `-S "<SmallNote"`.
+
+You can also search for entire lines of code:
+
+```
+<@text200>▶</@> git log <@cli-arg>-S</@> <@token.string>"[key, str] = part.split("=").map(s => s.trim());"</@>
+```
+
+<SmallNote label="">If you try searching for multiple lines of code using `-S`, keep in mind that the `-S` option is sensitive to whitespace.</SmallNote>
+
+When looking for a common term, you might get more results than you'd like. In those cases, try adding surrounding syntax to narrow the results. I've found that to be surprisingly helpful. For example, if looking for a property called `foo` I might try the following:
+
+ * `-S ".foo"`,
+ * `-S "foo: "`,
+ * `-S "foo,"`, and
+ * `-S " foo "`.
+
+ For example, when we were looking for `distDir` in the Next.js codebase, searching for `".distDir"` or `"distDir:"` would have returned the commit we were looking for as the first commit.
+
+ There are tons of ways to make effective use of the `-S` option. Try experimenting and see what works for you!
+ 
+ <SmallNote label="">One option that I've yet to try is `-G`, which works like `-S` except that it accepts a regex for matching instead of a literal string. [See docs](https://git-scm.com/docs/git-log#Documentation/git-log.txt--Gltregexgt).</SmallNote>
+
+
+ ## Final words
+
+ I wasn't aware of the `-S` option, and neither was a colleague of mine that I showed this to who has been writing software since before Git was created. Given that, there's probably a ton of developers that would benefit from being aware that Git has this capability!
+ 
+ I've used the `-S` option a couple of times since discovering it, and it's made searching for code significantly more efficient. Go ahead and try the `-S` option the next time you need to search through commits. I hope it proves useful!
+
+ <EmDash /> Alex Harri
