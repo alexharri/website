@@ -2,7 +2,7 @@ import Highlight, { defaultProps, Prism } from "prism-react-renderer";
 import { CopyIcon18 } from "../Icon/CopyIcon18";
 import { prismTheme } from "./prismTheme";
 import { copyTextToClipboard } from "../../utils/clipboard";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { squiggleIcon10x7Base64Blue, squiggleIcon10x7Base64Red } from "../Icon/SquiggleIcon10x7";
 import { useStyles } from "../../utils/styles";
 import { StaticCodeBlockStyles } from "./StaticCodeBlock.styles";
@@ -198,8 +198,10 @@ const JSDocLine = (props: TokenProps) => {
   );
 };
 
+// 's' flag makes '.' match newlines
 const tagRegex =
-  /^(?<before>.*?)<(?<command>[@~])(?<tag>.+?)>(?<content>.*?)<\/[@~]>(?<after>.*)$/i;
+  /^(?<before>.*?)<(?<command>[@~])(?<tag>.+?)>(?<content>.*?)<\/[@~]>(?<after>.*)$/is;
+type TagRegexKeys = "before" | "command" | "tag" | "content" | "after";
 
 interface TokenProps {
   token: Token;
@@ -226,7 +228,10 @@ const Token = (props: TokenProps) => {
 
     let match: RegExpExecArray | null;
     while ((match = tagRegex.exec(s))) {
-      const { before, command, tag, content, after } = match.groups!;
+      const { before, command, tag, content, after } = match.groups! as Record<
+        TagRegexKeys,
+        string
+      >;
 
       toRender.push(before);
       switch (command) {
@@ -323,6 +328,19 @@ const Line = (props: LineProps) => {
   );
 };
 
+function removeOrReplaceCommands(text: string): string {
+  let match: RegExpMatchArray | null = null;
+  while ((match = tagRegex.exec(text))) {
+    const { before, content, after } = match.groups! as Record<TagRegexKeys, string>;
+    text = before + content + after;
+  }
+  // prettier-ignore
+  text = text
+    .replaceAll(/@error {.*} /g, "Error: ")
+    .replaceAll(/@info {.*} /g, "Info: ");
+  return text;
+}
+
 export const StaticCodeBlock = (props: StaticCodeBlockProps) => {
   const s = useStyles(StaticCodeBlockStyles);
 
@@ -332,9 +350,7 @@ export const StaticCodeBlock = (props: StaticCodeBlockProps) => {
   const fontSize = small ? 14 : 16;
   const paddingRight = small ? 32 : 48;
 
-  const textToCopy = children
-    .replaceAll(/@error {.*} /g, "Error: ")
-    .replaceAll(/@info {.*} /g, "Info: ");
+  const textToCopy = useMemo(() => removeOrReplaceCommands(children), [children]);
 
   return (
     <div className="pre">
