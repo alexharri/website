@@ -12,11 +12,11 @@ To get more context, I often use [Git blame][git_blame] to view the commit (and 
 
 [git_blame]: https://git-scm.com/docs/git-blame
 
-Sometimes the pull request has a description (or a link to an issue with one) which clarifies the change, or discussions added during code review — those are super valuable! Often the commit itself also contains related changes that provide context to the code.
+Sometimes the pull request has a description (or a link to an issue with one) that clarifies the change, or discussions added during code review — those are super valuable! Often the commit itself also contains related changes that provide context to the code.
 
-But it's not always that straightforward. Sometimes the commit that Git blame points to is not the change that introduced the behavior. Examples of such commits are refactors or formatting changes. I used to solve this by repeatedly `git blame`ing and reading diff after diff, which was _terribly_ laborious and time consuming. I recently encountered a particularly tough case where I got fed up and decided to find a better way.
+But it's not always that straightforward. Sometimes the commit that Git blame points to is not the change that introduced the behavior. Examples of such commits are refactors or formatting changes. I used to solve this by repeatedly `git blame`ing and reading diff after diff, which was _terribly_ laborious and time-consuming. I recently encountered a particularly tough case where I got fed up and decided to find a better way.
 
-In this post, I'll share with you the tools I found for effectively searching for and navigating through Git commits.
+In this post, I'll share the tools I found for effectively searching for and navigating through Git commits.
 
 
 ## Running Git blame on a piece of code
@@ -63,7 +63,7 @@ To do that, we might repeat the process and run `git blame` again on the prior v
 
 <Image src="~/git-commit-3.png" width={420} />
 
-We don't care about these changes. What we care about is the commit where the `MPP_ACTIVE` condition was introduced. Ideally, we'd be able to search for commits that mentions `MPP_ACTIVE` and just look at the earliest one.
+We don't care about these changes. What we care about is the commit where the `MPP_ACTIVE` condition was introduced. Ideally, we'd be able to search for commits that mention `MPP_ACTIVE` and just look at the earliest one.
 
 That is exactly what `git log -S` lets us do.
 
@@ -90,7 +90,7 @@ if (typeof args.S === "string") {
 }
 ```
 
-It's worth noting that moving lines of code that including our search string does _not_ constitute a match. The string we searching for needs to have been added or deleted <EmDash /> not just moved <EmDash /> for the commit to be included. This filters out _"just moving things around"_ commits that would've just added noise.
+It's worth noting that moving lines of code that include our search string around does _not_ constitute a match. The string we searching for needs to have been added or deleted <EmDash /> not just moved <EmDash /> for the commit to be included. This filters out _"just moving things around"_ commits that would've just added noise.
 
 Let's try running `git log -S "MPP_ACTIVE"` and see what we get:
 
@@ -124,7 +124,7 @@ The commits returned from `git log` are ordered from newest to oldest, which mea
 <Image src="~/git-commit-4.png" width={460} />
 <SmallNote label="" center>Hooray!</SmallNote>
 
-Let's move past this toy example and try `git log -S` on a larger codebase. I'll use the Next.js codebase as an example and try and finding the commit that implemented a specific feature.
+Let's move past this toy example and try `git log -S` on a larger codebase. I'll use the Next.js codebase as an example and try finding the commit that implemented a specific feature.
 
 
 ## Using `git log -S` in larger codebases
@@ -191,7 +191,7 @@ Reading the full diffs via `git diff` would be exhausting. A quick way to get a 
 
 This output feels really familiar. It gives us a great overview of which files are being changed (and how much).
 
-Still, we can narrow this down even further with the `-S` option. Using `-S "distDir"` in conjuction with `show --stat` will show us only the touched files whose diff includes `distDir`:
+Still, we can narrow this down even further with the `-S` option. Using `-S "distDir"` in conjunction with `show --stat` will show us only the touched files whose diff includes `distDir`:
 
 ```
 <@text200>▶</@> <@text400>git show</@> <@commit>acc1983f80</@> <@cli-arg>--stat -S</@> <@token.string>"distDir"</@> <@cli-arg>--oneline</@>
@@ -297,7 +297,7 @@ The issue provides us with the original motive for adding `distDir` as an option
 >
 > Firebase CLI seems to ignore all hidden files, so I want to use a differently named directory.
 
-<SmallNote label="">The PR itself also contains a [design decision](https://github.com/vercel/next.js/pull/1599#discussion_r109336572) where the option was renamed from `options.dist` to `distDir`.</SmallNote>
+<SmallNote label="">The PR also contains a [design decision](https://github.com/vercel/next.js/pull/1599#discussion_r109336572) where the option was renamed from `options.dist` to `distDir`.</SmallNote>
 
 It didn't take a long time for us to track down when this option was added!
 
@@ -334,8 +334,8 @@ When looking for a common term, you might get more results than you'd like. In t
 
  ## Final words
 
- I wasn't aware of the `-S` option, and neither was a colleague of mine that I showed this to who has been writing software since before Git was created. Given that, there's probably a ton of developers that would benefit from being aware that Git has this capability!
+ I wasn't aware of the `-S` option, and neither was a colleague I showed this to who has been writing software since before Git was created. Given that, there are probably a ton of developers who would benefit from being aware that Git has this capability!
  
- I've used the `-S` option a couple of times since discovering it, and it's made searching for code significantly more efficient. Go ahead and try the `-S` option the next time you need to search through commits. I hope it proves useful!
+ I've used the `-S` option a few times since discovering it, and it's made searching for commits much more enjoyable. Go ahead and try the `-S` option the next time you need to search for commits. I hope it proves useful!
 
  <EmDash /> Alex Harri
