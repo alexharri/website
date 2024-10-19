@@ -1,7 +1,7 @@
 ---
 title: "Searching for and navigating Git commits"
 description: ""
-image: ""
+image: "/images/og-searching-and-navigating-git-commits.png"
 publishedAt: ""
 tags: []
 ---
