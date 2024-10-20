@@ -3,7 +3,7 @@ title: "Searching for and navigating Git commits"
 description: "Exploring Git's built-in tools for searching through and analyzing Git commit logs and diffs."
 image: "/images/og-searching-and-navigating-git-commits.png"
 publishedAt: ""
-tags: []
+tags: [git]
 ---
 
 I sometimes encounter code that puzzles me. When that happens, I try to find the commit that added it. Perhaps the code is that way because of a bug fix that's not obvious at a glance, or maybe there's some constraint I'm not aware of. Either way, more context is needed.
