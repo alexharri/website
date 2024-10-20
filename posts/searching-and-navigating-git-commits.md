@@ -100,19 +100,19 @@ Let's try running `git log -S` with `"MPP_ACTIVE"` and see what we get:
 <@text200>▶</@> <@text400>git log</@> <@cli-arg>-S</@> <@token.string>"MPP_ACTIVE"</@>
 
 <@text400>commit</@> <@commit>33a8b6ea050963e452b1d16165f64a77df3ff054</@>
-<@text400>Author: johndoe42 <j.doe@company.com></@>
+<@text400>Author: johndoe42 <j.doe@example.com></@>
 <@text400>Date:   Tue Sept 14 14:05:52 2022 +0000</@>
 
     refactor
 
 <@text400>commit</@> <@commit>8fed03eadf2afc5efe91ddf0cf7a7837c8b680fe</@>
-<@text400>Author: aliceb76 <aliceb@company.com></@>
+<@text400>Author: aliceb76 <aliceb@example.com></@>
 <@text400>Date:   Mon Jan 19 10:44:19 2021 +0000</@>
 
     do funky stuff if MPP_ACTIVE is set
 ```
 
-I find the default output format far too verbose so I almost always use `--oneline` to compact the output:
+I find the default output format far too verbose so I almost always use the `--oneline` flag to compact the output:
 
 ```
 <@text200>▶</@> <@text400>git log</@> <@cli-arg>-S</@> <@token.string>"MPP_ACTIVE"</@> <@cli-arg>--oneline</@>
@@ -121,7 +121,7 @@ I find the default output format far too verbose so I almost always use `--oneli
 <@commit>8fed03e</@> do funky stuff if MPP_ACTIVE is set
 ```
 
-The commits returned from `git log` are ordered from newest to oldest, which means that `8fed03e` is the first commit in the codebase that mentioned `MPP_ACTIVE`. It turns out that commit is exactly the one we were looking for!
+The commits returned from `git log` are ordered from newest to oldest, which means that `8fed03e` is the first commit in the codebase that mentioned `MPP_ACTIVE`. It turns out that `8fed03e` is exactly the commit we're looking for!
 
 <Image src="~/git-commit-4.png" width={460} />
 
@@ -130,23 +130,23 @@ Let's move past this toy example and try `git log -S` on a larger codebase. I'll
 
 ## Using `git log -S` in larger codebases
 
-The [vercel/next.js codebase][next_codebase] has over 25,000 commits added over 8 years, so it's a fairly large and mature codebase! Next.js has a [`distDir` option][distdir] that allows the user to specify a custom build directory. Let's try finding the commit that added this option.
+The [vercel/next.js codebase][next_codebase] has over 25,000 commits added over 8 years, so it's a fairly large and mature codebase!
+
+Next.js has a [`distDir` option][distdir] that allows the user to specify a custom build directory. Let's try finding the commit that added this option.
 
 [next_codebase]: https://github.com/vercel/next.js
 [distdir]: https://nextjs.org/docs/pages/api-reference/next-config-js/distDir
 
-As a first step, let's run `git log -S "distDir"` and see what we get:
+As a first step, let's run `git log -S` with `"distDir"` and see what we get:
 
 ```
 <@text200>▶</@> <@text400>git log</@> <@cli-arg>-S</@> <@token.string>"distDir"</@> <@cli-arg>--oneline</@>
 
-<@commit>5c1828bdd6</@> Handle source map <@text200>[...]</@> chunks <@text200>(#71168)</@>
-<@commit>d8c0539b08</@> fix: allow custom <@text200>[...]</@> conventions <@text200>(#71153)</@>
-<@commit>490704430b</@> Add source map <@text200>[...]</@> the browser <@text200>(#71042)</@>
-<@commit>13f8fcbb6b</@> [Turbopack] Implement <@text200>[...]</@> `stats.json` <@text200>(#70996)</@>
-<@commit>3b9889e1d8</@> [Turbopack] add new backend (#69667)
-<@commit>30789cc19f</@> Auto rotate Server <@text200>[...]</@> periodically <@text200>(#70516)</@>
-<@commit>0539477e7c</@> types: improve napi binding <@text200>[...]</@> types <@text200>(#69680)</@>
+<@commit>5c1828bdd6</@> Handle source map requests for Turbopack client chunks <@text200>(#71168)</@>
+<@commit>d8c0539b08</@> fix: allow custom app routes for metadata conventions <@text200>(#71153)</@>
+<@commit>490704430b</@> Add source map support for <@text200>[...]</@> in the browser <@text200>(#71042)</@>
+<@commit>13f8fcbb6b</@> <@text200>[...]</@> Implement support for webpack’s `stats.json` <@text200>(#70996)</@>
+<@commit>3b9889e1d8</@> [Turbopack] add new backend <@text200>(#69667)</@>
 <@text400>...over 400 more commits</@>
 ```
 
@@ -155,13 +155,11 @@ Hmm... these are all very recent commits. As we touched on earlier, `git log` or
 ```
 <@text200>▶</@> <@text400>git log</@> <@cli-arg>-S</@> <@token.string>"distDir"</@> <@cli-arg>--oneline --reverse</@>
 
-<@commit>acc1983f80</@> Don't delete <@text200>[...]</@> before a replacement is built <@text200>(#1139)</@>
+<@commit>acc1983f80</@> Don't delete `.next` folder before a replacement is built <@text200>(#1139)</@>
 <@commit>141ab99888</@> build on tmp dir <@text200>(#1150)</@>
 <@commit>9347c8bdd0</@> Specify a different build directory for #1513 <@text200>(#1599)</@>
 <@commit>8d2bbf940d</@> Refactor the build server to remove tie to fs <@text200>(#1656)</@>
 <@commit>dec85fe6c4</@> Add CDN support with assetPrefix <@text200>(#1700)</@>
-<@commit>cb635dd9a5</@> use configured distDir where required <@text200>(#1816)</@>
-<@commit>ca9146c421</@> support custom build directory in next export <@text200>(#2135)</@>
 <@text400>...over 400 more commits</@>
 ```
 
