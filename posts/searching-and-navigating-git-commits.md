@@ -247,7 +247,7 @@ As a first step, let's look at a summary of the changes in `9347c8bdd0` via `sho
 We can shorten this by only showing files whose diff includes `distDir` via the `-S` option:
 
 ```
-<@text200>▶</@> <@text400>git show</@> <@commit>9347c8bdd0</@> <@cli-arg>--stat --oneline -S</@> <@token.string>"distDir"</@>
+<@text200>▶</@> <@text400>git show</@> <@commit>9347c8bdd0</@> <@cli-arg>--stat -S</@> <@token.string>"distDir"</@> <@cli-arg>--oneline</@>
 
 <@commit>9347c8bdd0</@> Specify a different build directory for #1513 <@text200>(#1599)</@>
  <@text700>bin/next-start</@>          <@text200>|</@>  9 <@green>++++++</@><@red>---</@>
@@ -265,7 +265,7 @@ This looks promising! Let's start looking at some diffs to see if this is the co
  1. Look at the diff for a specific file via `show <commit> -- <file>`, or
  2. look at diffs for all files that mention `distDir` via `show <commit> -S <code>`.
 
-Since we don't know which file to look at, let's use the latter option and browse through files mentioning `distDir`. After scrolling a bit, this addition to `readme.md` crops up:
+Since we don't know which file to look at, let's use the latter option and browse through files mentioning `distDir`. After a bit of scrolling, this addition to `readme.md` crops up:
 
 ```
 <@text200>▶</@> <@text400>git show</@> <@commit>9347c8bdd0</@> <@cli-arg>-S</@> <@token.string>"distDir"</@> <@cli-arg>--oneline</@>
@@ -287,7 +287,7 @@ Since we don't know which file to look at, let's use the latter option and brows
 <@green>+</@> <@text200>```</@>
 ```
 
-Looks like `9347c8bdd0` was the commit that added the `distDir` option! Opening the commit on GitHub shows us the [associated Pull Request][PR_1599], which also links to the [issue requesting the feature][issue_1513].
+Looks like `9347c8bdd0` was the commit that added the `distDir` option! Opening the commit on GitHub shows us the [associated Pull Request][PR_1599] which also links to the [issue requesting the feature][issue_1513].
 
 The issue provides us with the original motive for adding `distDir` as an option:
 
@@ -300,17 +300,17 @@ The issue provides us with the original motive for adding `distDir` as an option
 
 <SmallNote label="">The PR also contains a [design decision](https://github.com/vercel/next.js/pull/1599#discussion_r109336572) where the option was renamed from `options.dist` to `distDir`.</SmallNote>
 
-It didn't take a long time for us to track down when this option was added!
+It didn't us long to track down the commit that added the `distDir` option!
 
 
 ## Effective use of `-S`
 
-Our usage of the `-S` option was quite simplistic in the examples above. We were just looking for a single term, but that term was distinct enough that we got useful results.
+Our usage of the `-S` option was quite simplistic <EmDash /> we were just looking for a single term. But that term was distinct enough that we got useful results.
 
 The usefulness of the results produced by `-S` is proportional to how distinct the search term is. So when searching for common terms it can be helpful to make your query more distinct. For example:
 
   * Given a function called `createContext`, you could use `-S "createContext("` to find invocations of that function.
-  * To find code referencing a property called `numInstances`, you could do `-S ".numInstances"`.
+  * To find code referencing a property called `numInstances`, you could search for `-S ".numInstances"`.
   * If you have a React component called `SmallNote`, you could look for usage of that component via `-S "<SmallNote"`.
 
 I've found that it quite useful to try multiple surrounding syntaxes. For example, if looking for a property called `foo` I might try the following:
@@ -334,15 +334,28 @@ You can also search for entire lines of code:
 
 <SmallNote label="">If you try searching for multiple lines of code using `-S`, keep in mind that the `-S` option is sensitive to whitespace.</SmallNote>
 
- There are tons of ways to make effective use of the `-S` option. Try experimenting and see what works for you!
+There are tons of ways to make effective use of the `-S` option. Try experimenting and see what works for you!
  
- One option that I've yet to try is `-G`, which works like `-S` except that it accepts a regex for matching instead of a literal string. [See docs](https://git-scm.com/docs/git-log#Documentation/git-log.txt--Gltregexgt).
+One option that I've yet to try is `-G`, which works like `-S` except that it accepts a regex for matching instead of a literal string. [See docs](https://git-scm.com/docs/git-log#Documentation/git-log.txt--Gltregexgt).
 
 
- ## Final words
+## Note on performance
 
- Until recently, I wasn't aware of the `-S` option, and neither was a colleague I showed this to who has been writing software since before Git was created. There are probably a ton of developers who would benefit from being aware that Git has this capability!
- 
- I've used the `-S` option a few times since discovering it, and it's made searching for commits much more enjoyable. Go ahead and try the `-S` option the next time you need to search a commit history. I hope it proves useful!
+Searching through the commit history of the Next.js codebase on my M1 MacBook Air takes 60 seconds
 
- <EmDash /> Alex Harri
+```
+<@text200>▶</@> <@text200>time git --no-pager log -S</@> <@token.string>"distDir"</@> <@text200>--reverse --oneline</@>
+
+60.63s <@text400>user 1.93s system 95% cpu 1:05.43 total</@>
+```
+
+If your codebase is significantly larger, you may run into performance bottlenecks. If you do, I'd love to hear how you work around them!
+
+
+## Final words
+
+Until recently, I wasn't aware of the `-S` option, and neither was a colleague I showed this to who has been writing software since before Git was created. There are probably a ton of developers who would benefit from being aware that Git has this capability!
+
+I've used the `-S` option a few times since discovering it, and it's made searching for commits much more enjoyable. Go ahead and try the `-S` option the next time you need to search a commit history. I hope it proves useful!
+
+<EmDash /> Alex Harri
