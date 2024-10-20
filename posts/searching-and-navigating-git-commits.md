@@ -2,7 +2,7 @@
 title: "Searching for and navigating Git commits"
 description: "Exploring Git's built-in tools for searching through and analyzing Git commit logs and diffs."
 image: "/images/og-searching-and-navigating-git-commits.png"
-publishedAt: ""
+publishedAt: "2024-10-20"
 tags: [git]
 ---
 
