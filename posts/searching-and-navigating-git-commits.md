@@ -79,7 +79,9 @@ git log <@cli-arg>-S</@> <@token.string>"getUser"</@>
 
 <SmallNote>The string passed to `-S` is case-sensitive. `getUser` will not match `GetUser`.</SmallNote>
 
-More specifically, the `-S` option is used to match code that was added or deleted in that commit. If no match is found, the commit is not included in the output. As a mental model, you can imagine the `-S` option being implemented like so:
+More specifically, the `-S` option is used to match code that was added or deleted in that commit. If no match is found, the commit is not included in the output.
+
+As a mental model, you can imagine the `-S` option being implemented like so:
 
 ```ts
 if (typeof args.S === "string") {
@@ -92,7 +94,7 @@ if (typeof args.S === "string") {
 
 <SmallNote label="">It's worth emphasising that the string we're searching for needs to have been added or deleted <EmDash /> not just moved <EmDash /> for the commit to be included. Moving lines of code that include our search string around does _not_ constitute a match. This filters out _"just moving things around"_ commits that would've just added noise.</SmallNote>
 
-Let's try running `git log -S "MPP_ACTIVE"` and see what we get:
+Let's try running `git log -S` with `"MPP_ACTIVE"` and see what we get:
 
 ```
 <@text200>▶</@> <@text400>git log</@> <@cli-arg>-S</@> <@token.string>"MPP_ACTIVE"</@>
