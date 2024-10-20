@@ -313,7 +313,7 @@ The usefulness of the results produced by `-S` is proportional to how distinct t
   * To find code referencing a property called `numInstances`, you could search for `-S ".numInstances"`.
   * If you have a React component called `SmallNote`, you could look for usage of that component via `-S "<SmallNote"`.
 
-I've found that it quite useful to try multiple surrounding syntaxes. For example, if looking for a property called `foo` I might try the following:
+I've found it quite useful to try multiple surrounding syntaxes. For example, if looking for a property called `foo`, I might try the following:
 
  * `-S ".foo"` to find property accesses,
  * `-S "foo ="` to find variable assignments,
@@ -339,9 +339,11 @@ There are tons of ways to make effective use of the `-S` option. Try experimenti
 One option that I've yet to try is `-G`, which works like `-S` except that it accepts a regex for matching instead of a literal string. [See docs](https://git-scm.com/docs/git-log#Documentation/git-log.txt--Gltregexgt).
 
 
-## Note on performance
+## Performance
 
-Searching through the commit history of the Next.js codebase on my M1 MacBook Air takes 60 seconds
+`git log` shows commits as soon as it finds them. So if you're looking for a relatively recent commit, `git log` will surface it pretty much instantly. But if the commit you're looking for is really far from the starting point of your search (which the `--reverse` flag affects), you might need to wait a while.
+
+Searching through the entire commit history of the Next.js codebase takes 60 seconds on my M1 MacBook Air:
 
 ```
 <@text200>▶</@> <@text200>time git --no-pager log -S</@> <@token.string>"distDir"</@> <@text200>--reverse --oneline</@>
