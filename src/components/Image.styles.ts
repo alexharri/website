@@ -5,6 +5,7 @@ export const ImageStyles = ({ styled }: StyleOptions) => ({
   container: styled.css`
     margin: 40px auto 40px;
     position: relative;
+    max-width: 100%;
 
     &:before {
       content: "";
@@ -30,6 +31,7 @@ export const ImageStyles = ({ styled }: StyleOptions) => ({
     &--noMargin {
       margin-left: -${cssVariables.contentPadding}px;
       margin-right: -${cssVariables.contentPadding}px;
+      max-width: calc(100% + ${cssVariables.contentPadding * 2}px);
     }
   `,
 
