@@ -47,15 +47,15 @@ Let's look at the diff of `1edd8004`, the commit for line 7, that last touched t
 
 <Image src="~/git-commit-0.png" width={450} />
 
-Hmm, no, that's not it <EmDash /> that's just a refactoring change. We need to go further back to find the change that introduced the if statement itself.
+Hmm, no, that's not it <EmDash /> that's just making the comparison more specific. We need to go further back to find the change that introduced the if statement itself.
 
-To do that, we might repeat the process and run `git blame` again on the prior version of the file. Let's keep going and see what we get.
+To do that, we might repeat the process and run `git blame` again on the prior version of the file. Let's do that and see what we get.
 
-<p align="center">What we find is a refactoring change...</p>
+<p align="center">What we find is a tweak...</p>
 
 <Image src="~/git-commit-1.png" width={420} />
 
-<p align="center">...another refactoring change...</p>
+<p align="center">...a refactoring change...</p>
 
 <Image src="~/git-commit-2.png" width={420} />
 
