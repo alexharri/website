@@ -228,7 +228,7 @@ The next commit of interest seems to be `9347c8bdd0`, which talks about specifyi
 <@text200>...</@>
 ```
 
-As a first step, let's look at a summary of the changes in `9347c8bdd0` changed via `show --stat`:
+As a first step, let's look at a summary of the changes in `9347c8bdd0` via `show --stat`:
 
 ```
 <@text200>▶</@> <@text400>git show</@> <@commit>9347c8bdd0</@> <@cli-arg>--stat --oneline</@>
@@ -279,13 +279,15 @@ Since we don't know which file to look at, let's use the latter option and brows
 <@green>+</@> <@text400>of a `.next` folder. If no configuration is specified then next</@>
 <@green>+</@> <@text400>will create a `.next` folder.</@>
 <@green>+</@> 
-<@green>+</@>     <~js>// next.config.js</~>
-<@green>+</@>     <~js>module.exports = {</~>
-<@green>+</@>     <~js>  distDir: 'build'</~>
-<@green>+</@>     <~js>}</~>
+<@green>+</@> <@text200>```javascript</@>
+<@green>+</@> <~js>// next.config.js</~>
+<@green>+</@> <~js>module.exports = {</~>
+<@green>+</@> <~js>  distDir: 'build'</~>
+<@green>+</@> <~js>}</~>
+<@green>+</@> <@text200>```</@>
 ```
 
-Looks like `9347c8bdd0` was the commit that added this option! Opening the commit on GitHub shows us the [associated Pull Request][PR_1599], which also links to the [issue requesting the feature][issue_1513].
+Looks like `9347c8bdd0` was the commit that added the `distDir` option! Opening the commit on GitHub shows us the [associated Pull Request][PR_1599], which also links to the [issue requesting the feature][issue_1513].
 
 The issue provides us with the original motive for adding `distDir` as an option:
 
@@ -303,11 +305,26 @@ It didn't take a long time for us to track down when this option was added!
 
 ## Effective use of `-S`
 
-Our usage of the `-S` option was quite simple in the examples above <EmDash /> we were just looking for a single term. However, you can use `-S` much more effectively, for example:
+Our usage of the `-S` option was quite simplistic in the examples above. We were just looking for a single term, but that term was distinct enough that we got useful results.
+
+The usefulness of the results produced by `-S` is proportional to how distinct the search term is. So when searching for common terms it can be helpful to make your query more distinct. For example:
 
   * Given a function called `createContext`, you could use `-S "createContext("` to find invocations of that function.
   * To find code referencing a property called `numInstances`, you could do `-S ".numInstances"`.
   * If you have a React component called `SmallNote`, you could look for usage of that component via `-S "<SmallNote"`.
+
+I've found that it quite useful to try multiple surrounding syntaxes. For example, if looking for a property called `foo` I might try the following:
+
+ * `-S ".foo"` to find property accesses,
+ * `-S "foo ="` to find variable assignments,
+ * `-S "foo: "` to find object literal assignments,
+ * `-S "foo,"` for passing as an argument, or assignments using the [shorthand syntax][assignment_shorthand], or [destructuring assignments][destructuring_assignment],
+ * `-S " foo "` to find standalone destructuring assignments.
+
+For example, when we were looking for `distDir` in the Next.js codebase, searching for `".distDir"` or `"distDir:"` would have returned the commit we were looking for as the first commit.
+
+[assignment_shorthand]: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Grammar_and_types#object_literals:~:text=Enhanced%20Object%20literals
+[destructuring_assignment]: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Destructuring_assignment
 
 You can also search for entire lines of code:
 
@@ -317,24 +334,15 @@ You can also search for entire lines of code:
 
 <SmallNote label="">If you try searching for multiple lines of code using `-S`, keep in mind that the `-S` option is sensitive to whitespace.</SmallNote>
 
-When looking for a common term, you might get more results than you'd like. In those cases, try adding surrounding syntax to narrow the results. I've found that to be surprisingly helpful. For example, if looking for a property called `foo` I might try the following:
-
- * `-S ".foo"`,
- * `-S "foo: "`,
- * `-S "foo,"`, and
- * `-S " foo "`.
-
- For example, when we were looking for `distDir` in the Next.js codebase, searching for `".distDir"` or `"distDir:"` would have returned the commit we were looking for as the first commit.
-
  There are tons of ways to make effective use of the `-S` option. Try experimenting and see what works for you!
  
- <SmallNote label="">One option that I've yet to try is `-G`, which works like `-S` except that it accepts a regex for matching instead of a literal string. [See docs](https://git-scm.com/docs/git-log#Documentation/git-log.txt--Gltregexgt).</SmallNote>
+ One option that I've yet to try is `-G`, which works like `-S` except that it accepts a regex for matching instead of a literal string. [See docs](https://git-scm.com/docs/git-log#Documentation/git-log.txt--Gltregexgt).
 
 
  ## Final words
 
- I wasn't aware of the `-S` option, and neither was a colleague I showed this to who has been writing software since before Git was created. Given that, there are probably a ton of developers who would benefit from being aware that Git has this capability!
+ Until recently, I wasn't aware of the `-S` option, and neither was a colleague I showed this to who has been writing software since before Git was created. There are probably a ton of developers who would benefit from being aware that Git has this capability!
  
- I've used the `-S` option a few times since discovering it, and it's made searching for commits much more enjoyable. Go ahead and try the `-S` option the next time you need to search for commits. I hope it proves useful!
+ I've used the `-S` option a few times since discovering it, and it's made searching for commits much more enjoyable. Go ahead and try the `-S` option the next time you need to search a commit history. I hope it proves useful!
 
  <EmDash /> Alex Harri
