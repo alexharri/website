@@ -6,17 +6,17 @@ publishedAt: ""
 tags: []
 ---
 
-I sometimes encounter code that puzzles me. When that happens, it's usually because I lack some context. Perhaps the code is that way because of a bug fix that's not immediately obvious at a glance, or maybe there's some constraint I'm not aware of.
+I sometimes encounter code that puzzles me. When that happens, I try to find the commit that added it. Perhaps the code is that way because of a bug fix that's not obvious at a glance, or maybe there's some constraint I'm not aware of. Either way, more context is needed.
 
-To get more context, I often use [Git blame][git_blame] to view the commit (and usually, the associated pull request) that added the code.
+The obvious solution is to use [Git blame][git_blame] to view the commit (and associated pull request) that added the code.
 
 [git_blame]: https://git-scm.com/docs/git-blame
 
-Sometimes the pull request has a description (or a link to an issue with one) that clarifies the change, or discussions added during code review — those are super valuable! Often the commit itself also contains related changes that provide context to the code.
+The pull request often has a description (or a link to an issue with one) that clarifies the change, or discussions added during code review <EmDash /> those are super valuable! When that fails, the commit itself frequently contains related changes that provide context to the code.
 
-But it's not always that straightforward. Sometimes the commit that Git blame points to is not the change that introduced the behavior. Examples of such commits are refactors or formatting changes. I used to solve this by repeatedly `git blame`ing and reading diff after diff, which was _terribly_ laborious and time-consuming. I recently encountered a particularly tough case where I got fed up and decided to find a better way.
+But it's not always that straightforward. Sometimes the commit that Git blame points to is not the change that introduced the behavior <EmDash /> like a refactor or formatting change. I used to solve this by repeatedly `git blame`ing and reading diff after diff, but that could become terribly laborious and time-consuming.
 
-In this post, I'll share the tools I found for effectively searching for and navigating through Git commits.
+I recently encountered a particularly tough case where I got fed up and decided to find a better way. In this post, I'll share the tools I found for effectively searching for and navigating through Git commits.
 
 
 ## Running Git blame on a piece of code
@@ -43,11 +43,11 @@ What does "MPP" stand for? And what does it mean for it to be active? Let's use 
 
 <SmallNote>The `-s` option strips author and date information. `-L` selects specific lines.</SmallNote>
 
-Let's take a look at `1edd8004`, the commit for line 7, which seems responsible for the `MPP_ACTIVE` check:
+Let's look at the diff of `1edd8004`, the commit for line 7, that last touched the `MPP_ACTIVE` check:
 
 <Image src="~/git-commit-0.png" width={450} />
 
-Hmm, no, that's not it <EmDash /> that's just a refactoring change. We need to go further back to find the change that introduced the condition itself.
+Hmm, no, that's not it <EmDash /> that's just a refactoring change. We need to go further back to find the change that introduced the if statement itself.
 
 To do that, we might repeat the process and run `git blame` again on the prior version of the file. Let's keep going and see what we get.
 
@@ -70,7 +70,7 @@ That is exactly what `git log -S` lets us do.
 
 ## Searching for commits by code
 
-By default, `git log` lists every commit in your branch. The `-S` option lets us pass a string used to filter out commits whose diffs don't include that specific string.
+By default, `git log` lists every commit in your branch. The `-S` option lets us pass a string used to filter out commits whose diff doesn't include that specific string.
 
 ```
 <@token.comment># Show commits that include "getUser" in the diff</@>
@@ -90,7 +90,7 @@ if (typeof args.S === "string") {
 }
 ```
 
-It's worth noting that moving lines of code that include our search string around does _not_ constitute a match. The string we searching for needs to have been added or deleted <EmDash /> not just moved <EmDash /> for the commit to be included. This filters out _"just moving things around"_ commits that would've just added noise.
+<SmallNote label="">It's worth emphasising that the string we're searching for needs to have been added or deleted <EmDash /> not just moved <EmDash /> for the commit to be included. Moving lines of code that include our search string around does _not_ constitute a match. This filters out _"just moving things around"_ commits that would've just added noise.</SmallNote>
 
 Let's try running `git log -S "MPP_ACTIVE"` and see what we get:
 
@@ -122,7 +122,6 @@ I find the default output format far too verbose so I almost always use `--oneli
 The commits returned from `git log` are ordered from newest to oldest, which means that `8fed03e` is the first commit in the codebase that mentioned `MPP_ACTIVE`. It turns out that commit is exactly the one we were looking for!
 
 <Image src="~/git-commit-4.png" width={460} />
-<SmallNote label="" center>Hooray!</SmallNote>
 
 Let's move past this toy example and try `git log -S` on a larger codebase. I'll use the Next.js codebase as an example and try finding the commit that implemented a specific feature.
 
@@ -149,7 +148,7 @@ As a first step, let's run `git log -S "distDir"` and see what we get:
 <@text400>...over 400 more commits</@>
 ```
 
-Hmm... these are all very recent commits. As we touched on earlier, `git log` orders commits from newest to oldest by default. Since we want to find the earliest mentions of `distDir` we can use the handy `--reverse` option to get the oldest commits first:
+Hmm... these are all very recent commits. As we touched on earlier, `git log` orders commits from newest to oldest by default. Since we want to find the earliest mentions of `distDir` we can use the handy `--reverse` flag to get the oldest commits first:
 
 ```
 <@text200>▶</@> <@text400>git log</@> <@cli-arg>-S</@> <@token.string>"distDir"</@> <@cli-arg>--oneline --reverse</@>
@@ -164,14 +163,14 @@ Hmm... these are all very recent commits. As we touched on earlier, `git log` or
 <@text400>...over 400 more commits</@>
 ```
 
-Nice! This gives us the first commits in `vercel/next.js` mentioning `distDir`, though it's not necessarily obvious which one we care about.
+Nice! This gives us the first commits mentioning `distDir`, though it's not necessarily obvious which one we care about.
 
-We could look through the diffs, but that would be a ton of work. Instead, I'll show you some tools that we can use to analyze these commits at a high level so that we can quickly figure out which commits we care about.
+We could look through the diffs to figure that out, but that would be a lot of work. Let's instead explore some tools that we can use to analyze these commits at a high level so that we can quickly figure out which commits we care about.
 
 
 ## Commits at a glance
 
-Reading the full diffs via `git diff` would be exhausting. A quick way to get a feel for a commit is to view the files that it touched, which we can do via `git show <commit> --stat`. Let's try that on the first commit in the list:
+A quick way to get a feel for a commit is to view the files that it touched, which we can do via `git show <commit> --stat`. Let's try that on the first commit in the list:
 
 ```
 <@text200>▶</@> <@text400>git show</@> <@commit>acc1983f80</@> <@cli-arg>--stat --oneline</@>
@@ -189,9 +188,9 @@ Reading the full diffs via `git diff` would be exhausting. A quick way to get a 
 
 <SmallNote>The `--oneline` option works the same as in `git log`, compacting the commit log.</SmallNote>
 
-This output feels really familiar. It gives us a great overview of which files are being changed (and how much).
+`show --stat` gives us a great overview of the files that the commit touches, and to what extent.
 
-Still, we can narrow this down even further with the `-S` option. Using `-S "distDir"` in conjunction with `show --stat` will show us only the touched files whose diff includes `distDir`:
+Still, we can narrow this down even further with the `-S` option. Using `-S "distDir"` in conjunction with `show --stat` shows us only the touched files whose diff includes `distDir`:
 
 ```
 <@text200>▶</@> <@text400>git show</@> <@commit>acc1983f80</@> <@cli-arg>--stat -S</@> <@token.string>"distDir"</@> <@cli-arg>--oneline</@>
@@ -201,7 +200,7 @@ Still, we can narrow this down even further with the `-S` option. Using `-S "dis
  1 file changed, 18 insertions(<@green>+</@>)
 ```
 
-That certainly narrows it down! We can now view the diff for `server/build/replace.js` via `show <commit> -- <file>`:
+That certainly narrows it down! Let's view the diff for that specific file via `show <commit> -- <file>`:
 
 ```
 <@text200>▶</@> <@text400>git show</@> <@commit>acc1983f80</@> <@cli-arg>-- server/build/replace.js</@>
@@ -229,7 +228,7 @@ The next commit of interest seems to be `9347c8bdd0`, which talks about specifyi
 <@text200>...</@>
 ```
 
-As a first step, we look at a summary of which files changed via `show --stat`:
+As a first step, let's look at a summary of the changes in `9347c8bdd0` changed via `show --stat`:
 
 ```
 <@text200>▶</@> <@text400>git show</@> <@commit>9347c8bdd0</@> <@cli-arg>--stat --oneline</@>
@@ -245,7 +244,7 @@ As a first step, we look at a summary of which files changed via `show --stat`:
  15 files changed, 128 insertions(<@green>+</@>), 34 deletions(<@red>-</@>)
 ```
 
-We can narrow this list of changes by only showing files whose diff includes `distDir` via the `-S` option:
+We can shorten this by only showing files whose diff includes `distDir` via the `-S` option:
 
 ```
 <@text200>▶</@> <@text400>git show</@> <@commit>9347c8bdd0</@> <@cli-arg>--stat --oneline -S</@> <@token.string>"distDir"</@>
