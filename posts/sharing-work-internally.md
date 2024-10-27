@@ -45,3 +45,26 @@ The image above shows a change to existing behavior, but we can also represents 
 
 <Image src="~/two-point-guide-alignment.jpg" width={600} plain />
 
+
+## Advances made
+
+This one is fairly straightforward. How does your change improve the state of things?
+
+When sharing improvements, it's very effective to contrast those improvements with the prior state.
+
+
+### Show, don't tell
+
+A few months after joining, I profiled editing in Arkio and noticed that calculating three-plane intersections constituted 52% of time spent when editing large geometries (geometry in Arkio is defined by planes and their intersections). Implementing the fast algorithm for three-plane intersections from [Real-Time Collision Detection][real_time_collision_detection] (chapter 5.4.5) resulted in those calculations becoming ~500% faster. As a whole, editing became ~42% faster.
+
+[real_time_collision_detection]: https://www.amazon.com/Real-Time-Collision-Detection-Interactive-Technology/dp/1558607323
+
+One way of sharing the change would be to just state the raw numbers. Telling people that the change improves edit performance by ~42% _sounds_ technically impressive, but what does that mean for users of the app? Fast edits are cool and all, but is this creating value for our users?
+
+To make the change palpable, I recorded a before/after video showing how the change nearly doubled the framerate when editing large objects.
+
+<Image src="~/edit-performance-comparison.mp4" width={600} plain />
+
+I shared the raw numbers alongside the video <EmDash /> but without visualizing the impact through the video, the numbers would have felt abstract and meaningless.
+
+

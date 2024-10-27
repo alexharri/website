@@ -1,6 +1,7 @@
 import { useRouter } from "next/router";
 import { useStyles } from "../utils/styles";
 import { ImageStyles } from "./Image.styles";
+import { useState } from "react";
 
 interface Props {
   src?: string;
@@ -55,10 +56,24 @@ export const Image = (props: Props) => {
   const className = s("image", { plain });
   const commonProps = { src, width, className };
 
+  function onClickVideo(e: React.MouseEvent<HTMLVideoElement>) {
+    const video = e.currentTarget;
+    if (video.paused) video.play();
+    else video.pause();
+  }
+
   return (
     <div className={containerClassName} style={{ width }}>
       {video ? (
-        <video {...commonProps} autoPlay muted preload="" tabIndex={-1} loop />
+        <video
+          {...commonProps}
+          autoPlay
+          muted
+          preload=""
+          tabIndex={-1}
+          loop
+          onClick={onClickVideo}
+        />
       ) : (
         <img {...commonProps} />
       )}
