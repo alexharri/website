@@ -1,7 +1,6 @@
 import { useRouter } from "next/router";
 import { useStyles } from "../utils/styles";
 import { ImageStyles } from "./Image.styles";
-import { useState } from "react";
 
 interface Props {
   src?: string;
