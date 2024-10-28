@@ -30,10 +30,10 @@ export default createScene(() => {
       <Point position={end} color="white" />
       <Vector from={point} to={end} color="red" strictEnd />
 
-      <MathLabel label="x" scale={1.3} position={point} offset={[-0.18, -0.3, 0]} />
-      <MathLabel label="D" scale={1.3} position={mid} offset={[-0.3, 1, 0]} />
-      <MathLabel label="S" scale={1.3} position={end} offset={[-0.2, 0.9, 0]} />
-      <MathLabel label="vec_n" scale={1.3} position={planeNormalEnd} offset={[-0.2, 0.9, 0]} />
+      <MathLabel label="x" scale={1.18} position={point} offset={[-0.18, -0.3, 0]} />
+      <MathLabel label="D" scale={1.18} position={mid} offset={[-0.3, 1, 0]} />
+      <MathLabel label="S" scale={1.18} position={end} offset={[-0.2, 0.9, 0]} />
+      <MathLabel label="vec_n" scale={1.18} position={planeNormalEnd} offset={[-0.2, 0.9, 0]} />
 
       <Plane distance={planeDistance} normal={normal} color="blue" />
       <Vector from={planePos} to={planeNormalEnd} color="blue" />

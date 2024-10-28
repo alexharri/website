@@ -12,6 +12,7 @@ export interface SceneProps {
   height: number;
   autoRotate?: boolean;
   angle?: number;
+  xRotation?: number;
   usesVariables?: boolean;
   zoom?: number;
   yOffset?: number;
@@ -90,10 +91,11 @@ interface Props {
   usesVariables?: boolean;
   zoom?: number;
   yOffset?: number;
+  xRotation?: number;
 }
 
 export const Scene: React.FC<Props> = (props) => {
-  const { scene, height, usesVariables, angle, zoom, yOffset, autoRotate } = props;
+  const { scene, height, usesVariables, angle, zoom, yOffset, autoRotate, xRotation } = props;
   const containerRef = useRef<HTMLDivElement>(null);
   const visible = useVisible(containerRef, "350px");
   const render = useVisible(containerRef, "50px");
@@ -125,6 +127,7 @@ export const Scene: React.FC<Props> = (props) => {
     usesVariables,
     yOffset,
     zoom,
+    xRotation,
     errorLoadingThreeJs: error,
   };
 

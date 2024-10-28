@@ -48,17 +48,17 @@ This way of describing planes—in terms of a point and a normal—is the [point
 
 We can also describe a plane using three points in 3D space $a$, $b$, $c$ forming a triangle:
 
-<Scene scene="three-points" height={440} zoom={1.4} yOffset={-0.8} />
+<Scene scene="three-points" height={440} zoom={1.4} yOffset={-0.8} autoRotate />
 
 The triangle forms an implicit plane, but for us to be able to do anything useful with the plane we'll need to calculate its normal $\vec{n}$. Once we've calculated the plane's normal, we can use that normal along with one of the triangle's three points to describe the plane in point-normal form.
 
-<Scene scene="three-points-normal-centered" height={420} zoom={1.4} yOffset={-0.8} />
+<Scene scene="three-points-normal-centered" height={420} zoom={1.4} yOffset={-0.8} autoRotate />
 
 <SmallNote label="" center>As mentioned earlier, the normal $\vec{n}$ describing a plane is a unit vector ($\|\vec{n}\|=1$) perpendicular to the plane.</SmallNote>
 
 We can use $b - a$ and $c - a$ as two edge vectors that are parallel to the plane's surface.
 
-<Scene scene="three-points-edge-vectors" height={400} zoom={1.4} yOffset={-0.8} />
+<Scene scene="three-points-edge-vectors" height={400} zoom={1.4} yOffset={-0.8} autoRotate />
 
 By virtue of being parallel to the plane's surface, the vectors $b - a$ and $c - a$ are perpendicular to the plane's normal. This is where the cross product becomes useful to us.
 
@@ -70,7 +70,7 @@ The [cross product][cross_product] takes in two vectors $\vec{a}$ and $\vec{b}$ 
 
 For example, given the vectors $\vec{i} = (1, 0, 0)$ and $\vec{j} = (0, 1, 0)$, their cross product is the vector $(0, 0, 1)$, which we'll label $\vec{k}$:
 
-<Scene scene="cross-product" height={370} zoom={1.7} yOffset={-0.0} />
+<Scene scene="cross-product" height={370} zoom={1.7} yOffset={-0.0} autoRotate />
 
 <SmallNote label="" center>This explanation is simple on purpose. We'll get into more detail about the cross product later on.</SmallNote>
 
@@ -78,7 +78,7 @@ Because the edge vectors of the triangle, $b - a$ and $c - a$, are both parallel
 
 <p className="mathblock">$$\vec{d} = (b - a) × (c - a)$$</p>
 
-<Scene scene="three-points-cross-product" height={440} zoom={1.4} yOffset={-0.8} />
+<Scene scene="three-points-cross-product" height={440} zoom={1.4} yOffset={-0.8} autoRotate />
 
 <SmallNote label="" center>$\vec{d}$ has been scaled down for illustrative purposes</SmallNote>
 
@@ -88,11 +88,11 @@ $\vec{d}$ points in the right direction, but it's not a normal. For $\vec{d}$ to
 
 This gives us a normal $\vec{n}$ where $\|\vec{n}\| = 1$:
 
-<Scene scene="three-points-normal" height={420} zoom={1.4} yOffset={-0.8} />
+<Scene scene="three-points-normal" height={420} zoom={1.4} yOffset={-0.8} autoRotate />
 
 Having found the triangle's normal $\vec{n}$ we can use it and any of the points $a$, $b$, $c$ to describe the plane containing the three points in point-normal form.
 
-<Scene scene="three-points-plane" height={460} zoom={1.1} yOffset={-1.6} />
+<Scene scene="three-points-plane" height={460} zoom={1.1} yOffset={-1.6} autoRotate />
 
 It doesn't matter which of $a$, $b$, $c$ we use as the point in the point-normal form; we always get the same plane.
 
@@ -132,23 +132,23 @@ The normal $\vec{n}$ stays the same across both forms.
 
 Given an arbitrary point $x$ and a plane $P$ in constant-normal form, we may want to ask how far away the point is from the plane. In other words, what is the minimum distance $x$ needs to travel to lie on the plane?
 
-<Scene scene="point-and-plane" height={440} zoom={1.3} yOffset={-0.5} />
+<Scene scene="point-and-plane" height={440} zoom={1.3} yOffset={-0.5} autoRotate />
 
 We can frame this differently if we construct a plane $P_x$ containing $x$ that is parallel to $P$, which we can do in point-normal form using $x$ as the point and $P$'s normal $\vec{n}$ as the normal:
 
-<Scene scene="point-distance-step-1" height={440} zoom={1.3} yOffset={-0.5} />
+<Scene scene="point-distance-step-1" height={440} zoom={1.3} yOffset={-0.5} autoRotate />
 
 With two parallel planes, we can frame the problem as finding the distance between the two planes. This becomes trivial using their constant-normal form since it allows us to take the difference between their distance components $d_1$ and $d_2$.
 
 So let's find $P_x$'s distance using the $d = \vec{n} \cdot p$ equation we learned about:
 
-<Scene scene="point-distance-step-2" height={440} zoom={1.3} yOffset={-0.5} />
+<Scene scene="point-distance-step-2" height={440} zoom={1.3} yOffset={-0.5} autoRotate />
 
 With two distances $d_1$ and $d_2$ from the planes $P$ and $P_x$ the solution simply becomes:
 
 <p className="mathblock">$$ d_1 - d_2 $$</p>
 
-<Scene scene="point-distance-step-3" height={440} zoom={1.3} yOffset={-0.5} />
+<Scene scene="point-distance-step-3" height={440} zoom={1.3} yOffset={-0.5} autoRotate />
 
 So, to simplify, given a plane $P$ having a normal $\vec{n}$ and distance $d$, we can calculate a point $x$'s distance from $P$ like so:
 
@@ -169,7 +169,7 @@ Multiplying the plane's normal $\vec{n}$ by $D$ gives us a vector which when add
 
 <p className="mathblock">$$ S = x + (\vec{n} \times D) $$</p>
 
-<Scene scene="project-point-onto-plane-along-normal" height={440} zoom={1.3} yOffset={-0.5} />
+<Scene scene="project-point-onto-plane-along-normal" height={440} zoom={1.3} yOffset={-0.5} autoRotate />
 
 The projection occurs along the plane's normal, which is sometimes useful. However, it is much more useful to be able to project a point onto a plane along an _arbitrary_ direction instead. Doing that boils down finding the point of intersection of a line and a plane.
 
@@ -244,7 +244,7 @@ Vector3 LinePlaneIntersection(Line line, Plane plane) {
 
 However, our code is not complete yet. In the case where the line is parallel to the plane's surface, the line and plane do not intersect.
 
-<Scene scene="project-point-onto-plane-4" height={450} yOffset={-1} zoom={1.5} />
+<Scene scene="project-point-onto-plane-4" height={450} yOffset={-1} zoom={1.5} autoRotate />
 
 That happens when $\vec{n_l}$ and $\vec{n_p}$ are perpendicular, in which case their dot product is zero. So if $\vec{n_l} \cdot \vec{n_p} = 0$, the line and plane do not intersect. This gives us an easy test we can add to our code to yield a result of "no intersection".
 
@@ -371,7 +371,7 @@ But this is only half of the puzzle! We'll also need to find a point in space to
 
 Two planes whose normals are parallel will never intersect, which is a case that we'll have to handle.
 
-<Scene scene="parallel-planes" height={480} zoom={1.3} yOffset={-0.5} />
+<Scene scene="parallel-planes" height={480} zoom={1.3} yOffset={-0.5} autoRotate />
 
 The cross product of two parallel normals is $(0, 0, 0)$. So if $\|\vec{n_1} × \vec{n_2}\| = 0$, the planes do not intersect.
 
@@ -589,7 +589,7 @@ When I first saw this, I found it hard to believe this would work for all cases.
 
 We'll start with the configurations where two or more planes are parallel:
 
-<Scene scene="three-planes-some-parallel" height={400} />
+<Scene scene="three-planes-some-parallel" height={400} autoRotate />
 
 If $\vec{n_2}$ and $\vec{n_3}$ are parallel then $\vec{n_2} × \vec{n_3}$ is a vector whose magnitude is zero.
 
@@ -605,17 +605,17 @@ the final result is zero whenever $\vec{n_2}$ and $\vec{n_3}$ are parallel.
 
 This takes care of the "all-planes-parallel" configuration, and the configuration where $\vec{n_2}$ and $\vec{n_3}$ are parallel
 
-<Scene scene="three-planes-n2-n3-parallel" height={440} zoom={1.4} />
+<Scene scene="three-planes-n2-n3-parallel" height={440} zoom={1.4} xRotation={-20} autoRotate />
 
 With that, let's consider the case where $\vec{n_1}$ is parallel to either $\vec{n_2}$ or $\vec{n_3}$ but $\vec{n_2}$ and $\vec{n_3}$ are not parallel to each other.
 
 Let's take the specific case where $\vec{n_1}$ is parallel to $\vec{n_2}$ but $\vec{n_3}$ is parallel to neither.
 
-<Scene scene="three-planes-n1-n2-parallel" height={440} zoom={1.4} />
+<Scene scene="three-planes-n1-n2-parallel" height={440} zoom={1.4} xRotation={-20} autoRotate />
 
 Here the cross product $\vec{n_2} × \vec{n_3}$ is a vector (colored red) that's perpendicular to both $\vec{n_2}$ and $\vec{n_3}$.
 
-<Scene scene="three-planes-n1-n2-parallel-cross" height={440} zoom={1.4} />
+<Scene scene="three-planes-n1-n2-parallel-cross" height={440} zoom={1.4} xRotation={-20} autoRotate />
 
 Since $\vec{n_1}$ is parallel to $\vec{n_2}$, that means that $\vec{n_2} × \vec{n_3}$ is also perpendicular to $\vec{n_1}$. As we've learned, the dot product of two perpendicular vectors is zero, meaning that:
 
@@ -627,11 +627,11 @@ This also holds in the case where $\vec{n_1}$ is parallel to $\vec{n_3}$ instead
 
 We've demonstrated that two of the three normals being parallel results in $\vec{n_1} \cdot (\vec{n_2} × \vec{n_3}) = 0$. But what about the configurations where the three planes intersect along parallel lines? Those configurations have no parallel normals.
 
-<Scene scene="three-planes-three-lines" height={430} zoom={1.2} yOffset={0.5} />
+<Scene scene="three-planes-three-lines" height={430} zoom={1.2} yOffset={0.5} autoRotate />
 
 As we learned when looking at plane-plane intersections, the cross product of two plane normals gives us the direction vector of the planes' line of intersection.
 
-<Scene scene="three-planes-three-lines-cross" height={460} zoom={1.4} />
+<Scene scene="three-planes-three-lines-cross" height={460} zoom={1.4} autoRotate />
 
 When all of the lines of intersection are parallel, all of the plane normals defining those lines are perpendicular to them.
 
@@ -654,15 +654,15 @@ Vector3 ThreePlaneIntersection(Plane P1, Plane P2, Plane P3) {
 
 We want to find the point at which our three planes $P_1$, $P_2$, $P_3$ intersect:
 
-<Scene scene="three-intersecting-planes-point" height={520} zoom={1.25} yOffset={-1} />
+<Scene scene="three-intersecting-planes-point" height={520} zoom={1.25} yOffset={-1} xRotation={-17} autoRotate />
 
 Some of what we learned about two-plane intersections will come into play here. Let's start by taking the line of intersection for $P_2$ and $P_3$ and varying the position of $P_1$. You'll notice that the point of intersection is the point at which $P_1$ intersects the line.
 
-<Scene scene="three-intersecting-planes" height={450} zoom={1.25} yOffset={-0.5} usesVariables />
+<Scene scene="three-intersecting-planes" height={450} zoom={1.25} yOffset={-0.5} xRotation={-17} usesVariables />
 
 When $P_1$'s distance from the origin is 0, the vector pointing from the origin to the point of intersection is parallel to $P_1$ (and perpendicular to $P_1$'s normal).
 
-<Scene scene="three-intersecting-planes-10" height={450} zoom={1.25} yOffset={-0.5} />
+<Scene scene="three-intersecting-planes-10" height={450} zoom={1.25} yOffset={-0.5} xRotation={45} autoRotate />
 
 This vector—let's call it $\vec{V}$—will play a large role in computing the point of intersection.
 
@@ -682,7 +682,7 @@ With $\vec{v_1}$ and $\vec{v_2}$ defined, we assign their cross product to $\vec
 
 Let's see what it looks like:
 
-<Scene scene="three-intersecting-planes-3" height={450} zoom={1.25} yOffset={-0.5} />
+<Scene scene="three-intersecting-planes-3" height={450} zoom={1.25} yOffset={-0.5} autoRotate />
 
 Hmm, not quite long enough. $\vec{V}$ certainly points in the right direction, but to make $\vec{V}$'s tip lie on the line of intersection, we need to compute some scaling factor for $\vec{V}$.
 
@@ -698,7 +698,7 @@ We want the $\vec{V}$'s magnitude to increase as $D$ decreases, so we'll make $\
 
 <p className="mathblock">$$\vec{V} = \dfrac{\vec{v_1} × \vec{v_2}}{D}$$</p>
 
-<Scene scene="three-intersecting-planes-4" height={450} zoom={1.25} yOffset={-0.5} />
+<Scene scene="three-intersecting-planes-4" height={450} zoom={1.25} yOffset={-0.5} autoRotate />
 
 Fully expanded, the equation for $\vec{V}$ becomes:
 
@@ -706,7 +706,7 @@ Fully expanded, the equation for $\vec{V}$ becomes:
 
 Bam! The problem is now reduced to traveling along the direction of the line intersection until we intersect with $P_1$.
 
-<Scene scene="three-intersecting-planes-5" height={450} zoom={1.25} yOffset={-0.5} />
+<Scene scene="three-intersecting-planes-5" height={450} zoom={1.25} yOffset={-0.5} autoRotate />
 
 We could use our knowledge of line-plane intersections to solve this, but there is a more efficient approach I want to demonstrate.
 
@@ -714,21 +714,21 @@ It involves finding a scaling factor for the direction vector $\vec{n_2} × \vec
 
 There's one observation we can make that simplifies that. Since $\vec{V}$ is perpendicular to $P_1$'s normal, the distance from $\vec{V}$'s tip to $P_1$ along the direction vector $\vec{U}$ is the same as the distance from the origin to $P_1$ along that same direction.
 
-<Scene scene="three-intersecting-planes-6" height={450} zoom={1.25} yOffset={-0.5} />
+<Scene scene="three-intersecting-planes-6" height={450} zoom={1.25} yOffset={-0.5} autoRotate />
 
 With that, consider the vector $\vec{n_1} \times d_1$ where $\vec{n_1}$ and $d_1$ are the normal and distance of $P_1$.
 
-<Scene scene="three-intersecting-planes-7" height={450} zoom={1.25} yOffset={-0.5} />
+<Scene scene="three-intersecting-planes-7" height={450} zoom={1.25} yOffset={-0.5} autoRotate />
 
 If $\vec{n_1}$ were parallel to $\vec{U}$, then $d_1$ would be the scaling factor we need, but let's see what happens with $\vec{U} \times d_1$:
 
-<Scene scene="three-intersecting-planes-8" height={450} zoom={1.25} yOffset={-0.5} usesVariables />
+<Scene scene="three-intersecting-planes-8" height={450} zoom={1.25} yOffset={-0.5} xRotation={-17} usesVariables />
 
 As $\vec{n_1}$ and $\vec{U}$ become less parallel, $U \times d_1$ becomes increasingly too short.
 
 One thing to note as well is that even when $\vec{n_1}$ and $\vec{U}$ are completely parallel, $\vec{U} \times d_1$ is still too short, which is due to $\vec{U}$ not being a unit vector. If we normalize $\vec{U}$ prior to multiplying with $d_1$ that problem goes away.
 
-<Scene scene="three-intersecting-planes-11" height={450} zoom={1.25} yOffset={-0.5} usesVariables />
+<Scene scene="three-intersecting-planes-11" height={450} zoom={1.25} yOffset={-0.5} xRotation={-17} usesVariables />
 
 But we're getting ahead of ourselves—we won't need to normalize $\vec{U}$. Let's take a fresh look at how $D$ is defined:
 
@@ -747,7 +747,7 @@ Since the dot product is a multiple of the magnitudes of its component vectors, 
 
 So $\dfrac{1}{D}$ is both the scaling factor we need for $\vec{U} \times d_1$, as well as $\vec{V}$:
 
-<Scene scene="three-intersecting-planes-9" height={450} zoom={1.25} yOffset={-0.5} usesVariables />
+<Scene scene="three-intersecting-planes-9" height={450} zoom={1.25} yOffset={-0.5} xRotation={-17} usesVariables />
 
 We've got our solution! Let's do a quick overview.
 

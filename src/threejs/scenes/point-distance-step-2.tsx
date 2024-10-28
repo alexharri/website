@@ -13,7 +13,7 @@ export default createScene(() => {
   const point = new THREE.Vector3(1, 1.5, 1);
   const d1 = 3;
   const d2 = point.clone().dot(normal);
-  const vOffs = new THREE.Vector3(0, 0, 0.15);
+  const vOffs = new THREE.Vector3(0, 0, 0.25);
 
   return (
     <>
