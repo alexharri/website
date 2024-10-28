@@ -9,7 +9,6 @@ import { Plane } from "../Components/primitives/Plane";
 import { Point } from "../Components/primitives/Point";
 import { FiberContext, ThreeContext } from "../Components/ThreeProvider";
 import { createScene } from "../createScene";
-import { getTransparentBasicMaterial } from "../utils";
 
 const OFF = 12;
 
@@ -102,20 +101,6 @@ export default createScene(
       occludePlane1.position.setX(Math.max(OFF / 2, state.camera.position.x + 0.3));
     });
 
-    const tints = useMemo(() => {
-      const g0 = new THREE.BoxGeometry(0.01, 100, 100);
-      const g1 = new THREE.BoxGeometry(100, 100, 0.01);
-      const material = getTransparentBasicMaterial(THREE, "background");
-      return (
-        <>
-          <mesh position={[OFF / 2, 0, 0]} geometry={g0} material={material} ref={occludeRef0} />
-          <mesh position={[OFF / 2, 0, 0]} geometry={g0} material={material} ref={occludeRef1} />
-          <mesh position={[0, 0, OFF * 2]} geometry={g1} material={material} />
-          <mesh position={[0, 0, -OFF * 2]} geometry={g1} material={material} />
-        </>
-      );
-    }, []);
-
     const configurations = useMemo(() => {
       return (
         <>
@@ -170,7 +155,6 @@ export default createScene(
 
     return (
       <>
-        {tints}
         <mesh ref={meshRef}>{configurations}</mesh>
         <Grid light size={10} />
       </>
