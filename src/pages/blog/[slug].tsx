@@ -15,6 +15,7 @@ import { getPostPaths, getPostProps } from "../../utils/blogPageUtils";
 import { RenderTextCommand } from "../../components/ScriptedEditor/RenderCommand/RenderCommand";
 import { NotMacOs } from "../../components/OperatingSystem/OperatingSystem";
 import { Image } from "../../components/Image";
+import { ImageCarousel } from "../../components/ImageCarousel";
 import { SectionAnchor } from "../../components/SectionAnchor/SectionAnchor";
 import { formatDate } from "../../utils/formatDate";
 import { Note } from "../../components/Note/Note";
@@ -38,6 +39,7 @@ const baseComponents = {
   }),
   img: Image,
   Image,
+  ImageCarousel,
   StaticCodeBlock: withScriptedEditor(StaticCodeBlock, (props) => ({
     code: props.children,
     language: props.language,

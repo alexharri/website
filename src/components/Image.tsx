@@ -1,4 +1,4 @@
-import { useRouter } from "next/router";
+import { NextRouter, useRouter } from "next/router";
 import { useStyles } from "../utils/styles";
 import { ImageStyles } from "./Image.styles";
 
@@ -12,19 +12,8 @@ interface Props {
 const videoExtensions = new Set(["mp4"]);
 const customPosts = new Set(["stabilizing-noisy-inputs"]);
 
-export const Image = (props: Props) => {
-  const s = useStyles(ImageStyles);
-  const router = useRouter();
-
-  const { noMargin, plain } = props;
-  let src = props.src || "";
-
+export function imgSrcToHref(src: string, router: NextRouter) {
   const { slug } = router.query;
-
-  const srcParts = src.split(".");
-  const extension = srcParts[srcParts.length - 1];
-  const video = videoExtensions.has(extension);
-
   const isBlogPost = ["/blog/draft/", "/blog/"].some((path) => router.pathname.startsWith(path));
   if (src.startsWith("~/") && isBlogPost) {
     const parts = router.pathname.split("/");
@@ -32,12 +21,27 @@ export const Image = (props: Props) => {
 
     if (typeof slug === "string") {
       const dirName = `/images/posts/${slug}/`;
-      src = dirName + src.substr(2);
+      return dirName + src.substr(2);
     } else if (customPosts.has(lastPart)) {
       const dirName = `/images/posts/${lastPart}/`;
-      src = dirName + src.substr(2);
+      return dirName + src.substr(2);
     }
   }
+  return src;
+}
+
+export const Image = (props: Props) => {
+  const s = useStyles(ImageStyles);
+  const router = useRouter();
+
+  const { noMargin, plain } = props;
+  let src = props.src || "";
+
+  const srcParts = src.split(".");
+  const extension = srcParts[srcParts.length - 1];
+  const video = videoExtensions.has(extension);
+
+  src = imgSrcToHref(src || "", router);
 
   let flow = true;
   let width: string | number | undefined;

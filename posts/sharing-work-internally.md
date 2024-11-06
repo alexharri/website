@@ -65,13 +65,18 @@ To make the change palpable, I recorded a before/after video showing how the cha
 I did share the numbers alongside the video, but without the video demonstrating the concrete impact the numbers would have felt abstract.
 
 
-## Multiple examples
+## Use multiple examples
 
-A fairly simple change I made is to scale measurement labels to fit the line that they're describing, and fully hiding them when too small. It produced useful results in many circumstances, so I created multiple picture to demonstrate them:
+A fairly simple change I made was to scale measurement labels down when they were too large to fit the line that they describing, and fully hiding them when too small. It produced useful results in an array of circumstances, so I created multiple picture to demonstrate:
 
-<Image src="~/labels-hidden-when-small.jpg" width={600} plain />
-<Image src="~/labels-scaled-to-fit.jpg" width={600} plain />
-<Image src="~/labels-reduced-overlap.jpg" width={600} plain />
+<ImageCarousel
+  width={600}
+  images={[
+    { src: "~/labels-hidden-when-small.jpg", dimensions: [3510 , 2390] },
+    { src: "~/labels-scaled-to-fit.jpg", dimensions: [3510 , 2390] },
+    { src: "~/labels-reduced-overlap.jpg", dimensions: [3510 , 2390] },
+  ]}
+/>
 
 If you're presenting a change that has a broad impact, demonstrate that using multiple examples!
 
