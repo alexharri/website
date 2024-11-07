@@ -26,6 +26,12 @@ const styles = ({ styled, theme }: StyleOptions) => ({
     }
   `,
 
+  children: styled.css`
+    .note {
+      margin-bottom: 0;
+    }
+  `,
+
   imageContainer: styled.css`
     position: absolute;
     top: 50%;
@@ -75,6 +81,10 @@ const styles = ({ styled, theme }: StyleOptions) => ({
       }
     }
 
+    button:disabled {
+      cursor: default;
+    }
+
     button:disabled svg {
       color: ${theme.text200};
     }
@@ -93,6 +103,7 @@ interface Props {
   images: Image[];
   height?: number;
   width?: number;
+  children?: React.ReactNode;
 }
 
 export const ImageCarousel = (props: Props) => {
@@ -105,18 +116,21 @@ export const ImageCarousel = (props: Props) => {
   const [index, setIndex] = useState(0);
 
   const [targetWidth, targetHeight] = useMemo(() => {
-    let maxRatio = -Infinity;
-    let minRatio = Infinity;
-    for (const image of images) {
-      const ratio = image.dimensions[0] / image.dimensions[1];
-      if (ratio > maxRatio) maxRatio = ratio;
-      if (ratio < minRatio) minRatio = ratio;
-    }
+    // For now, just use the ratio of the first image.
+    const ratio = images[0].dimensions[0] / images[0].dimensions[1];
+    //
+    // let maxRatio = -Infinity;
+    // let minRatio = Infinity;
+    // for (const image of images) {
+    //   const ratio = image.dimensions[0] / image.dimensions[1];
+    //   if (ratio > maxRatio) maxRatio = ratio;
+    //   if (ratio < minRatio) minRatio = ratio;
+    // }
 
     let targetHeight = props.height ?? DEFAULT_HEIGHT;
     let targetWidth = props.width ?? DEFAULT_WIDTH;
-    if (props.height != null && props.width == null) targetWidth = targetHeight * minRatio;
-    else if (props.height == null) targetHeight = targetWidth / minRatio;
+    if (props.height != null && props.width == null) targetWidth = targetHeight * ratio;
+    else if (props.height == null) targetHeight = targetWidth / ratio;
     return [targetWidth, targetHeight];
   }, [props.width, props.height, images]);
 
@@ -135,23 +149,28 @@ export const ImageCarousel = (props: Props) => {
     [images, viewportWidth, targetWidth, targetHeight],
   );
 
-  const getImageOffsetStyles = useCallback((offset: number, height: number) => {
-    const opacity =
-      offset > 0
-        ? clamp(1 - Math.pow(offset, 0.5) * 0.5, 0, 1)
-        : clamp(1 - Math.pow(-offset, 0.2) * 0.7, 0, 1);
-    let translate = "translate(-50%, -50%)";
-    let transform = "";
-    if (offset < 0) {
-      translate += ` translateX(calc(-100% + ${-48 + offset * 48}px))`;
-      transform = `rotate3d(0, 1, 0, ${offset * 10}deg) scale(${
-        (height + Math.min(80, Math.pow(-offset, 0.6) * 40)) / height
-      })`;
-    } else if (offset > 0) {
-      translate += ` scale(${1 - 0.1 * offset}) translateX(${Math.pow(offset, 0.8) * 14}px)`;
-    }
-    return { opacity, transform, translate };
-  }, []);
+  const getImageOffsetStyles = useCallback(
+    (offset: number, width: number, height: number) => {
+      const opacity =
+        offset > 0
+          ? clamp(1 - Math.pow(offset, 0.5) * 0.5, 0, 1)
+          : clamp(1 - Math.pow(-offset, 0.2) * 0.7, 0, 1);
+      let translate = "translate(-50%, -50%)";
+      let transform = "";
+      if (offset < 0) {
+        translate += ` translateX(calc(-100% + ${-48 + offset * 48}px))`;
+        transform = `rotate3d(0, 1, 0, ${offset * 10}deg) scale(${
+          (height + Math.min(80, Math.pow(-offset, 0.6) * 40)) / height
+        })`;
+      } else if (offset > 0) {
+        translate += ` translateX(${(targetWidth - width) / 2}px) scale(${
+          1 - 0.1 * offset
+        }) translateX(${Math.pow(offset, 0.8) * 14}px)`;
+      }
+      return { opacity, transform, translate };
+    },
+    [targetWidth],
+  );
 
   return (
     <>
@@ -162,7 +181,7 @@ export const ImageCarousel = (props: Props) => {
           images.map((image, i) => {
             const { width, height } = imageDimensions[i];
             const offset = i - index;
-            const { opacity, transform, translate } = getImageOffsetStyles(offset, height);
+            const { opacity, transform, translate } = getImageOffsetStyles(offset, width, height);
 
             return (
               <div
@@ -177,6 +196,7 @@ export const ImageCarousel = (props: Props) => {
             );
           })}
       </div>
+      {props.children && <div className={s("children")}>{props.children}</div>}
       <div className={s("controls")}>
         <button
           disabled={index === 0}
