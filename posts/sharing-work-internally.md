@@ -144,3 +144,13 @@ I usually pair this with a before-after comparisons. Here are some examples of b
 Admittedly, these take a bit more effort to make because of the masking required for the diagonal split <EmDash /> I felt that it made the image more "action-y".
 
 
+## Other mediums
+
+These release comics are tailored to a distributed working culture. With Arkio's employees spanning central Europe and the west coast of the US, using async modes of communication becomes a necessity.
+
+However, the ideas at work translate to other forms of communication <EmDash /> like my favorite <EmDash /> live demos!
+
+For example, I often find that presenters spend far to little time (if any) explaining the prior state, or explaining the context of what they're presenting. When presenters go straight to showing off exactly how the thing they built works, it can leave the audience lost as to what they're being presented with.
+
+Side note: as an audience member, even if you have the full context, it can be helpful to ask prodding questions like "Under what circumstances would this be used?". Getting the presenter to provide context is useful for everyone involved and makes any post-demo discussions much more productive.
+
