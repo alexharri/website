@@ -21,14 +21,14 @@ Over the past year, I've shared much of my work at Arkio internally through so-c
     { src: "~/distance-markers-orthogonal.jpg", dimensions: [3618, 2230] },
   ]}
 >
-  <SmallNote label="" center>Examples of release comics I shared within Arkio.</SmallNote>
+  <SmallNote label="" center>Examples of release comics I've shared within Arkio.</SmallNote>
 </ImageCarousel>
 
-These release comics have been a really effective medium to communicate changes. Their visual nature makes them really easy to understand at a glance.
+These release comics have been a really effective medium to communicate changes. Their visual nature makes them really easy to understand at a glance, which has been appreciated within Arkio.
 
-> _at the risk of repeating myself, i continue to LOVE these comic-book style explanations for features and fixes!_
+<Image src="~/dace-quote.png" width={500} />
 
-In this post, I want to explore this visual-first approach of communication and figure out what makes it so effective.
+In this post, I want to explore this visual-first approach and figure out what makes it so effective. There'll definitely be some ideas for you to take and apply to your own communication!
 
 
 ## Prior state
@@ -130,7 +130,7 @@ I represent actions by connecting the start and end states using an arrow. For e
 
 <Image src="~/wall-side-of-corner.jpg" width={600} plain />
 
-I usually pair this with a before-after comparisons. Here are some examples of before-after actions from my work on the wall tool for Arkio's 2.0 release:
+I usually pair actions and before-after comparisons. Here are some examples of before-after actions from my work on the wall tool for Arkio's 2.0 release:
 
 <ImageCarousel
   width={600}
@@ -146,11 +146,24 @@ Admittedly, these take a bit more effort to make because of the masking required
 
 ## Other mediums
 
-These release comics are tailored to a distributed working culture. With Arkio's employees spanning central Europe and the west coast of the US, using async modes of communication becomes a necessity.
+This "release comic" idea is tailored to a distributed working culture. However, many of the ideas at work translate to other forms of communication <EmDash /> like my favorite <EmDash /> live demos!
 
-However, the ideas at work translate to other forms of communication <EmDash /> like my favorite <EmDash /> live demos!
+For example, I often find that presenters spend far to little time (if any) explaining the prior state, or explaining the context of what they're presenting. When presenters go straight to showing off exactly how the thing they built works, it can leave the audience lost.
 
-For example, I often find that presenters spend far to little time (if any) explaining the prior state, or explaining the context of what they're presenting. When presenters go straight to showing off exactly how the thing they built works, it can leave the audience lost as to what they're being presented with.
+<Note>
+Side note: as an audience member, even if you have the full context, it can be helpful to ask prodding questions like _"Under what circumstances would this be used?"_. Getting the presenter to provide context is useful for everyone involved <EmDash /> and makes any post-demo discussions much more productive.
+</Note>
 
-Side note: as an audience member, even if you have the full context, it can be helpful to ask prodding questions like "Under what circumstances would this be used?". Getting the presenter to provide context is useful for everyone involved and makes any post-demo discussions much more productive.
+I also think that people should use far more annotations and diagrams, whether in design documents or traditional presentations. Less text, more visuals! <EmDash /> They make absorbing ideas so much easier.
+
+
+## Final words
+
+I haven't seen this visual-first approach used much, and I hope that changes. I'm hoping that me writing this will influence some people out there to take up this habit.
+
+I've found these release comics to aid other people's understanding of my work, and the changes I'm making. They're quick and fun to make, save other people effort, and act as a portable artifact for a piece of work!
+
+This way of sharing changes visually will fit some projects and roles better than other. Still, see if you don't find an opportunity to present your work visually!
+
+<EmDash /> Alex Harri
 

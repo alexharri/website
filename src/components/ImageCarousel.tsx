@@ -58,12 +58,13 @@ const styles = ({ styled, theme }: StyleOptions) => ({
     display: flex;
     justify-content: center;
     margin-top: 16px;
-    margin-bottom: 40px;
+    margin-bottom: 32px;
     gap: 16px;
 
     span {
       font-size: 17px;
       letter-spacing: 1px;
+      cursor: default;
     }
 
     button {
