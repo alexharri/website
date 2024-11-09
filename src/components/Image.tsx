@@ -72,6 +72,7 @@ export const Image = (props: Props) => {
           {...commonProps}
           autoPlay
           muted
+          playsInline
           preload=""
           tabIndex={-1}
           loop
