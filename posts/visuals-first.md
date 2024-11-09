@@ -1,6 +1,6 @@
 ---
 title: "Sharing changes, visuals first"
-description: ""
+description: "Exploring my visuals-first approach to sharing my work internally."
 publishedAt: ""
 image: ""
 tags: []
