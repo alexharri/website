@@ -259,7 +259,7 @@ JSDoc allows you to use `import("./path")`, like in TypeScript:
 let foo;
 ```
 
-Though that can get quite verbose for long module paths and type names. You can instead import types via the `@import` tag [introduced in TypeScript 5.5][import_tag]:
+That can get quite verbose for long module paths and type names. You can instead import types via the `@import` tag [introduced in TypeScript 5.5][import_tag]:
 
 [import_tag]: https://devblogs.microsoft.com/typescript/announcing-typescript-5-5/#the-jsdoc-@import-tag
 
