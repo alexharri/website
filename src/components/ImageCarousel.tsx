@@ -150,6 +150,11 @@ export const ImageCarousel = (props: Props) => {
     [images, viewportWidth, targetWidth, targetHeight],
   );
 
+  const scale = useMemo(() => {
+    const availableWidth = viewportWidth! - cssVariables.contentPadding * 2;
+    return Math.min(1, availableWidth / targetWidth);
+  }, [viewportWidth, targetWidth]);
+
   const getImageOffsetStyles = useCallback(
     (offset: number, width: number, height: number) => {
       const opacity =
@@ -164,13 +169,13 @@ export const ImageCarousel = (props: Props) => {
           (height + Math.min(80, Math.pow(-offset, 0.6) * 40)) / height
         })`;
       } else if (offset > 0) {
-        translate += ` translateX(${(targetWidth - width) / 2}px) scale(${
+        translate += ` translateX(${(targetWidth * scale - width) / 2}px) scale(${
           1 - 0.1 * offset
         }) translateX(${Math.pow(offset, 0.8) * 14}px)`;
       }
       return { opacity, transform, translate };
     },
-    [targetWidth],
+    [targetWidth, scale],
   );
 
   return (
