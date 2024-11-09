@@ -1,7 +1,7 @@
 ---
 title: "Sharing changes, visuals first"
 description: "Exploring my visuals-first approach to sharing my work internally."
-publishedAt: ""
+publishedAt: "2024-11-09"
 image: "/images/og-visuals-first.png"
 tags: []
 ---
@@ -24,7 +24,7 @@ Over the past year, I've shared much of my work at [Arkio][arkio] internally thr
   <SmallNote label="" center>Examples of release comics I've shared within Arkio.</SmallNote>
 </ImageCarousel>
 
-These release comics have been an effective medium for communicating changes <EmDash /> their visual nature makes them really easy to understand at a glance.
+These release comics have been an effective medium for communicating changes. Their visual nature makes them really easy to understand at a glance.
 
 <Image src="~/dace-quote.png" width={500} />
 <SmallNote label="" center>The release comics have been well received!</SmallNote>
@@ -62,7 +62,7 @@ The after image then shows how guides make aligning to existing geometry a breez
 
 ## Show, don't tell
 
-A few months after joining, I profiled editing in Arkio and noticed that calculating three-plane intersections constituted around 52% of time spent when editing large geometries (geometry in Arkio is defined by planes and their intersections). Implementing the fast algorithm for three-plane intersections from [Real-Time Collision Detection][real_time_collision_detection] (chapter 5.4.5) resulted in those calculations becoming ~500% faster, which resulted in editing becoming ~72% faster.
+A few months after joining, I profiled editing in Arkio and noticed that calculating three-plane intersections constituted around 52% of the time spent when editing large geometries (geometry in Arkio is defined by planes and their intersections). Implementing the fast algorithm for three-plane intersections from [Real-Time Collision Detection][real_time_collision_detection] (chapter 5.4.5) resulted in those calculations becoming ~500% faster, which resulted in editing becoming ~72% faster.
 
 [real_time_collision_detection]: https://www.amazon.com/Real-Time-Collision-Detection-Interactive-Technology/dp/1558607323
 
@@ -80,7 +80,7 @@ I did share the numbers alongside the video, but without the video demonstrating
 
 ## Use multiple examples
 
-Earlier this year I made a fairly simple change which was to scale measurement labels down when they were too large to fit the line that they describing (and fully hiding them when too small). It produced useful results in an array of circumstances, so I created multiple picture to demonstrate:
+Earlier this year I made a fairly simple change which was to scale measurement labels down when they were too large to fit the line that they describing (and fully hiding them when too small). It produced useful results in an array of circumstances, so I created multiple pictures to demonstrate:
 
 <ImageCarousel
   width={600}
@@ -146,10 +146,10 @@ This is just one way to represent actions, but it's worked quite well for me!
 
 This "release comic" idea is tailored to a distributed working culture. However, many of the ideas at work translate well to other forms of communication, like my favorite, live demos!
 
-In live demos, I find that presenters sometimes spend far to little time (if any) explaining the prior state, or explaining the context of what they're presenting. When presenters go straight to showing off exactly how the thing they built works, it can leave the audience lost.
+In live demos, I find that presenters sometimes spend far too little time (if any) explaining the prior state, or explaining the context of what they're presenting. When presenters go straight to showing off exactly how the thing they built works, it can leave the audience lost.
 
 <Note>
-Side note: as an audience member, even if you have the full context, it can be helpful to ask prodding questions like _"Under what circumstances would this be used?"_. Getting the presenter to provide context is useful for everyone involved <EmDash /> and makes any post-demo discussions much more productive.
+Side note: as an audience member, even if you have the full context, it can be helpful to ask prodding questions like _"Under what circumstances would this be used?"_. Getting the presenter to provide context is useful for everyone involved, and makes any post-demo discussions much more productive.
 </Note>
 
 I also think that people should use far more annotations and diagrams than they currently do, whether in design documents or traditional presentations. Less text, more visuals! <EmDash /> They make absorbing ideas so much easier.
@@ -161,7 +161,7 @@ I'm hoping that me writing this will influence some people out there to take a m
 
 I've found the release comics to aid other people's understanding of my work, and the changes I'm making. They're quick and fun to make, save other people effort, and they act as a very portable artifact for a piece of work!
 
-Sharing changes visually will fit some projects and roles better than other. Still, see if you don't find an opportunity to present your work visually!
+Sharing changes visually will fit some projects and roles better than others. Still, see if you don't find an opportunity to present your work visually!
 
 <EmDash /> Alex Harri
 
