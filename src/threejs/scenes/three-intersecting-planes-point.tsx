@@ -1,7 +1,6 @@
 import { useContext } from "react";
 import { Plane as PlaneClass } from "../../math/Plane";
-import { planePlaneIntersection } from "../../math/planePlaneIntersection";
-import { threePlaneIntersection } from "../../math/threePlaneIntersection";
+import { planePlaneIntersection } from "../../math/intersection";
 import { Grid } from "../Components/primitives/Grid";
 import { Line } from "../Components/primitives/Line";
 import { MathLabel } from "../Components/primitives/MathLabel";
@@ -9,6 +8,7 @@ import { Plane } from "../Components/primitives/Plane";
 import { Point } from "../Components/primitives/Point";
 import { ThreeContext } from "../Components/ThreeProvider";
 import { createScene } from "../createScene";
+import { threePlaneIntersection } from "../../math/intersection";
 
 export default createScene(({}) => {
   const THREE = useContext(ThreeContext);

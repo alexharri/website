@@ -1,5 +1,5 @@
 import { useContext, useMemo, useState } from "react";
-import { linePlaneIntersection } from "../../math/linePlaneIntersection";
+import { linePlaneIntersection } from "../../math/intersection";
 import { Grid } from "../Components/primitives/Grid";
 import { Plane } from "../Components/primitives/Plane";
 import { Vector } from "../Components/primitives/Vector";

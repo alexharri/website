@@ -2,13 +2,13 @@ import { useContext } from "react";
 import { Grid } from "../Components/primitives/Grid";
 import { Line } from "../Components/primitives/Line";
 import { Plane as PlaneClass } from "../../math/Plane";
-import { rayPlaneIntersection } from "../../math/rayPlaneIntersection";
 import { Plane } from "../Components/primitives/Plane";
 import { Point } from "../Components/primitives/Point";
 import { Vector } from "../Components/primitives/Vector";
 import { ThreeContext } from "../Components/ThreeProvider";
 import { createScene } from "../createScene";
 import { MathLabel } from "../Components/primitives/MathLabel";
+import { rayPlaneIntersection } from "../../math/intersection";
 
 export default createScene(
   ({ variables }) => {

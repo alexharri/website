@@ -1,7 +1,7 @@
 import { useContext } from "react";
 import { lerp } from "three/src/math/MathUtils";
 import { Plane as PlaneClass } from "../../math/Plane";
-import { planePlaneIntersection } from "../../math/planePlaneIntersection";
+import { planePlaneIntersection } from "../../math/intersection";
 import { Grid } from "../Components/primitives/Grid";
 import { Line } from "../Components/primitives/Line";
 import { MathLabel } from "../Components/primitives/MathLabel";
