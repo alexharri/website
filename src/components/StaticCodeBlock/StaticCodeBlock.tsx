@@ -152,6 +152,20 @@ const JSDocLine = (props: TokenProps) => {
   const match = jsDocRegex.exec(token.content);
   let { pre, keyword, typeExpr, name, post } = match!.groups!;
 
+  // Special handling for the @import JSDoc tag. This is fairly hacky, which is
+  // because I'm avoiding reworking the JSDoc regex above.
+  let importModuleName: string | null = null;
+  if (name === "from") {
+    try {
+      const preEndComment = post.split("*/")[0];
+      if (typeof JSON.parse(preEndComment) === "string") {
+        importModuleName = preEndComment.trim();
+        name = "";
+        post = "";
+      }
+    } catch (e) {} // No match
+  }
+
   const expr = typeExpr && (
     <Highlight
       {...defaultProps}
@@ -192,6 +206,14 @@ const JSDocLine = (props: TokenProps) => {
         </>
       ) : null}
       {name && <span style={{ color: colors.text800 }}>&nbsp;{name}</span>}
+
+      {importModuleName && (
+        <>
+          &nbsp;<span style={{ color: colors.blue }}>from</span>
+          &nbsp;<span style={{ color: colors.token.string }}>{importModuleName}</span>
+          &nbsp;<span style={{ color: colors.token.comment }}>*/</span>
+        </>
+      )}
 
       {post && <span {...getTokenProps({ token: { ...token, content: post }, key: 1001 })} />}
     </>

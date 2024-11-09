@@ -252,14 +252,25 @@ let bar: import("./module").Bar;
 
 <SmallNote>In TypeScript modules you can declare that the import is for a type via `import type { Foo }` or `import { type Foo }`</SmallNote>
 
-JSDoc only allows you to use `import("./path")`:
+JSDoc allows you to use `import("./path")`, like in TypeScript:
 
 ```ts
 /** @type {import("./module").Foo} */
 let foo;
 ```
 
-This can get quite verbose for long module paths and type names, so you can "fake" normal imports using `@typedef`:
+Though that can get quite verbose for long module paths and type names. You can instead import types via the `@import` tag [introduced in TypeScript 5.5][import_tag]:
+
+[import_tag]: https://devblogs.microsoft.com/typescript/announcing-typescript-5-5/#the-jsdoc-@import-tag
+
+```ts
+/** @import { Foo } from "./module" */
+
+/** @type {Foo} */
+let foo;
+```
+
+If you're using an older version of TypeScript, you can instead "fake" normal imports using `@typedef`:
 
 ```ts
 /** @typedef {import("./module").Foo} Foo */
