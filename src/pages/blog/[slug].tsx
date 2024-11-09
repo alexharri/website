@@ -9,7 +9,6 @@ import { withScriptedEditor } from "../../components/ScriptedEditor/LazyScripted
 import { SmallNote } from "../../components/SmallNote/SmallNote";
 import { Pre, StaticCodeBlock } from "../../components/StaticCodeBlock/StaticCodeBlock";
 import { FrontMatter } from "../../types/FrontMatter";
-import { usePostWatcher } from "../../utils/hooks/usePostWatcher";
 import { MonacoProvider } from "../../components/ScriptedEditor/MonacoProvider";
 import { getPostPaths, getPostProps } from "../../utils/blogPageUtils";
 import { RenderTextCommand } from "../../components/ScriptedEditor/RenderCommand/RenderCommand";
@@ -26,6 +25,7 @@ import { BarChart } from "../../components/BarChart/BarChart";
 import { PostDataProvider } from "../../data/DataProvider";
 import { PostDataStore } from "../../types/Post";
 import { SubscribeToNewsletter } from "../../components/SubscribeToNewsletter/SubscribeToNewsletter";
+import { usePostWatcher } from "../../utils/watcher-client";
 
 // Custom components/renderers to pass to MDX.
 // Since the MDX files aren't loaded by webpack, they have no knowledge of how
@@ -75,7 +75,7 @@ export function createPage(customComponents: Record<string, React.FC<any>>) {
     ...customComponents,
   };
   return function PostPage(props: Props) {
-    const source = usePostWatcher(props);
+    const source = usePostWatcher({ ...props, postsPath: "posts/" });
     const scope = source.scope! as unknown as FrontMatter;
 
     const pathName = scope.publishedAt ? `/blog/${props.slug}` : `/blog/draft/${props.slug}`;

@@ -6,7 +6,7 @@
     "build": "next build",
     "start": "next start -p 8080",
     "lint": "next lint",
-    "watcher": "ts-node -T ./watcher/postWatcher.ts",
+    "watcher": "NODE_NO_WARNINGS=1 NODE_OPTIONS=\"--experimental-require-module\" ts-node -T ./src/watcher-server.ts",
     "typecheck": "tsc --noEmit --skipLibCheck",
     "generate-sitemap": "ts-node -T ./scripts/generate-sitemap.ts",
     "generate-rss": "ts-node -T ./scripts/generate-rss.ts"
@@ -36,6 +36,8 @@
     "remark-math": "^6.0.0",
     "rss": "^1.2.2",
     "sass": "^1.55.0",
+    "socket.io": "^4.8.1",
+    "socket.io-client": "^4.8.1",
     "three": "^0.162.0"
   },
   "devDependencies": {

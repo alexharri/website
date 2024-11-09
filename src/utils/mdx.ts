@@ -1,7 +1,12 @@
 import { SerializeOptions } from "next-mdx-remote/dist/types";
 
 async function rehypeMathjax() {
-  const plugin = (await import("rehype-mathjax/svg")).default({ svg: { scale: 1 } });
+  // This weird pattern is to work around what happens when using
+  // the '--experimental-require-module' option
+  let method = (await import("rehype-mathjax/svg")).default;
+  if ("default" in method) method = method.default as any;
+
+  const plugin = method({ svg: { scale: 1 } });
   return () => (tree: import("hast").Root) => {
     plugin(tree);
 
@@ -23,7 +28,13 @@ async function rehypeMathjax() {
   };
 }
 
+async function remarkMath() {
+  let method = (await import("remark-math")).default;
+  if ("default" in method) method = method.default as any;
+  return method;
+}
+
 export const getMdxOptions = async (): Promise<SerializeOptions["mdxOptions"]> => ({
-  remarkPlugins: [(await import("remark-math")).default],
+  remarkPlugins: [await remarkMath()],
   rehypePlugins: [await rehypeMathjax()],
 });
