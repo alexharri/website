@@ -2,7 +2,7 @@
 title: "Sharing changes, visuals first"
 description: "Exploring my visuals-first approach to sharing my work internally."
 publishedAt: ""
-image: ""
+image: "/images/og-visuals-first.png"
 tags: []
 ---
 
