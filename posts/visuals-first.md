@@ -27,7 +27,7 @@ Over the past year, I've shared much of my work at [Arkio][arkio] internally thr
 These release comics have been an effective medium for communicating changes. Their visual nature makes them really easy to understand at a glance.
 
 <Image src="~/dace-quote.png" width={500} />
-<SmallNote label="" center>The release comics have been well received!</SmallNote>
+<SmallNote label="" center>The feedback I've gotten has been very positive.</SmallNote>
 
 In this post, I'll explore this visual-first approach to sharing changes and discuss what makes it so effective. There'll definitely be some ideas for you to take and apply to your own communication!
 
