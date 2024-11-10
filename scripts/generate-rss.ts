@@ -20,7 +20,7 @@ function generateRSS() {
     rss.item({
       title: post.title,
       description: post.description,
-      date: new Date(post.publishedAt).toUTCString(),
+      date: new Date(post.updatedAt || post.publishedAt).toUTCString(),
       url: `${url}/blog/${post.slug}`,
       author: "Alex Harri Jónsson",
     });

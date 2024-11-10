@@ -2,6 +2,7 @@
 title: "JSDoc as an alternative TypeScript syntax"
 description: "How to type your JavaScript code base without writing a single TypeScript file."
 publishedAt: "2024-02-24"
+updatedAt: "2024-10-09"
 image: ""
 tags: ["TypeScript", "JavaScript"]
 ---
