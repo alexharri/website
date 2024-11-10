@@ -6,6 +6,7 @@ import { serialize } from "next-mdx-remote/serialize";
 import { MdxOptions } from "./types";
 import { WATCHER_PORT } from "./constants";
 import { getMdxOptions } from "./utils/mdx";
+import { MDXRemoteSerializeResult } from "next-mdx-remote";
 
 async function startWatcher(onUpdated: (slug: string) => void) {
   const watcher = fs.watch(process.cwd(), { recursive: true });
@@ -43,7 +44,14 @@ export function startWatcherServer(mdxOptions?: MdxOptions) {
 
   startWatcher(async (fileName: string) => {
     const filePathRelative = fileName.split(".")[0];
-    const source = await getSource(fileName);
+    let source: MDXRemoteSerializeResult;
+    try {
+      source = await getSource(fileName);
+    } catch (e) {
+      console.warn(`Failed to compile '${fileName}' as MDX, see error:`);
+      console.log(e);
+      return;
+    }
     let nSent = 0;
     for (const socket of io.sockets.sockets.values()) {
       if ((socket as any)[PATH_KEY] === filePathRelative) {
