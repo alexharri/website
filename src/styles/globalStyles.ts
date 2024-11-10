@@ -92,6 +92,10 @@ code {
   padding: 0.3em 0.4em 0.35em;
 }
 
+code span.token.plain {
+  color: ${theme.text800};
+}
+
 a {
   color: ${theme.blue};
   text-decoration: none;

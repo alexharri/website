@@ -17,8 +17,14 @@ function getCode(variant: Variant, children: React.ReactNode): string {
   throw new Error(`Unknown variant '${variant}'`);
 }
 
-const TypeScript = (props: { variant?: Variant; children: React.ReactNode }) => {
-  let { variant = "expression", children } = props;
+interface Props {
+  variant?: Variant;
+  children: React.ReactNode;
+  firstWord?: boolean;
+}
+
+const TypeScript = (props: Props) => {
+  let { variant = "expression", children, firstWord = false } = props;
   if ("method" in props) variant = "method";
   if ("interface" in props) variant = "interface";
   return (
@@ -35,7 +41,10 @@ const TypeScript = (props: { variant?: Variant; children: React.ReactNode }) => 
         const line = lines[0];
         const tokens = getTokenSlice(variant, line);
         return (
-          <code {...getLineProps({ line: tokens, key: 0 })}>
+          <code
+            {...getLineProps({ line: tokens, key: 0 })}
+            style={firstWord ? { marginLeft: "-0.4em" } : {}}
+          >
             {tokens.map((token, i) => (
               <span key={i} {...getTokenProps({ token, key: i })} />
             ))}

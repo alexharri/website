@@ -291,7 +291,9 @@ import { Foo } from "./module";
 export { Foo } from "./module";
 ```
 
-### Non-null assertions
+<SectionAnchor id="non-null-assertions">
+  <h3>Non-null assertions</h3>
+</SectionAnchor>
 
 We've arrived at my largest gripe with JSDoc: __it doesn't support non-null assertions__.
 
