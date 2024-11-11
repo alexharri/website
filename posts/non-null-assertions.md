@@ -63,7 +63,7 @@ if (map.has("foo")) {
 }
 ```
 
-TypeScript does not give us a type error because narrowing a type through <Code.ts>as</Code.ts> is a common and useful operation. Take this example of getting the rendering context of a canvas element:
+TypeScript does not give us a type error because narrowing a type through <Code.ts>as</Code.ts> is a common and useful operation. Take this example of getting the rendering context of a canvas element whose id is <Code.ts>"some-canvas"</Code.ts>:
 
 ```ts
 const canvas = document.getElementById("some-canvas");
@@ -74,7 +74,7 @@ const ctx = canvas.getContext("2d");
 
 <Code.ts method>getElementById</Code.ts>'s type definition has no way of knowing whether the returned element will be a canvas, span, or video element, so it makes sense for the method's return type to be the general <Code.ts interface>HTMLElement</Code.ts> interface. As a consequence, we get a type error when we attempt to use the canvas-specific <Code.ts method>getContext</Code.ts> method.
 
-However, if we know that the element will always be a canvas element we can communicate that to TypeScript by asserting that the returned element is an <Code.ts interface>HTMLCanvasElement</Code.ts>. This lets us use <Code.ts method>getContext</Code.ts> without error.
+However, if we know that the element whose id is <Code.ts>"some-canvas"</Code.ts> will always be a canvas element, we can communicate that to TypeScript by asserting that the returned element is an <Code.ts interface>HTMLCanvasElement</Code.ts>. This lets us use <Code.ts method>getContext</Code.ts> without error.
 
 ```ts
 const canvas = document.getElementById("some-canvas") as HTMLCanvasElement;
