@@ -72,9 +72,9 @@ const ctx = canvas.getContext("2d");
                    // @error {w=10} Property 'getContext' does not exist on type 'HTMLElement'.
 ```
 
-The <Code.ts method>getElementById</Code.ts> method's type definition has no way of knowing whether the returned element will be a canvas, span or video element, so it makes sense for its return type to be the general <Code.ts interface>HTMLElement</Code.ts> interface. As a consequence, we get a type error when we attempt to use the canvas-specific <Code.ts method>getContext</Code.ts> method.
+The <Code.ts method>getElementById</Code.ts> method's type definition has no way of knowing whether the returned element will be a canvas, span, or video element, so it makes sense for its return type to be the general <Code.ts interface>HTMLElement</Code.ts> interface. As a consequence, we get a type error when we attempt to use the canvas-specific <Code.ts method>getContext</Code.ts> method.
 
-However, if we know that the element will always be a canvas element we can communicate that to TypeScript by asserting that the returned element is a <Code.ts interface>HTMLCanvasElement</Code.ts>. This lets us use <Code.ts method>getContext</Code.ts> without error.
+However, if we know that the element will always be a canvas element we can communicate that to TypeScript by asserting that the returned element is an <Code.ts interface>HTMLCanvasElement</Code.ts>. This lets us use <Code.ts method>getContext</Code.ts> without error.
 
 ```ts
 const canvas = document.getElementById("canvas") as HTMLCanvasElement;
@@ -82,7 +82,7 @@ const canvas = document.getElementById("canvas") as HTMLCanvasElement;
 const ctx = canvas.getContext("2d"); // No error
 ```
 
-We know that the returned element will always be a canvas, and we communicated that extra information to TypeScript via the type assertion. TypeScript accepts this information at face value <EmDash /> it trusts that we, the developer, have some information it doesn't.
+We know the returned element will always be a canvas, and we communicated that extra information to TypeScript via the type assertion. TypeScript accepts this information at face value <EmDash /> it trusts that we, the developer, have some information it doesn't.
 
 With this in mind, let's circle back to the <Code.ts interface>Map</Code.ts> example.
 
@@ -123,7 +123,7 @@ map.get("foo").toUpperCase();
 // @error {w=14} Object is possibly 'undefined'.
 ```
 
-A non-null assertion, in spite of its name, both asserts that the type is not <Code.ts>null</Code.ts> _and_ that the type is not <Code.ts>undefined</Code.ts>.
+A non-null assertion, despite its name, asserts that the type is not <Code.ts>null</Code.ts> _and_ that the type is not <Code.ts>undefined</Code.ts>.
 
 <SmallNote label="">A more accurate name would be _"non-[nullish][nullish] assertion"_, but that sounds silly, so non-null assertion it is!</SmallNote>
 
@@ -172,9 +172,9 @@ Always use non-null assertions over type assertions when possible.
 
 ## Final words
 
-It became incredibly obvious to me how valuable non-null assertions are when I worked in a code base that did not support them. They were not supported because the code base used [TypeScript via JSDoc][jsdoc_post] and JSDoc does not have a non-null assertion tag.
+The value of non-null assertions became incredibly obvious when I worked in a code base that did not support them. They were not supported because the code base used [TypeScript via JSDoc][jsdoc_post] (JSDoc does not have a non-null assertion tag).
 
-Earlier this year I wrote about [JSDoc and TypeScript interop][jsdoc_post] and [briefly discussed][jsdoc_non_null] the problem that the lack of non-null assertions creates. But the problem of incorrectly used type assertions is a more general problem that is worth writing about, hence this post.
+I wrote about [JSDoc and TypeScript interop][jsdoc_post] earlier this year, [briefly discussing][jsdoc_non_null] the problem that the lack of non-null assertions creates. But the problem of incorrectly used type assertions is a more general problem that is worth writing about, hence this post.
 
 [jsdoc_post]: https://alexharri.com/blog/jsdoc-as-an-alternative-typescript-syntax
 [jsdoc_non_null]: https://alexharri.com/blog/jsdoc-as-an-alternative-typescript-syntax#non-null-assertions
