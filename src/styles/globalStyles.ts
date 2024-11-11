@@ -93,7 +93,7 @@ code {
 }
 
 code span.token.plain {
-  color: ${theme.text800};
+  color: ${theme.text};
 }
 
 a {
