@@ -15,7 +15,7 @@ interface Map<K, V> {
 }
 ```
 
-<Code.ts method firstWord>get</Code.ts>'s return type of <Code.ts>V | undefined</Code.ts> can result in frustration when you know that the return value is not <Code.ts>undefined</Code.ts> <EmDash /> like when you've already checked for the key's presence via <Code.ts method>has</Code.ts>:
+<Code.ts method>get</Code.ts>'s return type of <Code.ts>V | undefined</Code.ts> can result in frustration when you know that the return value is not <Code.ts>undefined</Code.ts> <EmDash /> like when you've already checked for the key's presence via <Code.ts method>has</Code.ts>:
 
 ```ts
 const map = new Map<string, number>();
@@ -51,7 +51,7 @@ if (map.has("foo")) {
 
 No type error! That's dangerous.
 
-<Code.ts method firstWord>get</Code.ts>'s return type became <Code.ts>number | string | undefined</Code.ts>, but the type assertion still narrows the type to <Code.ts>number</Code.ts>.
+<Code.ts method>get</Code.ts>'s return type became <Code.ts>number | string | undefined</Code.ts>, but the type assertion still narrows the type to <Code.ts>number</Code.ts>.
 
 We may have gotten no compile-time type error, but we'll certainly encounter errors at run-time when we try to use <Code.ts>value</Code.ts> as a number.
 
