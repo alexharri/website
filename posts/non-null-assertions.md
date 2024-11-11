@@ -131,7 +131,7 @@ A non-null assertion, despite its name, asserts that the type is not <Code.ts>nu
 
 Non-null assertions are preferable to type assertions because they're a narrower form of assertion that retains the original type information.
 
-Let's take a look I mean by that.
+Let's take a look at what I mean by that.
 
 
 ### Type retention
