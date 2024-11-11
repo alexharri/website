@@ -242,6 +242,7 @@ mjx-container svg {
 }
 
 input[type="range"] {
+  appearance: none;
   -webkit-appearance: none;
 
   cursor: pointer;
