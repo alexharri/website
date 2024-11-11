@@ -162,9 +162,9 @@ The type assertion, <Code.ts>as string</Code.ts>, did remove <Code.ts>null</Code
 Non-null assertions don't suffer from this problem. They retain type information.
 
 ```ts
-let value: X | Y | null;
+let value: string | number | null;
 
-value!; //=> <~ts>X | Y</~>
+value!; //=> <~ts>string | number</~>
 ```
 
 Always use non-null assertions over type assertions when possible.
