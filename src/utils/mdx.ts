@@ -1,4 +1,5 @@
 import { SerializeOptions } from "next-mdx-remote/dist/types";
+import { typographyPlugin } from "./typography";
 
 async function rehypeMathjax() {
   // This weird pattern is to work around what happens when using
@@ -35,6 +36,6 @@ async function remarkMath() {
 }
 
 export const getMdxOptions = async (): Promise<SerializeOptions["mdxOptions"]> => ({
-  remarkPlugins: [await remarkMath()],
+  remarkPlugins: [await remarkMath(), typographyPlugin],
   rehypePlugins: [await rehypeMathjax()],
 });
