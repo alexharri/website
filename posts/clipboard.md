@@ -1,6 +1,6 @@
 ---
-title: "The web's clipboard, and how it stores data of different types"
-description: "Exploring the web's clipboard APIs, their limitations, and their history."
+title: "The web’s clipboard, and how it stores data of different types"
+description: "Exploring the web’s clipboard APIs, their limitations, and their history."
 image: "/images/og-clipboard.png"
 publishedAt: "2024-09-01"
 updatedAt: "2024-09-14"
