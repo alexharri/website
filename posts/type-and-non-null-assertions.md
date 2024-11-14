@@ -134,7 +134,7 @@ Let's take a look at what I mean by that.
 
 ### Type retention
 
-In a type assertion, the original type information is only used to determine whether the type assertion is legal <EmDash /> the resulting type [must][type_assertions] be a more specific or less specific version of the original type.
+In a type assertion, the original type information is only used to determine whether the assertion is legal. To be legal, the resulting type [must][type_assertions] be a more specific or less specific version of the original type.
 
 [type_assertions]: https://www.typescriptlang.org/docs/handbook/2/everyday-types.html#type-assertions
 
