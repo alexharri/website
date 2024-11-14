@@ -1,6 +1,6 @@
 ---
 title: "Type assertions are not a substitute for non-null assertions"
-description: ""
+description: "Exploring why non-null assertions are always preferable to type assertions."
 publishedAt: ""
 image: ""
 tags: ["TypeScript"]
