@@ -7,6 +7,7 @@ import { SnippetLink } from "../../components/Snippet/Snippet";
 import { SnippetList } from "../../components/SnippetList/SnippetList";
 import { Snippet } from "../../types/Snippet";
 import { snippetFileNames, SNIPPETS_PATH } from "../../utils/mdxUtils";
+import { adjustPostMetadata } from "../../utils/postMetadata";
 
 interface Props {
   snippets: Snippet[];
@@ -33,6 +34,7 @@ export const getStaticProps: GetStaticProps<Props> = async () => {
     const fileContent = fs.readFileSync(filePath, "utf8");
 
     const { data } = matter(fileContent);
+    adjustPostMetadata(data);
 
     const {
       title,

@@ -16,6 +16,7 @@ import { FrontMatter } from "../../../types/FrontMatter";
 import { usePostWatcher } from "../../../utils/hooks/usePostWatcher";
 import { getMdxOptions } from "../../../utils/mdx";
 import { snippetFileNames, SNIPPETS_PATH } from "../../../utils/mdxUtils";
+import { adjustPostMetadata } from "../../../utils/postMetadata";
 
 // Custom components/renderers to pass to MDX.
 // Since the MDX files aren't loaded by webpack, they have no knowledge of how
@@ -73,6 +74,7 @@ export const getStaticProps: GetStaticProps<Props, Params> = async (ctx) => {
   const fileContent = fs.readFileSync(filePath);
 
   const { content, data } = matter(fileContent);
+  adjustPostMetadata(data);
 
   const source = await serialize(content, {
     scope: data,
