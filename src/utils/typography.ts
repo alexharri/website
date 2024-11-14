@@ -49,6 +49,16 @@ function collectTextNodes(root: Node): TextNode[] {
   const textNodes: TextNode[] = [FAKE_NEWLINE];
 
   function dfs(node: Node) {
+    if (
+      // Special case: do not apply pretty typograph to content of '<Code.ts>...</Code.ts>'
+      node.type === "mdxJsxTextElement" &&
+      "name" in node &&
+      typeof node.name === "string" &&
+      node.name.toLowerCase().startsWith("code")
+    ) {
+      return;
+    }
+
     if (node.type === "text") textNodes.push(node as TextNode);
     else if (blockElements.has(node.type)) textNodes.push(FAKE_NEWLINE);
     else if (inlineElements.has(node.type)) textNodes.push(INLINE_ELEMENT);
