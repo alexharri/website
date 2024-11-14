@@ -183,3 +183,6 @@ I hope this was interesting. Thanks for reading!
 
 <EmDash /> Alex Harri
 
+<SmallNote thanks>Thanks for [Eiríkur Fannar Torfason][eirikur_dev] for reading a draft of this post.</SmallNote>
+
+[eirikur_dev]: https://eirikur.dev/
