@@ -123,9 +123,7 @@ map.get("foo").toUpperCase();
 // @error {w=14} Object is possibly 'undefined'.
 ```
 
-A non-null assertion, despite its name, asserts that the type is not <Code.ts>null</Code.ts> _and_ that the type is not <Code.ts>undefined</Code.ts>.
-
-<SmallNote label="">A more accurate name would be _"non-[nullish][nullish] assertion"_, but that sounds silly, so non-null assertion it is!</SmallNote>
+A non-null assertion, despite its name, asserts that the type is not <Code.ts>null</Code.ts> _and_ that the type is not <Code.ts>undefined</Code.ts>. A more accurate name would be _"non-[nullish][nullish] assertion"_.
 
 [nullish]: https://developer.mozilla.org/en-US/docs/Glossary/Nullish
 
