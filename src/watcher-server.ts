@@ -7,6 +7,7 @@ import { MdxOptions } from "./types";
 import { WATCHER_PORT } from "./constants";
 import { getMdxOptions } from "./utils/mdx";
 import { MDXRemoteSerializeResult } from "next-mdx-remote";
+import { adjustPostMetadata } from "./utils/postMetadata";
 
 async function startWatcher(onUpdated: (slug: string) => void) {
   const watcher = fs.watch(process.cwd(), { recursive: true });
@@ -37,6 +38,7 @@ export function startWatcherServer(mdxOptions?: MdxOptions) {
     const filePath = path.resolve(process.cwd(), fileName);
     const fileContent = await fs.readFile(filePath, "utf-8");
     const { content, data } = matter(fileContent);
+    adjustPostMetadata(data);
     if (typeof mdxOptions === "function") mdxOptions = await mdxOptions();
     const source = await serialize(content, { scope: data, mdxOptions });
     return source;

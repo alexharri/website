@@ -20,21 +20,48 @@ const EM_DASH = "—";
 
 const whitespaceOrPunctuation = /\s|\p{P}/u;
 
+const INLINE_ELEMENT: TextNode = { type: "text", value: "X" };
 const FAKE_NEWLINE: TextNode = { type: "text", value: "\n" };
+
+const blockElements = new Set([
+  "paragraph",
+  "listItem",
+  "heading",
+  "blockquote",
+  "code",
+  "mdxJsxFlowElement", // E.g. images
+  "mdxFlowExpression", // Stuff like {<table>...</table>} (see bit set iteration post)
+  "thematicBreak", // <hr> element
+]);
+const inlineElements = new Set(["inlineMath", "inlineCode"]);
+const ignoreElements = new Set([
+  "link",
+  "linkReference",
+  "mdxJsxTextElement",
+  "emphasis",
+  "strong",
+  "definition",
+  "root",
+  "list",
+]);
 
 function collectTextNodes(root: Node): TextNode[] {
   const textNodes: TextNode[] = [FAKE_NEWLINE];
 
   function dfs(node: Node) {
-    if (node.type === "paragraph") textNodes.push(FAKE_NEWLINE);
-    else if (node.type === "text") textNodes.push(node as TextNode);
+    if (node.type === "text") textNodes.push(node as TextNode);
+    else if (blockElements.has(node.type)) textNodes.push(FAKE_NEWLINE);
+    else if (inlineElements.has(node.type)) textNodes.push(INLINE_ELEMENT);
+    else if (!ignoreElements.has(node.type)) {
+      console.log(`Unknown element type: ${node.type}`);
+    }
 
     if ("children" in node) {
       for (const child of node.children) {
         dfs(child);
       }
+      if (blockElements.has(node.type)) textNodes.push(FAKE_NEWLINE);
     }
-    if (node.type === "paragraph") textNodes.push(FAKE_NEWLINE);
   }
   dfs(root);
 
@@ -43,7 +70,7 @@ function collectTextNodes(root: Node): TextNode[] {
   return textNodes;
 }
 
-export function applyPrettyTypography(value: string, left: string, right: string) {
+export function applyPrettyTypography(value: string, left: string = "\n", right: string = "\n") {
   let s = value;
 
   for (let i = 0; i < s.length; i++) {

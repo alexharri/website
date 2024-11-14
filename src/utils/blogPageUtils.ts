@@ -4,6 +4,7 @@ import matter from "gray-matter";
 import { postFileNames, POSTS_PATH } from "./mdxUtils";
 import { Post, PostDataStore } from "../types/Post";
 import { getMdxOptions } from "./mdx";
+import { adjustPostMetadata } from "./postMetadata";
 
 export const getPosts = (type: "published" | "draft") => {
   const posts: Post[] = [];
@@ -13,6 +14,7 @@ export const getPosts = (type: "published" | "draft") => {
     const fileContent = fs.readFileSync(filePath);
 
     const { data } = matter(fileContent);
+    adjustPostMetadata(data);
 
     const {
       title,
@@ -71,6 +73,7 @@ export function getPostPaths(options: { type: "published" | "draft" }) {
     .filter((filePath) => {
       const fileContent = fs.readFileSync(path.resolve(POSTS_PATH, filePath));
       const { data } = matter(fileContent);
+      adjustPostMetadata(data);
 
       if (draft) {
         return !data.publishedAt;
@@ -128,6 +131,7 @@ export const getPostProps = async (ctx: Context) => {
   const fileContent = fs.readFileSync(filePath);
 
   const { content, data: scope } = matter(fileContent);
+  adjustPostMetadata(scope);
 
   const serialize = (await import("next-mdx-remote/serialize")).serialize;
   const source = await serialize(content, {
