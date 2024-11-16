@@ -6,7 +6,7 @@ image: ""
 tags: ["TypeScript"]
 ---
 
-Take JavaScript's <Code.ts interface>Map</Code.ts> data structure <EmDash /> it's <Code.ts method>get</Code.ts> and <Code.ts method>has</Code.ts> methods are defined like so in TypeScript:
+Take JavaScript's <Code.ts interface>Map</Code.ts> data structure <EmDash /> its <Code.ts method>get</Code.ts> and <Code.ts method>has</Code.ts> methods are defined like so in TypeScript:
 
 ```ts
 interface Map<K, V> {
