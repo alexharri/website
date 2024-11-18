@@ -27,6 +27,7 @@ import { PostDataStore } from "../../types/Post";
 import { SubscribeToNewsletter } from "../../components/SubscribeToNewsletter/SubscribeToNewsletter";
 import { usePostWatcher } from "../../utils/watcher-client";
 import { Code } from "../../components/Code/Code";
+import { TestCanvas } from "../../components/TestCanvas/TestCanvas";
 
 // Custom components/renderers to pass to MDX.
 // Since the MDX files aren't loaded by webpack, they have no knowledge of how
@@ -62,6 +63,7 @@ const baseComponents = {
   Scene,
   BarChart,
   EmDash: () => "—",
+  TestCanvas,
 };
 
 interface Props {
