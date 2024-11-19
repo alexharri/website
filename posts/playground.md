@@ -1,13 +1,13 @@
 ---
-title: "Playground"
+title: "Test"
 description: "A test playground"
 image: ""
 publishedAt: ""
 tags: []
 ---
 
-This is a test playground.
+Here is some cool stuff:
 
 <TestCanvas />
 
-Here is some more text.
+Look at how cool it is.
