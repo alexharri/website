@@ -2,8 +2,8 @@ import { useEffect, useRef } from "react";
 import { StyleOptions, useStyles } from "../../utils/styles";
 import { Renderer } from "./Renderer";
 
-const W = 800;
-const H = 400;
+const W = 1200;
+const H = 350;
 
 const styles = ({ styled, theme }: StyleOptions) => ({
   container: styled.css`
