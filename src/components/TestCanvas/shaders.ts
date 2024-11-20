@@ -24,11 +24,12 @@ export const fragmentShader = /* glsl */ `
   const float WAVE_AMPLITUDE_SCALE = 1.0;
   const float BLUR_AMPLITUDE_SCALE = 1.0;
   const float BLUR_HEIGHT = 300.0;
-  const float BLUR_BIAS = 0.8; // Higher means it's harder to get sharp lines (values from 0.8 to 1.2 work great)
+  const float BLUR_BIAS = 1.15; // Higher means it's harder to get sharp lines (values from 0.8 to 1.2 work great)
   const float WAVE_SPEED = 1.0; // Higher is faster
-  const float NOISE_SPEED = 0.05; // Higher is faster
+  const float NOISE_SPEED = 0.08; // Higher is faster
   const float NOISE_SCALE = 1.5; // Higher is smaller
-  const float NOISE_X_SHIFT = 0.03; // Higher is faster
+  const float ACCENT_NOISE_SCALE = 1.0;
+  const float NOISE_X_SHIFT = 0.02; // Higher is faster
 
   uniform vec2 u_resolution;
   uniform float u_time;
@@ -99,19 +100,28 @@ export const fragmentShader = /* glsl */ `
     vec2 xy = gl_FragCoord.xy / u_resolution.xy;
     float noise_x = xy.x * NOISE_SCALE + u_time * NOISE_X_SHIFT;
     float noise_y = xy.y * NOISE_SCALE;
-    float noise_raw = perlinNoise(vec3(noise_x, noise_y, off1 + u_time * NOISE_SPEED)) +
-                      perlinNoise(vec3(noise_x, noise_y, off2 + u_time * NOISE_SPEED));
-    float noise = lerp(0.5, 1.2, noise_raw);
-    return noise;
+    float s1 = 1.0, s2 = 0.7, s3 = 0.4;
+    float off3 = off1 - off2;
+    float noise_raw =
+      perlinNoise(vec3(noise_x * s1, noise_y * s1, off1 + u_time * NOISE_SPEED)) * 0.4 +
+      perlinNoise(vec3(noise_x * s2, noise_y * s2, off2 + u_time * NOISE_SPEED)) * 0.35 +
+      perlinNoise(vec3(noise_x * s2, noise_y * s2, off3 + u_time * NOISE_SPEED)) * 0.25 +
+      0.5;
+    return smooth_step(noise_raw);
   }
 
   vec2 wave1() {
     float sin_sum = 0.0;
-    sin_sum += sin(wave_len(2.180) + wave_phase(-0.15) + offset(0.3)) * wave_amp(0.6);
-    sin_sum += sin(wave_len(4.193) + wave_phase(0.18) + offset(0.2)) * wave_amp(0.8);
-    sin_sum += sin(wave_len(2.974) + wave_phase(0.13) + offset(0.0)) * wave_amp(0.75);
-    sin_sum += sin(wave_len(3.395) + wave_phase(-0.21) + offset(0.7)) * wave_amp(0.8);
-    sin_sum += sin(wave_len(2.683) + wave_phase(0.23) + offset(0.5)) * wave_amp(0.5);
+    sin_sum += sin(wave_len(5.180) + wave_phase(-0.15) + offset(0.3)) * wave_amp(0.6);
+    sin_sum += sin(wave_len(3.193) + wave_phase( 0.18) + offset(0.2)) * wave_amp(0.8);
+    sin_sum += sin(wave_len(5.974) + wave_phase( 0.13) + offset(0.0)) * wave_amp(0.6);
+    sin_sum += sin(wave_len(6.395) + wave_phase(-0.21) + offset(0.7)) * wave_amp(0.4);
+    sin_sum += sin(wave_len(9.683) + wave_phase( 0.23) + offset(0.5)) * wave_amp(0.5);
+
+    // up-down wave
+    sin_sum += sin(wave_len(200.0) + wave_phase( 0.212) + offset(0.7)) * wave_amp(0.8);
+    sin_sum += sin(wave_len(200.0) + wave_phase(-0.276) + offset(0.3)) * wave_amp(0.6);
+    sin_sum += sin(wave_len(200.0) + wave_phase( 0.148) + offset(0.1)) * wave_amp(0.9);
     
     float blur_sin_sum = 0.0;
     blur_sin_sum += sin(wave_len(4.739) + wave_phase(0.19) + offset(0.0)) * blur_amp(0.6);
@@ -149,16 +159,33 @@ export const fragmentShader = /* glsl */ `
     return vec2(noise, alpha);
   }
 
-  float baselineLightness() {
+  float bg_lightness() {
     vec2 xy = gl_FragCoord.xy / u_resolution.xy;
     float noise_x = xy.x * NOISE_SCALE + u_time * NOISE_X_SHIFT;
-    float noise_y = xy.y * NOISE_SCALE * 0.5 + 0.7;
+    float noise_y = xy.y * NOISE_SCALE * 0.5;
 
-    float s1 = 0.9, s2 = 0.6, s3 = 0.35;
+    float s1 = 2.0, s2 = 1.0, s3 = 0.5;
     return
-      perlinNoise(vec3(noise_x * s1, noise_y * s1, -256.0 + u_time * NOISE_SPEED)) +
-      perlinNoise(vec3(noise_x * s2, noise_y * s2 + 0.3, -532.0 + u_time * NOISE_SPEED)) +
-      perlinNoise(vec3(noise_x * s3, noise_y * s3 + 0.8, -192.0 + u_time * NOISE_SPEED));
+      0.5 + 
+      perlinNoise(vec3(noise_x * s1, noise_y * s1 + 0.0, -256.0 + u_time * NOISE_SPEED)) * 0.4 +
+      perlinNoise(vec3(noise_x * s2, noise_y * s2 + 0.3, -532.0 + u_time * NOISE_SPEED)) * 0.3 +
+      perlinNoise(vec3(noise_x * s3, noise_y * s3 + 0.8, -192.0 + u_time * NOISE_SPEED)) * 0.2;
+  }
+
+  float accent_lightness() {
+    vec2 xy = gl_FragCoord.xy / u_resolution.xy;
+    float noise_x = xy.x * ACCENT_NOISE_SCALE + u_time * NOISE_X_SHIFT;
+    float noise_y = xy.y * ACCENT_NOISE_SCALE * 0.5;
+
+    float s1 = 5.0, s2 = 0.5, s3 = 0.35;
+    return perlinNoise(vec3(noise_x * s1, noise_y * s1 + 0.0, -123.0 + u_time * NOISE_SPEED));
+      // perlinNoise(vec3(noise_x * s2, noise_y * s2 + 0.3, -693.0 + u_time * NOISE_SPEED))
+      // perlinNoise(vec3(noise_x * s3, noise_y * s3 + 0.8, -274.0 + u_time * NOISE_SPEED));
+  }
+
+  vec3 color_from_lightness(float lightness) {
+    lightness = clamp(lightness, 0.0, 1.0);
+    return vec3(texture2D(u_gradient, vec2(lerp(0.00001, 0.999, lightness), 0.5)));
   }
 
   void main() {
@@ -169,18 +196,28 @@ export const fragmentShader = /* glsl */ `
     vec2 w2 = wave2();
     float w2_lightness = w2.x;
     float w2_alpha = w2.y;
-  
-    float lightness = baselineLightness();
 
+    float lightness = bg_lightness();
     lightness = lerp(lightness, w2_lightness, w2_alpha);
     lightness = lerp(lightness, w1_lightness, w1_alpha);
+  
+    vec3 bg_color = color_from_lightness(lightness);
+    // vec3 w1_color = color_from_lightness(w2_lightness);
+    // vec3 w2_color = color_from_lightness(w2_lightness);
 
-    lightness = clamp(lightness, 0.0, 1.0);
+    // lightness = clamp(lightness, 0.0, 1.0);
 
     // Map lightness from red to blue
     // vec4 color = mix(vec4(1.0, 0.0, 0.0, 1.0), vec4(0.0, 0.0, 1.0, 1.0), lightness);
-    vec4 color = texture2D(u_gradient, vec2(lerp(0.00001, 0.999, lightness), 0.5));
+    // vec4 color = texture2D(u_gradient, vec2(lerp(0.00001, 0.999, lightness), 0.5));
     
+    vec4 accent_color = vec4(0.75, 0.37, 1.0, 1.0);
+
+    vec4 color = vec4(bg_color, 1.0);
+
+    // color = mix(color, accent_color, accent_lightness());
+    
+
     gl_FragColor = color;
     // gl_FragColor = vec4(lightness, lightness, lightness, 1.0);
   }
