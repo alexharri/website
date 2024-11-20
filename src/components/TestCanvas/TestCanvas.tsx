@@ -1,6 +1,7 @@
 import { useEffect, useRef } from "react";
 import { StyleOptions, useStyles } from "../../utils/styles";
 import { Renderer } from "./Renderer";
+import { gradients } from "./gradients";
 
 const W = 1200;
 const H = 350;
@@ -26,7 +27,7 @@ export const TestCanvas = () => {
     const canvas = canvasRef.current;
     if (!canvas) return () => {};
 
-    const renderer = new Renderer(canvas, W, H);
+    const renderer = new Renderer(canvas, gradients.blue, W, H);
 
     function tick() {
       if (stop) return;

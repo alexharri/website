@@ -12,18 +12,7 @@ export const vertexShader = /* glsl */ `
   }
 `;
 
-export const blurFragmentShader = /* glsl */ `
-  precision mediump float;
-
-  uniform vec2 u_resolution;
-  uniform sampler2D u_sine_texture;
-
-  void main() {
-    gl_FragColor = texture2D(u_sine_texture, gl_FragCoord.xy / u_resolution);
-  }
-`;
-
-export const sineWaveFragmentShader = /* glsl */ `
+export const fragmentShader = /* glsl */ `
   precision mediump float;
 
   const float PI = 3.14159;
@@ -34,7 +23,8 @@ export const sineWaveFragmentShader = /* glsl */ `
   const float WAVE2_Y = 0.9; // From 0 to 1
   const float WAVE_AMPLITUDE_SCALE = 1.0;
   const float BLUR_AMPLITUDE_SCALE = 1.0;
-  const float BLUR_HEIGHT = 250.0;
+  const float BLUR_HEIGHT = 300.0;
+  const float BLUR_BIAS = 0.8; // Higher means it's harder to get sharp lines (values from 0.8 to 1.2 work great)
   const float WAVE_SPEED = 1.0; // Higher is faster
   const float NOISE_SPEED = 0.05; // Higher is faster
   const float NOISE_SCALE = 1.5; // Higher is smaller
@@ -42,6 +32,7 @@ export const sineWaveFragmentShader = /* glsl */ `
 
   uniform vec2 u_resolution;
   uniform float u_time;
+  uniform sampler2D u_gradient; // height=1, width=N
 
   float W = u_resolution.x;
   float H = u_resolution.y;
@@ -69,9 +60,8 @@ export const sineWaveFragmentShader = /* glsl */ `
   float pow2(float value)
     { return value * value; }
 
-  float lerp(float a, float b, float t) {
-    return a * (1.0 - t) + b * t;
-  }
+  float lerp(float a, float b, float t)
+    { return a * (1.0 - t) + b * t; }
 
   float calc_dist(float wave_y, float wave_height_px, float curve_y_off) {
     float wave_height = wave_height_px / H;
@@ -82,10 +72,15 @@ export const sineWaveFragmentShader = /* glsl */ `
   }
 
   float calc_blur(float blur_sin_sum) {
-    float blur_normalized = (blur_sin_sum + 1.25) * 0.5;
-    // max(0.08, ...) to avoid a near-zero blur that appears to the user as a lack
+    float blur_normalized = (blur_sin_sum + BLUR_BIAS) * 0.5;
+    // Squaring the blur means a quicker transition from no blur to a lot of blur
+    //
+    // Without squaring, we get long semi blurred lines, which don't look great.
+    blur_normalized *= blur_normalized;
+
+    // max(0.1, ...) to avoid a near-zero blur that appears to the user as a lack
     // of anti-aliasing.
-    return smooth_step(max(0.1, blur_normalized)) * BLUR_HEIGHT;
+    return smooth_step(clamp(blur_normalized, 0.1, 1.0)) * BLUR_HEIGHT;
   }
 
   float calc_alpha(float dist, float blur_fac) {
@@ -179,7 +174,14 @@ export const sineWaveFragmentShader = /* glsl */ `
 
     lightness = lerp(lightness, w2_lightness, w2_alpha);
     lightness = lerp(lightness, w1_lightness, w1_alpha);
+
+    lightness = clamp(lightness, 0.0, 1.0);
+
+    // Map lightness from red to blue
+    // vec4 color = mix(vec4(1.0, 0.0, 0.0, 1.0), vec4(0.0, 0.0, 1.0, 1.0), lightness);
+    vec4 color = texture2D(u_gradient, vec2(lerp(0.00001, 0.999, lightness), 0.5));
     
-    gl_FragColor = vec4(lightness, lightness, lightness, 1.0);
+    gl_FragColor = color;
+    // gl_FragColor = vec4(lightness, lightness, lightness, 1.0);
   }
 `;
