@@ -4,16 +4,19 @@ import { Renderer } from "./Renderer";
 import { gradients } from "./gradients";
 
 const W = 1200;
-const H = 350;
+const H = 250;
 
 const styles = ({ styled, theme }: StyleOptions) => ({
   container: styled.css`
-    border: 1px solid ${theme.blue};
     width: ${W + 16}px;
     height: ${H + 16}px;
     padding: 7px;
     border-radius: 4px;
     margin: 0 auto;
+
+    canvas {
+      border-radius: 8px;
+    }
   `,
 });
 

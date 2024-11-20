@@ -119,8 +119,8 @@ export const fragmentShader = /* glsl */ `
     sin_sum += sin(wave_len(9.683) + wave_phase( 0.23) + offset(0.5)) * wave_amp(0.5);
 
     // up-down wave
-    sin_sum += sin(wave_len(200.0) + wave_phase( 0.212) + offset(0.7)) * wave_amp(0.8);
-    sin_sum += sin(wave_len(200.0) + wave_phase(-0.276) + offset(0.3)) * wave_amp(0.6);
+    sin_sum += sin(wave_len(200.0) + wave_phase( 0.112) + offset(0.7)) * wave_amp(0.8);
+    sin_sum += sin(wave_len(200.0) + wave_phase(-0.176) + offset(0.3)) * wave_amp(0.6);
     sin_sum += sin(wave_len(200.0) + wave_phase( 0.148) + offset(0.1)) * wave_amp(0.9);
     
     float blur_sin_sum = 0.0;
