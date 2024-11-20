@@ -29,11 +29,12 @@ export const sineWaveFragmentShader = /* glsl */ `
   const float PI = 3.14159;
   const float WAVE_LENGTH_SCALAR = 1000.0;
   const float WAVE1_HEIGHT = 40.0; // Height in px
-  const float WAVE1_Y = 0.33; // From 0 to 1
-  const float WAVE2_HEIGHT = 60.0; // Height in px
-  const float WAVE2_Y = 0.71; // From 0 to 1
+  const float WAVE1_Y = 0.45; // From 0 to 1
+  const float WAVE2_HEIGHT = 30.0; // Height in px
+  const float WAVE2_Y = 0.9; // From 0 to 1
   const float WAVE_AMPLITUDE_SCALE = 1.0;
   const float BLUR_AMPLITUDE_SCALE = 1.0;
+  const float BLUR_HEIGHT = 250.0;
   const float WAVE_SPEED = 1.0; // Higher is faster
   const float NOISE_SPEED = 0.05; // Higher is faster
   const float NOISE_SCALE = 1.5; // Higher is smaller
@@ -72,6 +73,43 @@ export const sineWaveFragmentShader = /* glsl */ `
     return a * (1.0 - t) + b * t;
   }
 
+  float calc_dist(float wave_y, float wave_height_px, float curve_y_off) {
+    float wave_height = wave_height_px / H;
+    float curve_y = wave_y + curve_y_off * wave_height;
+    float y = gl_FragCoord.y / u_resolution.y;
+    float dist = curve_y - y;
+    return dist;
+  }
+
+  float calc_blur(float blur_sin_sum) {
+    float blur_normalized = (blur_sin_sum + 1.25) * 0.5;
+    // max(0.08, ...) to avoid a near-zero blur that appears to the user as a lack
+    // of anti-aliasing.
+    return smooth_step(max(0.1, blur_normalized)) * BLUR_HEIGHT;
+  }
+
+  float calc_alpha(float dist, float blur_fac) {
+    float dist_sign_pos = (-sign(dist) + 1.0) * 0.5;
+    float dist_sign_neg = 1.0 - dist_sign_pos;
+
+    float delta = dist * u_resolution.y / blur_fac;
+    float alpha_pos = min(1.0, max(0.0, 0.5 + delta));
+    float alpha_neg = min(1.0, max(0.0, 0.5 + -delta));
+
+    float alpha = alpha_pos * dist_sign_pos + (1.0 - alpha_neg) * dist_sign_neg;
+    return smooth_step(alpha);
+  }
+
+  float calc_noise(float off1, float off2) {
+    vec2 xy = gl_FragCoord.xy / u_resolution.xy;
+    float noise_x = xy.x * NOISE_SCALE + u_time * NOISE_X_SHIFT;
+    float noise_y = xy.y * NOISE_SCALE;
+    float noise_raw = perlinNoise(vec3(noise_x, noise_y, off1 + u_time * NOISE_SPEED)) +
+                      perlinNoise(vec3(noise_x, noise_y, off2 + u_time * NOISE_SPEED));
+    float noise = lerp(0.5, 1.2, noise_raw);
+    return noise;
+  }
+
   vec2 wave1() {
     float sin_sum = 0.0;
     sin_sum += sin(wave_len(2.180) + wave_phase(-0.15) + offset(0.3)) * wave_amp(0.6);
@@ -80,17 +118,6 @@ export const sineWaveFragmentShader = /* glsl */ `
     sin_sum += sin(wave_len(3.395) + wave_phase(-0.21) + offset(0.7)) * wave_amp(0.8);
     sin_sum += sin(wave_len(2.683) + wave_phase(0.23) + offset(0.5)) * wave_amp(0.5);
     
-    vec2 xy = gl_FragCoord.xy / u_resolution.xy;
-    float wave_height = WAVE1_HEIGHT / H * 1.0;
-
-    float sin_normalized = (sin_sum + 1.0) * 0.5;
-    float sine_y = sin_normalized * wave_height + WAVE1_Y - (WAVE1_HEIGHT / H) * 0.5;
-    float sine_dist_signed = sine_y - xy.y;
-    float sine_dist = abs(sine_dist_signed);
-    float sine_sign = sign(sine_dist_signed);
-    float sine_pos = ((-sine_sign + 1.0) * 0.5);
-    float sine_neg = 1.0 - sine_pos;
-    
     float blur_sin_sum = 0.0;
     blur_sin_sum += sin(wave_len(4.739) + wave_phase(0.19) + offset(0.0)) * blur_amp(0.6);
     blur_sin_sum += sin(wave_len(3.232) + wave_phase(-0.22) + offset(0.8)) * blur_amp(0.3);
@@ -98,73 +125,45 @@ export const sineWaveFragmentShader = /* glsl */ `
     blur_sin_sum += sin(wave_len(2.937) + wave_phase(-0.25) + offset(0.2)) * blur_amp(0.5);
     blur_sin_sum += sin(wave_len(4.888) + wave_phase(0.12) + offset(0.4)) * blur_amp(0.2);
     blur_sin_sum = min(1.0, max(-1.0, blur_sin_sum));
-
-    float blur_sin = smooth_step((blur_sin_sum + 1.0) * 0.5);
-    float blur_fac = blur_sin * 250.0;
-
-    float delta = sine_dist_signed * u_resolution.y / blur_fac;
-    float alpha_pos = min(1.0, max(0.0, 0.5 + delta));
-    float alpha_neg = min(1.0, max(0.0, 0.5 + -delta));
-
-    float alpha = alpha_pos * sine_pos + (1.0 - alpha_neg) * sine_neg;
     
-    float noise_x = xy.x * NOISE_SCALE + u_time * NOISE_X_SHIFT;
-    float noise_y = xy.y * NOISE_SCALE;
-    float noise_raw = perlinNoise(vec3(noise_x, noise_y, u_time * NOISE_SPEED)) +
-                      perlinNoise(vec3(noise_x, noise_y, 420.0 + u_time * NOISE_SPEED));
-    float noise = lerp(0.5, 1.2, noise_raw);
+    float dist = calc_dist(WAVE1_Y, WAVE1_HEIGHT, sin_sum);
+    float alpha = calc_alpha(dist, calc_blur(blur_sin_sum));
+    float noise = calc_noise(0.0, 420.0);
     return vec2(noise, alpha);
   }
 
   vec2 wave2() {
     float sin_sum = 0.0;
-    sin_sum += sin(wave_len(1430.0) + wave_phase(-0.16) + offset(0.8)) * wave_amp(0.35);
-    sin_sum += sin(wave_len(977.0) + wave_phase(0.18) + offset(0.2)) * wave_amp(0.56);
-    sin_sum += sin(wave_len(721.0) + wave_phase(0.15) + offset(0.7)) * wave_amp(0.4);
-    sin_sum += sin(wave_len(870.0) + wave_phase(-0.23) + offset(0.2)) * wave_amp(0.39);
-    sin_sum += sin(wave_len(1238.0) + wave_phase(0.15) + offset(0.5)) * wave_amp(0.5);
-    
-    vec2 xy = gl_FragCoord.xy / u_resolution.xy;
-    float wave_height = WAVE2_HEIGHT / H * 0.17777;
-
-    float sin_normalized = (sin_sum + 1.0) * 0.5;
-    float sine_y = sin_normalized * wave_height + WAVE2_Y;
-    float sine_dist_signed = xy.y - sine_y;
-    float sine_dist = abs(sine_dist_signed);
-    float sine_sign = sign(sine_dist_signed);
-    float sine_pos = ((-sine_sign + 1.0) * 0.5);
-    float sine_neg = 1.0 - sine_pos;
+    sin_sum += sin(wave_len(4.410) + wave_phase( 0.149) + offset(0.6)) * wave_amp(0.2);
+    sin_sum += sin(wave_len(3.823) + wave_phase(-0.140) + offset(0.4)) * wave_amp(0.7);
+    sin_sum += sin(wave_len(4.274) + wave_phase( 0.173) + offset(0.9)) * wave_amp(0.5);
+    sin_sum += sin(wave_len(3.815) + wave_phase(-0.212) + offset(0.2)) * wave_amp(0.8);
+    sin_sum += sin(wave_len(3.183) + wave_phase( 0.218) + offset(0.1)) * wave_amp(0.4);
     
     float blur_sin_sum = 0.0;
-    blur_sin_sum += sin(wave_len(1220.0) + wave_phase(0.25) + offset(0.2)) * blur_amp(0.47);
-    blur_sin_sum += sin(wave_len(989.0) + wave_phase(0.22) + offset(0.0)) * blur_amp(0.4);
-    blur_sin_sum += sin(wave_len(1463.0) + wave_phase(-0.19) + offset(0.7)) * blur_amp(0.5);
-    blur_sin_sum += sin(wave_len(1280.0) + wave_phase(0.17) + offset(0.4)) * blur_amp(0.4);
-    blur_sin_sum += sin(wave_len(890.0) + wave_phase(-0.14) + offset(0.87)) * blur_amp(0.3);
+    blur_sin_sum += sin(wave_len(3.539) + wave_phase(-0.175) + offset(0.2)) * blur_amp(0.4);
+    blur_sin_sum += sin(wave_len(4.232) + wave_phase( 0.113) + offset(0.5)) * blur_amp(0.7);
+    blur_sin_sum += sin(wave_len(2.893) + wave_phase( 0.142) + offset(0.8)) * blur_amp(0.5);
+    blur_sin_sum += sin(wave_len(3.972) + wave_phase(-0.127) + offset(0.3)) * blur_amp(0.2);
+    blur_sin_sum += sin(wave_len(4.389) + wave_phase( 0.134) + offset(0.1)) * blur_amp(0.5);
     blur_sin_sum = min(1.0, max(-1.0, blur_sin_sum));
 
-    float blur_sin = smooth_step((blur_sin_sum + 1.0) * 0.5);
-    float blur_fac = blur_sin * 250.0;
-
-    float delta = sine_dist_signed * u_resolution.y / blur_fac;
-    float alpha_pos = min(1.0, max(0.0, 0.5 + delta));
-    float alpha_neg = min(1.0, max(0.0, 0.5 + -delta));
-
-    float alpha = alpha_pos * sine_pos + (1.0 - alpha_neg) * sine_neg;
-    
-    float noise_x = xy.x * NOISE_SCALE + u_time * NOISE_X_SHIFT;
-    float noise_y = xy.y * NOISE_SCALE;
-    float noise_raw = perlinNoise(vec3(noise_x, noise_y, -100.0 + u_time * NOISE_SPEED)) +
-                      perlinNoise(vec3(noise_x, noise_y, -420.0 + u_time * NOISE_SPEED));
-    float noise = lerp(0.5, 1.2, noise_raw);
+    float dist = calc_dist(WAVE2_Y, WAVE2_HEIGHT, sin_sum);
+    float alpha = calc_alpha(dist, calc_blur(blur_sin_sum));
+    float noise = calc_noise(-100.0, -420.0);
     return vec2(noise, alpha);
   }
 
   float baselineLightness() {
     vec2 xy = gl_FragCoord.xy / u_resolution.xy;
     float noise_x = xy.x * NOISE_SCALE + u_time * NOISE_X_SHIFT;
-    float noise_y = xy.y * NOISE_SCALE;
-    return perlinNoise(vec3(noise_x, noise_y, -256.0 + u_time * NOISE_SPEED));
+    float noise_y = xy.y * NOISE_SCALE * 0.5 + 0.7;
+
+    float s1 = 0.9, s2 = 0.6, s3 = 0.35;
+    return
+      perlinNoise(vec3(noise_x * s1, noise_y * s1, -256.0 + u_time * NOISE_SPEED)) +
+      perlinNoise(vec3(noise_x * s2, noise_y * s2 + 0.3, -532.0 + u_time * NOISE_SPEED)) +
+      perlinNoise(vec3(noise_x * s3, noise_y * s3 + 0.8, -192.0 + u_time * NOISE_SPEED));
   }
 
   void main() {
@@ -175,12 +174,11 @@ export const sineWaveFragmentShader = /* glsl */ `
     vec2 w2 = wave2();
     float w2_lightness = w2.x;
     float w2_alpha = w2.y;
-    
   
-    float lightness = 0.0; //baselineLightness();
+    float lightness = baselineLightness();
 
+    lightness = lerp(lightness, w2_lightness, w2_alpha);
     lightness = lerp(lightness, w1_lightness, w1_alpha);
-    // lightness = lerp(lightness, w2_lightness, w2_alpha);
     
     gl_FragColor = vec4(lightness, lightness, lightness, 1.0);
   }
