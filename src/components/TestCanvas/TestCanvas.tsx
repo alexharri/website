@@ -6,11 +6,10 @@ import { gradients } from "./gradients";
 const W = 1200;
 const H = 250;
 
-const styles = ({ styled, theme }: StyleOptions) => ({
+const styles = ({ styled }: StyleOptions) => ({
   container: styled.css`
-    width: ${W + 16}px;
-    height: ${H + 16}px;
-    padding: 7px;
+    width: ${W}px;
+    height: ${H}px;
     border-radius: 4px;
     margin: 0 auto;
 
@@ -30,7 +29,7 @@ export const TestCanvas = () => {
     const canvas = canvasRef.current;
     if (!canvas) return () => {};
 
-    const renderer = new Renderer(canvas, gradients.default, W, H);
+    const renderer = new Renderer(canvas, gradients.blue2, W, H);
 
     function tick() {
       if (stop) return;

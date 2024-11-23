@@ -28,7 +28,7 @@ export const fragmentShader = /* glsl */ `
   const float WAVE_SPEED = 1.0; // Higher is faster
   const float NOISE_SPEED = 0.08; // Higher is faster
   const float NOISE_SCALE = 1.5; // Higher is smaller
-  const float ACCENT_NOISE_SCALE = 1.0;
+  const float ACCENT_NOISE_SCALE = 1.0; // Smaller is bigger
   const float NOISE_X_SHIFT = 0.02; // Higher is faster
 
   uniform vec2 u_resolution;
@@ -119,16 +119,17 @@ export const fragmentShader = /* glsl */ `
     sin_sum += sin(wave_len(9.683) + wave_phase( 0.23) + offset(0.5)) * wave_amp(0.5);
 
     // up-down wave
-    sin_sum += sin(wave_len(200.0) + wave_phase( 0.112) + offset(0.7)) * wave_amp(0.8);
-    sin_sum += sin(wave_len(200.0) + wave_phase(-0.176) + offset(0.3)) * wave_amp(0.6);
-    sin_sum += sin(wave_len(200.0) + wave_phase( 0.148) + offset(0.1)) * wave_amp(0.9);
+    sin_sum += sin(wave_len(200.0) + wave_phase( 0.092) + offset(0.7)) * wave_amp(0.8);
+    sin_sum += sin(wave_len(200.0) + wave_phase(-0.136) + offset(0.3)) * wave_amp(0.6);
+    sin_sum += sin(wave_len(200.0) + wave_phase( 0.118) + offset(0.1)) * wave_amp(0.9);
     
     float blur_sin_sum = 0.0;
-    blur_sin_sum += sin(wave_len(4.739) + wave_phase(0.19) + offset(0.0)) * blur_amp(0.6);
-    blur_sin_sum += sin(wave_len(3.232) + wave_phase(-0.22) + offset(0.8)) * blur_amp(0.3);
-    blur_sin_sum += sin(wave_len(3.478) + wave_phase(0.28) + offset(0.4)) * blur_amp(0.2);
-    blur_sin_sum += sin(wave_len(2.937) + wave_phase(-0.25) + offset(0.2)) * blur_amp(0.5);
-    blur_sin_sum += sin(wave_len(4.888) + wave_phase(0.12) + offset(0.4)) * blur_amp(0.2);
+    blur_sin_sum += sin(wave_len( 4.739) + wave_phase(-0.19) + offset(0.9)) * blur_amp(0.6);
+    blur_sin_sum += sin(wave_len( 4.296) + wave_phase( 0.28) + offset(0.1)) * blur_amp(0.4);
+    blur_sin_sum += sin(wave_len(12.232) + wave_phase(-0.32) + offset(0.8)) * blur_amp(0.6);
+    blur_sin_sum += sin(wave_len( 8.478) + wave_phase( 0.28) + offset(0.4)) * blur_amp(0.2);
+    blur_sin_sum += sin(wave_len( 3.937) + wave_phase(-0.25) + offset(0.2)) * blur_amp(0.5);
+    blur_sin_sum += sin(wave_len( 7.888) + wave_phase( 0.19) + offset(0.4)) * blur_amp(0.3);
     blur_sin_sum = min(1.0, max(-1.0, blur_sin_sum));
     
     float dist = calc_dist(WAVE1_Y, WAVE1_HEIGHT, sin_sum);
@@ -159,7 +160,7 @@ export const fragmentShader = /* glsl */ `
     return vec2(noise, alpha);
   }
 
-  float bg_lightness() {
+  float calc_bg_lightness() {
     vec2 xy = gl_FragCoord.xy / u_resolution.xy;
     float noise_x = xy.x * NOISE_SCALE + u_time * NOISE_X_SHIFT;
     float noise_y = xy.y * NOISE_SCALE * 0.5;
@@ -172,15 +173,22 @@ export const fragmentShader = /* glsl */ `
       perlinNoise(vec3(noise_x * s3, noise_y * s3 + 0.8, -192.0 + u_time * NOISE_SPEED)) * 0.2;
   }
 
-  float accent_lightness() {
+  float accent_lightness(float off1, float off2) {
     vec2 xy = gl_FragCoord.xy / u_resolution.xy;
     float noise_x = xy.x * ACCENT_NOISE_SCALE + u_time * NOISE_X_SHIFT;
-    float noise_y = xy.y * ACCENT_NOISE_SCALE * 0.5;
+    float noise_y = xy.y * ACCENT_NOISE_SCALE * 1.15;
+    float off3 = off1 - off2;
 
-    float s1 = 5.0, s2 = 0.5, s3 = 0.35;
-    return perlinNoise(vec3(noise_x * s1, noise_y * s1 + 0.0, -123.0 + u_time * NOISE_SPEED));
-      // perlinNoise(vec3(noise_x * s2, noise_y * s2 + 0.3, -693.0 + u_time * NOISE_SPEED))
-      // perlinNoise(vec3(noise_x * s3, noise_y * s3 + 0.8, -274.0 + u_time * NOISE_SPEED));
+    // s1 is smaller than s2
+    float s1 = 1.5, s2 = 1.0, s3 = 0.7;
+    float noise = -0.0;
+    noise += perlinNoise(vec3(noise_x * s1, noise_y * s1 + 0.0, off1 + u_time * NOISE_SPEED)) * 0.75;
+    noise += perlinNoise(vec3(noise_x * s2, noise_y * s2 + 0.3, off2 + u_time * NOISE_SPEED)) * 0.6;
+    noise += perlinNoise(vec3(noise_x * s3, noise_y * s3 + 0.7, off3 + u_time * NOISE_SPEED)) * 0.4;
+    float t = clamp(noise, 0.0, 1.0);
+    t = sqrt(t);
+    t = smooth_step(t);
+    return t;
   }
 
   vec3 color_from_lightness(float lightness) {
@@ -189,36 +197,31 @@ export const fragmentShader = /* glsl */ `
   }
 
   void main() {
-    vec2 w1 = wave1();
-    float w1_lightness = w1.x;
-    float w1_alpha = w1.y;
+    vec2 w1 = wave1(), w2 = wave2();
+    float bg_lightness = calc_bg_lightness();
+    float w1_lightness = w1.x, w1_alpha = w1.y;
+    float w2_lightness = w2.x, w2_alpha = w2.y;
+    vec3 w1_color = color_from_lightness(w1_lightness);
+    vec3 w2_color = color_from_lightness(w2_lightness);
+    vec3 bg_color = color_from_lightness(bg_lightness);
 
-    vec2 w2 = wave2();
-    float w2_lightness = w2.x;
-    float w2_alpha = w2.y;
+    
+    float bg_acc_t = accent_lightness(-397.2,   64.2);
+    float w1_acc_t = accent_lightness( 163.2, -512.3);
+    float w2_acc_t = accent_lightness( 433.2,  127.9);
 
-    float lightness = bg_lightness();
-    lightness = lerp(lightness, w2_lightness, w2_alpha);
-    lightness = lerp(lightness, w1_lightness, w1_alpha);
+    vec3 accent_color = vec3(0.75, 0.37, 1.0);
+    bg_color = mix(bg_color, accent_color, clamp(bg_acc_t - bg_lightness, 0.0, 1.0));
+    w1_color = mix(w1_color, accent_color, clamp(w1_acc_t - w1_lightness, 0.0, 1.0));
+    w2_color = mix(w2_color, accent_color, clamp(w2_acc_t - w2_lightness, 0.0, 1.0));
+
+    vec3 color = color_from_lightness(0.0);
+    color = bg_color;
+    color = mix(color, w2_color, w2_alpha);
+    color = mix(color, w1_color, w1_alpha);
   
-    vec3 bg_color = color_from_lightness(lightness);
-    // vec3 w1_color = color_from_lightness(w2_lightness);
-    // vec3 w2_color = color_from_lightness(w2_lightness);
 
-    // lightness = clamp(lightness, 0.0, 1.0);
-
-    // Map lightness from red to blue
-    // vec4 color = mix(vec4(1.0, 0.0, 0.0, 1.0), vec4(0.0, 0.0, 1.0, 1.0), lightness);
-    // vec4 color = texture2D(u_gradient, vec2(lerp(0.00001, 0.999, lightness), 0.5));
-    
-    vec4 accent_color = vec4(0.75, 0.37, 1.0, 1.0);
-
-    vec4 color = vec4(bg_color, 1.0);
-
-    // color = mix(color, accent_color, accent_lightness());
-    
-
-    gl_FragColor = color;
+    gl_FragColor = vec4(color, 1.0);
     // gl_FragColor = vec4(lightness, lightness, lightness, 1.0);
   }
 `;
