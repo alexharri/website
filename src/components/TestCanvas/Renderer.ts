@@ -18,8 +18,10 @@ export class Renderer {
 
   constructor(
     canvas: HTMLCanvasElement,
-    gradient: string[],
-    accentColor: string | null,
+    colorConfig: {
+      gradient: string[];
+      accentColor?: string | null;
+    },
     private W: number,
     private H: number,
   ) {
@@ -34,7 +36,7 @@ export class Renderer {
     this.program = Renderer.createProgram(
       gl,
       shaders.vertexShader,
-      shaders.createFragmentShader({ accentColor }),
+      shaders.createFragmentShader({ accentColor: colorConfig.accentColor }),
     );
     this.a_position = gl.getAttribLocation(this.program, "a_position");
     this.positionBuffer = gl.createBuffer();
@@ -43,7 +45,7 @@ export class Renderer {
     this.u_resolution = gl.getUniformLocation(this.program, "u_resolution");
     this.u_time = gl.getUniformLocation(this.program, "u_time");
 
-    Renderer.writeGradientToTexture(gl, gradient, this.gradientTexture, 1000, 2);
+    Renderer.writeGradientToTexture(gl, colorConfig.gradient, this.gradientTexture, 1000, 2);
 
     // Place positions into buffer
     gl.bindBuffer(gl.ARRAY_BUFFER, this.positionBuffer);

@@ -25,8 +25,13 @@ interface Options {
   };
 }
 
-function includeif(condition: boolean, content: () => string) {
-  if (condition) return content();
+function includeif(
+  condition: boolean,
+  ifContent: () => string,
+  elseContent?: () => string,
+): string {
+  if (condition) return ifContent();
+  if (elseContent) return elseContent();
   return "";
 }
 
@@ -285,6 +290,8 @@ export function createFragmentShader(options: Options) {
   
       ${includeif(
         options.accentColor != null,
+
+        // if we're using an accent color
         () => /* glsl */ `
         float bg_accent_color_blend_fac = accent_lightness(-397.2,   64.2);
         float w1_accent_color_blend_fac = accent_lightness( 163.2, -512.3);
@@ -298,19 +305,30 @@ export function createFragmentShader(options: Options) {
         bg_color = mix(bg_color, accent_color, bg_accent_color_blend_fac);
         w1_color = mix(w1_color, accent_color, bg_accent_color_blend_fac);
         w2_color = mix(w2_color, accent_color, bg_accent_color_blend_fac);
+
+        // Comment out to visualize alpha mixing
+        //
+        // bg_color = vec3(1.0, 0.0, 0.0);
+        // w1_color = vec3(0.0, 0.0, 1.0);
+        // w2_color = vec3(0.0, 1.0, 0.0);
+    
+        vec3 color = bg_color;
+        color = mix(color, w2_color, w2_alpha);
+        color = mix(color, w1_color, w1_alpha);
+        `,
+
+        // else: we're not using an accent color
+        //
+        // In this case, we can compute a single lightness value and determine the color for
+        // that lightness. We don't need to perform any color blending, so we avoid washed out
+        // middle colors (see https://www.joshwcomeau.com/css/make-beautiful-gradients/).
+        () => /* glsl */ `
+          float lightness = bg_lightness;
+          lightness = lerp(lightness, w1_lightness, w1_alpha);
+          lightness = lerp(lightness, w2_lightness, w2_alpha);
+          vec3 color = color_from_lightness(lightness);
         `,
       )}
-  
-      // Comment out to visualize alpha mixing
-      //
-      // bg_color = vec3(1.0, 0.0, 0.0);
-      // w1_color = vec3(0.0, 0.0, 1.0);
-      // w2_color = vec3(0.0, 1.0, 0.0);
-  
-      vec3 color = color_from_lightness(0.0);
-      color = bg_color;
-      color = mix(color, w2_color, w2_alpha);
-      color = mix(color, w1_color, w1_alpha);
     
       gl_FragColor = vec4(color, 1.0);
     }
