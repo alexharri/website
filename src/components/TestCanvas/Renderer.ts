@@ -16,7 +16,13 @@ export class Renderer {
   private u_time: WebGLUniformLocation | null;
   private u_gradient: WebGLUniformLocation | null;
 
-  constructor(canvas: HTMLCanvasElement, gradient: string[], private W: number, private H: number) {
+  constructor(
+    canvas: HTMLCanvasElement,
+    gradient: string[],
+    accentColor: string | null,
+    private W: number,
+    private H: number,
+  ) {
     const gl = canvas.getContext("webgl", { premultipliedAlpha: false });
     if (!gl) {
       throw new Error("Failed to acquire WebGL context");
@@ -25,7 +31,11 @@ export class Renderer {
     this.numPositions = this.positions().length / 2; // Positions are vec2
 
     // prettier-ignore
-    this.program = Renderer.createProgram(gl, shaders.vertexShader, shaders.fragmentShader);
+    this.program = Renderer.createProgram(
+      gl,
+      shaders.vertexShader,
+      shaders.createFragmentShader({ accentColor }),
+    );
     this.a_position = gl.getAttribLocation(this.program, "a_position");
     this.positionBuffer = gl.createBuffer();
     this.gradientTexture = gl.createTexture();

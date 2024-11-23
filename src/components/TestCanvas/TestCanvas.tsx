@@ -29,7 +29,7 @@ export const TestCanvas = () => {
     const canvas = canvasRef.current;
     if (!canvas) return () => {};
 
-    const renderer = new Renderer(canvas, gradients.blue2, W, H);
+    const renderer = new Renderer(canvas, gradients.blue2, "#f26bff", W, H);
 
     function tick() {
       if (stop) return;
