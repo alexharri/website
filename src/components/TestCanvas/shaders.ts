@@ -1,3 +1,4 @@
+import { lerp } from "../../math/lerp";
 import { hexToRgb } from "../../utils/color";
 import { perlinNoise } from "./noise";
 
@@ -20,6 +21,8 @@ function hexToVec3(hex: string) {
 
 interface Options {
   accentColor?: string | null;
+  blurQuality?: number;
+  blurExponentRange?: [number, number];
   constants?: {
     BLUR_HEIGHT?: number;
   };
@@ -36,6 +39,7 @@ function includeif(
 }
 
 export function createFragmentShader(options: Options) {
+  const { blurQuality = 7, blurExponentRange = [0.96, 1.15] } = options;
   const { BLUR_HEIGHT = 230 } = options.constants ?? {};
 
   return /* glsl */ `
@@ -69,7 +73,7 @@ export function createFragmentShader(options: Options) {
   
     ${perlinNoise}
   
-    float smoothstep(float t)
+    float smooth_step(float t)
       { return t * t * t * (t * (6.0 * t - 15.0) + 10.0); }
       
     float lerp(float a, float b, float t)
@@ -125,55 +129,34 @@ export function createFragmentShader(options: Options) {
       
       float blur_fac = (blur_sin_sum + bias) * 0.5;
   
-      float BLEED = 0.15;
-      float b1 = pow(blur_fac, 1.0 + BLEED * 1.0);
-      float b2 = pow(blur_fac, 1.0 + BLEED * 0.6);
-      float b3 = pow(blur_fac, 1.0 + BLEED * 0.4);
-      float b4 = pow(blur_fac, 1.0 + BLEED * 0.0);
-      float b5 = pow(blur_fac, 1.0 - BLEED * 0.1);
-      float b6 = pow(blur_fac, 1.0 - BLEED * 0.25);
+
+      ${Array.from({ length: blurQuality })
+        .map((_, i) => {
+          const varName = `b${i}`;
+          const t = blurQuality === 1 ? 0.5 : i / (blurQuality - 1);
+          const exp = lerp(blurExponentRange[0], blurExponentRange[1], t);
+          return /* glsl */ `
+          float ${varName} = pow(blur_fac, ${exp.toFixed(1)});
+          ${varName} = ease_in(${varName});
+          ${varName} = smooth_step(${varName});
+          ${varName} = clamp(${varName}, 0.005, 1.0);
+          ${varName} *= BLUR_HEIGHT;
+        `;
+        })
+        .join("")}
+
+      float b_sum = 0.0;
+
+      ${Array.from({ length: blurQuality })
+        .map((_, i) => {
+          const varName = `b${i}`;
+          return /* glsl */ `
+          b_sum += alpha_part(dist, ${varName}) * ${(1 / blurQuality).toFixed(5)};
+        `;
+        })
+        .join("")}
   
-      b1 = ease_in(b1);
-      b2 = ease_in(b2);
-      b3 = ease_in(b3);
-      b4 = ease_in(b4);
-      b5 = ease_in(b5);
-      b6 = ease_in(b6);
-  
-      b1 = smoothstep(b1);
-      b2 = smoothstep(b2);
-      b3 = smoothstep(b3);
-      b4 = smoothstep(b4);
-      b5 = smoothstep(b5);
-      b6 = smoothstep(b6);
-  
-      b1 = clamp(b1, 0.005, 1.0);
-      b2 = clamp(b2, 0.005, 1.0);
-      b3 = clamp(b3, 0.005, 1.0);
-      b4 = clamp(b4, 0.005, 1.0);
-      b5 = clamp(b5, 0.005, 1.0);
-      b6 = clamp(b6, 0.005, 1.0);
-  
-      float b1_fac = b1 * BLUR_HEIGHT;
-      float b2_fac = b2 * BLUR_HEIGHT;
-      float b3_fac = b3 * BLUR_HEIGHT;
-      float b4_fac = b4 * BLUR_HEIGHT;
-      float b5_fac = b5 * BLUR_HEIGHT;
-      float b6_fac = b6 * BLUR_HEIGHT;
-  
-      float dist_sign_pos = (-sign(dist) + 1.0) * 0.5;
-      float dist_sign_neg = 1.0 - dist_sign_pos;
-  
-      float N = 6.0;
-      float F = 1.0 / N;
-      return
-        alpha_part(dist, b1_fac) * F +
-        alpha_part(dist, b2_fac) * F +
-        alpha_part(dist, b3_fac) * F +
-        alpha_part(dist, b4_fac) * F +
-        alpha_part(dist, b5_fac) * F +
-        alpha_part(dist, b6_fac) * F +
-        0.0;
+      return b_sum;
     }
   
     float calc_noise(float off1, float off2) {
@@ -268,7 +251,7 @@ export function createFragmentShader(options: Options) {
       noise += 0.45;
       float t = clamp(noise, 0.0, 1.0);
       t = pow(t, 2.0);
-      // t = smoothstep(t);
+      // t = smooth_step(t);
       t = ease_out(t);
       return t;
     }

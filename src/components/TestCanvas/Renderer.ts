@@ -33,6 +33,7 @@ export class Renderer {
     this.numPositions = this.positions().length / 2; // Positions are vec2
 
     // prettier-ignore
+    console.log({ shader: shaders.createFragmentShader({ accentColor: colorConfig.accentColor })})
     this.program = Renderer.createProgram(
       gl,
       shaders.vertexShader,
