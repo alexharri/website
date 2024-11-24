@@ -108,7 +108,7 @@ export function createFragmentShader(options: Options) {
       float dist_sign_pos = (-sign(dist) + 1.0) * 0.5;
       float dist_sign_neg = 1.0 - dist_sign_pos;
   
-      float d2 = dist * u_resolution.y / fac;
+      float d2 = dist * H / fac;
       float alpha_pos = clamp(0.5 + d2, 0.0, 1.0);
       float alpha_neg = clamp(0.5 - d2, 0.0, 1.0);
       float alpha = alpha_pos * dist_sign_pos + (1.0 - alpha_neg) * dist_sign_neg;
@@ -165,13 +165,14 @@ export function createFragmentShader(options: Options) {
       float dist_sign_neg = 1.0 - dist_sign_pos;
   
       float N = 6.0;
+      float F = 1.0 / N;
       return
-        alpha_part(dist, b1_fac) / N +
-        alpha_part(dist, b2_fac) / N +
-        alpha_part(dist, b3_fac) / N +
-        alpha_part(dist, b4_fac) / N +
-        alpha_part(dist, b5_fac) / N +
-        alpha_part(dist, b6_fac) / N +
+        alpha_part(dist, b1_fac) * F +
+        alpha_part(dist, b2_fac) * F +
+        alpha_part(dist, b3_fac) * F +
+        alpha_part(dist, b4_fac) * F +
+        alpha_part(dist, b5_fac) * F +
+        alpha_part(dist, b6_fac) * F +
         0.0;
     }
   
