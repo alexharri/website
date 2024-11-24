@@ -64,11 +64,11 @@ export function createFragmentShader(options: Options) {
   
     ${perlinNoise}
   
-    float smooth_step(float t)
+    float smoothstep(float t)
       { return t * t * t * (t * (6.0 * t - 15.0) + 10.0); }
   
     float wave_len(float value)
-      { return ((gl_FragCoord.x / 1.0) / (u_resolution.x / W)) * 0.02 * (1.0 / value); }
+      { return gl_FragCoord.x * 0.02 / value; }
   
     float wave_phase(float phase)
       { return u_time * phase * WAVE_SPEED; }
@@ -141,12 +141,12 @@ export function createFragmentShader(options: Options) {
       b5 = EaseInSine(b5);
       b6 = EaseInSine(b6);
   
-      b1 = smooth_step(b1);
-      b2 = smooth_step(b2);
-      b3 = smooth_step(b3);
-      b4 = smooth_step(b4);
-      b5 = smooth_step(b5);
-      b6 = smooth_step(b6);
+      b1 = smoothstep(b1);
+      b2 = smoothstep(b2);
+      b3 = smoothstep(b3);
+      b4 = smoothstep(b4);
+      b5 = smoothstep(b5);
+      b6 = smoothstep(b6);
   
       b1 = clamp(b1, 0.005, 1.0);
       b2 = clamp(b2, 0.005, 1.0);
@@ -270,7 +270,7 @@ export function createFragmentShader(options: Options) {
       noise += 0.45;
       float t = clamp(noise, 0.0, 1.0);
       t = pow(t, 2.0);
-      // t = smooth_step(t);
+      // t = smoothstep(t);
       t = EaseOutSine(t);
       return t;
     }
