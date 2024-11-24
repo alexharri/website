@@ -42,6 +42,7 @@ export function createFragmentShader(options: Options) {
     precision mediump float;
   
     const float PI = 3.14159;
+    const float TAU = PI * 2.0;
     const float WAVE1_HEIGHT = 40.0; // Height in px
     const float WAVE1_Y = 0.45; // From 0 to 1
     const float WAVE2_HEIGHT = 30.0; // Height in px
@@ -61,17 +62,22 @@ export function createFragmentShader(options: Options) {
   
     float W = u_resolution.x;
     float H = u_resolution.y;
+
+    float wave_phase_multiplier = u_time * WAVE_SPEED;
   
     ${perlinNoise}
   
     float smoothstep(float t)
       { return t * t * t * (t * (6.0 * t - 15.0) + 10.0); }
+      
+    float lerp(float a, float b, float t)
+      { return a * (1.0 - t) + b * t; }
   
     float wave_len(float value)
       { return gl_FragCoord.x * 0.02 / value; }
   
     float wave_phase(float phase)
-      { return u_time * phase * WAVE_SPEED; }
+      { return phase * wave_phase_multiplier; }
   
     float wave_amp(float value)
       { return value * WAVE_AMPLITUDE_SCALE; }
@@ -79,14 +85,8 @@ export function createFragmentShader(options: Options) {
     float blur_amp(float value)
       { return value * BLUR_AMPLITUDE_SCALE; }
   
-    float offset(float t)
-      { return t * PI * 2.0; }
-  
-    float pow2(float value)
-      { return value * value; }
-  
-    float lerp(float a, float b, float t)
-      { return a * (1.0 - t) + b * t; }
+    float wave_offset(float t)
+      { return t * TAU; }
   
     float calc_dist(float wave_y, float wave_height_px, float curve_y_off) {
       float wave_height = wave_height_px / H;
@@ -194,23 +194,23 @@ export function createFragmentShader(options: Options) {
   
     vec2 wave1() {
       float sin_sum = 0.0;
-      sin_sum += sin(wave_len(5.180) + wave_phase(-0.15) + offset(0.3)) * wave_amp(0.6);
-      sin_sum += sin(wave_len(3.193) + wave_phase( 0.18) + offset(0.2)) * wave_amp(0.8);
-      sin_sum += sin(wave_len(5.974) + wave_phase( 0.13) + offset(0.0)) * wave_amp(0.6);
-      sin_sum += sin(wave_len(6.395) + wave_phase(-0.21) + offset(0.7)) * wave_amp(0.4);
-      sin_sum += sin(wave_len(3.683) + wave_phase( 0.23) + offset(0.5)) * wave_amp(0.5);
+      sin_sum += sin(wave_len(5.180) + wave_phase(-0.15) + wave_offset(0.3)) * wave_amp(0.6);
+      sin_sum += sin(wave_len(3.193) + wave_phase( 0.18) + wave_offset(0.2)) * wave_amp(0.8);
+      sin_sum += sin(wave_len(5.974) + wave_phase( 0.13) + wave_offset(0.0)) * wave_amp(0.6);
+      sin_sum += sin(wave_len(6.395) + wave_phase(-0.21) + wave_offset(0.7)) * wave_amp(0.4);
+      sin_sum += sin(wave_len(3.683) + wave_phase( 0.23) + wave_offset(0.5)) * wave_amp(0.5);
       
       // up-down wave
-      sin_sum += sin(wave_len(200.0) + wave_phase( 0.092) + offset(0.7)) * wave_amp(0.8);
-      sin_sum += sin(wave_len(200.0) + wave_phase(-0.136) + offset(0.3)) * wave_amp(0.6);
-      sin_sum += sin(wave_len(200.0) + wave_phase( 0.118) + offset(0.1)) * wave_amp(0.9);
+      sin_sum += sin(wave_len(200.0) + wave_phase( 0.092) + wave_offset(0.7)) * wave_amp(0.8);
+      sin_sum += sin(wave_len(200.0) + wave_phase(-0.136) + wave_offset(0.3)) * wave_amp(0.6);
+      sin_sum += sin(wave_len(200.0) + wave_phase( 0.118) + wave_offset(0.1)) * wave_amp(0.9);
       
       float blur_sin_sum = 0.0;
-      blur_sin_sum += sin(wave_len( 7.296) + wave_phase( 0.28) + offset(0.1)) * blur_amp(0.58);
-      blur_sin_sum += sin(wave_len( 4.739) + wave_phase(-0.19) + offset(0.9)) * blur_amp(0.43);
-      blur_sin_sum += sin(wave_len( 5.973) + wave_phase( 0.15) + offset(0.4)) * blur_amp(0.54);
-      blur_sin_sum += sin(wave_len( 3.375) + wave_phase(-0.26) + offset(0.3)) * blur_amp(0.39);
-      blur_sin_sum += sin(wave_len( 6.478) + wave_phase( 0.23) + offset(0.8)) * blur_amp(0.35);
+      blur_sin_sum += sin(wave_len( 7.296) + wave_phase( 0.28) + wave_offset(0.1)) * blur_amp(0.58);
+      blur_sin_sum += sin(wave_len( 4.739) + wave_phase(-0.19) + wave_offset(0.9)) * blur_amp(0.43);
+      blur_sin_sum += sin(wave_len( 5.973) + wave_phase( 0.15) + wave_offset(0.4)) * blur_amp(0.54);
+      blur_sin_sum += sin(wave_len( 3.375) + wave_phase(-0.26) + wave_offset(0.3)) * blur_amp(0.39);
+      blur_sin_sum += sin(wave_len( 6.478) + wave_phase( 0.23) + wave_offset(0.8)) * blur_amp(0.35);
       // blur_sin_sum = min(1.0, max(-1.0, blur_sin_sum));
       
       float dist = calc_dist(WAVE1_Y, WAVE1_HEIGHT, sin_sum);
@@ -221,18 +221,18 @@ export function createFragmentShader(options: Options) {
   
     vec2 wave2() {
       float sin_sum = 0.0;
-      sin_sum += sin(wave_len(4.410) + wave_phase( 0.149) + offset(0.6)) * wave_amp(0.2);
-      sin_sum += sin(wave_len(3.823) + wave_phase(-0.140) + offset(0.4)) * wave_amp(0.7);
-      sin_sum += sin(wave_len(4.274) + wave_phase( 0.173) + offset(0.9)) * wave_amp(0.5);
-      sin_sum += sin(wave_len(3.815) + wave_phase(-0.212) + offset(0.2)) * wave_amp(0.8);
-      sin_sum += sin(wave_len(3.183) + wave_phase( 0.218) + offset(0.1)) * wave_amp(0.4);
+      sin_sum += sin(wave_len(4.410) + wave_phase( 0.149) + wave_offset(0.6)) * wave_amp(0.2);
+      sin_sum += sin(wave_len(3.823) + wave_phase(-0.140) + wave_offset(0.4)) * wave_amp(0.7);
+      sin_sum += sin(wave_len(4.274) + wave_phase( 0.173) + wave_offset(0.9)) * wave_amp(0.5);
+      sin_sum += sin(wave_len(3.815) + wave_phase(-0.212) + wave_offset(0.2)) * wave_amp(0.8);
+      sin_sum += sin(wave_len(3.183) + wave_phase( 0.218) + wave_offset(0.1)) * wave_amp(0.4);
       
       float blur_sin_sum = 0.0;
-      blur_sin_sum += sin(wave_len(3.539) + wave_phase(-0.175) + offset(0.2)) * blur_amp(0.4);
-      blur_sin_sum += sin(wave_len(4.232) + wave_phase( 0.113) + offset(0.5)) * blur_amp(0.7);
-      blur_sin_sum += sin(wave_len(2.893) + wave_phase( 0.142) + offset(0.8)) * blur_amp(0.5);
-      blur_sin_sum += sin(wave_len(3.972) + wave_phase(-0.127) + offset(0.3)) * blur_amp(0.2);
-      blur_sin_sum += sin(wave_len(4.389) + wave_phase( 0.134) + offset(0.1)) * blur_amp(0.5);
+      blur_sin_sum += sin(wave_len(3.539) + wave_phase(-0.175) + wave_offset(0.2)) * blur_amp(0.4);
+      blur_sin_sum += sin(wave_len(4.232) + wave_phase( 0.113) + wave_offset(0.5)) * blur_amp(0.7);
+      blur_sin_sum += sin(wave_len(2.893) + wave_phase( 0.142) + wave_offset(0.8)) * blur_amp(0.5);
+      blur_sin_sum += sin(wave_len(3.972) + wave_phase(-0.127) + wave_offset(0.3)) * blur_amp(0.2);
+      blur_sin_sum += sin(wave_len(4.389) + wave_phase( 0.134) + wave_offset(0.1)) * blur_amp(0.5);
       // blur_sin_sum = min(1.0, max(-1.0, blur_sin_sum));
   
       float dist = calc_dist(WAVE2_Y, WAVE2_HEIGHT, sin_sum);
