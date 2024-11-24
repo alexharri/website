@@ -36,26 +36,25 @@ function includeif(
 }
 
 export function createFragmentShader(options: Options) {
-  const { BLUR_HEIGHT = 300 } = options.constants ?? {};
+  const { BLUR_HEIGHT = 230 } = options.constants ?? {};
 
   return /* glsl */ `
     precision mediump float;
   
     const float PI = 3.14159;
-    const float WAVE_LENGTH_SCALAR = 1000.0;
     const float WAVE1_HEIGHT = 40.0; // Height in px
     const float WAVE1_Y = 0.45; // From 0 to 1
     const float WAVE2_HEIGHT = 30.0; // Height in px
     const float WAVE2_Y = 0.9; // From 0 to 1
-    const float WAVE_AMPLITUDE_SCALE = 1.0;
-    const float BLUR_AMPLITUDE_SCALE = 1.0;
+    const float WAVE_AMPLITUDE_SCALE = 1.2;
+    const float BLUR_AMPLITUDE_SCALE = 0.5;
     const float BLUR_HEIGHT = ${BLUR_HEIGHT.toFixed(1)};
-    const float BLUR_BIAS = 1.1; // Higher means it's harder to get sharp lines (values from 0.8 to 1.2 work great)
-    const float WAVE_SPEED = 1.0; // Higher is faster
-    const float NOISE_SPEED = 0.08; // Higher is faster
-    const float NOISE_SCALE = 1.5; // Higher is smaller
+    const float BLUR_BIAS = 1.0; // Higher means it's harder to get sharp lines (values from 0.8 to 1.2 work great)
+    const float WAVE_SPEED = 0.8; // Higher is faster
+    const float NOISE_SPEED = 0.084; // Higher is faster
+    const float NOISE_SCALE = 1.0; // Higher is smaller
     const float ACCENT_NOISE_SCALE = 1.0; // Smaller is bigger
-    const float NOISE_X_SHIFT = 0.02; // Higher is faster
+    const float NOISE_X_SHIFT = 0.04; // Higher is faster
   
     uniform vec2 u_resolution;
     uniform float u_time;
@@ -128,12 +127,13 @@ export function createFragmentShader(options: Options) {
       float b5 = (blur_sin_sum + BLUR_BIAS) * 0.5;
       float b6 = (blur_sin_sum + BLUR_BIAS) * 0.5;
   
-      b1 = pow(b1, 1.5);
-      b2 = pow(b2, 1.3);
-      b3 = pow(b3, 1.0);
-      b4 = pow(b4, 0.8);
-      b5 = pow(b5, 0.6);
-      b6 = pow(b6, 0.4);
+      float BLEED = 0.15;
+      b1 = pow(b1, 1.0 + BLEED * 1.0);
+      b2 = pow(b2, 1.0 + BLEED * 0.6);
+      b3 = pow(b3, 1.0 + BLEED * 0.4);
+      b4 = pow(b4, 1.0 + BLEED * 0.0);
+      b5 = pow(b5, 1.0 - BLEED * 0.1);
+      b6 = pow(b6, 1.0 - BLEED * 0.25);
   
       b1 = EaseInSine(b1);
       b2 = EaseInSine(b2);
@@ -180,16 +180,18 @@ export function createFragmentShader(options: Options) {
   
     float calc_noise(float off1, float off2) {
       vec2 xy = gl_FragCoord.xy / u_resolution.xy;
-      float noise_x = xy.x * NOISE_SCALE + u_time * NOISE_X_SHIFT;
+      float noise_x = xy.x * NOISE_SCALE;
       float noise_y = xy.y * NOISE_SCALE;
-      float s1 = 1.0, s2 = 0.7, s3 = 0.4;
+      float s1 = 1.4, s2 = 1.0, s3 = 0.8, s4 = 0.4;
       float off3 = off1 - off2;
+      float off4 = off1 * off2;
       float noise_raw =
-        perlinNoise(vec3(noise_x * s1, noise_y * s1, off1 + u_time * NOISE_SPEED)) * 0.4 +
-        perlinNoise(vec3(noise_x * s2, noise_y * s2, off2 + u_time * NOISE_SPEED)) * 0.35 +
-        perlinNoise(vec3(noise_x * s2, noise_y * s2, off3 + u_time * NOISE_SPEED)) * 0.25 +
+        perlinNoise(vec3(noise_x * s1 + u_time * NOISE_X_SHIFT * 1.5, noise_y * s1, off1 + u_time * NOISE_SPEED)) * 0.55 +
+        perlinNoise(vec3(noise_x * s2 + u_time * NOISE_X_SHIFT * 0.8, noise_y * s2, off2 + u_time * NOISE_SPEED)) * 0.45 +
+        perlinNoise(vec3(noise_x * s3 + u_time * -NOISE_X_SHIFT, noise_y * s3, off3 + u_time * NOISE_SPEED)) * 0.35 +
+        perlinNoise(vec3(noise_x * s4 + u_time * NOISE_X_SHIFT, noise_y * s4, off4 + u_time * NOISE_SPEED)) * 0.35 +
         0.5;
-      return smooth_step(noise_raw);
+      return noise_raw;
     }
   
     vec2 wave1() {
@@ -256,19 +258,22 @@ export function createFragmentShader(options: Options) {
   
     float accent_lightness(float off1, float off2) {
       vec2 xy = gl_FragCoord.xy / u_resolution.xy;
-      float noise_x = xy.x * ACCENT_NOISE_SCALE + u_time * NOISE_X_SHIFT;
-      float noise_y = xy.y * ACCENT_NOISE_SCALE * 1.15;
+      float noise_x = xy.x * ACCENT_NOISE_SCALE;
+      float noise_y = xy.y * ACCENT_NOISE_SCALE * 1.0;
       float off3 = off1 - off2;
+      float off4 = off1 * off2;
   
       // s1 is smaller than s2
-      float s1 = 1.5, s2 = 1.0, s3 = 0.7;
+      float s1 = 2.5, s2 = 1.8, s3 = 1.0;
       float noise = -0.0;
-      noise += perlinNoise(vec3(noise_x * s1, noise_y * s1 + 0.0, off1 + u_time * NOISE_SPEED)) * 0.75;
-      noise += perlinNoise(vec3(noise_x * s2, noise_y * s2 + 0.3, off2 + u_time * NOISE_SPEED)) * 0.6;
-      noise += perlinNoise(vec3(noise_x * s3, noise_y * s3 + 0.7, off3 + u_time * NOISE_SPEED)) * 0.4;
+      noise += perlinNoise(vec3(noise_x * s1 + u_time * NOISE_X_SHIFT * 1.2, noise_y * s1 + 0.0, off1 + u_time * NOISE_SPEED)) * 0.7;
+      noise += perlinNoise(vec3(noise_x * s2 + u_time * -NOISE_X_SHIFT * 1.5, noise_y * s2 + 0.3, off2 + u_time * NOISE_SPEED)) * 0.5;
+      noise += perlinNoise(vec3(noise_x * s3 + u_time * NOISE_X_SHIFT * 0.8, noise_y * s3 + 0.7, off3 + u_time * NOISE_SPEED)) * 0.4;
+      noise += 0.45;
       float t = clamp(noise, 0.0, 1.0);
-      t = sqrt(t);
-      t = smooth_step(t);
+      t = pow(t, 2.0);
+      // t = smooth_step(t);
+      t = EaseOutSine(t);
       return t;
     }
   
@@ -297,14 +302,14 @@ export function createFragmentShader(options: Options) {
         float w1_accent_color_blend_fac = accent_lightness( 163.2, -512.3);
         float w2_accent_color_blend_fac = accent_lightness( 433.2,  127.9);
     
-        bg_accent_color_blend_fac = clamp(bg_accent_color_blend_fac - bg_lightness, 0.0, 1.0);
-        w1_accent_color_blend_fac = clamp(w1_accent_color_blend_fac - w1_lightness, 0.0, 1.0);
-        w2_accent_color_blend_fac = clamp(w2_accent_color_blend_fac - w2_lightness, 0.0, 1.0);
+        bg_accent_color_blend_fac = clamp(bg_accent_color_blend_fac - pow(bg_lightness, 2.0), 0.0, 1.0);
+        w1_accent_color_blend_fac = clamp(w1_accent_color_blend_fac - pow(w1_lightness, 2.0), 0.0, 1.0);
+        w2_accent_color_blend_fac = clamp(w2_accent_color_blend_fac - pow(w2_lightness, 2.0), 0.0, 1.0);
     
         vec3 accent_color = ${hexToVec3(options.accentColor!)};
         bg_color = mix(bg_color, accent_color, bg_accent_color_blend_fac);
-        w1_color = mix(w1_color, accent_color, bg_accent_color_blend_fac);
-        w2_color = mix(w2_color, accent_color, bg_accent_color_blend_fac);
+        w1_color = mix(w1_color, accent_color, w1_accent_color_blend_fac);
+        w2_color = mix(w2_color, accent_color, w2_accent_color_blend_fac);
 
         // Comment out to visualize alpha mixing
         //
@@ -324,8 +329,8 @@ export function createFragmentShader(options: Options) {
         // middle colors (see https://www.joshwcomeau.com/css/make-beautiful-gradients/).
         () => /* glsl */ `
           float lightness = bg_lightness;
-          lightness = lerp(lightness, w1_lightness, w1_alpha);
           lightness = lerp(lightness, w2_lightness, w2_alpha);
+          lightness = lerp(lightness, w1_lightness, w1_alpha);
           vec3 color = color_from_lightness(lightness);
         `,
       )}
