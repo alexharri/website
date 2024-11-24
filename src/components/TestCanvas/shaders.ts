@@ -208,7 +208,6 @@ export function createFragmentShader(options: Options) {
       blur_sin_sum += sin(wave_len( 5.973) + wave_phase( 0.15) + wave_offset(0.4)) * blur_amp(0.54);
       blur_sin_sum += sin(wave_len( 3.375) + wave_phase(-0.26) + wave_offset(0.3)) * blur_amp(0.39);
       blur_sin_sum += sin(wave_len( 6.478) + wave_phase( 0.23) + wave_offset(0.8)) * blur_amp(0.35);
-      // blur_sin_sum = min(1.0, max(-1.0, blur_sin_sum));
       
       float dist = calc_dist(WAVE1_Y, WAVE1_HEIGHT, sin_sum);
       float alpha = calc_alpha(dist, blur_sin_sum);
@@ -230,7 +229,6 @@ export function createFragmentShader(options: Options) {
       blur_sin_sum += sin(wave_len(2.893) + wave_phase( 0.142) + wave_offset(0.8)) * blur_amp(0.5);
       blur_sin_sum += sin(wave_len(3.972) + wave_phase(-0.127) + wave_offset(0.3)) * blur_amp(0.2);
       blur_sin_sum += sin(wave_len(4.389) + wave_phase( 0.134) + wave_offset(0.1)) * blur_amp(0.5);
-      // blur_sin_sum = min(1.0, max(-1.0, blur_sin_sum));
   
       float dist = calc_dist(WAVE2_Y, WAVE2_HEIGHT, sin_sum);
       float alpha = calc_alpha(dist, blur_sin_sum);
