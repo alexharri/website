@@ -19,6 +19,26 @@ export const colorConfigurations = {
 
   black_white: { gradient: ["hsl(0deg 0% 0%)", "hsl(0deg 0% 100%)"] },
 
+  lightgreen: {
+    gradient: [
+      "hsl(135deg 91% 33%)",
+      "hsl(137deg 88% 35%)",
+      "hsl(138deg 87% 37%)",
+      "hsl(140deg 86% 38%)",
+      "hsl(141deg 85% 40%)",
+      "hsl(143deg 85% 41%)",
+      "hsl(145deg 85% 43%)",
+      "hsl(146deg 86% 44%)",
+      "hsl(148deg 87% 45%)",
+      "hsl(149deg 88% 47%)",
+      "hsl(150deg 89% 48%)",
+      "hsl(152deg 91% 49%)",
+      "hsl(153deg 94% 50%)",
+      "hsl(155deg 98% 50%)",
+    ],
+    accentColor: "#17FFF2",
+  },
+
   blue: {
     gradient: [
       "hsl(253deg 95% 59%)",

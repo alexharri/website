@@ -11,7 +11,7 @@ const styles = ({ styled }: StyleOptions) => ({
     width: ${W}px;
     height: ${H}px;
     border-radius: 4px;
-    margin: 0 auto;
+    margin: 40px auto;
 
     canvas {
       border-radius: 8px;
@@ -19,7 +19,11 @@ const styles = ({ styled }: StyleOptions) => ({
   `,
 });
 
-export const TestCanvas = () => {
+interface Props {
+  colorConfiguration: keyof typeof colorConfigurations;
+}
+
+export const TestCanvas: React.FC<Props> = (props) => {
   const s = useStyles(styles);
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
@@ -29,7 +33,10 @@ export const TestCanvas = () => {
     const canvas = canvasRef.current;
     if (!canvas) return () => {};
 
-    const renderer = new Renderer(canvas, colorConfigurations.default, W, H);
+    const colorConfig =
+      colorConfigurations[props.colorConfiguration] ?? colorConfigurations.default;
+
+    const renderer = new Renderer(canvas, colorConfig, W, H);
 
     function tick() {
       if (stop) return;

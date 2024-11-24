@@ -8,6 +8,8 @@ tags: []
 
 Here is some cool stuff:
 
-<TestCanvas />
+<TestCanvas colorConfiguration="blue" />
+<TestCanvas colorConfiguration="default" />
+<TestCanvas colorConfiguration="lightgreen" />
 
 Look at how cool it is.
