@@ -62,6 +62,8 @@ export function createFragmentShader(options: Options) {
   
     float W = u_resolution.x;
     float H = u_resolution.y;
+    float DIV_H = 1.0 / H;
+    float DIV_W = 1.0 / W;
 
     float wave_phase_multiplier = u_time * WAVE_SPEED;
   
@@ -74,10 +76,10 @@ export function createFragmentShader(options: Options) {
       { return a * (1.0 - t) + b * t; }
 
     float ease_in(float x)
-      { return 1.0 - cos((x * PI) / 2.0); }
+      { return 1.0 - cos((x * PI) * 0.5); }
 
     float ease_out(float x)
-      { return sin((x * PI) / 2.0); }
+      { return sin((x * PI) * 0.5); }
 
     float wave_len(float value)
       { return gl_FragCoord.x * 0.02 / value; }
@@ -95,9 +97,9 @@ export function createFragmentShader(options: Options) {
       { return value * BLUR_AMPLITUDE_SCALE; }
   
     float calc_dist(float wave_y, float wave_height_px, float curve_y_off) {
-      float wave_height = wave_height_px / H;
+      float wave_height = wave_height_px * DIV_H;
       float curve_y = wave_y + curve_y_off * wave_height;
-      float y = gl_FragCoord.y / u_resolution.y;
+      float y = gl_FragCoord.y * DIV_H;
       float dist = curve_y - y;
       return dist;
     }
