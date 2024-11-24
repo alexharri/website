@@ -49,7 +49,6 @@ export function createFragmentShader(options: Options) {
     const float WAVE_AMPLITUDE_SCALE = 1.2;
     const float BLUR_AMPLITUDE_SCALE = 0.5;
     const float BLUR_HEIGHT = ${BLUR_HEIGHT.toFixed(1)};
-    const float BLUR_BIAS = 1.0; // Higher means it's harder to get sharp lines (values from 0.8 to 1.2 work great)
     const float WAVE_SPEED = 0.8; // Higher is faster
     const float NOISE_SPEED = 0.084; // Higher is faster
     const float NOISE_SCALE = 1.0; // Higher is smaller
@@ -118,22 +117,22 @@ export function createFragmentShader(options: Options) {
     }
   
     float calc_alpha(float dist, float blur_sin_sum) {
-      float blur_normalized = (blur_sin_sum + BLUR_BIAS) * 0.5;
+      // A higher bias makes it harder to get sharp lines, while a lower bias makes it easier.
+      //
+      // Fluctuate between slight positive and negative biases, so that we get periods with
+      // long sharp lines, and periods with few sharp lines at all.
+      float bias_t = (1.0 + sin(u_time * 0.3)) * 0.5;
+      float bias = lerp(0.8, 1.1, bias_t);
       
-      float b1 = (blur_sin_sum + BLUR_BIAS) * 0.5;
-      float b2 = (blur_sin_sum + BLUR_BIAS) * 0.5;
-      float b3 = (blur_sin_sum + BLUR_BIAS) * 0.5;
-      float b4 = (blur_sin_sum + BLUR_BIAS) * 0.5;
-      float b5 = (blur_sin_sum + BLUR_BIAS) * 0.5;
-      float b6 = (blur_sin_sum + BLUR_BIAS) * 0.5;
+      float blur_fac = (blur_sin_sum + bias) * 0.5;
   
       float BLEED = 0.15;
-      b1 = pow(b1, 1.0 + BLEED * 1.0);
-      b2 = pow(b2, 1.0 + BLEED * 0.6);
-      b3 = pow(b3, 1.0 + BLEED * 0.4);
-      b4 = pow(b4, 1.0 + BLEED * 0.0);
-      b5 = pow(b5, 1.0 - BLEED * 0.1);
-      b6 = pow(b6, 1.0 - BLEED * 0.25);
+      float b1 = pow(blur_fac, 1.0 + BLEED * 1.0);
+      float b2 = pow(blur_fac, 1.0 + BLEED * 0.6);
+      float b3 = pow(blur_fac, 1.0 + BLEED * 0.4);
+      float b4 = pow(blur_fac, 1.0 + BLEED * 0.0);
+      float b5 = pow(blur_fac, 1.0 - BLEED * 0.1);
+      float b6 = pow(blur_fac, 1.0 - BLEED * 0.25);
   
       b1 = EaseInSine(b1);
       b2 = EaseInSine(b2);
@@ -148,7 +147,6 @@ export function createFragmentShader(options: Options) {
       b4 = smooth_step(b4);
       b5 = smooth_step(b5);
       b6 = smooth_step(b6);
-      // b2 = clamp(b2, 0.01, 1.0);
   
       b1 = clamp(b1, 0.005, 1.0);
       b2 = clamp(b2, 0.005, 1.0);
@@ -208,7 +206,7 @@ export function createFragmentShader(options: Options) {
       sin_sum += sin(wave_len(200.0) + wave_phase( 0.118) + offset(0.1)) * wave_amp(0.9);
       
       float blur_sin_sum = 0.0;
-      blur_sin_sum += sin(wave_len( 2.296) + wave_phase( 0.28) + offset(0.1)) * blur_amp(0.58);
+      blur_sin_sum += sin(wave_len( 7.296) + wave_phase( 0.28) + offset(0.1)) * blur_amp(0.58);
       blur_sin_sum += sin(wave_len( 4.739) + wave_phase(-0.19) + offset(0.9)) * blur_amp(0.43);
       blur_sin_sum += sin(wave_len( 5.973) + wave_phase( 0.15) + offset(0.4)) * blur_amp(0.54);
       blur_sin_sum += sin(wave_len( 3.375) + wave_phase(-0.26) + offset(0.3)) * blur_amp(0.39);
@@ -336,6 +334,9 @@ export function createFragmentShader(options: Options) {
       )}
     
       gl_FragColor = vec4(color, 1.0);
+      
+      // float v = (1.0 + sin(u_time * 0.6)) * 0.5;
+      // gl_FragColor = vec4(v, v, v, 1.0);
     }
   `;
 }
