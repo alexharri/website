@@ -1,5 +1,6 @@
 import { lerp } from "../../math/lerp";
 import { hexToRgb } from "../../utils/color";
+import { noiseUtils } from "./noiseUtils";
 import { perlinNoise } from "./perlinNoise";
 import { simplexNoise } from "./simplexNoise";
 
@@ -48,11 +49,10 @@ export function createFragmentShader(options: Options) {
   
     const float PI = 3.14159;
     const float TAU = PI * 2.0;
-    const float WAVE1_HEIGHT = 40.0; // Height in px
+    const float WAVE1_HEIGHT = 48.0; // Height in px
     const float WAVE1_Y = 0.45; // From 0 to 1
-    const float WAVE2_HEIGHT = 30.0; // Height in px
+    const float WAVE2_HEIGHT = 36.0; // Height in px
     const float WAVE2_Y = 0.9; // From 0 to 1
-    const float WAVE_AMPLITUDE_SCALE = 1.2;
     const float BLUR_AMPLITUDE_SCALE = 0.5;
     const float BLUR_HEIGHT = ${BLUR_HEIGHT.toFixed(1)};
     const float WAVE_SPEED = 0.8; // Higher is faster
@@ -72,6 +72,7 @@ export function createFragmentShader(options: Options) {
 
     float wave_phase_multiplier = u_time * WAVE_SPEED;
   
+    ${noiseUtils}
     ${perlinNoise}
     ${simplexNoise}
   
@@ -94,7 +95,7 @@ export function createFragmentShader(options: Options) {
       { return phase * wave_phase_multiplier; }
   
     float wave_amplitude(float value)
-      { return value * WAVE_AMPLITUDE_SCALE; }
+      { return value; }
 
     float wave_offset(float t)
       { return t * TAU; }
@@ -199,19 +200,42 @@ export function createFragmentShader(options: Options) {
     float calc_noise(float off1, float off2) {
       return calc_noise_simplex(off1, off2);
     }
+
+    float noise_1D(float off1, float off2, float len, float evolution, float shift_speed) {
+      float off3 = off1 - off2, off4 = off1 * off2;
+
+      float s1 = 1.30, s2 = 1.00, s3 = 0.70, s4 = 0.40; // Scale
+      float p1 = 0.49, p2 = 0.68, p3 = 0.59, p4 = 0.77; // Phase
+      float a1 = 0.70, a2 = 1.00, a3 = 0.50, a4 = 0.40; // Amplitude
+
+      float x = (gl_FragCoord.x / u_resolution.x) * len;
+      float y = u_time * evolution;
+      float x_shift = u_time * shift_speed;
+      float noise_raw =
+        simplexNoise(vec2(x * s1 + x_shift, y * p1 + off1)) * a1 +
+        simplexNoise(vec2(x * s2 + x_shift, y * p2 + off2)) * a2 +
+        simplexNoise(vec2(x * s3 + x_shift, y * p3 + off3)) * a3 +
+        simplexNoise(vec2(x * s4 + x_shift, y * p4 + off4)) * a4 +
+        0.0;
+      return noise_raw;
+    }
   
     vec2 wave1() {
-      float sin_sum = 0.0;
-      sin_sum += sin(wave_len(5.180) + wave_phase(-0.15) + wave_offset(0.3)) * wave_amplitude(0.6);
-      sin_sum += sin(wave_len(3.193) + wave_phase( 0.18) + wave_offset(0.2)) * wave_amplitude(0.8);
-      sin_sum += sin(wave_len(5.974) + wave_phase( 0.13) + wave_offset(0.0)) * wave_amplitude(0.6);
-      sin_sum += sin(wave_len(6.395) + wave_phase(-0.21) + wave_offset(0.7)) * wave_amplitude(0.4);
-      sin_sum += sin(wave_len(3.683) + wave_phase( 0.23) + wave_offset(0.5)) * wave_amplitude(0.5);
+      // float sin_sum = 0.0;
+      // sin_sum += sin(wave_len(5.180) + wave_phase(-0.15) + wave_offset(0.3)) * wave_amplitude(0.6);
+      // sin_sum += sin(wave_len(3.193) + wave_phase( 0.18) + wave_offset(0.2)) * wave_amplitude(0.8);
+      // sin_sum += sin(wave_len(5.974) + wave_phase( 0.13) + wave_offset(0.0)) * wave_amplitude(0.6);
+      // sin_sum += sin(wave_len(6.395) + wave_phase(-0.21) + wave_offset(0.7)) * wave_amplitude(0.4);
+      // sin_sum += sin(wave_len(3.683) + wave_phase( 0.23) + wave_offset(0.5)) * wave_amplitude(0.5);
       
-      // up-down wave
-      sin_sum += sin(wave_len(200.0) + wave_phase( 0.092) + wave_offset(0.7)) * wave_amplitude(0.8);
-      sin_sum += sin(wave_len(200.0) + wave_phase(-0.136) + wave_offset(0.3)) * wave_amplitude(0.6);
-      sin_sum += sin(wave_len(200.0) + wave_phase( 0.118) + wave_offset(0.1)) * wave_amplitude(0.9);
+      // // up-down wave
+      // sin_sum += sin(wave_len(200.0) + wave_phase( 0.092) + wave_offset(0.7)) * wave_amplitude(0.8);
+      // sin_sum += sin(wave_len(200.0) + wave_phase(-0.136) + wave_offset(0.3)) * wave_amplitude(0.6);
+      // sin_sum += sin(wave_len(200.0) + wave_phase( 0.118) + wave_offset(0.1)) * wave_amplitude(0.9);
+      float y_noise = noise_1D(
+        -387.8, 154.0,      // Random offsets
+         1.0,  0.05,  0.016 // Length, Evolution, X shift
+      );
       
       float blur_sin_sum = 0.0;
       blur_sin_sum += sin(wave_len( 7.296) + wave_phase( 0.28) + wave_offset(0.1)) * blur_amp(0.58);
@@ -220,19 +244,23 @@ export function createFragmentShader(options: Options) {
       blur_sin_sum += sin(wave_len( 3.375) + wave_phase(-0.26) + wave_offset(0.3)) * blur_amp(0.39);
       blur_sin_sum += sin(wave_len( 6.478) + wave_phase( 0.23) + wave_offset(0.8)) * blur_amp(0.35);
       
-      float dist = calc_dist(WAVE1_Y, WAVE1_HEIGHT, sin_sum);
+      float dist = calc_dist(WAVE1_Y, WAVE1_HEIGHT, y_noise);
       float alpha = calc_alpha(dist, blur_sin_sum);
       float noise = calc_noise(0.0, 420.0);
       return vec2(noise, alpha);
     }
   
     vec2 wave2() {
-      float sin_sum = 0.0;
-      sin_sum += sin(wave_len(4.410) + wave_phase( 0.149) + wave_offset(0.6)) * wave_amplitude(0.2);
-      sin_sum += sin(wave_len(3.823) + wave_phase(-0.140) + wave_offset(0.4)) * wave_amplitude(0.7);
-      sin_sum += sin(wave_len(4.274) + wave_phase( 0.173) + wave_offset(0.9)) * wave_amplitude(0.5);
-      sin_sum += sin(wave_len(3.815) + wave_phase(-0.212) + wave_offset(0.2)) * wave_amplitude(0.8);
-      sin_sum += sin(wave_len(3.183) + wave_phase( 0.218) + wave_offset(0.1)) * wave_amplitude(0.4);
+      // float sin_sum = 0.0;
+      // sin_sum += sin(wave_len(4.410) + wave_phase( 0.149) + wave_offset(0.6)) * wave_amplitude(0.2);
+      // sin_sum += sin(wave_len(3.823) + wave_phase(-0.140) + wave_offset(0.4)) * wave_amplitude(0.7);
+      // sin_sum += sin(wave_len(4.274) + wave_phase( 0.173) + wave_offset(0.9)) * wave_amplitude(0.5);
+      // sin_sum += sin(wave_len(3.815) + wave_phase(-0.212) + wave_offset(0.2)) * wave_amplitude(0.8);
+      // sin_sum += sin(wave_len(3.183) + wave_phase( 0.218) + wave_offset(0.1)) * wave_amplitude(0.4);
+      float y_noise = noise_1D(
+        -862.8, -185.2,     // Random offsets
+         1.0,  0.05,  0.016 // Length, Evolution, X shift
+      );
       
       float blur_sin_sum = 0.0;
       blur_sin_sum += sin(wave_len(3.539) + wave_phase(-0.175) + wave_offset(0.2)) * blur_amp(0.4);
@@ -241,7 +269,7 @@ export function createFragmentShader(options: Options) {
       blur_sin_sum += sin(wave_len(3.972) + wave_phase(-0.127) + wave_offset(0.3)) * blur_amp(0.2);
       blur_sin_sum += sin(wave_len(4.389) + wave_phase( 0.134) + wave_offset(0.1)) * blur_amp(0.5);
   
-      float dist = calc_dist(WAVE2_Y, WAVE2_HEIGHT, sin_sum);
+      float dist = calc_dist(WAVE2_Y, WAVE2_HEIGHT, y_noise);
       float alpha = calc_alpha(dist, blur_sin_sum);
       float noise = calc_noise(-100.0, -420.0);
       return vec2(noise, alpha);
