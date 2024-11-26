@@ -5,7 +5,8 @@ type ShaderType = WebGLRenderingContext["VERTEX_SHADER"] | WebGLRenderingContext
 export class Renderer {
   private gl: WebGLRenderingContext;
 
-  private startTime = Date.now() + Math.random() * 100000000;
+  private seed = 5983; // Math.random() * 100_000;
+  private startTime = Date.now();
 
   private program: WebGLProgram;
   private positionBuffer: WebGLBuffer | null;
@@ -62,7 +63,7 @@ export class Renderer {
 
   private renderSine() {
     const { gl } = this;
-    const time = (Date.now() - this.startTime) / 1000;
+    const time = this.seed + (Date.now() - this.startTime) / 1000;
 
     gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
     gl.useProgram(this.program);
