@@ -58,7 +58,7 @@ export const WebGLShader: React.FC<Props> = (props) => {
       throw new Error(`Could not find '${props.fragmentShader}' fragment shader.`);
 
     const fragmentShader = createFragmentShader(props.fragmentShaderOptions ?? {});
-    const renderer = new Renderer(canvas, vertexShader, fragmentShader, colorConfig, [1400, 250]);
+    const renderer = new Renderer(canvas, vertexShader, fragmentShader, colorConfig);
 
     let resized = true;
     const resizeListener = () => {

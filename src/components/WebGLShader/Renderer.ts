@@ -12,7 +12,6 @@ export class Renderer {
   private numPositions: number;
   private gradientTexture: WebGLTexture | null;
   private a_position: number;
-  private u_resolution: WebGLUniformLocation | null;
   private u_time: WebGLUniformLocation | null;
   private u_gradient: WebGLUniformLocation | null;
 
@@ -24,7 +23,6 @@ export class Renderer {
       gradient: string[];
       accentColor?: string | null;
     },
-    private resolution: [number, number],
   ) {
     const gl = canvas.getContext("webgl", { premultipliedAlpha: false });
     if (!gl) {
@@ -38,7 +36,6 @@ export class Renderer {
     this.positionBuffer = gl.createBuffer();
     this.gradientTexture = gl.createTexture();
     this.u_gradient = gl.getUniformLocation(this.program, "u_gradient");
-    this.u_resolution = gl.getUniformLocation(this.program, "u_resolution");
     this.u_time = gl.getUniformLocation(this.program, "u_time");
 
     Renderer.writeGradientToTexture(gl, colorConfig.gradient, this.gradientTexture, 1000, 2);
@@ -55,7 +52,6 @@ export class Renderer {
 
     // Set uniforms
     gl.uniform1f(this.u_time, time);
-    gl.uniform2f(this.u_resolution, this.resolution[0], this.resolution[1]);
 
     // Pass gradient texture
     gl.activeTexture(gl.TEXTURE1);

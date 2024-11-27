@@ -26,11 +26,13 @@ const createFragmentShader: CreateFragmentShader = (options) => {
     BLUR_HEIGHT = 230,
     blurQuality = 7,
     blurExponentRange = [0.96, 1.15],
+    resolution = [1400, 250],
   } = options as Partial<{
     BLUR_HEIGHT: number;
     blurQuality: number;
     blurExponentRange: [number, number];
     accentColor: string;
+    resolution: [number, number];
   }>;
 
   return /* glsl */ `
@@ -50,14 +52,14 @@ const createFragmentShader: CreateFragmentShader = (options) => {
     const float ACCENT_NOISE_SCALE = 0.4; // Smaller is bigger
     const float NOISE_X_SHIFT = 0.04; // Higher is faster
   
-    uniform vec2 u_resolution;
     uniform float u_time;
     uniform sampler2D u_gradient; // height=1, width=N
   
-    float W = u_resolution.x;
-    float H = u_resolution.y;
-    float DIV_H = 1.0 / H;
-    float DIV_W = 1.0 / W;
+    const float W = ${resolution[0].toFixed(1)};
+    const float H = ${resolution[1].toFixed(1)};
+    const vec2 WH = vec2(W, H);
+    const float DIV_H = 1.0 / H;
+    const float DIV_W = 1.0 / W;
 
     float wave_phase_multiplier = u_time * WAVE_SPEED;
   
@@ -146,9 +148,9 @@ const createFragmentShader: CreateFragmentShader = (options) => {
       const float NOISE_X_SHIFT = 0.04; // Higher is faster
       const float NOISE_SPEED = 0.084; // Higher is faster
       
-      vec2 xy = gl_FragCoord.xy / u_resolution.xy;
-      float noise_x = xy.x * NOISE_SCALE;
-      float noise_y = xy.y * NOISE_SCALE;
+      float x = gl_FragCoord.x * DIV_W, y = gl_FragCoord.y * DIV_H;
+      float noise_x = x * NOISE_SCALE;
+      float noise_y = y * NOISE_SCALE;
       float s1 = 1.4, s2 = 1.0, s3 = 0.8, s4 = 0.4;
       float off3 = off1 - off2;
       float off4 = off1 * off2;
@@ -162,9 +164,9 @@ const createFragmentShader: CreateFragmentShader = (options) => {
     }
   
     float calc_noise_simplex(float off1, float off2) {
-      vec2 xy = gl_FragCoord.xy / u_resolution.xy;
-      float noise_x = xy.x * BASE_NOISE_SCALE;
-      float noise_y = xy.y * BASE_NOISE_SCALE;
+      float x = gl_FragCoord.x * DIV_W, y = gl_FragCoord.y * DIV_H;
+      float noise_x = x * BASE_NOISE_SCALE;
+      float noise_y = y * BASE_NOISE_SCALE;
       float s1 = 1.5, s2 = 0.9, s3 = 0.6;
       float off3 = off1 - off2;
       float off4 = off1 * off2;
@@ -187,7 +189,7 @@ const createFragmentShader: CreateFragmentShader = (options) => {
       float p1 = 0.54, p2 = 0.68, p3 = 0.59, p4 = 0.48; // Phase
       float a1 = 0.85, a2 = 1.15, a3 = 0.60, a4 = 0.40; // Amplitude
 
-      float x = (gl_FragCoord.x / u_resolution.x) * len;
+      float x = gl_FragCoord.x * DIV_W * len;
       float y = u_time * evolution;
       float x_shift = u_time * shift_speed;
       float noise_raw =
@@ -218,7 +220,7 @@ const createFragmentShader: CreateFragmentShader = (options) => {
       float p1 = 0.7, p2 = 1.0, p3 = 0.59, p4 = 0.48; // Phase
       float a1 = 0.5, a2 = 0.4, a3 = 0.3, a4 = 0.40; // Amplitude
 
-      float x = (gl_FragCoord.x / u_resolution.x) * len;
+      float x = gl_FragCoord.x * DIV_W * len;
       float y = u_time * evolution;
       float x_shift = u_time * shift_speed;
       float blur_fac =
@@ -304,9 +306,9 @@ const createFragmentShader: CreateFragmentShader = (options) => {
     }
   
     float accent_lightness(float off1, float off2) {
-      vec2 xy = gl_FragCoord.xy / u_resolution.xy;
-      float noise_x = xy.x * ACCENT_NOISE_SCALE;
-      float noise_y = xy.y * ACCENT_NOISE_SCALE * 1.0;
+      float x = gl_FragCoord.x * DIV_W, y = gl_FragCoord.y * DIV_H;
+      float noise_x = x * ACCENT_NOISE_SCALE;
+      float noise_y = y * ACCENT_NOISE_SCALE * 1.0;
       float off3 = off1 - off2;
       float off4 = off1 * off2;
   
