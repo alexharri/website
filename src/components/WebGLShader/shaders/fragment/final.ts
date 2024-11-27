@@ -37,39 +37,34 @@ const createFragmentShader: CreateFragmentShader = (options) => {
 
   return /* glsl */ `
     precision mediump float;
-  
-    const float PI = 3.14159;
-    const float TAU = PI * 2.0;
-    const float WAVE1_HEIGHT = 48.0; // Height in px
-    const float WAVE1_Y = 0.45; // From 0 to 1
-    const float WAVE2_HEIGHT = 36.0; // Height in px
-    const float WAVE2_Y = 0.9; // From 0 to 1
-    const float BLUR_AMPLITUDE_SCALE = 0.5;
-    const float BLUR_HEIGHT = ${BLUR_HEIGHT.toFixed(1)};
-    const float WAVE_SPEED = 0.8; // Higher is faster
-    const float NOISE_SPEED = 0.064; // Higher is faster
-    const float BASE_NOISE_SCALE = 1.0; // Higher is smaller
-    const float ACCENT_NOISE_SCALE = 0.4; // Smaller is bigger
-    const float NOISE_X_SHIFT = 0.04; // Higher is faster
-  
-    uniform float u_time;
+
+    // Uniforms (inputs)
+    uniform float u_time; // Time in seconds
     uniform sampler2D u_gradient; // height=1, width=N
   
-    const float W = ${resolution[0].toFixed(1)};
-    const float H = ${resolution[1].toFixed(1)};
-    const vec2 WH = vec2(W, H);
-    const float DIV_H = 1.0 / H;
-    const float DIV_W = 1.0 / W;
+    // Math constants
+    const float PI = 3.14159, TAU = PI * 2.0;
 
-    float wave_phase_multiplier = u_time * WAVE_SPEED;
+    // Wave config
+    const float WAVE1_Y = 0.45,      WAVE2_Y = 0.9; // Proportion of H
+    const float WAVE1_HEIGHT = 48.0, WAVE2_HEIGHT = 36.0; // Height in px
+
+    // Accent color config
+    const float ACCENT_NOISE_SCALE = 0.4; // Smaller is bigger
   
+    // Resolution
+    const float W = ${resolution[0].toFixed(1)}, H = ${resolution[1].toFixed(1)};
+    const float DIV_H = 1.0 / H, DIV_W = 1.0 / W;
+    const vec2 WH = vec2(W, H);
+  
+    // Imports
     ${noiseUtils}
     ${perlinNoise}
     ${simplexNoise}
   
     float smooth_step(float t)
       { return t * t * t * (t * (6.0 * t - 15.0) + 10.0); }
-      
+
     float lerp(float a, float b, float t)
       { return a * (1.0 - t) + b * t; }
 
@@ -82,17 +77,16 @@ const createFragmentShader: CreateFragmentShader = (options) => {
     float wave_len(float value)
       { return gl_FragCoord.x * 0.02 / value; }
   
-    float wave_phase(float phase)
-      { return phase * wave_phase_multiplier; }
+    float wave_phase(float phase) {
+      const float WAVE_SPEED = 0.8; // Higher is faster
+      return phase * u_time * WAVE_SPEED;
+    }
   
     float wave_amplitude(float value)
       { return value; }
 
     float wave_offset(float t)
       { return t * TAU; }
-  
-    float blur_amp(float value)
-      { return value * BLUR_AMPLITUDE_SCALE; }
   
     float calc_dist(float wave_y, float wave_height_px, float curve_y_off) {
       float wave_height = wave_height_px * DIV_H;
@@ -124,7 +118,7 @@ const createFragmentShader: CreateFragmentShader = (options) => {
           ${varName} = ease_in(${varName});
           ${varName} = smooth_step(${varName});
           ${varName} = clamp(${varName}, 0.008, 1.0);
-          ${varName} *= BLUR_HEIGHT;
+          ${varName} *= ${BLUR_HEIGHT.toFixed(1)};
         `;
         })
         .join("")}
@@ -155,25 +149,25 @@ const createFragmentShader: CreateFragmentShader = (options) => {
       float off3 = off1 - off2;
       float off4 = off1 * off2;
       float noise_raw =
-        perlinNoise(vec3(noise_x * s1 + u_time * NOISE_X_SHIFT * 1.5, noise_y * s1, off1 + u_time * NOISE_SPEED)) * 0.55 +
-        perlinNoise(vec3(noise_x * s2 + u_time * NOISE_X_SHIFT * 0.8, noise_y * s2, off2 + u_time * NOISE_SPEED)) * 0.45 +
-        perlinNoise(vec3(noise_x * s3 + u_time * -NOISE_X_SHIFT, noise_y * s3, off3 + u_time * NOISE_SPEED)) * 0.35 +
-        perlinNoise(vec3(noise_x * s4 + u_time * NOISE_X_SHIFT, noise_y * s4, off4 + u_time * NOISE_SPEED)) * 0.35 +
+        perlinNoise(vec3(noise_x * s1 + u_time *  NOISE_X_SHIFT * 1.5, noise_y * s1, off1 + u_time * NOISE_SPEED)) * 0.55 +
+        perlinNoise(vec3(noise_x * s2 + u_time *  NOISE_X_SHIFT * 0.8, noise_y * s2, off2 + u_time * NOISE_SPEED)) * 0.45 +
+        perlinNoise(vec3(noise_x * s3 + u_time * -NOISE_X_SHIFT,       noise_y * s3, off3 + u_time * NOISE_SPEED)) * 0.35 +
+        perlinNoise(vec3(noise_x * s4 + u_time *  NOISE_X_SHIFT,       noise_y * s4, off4 + u_time * NOISE_SPEED)) * 0.35 +
         0.5;
       return noise_raw;
     }
   
     float calc_noise_simplex(float off1, float off2) {
+      const float NOISE_SPEED = 0.064; // Higher is faster
+      const float NOISE_X_SHIFT = 0.04; // Higher is faster
       float x = gl_FragCoord.x * DIV_W, y = gl_FragCoord.y * DIV_H;
-      float noise_x = x * BASE_NOISE_SCALE;
-      float noise_y = y * BASE_NOISE_SCALE;
       float s1 = 1.5, s2 = 0.9, s3 = 0.6;
       float off3 = off1 - off2;
       float off4 = off1 * off2;
       float noise_raw =
-        simplexNoise(vec3(noise_x * s1 + u_time * NOISE_X_SHIFT * 1.1, noise_y * s1, off1 + u_time * NOISE_SPEED)) * 0.3 +
-        simplexNoise(vec3(noise_x * s2 + u_time * -NOISE_X_SHIFT * 0.6, noise_y * s2 * 0.85, off2 + u_time * NOISE_SPEED)) * 0.25 +
-        simplexNoise(vec3(noise_x * s3 + u_time * NOISE_X_SHIFT * 0.8, noise_y * s3 * 0.7, off3 + u_time * NOISE_SPEED)) * 0.2 +
+        simplexNoise(vec3(x * s1 + u_time *  NOISE_X_SHIFT * 1.1, y * s1 * 1.00, off1 + u_time * NOISE_SPEED)) * 0.30 +
+        simplexNoise(vec3(x * s2 + u_time * -NOISE_X_SHIFT * 0.6, y * s2 * 0.85, off2 + u_time * NOISE_SPEED)) * 0.25 +
+        simplexNoise(vec3(x * s3 + u_time *  NOISE_X_SHIFT * 0.8, y * s3 * 0.70, off3 + u_time * NOISE_SPEED)) * 0.20 +
         0.5;
       return noise_raw;
     }
@@ -306,6 +300,8 @@ const createFragmentShader: CreateFragmentShader = (options) => {
     }
   
     float accent_lightness(float off1, float off2) {
+      const float NOISE_SPEED = 0.064; // Higher is faster
+      const float NOISE_X_SHIFT = 0.04; // Higher is faster
       float x = gl_FragCoord.x * DIV_W, y = gl_FragCoord.y * DIV_H;
       float noise_x = x * ACCENT_NOISE_SCALE;
       float noise_y = y * ACCENT_NOISE_SCALE * 1.0;
@@ -315,9 +311,9 @@ const createFragmentShader: CreateFragmentShader = (options) => {
       // s1 is smaller than s2
       float s1 = 2.5, s2 = 1.8, s3 = 1.0;
       float noise = -0.0;
-      noise += simplexNoise(vec3(noise_x * s1 + u_time * NOISE_X_SHIFT * 1.2, noise_y * s1 + 0.0, off1 + u_time * NOISE_SPEED)) * 0.7;
+      noise += simplexNoise(vec3(noise_x * s1 + u_time *  NOISE_X_SHIFT * 1.2, noise_y * s1 + 0.0, off1 + u_time * NOISE_SPEED)) * 0.7;
       noise += simplexNoise(vec3(noise_x * s2 + u_time * -NOISE_X_SHIFT * 1.5, noise_y * s2 + 0.3, off2 + u_time * NOISE_SPEED)) * 0.5;
-      noise += simplexNoise(vec3(noise_x * s3 + u_time * NOISE_X_SHIFT * 0.8, noise_y * s3 + 0.7, off3 + u_time * NOISE_SPEED)) * 0.4;
+      noise += simplexNoise(vec3(noise_x * s3 + u_time *  NOISE_X_SHIFT * 0.8, noise_y * s3 + 0.7, off3 + u_time * NOISE_SPEED)) * 0.4;
       noise += 0.45;
       float t = clamp(noise, 0.0, 1.0);
       t = pow(t, 2.0);
