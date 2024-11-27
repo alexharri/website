@@ -10,6 +10,6 @@ Here is some cool stuff:
 
 <TestCanvas colorConfiguration="blue" />
 <TestCanvas colorConfiguration="default" />
-<TestCanvas colorConfiguration="lightgreen" />
+<TestCanvas colorConfiguration="orange" />
 
 Look at how cool it is.

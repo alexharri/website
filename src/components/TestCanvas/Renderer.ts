@@ -5,7 +5,8 @@ type ShaderType = WebGLRenderingContext["VERTEX_SHADER"] | WebGLRenderingContext
 export class Renderer {
   private gl: WebGLRenderingContext;
 
-  private seed = 5983; // Math.random() * 100_000;
+  // private seed = 5983; // Math.random() * 100_000;
+  private seed = Math.random() * 100_000;
   private startTime = Date.now();
 
   private program: WebGLProgram;
