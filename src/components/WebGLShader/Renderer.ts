@@ -1,5 +1,3 @@
-import * as shaders from "./shaders";
-
 type ShaderType = WebGLRenderingContext["VERTEX_SHADER"] | WebGLRenderingContext["FRAGMENT_SHADER"];
 
 export class Renderer {
@@ -20,12 +18,13 @@ export class Renderer {
 
   constructor(
     canvas: HTMLCanvasElement,
+    vertexShader: string,
+    fragmentShader: string,
     colorConfig: {
       gradient: string[];
       accentColor?: string | null;
     },
-    private W: number,
-    private H: number,
+    private resolution: [number, number],
   ) {
     const gl = canvas.getContext("webgl", { premultipliedAlpha: false });
     if (!gl) {
@@ -34,13 +33,7 @@ export class Renderer {
     this.gl = gl;
     this.numPositions = this.positions().length / 2; // Positions are vec2
 
-    // prettier-ignore
-    console.log({ shader: shaders.createFragmentShader({ accentColor: colorConfig.accentColor })})
-    this.program = Renderer.createProgram(
-      gl,
-      shaders.vertexShader,
-      shaders.createFragmentShader({ accentColor: colorConfig.accentColor }),
-    );
+    this.program = Renderer.createProgram(gl, vertexShader, fragmentShader);
     this.a_position = gl.getAttribLocation(this.program, "a_position");
     this.positionBuffer = gl.createBuffer();
     this.gradientTexture = gl.createTexture();
@@ -50,19 +43,10 @@ export class Renderer {
 
     Renderer.writeGradientToTexture(gl, colorConfig.gradient, this.gradientTexture, 1000, 2);
 
-    // Place positions into buffer
-    gl.bindBuffer(gl.ARRAY_BUFFER, this.positionBuffer);
-    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(this.positions()), gl.STATIC_DRAW);
-
-    // prettier-ignore -- Tell the attribute how to get data out of position buffer (ARRAY_BUFFER)
     gl.vertexAttribPointer(this.a_position, /* vec2 */ 2, gl.FLOAT, false, 0, 0);
   }
 
   public render() {
-    this.renderSine();
-  }
-
-  private renderSine() {
     const { gl } = this;
     const time = this.seed + (Date.now() - this.startTime) / 1000;
 
@@ -70,8 +54,8 @@ export class Renderer {
     gl.useProgram(this.program);
 
     // Set uniforms
-    gl.uniform2f(this.u_resolution, gl.canvas.width, gl.canvas.height);
     gl.uniform1f(this.u_time, time);
+    gl.uniform2f(this.u_resolution, this.resolution[0], this.resolution[1]);
 
     // Pass gradient texture
     gl.activeTexture(gl.TEXTURE1);
@@ -85,12 +69,24 @@ export class Renderer {
     gl.drawArrays(gl.TRIANGLES, 0, this.numPositions);
   }
 
+  public setWidth(width: number) {
+    const { gl } = this;
+
+    const canvas = gl.canvas;
+    canvas.width = width;
+
+    // Place positions into buffer
+    gl.bindBuffer(gl.ARRAY_BUFFER, this.positionBuffer);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(this.positions()), gl.STATIC_DRAW);
+  }
+
   private positions() {
-    const { W, H } = this;
+    // const W = this.W / RES_W;
+    // const H = this.H / RES_H;
     // prettier-ignore
     return [
-      0, 0,   W, 0,   0, H, // Top-left triangle
-      W, H,   W, 0,   0, H, // Bottom-right triangle
+      0, 0,   1, 0,   0, 1, // Top-left triangle
+      1, 1,   1, 0,   0, 1, // Bottom-right triangle
     ];
   }
 

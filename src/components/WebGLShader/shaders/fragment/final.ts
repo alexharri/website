@@ -1,33 +1,13 @@
-import { lerp } from "../../math/lerp";
-import { hexToRgb } from "../../utils/color";
-import { noiseUtils } from "./noiseUtils";
-import { perlinNoise } from "./perlinNoise";
-import { simplexNoise } from "./simplexNoise";
-
-export const vertexShader = /* glsl */ `
-  precision mediump float;
-  attribute vec2 a_position;
-
-  uniform vec2 u_resolution;
-  
-  void main() {
-    vec2 clipSpace = ((a_position / u_resolution) * 2.0) - 1.0;
-    gl_Position = vec4(clipSpace * vec2(1, -1), 0, 1);
-  }
-`;
+import { lerp } from "../../../../math/lerp";
+import { hexToRgb } from "../../../../utils/color";
+import { noiseUtils } from "../../noiseUtils";
+import { perlinNoise } from "../../perlinNoise";
+import { simplexNoise } from "../../simplexNoise";
+import { CreateFragmentShader } from "../types";
 
 function hexToVec3(hex: string) {
   const rgb = hexToRgb(hex);
   return `vec3(${rgb.map((n) => (n / 255).toFixed(1)).join(", ")})`;
-}
-
-interface Options {
-  accentColor?: string | null;
-  blurQuality?: number;
-  blurExponentRange?: [number, number];
-  constants?: {
-    BLUR_HEIGHT?: number;
-  };
 }
 
 function includeif(
@@ -40,9 +20,18 @@ function includeif(
   return "";
 }
 
-export function createFragmentShader(options: Options) {
-  const { blurQuality = 7, blurExponentRange = [0.96, 1.15] } = options;
-  const { BLUR_HEIGHT = 230 } = options.constants ?? {};
+const createFragmentShader: CreateFragmentShader = (options) => {
+  const {
+    accentColor,
+    BLUR_HEIGHT = 230,
+    blurQuality = 7,
+    blurExponentRange = [0.96, 1.15],
+  } = options as Partial<{
+    BLUR_HEIGHT: number;
+    blurQuality: number;
+    blurExponentRange: [number, number];
+    accentColor: string;
+  }>;
 
   return /* glsl */ `
     precision mediump float;
@@ -352,7 +341,7 @@ export function createFragmentShader(options: Options) {
       vec3 bg_color = color_from_lightness(bg_lightness);
   
       ${includeif(
-        options.accentColor != null,
+        accentColor != null,
 
         // if we're using an accent color
         () => /* glsl */ `
@@ -364,7 +353,7 @@ export function createFragmentShader(options: Options) {
         w1_accent_color_blend_fac = clamp(w1_accent_color_blend_fac - pow(w1_lightness, 2.0), 0.0, 1.0);
         w2_accent_color_blend_fac = clamp(w2_accent_color_blend_fac - pow(w2_lightness, 2.0), 0.0, 1.0);
     
-        vec3 accent_color = ${hexToVec3(options.accentColor!)};
+        vec3 accent_color = ${hexToVec3(accentColor!)};
         bg_color = mix(bg_color, accent_color, bg_accent_color_blend_fac);
         w1_color = mix(w1_color, accent_color, w1_accent_color_blend_fac);
         w2_color = mix(w2_color, accent_color, w2_accent_color_blend_fac);
@@ -400,4 +389,6 @@ export function createFragmentShader(options: Options) {
       // gl_FragColor = vec4(1.0, 1.0, 1.0, w1_lightness);
     }
   `;
-}
+};
+
+export default createFragmentShader;
