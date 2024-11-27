@@ -88,12 +88,10 @@ const createFragmentShader: CreateFragmentShader = (options) => {
     float wave_offset(float t)
       { return t * TAU; }
   
-    float calc_dist(float wave_y, float wave_height_px, float curve_y_off) {
-      float wave_height = wave_height_px * DIV_H;
-      float curve_y = wave_y + curve_y_off * wave_height;
-      float y = gl_FragCoord.y * DIV_H;
-      float dist = curve_y - y;
-      return dist;
+    float calc_y_dist(float target_y, float offset_px, float offset_fac) {
+      // Apply offset to target Y
+      target_y += offset_fac * offset_px * DIV_H;
+      return target_y - (gl_FragCoord.y * DIV_H);
     }
   
     float alpha_part(float dist, float fac) {
@@ -269,7 +267,7 @@ const createFragmentShader: CreateFragmentShader = (options) => {
       );
       // float blur_fac = blur_sin_noise_1D(0.9, 0.3);
       
-      float dist = calc_dist(WAVE1_Y, WAVE1_HEIGHT, y_noise);
+      float dist = calc_y_dist(WAVE1_Y, WAVE1_HEIGHT, y_noise);
       float alpha = calc_alpha(dist, blur_fac);
       float noise = calc_noise(0.0, 420.0);
       return vec2(noise, alpha);
@@ -293,7 +291,7 @@ const createFragmentShader: CreateFragmentShader = (options) => {
       );
       // float blur_fac = blur_sin_noise_1D(2.3, -1.7);
   
-      float dist = calc_dist(WAVE2_Y, WAVE2_HEIGHT, y_noise);
+      float dist = calc_y_dist(WAVE2_Y, WAVE2_HEIGHT, y_noise);
       float alpha = calc_alpha(dist, blur_fac);
       float noise = calc_noise(-100.0, -420.0);
       return vec2(noise, alpha);
