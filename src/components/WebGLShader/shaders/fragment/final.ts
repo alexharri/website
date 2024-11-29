@@ -94,45 +94,35 @@ const createFragmentShader: CreateFragmentShader = (options) => {
       return target_y - (gl_FragCoord.y * DIV_H);
     }
   
-    float alpha_part(float dist, float fac) {
-      float dist_sign_pos = (-sign(dist) + 1.0) * 0.5;
-      float dist_sign_neg = 1.0 - dist_sign_pos;
+    float calc_alpha_part(float dist, float fac) {
+      float dist_sign_pos = (-sign(dist) + 1.0) * 0.5; // 1 if positive, 0 if negative
+      float dist_sign_neg = 1.0 - dist_sign_pos;       // 0 if positive, 0 if negative
   
-      float d2 = dist * H / fac;
-      float alpha_pos = clamp(0.5 + d2, 0.0, 1.0);
-      float alpha_neg = clamp(0.5 - d2, 0.0, 1.0);
-      float alpha = alpha_pos * dist_sign_pos + (1.0 - alpha_neg) * dist_sign_neg;
+      float dist_normalized = dist * H / fac;
+      float alpha_pos =       clamp(0.5 + dist_normalized, 0.0, 1.0);
+      float alpha_neg = 1.0 - clamp(0.5 - dist_normalized, 0.0, 1.0);
+      float alpha = alpha_pos * dist_sign_pos + alpha_neg * dist_sign_neg;
       return alpha;
     }
   
     float calc_alpha(float dist, float blur_fac) {
+      float sum = 0.0;
       ${Array.from({ length: blurQuality })
         .map((_, i) => {
           const varName = `b${i}`;
           const t = blurQuality === 1 ? 0.5 : i / (blurQuality - 1);
           const exp = lerp(blurExponentRange[0], blurExponentRange[1], t);
           return /* glsl */ `
-          float ${varName} = pow(blur_fac, ${exp.toFixed(1)});
-          ${varName} = ease_in(${varName});
-          ${varName} = smooth_step(${varName});
-          ${varName} = clamp(${varName}, 0.008, 1.0);
-          ${varName} *= ${BLUR_HEIGHT.toFixed(1)};
-        `;
+            float ${varName} = pow(blur_fac, ${exp.toFixed(1)});
+            ${varName} = ease_in(${varName});
+            ${varName} = smooth_step(${varName});
+            ${varName} = clamp(${varName}, 0.008, 1.0);
+            ${varName} *= ${BLUR_HEIGHT.toFixed(1)};
+            sum += calc_alpha_part(dist, ${varName}) * ${(1 / blurQuality).toFixed(5)};
+          `;
         })
         .join("")}
-
-      float b_sum = 0.0;
-
-      ${Array.from({ length: blurQuality })
-        .map((_, i) => {
-          const varName = `b${i}`;
-          return /* glsl */ `
-          b_sum += alpha_part(dist, ${varName}) * ${(1 / blurQuality).toFixed(5)};
-        `;
-        })
-        .join("")}
-  
-      return b_sum;
+      return sum;
     }
 
     float calc_noise_perlin(float off1, float off2) {
