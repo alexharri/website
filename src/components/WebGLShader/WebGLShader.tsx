@@ -6,13 +6,12 @@ import { vertexShaderRegistry } from "./shaders/vertexShaders";
 import { fragmentShaderRegistry } from "./shaders/fragmentShaders";
 import { cssVariables } from "../../utils/cssVariables";
 
-const H = 250;
-
 const styles = ({ styled }: StyleOptions) => ({
   container: styled.css`
     width: 100vw;
-    height: ${H}px;
     margin: 40px -${cssVariables.contentPadding}px;
+    display: flex;
+    justify-content: center;
 
     canvas {
       border-radius: 0;
@@ -23,9 +22,6 @@ const styles = ({ styled }: StyleOptions) => ({
         calc(48px + min(100vw, ${cssVariables.contentWidth}px) * 0.04);
       transform: skewY(-6deg);
     }
-
-    &--skew canvas {
-    }
   `,
 });
 
@@ -34,13 +30,15 @@ interface Props {
   colorConfiguration: keyof typeof colorConfigurations;
   fragmentShader: string;
   fragmentShaderOptions?: Partial<Record<string, unknown>>;
+  width?: number;
+  height?: number;
 }
 
 export const WebGLShader: React.FC<Props> = (props) => {
   const s = useStyles(styles);
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
-  const { skew = false } = props;
+  const { skew = false, height = 250, width } = props;
 
   useEffect(() => {
     let stop = false;
@@ -69,7 +67,9 @@ export const WebGLShader: React.FC<Props> = (props) => {
       if (stop) return;
       requestAnimationFrame(tick);
 
-      if (resized) renderer.setWidth(window.innerWidth);
+      if (resized) {
+        renderer.setWidth(props.width ?? window.innerWidth);
+      }
       renderer.render();
     }
     tick();
@@ -82,8 +82,8 @@ export const WebGLShader: React.FC<Props> = (props) => {
   }, []);
 
   return (
-    <div className={s("container", { skew })}>
-      <canvas ref={canvasRef} width={100} height={H} />
+    <div className={s("container", { skew })} style={{ height }}>
+      <canvas ref={canvasRef} width={width} height={height} />
     </div>
   );
 };
