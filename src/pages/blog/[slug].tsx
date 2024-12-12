@@ -29,17 +29,30 @@ import { usePostWatcher } from "../../utils/watcher-client";
 import { Code } from "../../components/Code/Code";
 import { WebGLShader } from "../../components/WebGLShader/WebGLShader";
 
+function firstUpper(s: string) {
+  if (s.length === 0) return s;
+  return s[0].toUpperCase() + s.slice(1);
+}
+
+function propertiesToFirstUpper<K extends string, T>(record: Record<K, T>): Record<K, T> {
+  return Object.entries(record).reduce((out, [key, value]) => {
+    out[firstUpper(key) as K] = value as T;
+    return out;
+  }, {} as Record<K, T>);
+}
+
 // Custom components/renderers to pass to MDX.
 // Since the MDX files aren't loaded by webpack, they have no knowledge of how
 // to handle import statements. Instead, you must include components in scope
 // here.
 const baseComponents = {
+  ...propertiesToFirstUpper(Code),
+  Code,
   a: Link,
   pre: withScriptedEditor(Pre, (props) => {
     const language = props.children.props.className?.split("-")[1] ?? "text";
     return { code: props.children.props.children, language };
   }),
-  Code,
   img: Image,
   Image,
   ImageCarousel,
