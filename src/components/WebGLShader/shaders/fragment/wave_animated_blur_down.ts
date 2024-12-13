@@ -42,7 +42,7 @@ const createFragmentShader: CreateFragmentShader = (_) => {
       float blur_amount = mix(1.0, BLUR_AMOUNT, blur_t);
 
       float dist_signed = curve_y - y;
-      float fg_alpha = 0.5 + dist_signed / blur_amount;
+      float fg_alpha = 0.0 + dist_signed / blur_amount;
       fg_alpha = clamp(fg_alpha, 0.0, 1.0);
 
       vec3 color = mix(bg_color, fg_color, fg_alpha);

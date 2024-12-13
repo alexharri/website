@@ -13,6 +13,8 @@ import linear_gradient_area_under_wave_2 from "./fragment/linear_gradient_area_u
 import wave_animated_slow from "./fragment/wave_animated_slow";
 import wave_animated from "./fragment/wave_animated";
 import wave_animated_blur_left_to_right from "./fragment/wave_animated_blur_left_to_right";
+import wave_animated_blur_down from "./fragment/wave_animated_blur_down";
+import wave_animated_blur_down_even from "./fragment/wave_animated_blur_down_even";
 
 export const fragmentShaderRegistry: Partial<Record<string, CreateFragmentShader>> = {
   final,
@@ -29,4 +31,6 @@ export const fragmentShaderRegistry: Partial<Record<string, CreateFragmentShader
   wave_animated_slow,
   wave_animated,
   wave_animated_blur_left_to_right,
+  wave_animated_blur_down,
+  wave_animated_blur_down_even,
 };

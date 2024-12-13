@@ -567,3 +567,92 @@ To simulate this effect, we'll need to be able to apply variable amounts of blur
 
 <WebGLShader fragmentShader="wave_animated_blur_left_to_right" height={150} width={250} />
 
+### Gaussian blur
+
+When thinking about how I'd approach the blur problem, my first thought was to use a [gaussian blur][gaussian_blur]. I figured I'd determine the amount of blur to apply via a [noise function][perlin_noise] and then sampling neighboring pixels according to the blur amount.
+
+[gaussian_blur]: https://en.wikipedia.org/wiki/Gaussian_blur
+[perlin_noise]: https://en.wikipedia.org/wiki/Perlin_noise
+
+That's a valid approach -- progressive blur in WebGL is certainly [feasible][progressive_blur]. However, this approach turned out to be expensive in terms of both performance and complexity. 
+
+[progressive_blur]: https://tympanus.net/Tutorials/WebGLProgressiveBlur/
+
+First off, in order to get a decent blur you need to sample lots of neighboring pixels, and the amount of pixels to sample only increases as the blur radius gets larger (our effect requires a very large blur). This becomes very expensive, very quickly.
+
+Secondly, for us to be able to sample neighboring pixels we'd need to calculate their values up front. To do that we'd pre-render the alpha channel [into a texture][render_to_a_texture] for us to sample, which would require setting up another shader and complicating our pipeline.
+
+[render_to_a_texture]: https://webglfundamentals.org/webgl/lessons/webgl-render-to-texture.html
+
+I opted to take a different approach that doesn't require sampling neighboring pixels. Let's take a look.
+
+
+### Calculate blur using signed distance
+
+
+Let's look at how we're calculating the <Gl>fg_alpha</Gl> again:
+
+```glsl
+float dist_signed = curve_y - y;
+float dist_sign = sign(dist_signed);
+
+float fg_alpha = (dist_sign + 1.0) / 2.0;
+```
+
+By taking the sign of our distance, we always get 0% or 100% opacity -- either fully transparent or opaque. Instead, let's make the alpha gradually increase from $0$ to $1$ over a given amount of pixels, e.g. 50px. Let's define a constant for that.
+
+```glsl
+const float BLUR_AMOUNT = 50.0;
+```
+
+We'll change the calculation for <Gl>fg_alpha</Gl> to start at $0.0$ and then add <Gl>dist_signed / BLUR_AMOUNT</Gl>.
+
+```glsl
+float fg_alpha = 0.0 + dist_signed / BLUR_AMOUNT;
+```
+
+When <Gl>dist_signed == 0.0</Gl>, the alpha will be $0.0$, and as <Gl>dist_signed</Gl> approaches <Gl>BLUR_AMOUNT</Gl> the alpha approaches $1.0$. However, when <Gl>dist_signed</Gl> exceeds <Gl>BLUR_AMOUNT</Gl> the alpha will go over $1.0$. The alpha can also become negative when <Gl>dist_signed</Gl> is negative. Neither of those are desirable -- alpha values should only range from $0$ to $1$ -- so let's clamp <Gl>fg_alpha</Gl> to the range $[0.0, 1.0]$ using the built-in <Gl method>clamp</Gl> function:
+
+```glsl
+fg_alpha = clamp(fg_alpha, 0.0, 1.0);
+```
+
+This produces a blur effect, though you might notice that the wave appears to have shifted down.
+
+<WebGLShader fragmentShader="wave_animated_blur_down_even" height={150} width={250} />
+
+Let's put that aside for the time being and make the blur gradually increasing from left to right. To do that, we can calculate a $t$ value for the blur by taking <Gl>gl_FragCoord.x / (CANVAS_WIDTH - 1)</Gl>:
+
+```glsl
+float blur_t = gl_FragCoord.x / (CANVAS_WIDTH - 1);
+```
+
+We'll then calculate the blur amount by [linearly interpolating][lerp] (lerping) between <Gl>1.0</Gl> and <Gl>BLUR_AMOUNT</Gl> using the $t$ value and the <Gl method>mix</Gl> function:
+
+[lerp]: https://en.wikipedia.org/wiki/Linear_interpolation
+
+```glsl
+float blur_amount = mix(1.0, BLUR_AMOUNT, blur_t);
+```
+
+By using <Gl>blur_amount</Gl> to calculate the alpha, we get a gradually increasing blur:
+
+```glsl
+float fg_alpha = dist_signed / blur_amount;
+fg_alpha = clamp(fg_alpha, 0.0, 1.0);
+```
+
+<WebGLShader fragmentShader="wave_animated_blur_down" height={150} width={250} />
+
+As we can see, the wave shifts down as <Gl>blur_amount</Gl> increases.
+
+This makes sense. For pixels where <Gl>{"dist_signed <= 0"}</Gl> the alpha is $0$ regardless of the value of <Gl>blur_amount</Gl> so the top of the wave stays fixed. At the same time, alpha is $1$ for all pixels where <Gl>{"dist_signed >= blur_amount"}</Gl>, which shifts the "bottom" of the wave down as the blur increases.
+
+What we want is for the alpha to be $0.5$ when <Gl>{"dist_signed == 0"}</Gl>, which we can do by starting <Gl>fg_alpha</Gl> at $0.5$:
+
+```glsl
+float fg_alpha = 0.5 + dist_signed / blur_amount;
+fg_alpha = clamp(fg_alpha, 0.0, 1.0);
+```
+
+<WebGLShader fragmentShader="wave_animated_blur_left_to_right" height={150} width={250} />
