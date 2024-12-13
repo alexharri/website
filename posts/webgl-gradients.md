@@ -88,13 +88,13 @@ Those waves are quite thin! That's because we're oscillating between red and blu
 
 We can control the rate of oscillation by defining a [wave length][wave_len], which determines how many pixels it takes to oscillate from red to blue and red again.
 
-For a wave length of $W$, we can multiply <Ts>x</Ts> by $\dfrac{1}{W /\,2\pi}$:
+For a wave length of $L$, we can multiply <Ts>x</Ts> by $\dfrac{1}{L}2\pi$:
 
 [wave_len]: https://en.wikipedia.org/wiki/Wavelength
 
 ```ts
-const waveLength = 40;
-const toWaveLength = 1 / (waveLength / (2 * PI));
+const WAVE_LEN = 40;
+const toWaveLength = (1 / WAVE_LEN) * (2 * PI);
 
 function pixel({ x, y }: Position): Color {
   let t = sin(x * toWaveLength);
@@ -157,13 +157,11 @@ There are two types of shaders, vertex shaders and fragment shaders, which serve
 I'll mostly abstract the WebGL boilerplate away so that we can stay focused on our main goal, which is creating cool gradients. At the end of the post I'll link to the resource that helped me set up the WebGL plumbing.
 
 
-## Getting started with a fragment shader
+## Writing a fragment shader
 
-To get us acquainted with writing fragment shaders, we'll walk through how to create the following wave:
+To get us acquainted with writing fragment shaders, let's walk through how to create the following wave:
 
-<WebGLShader fragmentShader="sine_wave" height={150} />
-
-<SmallNote label="" center>If you find the motion distracting, you can click the canvas to pause/play.</SmallNote>
+<WebGLShader fragmentShader="wave_animated" height={150} width={400} />
 
 To get started, here's a WebGL fragment shader that sets every pixel to the same color.
 
@@ -174,7 +172,9 @@ void main() {
 }
 ```
 
-WebGL fragment shaders have a <Gl method>main</Gl> method that's responsible for setting <Gl>gl_FragColor</Gl> -- a special variable that determines the color of the pixel. In other words, <Gl>gl_FragColor</Gl> is the output of our color function.
+WebGL fragment shaders must define a <Gl method>main</Gl> function, and that <Gl method>main</Gl> function is invoked once for each pixel. The <Gl method>main</Gl> function must set the value of <Gl>gl_FragColor</Gl> -- a special variable that determines the color of the pixel.
+
+In other words: <Gl method>main</Gl> is our color function and <Gl>gl_FragColor</Gl> is the output of that function.
 
 WebGL colors are stored as vectors with 3 or 4 components (<Gl>vec3</Gl> or <Gl>vec4</Gl>) with values between 0 and 1, where the first three components are the [RGB][rgb] components. For 4D vectors, the fourth component is the [alpha][alpha] value -- 1 for fully opaque, 0 for transparent.
 
@@ -257,11 +257,9 @@ This gives us a linear gradient!
 
 <WebGLShader fragmentShader="linear_gradient" height={150} width={150} />
 
-TODO: Link to source
-
 ### Vector constructors
 
-Side note: the vector constructor syntax in GLSL is awesome! When passing a vector to a vector [constructor][vector_constructors], the components of the passed vector are read left-to-right -- similar to JavaScript's [spread][spread] syntax.
+I want to briefly mention how awesome the vector constructor syntax in GLSL is. When passing a vector to a vector [constructor][vector_constructors], the components of the passed vector are read left-to-right -- similar to JavaScript's [spread][spread] syntax.
 
 [spread]: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Spread_syntax
 
@@ -277,7 +275,7 @@ vec4 foo = vec4(a, 1.0);
 
 [vector_constructors]: https://www.khronos.org/opengl/wiki/Data_Type_(GLSL)#Vector_constructors
 
-You can match scalars and vectors in any way you see fit, as long as the number of components is correct:
+You can pass scalars alongside vectors in any way you see fit, as long as the number of values passed to the vectors is correct:
 
 ```glsl
 vec4(1.0 vec2(2.0, 3.0), 4.0); // OK
@@ -287,17 +285,18 @@ vec4(vec2(1.0, 2.0), vec2(3.0, 4.0)); // OK
 vec4(vec2(1.0, 2.0), 3.0); // Error, not enough components
 ```
 
-Anyway, back to our shader!
+I love this syntax! Anyway, back to our shader.
 
-### Coloring the area under a line
 
-We've got our linear gradient. Now we want to draw a wave on top of it.
+### Coloring the area under a curve
 
-Let's start by coloring the area under a curve white. For now, the curve will be a simple line, but we'll adjust the curve to be an animated sine wave later.
+Let's start by coloring the area under a curve white. For now, the curve will be a simple line, with the result looking like so:
 
 <WebGLShader fragmentShader="linear_gradient_area_under_line" height={150} width={150} />
 
-First, we'll calculate the Y position of the curve at the current pixel's X position:
+We'll adjust the curve to be an animated sine wave after.
+
+First, let's calculate the Y position of the curve at the current pixel's X position:
 
 ```glsl
 const float Y_START = CANVAS_HEIGHT * 0.4; // Start at 40%
@@ -339,7 +338,7 @@ float alpha = (dist_sign + 1.0) / 2.0;
 
 So, for every pixel, <Gl>alpha</Gl> will be either set to $0.0$ or $1.0$. If <Gl>alpha == 1.0</Gl> we want to color the pixel white, but if <Gl>alpha == 0.0</Gl> we want the pixel to retain the color from the linear gradient.
 
-We can do just that with the <Gl method>mix</Gl> function:
+We can do that with the <Gl method>mix</Gl> function:
 
 ```glsl
 color = mix(color, white, alpha);
@@ -351,7 +350,7 @@ This colors the area under the curve white!
 
 ### Why branchless?
 
-Calculating an alpha value by normalizing the sign may seem overly roundabout. Couldn't you just use an if statement?
+Calculating an alpha value by normalizing the sign and passing that to the <Gl method>mix</Gl> function may seem overly roundabout. Couldn't you just use an if statement?
 
 ```glsl
 if (sign(dist_signed) == 1.0) {
@@ -371,18 +370,18 @@ In our case, calculating the <Gl>alpha</Gl> and running the <Gl method>mix</Gl> 
 Currently, we're calculating the Y of our curve like so, producing a slanted line:
 
 ```glsl
-float curve_y = (CANVAS_HEIGHT * Y_START) + (x * INCLINE);
+float curve_y = Y_START + (x * INCLINE);
 ```
 
 To instead produce a sine wave-shaped curve, we can define the curve as:
 
-<p className="mathblock">$$Y + sin(x * L') * A$$</p>
+<p className="mathblock">$$Y + A \times sin(x \times L')$$</p>
 
 where $x$ is the current pixel's X position, $A$ is the [amplitude][amplitude] of the wave, $Y$ is the _vertical position_ of the wave (the Y position of the wave's center), and $L'$ is the "wave length multiplier", defined as
 
 [amplitude]: https://www.mathsisfun.com/algebra/amplitude-period-frequency-phase-shift.html
 
-<p className="mathblock">$$L' = \dfrac{1}{2\Large\pi\normalsize\times L}$$</p>
+<p className="mathblock">$$L' = \dfrac{1}{L}2\pi $$</p>
 
 where $L$ is the wave length in pixels.
 
@@ -393,7 +392,7 @@ const float WAVE_Y = CANVAS_HEIGHT * 0.5;
 const float WAVE_AMP = 15.0;
 const float WAVE_LEN = 75.0;
 
-const float toWaveLength = 1.0 / (WAVE_LEN / (2.0 * PI));
+const float toWaveLength = (1.0 / WAVE_LEN) * (2.0 * PI);
 
 float curve_y = WAVE_Y + sin(x * toWaveLength) * WAVE_AMP;
 ```
@@ -414,14 +413,14 @@ vec3 bg_color_1 = vec3(0.7, 0.1, 0.4);
 vec3 bg_color_2 = vec3(0.9, 0.6, 0.1);
 ```
 
-and then introduce two colors, <Gl>fg_color_1</Gl> and <Gl>fg_color_2</Gl>, that will make up the color under the wave -- the foreground:
+Let's then introduce two new colors for the foreground: <Gl>fg_color_1</Gl> and <Gl>fg_color_2</Gl>. Those will be used to create a linear gradient we will apply to the wave.
 
 ```glsl
 vec3 fg_color_1 = vec3(1.0, 0.7, 0.5);
 vec3 fg_color_2 = vec3(1.0, 1.0, 0.9);
 ```
 
-We'll calculate both the background color and foreground colors using the same $t$ value:
+We can calculate both the background color and foreground color for the current pixel using the same $t$ value (calculated via the pixel's Y position):
 
 ```glsl
 float t = y / (CANVAS_HEIGHT - 1.0);
@@ -430,33 +429,51 @@ vec3 bg_color = mix(bg_color_1, bg_color_2, t);
 vec3 fg_color = mix(fg_color_1, fg_color_2, t);
 ```
 
-Which we'll mix using the <Gl>alpha</Gl> value -- which we'll rename to <Gl>fg_alpha</Gl> -- to only apply <Gl>fg_color</Gl> on the area under the wave, assigning the result to <Gl>gl_FragColor</Gl>
+Let's also rename the <Gl>alpha</Gl> value to <Gl>fg_alpha</Gl> since it's the alpha value of the foreground.
 
 ```glsl
+float fg_alpha = (dist_sign + 1.0) / 2.0;
+```
+
+With the background color, foreground color, and foreground alpha calculated, we can calculate the final color via the <Gl method>mix</Gl> function -- assigning the result to <Gl>gl_FragColor</Gl>:
+
+```glsl
+float fg_alpha = (dist_sign + 1.0) / 2.0;
+
 vec3 color = mix(bg_color, fg_color, fg_alpha);
 gl_FragColor = vec4(color, 1.0);
 ```
 
 <WebGLShader fragmentShader="linear_gradient_area_under_wave_2" height={150} width={150} />
 
-We're doing is a bit of [alpha compositing][alpha_compositing] -- combining images using an alpha mask.
+
+#### Alpha compositing
+
+What we just did -- combining two images using an alpha mask -- is a form of [alpha compositing][alpha_compositing].
 
 [alpha_compositing]: https://ciechanow.ski/alpha-compositing/
 
 <Image src="~/alpha-compositing.svg" plain />
 
-Conceptually, we can think of this as two operations. First, we apply the area under the curve as an alpha mask to the foreground gradient.
+In calculating our color and alpha values, we produced three assets:
+
+ * For each pixel, we calculated both a foreground color and a background color. Together, those pixels form two images -- our foreground and background gradients.
+ * The alpha values we calculated for each pixel constitute our alpha mask. Each pixel in an alpha mask has a value from $0$ to $1$ that denotes how transparent or opaque that pixel is.
+
+Using alpha compositing, we then combined those three assets into a final image.
+
+I like to think of the alpha compositing we performed as two separate steps: First we applied the alpha mask to our foreground image.
 
 <Image src="~/alpha-compositing-alpha-mask.svg" plain />
 
-We then layer the masked foreground gradient onto the background gradient, giving us our final image.
+We then layered the masked foreground onto the background, giving us our final image:
 
 <Image src="~/alpha-compositing-final.svg" plain />
 
 
 ### Animating the wave
 
-To produce animations in the shader, we'll need to provide the shader with a time variable. We can do that using [uniforms][uniform].
+For the shader to produce motion, we'll need to provide the shader with a time variable. We can do that using [uniforms][uniform].
 
 [uniform]: https://www.khronos.org/opengl/wiki/Uniform_(GLSL)
 
@@ -464,32 +481,17 @@ To produce animations in the shader, we'll need to provide the shader with a tim
 uniform float time; // Time in seconds
 ```
 
-Uniforms can be thought of as global variables that the shader has read-only access to. The values of the uniforms are set by the user prior to rendering, and the values are read by shaders during rendering.
+Uniforms can be thought of as global variables that the shader has read-only access to. The values of the uniforms are set by the user prior to rendering, and the values are read by the shader during rendering.
 
 From the perspective of a shader, uniforms are constants. When rendering a frame, each shader invocation will have the uniforms set to the same values. You can even use uniforms in constant expressions:
 
 ```glsl
 uniform float time;
 
-const float time_ms = time * 1000.0; // OK
+const float time_ms = time * 1000.0; // This is OK
 ```
 
-I won't get into details on the WebGL API for uniforms here. For now, you can think of the renderer loop as looking like so:
-
-```ts
-function render() {
-  requestAnimationFrame(render);
-
-  const timeInSeconds = Date.now() / 1000;
-  webgl.setUniform("time", timeInSeconds);
-
-  webgl.renderFrame();
-};
-```
-
-<SmallNote label="">This is heavily simplified. We'll get into the weeds on the WebGL API later on.</SmallNote>
-
-Uniforms can be of many types, like floats, vectors and textures (we'll get into textures later). You can even use custom `struct`s:
+Uniform variables can be of many types, such floats, vectors and textures (we'll get into textures later). They can also be of struct types:
 
 ```glsl
 struct Foo {
@@ -500,38 +502,38 @@ struct Foo {
 uniform Foo foo;
 ```
 
----
-
-With our <Gl>time</Gl> value now accessible in our shader via a uniform, we can start animating the wave. As a refresher, we're currently calculating our curve's Y value like so:
+Anyway, with <Gl>float time</Gl> now accessible in our shader as a uniform, we can start animating the wave. As a refresher, we're currently calculating our curve's Y value like so:
 
 ```glsl
-float curve_y = WAVE_CENTER + sin(x * toLength) * WAVE_AMPLITUDE;
+float curve_y = WAVE_CENTER + sin(x * toWaveLength) * WAVE_AMPLITUDE;
 ```
 
-This is getting a bit long, so let's extract the result of <Gl>sin(...)</Gl> into a "wave factor" variable that we'll call <Gl>wave_fac</Gl>.
+This is getting a bit long, so let's extract the input to <Gl method>sin</Gl> into a variable called <Gl>sine_input</Gl>.
 
 ```glsl
-float wave_fac = sin(x * toLength);
-float curve_y = WAVE_CENTER + wave_fac * WAVE_AMPLITUDE;
+float sine_input = x * toWaveLength;
+float curve_y = WAVE_CENTER + sin(sine_input) * WAVE_AMPLITUDE;
 ```
 
-Now let's add <Gl>time * PI</Gl> to the value passed to the <Gl method>sin</Gl> method:
+Now let's add <Gl>time * PI</Gl> to the sine input:
 
 ```glsl
-float wave_fac = sin(x * toLength + time * PI);
+float sine_input = x * toWaveLength + time * PI;
 ```
 
 <WebGLShader fragmentShader="wave_animated_slow" height={150} width={150} />
 
-Adding <Gl>time * PI</Gl> shifts the phase of the wave by half a wavelength per second. To instead shift the wave by a full wavelength per second, we'd multiply time by $2\pi$. But instead of thinking in "wavelengths per second", I'd to be able to specify a number of pixels that the wave will move per second.
+Adding <Gl>time * PI</Gl> shifts the phase of the wave by half a wavelength per second. To instead shift the wave by a full wavelength per second, we'd multiply time by $2\pi$.
 
-Since $time \times 2\pi$ moves the wave by one wavelength per second, we can multiply $2\pi$ by the proportion of the wave's speed $W_S$ and wave's length $W_L$:
+However, instead of thinking in "wavelengths per second", I'd like to be able to specify a number of pixels that the wave will move per second.
 
-<p className="mathblock">$time \times 2\pi\dfrac{W_S}{W_L}$</p>
+Since $time \times 2\pi$ moves the wave by one wavelength per second, we can multiply $2\pi$ by the proportion of the wave's speed $S$ and wave's length $L$:
 
-Which will cause the wave to move by $W_S$ pixels per second.
+<p className="mathblock">$time \times 2\pi\dfrac{S}{L}$</p>
 
-Let's define a constant for the wave's speed $W_S$:
+Which will cause the wave to move by $S$ pixels per second.
+
+Let's define a constant for the wave's speed $S$:
 
 ```glsl
 const float WAVE_LEN = 75.0; // Length in pixels
@@ -541,12 +543,10 @@ const float WAVE_SPEED = 20.0; // Pixels per seconds
 Putting our equation into code, we get:
 
 ```glsl
-const float TAU = 2.0 * PI;
+const float toWaveLength = (1.0 / WAVE_LEN) * (2.0 * PI);
+const float toPhase = (WAVE_SPEED / WAVE_LEN) * (2.0 * PI);
 
-const float toLength = 1.0 / (WAVE_LEN / TAU);
-const float toPhase = (WAVE_SPEED / WAVE_LEN) * TAU;
-
-float wave_fac = sin(x * toLength + u_time * toPhase);
+float wave_fac = sin(x * toWaveLength + u_time * toPhase);
 ```
 
 We now have a constant that we can use to control the speed of the wave:
@@ -555,5 +555,15 @@ We now have a constant that we can use to control the speed of the wave:
 
 TODO: Make $W_S$ a slider
 
+## Adding blur
 
+Take another look at the final animation and consider the role that blur plays. The waves in the animation slowly fluctuate between a blurry and a sharp state, providing contrast and visual interest.
+
+<WebGLShader fragmentShader="final" width={1000} height={250} />
+
+The blur isn't applied uniformly. The wave slowly transitions from being fully blurred to being only partially blurred -- or not blurred at all.
+
+To simulate this effect, we'll need to be able to apply variable amounts of blur. As a step towards that, let's apply a gradually increasing blur across the horizontal axis, from left to right.
+
+<WebGLShader fragmentShader="wave_animated_blur_left_to_right" height={150} width={250} />
 

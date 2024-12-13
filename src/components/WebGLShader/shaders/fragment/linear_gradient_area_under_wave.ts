@@ -5,8 +5,8 @@ const createFragmentShader: CreateFragmentShader = (_) => {
     precision mediump float;
 
     const float CANVAS_HEIGHT = 150.0;
-    const float WAVE_CENTER = CANVAS_HEIGHT * 0.5;
-    const float WAVE_AMPLITUDE = 15.0;
+    const float WAVE_Y = CANVAS_HEIGHT * 0.5;
+    const float WAVE_AMP = 15.0;
     const float WAVE_LEN = 75.0;
     const float PI = ${Math.PI.toFixed(8)};
     const vec3 white = vec3(1.0, 1.0, 1.0);
@@ -23,8 +23,9 @@ const createFragmentShader: CreateFragmentShader = (_) => {
       vec3 color = mix(color_1, color_2, t);
 
       // Y position of curve at current X coordinate
-      const float toLength = 1.0 / (WAVE_LEN / (2.0 * PI));
-      float curve_y = WAVE_CENTER + sin(x * toLength) * WAVE_AMPLITUDE;
+      const float toWaveLength = (1.0 / WAVE_LEN) * (2.0 * PI);
+
+      float curve_y = WAVE_Y + sin(x * toWaveLength) * WAVE_AMP;
       float dist = curve_y - y;
       float dist_sign = sign(dist);
       float alpha = (dist_sign + 1.0) / 2.0;

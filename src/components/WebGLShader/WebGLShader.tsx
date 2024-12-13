@@ -5,6 +5,9 @@ import { colorConfigurations } from "./colorConfigurations";
 import { vertexShaderRegistry } from "./shaders/vertexShaders";
 import { fragmentShaderRegistry } from "./shaders/fragmentShaders";
 import { cssVariables } from "../../utils/cssVariables";
+import { useVisible } from "../../utils/hooks/useVisible";
+
+const DEFAULT_HEIGHT = 250;
 
 const styles = ({ styled }: StyleOptions) => ({
   container: styled.css`
@@ -34,11 +37,10 @@ interface Props {
   height?: number;
 }
 
-export const WebGLShader: React.FC<Props> = (props) => {
-  const s = useStyles(styles);
+const _WebGLShader: React.FC<Props> = (props) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
-  const { skew = false, height = 250, width } = props;
+  const { height = 250, width } = props;
 
   useEffect(() => {
     let stop = false;
@@ -81,9 +83,17 @@ export const WebGLShader: React.FC<Props> = (props) => {
     };
   }, []);
 
+  return <canvas ref={canvasRef} width={width} height={height} />;
+};
+
+export const WebGLShader: React.FC<Props> = (props) => {
+  const { height = DEFAULT_HEIGHT, skew } = props;
+  const s = useStyles(styles);
+  const ref = useRef<HTMLDivElement>(null);
+  const visible = useVisible(ref, "64px");
   return (
-    <div className={s("container", { skew })} style={{ height }}>
-      <canvas ref={canvasRef} width={width} height={height} />
+    <div className={s("container", { skew })} style={{ height }} ref={ref}>
+      {visible && <_WebGLShader {...props} />}
     </div>
   );
 };
