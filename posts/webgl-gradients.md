@@ -656,3 +656,132 @@ fg_alpha = clamp(fg_alpha, 0.0, 1.0);
 ```
 
 <WebGLShader fragmentShader="wave_animated_blur_left_to_right" height={150} width={250} />
+
+
+## Creating a natural wave
+
+If you look at the final gradient, you'll see that the waves look a lot more natural than the sine wave we've been working with. I'll disable the blur so that you can see the waves better.
+
+<WebGLShader fragmentShader="final" height={250} fragmentShaderOptions={{ blurAmount: 10 }} skew />
+
+There's loads of ways that you could go about creating such a wave, but I'll show you the two.
+
+
+### Stacked sine waves
+
+I often reach for stacked sine waves when I need a simple and natural wave-like noise function. Here's an example:
+
+<WebGLShader fragmentShader="sine_stack_final" width={800} height={200} />
+
+The idea is quite simple: sum the output of multiple sine waves with different wave lengths, amplitudes, and phase speeds.
+
+```glsl
+float noise(float x) {
+  float sum = 0.0;
+  sum += sin(x * L1 + time * S1) * A1;
+  sum += sin(x * L2 + time * S2) * A2;
+  sum += sin(x * L3 + time * S3) * A3;
+  ...
+  return sum;
+}
+```
+
+The $L$, $S$ and $A$ components control different aspects of each wave:
+
+ * $L$ determines the wave length,
+ * $S$ determines the phase evolution speed, and
+ * $A$ determines the amplitude.
+
+Let's walk through how I find the appropriate values for a stacked sine wave like this. First off, I create a "baseline wave" with the constants <Gl>L</Gl>, <Gl>S</Gl> and <Gl>A</Gl> set to a value that feels right.
+
+```glsl
+const float L = 0.011;
+const float S = 0.28;
+const float A = 32.0;
+
+float sum = 0.0;
+sum += sin(x * L + u_time * S) * A;
+```
+
+These constants produce the following wave. The length, speed and amplitude feel along the lines of what I want the final wave to look like.
+
+<WebGLShader fragmentShader="sine_stack_0" width={800} height={200} />
+
+I now add more sine waves with values relative to the baseline constants $L$, $S$, and $A$. 
+
+```glsl
+float sum = 0.0;
+sum += sin(x * L + u_time * S) * A;
+sum += sin(x * (L / 1.32) + u_time * S * 1.71) * A * 0.70;
+```
+
+This adds a second wave that's 32% longer, 71% faster, and 30% weaker than the baseline wave. Adding it has the following effect:
+
+<WebGLShader fragmentShader="sine_stack_1" width={800} height={200} />
+
+The second wave creating some interesting asymmetry, but the end result still looks and feels "sine wave-y". We'll need to add a few more sine waves for this to start feeling like a natural, flowing wave.
+
+After some trial and error, here are the constants I picked:
+
+```glsl
+float sum = 0.0;
+sum += sin(x * (L / 1.000) + u_time * 0.90 * S) * A * 0.64;
+sum += sin(x * (L / 1.153) + u_time * 1.15 * S) * A * 0.40;
+sum += sin(x * (L / 1.622) + u_time * 0.75 * S) * A * 0.48;
+sum += sin(x * (L / 1.871) + u_time * 0.65 * S) * A * 0.43;
+sum += sin(x * (L / 2.013) + u_time * 1.05 * S) * A * 0.32;
+```
+
+<SmallNote label="">I reduced the amplitude of the first wave to $0.64$ so that it doesn't dominate too much. I also slowed it down a bit, from $1.0$ to $0.9$.</SmallNote>
+
+The granularity and unevenness of the wave lengths ($L_1,\  L_2 \ 	\ldots\  L_n$) and phase speeds ($S_1,\  S_2 \ 	\ldots\  S_n$) is intentional -- the idea is to make it unlikely for the waves to converge at the same time and create excessive amounts of constructive and destructive [interference][interference].
+
+[interference]: https://en.wikipedia.org/wiki/Wave_interference
+
+Just these five waves give us quite a fairly natural looking final wave:
+
+<WebGLShader fragmentShader="sine_stack_2" width={800} height={200} />
+
+But there's one aspect that I don't like: the wave feels like it's moving left at a fairly even speed. That's not surprising -- each individual wave is moving left.
+
+We can counteract this effect by making the phase evolution of some waves negative:
+
+```glsl
+float sum = 0.0;
+sum += sin(x * (L / 1.000) + u_time *  0.90 * S) * A * 0.64;
+sum += sin(x * (L / 1.153) + u_time *  1.15 * S) * A * 0.40;
+sum += sin(x * (L / 1.622) + u_time * -0.75 * S) * A * 0.48;
+sum += sin(x * (L / 1.871) + u_time *  0.65 * S) * A * 0.43;
+sum += sin(x * (L / 2.013) + u_time * -1.05 * S) * A * 0.32;
+```
+
+Looking at the wave now, it fluctuates between drifting left, drifting right, and periods of relative stillness.
+
+<WebGLShader fragmentShader="sine_stack_3" width={800} height={200} />
+
+I think this looks really natural! We've achieved a very natural feeling wave with only five sine waves.
+
+Because all of the sine waves are relative to $L$, $S$, $A$, we can easily tune the wave as a whole by adjusting those constants. If we want the wave to move a bit faster, we increase $S$. If we want to make the waves shorter, we decrease $L$, and so on.
+
+### Adding tide
+
+The wave looks great, but it stays relatively still on the vertical axis. I want to make it more dynamic by adding periods of high and low tide. We can do that by adding a few more sine invocations with the $L$ component removed:
+
+```glsl
+float sum = 0.0;
+// ...
+
+sum += sin(u_time *  0.46 * S) * A * 0.64;
+sum += sin(u_time * -0.68 * S) * A * 0.48;
+sum += sin(u_time *  0.59 * S) * A * 0.72;
+```
+
+By removing $L$ component we've made the waves flat. They still fluctuate, but uniformly over the width of the canvas.
+
+Take a look at the result of only including these waves. I've sped up the animation up by a factor of $3$ to make the effect more obvious.
+
+<WebGLShader fragmentShader="sine_stack_4" width={800} height={200} />
+
+With this "tide component" added to our existing waves, we get a natural, flowing wave with added high and low tides:
+
+<WebGLShader fragmentShader="sine_stack_final" width={800} height={200} />

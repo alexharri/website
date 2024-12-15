@@ -15,6 +15,12 @@ import wave_animated from "./fragment/wave_animated";
 import wave_animated_blur_left_to_right from "./fragment/wave_animated_blur_left_to_right";
 import wave_animated_blur_down from "./fragment/wave_animated_blur_down";
 import wave_animated_blur_down_even from "./fragment/wave_animated_blur_down_even";
+import sine_stack_final from "./fragment/sine_stack_final";
+import sine_stack_0 from "./fragment/sine_stack_0";
+import sine_stack_1 from "./fragment/sine_stack_1";
+import sine_stack_2 from "./fragment/sine_stack_2";
+import sine_stack_3 from "./fragment/sine_stack_3";
+import sine_stack_4 from "./fragment/sine_stack_4";
 
 export const fragmentShaderRegistry: Partial<Record<string, CreateFragmentShader>> = {
   final,
@@ -33,4 +39,10 @@ export const fragmentShaderRegistry: Partial<Record<string, CreateFragmentShader
   wave_animated_blur_left_to_right,
   wave_animated_blur_down,
   wave_animated_blur_down_even,
+  sine_stack_final,
+  sine_stack_0,
+  sine_stack_1,
+  sine_stack_2,
+  sine_stack_3,
+  sine_stack_4,
 };

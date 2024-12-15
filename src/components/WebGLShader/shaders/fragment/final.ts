@@ -23,12 +23,12 @@ function includeif(
 const createFragmentShader: CreateFragmentShader = (options) => {
   const {
     accentColor,
-    BLUR_HEIGHT = 230,
+    blurAmount = 230,
     blurQuality = 7,
     blurExponentRange = [0.96, 1.15],
     resolution = [1400, 250],
   } = options as Partial<{
-    BLUR_HEIGHT: number;
+    blurAmount: number;
     blurQuality: number;
     blurExponentRange: [number, number];
     accentColor: string;
@@ -117,7 +117,7 @@ const createFragmentShader: CreateFragmentShader = (options) => {
             ${varName} = ease_in(${varName});
             ${varName} = smooth_step(${varName});
             ${varName} = clamp(${varName}, 0.008, 1.0);
-            ${varName} *= ${BLUR_HEIGHT.toFixed(1)};
+            ${varName} *= ${blurAmount.toFixed(1)};
             sum += calc_alpha_part(dist, ${varName}) * ${(1 / blurQuality).toFixed(5)};
           `;
         })
