@@ -546,7 +546,7 @@ Putting our equation into code, we get:
 const float toWaveLength = (1.0 / WAVE_LEN) * (2.0 * PI);
 const float toPhase = (WAVE_SPEED / WAVE_LEN) * (2.0 * PI);
 
-float wave_fac = sin(x * toWaveLength + u_time * toPhase);
+float wave_fac = sin(x * toWaveLength + time * toPhase);
 ```
 
 We now have a constant that we can use to control the speed of the wave:
@@ -700,7 +700,7 @@ const float S = 0.28;
 const float A = 32.0;
 
 float sum = 0.0;
-sum += sin(x * L + u_time * S) * A;
+sum += sin(x * L + time * S) * A;
 ```
 
 These constants produce the following wave. The length, speed and amplitude feel along the lines of what I want the final wave to look like.
@@ -711,8 +711,8 @@ I now add more sine waves with values relative to the baseline constants $L$, $S
 
 ```glsl
 float sum = 0.0;
-sum += sin(x * L + u_time * S) * A;
-sum += sin(x * (L / 1.32) + u_time * S * 1.71) * A * 0.70;
+sum += sin(x * L + time * S) * A;
+sum += sin(x * (L / 1.32) + time * S * 1.71) * A * 0.70;
 ```
 
 This adds a second wave that's 32% longer, 71% faster, and 30% weaker than the baseline wave. Adding it has the following effect:
@@ -725,11 +725,11 @@ After some trial and error, here are the constants I picked:
 
 ```glsl
 float sum = 0.0;
-sum += sin(x * (L / 1.000) + u_time * 0.90 * S) * A * 0.64;
-sum += sin(x * (L / 1.153) + u_time * 1.15 * S) * A * 0.40;
-sum += sin(x * (L / 1.622) + u_time * 0.75 * S) * A * 0.48;
-sum += sin(x * (L / 1.871) + u_time * 0.65 * S) * A * 0.43;
-sum += sin(x * (L / 2.013) + u_time * 1.05 * S) * A * 0.32;
+sum += sin(x * (L / 1.000) + time * 0.90 * S) * A * 0.64;
+sum += sin(x * (L / 1.153) + time * 1.15 * S) * A * 0.40;
+sum += sin(x * (L / 1.622) + time * 0.75 * S) * A * 0.48;
+sum += sin(x * (L / 1.871) + time * 0.65 * S) * A * 0.43;
+sum += sin(x * (L / 2.013) + time * 1.05 * S) * A * 0.32;
 ```
 
 <SmallNote label="">I reduced the amplitude of the first wave to $0.64$ so that it doesn't dominate too much. I also slowed it down a bit, from $1.0$ to $0.9$.</SmallNote>
@@ -748,22 +748,22 @@ We can counteract this effect by making the phase evolution of some waves negati
 
 ```glsl
 float sum = 0.0;
-sum += sin(x * (L / 1.000) + u_time *  0.90 * S) * A * 0.64;
-sum += sin(x * (L / 1.153) + u_time *  1.15 * S) * A * 0.40;
-sum += sin(x * (L / 1.622) + u_time * -0.75 * S) * A * 0.48;
-sum += sin(x * (L / 1.871) + u_time *  0.65 * S) * A * 0.43;
-sum += sin(x * (L / 2.013) + u_time * -1.05 * S) * A * 0.32;
+sum += sin(x * (L / 1.000) + time *  0.90 * S) * A * 0.64;
+sum += sin(x * (L / 1.153) + time *  1.15 * S) * A * 0.40;
+sum += sin(x * (L / 1.622) + time * -0.75 * S) * A * 0.48;
+sum += sin(x * (L / 1.871) + time *  0.65 * S) * A * 0.43;
+sum += sin(x * (L / 2.013) + time * -1.05 * S) * A * 0.32;
 ```
 
 Looking at the wave now, it fluctuates between drifting left, drifting right, and periods of relative stillness.
 
 <WebGLShader fragmentShader="sine_stack_3" width={800} height={200} />
 
-I think this looks really natural! We've achieved a very natural feeling wave with only five sine waves.
+We've achieved a very natural feeling wave with only five sine waves!
 
 Because all of the sine waves are relative to $L$, $S$, $A$, we can easily tune the wave as a whole by adjusting those constants. If we want the wave to move a bit faster, we increase $S$. If we want to make the waves shorter, we decrease $L$, and so on.
 
-### Adding tide
+#### Adding tides
 
 The wave looks great, but it stays relatively still on the vertical axis. I want to make it more dynamic by adding periods of high and low tide. We can do that by adding a few more sine invocations with the $L$ component removed:
 
@@ -771,12 +771,12 @@ The wave looks great, but it stays relatively still on the vertical axis. I want
 float sum = 0.0;
 // ...
 
-sum += sin(u_time *  0.46 * S) * A * 0.64;
-sum += sin(u_time * -0.68 * S) * A * 0.48;
-sum += sin(u_time *  0.59 * S) * A * 0.72;
+sum += sin(time *  0.46 * S) * A * 0.64;
+sum += sin(time * -0.68 * S) * A * 0.48;
+sum += sin(time *  0.59 * S) * A * 0.72;
 ```
 
-By removing $L$ component we've made the waves flat. They still fluctuate, but uniformly over the width of the canvas.
+By removing $L$ component we've made the waves flat. They still fluctuate, but they do so uniformly over the width of the canvas.
 
 Take a look at the result of only including these waves. I've sped up the animation up by a factor of $3$ to make the effect more obvious.
 
@@ -785,3 +785,84 @@ Take a look at the result of only including these waves. I've sped up the animat
 With this "tide component" added to our existing waves, we get a natural, flowing wave with added high and low tides:
 
 <WebGLShader fragmentShader="sine_stack_final" width={800} height={200} />
+
+
+### Simplex noise
+
+[Simplex noise][simplex_noise] is a family of $n$-dimensional noise functions that were designed by Ken Perlin -- the inventor of "classic" [perlin noise][perlin_noise] -- to address some of the drawbacks of perlin noise.
+
+[simplex_noise]: https://en.wikipedia.org/wiki/Simplex_noise
+[perlin_noise]: https://en.wikipedia.org/wiki/Perlin_noise
+
+Here's an example of the wave that is the output from a 2D simplex noise function.
+
+<WebGLShader fragmentShader="simplex_wave" width={800} height={200} />
+
+Just a single simplex noise function call already produces a very natural-looking wave. Good stuff!
+
+The two components we'll pass to the 2D simplex noise function are an <Gl>x</Gl> coordinate and a <Gl>time</Gl> value, both scaled by some constants -- $L$ for the wave length and $S$ for the evolution speed, just like before.
+
+```glsl
+simplex_noise(x * L, time * S);
+```
+
+Simplex noise returns a value from $1$ and $-1$, just like the <Gl method>sin</Gl> function. That means that simplex noise can for the most part be used as a drop-in replacement for <Gl method>sin</Gl>, and vice versa.
+
+But still, a single simplex wave looks too even for our purposes -- the peaks and valleys look too evenly spaced and predictable. We can -- just like with sine waves -- stack simplex waves to get a more natural looking final wave.
+
+As before, I'll find constants that create a "baseline" wave that I like:
+
+```glsl
+const float L = 0.0018;
+const float S = 0.04;
+const float A = 48.0;
+
+float sum = 0.0;
+sum += simplex_noise(x * (L / 1.00), time * S * 1.00) * A * 1.00;
+```
+
+Which produces the following wave:
+
+<WebGLShader fragmentShader="simplex_stack_0" width={800} height={200} />
+
+From there, I'll add a few increasingly large waves with different speeds and amplitudes. Here's what I ended up with:
+
+```glsl
+const float A = 32.0; // Adjusted from 48 to 32
+
+float sum = 0.0;
+sum += simplex_noise(x * (L / 1.00), time * S * 1.00)) * A * 0.85;
+sum += simplex_noise(x * (L / 1.30), time * S * 1.26)) * A * 1.15;
+sum += simplex_noise(x * (L / 1.86), time * S * 1.09)) * A * 0.60;
+sum += simplex_noise(x * (L / 3.25), time * S * 0.89)) * A * 0.40;
+```
+
+This produces a wave that feels natural yet visually interesting.
+
+<WebGLShader fragmentShader="simplex_stack_1" width={800} height={200} />
+
+I don't feel that this wave needs a tide component -- constructive interference seems to do a good enough job of introducing ebbs and flows.
+
+Part of the reason that we get more constructive interference here -- compared to the stacked sine wave -- is that we have fewer waves. As the number of waves increases, their sum tends closer to the average -- zero. With fewer waves, the peaks and valleys converge more frequently, resulting in high constructive interference.
+
+But there is one component that I feel is missing, which is flow. The wave feels too "still", which makes it feel a bit artificial, so let's make it flow a bit in one direction.
+
+To make the wave flow left, we can add <Gl>time</Gl> to the <Gl>x</Gl> component, scaled by some constant that determines the amount of flow. Let's name that constant $F$.
+
+```glsl
+const float F = 0.031;
+
+float sum = 0.0;
+sum += simplex_noise(x * (L / 1.00) + F * time, ...) * ...;
+sum += simplex_noise(x * (L / 1.30) + F * time, ...) * ...;
+sum += simplex_noise(x * (L / 1.86) + F * time, ...) * ...;
+sum += simplex_noise(x * (L / 3.25) + F * time, ...) * ...;
+```
+
+This adds a very subtle flowing feeling.
+
+<WebGLShader fragmentShader="simplex_stack_final" width={800} height={200} />
+
+TODO: Make $F$ a slider.
+
+The flow may be a bit hard to notice -- that's intentional! If the flow is noticeable, there's too much of it.
