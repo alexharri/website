@@ -68,6 +68,10 @@ const Styles = ({ styled }: StyleOptions) => ({
         max-width: initial;
       }
     }
+
+    .monospace {
+      font-family: ${cssVariables.fontMonospace};
+    }
   `,
 });
 
