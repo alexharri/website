@@ -1,10 +1,19 @@
-import { CreateFragmentShader } from "../types";
+import { CreateFragmentShader, FragmentShaderUniforms } from "../types";
 
 const createFragmentShader: CreateFragmentShader = (_) => {
-  return /* glsl */ `
+  const uniforms: FragmentShaderUniforms = {
+    B: {
+      label: "Blur amount",
+      range: [0, 150],
+      value: 50,
+      step: 1,
+    },
+  };
+  const shader = /* glsl */ `
     precision mediump float;
 
     uniform float u_time; // Time in seconds
+    uniform float B;
 
     const float CANVAS_HEIGHT = 150.0;
     const float CANVAS_WIDTH = 250.0;
@@ -12,7 +21,7 @@ const createFragmentShader: CreateFragmentShader = (_) => {
     const float WAVE_AMP = 15.0;
     const float WAVE_LEN = 75.0;
     const float WAVE_SPEED = 20.0; // Pixels per seconds
-    const float BLUR_AMOUNT = 50.0;
+    float BLUR_AMOUNT = B;
     const float PI = ${Math.PI.toFixed(8)};
 
     float smoothstep(float t)
@@ -50,6 +59,7 @@ const createFragmentShader: CreateFragmentShader = (_) => {
       gl_FragColor = vec4(color, 1.0);
     }
   `;
+  return { shader, uniforms };
 };
 
 export default createFragmentShader;

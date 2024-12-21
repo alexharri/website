@@ -1,6 +1,6 @@
 type ShaderType = WebGLRenderingContext["VERTEX_SHADER"] | WebGLRenderingContext["FRAGMENT_SHADER"];
 
-export class Renderer {
+export class WebGLRenderer {
   private gl: WebGLRenderingContext;
 
   // private seed = 5983; // Math.random() * 100_000;
@@ -13,7 +13,10 @@ export class Renderer {
   private gradientTexture: WebGLTexture | null;
   private a_position: number;
   private u_time: WebGLUniformLocation | null;
+  private u_w: WebGLUniformLocation | null;
   private u_gradient: WebGLUniformLocation | null;
+
+  private uniformLocations = new Map<string, WebGLUniformLocation | null>();
 
   constructor(
     canvas: HTMLCanvasElement,
@@ -31,16 +34,18 @@ export class Renderer {
     this.gl = gl;
     this.numPositions = this.positions().length / 2; // Positions are vec2
 
-    this.program = Renderer.createProgram(gl, vertexShader, fragmentShader);
+    this.program = WebGLRenderer.createProgram(gl, vertexShader, fragmentShader);
     this.a_position = gl.getAttribLocation(this.program, "a_position");
     this.positionBuffer = gl.createBuffer();
     this.gradientTexture = gl.createTexture();
     this.u_gradient = gl.getUniformLocation(this.program, "u_gradient");
     this.u_time = gl.getUniformLocation(this.program, "u_time");
+    this.u_w = gl.getUniformLocation(this.program, "u_w");
 
-    Renderer.writeGradientToTexture(gl, colorConfig.gradient, this.gradientTexture, 1000, 2);
+    WebGLRenderer.writeGradientToTexture(gl, colorConfig.gradient, this.gradientTexture, 1000, 2);
 
     gl.vertexAttribPointer(this.a_position, /* vec2 */ 2, gl.FLOAT, false, 0, 0);
+    gl.useProgram(this.program);
   }
 
   public render() {
@@ -48,10 +53,10 @@ export class Renderer {
     const time = this.seed + (Date.now() - this.startTime) / 1000;
 
     gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
-    gl.useProgram(this.program);
 
     // Set uniforms
     gl.uniform1f(this.u_time, time);
+    gl.uniform1f(this.u_w, gl.canvas.width);
 
     // Pass gradient texture
     gl.activeTexture(gl.TEXTURE1);
@@ -59,10 +64,17 @@ export class Renderer {
     gl.uniform1i(this.u_gradient, 1);
 
     // Draw 2 triangles forming quad
+    this.clear();
     gl.enableVertexAttribArray(this.a_position);
     gl.bindBuffer(gl.ARRAY_BUFFER, this.positionBuffer);
-    this.clear();
     gl.drawArrays(gl.TRIANGLES, 0, this.numPositions);
+  }
+
+  public setUniform(key: string, value: number) {
+    const { gl } = this;
+
+    const location = this.getUniformLocation(key);
+    gl.uniform1f(location, value);
   }
 
   public setWidth(width: number) {
@@ -76,9 +88,16 @@ export class Renderer {
     gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(this.positions()), gl.STATIC_DRAW);
   }
 
+  private getUniformLocation(key: string): WebGLUniformLocation | null {
+    let location = this.uniformLocations.get(key);
+    if (location == null) {
+      location = this.gl.getUniformLocation(this.program, key);
+      this.uniformLocations.set(key, location);
+    }
+    return location;
+  }
+
   private positions() {
-    // const W = this.W / RES_W;
-    // const H = this.H / RES_H;
     // prettier-ignore
     return [
       0, 0,   1, 0,   0, 1, // Top-left triangle

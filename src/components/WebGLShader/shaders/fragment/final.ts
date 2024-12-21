@@ -27,12 +27,14 @@ const createFragmentShader: CreateFragmentShader = (options) => {
     blurQuality = 7,
     blurExponentRange = [0.96, 1.15],
     resolution = [1400, 250],
+    showWaves = true,
   } = options as Partial<{
     blurAmount: number;
     blurQuality: number;
     blurExponentRange: [number, number];
     accentColor: string;
     resolution: [number, number];
+    showWaves: boolean;
   }>;
 
   return /* glsl */ `
@@ -366,6 +368,13 @@ const createFragmentShader: CreateFragmentShader = (options) => {
           lightness = lerp(lightness, w1_lightness, w1_alpha);
           vec3 color = color_from_lightness(lightness);
         `,
+      )}
+
+      ${includeif(
+        !showWaves,
+        () => /* glsl */ `
+        color = color_from_lightness(bg_lightness);
+      `,
       )}
     
       gl_FragColor = vec4(color, 1.0);

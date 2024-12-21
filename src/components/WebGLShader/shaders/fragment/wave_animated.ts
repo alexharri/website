@@ -1,17 +1,25 @@
-import { CreateFragmentShader } from "../types";
+import { CreateFragmentShader, FragmentShaderUniforms } from "../types";
 
 const createFragmentShader: CreateFragmentShader = (_) => {
-  return /* glsl */ `
+  const uniforms: FragmentShaderUniforms = {
+    S: {
+      label: "math:S",
+      range: [0, 150],
+      value: 30,
+    },
+  };
+  const shader = /* glsl */ `
     precision mediump float;
 
     uniform float u_time; // Time in seconds
+    uniform float S;
 
     const float CANVAS_HEIGHT = 150.0;
     const float WAVE_CENTER = CANVAS_HEIGHT * 0.5;
     const float WAVE_AMPLITUDE = 15.0;
     const float WAVE_LEN = 75.0;
-    const float WAVE_SPEED = 20.0; // Pixels per seconds
-    const float WAVES_PER_SECOND = WAVE_SPEED / WAVE_LEN;
+    float WAVE_SPEED = S; // Pixels per seconds
+    float WAVES_PER_SECOND = WAVE_SPEED / WAVE_LEN;
     const float PI = ${Math.PI.toFixed(8)};
 
     void main() {
@@ -29,7 +37,7 @@ const createFragmentShader: CreateFragmentShader = (_) => {
 
       // Y position of curve at current X coordinate
       const float toLength = 1.0 / (WAVE_LEN / (2.0 * PI));
-      const float toPhase = (WAVE_SPEED / WAVE_LEN) * (2.0 * PI);
+      float toPhase = (WAVE_SPEED / WAVE_LEN) * (2.0 * PI);
       float wave_fac = sin(x * toLength + u_time * toPhase);
       float curve_y = WAVE_CENTER + wave_fac * WAVE_AMPLITUDE;
       float dist = curve_y - y;
@@ -41,6 +49,7 @@ const createFragmentShader: CreateFragmentShader = (_) => {
       gl_FragColor = vec4(color, 1.0);
     }
   `;
+  return { shader, uniforms };
 };
 
 export default createFragmentShader;

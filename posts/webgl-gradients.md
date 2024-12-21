@@ -553,8 +553,6 @@ We now have a constant that we can use to control the speed of the wave:
 
 <WebGLShader fragmentShader="wave_animated" height={150} width={150} />
 
-TODO: Make $W_S$ a slider
-
 ## Adding blur
 
 Take another look at the final animation and consider the role that blur plays. The waves in the animation slowly fluctuate between a blurry and a sharp state, providing contrast and visual interest.
@@ -617,7 +615,7 @@ When <Gl>dist_signed == 0.0</Gl>, the alpha will be $0.0$, and as <Gl>dist_signe
 fg_alpha = clamp(fg_alpha, 0.0, 1.0);
 ```
 
-This produces a blur effect, though you might notice that the wave appears to have shifted down.
+This produces a blur effect, though you might notice that the wave shifts down as the blur increases -- try varying the amount of blur using the slider.
 
 <WebGLShader fragmentShader="wave_animated_blur_down_even" height={150} width={250} />
 
@@ -644,9 +642,9 @@ fg_alpha = clamp(fg_alpha, 0.0, 1.0);
 
 <WebGLShader fragmentShader="wave_animated_blur_down" height={150} width={250} />
 
-As we can see, the wave shifts down as <Gl>blur_amount</Gl> increases.
+Let's now fix how the wave shifts down as <Gl>blur_amount</Gl> increases.
 
-This makes sense. For pixels where <Gl>{"dist_signed <= 0"}</Gl> the alpha is $0$ regardless of the value of <Gl>blur_amount</Gl> so the top of the wave stays fixed. At the same time, alpha is $1$ for all pixels where <Gl>{"dist_signed >= blur_amount"}</Gl>, which shifts the "bottom" of the wave down as the blur increases.
+Consider why the down-shift occurs. For pixels where <Gl>{"dist_signed <= 0"}</Gl> the alpha is $0$ regardless of the value of <Gl>blur_amount</Gl>, thus the top of the wave stays fixed. At the same time, the alpha is $1$ for all pixels where <Gl>{"dist_signed >= blur_amount"}</Gl>, which shifts the "bottom" of the wave down as the blur increases.
 
 What we want is for the alpha to be $0.5$ when <Gl>{"dist_signed == 0"}</Gl>, which we can do by starting <Gl>fg_alpha</Gl> at $0.5$:
 
@@ -654,6 +652,8 @@ What we want is for the alpha to be $0.5$ when <Gl>{"dist_signed == 0"}</Gl>, wh
 float fg_alpha = 0.5 + dist_signed / blur_amount;
 fg_alpha = clamp(fg_alpha, 0.0, 1.0);
 ```
+
+This shifts the "top" and "bottom" of the wave up and down equally as the amount of blur increases:
 
 <WebGLShader fragmentShader="wave_animated_blur_left_to_right" height={150} width={250} />
 
@@ -859,10 +859,193 @@ sum += simplex_noise(x * (L / 1.86) + F * time, ...) * ...;
 sum += simplex_noise(x * (L / 3.25) + F * time, ...) * ...;
 ```
 
-This adds a very subtle flowing feeling.
+This adds a subtle, flowing feel to the wave.
 
 <WebGLShader fragmentShader="simplex_stack_final" width={800} height={200} />
 
 TODO: Make $F$ a slider.
 
 The flow may be a bit hard to notice -- that's intentional! If the flow is noticeable, there's too much of it.
+
+
+## Multiple waves
+
+We've created a natural looking wave using simplex noise. Let's now update our shader to include multiple waves.
+
+<WebGLShader fragmentShader="multiple_waves" width={800} height={200} />
+
+As a first step, I'll create a <Gl>wave_alpha</Gl> function that takes in a Y position and height for the wave.
+
+```glsl
+float wave_alpha(float Y, float height) {
+  // ...
+}
+```
+
+We'll calculate the alpha like before: take the signed distance of the pixel's and wave's Y positions and use the distance to calculate the alpha.
+
+```glsl
+float wave_alpha(float Y, float wave_height) {
+  float wave_y = Y + noise(gl_FragCoord.x) * wave_height;
+  float dist_signed = wave_y - gl_FragCoord.y;
+  float alpha = clamp(0.5 + dist_signed, 0.0, 1.0);
+  return alpha;
+}
+```
+
+Let's use this to calculate the alpha values of two waves:
+
+```glsl
+const float WAVE1_HEIGHT = 24.0;
+const float WAVE2_HEIGHT = 32.0;
+const float WAVE1_Y = 0.80 * CANVAS_HEIGHT;
+const float WAVE2_Y = 0.35 * CANVAS_HEIGHT;
+
+float w1_alpha = wave_alpha(WAVE1_Y, WAVE1_HEIGHT);
+float w2_alpha = wave_alpha(WAVE2_Y, WAVE2_HEIGHT);
+```
+
+We'll then pick three colors -- one for the background, two for the waves:
+
+```glsl
+vec3 bg_color = vec3(...);
+vec3 w1_color = vec3(...);
+vec3 w2_color = vec3(...);
+```
+
+And composite those into a final image using the alphas:
+
+```glsl
+vec3 color = bg_color;
+color = mix(color, w1_color, w1_alpha);
+color = mix(color, w2_color, w2_alpha);
+gl_FragColor = vec4(color, 1.0);
+```
+
+This gives us the following result:
+
+<WebGLShader fragmentShader="multiple_waves" width={800} height={200} fragmentShaderOptions={{ offsetScalar: 0 }} />
+
+This does gives us two waves, but they're completely in sync. We'll need to introduce an offset for the noise to make the waves distinct.
+
+One way to add an offset is to provide each wave with an offset value and pass that to the noise function:
+
+```glsl
+float wave_alpha(float Y, float wave_height, float offset) {
+  noise(..., offset);
+  // ...
+}
+
+float w1_alpha = wave_alpha(WAVE1_Y, WAVE1_HEIGHT, -72.2);
+float w2_alpha = wave_alpha(WAVE2_Y, WAVE2_HEIGHT, 163.9);
+```
+
+The noise function would then add the offset to the time component and use that when calculating the noise.
+
+```glsl
+float noise(float x, float offset) {
+  // ...
+
+  float t = time + offset;
+
+  float sum = 0.0;
+  sum += simplex_noise(x * L + F * t, t * S * 1.00);
+  // ...
+}
+```
+
+This would produce identical waves -- but the waves would be offset in time so no one would notice. If we want the waves to be distinct (for whatever reason), we can calculate multiple offsets and pass those to the different individual <Gl method>simplex_noise</Gl> functions:
+
+```glsl
+float noise(float x, float offset) {
+  float o1 = offset * 1.0;
+  float o2 = offset * 2.0;
+
+  float sum = 0.0;
+  sum += simplex_noise(x * L + F * t, t * S * 1.00 + o1);
+  sum += simplex_noise(x * L + F * t, t * S * 1.00 + o2);
+}
+```
+
+This would produce visually distinct waves.
+
+Anyway, I want to backtrack a bit to discuss the offset value and mentiona that we don't actually need to provide the offset manually:
+
+```glsl
+float wave_alpha(float Y, float wave_height, float offset) {
+  noise(..., offset);
+  // ...
+}
+
+// Providing these offsets is unnecessary
+float w1_alpha = wave_alpha(WAVE1_Y, WAVE1_HEIGHT, -72.2);
+float w2_alpha = wave_alpha(WAVE2_Y, WAVE2_HEIGHT, 163.9);
+```
+
+We can just calculate an offset in the <Gl method>wave_alpha</Gl> using the Y and height components:
+
+```glsl
+float wave_alpha(float Y, float wave_height) {
+  float noise_offset = Y * wave_height;
+  noise(..., noise_offset);
+  // ...
+}
+```
+
+How random the offset needs to be ultimately depend on your application. If you need really random offsets, you can use more complicated methods to calculate them, but we just need the offsets not to be too close that it becomes visually noticeable.
+
+Anyway, we can now easily generate an arbitrary number of waves! Let's move on.
+
+
+## Background color noise
+
+You've probably seen animated 2D noise like so:
+
+<WebGLShader fragmentShader="perlin_noise" width={350} height={250} />
+
+Above is an example of 3D [perlin noise][perlin_noise] -- the first two components are the X and Y position, and the third is time. I like to think of a 2D plane on the X/Y axes moving through a 3D volume along the Z axis (time) -- I find that to be a useful mental model.
+
+Anyway, here's what the shader looks like:
+
+```glsl
+float x = gl_FragCoord.x * 0.02;
+float y = gl_FragCoord.y * 0.02;
+float z = u_time * 0.6;
+
+float noise = perlin_noise(x, y, z);
+float lightness = (noise + 1.0) / 2.0; // Remap from [-1, 1] to [0, 1]
+
+gl_FragColor = vec4(lightness, lightness, lightness, 1.0);
+```
+
+If we scale the noise up, slow the evolution down, and make the X scale higher than the Y scale, we start to get fairly decent looking background noise:
+
+<WebGLShader
+  fragmentShader="perlin_noise"
+  width={800}
+  height={250}
+  fragmentShaderOptions={{ xScale: 0.004, yScale: 0.010, timeScale: 0.2 }}
+/>
+
+Perlin is the most common type of noise used for this purpose, but I find it a bit too "blobby". Simplex noise does not have the same level of blobbiness -- it feels more natural to me. Here's a side-by-side comparison:
+
+<WebGLShader fragmentShader="simplex_perlin_split" width={800} height={250} />
+
+<SmallNote label="" center>Perlin noise is left, simplex noise is right.</SmallNote>
+
+Either would work, but I find simplex noise more natural so let's go with it. Here's what simplex noise looks like scaled up and slowed down:
+
+<WebGLShader
+  fragmentShader="simplex_noise"
+  width={800}
+  height={250}
+  fragmentShaderOptions={{ xScale: 0.0017, yScale: 0.005, timeScale: 0.2 }}
+/>
+
+We can stack perlin noise just like we do with sine waves -- layering noise of different scales, speeds and amplitudes. After some tweaking, here's what I came up with:
+
+<WebGLShader fragmentShader="simplex_noise_stacked" width={800} height={250} />
+
+Let's break down how I got here.
+
+<span data-varlabel="Y">$Y$</span>
