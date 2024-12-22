@@ -6,7 +6,10 @@ import { clamp } from "../math/math";
 
 const firstUpper = (s: string) => s[0].toUpperCase() + s.slice(1);
 
-function format(value: number, step: number) {
+function format(value: number, step: number, format: NumberVariableSpec["format"]): string {
+  if (format === "percent") {
+    return Math.round(value * 100) + "%";
+  }
   let v = step;
   let digits = 0;
   while (v < 1) {
@@ -17,7 +20,8 @@ function format(value: number, step: number) {
       throw new Error(`Unexpectedly small step of ${step}`);
     }
   }
-  return Number(value.toFixed(digits));
+  let postfix = format === "multiplier" ? "x" : "";
+  return Number(value.toFixed(digits)) + postfix;
 }
 
 const styles = ({ styled, theme }: StyleOptions) => ({
@@ -63,7 +67,7 @@ const styles = ({ styled, theme }: StyleOptions) => ({
         transparent 100%
       );
       z-index: 101;
-      padding: 0 16px;
+      padding: 0 32px;
     }
     &--left {
       left: 11px;
@@ -86,22 +90,17 @@ const styles = ({ styled, theme }: StyleOptions) => ({
 
 export type NumberVariableSpec = {
   label?: string;
-  type: "number";
   range: [number, number];
   value: number;
   step?: number;
+  format?: "number" | "percent" | "multiplier";
 };
 
 interface NumberVariableProps {
   dataKey: string;
   value: number;
   onValueChange: (value: number) => void;
-  spec: {
-    range: [number, number];
-    value: number;
-    step?: number;
-    label?: string;
-  };
+  spec: NumberVariableSpec;
   width?: "small" | "normal";
 }
 
@@ -163,16 +162,16 @@ export const NumberVariable: React.FC<NumberVariableProps> = (props) => {
           step={step}
         />
         <span className={s("label", { left: true, down, hover })} style={{ opacity: lOpacity }}>
-          {min}
+          {format(min, step, spec.format)}
         </span>
         <span className={s("label", { right: true, down, hover })} style={{ opacity: rOpacity }}>
-          {max}
+          {format(max, step, spec.format)}
         </span>
         <span
           className={s("label", { value: true, down, hover })}
           style={{ left: `calc(${lerp(11, -11, t)}px + ${t * 100}%)` }}
         >
-          {format(value, step)}
+          {format(value, step, spec.format)}
         </span>
       </div>
     </label>

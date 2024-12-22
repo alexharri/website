@@ -2,25 +2,42 @@ import { CreateFragmentShader, FragmentShaderUniforms } from "../types";
 
 const createFragmentShader: CreateFragmentShader = (_) => {
   const uniforms: FragmentShaderUniforms = {
-    time: {
-      label: "Animation speed",
+    u_L: {
+      label: "math:L",
       value: 1,
-      range: [1, 10],
+      range: [0.1, 3],
       format: "multiplier",
+      width: "small",
+    },
+    time: {
+      label: "math:S",
+      value: 1,
+      range: [0.1, 10],
+      format: "multiplier",
+      width: "small",
+    },
+    u_A: {
+      label: "math:A",
+      value: 1,
+      range: [0, 3],
+      format: "multiplier",
+      width: "small",
     },
   };
   const shader = /* glsl */ `
     precision mediump float;
 
     uniform float u_time;
+    uniform float u_L;
+    uniform float u_A;
 
     const float HEIGHT = 200.0;
     const float PI = 3.14159, TAU = PI * 2.0;
-    const float WAVE_HEIGHT = 32.0;
+    float WAVE_HEIGHT = 32.0 * u_A;
 
     float noise(float x) {
-      const float L = 0.011;
-      const float S = 0.28;
+      float L = 0.011 * (1.0 / u_L);
+      float S = 0.28;
       
       float sum = 0.0;
       sum += sin(x * (L / 1.000) + u_time *  0.90 * S) * 0.64;

@@ -1,13 +1,22 @@
 import { noiseUtils } from "../../noiseUtils";
 import { simplexNoise } from "../../simplexNoise";
-import { CreateFragmentShader } from "../types";
+import { CreateFragmentShader, FragmentShaderUniforms } from "../types";
 
 const createFragmentShader: CreateFragmentShader = (options) => {
   const { flowScalar = 1 } = options as { flowScalar?: number };
-  return /* glsl */ `
+  const uniforms: FragmentShaderUniforms = {
+    time1: {
+      label: "math:F",
+      value: 1,
+      range: [0, 10],
+      format: "multiplier",
+    },
+  };
+  const shader = /* glsl */ `
     precision mediump float;
 
     uniform float u_time;
+    uniform float u_time2;
 
     const float HEIGHT = 200.0;
     const float WAVE_HEIGHT = 40.0;
@@ -18,13 +27,13 @@ const createFragmentShader: CreateFragmentShader = (options) => {
     float noise(float x) {
       const float L = 0.0018;
       const float S = 0.04;
-      const float F = ${0.031 * flowScalar};
+      float F = ${0.031 * flowScalar};
 
       float sum = 0.0;
-      sum += simplexNoise(vec2(x * (L / 1.00) + F * u_time, u_time * S * 1.00)) * 0.85;
-      sum += simplexNoise(vec2(x * (L / 1.30) + F * u_time, u_time * S * 1.26)) * 1.15;
-      sum += simplexNoise(vec2(x * (L / 1.86) + F * u_time, u_time * S * 1.09)) * 0.60;
-      sum += simplexNoise(vec2(x * (L / 3.25) + F * u_time, u_time * S * 0.89)) * 0.40;
+      sum += simplexNoise(vec2(x * (L / 1.00) + F * u_time2, u_time * S * 1.00)) * 0.85;
+      sum += simplexNoise(vec2(x * (L / 1.30) + F * u_time2, u_time * S * 1.26)) * 1.15;
+      sum += simplexNoise(vec2(x * (L / 1.86) + F * u_time2, u_time * S * 1.09)) * 0.60;
+      sum += simplexNoise(vec2(x * (L / 3.25) + F * u_time2, u_time * S * 0.89)) * 0.40;
       return sum;
     }
 
@@ -49,6 +58,7 @@ const createFragmentShader: CreateFragmentShader = (options) => {
       gl_FragColor = vec4(color, 1.0);
     }
   `;
+  return { shader, uniforms };
 };
 
 export default createFragmentShader;

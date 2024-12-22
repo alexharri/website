@@ -6,12 +6,23 @@ import { vertexShaderRegistry } from "./shaders/vertexShaders";
 import { fragmentShaderRegistry } from "./shaders/fragmentShaders";
 import { cssVariables } from "../../utils/cssVariables";
 import { useVisible } from "../../utils/hooks/useVisible";
-import { FragmentShader } from "./shaders/types";
+import { FragmentShader, FragmentShaderUniform } from "./shaders/types";
 import { NumberVariable } from "../../threejs/NumberVariable";
+import { invLerp, lerp } from "../../math/lerp";
 
 const DEFAULT_HEIGHT = 250;
 const UNIFORM_MARGIN = 24;
 const UNIFORM_V_GAP = 32;
+
+function parseUniformValue(uniform: FragmentShaderUniform, value: number) {
+  if (uniform.remap) {
+    const [min, max] = uniform.range;
+    const [from, to] = uniform.remap;
+    const t = invLerp(min, max, value);
+    value = lerp(from, to, t);
+  }
+  return value;
+}
 
 const styles = ({ styled }: StyleOptions) => ({
   container: styled.css`
@@ -132,8 +143,18 @@ const _WebGLShader: React.FC<Props> = (props) => {
         renderer.setWidth(props.width ?? window.innerWidth);
       }
 
-      for (const [key, value] of pendingUniformWrites.current) {
-        renderer.setUniform(key, value);
+      for (let [key, value] of pendingUniformWrites.current) {
+        const uniform = fragmentShader.uniforms[key];
+        value = parseUniformValue(uniform, value);
+        const timeKeyMatch = /^time(?<index>[1-9]?)$/.exec(key);
+        if (timeKeyMatch) {
+          const indexString = timeKeyMatch.groups?.index;
+          const index = indexString ? Number(indexString) : 0;
+          // The special key "time" controls the renderer time speed
+          renderer.setTimeSpeed(value, index);
+        } else {
+          renderer.setUniform(key, value);
+        }
       }
       pendingUniformWrites.current.length = 0;
 
@@ -164,10 +185,10 @@ const _WebGLShader: React.FC<Props> = (props) => {
             <NumberVariable
               key={key}
               dataKey={key}
-              value={uniformValues[key]}
+              value={uniformValues[key] ?? uniform.value}
               onValueChange={(value) => setUniformValue(key, value)}
               spec={uniform}
-              width="small"
+              width={uniform.width}
             />
           );
         })}

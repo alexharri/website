@@ -1,18 +1,32 @@
 type ShaderType = WebGLRenderingContext["VERTEX_SHADER"] | WebGLRenderingContext["FRAGMENT_SHADER"];
 
+const N_TIME_VALUES = 2;
+
+function timeKey(index: number) {
+  let key = "u_time";
+  if (index > 0) key += String(index + 1);
+  return key;
+}
+
+interface TimeState {
+  seed: number;
+  lastTime: number;
+  elapsed: number;
+  timeSpeed: number;
+}
+
 export class WebGLRenderer {
   private gl: WebGLRenderingContext;
 
   // private seed = 5983; // Math.random() * 100_000;
-  private seed = Math.random() * 100_000;
-  private startTime = Date.now();
+  private timeStates: TimeState[];
 
   private program: WebGLProgram;
   private positionBuffer: WebGLBuffer | null;
   private numPositions: number;
   private gradientTexture: WebGLTexture | null;
   private a_position: number;
-  private u_time: WebGLUniformLocation | null;
+  private u_timeList: Array<WebGLUniformLocation | null>;
   private u_w: WebGLUniformLocation | null;
   private u_gradient: WebGLUniformLocation | null;
 
@@ -39,8 +53,17 @@ export class WebGLRenderer {
     this.positionBuffer = gl.createBuffer();
     this.gradientTexture = gl.createTexture();
     this.u_gradient = gl.getUniformLocation(this.program, "u_gradient");
-    this.u_time = gl.getUniformLocation(this.program, "u_time");
+    this.u_timeList = Array.from({ length: N_TIME_VALUES }).map((_, i) =>
+      gl.getUniformLocation(this.program, timeKey(i)),
+    );
     this.u_w = gl.getUniformLocation(this.program, "u_w");
+
+    this.timeStates = Array.from({ length: N_TIME_VALUES }).map(() => ({
+      seed: Math.random() * 100_000,
+      lastTime: Date.now(),
+      elapsed: 0,
+      timeSpeed: 1,
+    }));
 
     WebGLRenderer.writeGradientToTexture(gl, colorConfig.gradient, this.gradientTexture, 1000, 2);
 
@@ -50,12 +73,18 @@ export class WebGLRenderer {
 
   public render() {
     const { gl } = this;
-    const time = this.seed + (Date.now() - this.startTime) / 1000;
+    const now = Date.now();
 
     gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
 
     // Set uniforms
-    gl.uniform1f(this.u_time, time);
+    for (let i = 0; i < N_TIME_VALUES; i++) {
+      const state = this.timeStates[i];
+      state.elapsed += (now - state.lastTime) * state.timeSpeed;
+      state.lastTime = now;
+      const time = state.seed + state.elapsed / 1000;
+      gl.uniform1f(this.u_timeList[i], time);
+    }
     gl.uniform1f(this.u_w, gl.canvas.width);
 
     // Pass gradient texture
@@ -75,6 +104,10 @@ export class WebGLRenderer {
 
     const location = this.getUniformLocation(key);
     gl.uniform1f(location, value);
+  }
+
+  public setTimeSpeed(value: number, index: number) {
+    this.timeStates[index].timeSpeed = value;
   }
 
   public setWidth(width: number) {

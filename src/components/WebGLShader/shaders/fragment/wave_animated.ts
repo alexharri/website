@@ -2,10 +2,11 @@ import { CreateFragmentShader, FragmentShaderUniforms } from "../types";
 
 const createFragmentShader: CreateFragmentShader = (_) => {
   const uniforms: FragmentShaderUniforms = {
-    S: {
+    time: {
       label: "math:S",
       range: [0, 150],
-      value: 30,
+      value: 20,
+      remap: [0, 7.5],
     },
   };
   const shader = /* glsl */ `
@@ -18,7 +19,7 @@ const createFragmentShader: CreateFragmentShader = (_) => {
     const float WAVE_CENTER = CANVAS_HEIGHT * 0.5;
     const float WAVE_AMPLITUDE = 15.0;
     const float WAVE_LEN = 75.0;
-    float WAVE_SPEED = S; // Pixels per seconds
+    float WAVE_SPEED = 20.0; // Pixels per seconds
     float WAVES_PER_SECOND = WAVE_SPEED / WAVE_LEN;
     const float PI = ${Math.PI.toFixed(8)};
 

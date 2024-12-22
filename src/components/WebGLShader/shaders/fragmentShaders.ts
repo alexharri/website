@@ -20,6 +20,7 @@ import sine_stack_0 from "./fragment/sine_stack_0";
 import sine_stack_1 from "./fragment/sine_stack_1";
 import sine_stack_2 from "./fragment/sine_stack_2";
 import sine_stack_3 from "./fragment/sine_stack_3";
+import sine_stack_3_LSA from "./fragment/sine_stack_3_LSA";
 import sine_stack_4 from "./fragment/sine_stack_4";
 import simplex_wave from "./fragment/simplex_wave";
 import simplex_stack_final from "./fragment/simplex_stack_final";
@@ -56,6 +57,7 @@ export const fragmentShaderRegistry: Partial<Record<string, CreateFragmentShader
   sine_stack_1,
   sine_stack_2,
   sine_stack_3,
+  sine_stack_3_LSA,
   sine_stack_4,
   simplex_wave,
   simplex_stack_final,

@@ -1,7 +1,15 @@
-import { CreateFragmentShader } from "../types";
+import { CreateFragmentShader, FragmentShaderUniforms } from "../types";
 
 const createFragmentShader: CreateFragmentShader = (_) => {
-  return /* glsl */ `
+  const uniforms: FragmentShaderUniforms = {
+    time: {
+      label: "Animation speed",
+      value: 1,
+      range: [1, 10],
+      format: "multiplier",
+    },
+  };
+  const shader = /* glsl */ `
     precision mediump float;
 
     uniform float u_time;
@@ -41,6 +49,7 @@ const createFragmentShader: CreateFragmentShader = (_) => {
       gl_FragColor = vec4(color, 1.0);
     }
   `;
+  return { shader, uniforms };
 };
 
 export default createFragmentShader;
