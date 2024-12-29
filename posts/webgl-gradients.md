@@ -875,13 +875,11 @@ Which gives us an animated wave:
 
 <SmallNote label="" center>Just a single simplex noise function call already produces a very natural-looking wave.</SmallNote>
 
-I've been simplifying things a bit by omitting the scalars I've been using. Like before, there are three scalars that determine the characteristics of our wave: $L$ determines the wave length, $S$ determines the evolution speed, and $A$ determines the amplitude of the wave.
-
-We scale $x$ by $L$ to make the wave shorter or longer on the horizontal axis
+I've been simplifying things a bit by omitting scalars. Like before, there are three scalars that determine the characteristics of our wave: $L$, $S$ and $A$. Firstly, we scale $x$ by $L$ to make the wave shorter or longer on the horizontal axis:
 
 <p className="mathblock">$$\text{simplex}(x \times L,\ \text{time})$$</p>
 
-and scale $\text{time}$ by $S$ to speed up or slow down the evolution of our wave -- the speed at which our figurative cross section moves across the $z$ axis:
+We then scale $\text{time}$ by $S$ to speed up or slow down the evolution of our wave -- the speed at which our figurative cross section moves across the $z$ axis:
 
 <p className="mathblock">$$\text{simplex}(x \times L,\ \text{time} \times S)$$</p>
 
@@ -889,36 +887,23 @@ Lastly, we scale the output of the $\text{simplex}$ function by $A$, which deter
 
 <p className="mathblock">$$\text{simplex}(x \times L,\ \text{time} \times S) \times A$$</p>
 
-As mentioned before, simplex noise returns a value from $1$ and $-1$. So to make a wave with a height of $96$, you'd scale the output of the $\text{simplex}$ function by $48$.
+As mentioned before, simplex noise returns a value from $1$ and $-1$. So to make a wave with a height of $96$ you'd set $A$ to $48$.
 
-As mentioned before, simplex noise returns a value from $1$ and $-1$. So to make a wave with a height of $96$, you'd make the amplitude $A$ equal $48$:
-
-```glsl
-const float L = 0.0015;
-const float S = 0.12;
-const float A = 48.0;
-
-simplex_noise(x * L, time * S) * A;
-```
-
-Anyway, let's create a nice looking simplex wave! As before, I'll start by finding constants that create a "baseline" wave that I like:
+Here are values for $L$, $S$, $A$ that create a nice looking wave:
 
 ```glsl
 const float L = 0.0018;
 const float S = 0.04;
 const float A = 48.0;
 
-float sum = 0.0;
-sum += simplex_noise(x * (L / 1.00), time * S * 1.00) * A * 1.00;
+simplex_noise(x * (L / 1.00), time * S * 1.00) * A * 1.00;
 ```
-
-These produce the following wave:
 
 <WebGLShader fragmentShader="simplex_stack_0" width={800} height={200} />
 
-A single simplex wave looks too simple -- the peaks and valleys look too evenly spaced and predictable. Like sine waves, we can stack simplex waves to get a more natural looking final wave.
+This wave is nice, but it feels too simple. The peaks and valleys look too evenly spaced and predictable.
 
-I added a few increasingly large waves with various speeds and amplitudes. Here's what I ended up with:
+Like sine waves, we can stack simplex waves of various lengths and speeds to get a more natural looking final wave. I added a few increasingly large waves, some slower, some faster. Here's what I ended up with:
 
 ```glsl
 float sum = 0.0;
@@ -928,7 +913,7 @@ sum += simplex_noise(x * (L / 1.86), time * S * 1.09)) * A * 0.60;
 sum += simplex_noise(x * (L / 3.25), time * S * 0.89)) * A * 0.40;
 ```
 
-<SmallNote label="">I reduced $A$ from 48 to 32. With more waves added, 48 became too high.</SmallNote>
+<SmallNote label="" center>I also reduced $A$ from 48 to 32. With more waves added, 48 became too high.</SmallNote>
 
 This produces a wave that feels natural yet visually interesting.
 
@@ -936,7 +921,7 @@ This produces a wave that feels natural yet visually interesting.
 
 I don't feel that this wave needs a tide component. Constructive interference seems to do a good enough job of introducing ebbs and flows.
 
-But there _is_ one component I feel is missing, which is flow. The wave feels too "still", which makes it feel a bit artificial, so let's make it flow a bit in one direction.
+But there _is_ one component I feel is missing, which is directional flow. The wave feels too "still", which makes it feel a bit artificial, so let's make it flow a bit in one direction.
 
 To make the wave flow left, we can add <Gl>time</Gl> to the <Gl>x</Gl> component, scaled by some constant that determines the amount of flow. Let's name that constant $F$.
 
@@ -954,7 +939,9 @@ This adds a subtle, flowing feel to the wave. I'll let you vary the amount of fl
 
 <WebGLShader fragmentShader="simplex_stack_final" width={800} height={200} />
 
-The amount of flow at 1x may feel a bit suble, but that's intentional. If the flow is easily noticeable, there's too much of it.
+<SmallNote label="" center>The amount of flow at 1x may feel a bit suble, but that's intentional. If the flow is easily noticeable, there's too much of it.</SmallNote>
+
+The wave is starting to feel really good. Let's move onto adding multiple waves.
 
 
 ## Multiple waves
