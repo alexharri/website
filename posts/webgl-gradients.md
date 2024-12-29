@@ -950,7 +950,7 @@ We've created a natural looking wave using simplex noise. Let's now update our s
 
 <WebGLShader fragmentShader="multiple_waves" width={800} height={200} />
 
-As a first step, I'll create a <Gl>wave_alpha</Gl> function that takes in a Y position and height for the wave.
+As a first step, I'll create a <Gl>wave_alpha</Gl> function that takes in a <Gl>Y</Gl> position and height for the wave.
 
 ```glsl
 float wave_alpha(float Y, float height) {
@@ -958,18 +958,20 @@ float wave_alpha(float Y, float height) {
 }
 ```
 
-We'll calculate the alpha like before: take the signed distance of the pixel's and wave's Y positions and use the distance to calculate the alpha.
+We'll calculate the alpha like before: take the distance between the Y position of the wave's and the current pixel's Y positions (<Gl>gl_FragCoord.y</Gl>) and use the distance to calculate the alpha.
 
 ```glsl
 float wave_alpha(float Y, float wave_height) {
-  float wave_y = Y + noise(gl_FragCoord.x) * wave_height;
+  float wave_y = Y + wave_noise(gl_FragCoord.x) * wave_height;
   float dist_signed = wave_y - gl_FragCoord.y;
   float alpha = clamp(0.5 + dist_signed, 0.0, 1.0);
   return alpha;
 }
 ```
 
-Let's use this to calculate the alpha values of two waves:
+<SmallNote label="">The <Gl method>wave_noise</Gl> function contains the simplex noise we were calculating earlier.</SmallNote>
+
+We use this to calculate the alpha values of two waves, each with their separate Y positions and heights:
 
 ```glsl
 const float WAVE1_HEIGHT = 24.0;
@@ -981,7 +983,7 @@ float w1_alpha = wave_alpha(WAVE1_Y, WAVE1_HEIGHT);
 float w2_alpha = wave_alpha(WAVE2_Y, WAVE2_HEIGHT);
 ```
 
-We'll then pick three colors -- one for the background, two for the waves:
+We'll pick three colors -- one for the background, two for the waves
 
 ```glsl
 vec3 bg_color = vec3(...);
@@ -989,7 +991,7 @@ vec3 w1_color = vec3(...);
 vec3 w2_color = vec3(...);
 ```
 
-And composite those into a final image using the alphas:
+and composite those into a final image using the alphas returned from the <Gl method>wave_alpha</Gl> calls:
 
 ```glsl
 vec3 color = bg_color;
@@ -1002,13 +1004,13 @@ This gives us the following result:
 
 <WebGLShader fragmentShader="multiple_waves" width={800} height={200} fragmentShaderOptions={{ offsetScalar: 0 }} />
 
-This does gives us two waves, but they're completely in sync. We'll need to introduce an offset for the noise to make the waves distinct.
+We do get two waves, but they're completely in sync. This makes sense because the only input we're passing to the <Gl method>wave_noise</Gl> function is the pixel's $x$ position.
 
-One way to add an offset is to provide each wave with an offset value and pass that to the noise function:
+We'll need to introduce an offset for the noise to make the waves distinct. One way to do that is just to provide each wave with a literal <Gl>offset</Gl> value and pass that to the noise function:
 
 ```glsl
 float wave_alpha(float Y, float wave_height, float offset) {
-  noise(..., offset);
+  wave_noise(..., offset);
   // ...
 }
 
@@ -1016,10 +1018,10 @@ float w1_alpha = wave_alpha(WAVE1_Y, WAVE1_HEIGHT, -72.2);
 float w2_alpha = wave_alpha(WAVE2_Y, WAVE2_HEIGHT, 163.9);
 ```
 
-The noise function would then add the offset to the time component and use that when calculating the noise.
+The <Gl method>wave_noise</Gl> function could then add <Gl>offset</Gl> to <Gl>time</Gl> and use that when calculating the noise.
 
 ```glsl
-float noise(float x, float offset) {
+float wave_noise(float x, float offset) {
   // ...
 
   float t = time + offset;
@@ -1030,47 +1032,32 @@ float noise(float x, float offset) {
 }
 ```
 
-This would produce identical waves -- but the waves would be offset in time so no one would notice. If we want the waves to be distinct (for whatever reason), we can calculate multiple offsets and pass those to the different individual <Gl method>simplex_noise</Gl> functions:
+This produces identical waves, just offset in time. By making the offset large enough, you get waves far enough apart that no one could possibly notice that they're the same wave.
 
-```glsl
-float noise(float x, float offset) {
-  float o1 = offset * 1.0;
-  float o2 = offset * 2.0;
-
-  float sum = 0.0;
-  sum += simplex_noise(x * L + F * t, t * S * 1.00 + o1);
-  sum += simplex_noise(x * L + F * t, t * S * 1.00 + o2);
-}
-```
-
-This would produce visually distinct waves.
-
-Anyway, I want to backtrack a bit to discuss the offset value and mentiona that we don't actually need to provide the offset manually:
-
-```glsl
-float wave_alpha(float Y, float wave_height, float offset) {
-  noise(..., offset);
-  // ...
-}
-
-// Providing these offsets is unnecessary
-float w1_alpha = wave_alpha(WAVE1_Y, WAVE1_HEIGHT, -72.2);
-float w2_alpha = wave_alpha(WAVE2_Y, WAVE2_HEIGHT, 163.9);
-```
-
-We can just calculate an offset in the <Gl method>wave_alpha</Gl> using the Y and height components:
+But we don't actually need to provide the offset manually. We can just calculate an offset in the <Gl method>wave_alpha</Gl> function using the Y and height components:
 
 ```glsl
 float wave_alpha(float Y, float wave_height) {
   float noise_offset = Y * wave_height;
-  noise(..., noise_offset);
+  wave_noise(..., noise_offset);
   // ...
 }
 ```
 
-How random the offset needs to be ultimately depend on your application. If you need really random offsets, you can use more complicated methods to calculate them, but we just need the offsets not to be too close that it becomes visually noticeable.
+Using the constants for our two waves from above, and a canvas height of $200$, we get two offsets:
 
-Anyway, we can now easily generate an arbitrary number of waves! Let's move on.
+<p className="mathblock">$$\begin{align}
+24 \times 0.80 \times 200 = 3{,}840 &\\
+32 \times 0.35 \times 200 = 2{,}240 &\\
+\end{align}$$</p>
+
+With these offsets added to $\text{time}$, the two waves become spaced apart by $1{,}600$ seconds. No one's gonna notice that.
+
+<SmallNote label="">How random and far apart your offsets needs to be ultimately depend on your application. If you need really random offsets, you can use more complicated methods to calculate them, but we just need the offsets not to be very close (a difference of 50 would do the trick).</SmallNote>
+
+<WebGLShader fragmentShader="multiple_waves" width={800} height={200} />
+
+Having updated our shader to handle multiple waves, let's move onto adding noise to our colors.
 
 
 ## Background color noise
