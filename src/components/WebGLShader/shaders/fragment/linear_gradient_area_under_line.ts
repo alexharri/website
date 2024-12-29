@@ -1,12 +1,21 @@
-import { CreateFragmentShader } from "../types";
+import { CreateFragmentShader, FragmentShaderUniforms } from "../types";
 
 const createFragmentShader: CreateFragmentShader = (_) => {
-  return /* glsl */ `
+  const uniforms: FragmentShaderUniforms = {
+    u_incline: {
+      label: "Incline",
+      value: 0.2,
+      range: [-1, 1],
+    },
+  };
+  const shader = /* glsl */ `
     precision mediump float;
+
+    uniform float u_incline;
 
     const float CANVAS_HEIGHT = 150.0;
     const float LINE_Y_FAC = 0.4; // 40%
-    const float LINE_INCLINE = 0.2;
+    float LINE_INCLINE = u_incline;
     const vec3 white = vec3(1.0, 1.0, 1.0);
 
     void main() {
@@ -30,6 +39,7 @@ const createFragmentShader: CreateFragmentShader = (_) => {
       gl_FragColor = vec4(color, 1.0);
     }
   `;
+  return { shader, uniforms };
 };
 
 export default createFragmentShader;

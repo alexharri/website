@@ -5,7 +5,7 @@ const createFragmentShader: CreateFragmentShader = (_) => {
     u_L: {
       label: "math:L",
       value: 1,
-      range: [0.1, 3],
+      range: [0.1, 5],
       format: "multiplier",
       width: "small",
     },
@@ -36,7 +36,7 @@ const createFragmentShader: CreateFragmentShader = (_) => {
     float WAVE_HEIGHT = 32.0 * u_A;
 
     float noise(float x) {
-      float L = 0.011 * (1.0 / u_L);
+      float L = 0.011 * u_L;
       float S = 0.28;
       
       float sum = 0.0;

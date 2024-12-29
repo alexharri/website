@@ -1,7 +1,14 @@
 import { CreateFragmentShader, FragmentShaderUniforms } from "../types";
 
 const createFragmentShader: CreateFragmentShader = (_) => {
-  const uniforms: FragmentShaderUniforms = {};
+  const uniforms: FragmentShaderUniforms = {
+    time: {
+      label: "Animation speed",
+      value: 1,
+      range: [1, 10],
+      format: "multiplier",
+    },
+  };
   const shader = /* glsl */ `
     precision mediump float;
 

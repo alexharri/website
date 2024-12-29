@@ -20,3 +20,11 @@ export function hexToRgb(hex: string): RgbColor {
   }
   return [1, 2, 3].map((i) => parseInt(match[i], 16)) as RgbColor;
 }
+
+export function hexToBinary(hex: string): number {
+  const match = hexColorRegex.exec(hex);
+  if (match == null) {
+    throw new Error(`Failed to parse '${hex}' as a hex color`);
+  }
+  return Number("0x" + [1, 2, 3].map((i) => match[i]).join(""));
+}

@@ -50,6 +50,7 @@ type Variables<V extends VariablesOptions> = {
 };
 
 interface SceneComponentProps<V extends VariablesOptions> {
+  scene: THREE.Scene;
   camera: THREE.PerspectiveCamera;
   variables: Variables<V>;
 }
@@ -93,6 +94,10 @@ export function createScene<V extends VariablesOptions>(
     const s = useStyles(styles);
 
     const [down, setDown] = useState(false);
+
+    const threeScene = useMemo(() => {
+      return new THREE.Scene();
+    }, [visible]);
 
     const camera = useMemo(() => {
       const scale = 1 - (targetHeight / 500) * 0.13;
@@ -179,6 +184,7 @@ export function createScene<V extends VariablesOptions>(
                 userSelect: "none",
                 cursor: down ? "grabbing" : "grab",
               }}
+              scene={threeScene}
               camera={camera}
               onMouseDown={() => setDown(true)}
               onMouseUp={() => setDown(false)}
@@ -205,7 +211,7 @@ export function createScene<V extends VariablesOptions>(
               />
 
               <mesh position={[0, yOffset, 0]}>
-                <Component camera={camera} variables={variables} />
+                <Component camera={camera} variables={variables} scene={threeScene} />
               </mesh>
             </FIBER.Canvas>
           )}

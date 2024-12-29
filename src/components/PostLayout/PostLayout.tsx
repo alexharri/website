@@ -1,5 +1,6 @@
 import { cssVariables } from "../../utils/cssVariables";
 import { StyleOptions, useStyles } from "../../utils/styles";
+import { useDevScroll } from "../../utils/hooks/useDevScroll";
 
 const Styles = ({ styled }: StyleOptions) => ({
   main: styled.css`
@@ -81,6 +82,8 @@ interface Props {
 
 export const PostLayout: React.FC<Props> = (props) => {
   const s = useStyles(Styles);
+
+  useDevScroll();
 
   return <main className={s("main")}>{props.children}</main>;
 };

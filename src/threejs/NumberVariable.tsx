@@ -89,6 +89,7 @@ const styles = ({ styled, theme }: StyleOptions) => ({
 });
 
 export type NumberVariableSpec = {
+  type: "number";
   label?: string;
   range: [number, number];
   value: number;
@@ -100,7 +101,7 @@ interface NumberVariableProps {
   dataKey: string;
   value: number;
   onValueChange: (value: number) => void;
-  spec: NumberVariableSpec;
+  spec: Omit<NumberVariableSpec, "type">;
   width?: "small" | "normal";
 }
 

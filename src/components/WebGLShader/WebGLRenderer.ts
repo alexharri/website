@@ -28,6 +28,7 @@ export class WebGLRenderer {
   private a_position: number;
   private u_timeList: Array<WebGLUniformLocation | null>;
   private u_w: WebGLUniformLocation | null;
+  private u_h: WebGLUniformLocation | null;
   private u_gradient: WebGLUniformLocation | null;
 
   private uniformLocations = new Map<string, WebGLUniformLocation | null>();
@@ -57,6 +58,7 @@ export class WebGLRenderer {
       gl.getUniformLocation(this.program, timeKey(i)),
     );
     this.u_w = gl.getUniformLocation(this.program, "u_w");
+    this.u_h = gl.getUniformLocation(this.program, "u_h");
 
     this.timeStates = Array.from({ length: N_TIME_VALUES }).map(() => ({
       seed: Math.random() * 100_000,
@@ -86,6 +88,7 @@ export class WebGLRenderer {
       gl.uniform1f(this.u_timeList[i], time);
     }
     gl.uniform1f(this.u_w, gl.canvas.width);
+    gl.uniform1f(this.u_h, gl.canvas.height);
 
     // Pass gradient texture
     gl.activeTexture(gl.TEXTURE1);

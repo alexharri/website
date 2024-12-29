@@ -37,6 +37,7 @@
     "remark-math": "^6.0.0",
     "rss": "^1.2.2",
     "sass": "^1.55.0",
+    "simplex-noise": "^4.0.3",
     "socket.io": "^4.8.1",
     "socket.io-client": "^4.8.1",
     "three": "^0.162.0"

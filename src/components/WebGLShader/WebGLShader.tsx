@@ -74,6 +74,8 @@ interface Props extends FragmentShaderProps {
   colorConfiguration: keyof typeof colorConfigurations;
   width?: number;
   height?: number;
+  showControls?: boolean;
+  animate?: boolean;
 }
 
 function useFragmentShader(props: FragmentShaderProps): FragmentShader {
@@ -96,7 +98,7 @@ const _WebGLShader: React.FC<Props> = (props) => {
 
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
-  const { height = 250, width } = props;
+  const { height = 250, width, showControls = true, animate = true } = props;
 
   const fragmentShader = useFragmentShader(props);
 
@@ -128,6 +130,9 @@ const _WebGLShader: React.FC<Props> = (props) => {
     const renderer = new WebGLRenderer(canvas, vertexShader, fragmentShader.shader, colorConfig);
     for (const [key, value] of Object.entries(uniformValues)) {
       pendingUniformWrites.current.push([key, value]);
+    }
+    if (!animate) {
+      renderer.setTimeSpeed(0, 0);
     }
 
     let resized = true;
@@ -167,7 +172,7 @@ const _WebGLShader: React.FC<Props> = (props) => {
       stop = true;
       window.removeEventListener("resize", resizeListener);
     };
-  }, [fragmentShader]);
+  }, [fragmentShader, animate]);
 
   const setUniformValue = useCallback((key: string, value: number) => {
     pendingUniformWrites.current.push([key, value]);
@@ -179,26 +184,28 @@ const _WebGLShader: React.FC<Props> = (props) => {
   return (
     <>
       <canvas ref={canvasRef} width={width} height={height} />
-      <div className={s("variables", { vertical: false && uniformEntries.length > 2 })}>
-        {uniformEntries.map(([key, uniform]) => {
-          return (
-            <NumberVariable
-              key={key}
-              dataKey={key}
-              value={uniformValues[key] ?? uniform.value}
-              onValueChange={(value) => setUniformValue(key, value)}
-              spec={uniform}
-              width={uniform.width}
-            />
-          );
-        })}
-      </div>
+      {showControls && (
+        <div className={s("variables", { vertical: false && uniformEntries.length > 2 })}>
+          {uniformEntries.map(([key, uniform]) => {
+            return (
+              <NumberVariable
+                key={key}
+                dataKey={key}
+                value={uniformValues[key] ?? uniform.value}
+                onValueChange={(value) => setUniformValue(key, value)}
+                spec={uniform}
+                width={uniform.width}
+              />
+            );
+          })}
+        </div>
+      )}
     </>
   );
 };
 
 export const WebGLShader: React.FC<Props> = (props) => {
-  let { height = DEFAULT_HEIGHT, skew } = props;
+  let { height = DEFAULT_HEIGHT, skew, showControls = true } = props;
   const s = useStyles(styles);
   const ref = useRef<HTMLDivElement>(null);
   const visible = useVisible(ref, "64px");
@@ -208,7 +215,7 @@ export const WebGLShader: React.FC<Props> = (props) => {
   // if (numUniforms > 2) {
   //   height += UNIFORM_MARGIN * 2 + numUniforms * UNIFORM_HEIGHT + UNIFORM_V_GAP * (numUniforms - 1);
   // } else
-  if (numUniforms > 0) {
+  if (showControls && numUniforms > 0) {
     height += 72;
   }
 

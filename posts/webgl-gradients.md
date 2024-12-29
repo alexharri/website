@@ -292,7 +292,7 @@ I love this syntax! Anyway, back to our shader.
 
 Let's start by coloring the area under a curve white. For now, the curve will be a simple line, with the result looking like so:
 
-<WebGLShader fragmentShader="linear_gradient_area_under_line" height={150} width={150} />
+<WebGLShader fragmentShader="linear_gradient_area_under_line" height={150} width={150} showControls={false} />
 
 We'll adjust the curve to be an animated sine wave after.
 
@@ -344,7 +344,11 @@ We can do that with the <Gl method>mix</Gl> function:
 color = mix(color, white, alpha);
 ```
 
-This colors the area under the curve white!
+This colors the area under the curve white:
+
+<WebGLShader fragmentShader="linear_gradient_area_under_line" height={150} width={150} showControls={false} />
+
+Currently the incline is set to $0.2$. Here's a canvas where you can configure the amount of inline from $-1$ to $1$:
 
 <WebGLShader fragmentShader="linear_gradient_area_under_line" height={150} width={150} />
 
@@ -388,16 +392,21 @@ where $L$ is the wave length in pixels.
 Putting this into code, we get:
 
 ```glsl
-const float WAVE_Y = CANVAS_HEIGHT * 0.5;
+const float WAVE_Y = 0.5;
 const float WAVE_AMP = 15.0;
 const float WAVE_LEN = 75.0;
 
-const float toWaveLength = (1.0 / WAVE_LEN) * (2.0 * PI);
+const float toWaveLength = (1.0 / WAVE_LEN) * 2.0 * PI;
 
-float curve_y = WAVE_Y + sin(x * toWaveLength) * WAVE_AMP;
+float y_base = CANVAS_HEIGHT * WAVE_Y;
+float curve_y = y_base + sin(x * toWaveLength) * WAVE_AMP;
 ```
 
 Which produces a sine wave:
+
+<WebGLShader fragmentShader="linear_gradient_area_under_wave" height={150} width={150} showControls={false} />
+
+Here's a canvas that makes the $Y$, $A$ and $L$ components configurable:
 
 <WebGLShader fragmentShader="linear_gradient_area_under_wave" height={150} width={150} />
 
@@ -455,18 +464,18 @@ What we just did -- combining two images using an alpha mask -- is a form of [al
 
 <Image src="~/alpha-compositing.svg" plain />
 
-In calculating our color and alpha values, we produced three assets:
+In calculating our two color values and an alpha value, we produced three assets:
 
  * For each pixel, we calculated both a foreground color and a background color. Together, those pixels form two images -- our foreground and background gradients.
- * The alpha values we calculated for each pixel constitute our alpha mask. Each pixel in an alpha mask has a value from $0$ to $1$ that denotes how transparent or opaque that pixel is.
+ * The alpha values we calculated for each pixel constitute our alpha mask. Each pixel in an alpha mask has a value from $0$ to $1$, denoting how transparent or opaque that pixel is.
 
-Using alpha compositing, we then combined those three assets into a final image.
+We then combined those three assets into a final image using the <Gl method>mix</Gl> function.
 
-I like to think of the alpha compositing we performed as two separate steps: First we applied the alpha mask to our foreground image.
+Even though the compositing was done with a single <Gl method>mix</Gl> invocation, I like to think of this as two operations. First, we applied the alpha mask to our foreground image.
 
 <Image src="~/alpha-compositing-alpha-mask.svg" plain />
 
-We then layered the masked foreground onto the background, giving us our final image:
+Secondly, we layered the masked foreground onto the background, giving us our final image:
 
 <Image src="~/alpha-compositing-final.svg" plain />
 
@@ -483,15 +492,11 @@ uniform float time; // Time in seconds
 
 Uniforms can be thought of as global variables that the shader has read-only access to. The values of the uniforms are set by the user prior to rendering, and the values are read by the shader during rendering.
 
-From the perspective of a shader, uniforms are constants. When rendering a frame, each shader invocation will have the uniforms set to the same values. You can even use uniforms in constant expressions:
+You can think of uniforms as per-frame constants. For any given draw call, each shader invocation will have the uniforms set to the same values.
 
-```glsl
-uniform float time;
+<SmallNote label="">Using the term "per-frame" is shaky. Multiple draw calls may be made when rendering a "frame". In this post, however, each frame is always the result of a single draw call.</SmallNote>
 
-const float time_ms = time * 1000.0; // This is OK
-```
-
-Uniform variables can be of many types, such floats, vectors and textures (we'll get into textures later). They can also be of struct types:
+Uniform variables can be of many types, such floats, vectors and textures (we'll discuss textures later). They can also be of custom struct types:
 
 ```glsl
 struct Foo {
@@ -502,7 +507,7 @@ struct Foo {
 uniform Foo foo;
 ```
 
-Anyway, with <Gl>float time</Gl> now accessible in our shader as a uniform, we can start animating the wave. As a refresher, we're currently calculating our curve's Y value like so:
+Anyway, with <Gl>time</Gl> now accessible in our shader as a uniform we can start animating the wave. As a refresher, we're currently calculating our curve's Y value like so:
 
 ```glsl
 float curve_y = WAVE_CENTER + sin(x * toWaveLength) * WAVE_AMPLITUDE;
@@ -523,17 +528,17 @@ float sine_input = x * toWaveLength + time * PI;
 
 <WebGLShader fragmentShader="wave_animated_slow" height={150} width={150} />
 
-Adding <Gl>time * PI</Gl> shifts the phase of the wave by half a wavelength per second. To instead shift the wave by a full wavelength per second, we'd multiply time by $2\pi$.
+Adding <Gl>time * PI</Gl> shifts the phase of the wave by half a wavelength per second. To instead shift the wave by a full wavelength per second, we'd multiply <Gl>time</Gl> by $2\pi$.
 
-However, instead of thinking in "wavelengths per second", I'd like to be able to specify a number of pixels that the wave will move per second.
+However, instead of thinking in "wavelengths per second", I'd like to be able to specify a number of pixels that the wave will move per second -- let $S$ be the pixels to move per second.
 
-Since $time \times 2\pi$ moves the wave by one wavelength per second, we can multiply $2\pi$ by the proportion of the wave's speed $S$ and wave's length $L$:
+Since $2\pi$ moves the wave by one wavelength per second, we can multiply $2\pi$ by the proportion of the wave's speed $S$ and wave's length $L$:
 
 <p className="mathblock">$time \times 2\pi\dfrac{S}{L}$</p>
 
-Which will cause the wave to move by $S$ pixels per second.
+which will cause the wave to move by $S$ pixels per second.
 
-Let's define a constant for the wave's speed $S$:
+Let's define a constant, <Gl>WAVE_SPEED</Gl>, for the wave's speed, $S$:
 
 ```glsl
 const float WAVE_LEN = 75.0; // Length in pixels
@@ -543,8 +548,8 @@ const float WAVE_SPEED = 20.0; // Pixels per seconds
 Putting our equation into code, we get:
 
 ```glsl
-const float toWaveLength = (1.0 / WAVE_LEN) * (2.0 * PI);
-const float toPhase = (WAVE_SPEED / WAVE_LEN) * (2.0 * PI);
+const float toWaveLength = (1.0 / WAVE_LEN) * 2.0 * PI;
+const float toPhase = (WAVE_SPEED / WAVE_LEN) * 2.0 * PI;
 
 float wave_fac = sin(x * toWaveLength + time * toPhase);
 ```
@@ -660,7 +665,7 @@ This shifts the "top" and "bottom" of the wave up and down equally as the amount
 
 ## Creating a natural wave
 
-If you look at the final gradient, you'll see that the waves look a lot more natural than the sine wave we've been working with. I'll disable the blur so that you can see the waves better.
+If you look at the final gradient, you'll see that the waves look a lot more natural than the sine waves we've been working with so far. I'll disable the blur so that you can see the waves better.
 
 <WebGLShader fragmentShader="final" height={250} fragmentShaderOptions={{ blurAmount: 10 }} skew />
 
@@ -673,26 +678,46 @@ I often reach for stacked sine waves when I need a simple and natural wave-like 
 
 <WebGLShader fragmentShader="sine_stack_final" width={800} height={200} />
 
-The idea is quite simple: sum the output of multiple sine waves with different wave lengths, amplitudes, and phase speeds.
+The idea is to sum the output of multiple sine waves with different wave lengths, amplitudes, and phase speeds.
 
-```glsl
-float noise(float x) {
-  float sum = 0.0;
-  sum += sin(x * L1 + time * S1) * A1;
-  sum += sin(x * L2 + time * S2) * A2;
-  sum += sin(x * L3 + time * S3) * A3;
-  ...
-  return sum;
-}
-```
+<p align="center">Take the following sine waves:</p>
 
-The $L$, $S$ and $A$ components control different aspects of each wave:
+<WebGLShader fragmentShader="sine_stack_decomposed" width={600} height={250} />
+
+<p align="center" style={{ marginBottom: -40 }}>If you sum their output, you get a fairly interesting final wave:</p>
+
+<WebGLShader fragmentShader="sine_stack_composed" width={600} height={170} />
+
+<p style={{ marginTop: -24 }}>Each individual wave is a pure sine wave whose input components -- an $x$ position and a time value -- have been scaled differently. An individual wave's equation can be described as</p>
+
+<p className="mathblock">$$\sin(x \times L + \text{time} \times S) \times A$$</p>
+
+where the $L$, $S$ and $A$ components are scalars controling different aspects of the wave:
 
  * $L$ determines the wave length,
  * $S$ determines the phase evolution speed, and
- * $A$ determines the amplitude.
+ * $A$ determines the amplitude of the wave.
 
-Let's walk through how I find the appropriate values for a stacked sine wave like this. First off, I create a "baseline wave" with the constants <Gl>L</Gl>, <Gl>S</Gl> and <Gl>A</Gl> set to a value that feels right.
+The final wave can be described as the sum of $N$ such waves:
+
+<p className="mathblock">$$\begin{align}
+\sum_{n=1}^{N}\ \sin(x \times L_n + \text{time} \times S_n) \times A_n\\
+\end{align}$$</p>
+
+Which put in code looks like so:
+
+```glsl
+float sum = 0.0;
+sum += sin(x * L1 + time * S1) * A1;
+sum += sin(x * L2 + time * S2) * A2;
+sum += sin(x * L3 + time * S3) * A3;
+...
+return sum;
+```
+
+The problem is finding $L$, $S$, $A$ scalars for each individual sine wave that, when stacked, produce a nice looking final wave.
+
+In finding those values, I first create a "baseline wave" with the $L$, $S$, $A$ components set to a value that feels right.
 
 ```glsl
 const float L = 0.011;
@@ -707,21 +732,7 @@ These constants produce the following wave. The length, speed and amplitude feel
 
 <WebGLShader fragmentShader="sine_stack_0" width={800} height={200} />
 
-I now add more sine waves with values relative to the baseline constants $L$, $S$, and $A$. 
-
-```glsl
-float sum = 0.0;
-sum += sin(x * L + time * S) * A;
-sum += sin(x * (L / 1.32) + time * S * 1.71) * A * 0.70;
-```
-
-This adds a second wave that's 32% longer, 71% faster, and 30% weaker than the baseline wave. Adding it has the following effect -- I'll let you speed up the animation up to 10x so that the effect is more obvious:
-
-<WebGLShader fragmentShader="sine_stack_1" width={800} height={200} />
-
-The second wave creating some interesting asymmetry, but the end result still looks and feels "sine wave-y". We'll need to add a few more sine waves for this to start feeling like a natural, flowing wave.
-
-After some trial and error, here are the constants I picked:
+I then add more sine waves that use the baseline $L$, $S$, $A$ components, scaled by some constants. After some trial and error, I ended up with the following:
 
 ```glsl
 float sum = 0.0;
@@ -732,19 +743,17 @@ sum += sin(x * (L / 1.871) + time * 0.65 * S) * A * 0.43;
 sum += sin(x * (L / 2.013) + time * 1.05 * S) * A * 0.32;
 ```
 
-<SmallNote label="">I reduced the amplitude of the first wave to $0.64$ so that it doesn't dominate too much. I also slowed it down a bit, from $1.0$ to $0.9$.</SmallNote>
-
-The granularity and unevenness of the wave lengths ($L_1,\  L_2 \ 	\ldots\  L_n$) and phase speeds ($S_1,\  S_2 \ 	\ldots\  S_n$) is intentional -- the idea is to make it unlikely for the waves to converge at the same time and create excessive amounts of constructive and destructive [interference][interference].
+<SmallNote label="">The "unevenness" of the wavelength and phase speed scalars ($L$ and $S$) is intentional. The idea is to make it unlikely for the waves to converge at the same time because that would result in excessive amounts of [constructive and destructive interference][interference].</SmallNote>
 
 [interference]: https://en.wikipedia.org/wiki/Wave_interference
 
-Just these five waves give us quite a fairly natural looking final wave:
+These five sine waves give us quite a fairly natural looking final wave:
 
 <WebGLShader fragmentShader="sine_stack_2" width={800} height={200} />
 
-But there's one aspect that I don't like: the wave feels like it's moving left at a fairly even speed. That's not surprising -- each individual wave is moving left at a constant rate.
+But there's one aspect that I don't like: the wave feels like it's moving left at a fairly even speed. That's not surprising considering that each individual wave is moving left at a constant rate.
 
-We can counteract this effect by making the phase evolution of some waves negative:
+We can counteract that by making the phase evolution of some waves negative:
 
 ```glsl
 float sum = 0.0;
@@ -759,7 +768,7 @@ Looking at the wave now, it fluctuates between flowing to the left or right with
 
 <WebGLShader fragmentShader="sine_stack_3" width={800} height={200} />
 
-Because all of the sine waves are relative to $L$, $S$, $A$, we can easily tune the wave as a whole by adjusting those constants. If we want the wave to move a bit faster, we increase $S$. If we want to make the waves shorter, we decrease $L$, and so on. Go ahead and try!
+Because all of the sine waves are relative to $L$, $S$, $A$ we can tune the waves as a whole by adjusting those constants. Increase $S$ to make the wave faster, $L$ to make the waves shorter, and $A$ to make the waves taller.
 
 <WebGLShader fragmentShader="sine_stack_3_LSA" width={800} height={200} />
 
@@ -790,25 +799,107 @@ It's a pretty good wave -- definitely passable for our purposes. But we can crea
 
 ### Simplex noise
 
-[Simplex noise][simplex_noise] is a family of $n$-dimensional noise functions designed by [Ken Perlin][ken_perlin] -- the inventor of "classic" [perlin noise][perlin_noise] -- to address some of the drawbacks of perlin noise.
+[Simplex noise][simplex_noise] is a family of $n$-dimensional noise functions designed by [Ken Perlin][ken_perlin], the inventor of "classic" [perlin noise][perlin_noise]. Simplex noise was designed to address some of the [drawbacks][perlin_drawbacks] of perlin noise.
 
 [simplex_noise]: https://en.wikipedia.org/wiki/Simplex_noise
 [perlin_noise]: https://en.wikipedia.org/wiki/Perlin_noise
 [ken_perlin]: https://en.wikipedia.org/wiki/Ken_Perlin
+[perlin_drawbacks]: https://noiseposti.ng/posts/2022-01-16-The-Perlin-Problem-Moving-Past-Square-Noise.html
 
-Here's a wave created using a single 2D simplex noise function:
+For our wave we'll use 2D simplex noise -- 2D meaning that the noise function takes two (numeric) arguments. Simplex noise functions return a single numeric value between $1$ and $-1$, so the 2D function's signature could be written as:
+
+```glsl
+float simplex_noise(float x, float y);
+```
+
+You've probably seen textures like this:
+
+[generate_terrain]: https://www.redblobgames.com/maps/terrain-from-noise/
+
+<WebGLShader
+  fragmentShader="simplex_noise"
+  width={400}
+  height={250}
+  fragmentShaderOptions={{ xScale: 0.02, yScale: 0.02 }}
+  animate={false}
+/>
+
+These sorts of textures can be generated using simplex or perlin noise. They can be used, for example, as a height map used to [generate terrain][generate_terrain] in video games.
+
+The texture above is generated by calculating the lightness of each pixel using the output of the simplex noise function for the pixel's $(x, y)$ position.
+
+```glsl
+float x = gl_FragCoord.x;
+float y = gl_FragCoord.y;
+
+float lightness = (simplex_noise(x, y) + 1.0) / 2.0;
+vec3 color = vec3(lightness);
+gl_FragColor = vec4(color, 1.0);
+```
+
+Interpreting the output of a 2D gradient noise function as a third coordinate gives us a point in 3D space. That idea allows us to create smooth, but noisy, 3D surfaces. Take this array of points:
+
+<Scene autoRotate scene="simplex-point-array" height={350} />
+
+The points are arranged in a grid configuration on the $x$ and $z$ axes. The $y$ position of each point is the output of <Gl>simplex_noise(x, z)</Gl>:
+
+```ts
+for (const point of points) {
+  const { x, z } = point.position;
+  point.position.y = simplex_noise(x, z);
+}
+```
+
+But how does all of this relate to generating an animated wave?
+
+Consider what happens if we use $\text{time}$ as the $z$ position. As $\text{time}$ passes, the $z$ position moves forward, giving us 1D slices of the surface across the $x$ axis. Here's a visualization:
+
+<Scene autoRotate scene="simplex" height={480} angle={-18} xRotation={154} />
+
+<SmallNote label="" center>TODO: Fix negative angle</SmallNote>
+
+Using $\text{time}$ as the $z$ position effectively gives us a cross section of the surface that's moving over the $z$ axis.
+
+Putting this in code for our 2D canvas is quite simple:
+
+```glsl
+uniform float time;
+float x = gl_FragCoord.x;
+
+float curve_y = Y_START + simplex_noise(x, time) * WAVE_HEIGHT;
+```
+
+Which gives us an animated wave:
 
 <WebGLShader fragmentShader="simplex_wave" width={800} height={200} />
 
-Just a single simplex noise function call already produces a very natural-looking wave -- good stuff!
+<SmallNote label="" center>Just a single simplex noise function call already produces a very natural-looking wave.</SmallNote>
 
-The two components fed to the 2D simplex noise function are an <Gl>x</Gl> coordinate and a <Gl>time</Gl> value, both scaled by some constants. We'll use the same constants as before: $L$ for the "wave length" and $S$ for the evolution speed.
+I've been simplifying things a bit by omitting the scalars I've been using. Like before, there are three scalars that determine the characteristics of our wave: $L$ determines the wave length, $S$ determines the evolution speed, and $A$ determines the amplitude of the wave.
+
+We scale $x$ by $L$ to make the wave shorter or longer on the horizontal axis
+
+<p className="mathblock">$$\text{simplex}(x \times L,\ \text{time})$$</p>
+
+and scale $\text{time}$ by $S$ to speed up or slow down the evolution of our wave -- the speed at which our figurative cross section moves across the $z$ axis:
+
+<p className="mathblock">$$\text{simplex}(x \times L,\ \text{time} \times S)$$</p>
+
+Lastly, we scale the output of the $\text{simplex}$ function by $A$, which determines the amplitude of our wave.
+
+<p className="mathblock">$$\text{simplex}(x \times L,\ \text{time} \times S) \times A$$</p>
+
+As mentioned before, simplex noise returns a value from $1$ and $-1$. So to make a wave with a height of $96$, you'd scale the output of the $\text{simplex}$ function by $48$.
+
+As mentioned before, simplex noise returns a value from $1$ and $-1$. So to make a wave with a height of $96$, you'd make the amplitude $A$ equal $48$:
 
 ```glsl
-simplex_noise(x * L, time * S);
-```
+const float L = 0.0015;
+const float S = 0.12;
+const float A = 48.0;
 
-Simplex noise returns a value from $1$ and $-1$, just like the <Gl method>sin</Gl> function. That means that simplex noise can for the most part be used as a drop-in replacement for <Gl method>sin</Gl>, and vice versa.
+simplex_noise(x * L, time * S) * A;
+```
 
 Anyway, let's create a nice looking simplex wave! As before, I'll start by finding constants that create a "baseline" wave that I like:
 
@@ -1046,4 +1137,4 @@ We can stack perlin noise just like we do with sine waves -- layering noise of d
 
 Let's break down how I got here.
 
-<span data-varlabel="Y">$Y$</span>
+<span data-varlabel="time">$\text{time}$</span>
