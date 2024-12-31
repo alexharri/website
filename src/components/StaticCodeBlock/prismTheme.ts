@@ -15,7 +15,16 @@ export const prismTheme: PrismTheme = {
       style: { color: colors.token.string },
     },
     {
-      types: ["boolean", "attr-name", "punctuation", "prolog", "operator", "keyword"],
+      types: [
+        "boolean",
+        "attr-name",
+        "punctuation",
+        "prolog",
+        "operator",
+        "keyword",
+        "selector",
+        "unit",
+      ],
       style: { color: colors.blue },
     },
     {
@@ -27,7 +36,7 @@ export const prismTheme: PrismTheme = {
       style: { color: colors.token.comment, fontStyle: "italic" },
     },
     {
-      types: ["builtin", "constant", "class-name"],
+      types: ["builtin", "constant", "class-name", "property"],
       style: { color: colors.green },
     },
   ],

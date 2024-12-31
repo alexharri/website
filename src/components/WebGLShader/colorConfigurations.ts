@@ -79,4 +79,16 @@ export const colorConfigurations = {
     ],
     accentColor: "#f26bff",
   },
+
+  blue_to_yellow: {
+    gradient: [
+      "hsl(204deg 100% 22%)",
+      "hsl(199deg 100% 29%)",
+      "hsl(189deg 100% 32%)",
+      "hsl(173deg 100% 33%)",
+      "hsl(154deg 100% 39%)",
+      "hsl( 89deg  70% 56%)",
+      "hsl( 55deg 100% 50%)",
+    ],
+  },
 };

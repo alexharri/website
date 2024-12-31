@@ -23,40 +23,24 @@ const createFragmentShader: CreateFragmentShader = () => {
       { return t * t * t * (t * (6.0 * t - 15.0) + 10.0); }
 
     void main() {
+      float L = 0.0015 * u_L;
+      float F = 0.11 * u_time;
       const float S = 0.13;
-      const float F = 0.11;
       const float Y_SCALE = 3.0;
-      float L = 0.001513 * u_L;
       
       float x = gl_FragCoord.x;
-      float y = gl_FragCoord.y;
-      float z = u_time * S;
+      float y = gl_FragCoord.y * Y_SCALE;
       
-      float L1 = L * 1.0;
-      float L2 = L * 0.6;
-      float L3 = L * 0.4;
-
-      float F1 = u_time *  F * 1.0;
-      float F2 = u_time * -F * 0.6;
-      float F3 = u_time *  F * 0.8;
-
-      float L1Y = L * Y_SCALE * 1.00;
-      float L2Y = L * Y_SCALE * 0.85;
-      float L3Y = L * Y_SCALE * 0.70;
-
       const float O1 = 138.0;
       const float O2 = 39.7;
       const float O3 = 258.2;
 
-      const float A1 = 0.30;
-      const float A2 = 0.26;
-      const float A3 = 0.22;
-
       float sum = 0.5; // Start at 50% lightness
-      sum += simplexNoise(vec3(x * L1 + F1, y * L1Y, u_time * S + O1)) * A1;
-      sum += simplexNoise(vec3(x * L2 + F2, y * L2Y, u_time * S + O2)) * A2;
-      sum += simplexNoise(vec3(x * L3 + F3, y * L3Y, u_time * S + O3)) * A3;
+      sum += simplexNoise(vec3(x * L * 1.0 +  F * 1.0, y * L * 1.00, u_time * S + O1)) * 0.30;
+      sum += simplexNoise(vec3(x * L * 0.6 + -F * 0.6, y * L * 0.85, u_time * S + O2)) * 0.26;
+      sum += simplexNoise(vec3(x * L * 0.4 +  F * 0.8, y * L * 0.70, u_time * S + O3)) * 0.22;
       sum = pow(sum, 1.7);
+      sum = clamp(sum, 0.0, 1.0);
 
       float lightness = clamp(0.0, 1.0, sum);
       gl_FragColor = vec4(lightness, lightness, lightness, 1.0);

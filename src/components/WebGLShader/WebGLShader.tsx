@@ -151,10 +151,10 @@ const _WebGLShader: React.FC<Props> = (props) => {
       for (let [key, value] of pendingUniformWrites.current) {
         const uniform = fragmentShader.uniforms[key];
         value = parseUniformValue(uniform, value);
-        const timeKeyMatch = /^time(?<index>[1-9]?)$/.exec(key);
+        const timeKeyMatch = /^time(?<num>[1-9]?)$/.exec(key);
         if (timeKeyMatch) {
-          const indexString = timeKeyMatch.groups?.index;
-          const index = indexString ? Number(indexString) : 0;
+          const numString = timeKeyMatch.groups?.num;
+          const index = numString ? Number(numString) - 1 : 0;
           // The special key "time" controls the renderer time speed
           renderer.setTimeSpeed(value, index);
         } else {

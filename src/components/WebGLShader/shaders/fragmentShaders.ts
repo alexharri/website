@@ -37,6 +37,12 @@ import simplex_noise_stacked from "./fragment/simplex_noise_stacked";
 import simplex_noise_stacked_0 from "./fragment/simplex_noise_stacked_0";
 import simplex_noise_stacked_1 from "./fragment/simplex_noise_stacked_1";
 import simplex_noise_stacked_2 from "./fragment/simplex_noise_stacked_2";
+import simplex_noise_stacked_3 from "./fragment/simplex_noise_stacked_3";
+import simplex_noise_stacked_4 from "./fragment/simplex_noise_stacked_4";
+import three_point_gradient from "./fragment/three_point_gradient";
+import rainbow from "./fragment/rainbow";
+import read_texture from "./fragment/read_texture";
+import read_texture_t from "./fragment/read_texture_t";
 
 export const fragmentShaderRegistry: Partial<Record<string, CreateFragmentShader>> = {
   final,
@@ -77,4 +83,10 @@ export const fragmentShaderRegistry: Partial<Record<string, CreateFragmentShader
   simplex_noise_stacked_0,
   simplex_noise_stacked_1,
   simplex_noise_stacked_2,
+  simplex_noise_stacked_3,
+  simplex_noise_stacked_4,
+  three_point_gradient,
+  rainbow,
+  read_texture,
+  read_texture_t,
 };

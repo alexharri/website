@@ -3,18 +3,12 @@ import { simplexNoise } from "../../simplexNoise";
 import { CreateFragmentShader, FragmentShaderUniforms } from "../types";
 
 const createFragmentShader: CreateFragmentShader = () => {
-  const uniforms: FragmentShaderUniforms = {
-    time: {
-      label: "Animation speed",
-      value: 1,
-      range: [0.1, 5],
-      format: "multiplier",
-    },
-  };
+  const uniforms: FragmentShaderUniforms = {};
   const shader = /* glsl */ `
     precision mediump float;
 
     uniform float u_time;
+    uniform sampler2D u_gradient;
 
     ${noiseUtils}
     ${simplexNoise}
@@ -24,26 +18,27 @@ const createFragmentShader: CreateFragmentShader = () => {
 
     void main() {
       float L = 0.0015;
-      float F = 0.11 * u_time;
+      const float F = 0.11;
       const float S = 0.13;
       const float Y_SCALE = 3.0;
+
+      vec3 red  = vec3(1.0, 0.0, 0.0);
+      vec3 blue = vec3(0.0, 0.0, 1.0);
       
       float x = gl_FragCoord.x;
       float y = gl_FragCoord.y * Y_SCALE;
-
+      
       const float O1 = 138.0;
       const float O2 = 39.7;
       const float O3 = 258.2;
 
       float sum = 0.5; // Start at 50% lightness
-      sum += simplexNoise(vec3(x * L * 1.0, y * L * 1.00, u_time * S + O1)) * 0.30;
-      sum += simplexNoise(vec3(x * L * 0.6, y * L * 0.85, u_time * S + O2)) * 0.26;
-      sum += simplexNoise(vec3(x * L * 0.4, y * L * 0.70, u_time * S + O3)) * 0.22;
-      sum = pow(sum, 1.7);
-      sum = clamp(sum, 0.0, 1.0);
+      sum += simplexNoise(vec3(x * L * 1.0 +  F * 1.0, y * L * 1.00, u_time * S + O1)) * 0.30;
+      sum += simplexNoise(vec3(x * L * 0.6 + -F * 0.6, y * L * 0.85, u_time * S + O2)) * 0.26;
+      sum += simplexNoise(vec3(x * L * 0.4 +  F * 0.8, y * L * 0.70, u_time * S + O3)) * 0.22;
 
-      float lightness = clamp(0.0, 1.0, sum);
-      gl_FragColor = vec4(lightness, lightness, lightness, 1.0);
+      float t = clamp(sum, 0.0, 1.0);
+      gl_FragColor = texture2D(u_gradient, vec2(t, 0.5));
     }
   `;
   return { shader, uniforms };
