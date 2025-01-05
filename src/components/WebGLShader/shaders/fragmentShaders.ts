@@ -43,6 +43,12 @@ import three_point_gradient from "./fragment/three_point_gradient";
 import rainbow from "./fragment/rainbow";
 import read_texture from "./fragment/read_texture";
 import read_texture_t from "./fragment/read_texture_t";
+import multiple_waves_blur_0 from "./fragment/multiple_waves_blur_0";
+import multiple_waves_blur_1 from "./fragment/multiple_waves_blur_1";
+import multiple_waves_blur_2 from "./fragment/multiple_waves_blur_2";
+import alpha_curve_0 from "./fragment/alpha_curve_0";
+import alpha_curve_1 from "./fragment/alpha_curve_1";
+import alpha_curve_2 from "./fragment/alpha_curve_2";
 
 export const fragmentShaderRegistry: Partial<Record<string, CreateFragmentShader>> = {
   final,
@@ -89,4 +95,10 @@ export const fragmentShaderRegistry: Partial<Record<string, CreateFragmentShader
   rainbow,
   read_texture,
   read_texture_t,
+  multiple_waves_blur_0,
+  multiple_waves_blur_1,
+  multiple_waves_blur_2,
+  alpha_curve_0,
+  alpha_curve_1,
+  alpha_curve_2,
 };

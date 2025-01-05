@@ -1471,3 +1471,191 @@ hsl(141 75% 72%), hsl(41 90% 62%), hsl(358 64% 50%)
 
 We've covered a ton of ground! Let's move onto the next part of our effect.
 
+
+## Wave blending
+
+Earlier we saw how to apply a progressive blur from left to right:
+
+<WebGLShader fragmentShader="wave_animated_blur_left_to_right" height={150} width={250} />
+
+We're going to take that idea and apply it to our multiple waves:
+
+<WebGLShader fragmentShader="multiple_waves" width={800} height={200} />
+
+We are currently calculating the alpha of our waves like so:
+
+```glsl
+float wave_alpha(float Y, float wave_height) {
+  float x = gl_FragCoord.x;
+  float y = gl_FragCoord.y;
+
+  // Calculate distance to curve Y
+  float noise_offset = Y * wave_height;
+  float wave_y = Y + noise(x, noise_offset) * wave_height;
+  float dist_signed = wave_y - y;
+  
+  // Calculate alpha
+  float alpha = clamp(0.5 + dist_signed, 0.0, 1.0);
+  return alpha;
+}
+```
+
+To add blur we'll calculate a blur value and divide the signed distance by it, like so:
+
+```glsl
+float blur = calc_blur();
+float alpha = clamp(0.5 + dist_signed / blur, 0.0, 1.0);
+```
+
+Let's start off by making the blur calculation just apply a left-to-right blur over the canvas:
+
+```glsl
+float calc_blur() {
+  float t = gl_FragCoord.x / (u_w - 1.0);
+  float blur = mix(1.0, BLUR_AMOUNT, t);
+  return blur;
+}
+```
+
+<WebGLShader fragmentShader="multiple_waves_blur_0" width={800} height={200} />
+
+The blur works. Let's now make the blur more interesting by also determining the amount of noise to apply via a noise function. Let's try using simplex noise:
+
+```glsl
+float calc_blur() {
+  const float L = 0.0018;
+  const float S = 0.1;
+  const float F = 0.034;
+  
+  float x = gl_FragCoord.x;
+  float blur_t = (simplexNoise(x * L + F * time, time * S) + 1.0) / 2.0;
+  float blur = mix(1.0, BLUR_AMOUNT, blur_t);
+  return blur;
+}
+```
+
+If we were to apply this to the waves, both waves would have identical blur. For the blurs to be distinct we'll need to apply an offset, like we did before with the wave. Luckily, we can just reuse the same offset that we're already calculating in <Gl method>wave_alpha</Gl>:
+
+```glsl
+float wave_alpha(float Y, float wave_height) {
+  float noise_offset = Y * wave_height;
+  float blur = calc_blur(noise_offset);
+  // ...
+}
+
+float calc_blur(float offset) {
+  float t = time * offset;
+  float blur_t = (simplexNoise(x * L + F * t, t * S) + 1.0) / 2.0;
+  // ...
+}
+```
+
+
+
+This works... but it doesn't look great.
+
+<WebGLShader fragmentShader="multiple_waves_blur_1" width={800} height={200} />
+
+First off, the whole wave feels kind blurry. We don't seem to get those long, sharp edges that regularly occur in the final effect:
+
+<WebGLShader fragmentShader="final" width={1000} height={250} />
+
+Secondly, the blur feels like it has distinct "edges". It feels like it starts and stops abruptly at the edges.
+
+Let's tackle each of these to get a high quality blur.
+
+
+## Creating a quality blur
+
+Consider how we're calculating the alpha:
+
+```glsl
+float alpha = clamp(0.5 + dist_signed / blur, 0.0, 1.0);
+```
+
+The alpha is $0.5$ when the distance is 0, and it then linearly increases or decreases until it hits either $0.0$ or $1.0$. This produces a alpha curve that looks like so:
+
+<WebGLShader fragmentShader="alpha_curve_0" width={330} height={200} />
+
+The harsh stops at $0.0$ and $1.1$ create the sharp-feeling edges.
+
+### Smoothing the blur
+
+What we could do is apply a [smoothstep][smoothstep] function. Smoothstep is a family of interpolation functions that, as the name suggests, smooth the transition from $0$ to $1$. Here's a chart:
+
+[smoothstep]: https://en.wikipedia.org/wiki/Smoothstep
+
+<WebGLShader fragmentShader="alpha_curve_1" width={330} height={200} />
+
+Let's apply smoothstep to our blur. Firstly, let's extract <Gl>dist_signed / blur</Gl> into a <Gl>delta</Gl> variable:
+
+```glsl
+float delta = dist_signed / blur;
+
+float alpha = clamp(0.5 + delta, 0.0, 1.0);
+```
+
+Before applying the <Gl method>smoothstep</Gl> function, there are two things to consider:
+
+ * Firstly, the <Gl method>smoothstep</Gl> function takes a numeric value $t$ between $0$ and $1$. We'll run into issues when $t$ is negative.
+ * Secondly, only values of <Gl>delta</Gl> between $-0.5$ and $0.5$ matter because we're adding <Gl>delta</Gl> to $0.5$ and clamping the result to $[0, 1]$.
+
+These are both simple to resolve. First, we'll clamp <Gl>delta</Gl> to the range $[-0.5, 0.5]$:
+
+```glsl
+float delta = clamp(dist_signed / blur, -0.5, 0.5);
+```
+
+After clamping, we'll add $0.5$. This shifts the range of <Gl>delta</Gl> values from $[-0.5, 0.5]$ to $[0.0, 1.0]$. That prepares <Gl>delta</Gl> for smoothing, which we perform with <Gl method>smoothstep</Gl>. We'll then subtract $0.5$ to shift <Gl>delta</Gl> back to the original range of $[-0.5, 0.5]$:
+
+```glsl
+delta += 0.5; // Shift to [0.0, 1.0]
+delta = smooth_step(delta); // Apply smoothing
+delta -= 0.5; // Shift back to [-0.5, 0.5]
+```
+
+We can shorten this to:
+
+```glsl
+delta = smooth_step(delta + 0.5) - 0.5;
+```
+
+Which gives us:
+
+```glsl
+float delta = clamp(dist_signed / blur, -0.5, 0.5);
+delta = smooth_step(delta + 0.5) - 0.5;
+
+float alpha = clamp(0.5 + delta, 0.0, 1.0);
+```
+
+This results in a beautifully smooth blur:
+
+<WebGLShader fragmentShader="multiple_waves_blur_2" width={800} height={200} />
+
+Let's now tackle the issue of the wave as a whole being too blurry.
+
+
+### Adding sharp edges to our blur
+
+Here's our <Gl method>calc_blur</Gl> method as we left it:
+
+```glsl
+float calc_blur() {
+  const float L = 0.0018;
+  const float S = 0.1;
+  const float F = 0.034;
+  
+  float x = gl_FragCoord.x;
+  float blur_t = (simplexNoise(x * L + F * time, time * S) + 1.0) / 2.0;
+  float blur = mix(1.0, BLUR_AMOUNT, blur_t);
+  return blur;
+}
+```
+
+The edge becomes sharper as <Gl>blur_t</Gl> approaches $0$, and blurrier as <Gl>blur_t</Gl> increases.
+
+With that in mind, an easy adjustment to sharpen the wave is to apply the [ease-in][ease_in] interpolation function to <Gl>blur_t</Gl>. Like other interpolation (easing) functions, <Gl method>ease_in</Gl> takes in a value between $0$ and $1$. Here's a chart for <Gl>ease_in(t)</Gl> for values of $t$ between $0$ and $1$:
+
+[ease_in]: https://easings.net/#easeInSine
+
