@@ -95,8 +95,11 @@ export class WebGLRenderer {
     gl.bindTexture(gl.TEXTURE_2D, this.gradientTexture);
     gl.uniform1i(this.u_gradient, 1);
 
-    // Draw 2 triangles forming quad
+    // Clear canvas
     this.clear();
+
+    // Draw 2 triangles forming quad
+    gl.vertexAttribPointer(this.a_position, /* vec2 */ 2, gl.FLOAT, false, 0, 0);
     gl.enableVertexAttribArray(this.a_position);
     gl.bindBuffer(gl.ARRAY_BUFFER, this.positionBuffer);
     gl.drawArrays(gl.TRIANGLES, 0, this.numPositions);
