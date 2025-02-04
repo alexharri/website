@@ -1,20 +1,19 @@
 import { CreateFragmentShader, FragmentShaderUniforms } from "../types";
 
 const createFragmentShader: CreateFragmentShader = () => {
-  const uniforms: FragmentShaderUniforms = {};
+  const uniforms: FragmentShaderUniforms = {
+    u_pow: {
+      label: "Exponent",
+      range: [1.0, 4.0],
+      value: 2,
+    },
+  };
   const shader = /* glsl */ `
     precision mediump float;
 
     uniform float u_w;
     uniform float u_h;
-
-    const float PI = 3.14159;
-
-    float smooth_step(float t)
-      { return t * t * t * (t * (6.0 * t - 15.0) + 10.0); }
-
-    float ease_in(float x)
-      { return 1.0 - cos((x * PI) * 0.5); }
+    uniform float u_pow;
 
     float v_line(float x_t, float w) {
       float curve_x = u_w * x_t;
@@ -31,7 +30,7 @@ const createFragmentShader: CreateFragmentShader = () => {
       t *= (1.0 / 0.6);
       t = clamp(t, 0.0, 1.0);
 
-      t = ease_in(t);
+      t = pow(t, u_pow);
       
       float curve_y = u_h * (0.2 + t * 0.6);
       float dist_signed = (gl_FragCoord.y - curve_y) * 1.5;

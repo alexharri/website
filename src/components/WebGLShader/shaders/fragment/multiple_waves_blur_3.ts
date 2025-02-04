@@ -60,6 +60,8 @@ const createFragmentShader: CreateFragmentShader = () => {
       float x = gl_FragCoord.x;
       float t = u_time + offset;
       float blur_t = (simplexNoise(vec2(x * L + F * t, t * S)) + 1.0) / 2.0;
+      blur_t = ease_in(blur_t);
+      
       float blur = mix(1.0, 1.0 + u_blur, blur_t);
       return blur;
     }
@@ -75,9 +77,11 @@ const createFragmentShader: CreateFragmentShader = () => {
       
       // Calculate alpha
       float blur = calc_blur(noise_offset);
+
+      float delta = clamp(dist_signed / blur, -0.5, 0.5);
+      delta = smooth_step(delta + 0.5) - 0.5;
       
-      float alpha = clamp(0.5 + dist_signed / blur, 0.0, 1.0);
-      alpha = smooth_step(alpha);
+      float alpha = clamp(0.5 + delta, 0.0, 1.0);
       return alpha;
     }
 

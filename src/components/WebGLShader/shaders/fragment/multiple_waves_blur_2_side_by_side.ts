@@ -77,7 +77,10 @@ const createFragmentShader: CreateFragmentShader = () => {
       float blur = calc_blur(noise_offset);
       
       float alpha = clamp(0.5 + dist_signed / blur, 0.0, 1.0);
-      alpha = smooth_step(alpha);
+
+      float smoothing_fac = (sign(u_w / 2.0 - x) + 1.0) / 2.0;
+      alpha = mix(alpha, smooth_step(alpha), smoothing_fac);
+
       return alpha;
     }
 
@@ -92,6 +95,11 @@ const createFragmentShader: CreateFragmentShader = () => {
       vec3 color = bg_color;
       color = mix(color, w1_color, w1_alpha);
       color = mix(color, w2_color, w2_alpha);
+
+      float center_dist = abs(u_w / 2.0 - gl_FragCoord.x);
+      float black_t = 1.0 - (sign(center_dist - 2.0) + 1.0) / 2.0;
+
+      color = mix(color, vec3(0.0), black_t);
 
       gl_FragColor = vec4(color, 1.0);
     }

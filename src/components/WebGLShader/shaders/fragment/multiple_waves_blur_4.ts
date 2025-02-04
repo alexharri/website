@@ -9,19 +9,26 @@ const createFragmentShader: CreateFragmentShader = () => {
       value: 50,
       range: [0, 100],
     },
+    u_pow: {
+      label: "Pow",
+      value: 1,
+      range: [1, 4],
+      step: 0.1,
+    },
   };
   const shader = /* glsl */ `
     precision mediump float;
 
     uniform float u_time;
     uniform float u_w;
+    uniform float u_h;
     uniform float u_blur;
+    uniform float u_pow;
 
-    const float HEIGHT = 200.0;
-    const float WAVE1_HEIGHT = 24.0;
-    const float WAVE2_HEIGHT = 32.0;
-    const float WAVE1_Y = 0.80 * HEIGHT;
-    const float WAVE2_Y = 0.35 * HEIGHT;
+    const float LOWER_HEIGHT = 140.0;
+    const float BOTTOM_PADDING = 0.0;
+    const float WAVE_HEIGHT = 24.0;
+    float WAVE_Y = 0.80 * u_h;
 
     ${noiseUtils}
     ${simplexNoise}
@@ -52,7 +59,7 @@ const createFragmentShader: CreateFragmentShader = () => {
       return sum;
     }
 
-    float calc_blur(float offset) {
+    float calc_blur_t(float offset, float _pow) {
       const float L = 0.0018;
       const float S = 0.1;
       const float F = 0.034;
@@ -60,8 +67,12 @@ const createFragmentShader: CreateFragmentShader = () => {
       float x = gl_FragCoord.x;
       float t = u_time + offset;
       float blur_t = (simplexNoise(vec2(x * L + F * t, t * S)) + 1.0) / 2.0;
-      float blur = mix(1.0, 1.0 + u_blur, blur_t);
-      return blur;
+      blur_t = pow(blur_t, _pow);
+      return blur_t;
+    }
+
+    float calc_blur(float offset) {
+      return mix(1.0, 1.0 + u_blur, calc_blur_t(offset, u_pow));
     }
 
     float wave_alpha(float Y, float wave_height) {
@@ -75,23 +86,68 @@ const createFragmentShader: CreateFragmentShader = () => {
       
       // Calculate alpha
       float blur = calc_blur(noise_offset);
-      
       float alpha = clamp(0.5 + dist_signed / blur, 0.0, 1.0);
       alpha = smooth_step(alpha);
       return alpha;
     }
 
-    void main() {
+    vec3 upper_color() {
       vec3 bg_color = vec3(0.102, 0.208, 0.761);
       vec3 w1_color = vec3(0.094, 0.502, 0.910);
       vec3 w2_color = vec3(0.384, 0.827, 0.898);
       
-      float w1_alpha = wave_alpha(WAVE1_Y, WAVE1_HEIGHT);
-      float w2_alpha = wave_alpha(WAVE2_Y, WAVE2_HEIGHT);
+      float w2_alpha = wave_alpha(WAVE_Y, WAVE_HEIGHT);
 
-      vec3 color = bg_color;
-      color = mix(color, w1_color, w1_alpha);
+      vec3 color = w1_color;
       color = mix(color, w2_color, w2_alpha);
+      return color;
+    }
+
+    vec3 lower_color() {
+      float y = gl_FragCoord.y;
+      float noise_offset = WAVE_Y * WAVE_HEIGHT;
+      float blur_t = calc_blur_t(noise_offset, u_pow);
+      float blur_t_org = calc_blur_t(noise_offset, 1.0);
+
+      float wave_y_org = BOTTOM_PADDING + blur_t_org * LOWER_HEIGHT;
+      float wave_y = BOTTOM_PADDING + blur_t * LOWER_HEIGHT;
+      float wave_dist_signed = wave_y - gl_FragCoord.y;
+      float wave_dist_signed_org = wave_y_org - gl_FragCoord.y;
+
+      float bottom_dist_signed = BOTTOM_PADDING - gl_FragCoord.y;
+      float top_dist_signed = LOWER_HEIGHT - gl_FragCoord.y;
+
+      float w_alpha = (sign(wave_dist_signed) + 1.0) / 2.0;
+
+      float w_org_alpha = 1.0;
+      w_org_alpha *= clamp(2.0 + wave_dist_signed_org, 0.0, 1.0);
+      w_org_alpha *= clamp(1.0 - wave_dist_signed_org, 0.0, 1.0);
+
+      float b_alpha = 1.0;
+      b_alpha *= clamp(1.5 + bottom_dist_signed, 0.0, 1.0);
+      b_alpha *= clamp(1.5 - bottom_dist_signed, 0.0, 1.0);
+
+      float t_alpha = 1.0;
+      t_alpha *= clamp(1.0 + top_dist_signed, 0.0, 1.0);
+      t_alpha *= clamp(1.0 - top_dist_signed, 0.0, 1.0);
+
+      vec3 color = vec3(0.027,0.11,0.2);
+      color = mix(color, vec3(0.133,0.416,0.702), w_alpha);
+      color = mix(color, vec3(0.2,0.702,0.839), w_org_alpha);
+      color = mix(color, vec3(1.0), b_alpha * 0.5);
+      color = mix(color, vec3(1.0), t_alpha * 0.5);
+      return color;
+    }
+
+    void main() {
+      float P = 2.0;
+      float split_dist = (LOWER_HEIGHT + P * 2.0) - gl_FragCoord.y;
+
+      float t = (sign(split_dist) + 1.0) / 2.0;
+      vec3 color = mix(upper_color(), lower_color(), t);
+
+      float black_t = 1.0 - (sign(abs(split_dist) - P) + 1.0) / 2.0;
+      color = mix(color, vec3(0.0), black_t);
 
       gl_FragColor = vec4(color, 1.0);
     }

@@ -6,22 +6,13 @@ publishedAt: ""
 tags: []
 ---
 
-Stripe launched a new design for stripe.com back in 2020 which showcased some beautiful, flowing, animated gradients.
-
-<Image src="~/stripe-gradient.png" width={500} plain marginTop={8} />
-<SmallNote center label="">Examples of gradients from various [product pages][stripe_product_page] on stripe.com.</SmallNote>
-
-[stripe_product_page]: https://stripe.com/billing
-
-I remember how striking they were when I first saw them. Since then, I've thought about how they might have been created more times than I'd like to admit.
-
-Well, a few weeks ago I rolled up my sleeves and embarked on a journey to produce a flowing gradient effect. Here's what I got:
+A few weeks ago I rolled up my sleeves and embarked on a journey to produce a flowing gradient effect. Here's what I got:
 
 <WebGLShader fragmentShader="final" skew />
 
-This is created using a WebGL shader and various types of noise functions.
+This is built using a WebGL shader and some clever use of noise functions. The noise functions produce the flowing waves and dynamic blur effect, which we run on the GPU using WebGL. Running this on the GPU gives us computing power to make the animation silky smooth.
 
-The noise functions produce the flowing waves, smooth color blends, and blur effect. WebGL is used to run all that on the GPU, giving us buttery smooth performance.
+The effect is inspired by the flowing gradients I saw features in Stripe's 2020 redesign. I've thought about how they might have been created more times than I'd like to admit.
 
 In this post, I'll break down how I created this effect. We'll learn about WebGL and fragment shaders, various types of noise. Let's get to it!
 
@@ -629,7 +620,7 @@ This produces a blur effect, though you might notice that the wave shifts down a
 Let's put that aside for the time being and make the blur gradually increasing from left to right. To do that, we can calculate a $t$ value for the blur by taking <Gl>gl_FragCoord.x / (CANVAS_WIDTH - 1)</Gl>:
 
 ```glsl
-float blur_t = gl_FragCoord.x / (CANVAS_WIDTH - 1);
+float blur_fac = gl_FragCoord.x / (CANVAS_WIDTH - 1);
 ```
 
 We'll then calculate the blur amount by [linearly interpolating][lerp] (lerping) between <Gl>1.0</Gl> and <Gl>BLUR_AMOUNT</Gl> using the $t$ value and the <Gl method>mix</Gl> function:
@@ -637,7 +628,7 @@ We'll then calculate the blur amount by [linearly interpolating][lerp] (lerping)
 [lerp]: https://en.wikipedia.org/wiki/Linear_interpolation
 
 ```glsl
-float blur_amount = mix(1.0, BLUR_AMOUNT, blur_t);
+float blur_amount = mix(1.0, BLUR_AMOUNT, blur_fac);
 ```
 
 By using <Gl>blur_amount</Gl> to calculate the alpha, we get a gradually increasing blur:
@@ -1084,7 +1075,7 @@ simplex_noise(x, y, time);
 
 This gives us animated 2D noise:
 
-<WebGLShader fragmentShader="simplex_noise" width={350} height={250} animate={true} showControls={false} />
+<WebGLShader fragmentShader="simplex_noise" width={350} height={250} showControls={false} />
 
 Note that we could use classic perlin noise instead of simplex. Perlin noise has been in use longer and is more popular than simplex noise, but I find perlin a bit too "blocky". Simplex noise, by comparison, feels more natural to me. Here's a side-by-side comparison:
 
@@ -1257,7 +1248,7 @@ Doing that maps the background noise to the gradient:
 
 <WebGLShader fragmentShader="simplex_noise_stacked_3" width={800} height={200} />
 
-Our <Gl method>calc_color</Gl> function is set up to handle three-step gradients, but we can easily update it to handle gradients with $n$ stops. Here is a function that handles N stops:
+Our <Gl method>calc_color</Gl> function is set up to handle three-step gradients, but we can pretty easily create functions that handle gradients with $n$ stops. Here is an exampe of a 5-stop gradient:
 
 ```glsl
 vec3 calc_color(float t) {
@@ -1278,33 +1269,31 @@ vec3 calc_color(float t) {
 }
 ```
 
-This works. The function produces this nice rainbow:
+This works -- the above function produces the following rainbow:
 
 <WebGLShader fragmentShader="rainbow" width={300} height={50} />
 
 But this way of calculating the gradient is burdensome and not very flexible.
 
-If we want to change the gradient, we need to manually input <Gl>vec3</Gl>s and adjust the function to the correct number of color stops. And speaking of colors stops, what if we want to adjust the spacing of our color stops? And what if we want to dynamically adjust the colors of the gradient?
+If we want to change the gradient, we need to manually input <Gl>vec3</Gl>s and adjust the function to the correct number of color stops. And what if we want to adjust the spacing of our color stops? And what if we want to dynamically adjust the colors of the gradient at runtime?
 
-Instead of hardcoding, let's move onto using a texture for our gradient.
+Let's move on from hardcoding the gradient to reading the gradient from a texture.
 
 
 ### Using a gradient texture
 
-WebGL supports passing textures to our shader, which the shader can then read data from.
-
 Textures are arrays of data. We can put many types of data in textures, but in our case we'll store image data in the texture.
 
-We'll get to how to use textures shader, but let's first create a texture to use.
+We'll generate an image texture for our gradient in JavaScript and then pass that texture to our WebGL shader. The shader will then read data from that texture.
+
+Before diving into read from textures in shaders, let's first create a gradient image texture to use in JavaScript.
 
 
 ### Creating a linear gradient
 
-You could create a static PNG image of a linear gradient, load that, and put it into a texture.
+We could create a static PNG image of a linear gradient, load that, and put it into an image texture. I want to instead programmatically generate the linear gradient with JavaScript. That gives us full control of the gradient, and allows us to change it dynamically at runtime.
 
-However, I want to generate the linear gradient with JavaScript. That gives us full control of the gradient, and allows us to change it dynamically.
-
-First, let's pick colors for our gradient. I used [this gradient generator][gradient_generator] to pick the following colors:
+I used [this gradient generator][gradient_generator] to pick the following colors:
 
 ```ts
 const colors = [
@@ -1334,7 +1323,7 @@ We'll then create a [<Ts>CanvasGradient</Ts>][canvas_gradient] via <Ts method>cr
 ```ts
 const linearGradient = ctx.createLinearGradient(
   0, 0, // Top-left corner
-  width, 0 // Top-right corner
+  canvas.width, 0 // Top-right corner
 );
 
 for (const [i, color] of colors.entries()) {
@@ -1343,7 +1332,7 @@ for (const [i, color] of colors.entries()) {
 }
 ```
 
-Lastly, we'll set the gradient as the active fill style and draw a rectangle over the canvas.
+Lastly, we'll set the newly created <Ts>linearGradient</Ts> as the active fill style and draw a rectangle over the canvas.
 
 ```ts
 ctx.fillStyle = linearGradient;
@@ -1356,10 +1345,11 @@ This gives us a canvas element with the gradient:
 
 [gradient_generator]: https://www.joshwcomeau.com/gradient-generator/
 
-Now that we've rendered a linear gradient onto a canvas element, there are two more things to figure out:
+Now that we've rendered a linear gradient onto a canvas element, there are three more things to figure out:
 
- 1. how to write the contents of the canvas to a texture, and
- 2. how to read from the texture in the shader.
+ 1. how to write the contents of the canvas to a texture,
+ 2. how to pass the texture to the shader, and
+ 3. how to read from the texture in the shader.
 
 ### Writing canvas contents to a texture
 
@@ -1383,18 +1373,15 @@ gl.bindTexture(gl.TEXTURE_2D, null);
 
 <SmallNote label="">I'm by no means an expert on the WebGL API so take the comments with a large grain of salt.</SmallNote>
 
-Let's move onto reading the texture contents in the shader.
+### Passing the texture our shader and reading from it
 
-### Reading the texture in the shader
-
-In shaders, data from textures is read via [samplers][samplers]. Samplers are a way to read a value at given position in a texture.
+GLSL shaders read data from textures via [samplers][samplers]. Samplers are a function that accept texture coordinates and return the value of the texture at that position.
 
 [samplers]: https://www.khronos.org/opengl/wiki/Sampler_(GLSL)
 
-There are lots of different types of samplers for different types of data.
+There are different sampler types for different value types: `isampler` for signed integers, `usampler` for unsigned integers, and `sampler` for floats. Our image texture contains floats so we'll use the unprefixed `sampler`.
 
- * Firstly, there are different sampler types for different value types: `isampler` for signed integers, `usampler` for unsigned integers, and `sampler` for floats. Our image texture contains floats so we'll use the unprefixed `sampler`.
- * Samplers also have dimensionality. You can have 1D, 2D or 3D samplers. Since we'll be reading from a 2D image texture, we'll use a `sampler2D`. If you were reading signed integers from a 3D texture, you'd use a `usampler3D`.
+Samplers also have dimensionality. You can have 1D, 2D or 3D samplers. Since we'll be reading from a 2D image texture, we'll use a `sampler2D`. If you were reading signed integers from a 3D texture, you'd use a `usampler3D`.
 
 In the shader, we'll declare our sampler via a uniform. I'll name it <Gl>gradient</Gl>:
 
@@ -1402,19 +1389,25 @@ In the shader, we'll declare our sampler via a uniform. I'll name it <Gl>gradien
 uniform sampler2D gradient;
 ```
 
-<SmallNote label="">Again, I won't be covering the WebGL API in detail, but on the JavaScript side you'd pass a "pointer" to the texture to the uniform.</SmallNote>
+I won't cover how to pass the gradient texture to the WebGL shader on the JavaScript side -- I want to stay focused on the shader side -- but I'll refer you to [this post][webgl_textures] on WebGL textures.
 
-To read data from samplers, we'll need to use OpenGL's [texture lookup functions][texture_lookup_functions]. In our case, we're reading 2D image data, so we'll use <Gl method>texture2D</Gl>.
+[webgl_textures]: https://webglfundamentals.org/webgl/lessons/webgl-3d-textures.html
+
+To read data from samplers, we'll need to use OpenGL's [texture lookup functions][texture_lookup_functions]. In our case, we're reading 2D image data, so we'll use the built-in <Gl method>texture2D</Gl> function.
 
 [texture_lookup_functions]: https://www.khronos.org/opengl/wiki/Sampler_(GLSL)#Texture_lookup_functions
 
-<Gl method>texture2D</Gl> takes two arguments: a sampler and the 2D coordinates to sample data from. The coordinates are normalized from $[0, 1]$ so $(0, 0)$ is the top-left corner of the texture and $(1, 1)$ is the bottom-right corner of the texture.
+```glsl
+texture2D(textureSampler, textureCoordinates2D);
+```
 
-<SmallNote>texture2D coordinates are normalized, but samplers may also use "texel space" coordinates which range from $[0, S]$ where $S$ is the size of the texture for that dimension.</SmallNote>
+<Gl method>texture2D</Gl> takes two arguments, a sampler and 2D texture coordinates. The coordinates are normalized so $(0, 0)$ is the top-left corner of the texture and $(1, 1)$ is the bottom-right corner of the texture.
+
+<SmallNote>texture2D coordinates are typically normalized, but samplers may also use "texel space" coordinates which range from $[0, S]$ where $S$ is the size of the texture for that dimension.</SmallNote>
 
 Here's our texture again, for reference:
 
-<WebGLShader fragmentShader="read_texture" width={256} height={64} colorConfiguration="blue_to_yellow" fragmentShaderOptions={{ read: "left" }} />
+<WebGLShader fragmentShader="read_texture" width={256} height={64} colorConfiguration="blue_to_yellow" />
 
 The texture is uniform across the $y$ axis so we can just set the $y$ coordinate to $0.5$. We'll get the same color for any value of $y$ between $0$ and $1$.
 
@@ -1431,19 +1424,21 @@ void main() {
 
 <WebGLShader fragmentShader="read_texture_t" width={100} height={100} colorConfiguration="blue_to_yellow" />
 
-It works! We can now calculate a $t$ value ranging from $0$ to $1$ over the $x$ axis and use that to read from the texture:
+It works! We can now calculate a $t$ value ranging from $0$ to $1$ -- let's do that over the Y axis -- and use that to read from the texture:
 
 ```glsl
-float t = gl_FragCoord.x / (CANVAS_WIDTH - 1.0);
+float t = 1.0 - gl_FragCoord.y / (CANVAS_HEIGHT - 1.0);
 
 gl_FragColor = texture2D(gradient, vec2(t, 0.5));
 ```
 
-which renders the gradient from our input texture:
+This renders the gradient across the Y axis:
 
-<WebGLShader fragmentShader="read_texture" width={100} height={100} colorConfiguration="blue_to_yellow" />
+<WebGLShader fragmentShader="read_texture_y" width={100} height={100} colorConfiguration="blue_to_yellow" />
 
-Let's now map the background noise to the texture. We'll take the $t$ value that we're calculating using simplex noise and pass that as the $x$ coordinate to the sampler:
+### Applying a gradient to the background noise
+
+Let's now map the background noise to the gradient. As a refresher, we're calculating a single $t$ value from $0$ to $1$ using multiple simplex noise calls that represents our background noise.
 
 ```glsl
 uniform sampler2D gradient;
@@ -1454,10 +1449,18 @@ sum += simplex_noise(...) * ...;
 sum += simplex_noise(...) * ...;
 
 float t = clamp(sum, 0.0, 1.0);
+```
+
+We'll use $t$ as the $x$ component of our texture coordinate.
+
+```glsl
 gl_FragColor = texture2D(gradient, vec2(t, 0.5));
 ```
 
-Which has the effect of applying the gradient to the background noise:
+<WebGLShader fragmentShader="read_texture" width={256} height={64} colorConfiguration="blue_to_yellow" />
+<SmallNote label="" center>Here's our gradient again, for reference</SmallNote>
+
+This has the effect of applying our gradient to the background noise:
 
 <WebGLShader fragmentShader="simplex_noise_stacked_4" width={800} height={200} colorConfiguration="blue_to_yellow" />
 
@@ -1469,20 +1472,22 @@ hsl(141 75% 72%), hsl(41 90% 62%), hsl(358 64% 50%)
 
 <WebGLShader fragmentShader="simplex_noise_stacked_4" width={800} height={200} colorConfiguration="pastel" />
 
-We've covered a ton of ground! Let's move onto the next part of our effect.
+We've covered a ton of ground! We've learned how to programmatically generate gradient image textures and how to use them in WebGL shaders, and we're using that to generate beautiful, smooth background noise. We'll eventually use that in our final effect by coloring each wave using this type of background noise.
+
+Before we get to that, let's look at blending our waves.
 
 
-## Wave blending
+## Dynamic blur
 
-Earlier we saw how to apply a progressive blur from left to right:
-
-<WebGLShader fragmentShader="wave_animated_blur_left_to_right" height={150} width={250} />
-
-We're going to take that idea and apply it to our multiple waves:
+Currently, our waves have sharp edges:
 
 <WebGLShader fragmentShader="multiple_waves" width={800} height={200} />
 
-We are currently calculating the alpha of our waves like so:
+But in the final effect we see varying amounts of blur applied to each wave. The amount of blur applied evolves over time.
+
+<WebGLShader fragmentShader="final" width={1000} height={250} />
+
+Let's get started building this sort of blur. As a refresher, we're currently calculating the alpha of our waves like so:
 
 ```glsl
 float wave_alpha(float Y, float wave_height) {
@@ -1500,18 +1505,18 @@ float wave_alpha(float Y, float wave_height) {
 }
 ```
 
-To add blur we'll calculate a blur value and divide the signed distance by it, like so:
+To add blur we'll calculate a <Gl>blur</Gl> value and divide <Gl>dist_signed</Gl> by it, like so:
 
 ```glsl
 float blur = calc_blur();
 float alpha = clamp(0.5 + dist_signed / blur, 0.0, 1.0);
 ```
 
-Let's start off by making the blur calculation just apply a left-to-right blur over the canvas:
+Let's start off by applying a progressively increasing left-to-right blur over the width of the canvas:
 
 ```glsl
 float calc_blur() {
-  float t = gl_FragCoord.x / (u_w - 1.0);
+  float t = gl_FragCoord.x / (CANVAS_WIDTH - 1.0);
   float blur = mix(1.0, BLUR_AMOUNT, t);
   return blur;
 }
@@ -1519,7 +1524,7 @@ float calc_blur() {
 
 <WebGLShader fragmentShader="multiple_waves_blur_0" width={800} height={200} />
 
-The blur works. Let's now make the blur more interesting by also determining the amount of noise to apply via a noise function. Let's try using simplex noise:
+To make the blur vary and evolve over time, we'll determine the amount of blur using a noise function. We'll use simplex noise again:
 
 ```glsl
 float calc_blur() {
@@ -1528,24 +1533,29 @@ float calc_blur() {
   const float F = 0.034;
   
   float x = gl_FragCoord.x;
-  float blur_t = (simplexNoise(x * L + F * time, time * S) + 1.0) / 2.0;
-  float blur = mix(1.0, BLUR_AMOUNT, blur_t);
+  float blur_fac = (simplexNoise(x * L + F * time, time * S) + 1.0) / 2.0;
+  float blur = mix(1.0, BLUR_AMOUNT, blur_fac);
   return blur;
 }
 ```
 
-If we were to apply this to the waves, both waves would have identical blur. For the blurs to be distinct we'll need to apply an offset, like we did before with the wave. Luckily, we can just reuse the same offset that we're already calculating in <Gl method>wave_alpha</Gl>:
+If we were to apply this as-is to our waves, each wave's blur would look identical. For the wave blurs to be distinct we'll need to apply an offset to time.
+
+We did that before when calculating <Gl>wave_y</Gl>. Conveniently, we can just reuse that same offset and add it to <Gl>time</Gl> in <Gl method>calc_blur</Gl>:
 
 ```glsl
 float wave_alpha(float Y, float wave_height) {
   float noise_offset = Y * wave_height;
-  float blur = calc_blur(noise_offset);
+  float wave_y = Y + noise(x, noise_offset) * wave_height;
+
   // ...
+
+  float blur = calc_blur(noise_offset);
 }
 
 float calc_blur(float offset) {
   float t = time * offset;
-  float blur_t = (simplexNoise(x * L + F * t, t * S) + 1.0) / 2.0;
+  float blur_fac = (simplexNoise(x * L + F * t, t * S) + 1.0) / 2.0;
   // ...
 }
 ```
@@ -1556,16 +1566,14 @@ This works... but it doesn't look great.
 
 <WebGLShader fragmentShader="multiple_waves_blur_1" width={800} height={200} />
 
-First off, the whole wave feels kind blurry. We don't seem to get those long, sharp edges that regularly occur in the final effect:
+First off, the whole wave feels kind blurry. We don't seem to get those long, sharp edges that appear in the final effect:
 
 <WebGLShader fragmentShader="final" width={1000} height={250} />
 
 Secondly, the blur feels like it has distinct "edges". It feels like it starts and stops abruptly at the edges.
 
-Let's tackle each of these to get a high quality blur.
 
-
-## Creating a quality blur
+## Making our blur look better
 
 Consider how we're calculating the alpha:
 
@@ -1577,63 +1585,30 @@ The alpha is $0.5$ when the distance is 0, and it then linearly increases or dec
 
 <WebGLShader fragmentShader="alpha_curve_0" width={330} height={200} />
 
-The harsh stops at $0.0$ and $1.1$ create the sharp-feeling edges.
+The harsh stops at $0.0$ and $1.0$ produce the sharp-feeling edges that we observed earlier.
 
-### Smoothing the blur
-
-What we could do is apply a [smoothstep][smoothstep] function. Smoothstep is a family of interpolation functions that, as the name suggests, smooth the transition from $0$ to $1$. Here's a chart:
+To smooth out the edges we'll apply a [smoothstep][smoothstep] function. Smoothstep is a family of interpolation functions that, as the name suggests, smooth the transition from $0$ to $1$. Here's a chart:
 
 [smoothstep]: https://en.wikipedia.org/wiki/Smoothstep
 
 <WebGLShader fragmentShader="alpha_curve_1" width={330} height={200} />
 
-Let's apply smoothstep to our blur. Firstly, let's extract <Gl>dist_signed / blur</Gl> into a <Gl>delta</Gl> variable:
+Applying it is simple -- we'll apply it to the value of <Gl>alpha</Gl>
 
 ```glsl
-float delta = dist_signed / blur;
-
-float alpha = clamp(0.5 + delta, 0.0, 1.0);
-```
-
-Before applying the <Gl method>smoothstep</Gl> function, there are two things to consider:
-
- * Firstly, the <Gl method>smoothstep</Gl> function takes a numeric value $t$ between $0$ and $1$. We'll run into issues when $t$ is negative.
- * Secondly, only values of <Gl>delta</Gl> between $-0.5$ and $0.5$ matter because we're adding <Gl>delta</Gl> to $0.5$ and clamping the result to $[0, 1]$.
-
-These are both simple to resolve. First, we'll clamp <Gl>delta</Gl> to the range $[-0.5, 0.5]$:
-
-```glsl
-float delta = clamp(dist_signed / blur, -0.5, 0.5);
-```
-
-After clamping, we'll add $0.5$. This shifts the range of <Gl>delta</Gl> values from $[-0.5, 0.5]$ to $[0.0, 1.0]$. That prepares <Gl>delta</Gl> for smoothing, which we perform with <Gl method>smoothstep</Gl>. We'll then subtract $0.5$ to shift <Gl>delta</Gl> back to the original range of $[-0.5, 0.5]$:
-
-```glsl
-delta += 0.5; // Shift to [0.0, 1.0]
-delta = smooth_step(delta); // Apply smoothing
-delta -= 0.5; // Shift back to [-0.5, 0.5]
-```
-
-We can shorten this to:
-
-```glsl
-delta = smooth_step(delta + 0.5) - 0.5;
-```
-
-Which gives us:
-
-```glsl
-float delta = clamp(dist_signed / blur, -0.5, 0.5);
-delta = smooth_step(delta + 0.5) - 0.5;
-
-float alpha = clamp(0.5 + delta, 0.0, 1.0);
+float alpha = clamp(0.5 + dist_signed / blur, 0.0, 1.0);
+alpha = smoothstep(alpha);
 ```
 
 This results in a beautifully smooth blur:
 
 <WebGLShader fragmentShader="multiple_waves_blur_2" width={800} height={200} />
 
-Let's now tackle the issue of the wave as a whole being too blurry.
+Following is a side-by-side comparison. The blur to the left is smoothed, while the right one is not.
+
+<WebGLShader fragmentShader="multiple_waves_blur_2_side_by_side" width={800} height={200} />
+
+That takes care of the sharp edges. Let's now tackle the issue of the wave as a whole being too blurry.
 
 
 ### Adding sharp edges to our blur
@@ -1647,15 +1622,56 @@ float calc_blur() {
   const float F = 0.034;
   
   float x = gl_FragCoord.x;
-  float blur_t = (simplexNoise(x * L + F * time, time * S) + 1.0) / 2.0;
-  float blur = mix(1.0, BLUR_AMOUNT, blur_t);
+  float blur_fac = (simplexNoise(x * L + F * time, time * S) + 1.0) / 2.0;
+  float blur = mix(1.0, BLUR_AMOUNT, blur_fac);
   return blur;
 }
 ```
 
-The edge becomes sharper as <Gl>blur_t</Gl> approaches $0$, and blurrier as <Gl>blur_t</Gl> increases.
+The edge becomes sharper as <Gl>blur_fac</Gl> approaches $0$, and blurrier as <Gl>blur_fac</Gl> approaches $1$. However, the wave only becomes sharp when <Gl>blur_fac</Gl> is very close to zero. Take a look at this visualization which shows the <Gl>blur_fac</Gl> applied over the wave in a chart below the canvas:
 
-With that in mind, an easy adjustment to sharpen the wave is to apply the [ease-in][ease_in] interpolation function to <Gl>blur_t</Gl>. Like other interpolation (easing) functions, <Gl method>ease_in</Gl> takes in a value between $0$ and $1$. Here's a chart for <Gl>ease_in(t)</Gl> for values of $t$ between $0$ and $1$:
+<WebGLShader fragmentShader="multiple_waves_blur_4" width={800} height={320} showControls={false} />
+
+You'll notice that the wave gets sharp when the chart gets close to touching the bottom -- at values close to zero -- but it rarely gets close to zero. The <Gl>blur_fac</Gl> spends too much time around the middle, which causes the wave to be _somewhat_ blurry over its entire length.
+
+To bias the wave towards zero, we can apply an exponent to <Gl>blur_fac</Gl>
+
+
+With that in mind, an easy adjustment to sharpen the wave is to apply the [ease-in][ease_in] to <Gl>blur_fac</Gl>. Like other interpolation (easing) functions, <Gl method>ease_in</Gl> takes in a value between $0$ and $1$. Here's a chart of <Gl>ease_in(t)</Gl> for values of $t$ between $0$ and $1$:
 
 [ease_in]: https://easings.net/#easeInSine
 
+<WebGLShader fragmentShader="alpha_curve_2" width={330} height={200} />
+
+Applying ease-in is simple:
+
+```glsl
+float blur_fac = (simplexNoise(x * L + F * time, time * S) + 1.0) / 2.0;
+blur_fac = ease_in(blur_fac);
+```
+
+<WebGLShader fragmentShader="multiple_waves_blur_4" width={800} height={320} />
+
+By applying <Gl method>ease_in</Gl> to <Gl>blur_fac</Gl>, the blur "stays longer" at values close to 0.
+
+<WebGLShader fragmentShader="multiple_waves_blur_3" width={800} height={200} />
+
+This looks much better! The wave now has distinct "sharp segments".
+
+### Replacing ease-in with an exponent
+
+Instead of using <Gl method>ease_in</Gl>, we can use an exponent instead. Take <Gl>pow(t, 2.0)</Gl> for example. It gives us a very "ease-in-looking" curve:
+
+<WebGLShader fragmentShader="alpha_curve_3" width={330} height={200} showControls={false} animate={false} />
+
+What's great about using exponents is that we can very easily adjust the curve by increasing or decreasing the exponent. As the exponent approaches $1$, the curve flattens, while higher exponents give us steeper curves.
+
+Here's a canvas that lets you adjust the exponent:
+
+<WebGLShader fragmentShader="alpha_curve_3" width={330} height={200} animate={false} />
+
+Applying this to our blur is simple:
+
+```glsl
+const float BLUR_EXPONENT = 2.0;
+```
