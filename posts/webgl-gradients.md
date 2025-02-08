@@ -1581,19 +1581,21 @@ Consider how we're calculating the alpha:
 float alpha = clamp(0.5 + dist_signed / blur, 0.0, 1.0);
 ```
 
-The alpha is $0.5$ when the distance is 0, and it then linearly increases or decreases until it hits either $0.0$ or $1.0$. This produces a alpha curve that looks like so:
+The alpha is $0.5$ when the distance is 0, and it then linearly increases or decreases until it hits either $0.0$ or $1.0$. This produces an alpha curve that looks like so:
 
 <WebGLShader fragmentShader="alpha_curve_0" width={330} height={200} />
 
-The harsh stops at $0.0$ and $1.0$ produce the sharp-feeling edges that we observed earlier.
+The harsh stops at $0.0$ and $1.0$ produce the sharp-feeling edges that we observe at the edges of the blur.
 
-To smooth out the edges we'll apply a [smoothstep][smoothstep] function. Smoothstep is a family of interpolation functions that, as the name suggests, smooth the transition from $0$ to $1$. Here's a chart:
+<WebGLShader fragmentShader="multiple_waves_blur_1" width={800} height={200} showControls={false} />
+
+The [smoothstep][smoothstep] function can help here. Smoothstep is a family of interpolation functions that, as the name suggests, smooth the transition from $0$ to $1$. Here's a chart showing the output:
 
 [smoothstep]: https://en.wikipedia.org/wiki/Smoothstep
 
 <WebGLShader fragmentShader="alpha_curve_1" width={330} height={200} />
 
-Applying it is simple -- we'll apply it to the value of <Gl>alpha</Gl>
+Applying it is simple -- we'll assign the result of <Gl>smoothstep(alpha)</Gl> to <Gl>alpha</Gl>:
 
 ```glsl
 float alpha = clamp(0.5 + dist_signed / blur, 0.0, 1.0);
@@ -1611,7 +1613,7 @@ Following is a side-by-side comparison. The blur to the left is smoothed, while 
 That takes care of the sharp edges. Let's now tackle the issue of the wave as a whole being too blurry.
 
 
-### Adding sharp edges to our blur
+### Making the wave less uniformly blurry
 
 Here's our <Gl method>calc_blur</Gl> method as we left it:
 
@@ -1628,50 +1630,51 @@ float calc_blur() {
 }
 ```
 
-The edge becomes sharper as <Gl>blur_fac</Gl> approaches $0$, and blurrier as <Gl>blur_fac</Gl> approaches $1$. However, the wave only becomes sharp when <Gl>blur_fac</Gl> is very close to zero. Take a look at this visualization which shows the <Gl>blur_fac</Gl> applied over the wave in a chart below the canvas:
+The edge becomes sharper as <Gl>blur_fac</Gl> approaches $0$, and blurrier as <Gl>blur_fac</Gl> approaches $1$. However, the wave only becomes sharp when <Gl>blur_fac</Gl> is _very_ close to zero.
+
+Consider the visualization below. It visualizes <Gl>blur_fac</Gl> applied over the wave in the chart below the canvas:
 
 <WebGLShader fragmentShader="multiple_waves_blur_4" width={800} height={320} showControls={false} />
 
-You'll notice that the wave gets sharp when the chart gets close to touching the bottom -- at values close to zero -- but it rarely gets close to zero. The <Gl>blur_fac</Gl> spends too much time around the middle, which causes the wave to be _somewhat_ blurry over its entire length.
+<SmallNote label="" center>`blur_fac == 1.0` at the top of the chart, and `blur_fac == 0.0` at the bottom</SmallNote>
 
-To bias the wave towards zero, we can apply an exponent to <Gl>blur_fac</Gl>
+You'll notice that the wave gets sharp when the chart gets close to touching the bottom -- at values close to zero -- but it rarely gets close to zero. <Gl>blur_fac</Gl> spends too much time around the middle, which causes the wave to be _somewhat_ blurry over its entire length.
 
+We want to somehow bias <Gl>blur_fac</Gl> such that it spends more time at values very close to zero, while still reaching values close to one. We can do this by applying an exponent to <Gl>blur_fac</Gl>.
 
-With that in mind, an easy adjustment to sharpen the wave is to apply the [ease-in][ease_in] to <Gl>blur_fac</Gl>. Like other interpolation (easing) functions, <Gl method>ease_in</Gl> takes in a value between $0$ and $1$. Here's a chart of <Gl>ease_in(t)</Gl> for values of $t$ between $0$ and $1$:
+Consider the what applying an exponent does to values in the range $[0, 1]$. Applying a power of $2$ to a value close to zero, such as $0.1$, gives us $0.01$
 
-[ease_in]: https://easings.net/#easeInSine
+<p className="mathblock">$$0.1^2=0.01$$</p>
 
-<WebGLShader fragmentShader="alpha_curve_2" width={330} height={200} />
+while for $0.9$ we get $0.81$:
 
-Applying ease-in is simple:
+<p className="mathblock">$$0.9^2=0.81$$</p>
+
+When exponentiating numbers between zero and one, numbers close to zero approach zero way faster than numbers close to one. Here's a chart for $x^2$ for values of $x$ between zero and one:
+
+<WebGLShader fragmentShader="alpha_curve_2" width={330} height={200} showControls={false} />
+
+This effect only gets more extreme as we increase the exponent -- $0.1^3$ gives us $0.001$ while $0.9^3$ results in roughly $0.73$:
+
+<p className="mathblock">$$0.1^3=0.001$$<br />$$0.9^3=0.729$$</p>
+
+<SmallNote label="" center>$0.1$ got $99\%$ smaller, while $0.9$ only got ~$20\%$ smaller!</SmallNote>
+
+To get a feel for this, here's a chart of $x^n$ that lets you vary $n$:
+
+<WebGLShader fragmentShader="alpha_curve_3" width={330} height={200} />
+
+<SmallNote label="" center>Observe how an exponent of $1$ has no effect.</SmallNote>
+
+With that, let's apply an exponent to <Gl>blur_fac</Gl>. We can do that with the built-in <Gl method>pow</Gl> function:
 
 ```glsl
 float blur_fac = (simplexNoise(x * L + F * time, time * S) + 1.0) / 2.0;
-blur_fac = ease_in(blur_fac);
+blur_fac = pow(blur_fac, exponent);
 ```
+
+Here's a canvas that lets you change the value of <Gl>exponent</Gl> up to a $4$. I intentionally set <Gl>exponent</Gl> to a default value of $1$ (no effect) so that you can see the change occur as you increase it.
 
 <WebGLShader fragmentShader="multiple_waves_blur_4" width={800} height={320} />
 
-By applying <Gl method>ease_in</Gl> to <Gl>blur_fac</Gl>, the blur "stays longer" at values close to 0.
-
-<WebGLShader fragmentShader="multiple_waves_blur_3" width={800} height={200} />
-
-This looks much better! The wave now has distinct "sharp segments".
-
-### Replacing ease-in with an exponent
-
-Instead of using <Gl method>ease_in</Gl>, we can use an exponent instead. Take <Gl>pow(t, 2.0)</Gl> for example. It gives us a very "ease-in-looking" curve:
-
-<WebGLShader fragmentShader="alpha_curve_3" width={330} height={200} showControls={false} animate={false} />
-
-What's great about using exponents is that we can very easily adjust the curve by increasing or decreasing the exponent. As the exponent approaches $1$, the curve flattens, while higher exponents give us steeper curves.
-
-Here's a canvas that lets you adjust the exponent:
-
-<WebGLShader fragmentShader="alpha_curve_3" width={330} height={200} animate={false} />
-
-Applying this to our blur is simple:
-
-```glsl
-const float BLUR_EXPONENT = 2.0;
-```
+Notice how as you increase the exponent <Gl>blur_fac</Gl> tends to "hug" the floor of the chart more and more. This produces noticeable periods of relative sharpness while not muting higher values of <Gl>blur_fac</Gl> too much.

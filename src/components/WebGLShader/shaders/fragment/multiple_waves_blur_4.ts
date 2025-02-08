@@ -4,11 +4,6 @@ import { CreateFragmentShader, FragmentShaderUniforms } from "../types";
 
 const createFragmentShader: CreateFragmentShader = () => {
   const uniforms: FragmentShaderUniforms = {
-    u_blur: {
-      label: "Blur amount",
-      value: 50,
-      range: [0, 100],
-    },
     u_pow: {
       label: "Pow",
       value: 1,
@@ -22,9 +17,9 @@ const createFragmentShader: CreateFragmentShader = () => {
     uniform float u_time;
     uniform float u_w;
     uniform float u_h;
-    uniform float u_blur;
     uniform float u_pow;
 
+    const float BLUR_AMOUNT = 60.0;
     const float LOWER_HEIGHT = 140.0;
     const float BOTTOM_PADDING = 0.0;
     const float WAVE_HEIGHT = 24.0;
@@ -72,7 +67,7 @@ const createFragmentShader: CreateFragmentShader = () => {
     }
 
     float calc_blur(float offset) {
-      return mix(1.0, 1.0 + u_blur, calc_blur_t(offset, u_pow));
+      return mix(1.0, 1.0 + BLUR_AMOUNT, calc_blur_t(offset, u_pow));
     }
 
     float wave_alpha(float Y, float wave_height) {
