@@ -18,7 +18,7 @@ const createFragmentShader: CreateFragmentShader = (_) => {
     ${simplexNoise}
 
     void main() {
-      const float LENGTH = 0.0015;
+      const float LENGTH = 0.0018;
       const float SPEED = 0.12;
       float t = simplexNoise(vec2(gl_FragCoord.x * LENGTH, u_time * SPEED));
 

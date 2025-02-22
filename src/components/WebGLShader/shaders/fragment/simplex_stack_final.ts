@@ -5,7 +5,7 @@ import { CreateFragmentShader, FragmentShaderUniforms } from "../types";
 const createFragmentShader: CreateFragmentShader = (options) => {
   const { flowScalar = 1 } = options as { flowScalar?: number };
   const uniforms: FragmentShaderUniforms = {
-    time1: {
+    time2: {
       label: "math:F",
       value: 1,
       range: [0, 10],
@@ -26,7 +26,7 @@ const createFragmentShader: CreateFragmentShader = (options) => {
 
     float noise(float x) {
       const float L = 0.0018;
-      const float S = 0.04;
+      const float S = 0.12;
       float F = ${0.031 * flowScalar};
 
       float sum = 0.0;

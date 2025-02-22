@@ -24,7 +24,7 @@ const createFragmentShader: CreateFragmentShader = (_) => {
 
     float noise(float x) {
       const float L = 0.0018;
-      const float S = 0.04;
+      const float S = 0.12;
 
       float sum = 0.0;
       sum += simplexNoise(vec2(x * (L / 1.00), u_time * S * 1.00)) * 0.85;

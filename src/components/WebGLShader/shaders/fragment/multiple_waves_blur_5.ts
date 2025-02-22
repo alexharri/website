@@ -2,12 +2,16 @@ import { noiseUtils } from "../../noiseUtils";
 import { simplexNoise } from "../../simplexNoise";
 import { CreateFragmentShader, FragmentShaderUniforms } from "../types";
 
-const createFragmentShader: CreateFragmentShader = () => {
+const createFragmentShader: CreateFragmentShader = (options) => {
+  const { value = 130 } = options as {
+    value?: number;
+    range?: [number, number];
+  };
   const uniforms: FragmentShaderUniforms = {
     u_blur: {
       label: "Blur amount",
-      value: 50,
-      range: [0, 100],
+      value,
+      range: [50, 250],
     },
   };
   const shader = /* glsl */ `
@@ -60,8 +64,8 @@ const createFragmentShader: CreateFragmentShader = () => {
       float x = gl_FragCoord.x;
       float t = u_time + offset;
       float blur_t = (simplexNoise(vec2(x * L + F * t, t * S)) + 1.0) / 2.0;
-      blur_t = pow(blur_t, 2.5);
-
+      blur_t = ease_in(blur_t);
+      
       float blur = mix(1.0, 1.0 + u_blur, blur_t);
       return blur;
     }
