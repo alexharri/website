@@ -1816,9 +1816,9 @@ This gives us the following effect:
 
 <WebGLShader fragmentShader="final_effect_0" width={800} height={200} />
 
-Just try to tell me that this effect doesn't look _absolutely sick_! The effect we get is flowing, smooth and -- occasionally -- incredibly dramatic.
+Just try to tell me that this effect doesn't look _absolutely sick_! The effect we get is flowing, smooth and quite dramatic at times.
 
-The only thing that's really left to do is mapping the final <Gl>lightness</Gl> value to a color gradient -- like this one:
+The only thing that's really left to do is mapping the final <Gl>lightness</Gl> value to a color gradient. Let's use this one:
 
 <WebGLShader fragmentShader="read_texture" width={256} height={64} colorConfiguration="default" />
 
@@ -1828,16 +1828,22 @@ Like before, we'll get the texture into our shader via a <Gl>uniform sampler2D</
 uniform sampler2D gradient;
 ```
 
-We'll then use the <Gl>lightness</Gl> value as the $x$ position at which we'll read a color from the texture, assigning the result to <Gl>gl_FragColor</Gl>. This maps lightness values to colors from the gradient texture:
+We'll then map the <Gl>lightness</Gl> value to the gradient by using <Gl>lightness</Gl> as the $x$ position at which we'll read a color from the texture, assigning the result to <Gl>gl_FragColor</Gl>:
 
 ```glsl
 gl_FragColor = texture2D(gradient, vec2(lightness, 0.5));
 ```
 
-We now see the gradient in the effect:
+This applies the gradient to our effect:
 
 <WebGLShader fragmentShader="final_effect_1" width={800} height={200} />
 
-Increasing the height of the canvas and adding a skew gives us a sleek final result:
+Looks gorgeous. We can make this more sleek by increasing the height of the canvas a bit and adding a skew:
 
 <WebGLShader fragmentShader="final_effect_1" height={250} skew />
+
+Sick, right? This effect could be used to add a modern and elegant touch to any landing page.
+
+We can apply any gradient to this effect. Below is a canvas that lets you pick the gradient:
+
+<WebGLShader fragmentShader="final_effect_1" height={200} colorConfiguration="blue_to_yellow" />
