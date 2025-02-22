@@ -3,7 +3,7 @@ import { hexToRgb } from "../../../../utils/color";
 import { noiseUtils } from "../../noiseUtils";
 import { perlinNoise } from "../../perlinNoise";
 import { simplexNoise } from "../../simplexNoise";
-import { CreateFragmentShader } from "../types";
+import { CreateFragmentShader, FragmentShaderUniforms } from "../types";
 
 function hexToVec3(hex: string) {
   const rgb = hexToRgb(hex);
@@ -26,44 +26,40 @@ const createFragmentShader: CreateFragmentShader = (options) => {
     blurAmount = 230,
     blurQuality = 7,
     blurExponentRange = [0.96, 1.15],
-    resolution = [1400, 250],
     showWaves = true,
   } = options as Partial<{
     blurAmount: number;
     blurQuality: number;
     blurExponentRange: [number, number];
     accentColor: string;
-    resolution: [number, number];
     showWaves: boolean;
   }>;
 
-  return /* glsl */ `
+  const uniforms: FragmentShaderUniforms = {};
+
+  const shader = /* glsl */ `
     precision mediump float;
 
-    // Uniforms (inputs)
     uniform float u_time; // Time in seconds
-    uniform sampler2D u_gradient; // height=1, width=N
+    uniform float u_w;
+    uniform float u_h;
+    uniform sampler2D u_gradient;
   
-    // Math constants
     const float PI = 3.14159, TAU = PI * 2.0;
 
-    // Wave config
-    const float WAVE1_Y = 0.45,      WAVE2_Y = 0.9; // Proportion of H
-    const float WAVE1_HEIGHT = 48.0, WAVE2_HEIGHT = 36.0; // Height in px
+    const float WAVE1_Y = 0.45, WAVE2_Y = 0.9;
+    const float WAVE1_HEIGHT = 48.0, WAVE2_HEIGHT = 36.0;
 
-    // Accent color config
     const float ACCENT_NOISE_SCALE = 0.4; // Smaller is bigger
   
-    // Resolution
-    const float W = ${resolution[0].toFixed(1)}, H = ${resolution[1].toFixed(1)};
-    const float DIV_H = 1.0 / H, DIV_W = 1.0 / W;
-    const vec2 WH = vec2(W, H);
+    float DIV_H = 1.0 / u_h, DIV_W = 1.0 / u_w;
   
     // Imports
     ${noiseUtils}
     ${perlinNoise}
     ${simplexNoise}
   
+    // Various utility functions
     float smooth_step(float t)
       { return t * t * t * (t * (6.0 * t - 15.0) + 10.0); }
 
@@ -76,35 +72,13 @@ const createFragmentShader: CreateFragmentShader = (options) => {
     float ease_out(float x)
       { return sin((x * PI) * 0.5); }
 
-    float wave_len(float value)
-      { return gl_FragCoord.x * 0.02 / value; }
-  
-    float wave_phase(float phase) {
-      const float WAVE_SPEED = 0.8; // Higher is faster
-      return phase * u_time * WAVE_SPEED;
-    }
-  
-    float wave_amplitude(float value)
-      { return value; }
-
-    float wave_offset(float t)
-      { return t * TAU; }
-  
     float calc_y_dist(float target_y, float offset_px, float offset_fac) {
-      // Apply offset to target Y
       target_y += offset_fac * offset_px * DIV_H;
       return target_y - (gl_FragCoord.y * DIV_H);
     }
   
     float calc_alpha_part(float dist, float fac) {
-      float dist_sign_pos = (-sign(dist) + 1.0) * 0.5; // 1 if positive, 0 if negative
-      float dist_sign_neg = 1.0 - dist_sign_pos;       // 0 if positive, 0 if negative
-  
-      float dist_normalized = dist * H / fac;
-      float alpha_pos =       clamp(0.5 + dist_normalized, 0.0, 1.0);
-      float alpha_neg = 1.0 - clamp(0.5 - dist_normalized, 0.0, 1.0);
-      float alpha = alpha_pos * dist_sign_pos + alpha_neg * dist_sign_neg;
-      return alpha;
+      return clamp(0.5 + dist * u_h / fac, 0.0, 1.0);
     }
   
     float calc_alpha(float dist, float blur_fac) {
@@ -237,17 +211,6 @@ const createFragmentShader: CreateFragmentShader = (options) => {
     }
   
     vec2 wave1() {
-      // float y_noise = 0.0;
-      // y_noise += sin(wave_len(5.180) + wave_phase(-0.15) + wave_offset(0.3)) * wave_amplitude(0.6);
-      // y_noise += sin(wave_len(3.193) + wave_phase( 0.18) + wave_offset(0.2)) * wave_amplitude(0.8);
-      // y_noise += sin(wave_len(5.974) + wave_phase( 0.13) + wave_offset(0.0)) * wave_amplitude(0.6);
-      // y_noise += sin(wave_len(6.395) + wave_phase(-0.21) + wave_offset(0.7)) * wave_amplitude(0.4);
-      // y_noise += sin(wave_len(3.683) + wave_phase( 0.23) + wave_offset(0.5)) * wave_amplitude(0.5);
-      
-      // // up-down wave
-      // y_noise += sin(wave_len(200.0) + wave_phase( 0.092) + wave_offset(0.7)) * wave_amplitude(0.8);
-      // y_noise += sin(wave_len(200.0) + wave_phase(-0.136) + wave_offset(0.3)) * wave_amplitude(0.6);
-      // y_noise += sin(wave_len(200.0) + wave_phase( 0.118) + wave_offset(0.1)) * wave_amplitude(0.9);
       float y_noise = wave_y_noise(
         -187.8, 154.0,      // Random offsets
          1.0,  0.075,  0.026 // Length, Evolution, X shift
@@ -257,7 +220,6 @@ const createFragmentShader: CreateFragmentShader = (options) => {
         -164.8, 386.0,      // Random offsets
          1.0,  0.07,  0.03 // Length, Evolution, X shift
       );
-      // float blur_fac = blur_sin_noise_1D(0.9, 0.3);
       
       float dist = calc_y_dist(WAVE1_Y, WAVE1_HEIGHT, y_noise);
       float alpha = calc_alpha(dist, blur_fac);
@@ -266,12 +228,6 @@ const createFragmentShader: CreateFragmentShader = (options) => {
     }
   
     vec2 wave2() {
-      // float sin_sum = 0.0;
-      // sin_sum += sin(wave_len(4.410) + wave_phase( 0.149) + wave_offset(0.6)) * wave_amplitude(0.2);
-      // sin_sum += sin(wave_len(3.823) + wave_phase(-0.140) + wave_offset(0.4)) * wave_amplitude(0.7);
-      // sin_sum += sin(wave_len(4.274) + wave_phase( 0.173) + wave_offset(0.9)) * wave_amplitude(0.5);
-      // sin_sum += sin(wave_len(3.815) + wave_phase(-0.212) + wave_offset(0.2)) * wave_amplitude(0.8);
-      // sin_sum += sin(wave_len(3.183) + wave_phase( 0.218) + wave_offset(0.1)) * wave_amplitude(0.4);
       float y_noise = wave_y_noise(
         -262.8, -185.2,     // Random offsets
          1.0,  0.075,  0.026 // Length, Evolution, X shift
@@ -384,6 +340,7 @@ const createFragmentShader: CreateFragmentShader = (options) => {
       // gl_FragColor = vec4(1.0, 1.0, 1.0, w1_lightness);
     }
   `;
+  return { shader, uniforms };
 };
 
 export default createFragmentShader;
