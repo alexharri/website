@@ -1,4 +1,3 @@
-import { lerp } from "../../../../math/lerp";
 import { hexToRgb } from "../../../../utils/color";
 import { noiseUtils } from "../../noiseUtils";
 import { perlinNoise } from "../../perlinNoise";
@@ -76,52 +75,30 @@ const createFragmentShader: CreateFragmentShader = (options) => {
       target_y += offset_fac * offset_px * DIV_H;
       return target_y - (gl_FragCoord.y * DIV_H);
     }
-  
-    float calc_alpha_part(float dist, float fac) {
-      return clamp(0.5 + dist * u_h / fac, 0.0, 1.0);
+
+    float wave_alpha_part(float dist, float blur_fac, float t) {
+      float exp = mix(${blurExponentRange[0].toFixed(5)}, ${blurExponentRange[1].toFixed(5)}, t);
+      float v = pow(blur_fac, exp);
+      v = ease_in(v);
+      v = smooth_step(v);
+      v = clamp(v, 0.008, 1.0);
+      v *= ${blurAmount.toFixed(1)};
+      return clamp(0.5 + dist * u_h / v, 0.0, 1.0);
     }
   
-    float calc_alpha(float dist, float blur_fac) {
+    float wave_alpha(float dist, float blur_fac) {
+      const int N_PARTS = ${blurQuality};
+      const float PART = 1.0 / float(N_PARTS);
+      
       float sum = 0.0;
-      ${Array.from({ length: blurQuality })
-        .map((_, i) => {
-          const varName = `b${i}`;
-          const t = blurQuality === 1 ? 0.5 : i / (blurQuality - 1);
-          const exp = lerp(blurExponentRange[0], blurExponentRange[1], t);
-          return /* glsl */ `
-            float ${varName} = pow(blur_fac, ${exp.toFixed(1)});
-            ${varName} = ease_in(${varName});
-            ${varName} = smooth_step(${varName});
-            ${varName} = clamp(${varName}, 0.008, 1.0);
-            ${varName} *= ${blurAmount.toFixed(1)};
-            sum += calc_alpha_part(dist, ${varName}) * ${(1 / blurQuality).toFixed(5)};
-          `;
-        })
-        .join("")}
+      for (int i = 0; i < N_PARTS; i++) {
+        float t = N_PARTS == 1 ? 0.5 : PART * float(i);
+        sum += wave_alpha_part(dist, blur_fac, t) * PART;
+      }
       return sum;
     }
 
-    float calc_noise_perlin(float off1, float off2) {
-      const float NOISE_SCALE = 1.0; // Higher is smaller
-      const float NOISE_X_SHIFT = 0.04; // Higher is faster
-      const float NOISE_SPEED = 0.084; // Higher is faster
-      
-      float x = gl_FragCoord.x * DIV_W, y = gl_FragCoord.y * DIV_H;
-      float noise_x = x * NOISE_SCALE;
-      float noise_y = y * NOISE_SCALE;
-      float s1 = 1.4, s2 = 1.0, s3 = 0.8, s4 = 0.4;
-      float off3 = off1 - off2;
-      float off4 = off1 * off2;
-      float noise_raw =
-        perlinNoise(vec3(noise_x * s1 + u_time *  NOISE_X_SHIFT * 1.5, noise_y * s1, off1 + u_time * NOISE_SPEED)) * 0.55 +
-        perlinNoise(vec3(noise_x * s2 + u_time *  NOISE_X_SHIFT * 0.8, noise_y * s2, off2 + u_time * NOISE_SPEED)) * 0.45 +
-        perlinNoise(vec3(noise_x * s3 + u_time * -NOISE_X_SHIFT,       noise_y * s3, off3 + u_time * NOISE_SPEED)) * 0.35 +
-        perlinNoise(vec3(noise_x * s4 + u_time *  NOISE_X_SHIFT,       noise_y * s4, off4 + u_time * NOISE_SPEED)) * 0.35 +
-        0.5;
-      return noise_raw;
-    }
-  
-    float calc_noise_simplex(float off1, float off2) {
+    float calc_noise(float off1, float off2) {
       const float NOISE_SPEED = 0.064; // Higher is faster
       const float NOISE_X_SHIFT = 0.04; // Higher is faster
       float x = gl_FragCoord.x * DIV_W, y = gl_FragCoord.y * DIV_H;
@@ -134,10 +111,6 @@ const createFragmentShader: CreateFragmentShader = (options) => {
         simplexNoise(vec3(x * s3 + u_time *  NOISE_X_SHIFT * 0.8, y * s3 * 0.70, off3 + u_time * NOISE_SPEED)) * 0.20 +
         0.5;
       return noise_raw;
-    }
-
-    float calc_noise(float off1, float off2) {
-      return calc_noise_simplex(off1, off2);
     }
 
     float wave_y_noise(float off1, float off2, float len, float evolution, float shift_speed) {
@@ -222,7 +195,7 @@ const createFragmentShader: CreateFragmentShader = (options) => {
       );
       
       float dist = calc_y_dist(WAVE1_Y, WAVE1_HEIGHT, y_noise);
-      float alpha = calc_alpha(dist, blur_fac);
+      float alpha = wave_alpha(dist, blur_fac);
       float noise = calc_noise(0.0, 420.0);
       return vec2(noise, alpha);
     }
@@ -240,7 +213,7 @@ const createFragmentShader: CreateFragmentShader = (options) => {
       // float blur_fac = blur_sin_noise_1D(2.3, -1.7);
   
       float dist = calc_y_dist(WAVE2_Y, WAVE2_HEIGHT, y_noise);
-      float alpha = calc_alpha(dist, blur_fac);
+      float alpha = wave_alpha(dist, blur_fac);
       float noise = calc_noise(-100.0, -420.0);
       return vec2(noise, alpha);
     }
