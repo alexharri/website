@@ -36,6 +36,7 @@ const createFragmentShader: CreateFragmentShader = (options) => {
     u_foo: {
       value: 0,
       range: [0, 1],
+      step: 0.01,
     },
   };
 
@@ -86,37 +87,37 @@ const createFragmentShader: CreateFragmentShader = (options) => {
     }
 
     float background_noise(float offset) {
-      const float NOISE_SPEED = 0.064; // Higher is faster
-      const float NOISE_X_SHIFT = 0.04; // Higher is faster
+      const float S = 0.064; // Higher is faster
+      const float F = 0.04; // Higher is faster
 
       float time = u_time + offset;
-      float x = gl_FragCoord.x * DIV_W, y = gl_FragCoord.y * DIV_H;
+      float x_shift = time * F;
+      float x = gl_FragCoord.x * DIV_W, y = gl_FragCoord.y * DIV_H; // TODO: Remove DIV_W, DIV_H
       float s1 = 1.5, s2 = 0.9, s3 = 0.6;
       float noise_raw =
-        simplexNoise(vec3(x * s1 + time *  NOISE_X_SHIFT * 1.1, y * s1 * 1.00, time * NOISE_SPEED)) * 0.30 +
-        simplexNoise(vec3(x * s2 + time * -NOISE_X_SHIFT * 0.6, y * s2 * 0.85, time * NOISE_SPEED)) * 0.25 +
-        simplexNoise(vec3(x * s3 + time *  NOISE_X_SHIFT * 0.8, y * s3 * 0.70, time * NOISE_SPEED)) * 0.20 +
+        simplexNoise(vec3(x * s1 +  x_shift * 1.1, y * s1 * 1.00, time * S)) * 0.30 +
+        simplexNoise(vec3(x * s2 + -x_shift * 0.6, y * s2 * 0.85, time * S)) * 0.25 +
+        simplexNoise(vec3(x * s3 +  x_shift * 0.8, y * s3 * 0.70, time * S)) * 0.20 +
         0.5;
       return noise_raw;
     }
 
     float wave_y_noise(float offset) {
-      float s1 = 1.30, s2 = 1.00, s3 = 0.70, s4 = 0.40; // Scale
-      float p1 = 0.54, p2 = 0.68, p3 = 0.59, p4 = 0.48; // Phase
-      float a1 = 0.85, a2 = 1.15, a3 = 0.60, a4 = 0.40; // Amplitude
+      const float L = 0.000845;
+      const float S = 0.075;
+      const float F = 0.026;
 
       float time = u_time + offset;
-
-      float x = gl_FragCoord.x * DIV_W;
-      float y = time * 0.075;
+      float x = gl_FragCoord.x * 0.000845;
+      float y = time * S;
       float x_shift = time * 0.026;
-      float noise_raw =
-        simplexNoise(vec2(x * s1 + x_shift, y * p1)) * a1 +
-        simplexNoise(vec2(x * s2 + x_shift, y * p2)) * a2 +
-        simplexNoise(vec2(x * s3 + x_shift, y * p3)) * a3 +
-        simplexNoise(vec2(x * s4 + x_shift, y * p4)) * a4 +
-        0.0;
-      return noise_raw;
+
+      float sum = 0.0;
+      sum += simplexNoise(vec2(x * 1.30 + x_shift, y * 0.54)) * 0.85;
+      sum += simplexNoise(vec2(x * 1.00 + x_shift, y * 0.68)) * 1.15;
+      sum += simplexNoise(vec2(x * 0.70 + x_shift, y * 0.59)) * 0.60;
+      sum += simplexNoise(vec2(x * 0.40 + x_shift, y * 0.48)) * 0.40;
+      return sum;
     }
 
     float calc_blur_bias() {
@@ -159,25 +160,25 @@ const createFragmentShader: CreateFragmentShader = (options) => {
       return sum;
     }
   
-    float accent_lightness(float off1, float off2) {
-      const float NOISE_SPEED = 0.064; // Higher is faster
-      const float NOISE_X_SHIFT = 0.04; // Higher is faster
-      float x = gl_FragCoord.x * DIV_W, y = gl_FragCoord.y * DIV_H;
+    float accent_lightness(float offset) {
+      const float S = 0.064;
+      const float F = 0.04;
+      float x = gl_FragCoord.x * 0.001;
+      float y = gl_FragCoord.y * 0.001;
       float noise_x = x * ACCENT_NOISE_SCALE;
       float noise_y = y * ACCENT_NOISE_SCALE * 1.0;
-      float off3 = off1 - off2;
-      float off4 = off1 * off2;
+
+      float time = u_time + offset;
   
       // s1 is smaller than s2
       float s1 = 2.5, s2 = 1.8, s3 = 1.0;
       float noise = -0.0;
-      noise += simplexNoise(vec3(noise_x * s1 + u_time *  NOISE_X_SHIFT * 1.2, noise_y * s1 + 0.0, off1 + u_time * NOISE_SPEED)) * 0.7;
-      noise += simplexNoise(vec3(noise_x * s2 + u_time * -NOISE_X_SHIFT * 1.5, noise_y * s2 + 0.3, off2 + u_time * NOISE_SPEED)) * 0.5;
-      noise += simplexNoise(vec3(noise_x * s3 + u_time *  NOISE_X_SHIFT * 0.8, noise_y * s3 + 0.7, off3 + u_time * NOISE_SPEED)) * 0.4;
+      noise += simplexNoise(vec3(noise_x * s1 + time *  F * 1.2, noise_y * s1 + 0.0, time * S)) * 0.7;
+      noise += simplexNoise(vec3(noise_x * s2 + time * -F * 1.5, noise_y * s2 + 0.3, time * S)) * 0.5;
+      noise += simplexNoise(vec3(noise_x * s3 + time *  F * 0.8, noise_y * s3 + 0.7, time * S)) * 0.4;
       noise += 0.45;
       float t = clamp(noise, 0.0, 1.0);
       t = pow(t, 2.0);
-      // t = smooth_step(t);
       t = ease_out(t);
       return t;
     }
