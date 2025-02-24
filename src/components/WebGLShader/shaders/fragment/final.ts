@@ -71,11 +71,6 @@ const createFragmentShader: CreateFragmentShader = (options) => {
     float ease_out(float x)
       { return sin((x * PI) * 0.5); }
 
-    float calc_y_dist(float target_y, float offset_px, float offset_fac) {
-      target_y += offset_fac * offset_px * DIV_H;
-      return target_y - (gl_FragCoord.y * DIV_H);
-    }
-
     float wave_alpha_part(float dist, float blur_fac, float t) {
       float exp = mix(${blurExponentRange[0].toFixed(5)}, ${blurExponentRange[1].toFixed(5)}, t);
       float v = pow(blur_fac, exp);
@@ -85,49 +80,37 @@ const createFragmentShader: CreateFragmentShader = (options) => {
       v *= ${blurAmount.toFixed(1)};
       return clamp(0.5 + dist * u_h / v, 0.0, 1.0);
     }
-  
-    float wave_alpha(float dist, float blur_fac) {
-      const int N_PARTS = ${blurQuality};
-      const float PART = 1.0 / float(N_PARTS);
-      
-      float sum = 0.0;
-      for (int i = 0; i < N_PARTS; i++) {
-        float t = N_PARTS == 1 ? 0.5 : PART * float(i);
-        sum += wave_alpha_part(dist, blur_fac, t) * PART;
-      }
-      return sum;
-    }
 
-    float calc_noise(float off1, float off2) {
+    float background_noise(float offset) {
       const float NOISE_SPEED = 0.064; // Higher is faster
       const float NOISE_X_SHIFT = 0.04; // Higher is faster
+
+      float time = u_time + offset;
       float x = gl_FragCoord.x * DIV_W, y = gl_FragCoord.y * DIV_H;
       float s1 = 1.5, s2 = 0.9, s3 = 0.6;
-      float off3 = off1 - off2;
-      float off4 = off1 * off2;
       float noise_raw =
-        simplexNoise(vec3(x * s1 + u_time *  NOISE_X_SHIFT * 1.1, y * s1 * 1.00, off1 + u_time * NOISE_SPEED)) * 0.30 +
-        simplexNoise(vec3(x * s2 + u_time * -NOISE_X_SHIFT * 0.6, y * s2 * 0.85, off2 + u_time * NOISE_SPEED)) * 0.25 +
-        simplexNoise(vec3(x * s3 + u_time *  NOISE_X_SHIFT * 0.8, y * s3 * 0.70, off3 + u_time * NOISE_SPEED)) * 0.20 +
+        simplexNoise(vec3(x * s1 + time *  NOISE_X_SHIFT * 1.1, y * s1 * 1.00, time * NOISE_SPEED)) * 0.30 +
+        simplexNoise(vec3(x * s2 + time * -NOISE_X_SHIFT * 0.6, y * s2 * 0.85, time * NOISE_SPEED)) * 0.25 +
+        simplexNoise(vec3(x * s3 + time *  NOISE_X_SHIFT * 0.8, y * s3 * 0.70, time * NOISE_SPEED)) * 0.20 +
         0.5;
       return noise_raw;
     }
 
-    float wave_y_noise(float off1, float off2, float len, float evolution, float shift_speed) {
-      float off3 = off1 - off2, off4 = off1 * off2;
-
+    float wave_y_noise(float offset) {
       float s1 = 1.30, s2 = 1.00, s3 = 0.70, s4 = 0.40; // Scale
       float p1 = 0.54, p2 = 0.68, p3 = 0.59, p4 = 0.48; // Phase
       float a1 = 0.85, a2 = 1.15, a3 = 0.60, a4 = 0.40; // Amplitude
 
-      float x = gl_FragCoord.x * DIV_W * len;
-      float y = u_time * evolution;
-      float x_shift = u_time * shift_speed;
+      float time = u_time + offset;
+
+      float x = gl_FragCoord.x * DIV_W;
+      float y = time * 0.075;
+      float x_shift = time * 0.026;
       float noise_raw =
-        simplexNoise(vec2(x * s1 + x_shift, y * p1 + off1)) * a1 +
-        simplexNoise(vec2(x * s2 + x_shift, y * p2 + off2)) * a2 +
-        simplexNoise(vec2(x * s3 + x_shift, y * p3 + off3)) * a3 +
-        simplexNoise(vec2(x * s4 + x_shift, y * p4 + off4)) * a4 +
+        simplexNoise(vec2(x * s1 + x_shift, y * p1)) * a1 +
+        simplexNoise(vec2(x * s2 + x_shift, y * p2)) * a2 +
+        simplexNoise(vec2(x * s3 + x_shift, y * p3)) * a3 +
+        simplexNoise(vec2(x * s4 + x_shift, y * p4)) * a4 +
         0.0;
       return noise_raw;
     }
@@ -144,77 +127,55 @@ const createFragmentShader: CreateFragmentShader = (options) => {
       return (blur_fac + bias) * 0.5;
     }
 
-    float blur_simplex_noise_1D(float off1, float off2, float len, float evolution, float shift_speed) {
-      float off3 = off1 - off2, off4 = off1 * off2;
+    float blur_simplex_noise_1D(float offset) {
+      float s1 = 0.6, s2 = 1.30; // Scale
+      float p1 = 0.7, p2 = 1.0; // Phase
+      float a1 = 0.5, a2 = 0.4; // Amplitude
 
-      float s1 = 0.6, s2 = 1.30, s3 = 0.70, s4 = 0.40; // Scale
-      float p1 = 0.7, p2 = 1.0, p3 = 0.59, p4 = 0.48; // Phase
-      float a1 = 0.5, a2 = 0.4, a3 = 0.3, a4 = 0.40; // Amplitude
+      float time = u_time + offset;
 
-      float x = gl_FragCoord.x * DIV_W * len;
-      float y = u_time * evolution;
-      float x_shift = u_time * shift_speed;
+      float x = gl_FragCoord.x * DIV_W;
+      float y = time * 0.07;
+      float x_shift = time * 0.03;
       float blur_fac =
-        simplexNoise(vec2(x * s1 + x_shift *  1.0, y * p1 + off1)) * a1 +
-        simplexNoise(vec2(x * s2 + x_shift * -0.8, y * p2 + off2)) * a2 +
-        // simplexNoise(vec2(x * s3 + x_shift, y * p3 + off3)) * a3 +
-        // simplexNoise(vec2(x * s4 + x_shift, y * p4 + off4)) * a4 +
+        simplexNoise(vec2(x * s1 + x_shift *  1.0, y * p1)) * a1 +
+        simplexNoise(vec2(x * s2 + x_shift * -0.8, y * p2)) * a2 +
         -0.1;
       return normalize_blur_with_bias(blur_fac);
     }
 
-    float blur_sin_noise_1D(float off1, float off2) {
-      float blur_amp = 0.5;
-      float speed = 0.8;
-      float foo_x = gl_FragCoord.x * 0.02;
-      float phase = u_time * 0.8;
-
-      float off3 = off1 - off2;
-      float off4 = off2 - off1;
-      float off5 = -off2 - off1;
-
-      float blur_fac =
-        sin(foo_x / 7.296 + phase *  0.28 + off1 * TAU) * 0.58 * blur_amp +
-        sin(foo_x / 4.739 + phase * -0.19 + off2 * TAU) * 0.43 * blur_amp +
-        sin(foo_x / 5.973 + phase *  0.15 + off3 * TAU) * 0.54 * blur_amp +
-        sin(foo_x / 3.375 + phase * -0.26 + off4 * TAU) * 0.39 * blur_amp +
-        sin(foo_x / 6.478 + phase *  0.23 + off5 * TAU) * 0.35 * blur_amp +
-        + 0.0;
-      return normalize_blur_with_bias(blur_fac);
+    float calc_y_dist(float target_y, float offset_px, float offset_fac) {
+      target_y += offset_fac * offset_px * DIV_H;
+      return target_y - (gl_FragCoord.y * DIV_H);
     }
-  
-    vec2 wave1() {
-      float y_noise = wave_y_noise(
-        -187.8, 154.0,      // Random offsets
-         1.0,  0.075,  0.026 // Length, Evolution, X shift
-      );
 
-      float blur_fac = blur_simplex_noise_1D(
-        -164.8, 386.0,      // Random offsets
-         1.0,  0.07,  0.03 // Length, Evolution, X shift
-      );
+    float wave_alpha(float Y, float wave_height) {
+      float noise_offset = Y * wave_height;
+      float blur_fac = blur_simplex_noise_1D(noise_offset);
+
+      float y_noise = wave_y_noise(noise_offset);
+      float dist = calc_y_dist(Y, wave_height, y_noise);
       
-      float dist = calc_y_dist(WAVE1_Y, WAVE1_HEIGHT, y_noise);
-      float alpha = wave_alpha(dist, blur_fac);
-      float noise = calc_noise(0.0, 420.0);
+      const int N_PARTS = ${blurQuality};
+      const float PART = 1.0 / float(N_PARTS);
+      
+      float sum = 0.0;
+      for (int i = 0; i < N_PARTS; i++) {
+        float t = N_PARTS == 1 ? 0.5 : PART * float(i);
+        sum += wave_alpha_part(dist, blur_fac, t) * PART;
+      }
+      return sum;
+    }
+
+    vec2 wave1() {
+      float alpha = wave_alpha(WAVE1_Y, WAVE1_HEIGHT);
+      float noise = background_noise(420.0);
       return vec2(noise, alpha);
     }
   
     vec2 wave2() {
-      float y_noise = wave_y_noise(
-        -262.8, -185.2,     // Random offsets
-         1.0,  0.075,  0.026 // Length, Evolution, X shift
-      );
-
-      float blur_fac = blur_simplex_noise_1D(
-        51.8, -85.0,      // Random offsets
-        1.0,  0.07,  0.03 // Length, Evolution, X shift
-      );
-      // float blur_fac = blur_sin_noise_1D(2.3, -1.7);
-  
-      float dist = calc_y_dist(WAVE2_Y, WAVE2_HEIGHT, y_noise);
-      float alpha = wave_alpha(dist, blur_fac);
-      float noise = calc_noise(-100.0, -420.0);
+      float alpha = wave_alpha(WAVE2_Y, WAVE2_HEIGHT);
+      float noise = background_noise(-420.0);
       return vec2(noise, alpha);
     }
   
@@ -249,9 +210,12 @@ const createFragmentShader: CreateFragmentShader = (options) => {
     void main() {
       vec2 w1 = wave1(), w2 = wave2();
       
-      float bg_lightness = calc_noise(182.0, 795.0);;
-      float w1_lightness = w1.x, w1_alpha = w1.y;
-      float w2_lightness = w2.x, w2_alpha = w2.y;
+      float bg_lightness = background_noise(-192.4);
+      float w1_lightness = background_noise(273.3);
+      float w2_lightness = background_noise(623.1);
+
+      float w1_alpha = wave_alpha(WAVE1_Y, WAVE1_HEIGHT);
+      float w2_alpha = wave_alpha(WAVE2_Y, WAVE2_HEIGHT);
   
       vec3 w1_color = color_from_lightness(w1_lightness);
       vec3 w2_color = color_from_lightness(w2_lightness);
