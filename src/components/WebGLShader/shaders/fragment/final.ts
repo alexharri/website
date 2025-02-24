@@ -52,7 +52,7 @@ const createFragmentShader: CreateFragmentShader = (options) => {
   
     const float PI = 3.14159, TAU = PI * 2.0;
 
-    const float WAVE1_Y = 0.45, WAVE2_Y = 0.9;
+    float WAVE1_Y = 0.45 * u_h, WAVE2_Y = 0.9 * u_h;
     const float WAVE1_HEIGHT = 48.0, WAVE2_HEIGHT = 36.0;
 
     const float ACCENT_NOISE_SCALE = 0.4; // Smaller is bigger
@@ -84,7 +84,7 @@ const createFragmentShader: CreateFragmentShader = (options) => {
       v = smooth_step(v);
       v = clamp(v, 0.008, 1.0);
       v *= ${blurAmount.toFixed(1)};
-      return clamp(0.5 + dist * u_h / v, 0.0, 1.0);
+      return clamp(0.5 + dist / v, 0.0, 1.0);
     }
 
     float background_noise(float offset) {
@@ -124,7 +124,7 @@ const createFragmentShader: CreateFragmentShader = (options) => {
     float calc_blur_bias() {
       const float S = 0.3;
       float bias_t = (sin(u_time * S) + 1.0) * 0.5;
-      return lerp(-0.23, 0.06, bias_t);
+      return lerp(-0.18, 0.06, bias_t);
     }
 
     float calc_blur(float offset) {
@@ -142,39 +142,23 @@ const createFragmentShader: CreateFragmentShader = (options) => {
       return blur_fac;
     }
 
-    float calc_y_dist(float target_y, float offset_px, float offset_fac) {
-      target_y += offset_fac * offset_px * DIV_H;
-      return target_y - (gl_FragCoord.y * DIV_H);
-    }
-
     float wave_alpha(float Y, float wave_height) {
       float noise_offset = Y * wave_height;
-      float blur_fac = calc_blur(noise_offset);
-
+      
       float y_noise = wave_y_noise(noise_offset);
-      float dist = calc_y_dist(Y, wave_height, y_noise);
+      float wave_y = Y + wave_y_noise(noise_offset) * wave_height;
+      float dist_signed = wave_y - gl_FragCoord.y;
       
-      const int N_PARTS = ${blurQuality};
-      const float PART = 1.0 / float(N_PARTS);
+      float blur_fac = calc_blur(noise_offset);
       
+      const float PART = 1.0 / float(${blurQuality.toFixed(1)});
+
       float sum = 0.0;
-      for (int i = 0; i < N_PARTS; i++) {
-        float t = N_PARTS == 1 ? 0.5 : PART * float(i);
-        sum += wave_alpha_part(dist, blur_fac, t) * PART;
+      for (int i = 0; i < ${blurQuality}; i++) {
+        float t = ${blurQuality} == 1 ? 0.5 : PART * float(i);
+        sum += wave_alpha_part(dist_signed, blur_fac, t) * PART;
       }
       return sum;
-    }
-
-    vec2 wave1() {
-      float alpha = wave_alpha(WAVE1_Y, WAVE1_HEIGHT);
-      float noise = background_noise(420.0);
-      return vec2(noise, alpha);
-    }
-  
-    vec2 wave2() {
-      float alpha = wave_alpha(WAVE2_Y, WAVE2_HEIGHT);
-      float noise = background_noise(-420.0);
-      return vec2(noise, alpha);
     }
   
     float accent_lightness(float off1, float off2) {
@@ -206,7 +190,6 @@ const createFragmentShader: CreateFragmentShader = (options) => {
     }
   
     void main() {
-      vec2 w1 = wave1(), w2 = wave2();
       
       float bg_lightness = background_noise(-192.4);
       float w1_lightness = background_noise(273.3);
