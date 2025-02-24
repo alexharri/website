@@ -25,13 +25,11 @@ const createFragmentShader: CreateFragmentShader = (options) => {
     blurAmount = 230,
     blurQuality = 7,
     blurExponentRange = [0.96, 1.15],
-    showWaves = true,
   } = options as Partial<{
     blurAmount: number;
     blurQuality: number;
     blurExponentRange: [number, number];
     accentColor: string;
-    showWaves: boolean;
   }>;
 
   const uniforms: FragmentShaderUniforms = {
@@ -190,7 +188,6 @@ const createFragmentShader: CreateFragmentShader = (options) => {
     }
   
     void main() {
-      
       float bg_lightness = background_noise(-192.4);
       float w1_lightness = background_noise(273.3);
       float w2_lightness = background_noise(623.1);
@@ -198,15 +195,16 @@ const createFragmentShader: CreateFragmentShader = (options) => {
       float w1_alpha = wave_alpha(WAVE1_Y, WAVE1_HEIGHT);
       float w2_alpha = wave_alpha(WAVE2_Y, WAVE2_HEIGHT);
   
-      vec3 w1_color = color_from_lightness(w1_lightness);
-      vec3 w2_color = color_from_lightness(w2_lightness);
-      vec3 bg_color = color_from_lightness(bg_lightness);
-  
+      
       ${includeif(
         accentColor != null,
 
         // if we're using an accent color
         () => /* glsl */ `
+        vec3 w1_color = color_from_lightness(w1_lightness);
+        vec3 w2_color = color_from_lightness(w2_lightness);
+        vec3 bg_color = color_from_lightness(bg_lightness);
+
         float bg_accent_color_blend_fac = accent_lightness(-397.2,   64.2);
         float w1_accent_color_blend_fac = accent_lightness( 163.2, -512.3);
         float w2_accent_color_blend_fac = accent_lightness( 433.2,  127.9);
@@ -219,19 +217,13 @@ const createFragmentShader: CreateFragmentShader = (options) => {
         bg_color = mix(bg_color, accent_color, bg_accent_color_blend_fac);
         w1_color = mix(w1_color, accent_color, w1_accent_color_blend_fac);
         w2_color = mix(w2_color, accent_color, w2_accent_color_blend_fac);
-
-        // Debug viz: alpha mixing
-        //
-        // bg_color = vec3(1.0, 0.0, 0.0);
-        // w1_color = vec3(0.0, 0.0, 1.0);
-        // w2_color = vec3(0.0, 1.0, 0.0);
     
         vec3 color = bg_color;
         color = mix(color, w2_color, w2_alpha);
         color = mix(color, w1_color, w1_alpha);
         `,
 
-        // else: we're not using an accent color
+        // else (we're not using an accent color)
         //
         // In this case, we can compute a single lightness value and determine the color for
         // that lightness. We don't need to perform any color blending, so we avoid washed out
@@ -243,19 +235,8 @@ const createFragmentShader: CreateFragmentShader = (options) => {
           vec3 color = color_from_lightness(lightness);
         `,
       )}
-
-      ${includeif(
-        !showWaves,
-        () => /* glsl */ `
-        color = color_from_lightness(bg_lightness);
-      `,
-      )}
     
       gl_FragColor = vec4(color, 1.0);
-
-      // Debug viz: noise function
-      //
-      // gl_FragColor = vec4(1.0, 1.0, 1.0, w1_lightness);
     }
   `;
   return { shader, uniforms };
