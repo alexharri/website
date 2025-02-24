@@ -34,7 +34,12 @@ const createFragmentShader: CreateFragmentShader = (options) => {
     showWaves: boolean;
   }>;
 
-  const uniforms: FragmentShaderUniforms = {};
+  const uniforms: FragmentShaderUniforms = {
+    u_foo: {
+      value: 0,
+      range: [0, 1],
+    },
+  };
 
   const shader = /* glsl */ `
     precision mediump float;
@@ -42,6 +47,7 @@ const createFragmentShader: CreateFragmentShader = (options) => {
     uniform float u_time; // Time in seconds
     uniform float u_w;
     uniform float u_h;
+    uniform float u_foo;
     uniform sampler2D u_gradient;
   
     const float PI = 3.14159, TAU = PI * 2.0;
@@ -115,33 +121,25 @@ const createFragmentShader: CreateFragmentShader = (options) => {
       return noise_raw;
     }
 
-    float normalize_blur_with_bias(float blur_fac) {
-      // A higher bias makes it harder to get sharp lines, while a lower bias makes it easier.
-      //
-      // Fluctuate between slight positive and negative biases, so that we get periods with
-      // long sharp lines, and periods with few sharp lines at all.
-      float bias_t = (1.0 + sin(u_time * 0.3)) * 0.5;
-      float bias = lerp(0.8, 1.1, bias_t);
-      // bias = 1.0;
-      
-      return (blur_fac + bias) * 0.5;
+    float calc_blur_bias() {
+      const float S = 0.3;
+      float bias_t = (sin(u_time * S) + 1.0) * 0.5;
+      return lerp(-0.23, 0.06, bias_t);
     }
 
-    float blur_simplex_noise_1D(float offset) {
-      float s1 = 0.6, s2 = 1.30; // Scale
-      float p1 = 0.7, p2 = 1.0; // Phase
-      float a1 = 0.5, a2 = 0.4; // Amplitude
-
+    float calc_blur(float offset) {
+      const float L = 0.0011;
+      const float S = 0.07;
+      const float F = 0.03;
+      
       float time = u_time + offset;
 
-      float x = gl_FragCoord.x * DIV_W;
-      float y = time * 0.07;
-      float x_shift = time * 0.03;
-      float blur_fac =
-        simplexNoise(vec2(x * s1 + x_shift *  1.0, y * p1)) * a1 +
-        simplexNoise(vec2(x * s2 + x_shift * -0.8, y * p2)) * a2 +
-        -0.1;
-      return normalize_blur_with_bias(blur_fac);
+      float x = gl_FragCoord.x * L;
+      float blur_fac = calc_blur_bias();
+      blur_fac += simplexNoise(vec2(x * 0.60 + time * F *  1.0, time * S * 0.7)) * 0.5;
+      blur_fac += simplexNoise(vec2(x * 1.30 + time * F * -0.8, time * S * 1.0)) * 0.4;
+      blur_fac = clamp((blur_fac + 1.0) * 0.5, 0.0, 1.0);
+      return blur_fac;
     }
 
     float calc_y_dist(float target_y, float offset_px, float offset_fac) {
@@ -151,7 +149,7 @@ const createFragmentShader: CreateFragmentShader = (options) => {
 
     float wave_alpha(float Y, float wave_height) {
       float noise_offset = Y * wave_height;
-      float blur_fac = blur_simplex_noise_1D(noise_offset);
+      float blur_fac = calc_blur(noise_offset);
 
       float y_noise = wave_y_noise(noise_offset);
       float dist = calc_y_dist(Y, wave_height, y_noise);
