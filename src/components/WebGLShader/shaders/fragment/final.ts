@@ -22,7 +22,7 @@ function includeif(
 const createFragmentShader: CreateFragmentShader = (options) => {
   const {
     accentColor,
-    blurAmount = 230,
+    blurAmount = 345,
     blurQuality = 7,
     blurExponentRange = [0.96, 1.15],
   } = options as Partial<{
@@ -83,23 +83,28 @@ const createFragmentShader: CreateFragmentShader = (options) => {
       v = smooth_step(v);
       v = clamp(v, 0.008, 1.0);
       v *= ${blurAmount.toFixed(1)};
-      return clamp(0.5 + dist / v, 0.0, 1.0);
+      float alpha = clamp(0.5 + dist / v, 0.0, 1.0);
+      alpha = smooth_step(alpha);
+      return alpha;
     }
 
     float background_noise(float offset) {
-      const float S = 0.064; // Higher is faster
-      const float F = 0.04; // Higher is faster
+      const float S = 0.064;
+      const float L = 0.0009;
+      const float L1 = 1.5, L2 = 0.9, L3 = 0.6;
+      const float LY1 = 1.00, LY2 = 0.85, LY3 = 0.70;
+      const float F = 0.04;
+      const float Y_SCALE = 1.0 / 0.225;
 
+      float x = gl_FragCoord.x * L;
+      float y = gl_FragCoord.y * L * Y_SCALE;
       float time = u_time + offset;
       float x_shift = time * F;
-      float x = gl_FragCoord.x * DIV_W, y = gl_FragCoord.y * DIV_H; // TODO: Remove DIV_W, DIV_H
-      float s1 = 1.5, s2 = 0.9, s3 = 0.6;
-      float noise_raw =
-        simplexNoise(vec3(x * s1 +  x_shift * 1.1, y * s1 * 1.00, time * S)) * 0.30 +
-        simplexNoise(vec3(x * s2 + -x_shift * 0.6, y * s2 * 0.85, time * S)) * 0.25 +
-        simplexNoise(vec3(x * s3 +  x_shift * 0.8, y * s3 * 0.70, time * S)) * 0.20 +
-        0.5;
-      return noise_raw;
+      float sum = 0.5;
+      sum += simplexNoise(vec3(x * L1 +  x_shift * 1.1, y * L1 * LY1, time * S)) * 0.30;
+      sum += simplexNoise(vec3(x * L2 + -x_shift * 0.6, y * L2 * LY2, time * S)) * 0.25;
+      sum += simplexNoise(vec3(x * L3 +  x_shift * 0.8, y * L3 * LY3, time * S)) * 0.20;
+      return sum;
     }
 
     float wave_y_noise(float offset) {
@@ -137,21 +142,18 @@ const createFragmentShader: CreateFragmentShader = (options) => {
       float blur_fac = calc_blur_bias();
       blur_fac += simplexNoise(vec2(x * 0.60 + time * F *  1.0, time * S * 0.7)) * 0.5;
       blur_fac += simplexNoise(vec2(x * 1.30 + time * F * -0.8, time * S * 1.0)) * 0.4;
-      blur_fac = clamp((blur_fac + 1.0) * 0.5, 0.0, 1.0);
+      blur_fac = (blur_fac + 1.0) * 0.5;
+      blur_fac = clamp(blur_fac, 0.0, 1.0);
       return blur_fac;
     }
 
     float wave_alpha(float Y, float wave_height) {
-      float noise_offset = Y * wave_height;
-      
-      float y_noise = wave_y_noise(noise_offset);
-      float wave_y = Y + wave_y_noise(noise_offset) * wave_height;
+      float offset = Y * wave_height;
+      float wave_y = Y + wave_y_noise(offset) * wave_height;
       float dist_signed = wave_y - gl_FragCoord.y;
-      
-      float blur_fac = calc_blur(noise_offset);
+      float blur_fac = calc_blur(offset);
       
       const float PART = 1.0 / float(${blurQuality.toFixed(1)});
-
       float sum = 0.0;
       for (int i = 0; i < ${blurQuality}; i++) {
         float t = ${blurQuality} == 1 ? 0.5 : PART * float(i);
@@ -190,38 +192,37 @@ const createFragmentShader: CreateFragmentShader = (options) => {
   
     void main() {
       float bg_lightness = background_noise(-192.4);
-      float w1_lightness = background_noise(273.3);
-      float w2_lightness = background_noise(623.1);
+      float w1_lightness = background_noise( 273.3);
+      float w2_lightness = background_noise( 623.1);
 
       float w1_alpha = wave_alpha(WAVE1_Y, WAVE1_HEIGHT);
       float w2_alpha = wave_alpha(WAVE2_Y, WAVE2_HEIGHT);
-  
-      
+
       ${includeif(
         accentColor != null,
 
         // if we're using an accent color
         () => /* glsl */ `
-        vec3 w1_color = color_from_lightness(w1_lightness);
-        vec3 w2_color = color_from_lightness(w2_lightness);
-        vec3 bg_color = color_from_lightness(bg_lightness);
+      vec3 w1_color = color_from_lightness(w1_lightness);
+      vec3 w2_color = color_from_lightness(w2_lightness);
+      vec3 bg_color = color_from_lightness(bg_lightness);
 
-        float bg_accent_color_blend_fac = accent_lightness(-397.2,   64.2);
-        float w1_accent_color_blend_fac = accent_lightness( 163.2, -512.3);
-        float w2_accent_color_blend_fac = accent_lightness( 433.2,  127.9);
-    
-        bg_accent_color_blend_fac = clamp(bg_accent_color_blend_fac - pow(bg_lightness, 2.0), 0.0, 1.0);
-        w1_accent_color_blend_fac = clamp(w1_accent_color_blend_fac - pow(w1_lightness, 2.0), 0.0, 1.0);
-        w2_accent_color_blend_fac = clamp(w2_accent_color_blend_fac - pow(w2_lightness, 2.0), 0.0, 1.0);
-    
-        vec3 accent_color = ${hexToVec3(accentColor!)};
-        bg_color = mix(bg_color, accent_color, bg_accent_color_blend_fac);
-        w1_color = mix(w1_color, accent_color, w1_accent_color_blend_fac);
-        w2_color = mix(w2_color, accent_color, w2_accent_color_blend_fac);
-    
-        vec3 color = bg_color;
-        color = mix(color, w2_color, w2_alpha);
-        color = mix(color, w1_color, w1_alpha);
+      float bg_accent_color_blend_fac = accent_lightness(-397.2,   64.2);
+      float w1_accent_color_blend_fac = accent_lightness( 163.2, -512.3);
+      float w2_accent_color_blend_fac = accent_lightness( 433.2,  127.9);
+  
+      bg_accent_color_blend_fac = clamp(bg_accent_color_blend_fac - pow(bg_lightness, 2.0), 0.0, 1.0);
+      w1_accent_color_blend_fac = clamp(w1_accent_color_blend_fac - pow(w1_lightness, 2.0), 0.0, 1.0);
+      w2_accent_color_blend_fac = clamp(w2_accent_color_blend_fac - pow(w2_lightness, 2.0), 0.0, 1.0);
+  
+      vec3 accent_color = ${hexToVec3(accentColor!)};
+      bg_color = mix(bg_color, accent_color, bg_accent_color_blend_fac);
+      w1_color = mix(w1_color, accent_color, w1_accent_color_blend_fac);
+      w2_color = mix(w2_color, accent_color, w2_accent_color_blend_fac);
+  
+      vec3 color = bg_color;
+      color = mix(color, w2_color, w2_alpha);
+      color = mix(color, w1_color, w1_alpha);
         `,
 
         // else (we're not using an accent color)
@@ -230,10 +231,10 @@ const createFragmentShader: CreateFragmentShader = (options) => {
         // that lightness. We don't need to perform any color blending, so we avoid washed out
         // middle colors (see https://www.joshwcomeau.com/css/make-beautiful-gradients/).
         () => /* glsl */ `
-          float lightness = bg_lightness;
-          lightness = lerp(lightness, w2_lightness, w2_alpha);
-          lightness = lerp(lightness, w1_lightness, w1_alpha);
-          vec3 color = color_from_lightness(lightness);
+      float lightness = bg_lightness;
+      lightness = lerp(lightness, w2_lightness, w2_alpha);
+      lightness = lerp(lightness, w1_lightness, w1_alpha);
+      vec3 color = color_from_lightness(lightness);
         `,
       )}
     
