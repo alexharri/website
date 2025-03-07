@@ -28,6 +28,7 @@ import { SubscribeToNewsletter } from "../../components/SubscribeToNewsletter/Su
 import { usePostWatcher } from "../../utils/watcher-client";
 import { Code } from "../../components/Code/Code";
 import { WebGLShader } from "../../components/WebGLShader/WebGLShader";
+import { ThreeDots } from "../../components/ThreeDots/ThreeDots";
 
 function firstUpper(s: string) {
   if (s.length === 0) return s;
@@ -77,6 +78,7 @@ const baseComponents = {
   BarChart,
   EmDash: () => "—",
   WebGLShader,
+  ThreeDots,
 };
 
 interface Props {

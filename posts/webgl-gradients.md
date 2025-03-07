@@ -6,88 +6,93 @@ publishedAt: ""
 tags: []
 ---
 
-A few weeks ago I rolled up my sleeves and embarked on a journey to produce a flowing gradient effect. Here's what I got:
+A few weeks ago I rolled up my sleeves and embarked on a journey to produce a flowing gradient effect. Here's what I ended up with:
 
 <WebGLShader fragmentShader="final" skew />
 
-This is built using a WebGL shader and some clever use of noise functions. The noise functions produce the flowing waves and dynamic blur effect, which we run on the GPU using WebGL. Running this on the GPU gives us computing power to make the animation silky smooth.
+This effect is written in a WebGL shader, using noise functions to produce the flowing waves and dynamic blur. In this post, I'll break down how I created this effect. We'll learn about WebGL, fragment shaders, and we'll dive into noise functions.
 
-The effect is inspired by the flowing gradients I saw features in Stripe's 2020 redesign. I've thought about how they might have been created more times than I'd like to admit.
-
-In this post, I'll break down how I created this effect. We'll learn about WebGL and fragment shaders, various types of noise. Let's get to it!
+Let's get to it!
 
 
 ## Color as a function of position
 
-Our gradient effect will boil down to a function that takes in a pixel position and spits out a value:
+Building the gradient effect will boil down to writing a function that takes in a pixel position and returns a color value:
 
 ```ts
 type Position = { x: number, y: number };
 
-function pixel({ x, y }: Position): Color;
+function pixelColor({ x, y }: Position): Color;
 ```
 
-For example, we can create a linear gradient over the X axis by mixing two colors using the value of <Ts>x</Ts> to determine how much to blend the two colors.
+For every pixel on the canvas, we'll invoke the function with the pixel's position to determine the color of the pixel. You can think of this like so:
 
 ```ts
-function pixel({ x, y }: Position): Color {
-  const red  = color("#ff0000");
-  const blue = color("#0000ff");
-  
-  const t = x / (canvas.width - 1);
-  return mix(red, blue, t);
+for (let x = 0; x < canvas.width; x++) {
+  for (let y = 0; y < canvas.height; y++) {
+    const color = pixelColor({ x, y });
+    canvas.drawPixel({ x, y }, color);
+  }
 }
 ```
 
-When <Ts>x == 0</Ts>, we get a $t$ value of $0$, which gives us 100% red, but when <Ts>x == canvas.width - 1</Ts> we get a $t$ value of $1$, which gives us 100% blue. If $t = 0.3$ we'd get 70% red and 30% blue.
-
-
-At <Ts>x</Ts> values between those, we get different mixes of red and blue, which gives us a smooth red-to-blue gradient:
+To start, let's write a color function that produces a linear gradient like so:
 
 <WebGLShader fragmentShader="x_lerp" width={150} height={150} />
 
-We can interpolate along the Y axis as well:
+To produce this red-to-blue gradient we'll blend red and blue with a blend factor that increases from $0$ to $1$ over the width of the canvas -- let's call that blending factor $t$. We can calculate it like so:
 
 ```ts
-let color = red;
-color = mix(color,  blue, x / (canvas.width - 1));
-color = mix(color, white, y / (canvas.height - 1));
+function pixelColor({ x, y }: Position): Color {
+  const t = x / (canvas.width - 1);
+}
 ```
 
-This gives us a horizontal red-to-blue gradient that fades to white over the Y axis.
-
-<WebGLShader fragmentShader="xy_lerp" width={150} height={150} />
-
-If we want a wave-like gradient, we can use <Ts>sin(x)</Ts> to produce an oscillating $t$ value:
+Having calculated the blending factor $t$, we'll use it to mix red and blue:
 
 ```ts
-function pixel({ x, y }: Position): Color {
-  const red  = color("#ff0000");
-  const blue = color("#0000ff");
+const red  = color("#ff0000");
+const blue = color("#0000ff");
 
-  let t = sin(x);
-  t = (t + 1) / 2; // Normalize 't'
+function pixelColor({ x, y }: Position): Color {
+  const t = x / (canvas.width - 1);  
   return mix(red, blue, t);
 }
 ```
 
-<SmallNote>$sin()$ returns a value between $-1$ and $1$ but our mixing function accepts a value from $0$ and $1$. For this reason, we normalize $t$ by remapping $[-1, 1]$ to $[0, 1]$ via $(t + 1) / 2$.</SmallNote>
+<SmallNote>When <Ts>x == 0</Ts>, we get a $t$ value of $0$, which gives us 100% red. When <Ts>x == canvas.width - 1</Ts> we get a $t$ value of $1$, which gives us 100% blue. If $t = 0.3$ we'd get 70% red and 30% blue.</SmallNote>
 
-<WebGLShader fragmentShader="x_sine_lerp" width={150} height={150} fragmentShaderOptions={{ waveLength: Math.PI * 2 }} />
+This produces red-to-blue gradient over the width of the canvas (the $x$ axis):
+
+<WebGLShader fragmentShader="x_lerp" width={150} height={150} />
+
+If we want an oscillating gradient (red to blue to red again, repeating), we can do that by using <Ts>sin(x)</Ts> to calculate the blending factor:
+
+```ts
+function pixelColor({ x, y }: Position): Color {
+  let t = sin(x);
+  t = (t + 1) / 2; // Normalize
+  return mix(red, blue, t);
+}
+```
+
+<SmallNote>$sin()$ returns a value between $-1$ and $1$, but our mixing function accepts a value from $0$ and $1$. For this reason, we normalize $t$ by remapping $[-1, 1]$ to $[0, 1]$ via $(t + 1)\,/\,2$.</SmallNote>
+
+<WebGLShader fragmentShader="x_sine_lerp" width={150} height={150} fragmentShaderOptions={{ waveLength: Math.PI * 2 }} showControls={false} />
 
 Those waves are quite thin! That's because we're oscillating between red and blue every $\pi$ pixels.
 
-We can control the rate of oscillation by defining a [wave length][wave_len], which determines how many pixels it takes to oscillate from red to blue and red again.
+We can control the rate of oscillation by defining a [wave length][wave_len] multiplier. It will determine over how many pixels the gradient oscillates from red to blue and red again.
 
-For a wave length of $L$, we can multiply <Ts>x</Ts> by $\dfrac{1}{L}2\pi$:
+For a wave length of $L$ pixels the multiplier should be $\dfrac{2\pi}{L}$:
 
 [wave_len]: https://en.wikipedia.org/wiki/Wavelength
 
 ```ts
-const WAVE_LEN = 40;
-const toWaveLength = (1 / WAVE_LEN) * (2 * PI);
+const L = 40;
+const toWaveLength = (2 * PI) / L;
 
-function pixel({ x, y }: Position): Color {
+function pixelColor({ x, y }: Position): Color {
   let t = sin(x * toWaveLength);
   // ...
 }
@@ -103,58 +108,71 @@ This produces a oscillating gradient with the desired wave length:
 So far we've just been producing static images. To introduce motion, we'll update our color function to take in a <Ts>time</Ts> value as well.
 
 ```ts
-function pixel({ x, y }: Position, time: number): Color;
+function pixelColor({ x, y }: Position, time: number): Color;
 ```
 
-We'll define <Ts>time</Ts> as the "elapsed" time, measured in seconds, and add it to the value passed to the <Ts method>sin</Ts> function. That will makes the wave shift over time.
+We'll define <Ts>time</Ts> as the "elapsed" time, measured in seconds.
+
+If add <Ts>time</Ts> to the pixel's $x$ position, we will simulate the canvas "scrolling" to the right one pixel a second:
 
 ```ts
-let t = sin(x * toWaveLength + time * PI);
-                               // @info {w=9} Adding 'time * PI' to the value passed to 'sin' makes the wave move by half a wave length per second.
+let t = sin((x + time) * toWaveLength);
 ```
 
-Here's the result:
+But scrolling one pixel a second is very slow. Let's add a speed constant $S$ to control the speed of the scrolling motion and multiply <Ts>time</Ts> by it:
 
-<WebGLShader fragmentShader="x_sine_lerp_time" width={150} height={150} fragmentShaderOptions={{ waveLength: 40 }} />
+```ts
+const S = 20;
 
-These two variables, position and time, will be the main components that drive our animation.
+let t = sin((x + time * S) * toWaveLength);
+```
 
-We'll create a single color function that will, on every frame, and for every pixel, calculate a color for the current time and pixel position. The colors returned for each pixel will be used to create a single frame of our animation.
+Here's the result -- I'll let you vary $S$ so that you can adjust the speed:
+
+<WebGLShader fragmentShader="x_sine_lerp_time" width={150} height={150} />
+
+And voila -- we've got movement!
+
+<ThreeDots />
+
+These two inputs, time and the pixel's position, will be the main components that drive our final effect.
+
+We'll spend the rest of the post writing a color function that will calculate a color for every pixel -- with the pixel's position and time as the function's inputs. Together, the colors of each pixel constitute a single frame of animation.
 
 <WebGLShader fragmentShader="final" width={1000} height={250} />
 
-But consider the amount of work that needs to be done. A $1{,}000 \times 250$ canvas -- like the one above -- constitutes $250{,}000$ pixels. That's $250{,}000$ invocations of our pixel function on every frame -- a lot of work for a single threaded CPU to perform 60 times a second!
+But consider the amount of work that needs to be done. A $1{,}000 \times 250$ canvas, like the one above, contains $250{,}000$ pixels. That's $250{,}000$ invocations of our pixel function every frame -- a lot of work for a CPU thread to perform 60 times a second!
 
-That's where WebGL and shaders come in -- they allow us to run our color function in parallel on the GPU.
+That's why we'll write our color function as a WebGL shader: WebGL shaders run on the GPU! The GPU is designed for pararellized work, which allows us to run the color function in parallel.
 
-Conceptually, nothing changes. We're still going to be writing a single color function that takes a position and time value and returns a color. But instead of writing it in JavaScript and running it on the CPU, we'll write it in GLSL and run it on the GPU.
+Conceptually, nothing changes. We're still going to be writing a single color function that takes a position and time value and returns a color. But instead of writing it in JavaScript and running it on the CPU, we'll write it in GLSL (the language for shaders) and run it on the GPU.
 
 
 ## WebGL and GLSL
 
 WebGL can be thought of as a subset of [OpenGL][opengl], a cross-platform API for rendering graphics. WebGL is based on [OpenGL ES][opengl_es] -- an OpenGL spec for embedded systems (like mobile devices).
 
-<SmallNote label="">Here's a page listing [differences between OpenGL and WebGL][opengl_vs_webgl]. We won't encounter those differences in this post, so I won't dwell on them.</SmallNote>
+<SmallNote label="">Here's a page listing [differences between OpenGL and WebGL][opengl_vs_webgl]. We won't encounter those differences in this post.</SmallNote>
 
-GLSL stands for [OpenGL Shading Language][glsl] and it's the language we'll write our color function in. GLSL is strongly typed and has a C-like syntax.
+OpenGL shaders are written in GLSL, which stands for [OpenGL Shading Language][glsl]. It's a strongly typed language with a C-like syntax.
 
 [opengl]: https://en.wikipedia.org/wiki/OpenGL
 [opengl_es]: https://en.wikipedia.org/wiki/OpenGL_ES
 [opengl_vs_webgl]: https://www.khronos.org/webgl/wiki/WebGL_and_OpenGL_Differences
 [glsl]: https://en.wikipedia.org/wiki/OpenGL_Shading_Language
 
-There are two types of shaders, vertex shaders and fragment shaders, which serve different purposes. Our color function will run in the fragment shader -- sometimes referred to as a "pixel shader" -- so that's where we'll spend our time.
+There are two types of shaders, vertex shaders and fragment shaders, which serve different purposes. Our color function will run in the fragment shader (sometimes referred to as a "pixel shader"). That's where we'll spend most of our time.
 
-I'll mostly abstract the WebGL boilerplate away so that we can stay focused on our main goal, which is creating cool gradients. At the end of the post I'll link to the resource that helped me set up the WebGL plumbing.
+<Note>
+<p>There's tons of boilerplate code involved in setting up a WebGL rendering pipeline. I'll mostly omit it so that we can stay focused on our main goal, which is creating a cool gradient shader.</p>
+<p>At the end of the post I'll link to resources I found helpful in learning about how to set up and work with WebGL.</p>
+</Note>
+
 
 
 ## Writing a fragment shader
 
-To get us acquainted with writing fragment shaders, let's walk through how to create the following wave:
-
-<WebGLShader fragmentShader="wave_animated" height={150} width={400} />
-
-To get started, here's a WebGL fragment shader that sets every pixel to the same color.
+Here's a WebGL fragment shader that sets every pixel to the same color.
 
 ```glsl
 void main() {
@@ -163,22 +181,36 @@ void main() {
 }
 ```
 
-WebGL fragment shaders must define a <Gl method>main</Gl> function, and that <Gl method>main</Gl> function is invoked once for each pixel. The <Gl method>main</Gl> function must set the value of <Gl>gl_FragColor</Gl> -- a special variable that determines the color of the pixel.
+WebGL fragment shaders have a <Gl method>main</Gl> function that is invoked once for each pixel. The <Gl method>main</Gl> function sets the value of <Gl>gl_FragColor</Gl> -- a special variable that specifies the color of the pixel.
 
-In other words: <Gl method>main</Gl> is our color function and <Gl>gl_FragColor</Gl> is the output of that function.
+We can think of <Gl method>main</Gl> as our color function and <Gl>gl_FragColor</Gl> as its return value.
 
-WebGL colors are stored as vectors with 3 or 4 components (<Gl>vec3</Gl> or <Gl>vec4</Gl>) with values between 0 and 1, where the first three components are the [RGB][rgb] components. For 4D vectors, the fourth component is the [alpha][alpha] value -- 1 for fully opaque, 0 for transparent.
+WebGL colors are represented through vectors with 3 or 4 components: <Gl>vec3</Gl> for RGB and <Gl>vec4</Gl> for RGBA colors. For both types the first three components of the vector are the red, green and blue components (RGB), and for 4D vectors the fourth component is the [alpha][alpha] component of the color.
 
 [rgb]: https://en.wikipedia.org/wiki/RGB_color_model
 [alpha]: https://en.wikipedia.org/wiki/Alpha_compositing
 
-If we run the shader, we see that every pixel is set to the color we specified:
+```glsl
+vec3 red = vec3(1.0, 0.0, 0.0);
+vec3 blue = vec3(0.0, 0.0, 1.0);
+vec3 white = vec3(1.0, 1.0, 1.0);
+vec4 semi_transparent_green = vec4(0.0, 1.0, 0.0, 0.5);
+```
 
-<WebGLShader fragmentShader="single_color" height={150} width={150} />
+The color we saw in the shader above (<Gl>vec3(0.7, 0.1, 0.4)</Gl>) roughly translates to `rgba(178, 25, 102)` in CSS (`#b21966` in hex).
 
-<SmallNote label="" center>The color <Gl>vec3(0.7, 0.1, 0.4)</Gl> roughly translates to `rgba(178, 25, 102)` in CSS -- or `#b21966` in hex.</SmallNote>
+```glsl
+void main() {
+  vec4 color = vec4(0.7, 0.1, 0.4, 1.0);
+  gl_FragColor = color;
+}
+```
 
-Let's create a linear gradient that fades to another color, such as `#e59919`, which corresponds to <Gl>vec3(0.9, 0.6, 0.1)</Gl> (I've been using [this tool][glsl_to_hex] to convert from hex to GLSL colors, and vice versa).
+If we run the shader, we see that every pixel is set to that color:
+
+<WebGLShader fragmentShader="single_color" height={100} width={100} />
+
+Let's create a linear gradient that fades to another color, such as `#e59919`, which corresponds to <Gl>vec3(0.9, 0.6, 0.1)</Gl>.
 
 [glsl_to_hex]: https://airtightinteractive.com/util/hex-to-glsl/
 
@@ -187,22 +219,21 @@ vec3 color_1 = vec3(0.7, 0.1, 0.4);
 vec3 color_2 = vec3(0.9, 0.6, 0.1);
 ```
 
-<SmallNote label="">We're storing the colors without the alpha value by using <Gl>vec3</Gl> instead of <Gl>vec4</Gl>.</SmallNote>
+<SmallNote label="">I've been using [this tool][glsl_to_hex] to convert from hex to GLSL colors, and vice versa</SmallNote>
 
-To gradually transition from <Gl>color_1</Gl> to <Gl>color_2</Gl> over the Y axis, we'll need the Y position of the current pixel. In WebGL fragment shaders, we get that via a special input variable called [<Gl>gl_FragCoord</Gl>][frag_coord]:
+To gradually transition from <Gl>color_1</Gl> to <Gl>color_2</Gl> over the $y$ axis, we'll need the $y$ position of the current pixel. In WebGL fragment shaders, we get that via a special input variable called [<Gl>gl_FragCoord</Gl>][frag_coord]:
 
 [frag_coord]: https://registry.khronos.org/OpenGL-Refpages/gl4/html/gl_FragCoord.xhtml
 
 ```glsl
 float y = gl_FragCoord.y;
 ```
-<SmallNote label="">In GLSL we need to specify the number type. We'll only use <Gl>float</Gl> and <Gl>int</Gl> in this post, which both use 32 bits. See [GLSL data types][glsl_data_types].</SmallNote>
+<SmallNote label=""><Gl>float</Gl> corresponds to a 32-bit floating point number. We'll only use the <Gl>float</Gl> and <Gl>int</Gl> number types in this post, which both use 32 bits.</SmallNote>
 
 [glsl_data_types]: https://www.khronos.org/opengl/wiki/Data_Type_(GLSL)
 
 We can then calculate a blend value -- which we'll call $t$ -- by dividing the <Gl>y</Gl> coord by the canvas height.
 
-<SmallNote>I've configured the coordinates such that <Gl>gl_FragCoord</Gl> is <Gl>(0.0, 0.0)</Gl> at the lower-left corner and <Gl>(CANVAS_WIDTH, CANVAS_HEIGHT)</Gl> at the upper right corner. We'll go into detail on this later on.</SmallNote>
 
 ```glsl
 // We'll learn how to make the canvas width dynamic later
@@ -212,9 +243,9 @@ float y = gl_FragCoord.y;
 float t = y / (CANVAS_WIDTH - 1.0);
 ```
 
-<SmallNote label="">In GLSL, a number literal with a fraction (e.g. <Gl>4.0</Gl>) is a float while a number literal without one (e.g. <Gl>4</Gl>) is an integer.</SmallNote>
+<SmallNote>I've configured the coordinates such that <Gl>gl_FragCoord</Gl> is <Gl>(0.0, 0.0)</Gl> at the lower-left corner and <Gl>(CANVAS_WIDTH - 1, CANVAS_HEIGHT - 1)</Gl> at the upper right corner. This will stay consistent throughout the post.</SmallNote>
 
-We can then mix the two colors via the built-in [<Gl method>mix</Gl> function][mix] -- it takes in two colors and a blend value between 0 and 1.
+We can then mix the two colors via the [built-in <Gl method>mix</Gl> function][mix]. It takes in two colors and a blend value between 0 and 1.
 
 [mix]: https://registry.khronos.org/OpenGL-Refpages/gl4/html/mix.xhtml
 
@@ -233,11 +264,13 @@ vec3 color = mix(color_1, color_2, t);
 gl_FragColor = color;
 ```
 
-But wait -- we get an error.
+But wait -- we get a compile-time error.
 
 <blockquote className="monospace">ERROR: 'assign' : cannot convert from '3-component vector of float' to 'FragColor 4-component vector of float'</blockquote>
 
-This error is a bit obtuse, but it's telling us that we can't assign our <Gl>vec3 color</Gl> to <Gl>gl_FragColor</Gl> because it's of type <Gl>vec4</Gl>. In other words, we need to add an alpha channel to <Gl>color</Gl>. We can do that like so:
+This error is a bit obtuse, but it's telling us that we can't assign our <Gl>vec3 color</Gl> to <Gl>gl_FragColor</Gl> because <Gl>gl_FragColor</Gl> is of type <Gl>vec4</Gl>.
+
+In other words, we need to add an alpha component to <Gl>color</Gl> prior to passing it to <Gl>gl_FragColor</Gl>. We can do that like so:
 
 ```glsl
 vec3 color = mix(color_1, color_2, t);
@@ -276,7 +309,7 @@ vec4(vec2(1.0, 2.0), vec2(3.0, 4.0)); // OK
 vec4(vec2(1.0, 2.0), 3.0); // Error, not enough components
 ```
 
-I love this syntax! Anyway, back to our shader.
+I love this syntax, but enough about that -- back to writing shaders!
 
 
 ### Coloring the area under a curve

@@ -9,7 +9,7 @@ const createFragmentShader: CreateFragmentShader = (_) => {
     void main() {
       vec3 red   = vec3(1.0, 0.0, 0.0);
       vec3 blue  = vec3(0.0, 0.0, 1.0);
-      vec3 white = vec3(1.0, 1.0, 1.0);
+      vec3 white = vec3(0.0, 1.0, 0.0);
 
       vec3 color = red;
       color = mix(color, blue,        gl_FragCoord.x / 150.0);

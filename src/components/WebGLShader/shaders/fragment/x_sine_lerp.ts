@@ -1,12 +1,21 @@
-import { CreateFragmentShader } from "../types";
+import { CreateFragmentShader, FragmentShaderUniforms } from "../types";
 
 const createFragmentShader: CreateFragmentShader = (options) => {
   const { waveLength = 1 } = options as { waveLength: number };
-  return /* glsl */ `
+  const uniforms: FragmentShaderUniforms = {
+    u_wavelength: {
+      label: "math:L",
+      value: waveLength,
+      range: [10, 100],
+    },
+  };
+  const shader = /* glsl */ `
     precision mediump float;
 
-    const float WIDTH = 150.0;
-    const float to_length = 1.0 / ${(waveLength / (2.0 * Math.PI)).toFixed(1)};
+    uniform float u_wavelength;
+    
+    const float PI = ${Math.PI.toFixed(6)};
+    float to_length = (2.0 * PI) / u_wavelength;
 
     void main() {
       vec3 red   = vec3(1.0, 0.0, 0.0);
@@ -20,6 +29,7 @@ const createFragmentShader: CreateFragmentShader = (options) => {
       gl_FragColor = vec4(color, 1.0);
     }
   `;
+  return { shader, uniforms };
 };
 
 export default createFragmentShader;

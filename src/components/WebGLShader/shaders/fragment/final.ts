@@ -32,13 +32,7 @@ const createFragmentShader: CreateFragmentShader = (options) => {
     accentColor: string;
   }>;
 
-  const uniforms: FragmentShaderUniforms = {
-    u_foo: {
-      value: 0,
-      range: [0, 1],
-      step: 0.01,
-    },
-  };
+  const uniforms: FragmentShaderUniforms = {};
 
   const shader = /* glsl */ `
     precision mediump float;
@@ -46,7 +40,6 @@ const createFragmentShader: CreateFragmentShader = (options) => {
     uniform float u_time; // Time in seconds
     uniform float u_w;
     uniform float u_h;
-    uniform float u_foo;
     uniform sampler2D u_gradient;
   
     const float PI = 3.14159, TAU = PI * 2.0;

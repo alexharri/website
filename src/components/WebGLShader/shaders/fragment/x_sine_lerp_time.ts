@@ -1,20 +1,29 @@
-import { CreateFragmentShader } from "../types";
+import { CreateFragmentShader, FragmentShaderUniforms } from "../types";
 
-const createFragmentShader: CreateFragmentShader = (options) => {
-  const { waveLength = 1 } = options as { waveLength: number };
-  return /* glsl */ `
+const createFragmentShader: CreateFragmentShader = () => {
+  const uniforms: FragmentShaderUniforms = {
+    time2: {
+      label: "math:S",
+      value: 20,
+      range: [0.0, 100],
+      step: 5,
+    },
+  };
+  const shader = /* glsl */ `
     precision mediump float;
 
-    uniform float u_time;
+    uniform float u_time2;
 
-    const float WIDTH = 150.0;
-    const float to_length = 1.0 / ${(waveLength / (2.0 * Math.PI)).toFixed(1)};
+    const float L = 40.0;
+
+    const float PI = ${Math.PI.toFixed(6)};
+    float to_length = (2.0 * PI) / L;
 
     void main() {
       vec3 red   = vec3(1.0, 0.0, 0.0);
       vec3 blue  = vec3(0.0, 0.0, 1.0);
 
-      float t = sin(gl_FragCoord.x * to_length + u_time * ${Math.PI});
+      float t = sin((gl_FragCoord.x + u_time2) * to_length);
       t = (t + 1.0) * 0.5;
 
       vec3 color = mix(red, blue, t);
@@ -22,6 +31,7 @@ const createFragmentShader: CreateFragmentShader = (options) => {
       gl_FragColor = vec4(color, 1.0);
     }
   `;
+  return { shader, uniforms };
 };
 
 export default createFragmentShader;
