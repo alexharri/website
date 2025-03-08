@@ -8,9 +8,10 @@ import sine_wave from "./fragment/sine_wave";
 import single_color from "./fragment/single_color";
 import linear_gradient from "./fragment/linear_gradient";
 import linear_gradient_area_under_line from "./fragment/linear_gradient_area_under_line";
+import linear_gradient_area_under_slanted_line from "./fragment/linear_gradient_area_under_slanted_line";
+import linear_gradient_area_under_exponential from "./fragment/linear_gradient_area_under_exponential";
 import linear_gradient_area_under_wave from "./fragment/linear_gradient_area_under_wave";
 import linear_gradient_area_under_wave_2 from "./fragment/linear_gradient_area_under_wave_2";
-import wave_animated_slow from "./fragment/wave_animated_slow";
 import wave_animated from "./fragment/wave_animated";
 import wave_animated_blur_left_to_right from "./fragment/wave_animated_blur_left_to_right";
 import wave_animated_blur_down from "./fragment/wave_animated_blur_down";
@@ -68,9 +69,10 @@ export const fragmentShaderRegistry: Partial<Record<string, CreateFragmentShader
   single_color,
   linear_gradient,
   linear_gradient_area_under_line,
+  linear_gradient_area_under_slanted_line,
+  linear_gradient_area_under_exponential,
   linear_gradient_area_under_wave,
   linear_gradient_area_under_wave_2,
-  wave_animated_slow,
   wave_animated,
   wave_animated_blur_left_to_right,
   wave_animated_blur_down,

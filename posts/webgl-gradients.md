@@ -312,38 +312,33 @@ vec4(vec2(1.0, 2.0), 3.0); // Error, not enough components
 I love this syntax, but enough about that -- back to writing shaders!
 
 
-### Coloring the area under a curve
+### Coloring the lower half white
 
-Let's start by coloring the area under a curve white. For now, the curve will be a simple line, with the result looking like so:
+Let's color the bottom half of our canvas white, like so:
 
 <WebGLShader fragmentShader="linear_gradient_area_under_line" height={150} width={150} showControls={false} />
 
-We'll adjust the curve to be an animated sine wave after.
-
-First, let's calculate the Y position of the curve at the current pixel's X position:
+To do that, we'll first calculate the $y$ position of the canvas' midline:
 
 ```glsl
-const float Y_START = CANVAS_HEIGHT * 0.4; // Start at 40%
-const float INCLINE = 0.2; // Climb 0.2px every 1px
-
-float x = gl_FragCoord.x;
-
-// Curve Y at current X position
-float curve_y = Y_START + (x * INCLINE);
+const float LINE_Y = CANVAS_HEIGHT * 0.5;
 ```
 
-We can then determine the pixel's [signed][signed_distance] distance from the curve through subtraction:
+We can then determine the pixel's [signed][signed_distance] distance from the line through subtraction:
 
 [signed_distance]: https://en.wikipedia.org/wiki/Signed_distance_function
 
 ```glsl
-float dist_signed = curve_y - y;
+float y = gl_FragCoord.y;
+
+float dist_signed = LINE_Y - y;
 ```
 
-What we care about is whether our pixel is above or below the curve, which we can determine by reading the sign of the distance via the <Gl method>sign</Gl> function, which returns $-1.0$ if the distance is negative, or $1.0$ if the distance is positive.
+What determines whether our pixel should be white is whether it's below the line, which we can determine by reading the sign of the distance via the <Gl method>sign</Gl> function. It returns $-1.0$ if the value is negative and $1.0$ if the value is positive.
 
 ```glsl
-float dist_signed = curve_y - y;
+float dist_signed = LINE_Y - y;
+
 float dist_sign = sign(dist_signed); // -1.0 or 1.0
 ```
 
@@ -354,31 +349,24 @@ We can use the sign to calculate an alpha (blend) by normalizing the sign to $0.
 (1 + 1)\,/\,2 = 1&\\
 \end{align}$$</p>
 
-
-
 ```glsl
 float alpha = (dist_sign + 1.0) / 2.0;
 ```
 
-So, for every pixel, <Gl>alpha</Gl> will be either set to $0.0$ or $1.0$. If <Gl>alpha == 1.0</Gl> we want to color the pixel white, but if <Gl>alpha == 0.0</Gl> we want the pixel to retain the color from the linear gradient.
+This <Gl>alpha</Gl> represents how white our pixel should be. If <Gl>alpha == 1.0</Gl> we want to color the pixel white, but if <Gl>alpha == 0.0</Gl> we want the pixel to retain the color from the linear gradient.
 
-We can do that with the <Gl method>mix</Gl> function:
+We can achieve exactly that by blending <Gl>color</Gl> (the linear gradient's color) and <Gl>white</Gl> using the <Gl method>mix</Gl> function:
 
 ```glsl
 color = mix(color, white, alpha);
 ```
 
-This colors the area under the curve white:
+As we can see, this colors the bottom half of the canvas white:
 
 <WebGLShader fragmentShader="linear_gradient_area_under_line" height={150} width={150} showControls={false} />
 
-Currently the incline is set to $0.2$. Here's a canvas where you can configure the amount of inline from $-1$ to $1$:
 
-<WebGLShader fragmentShader="linear_gradient_area_under_line" height={150} width={150} />
-
-### Why branchless?
-
-Calculating an alpha value by normalizing the sign and passing that to the <Gl method>mix</Gl> function may seem overly roundabout. Couldn't you just use an if statement?
+Calculating an alpha value by normalizing the sign and passing that to the <Gl method>mix</Gl> function may seem overly roundabout -- couldn't you just use an if statement?
 
 ```glsl
 if (sign(dist_signed) == 1.0) {
@@ -386,53 +374,138 @@ if (sign(dist_signed) == 1.0) {
 }
 ```
 
-That works, but you generally want to avoid branching in code that runs on the GPU. There are [nuances][branch_nuances] to the performance of branches in shader code, but branchless code is usually preferable.
+That works, but only if you want to pick one of the colors. As we extend this to smoothly blend between the colors, using the sign of the distance won't work.
+
+<Note>
+As an additional point, you generally want to avoid branching in code that runs on the GPU. There are [nuances][branch_nuances] to the performance of branches in shader code, but branchless code is usually preferable. In our case, calculating the <Gl>alpha</Gl> and running the <Gl method>mix</Gl> function boils down to sequential math instructions that GPUs excel at.
+</Note>
 
 [branch_nuances]: http://www.gamedev.net/forums/topic/712557-is-branching-logic-in-shaders-really-still-a-problem/5448827/
 
-In our case, calculating the <Gl>alpha</Gl> and running the <Gl method>mix</Gl> function boils down to sequential math instructions, which GPUs excel at.
 
+### Drawing arbitrary curves
 
-### Converting the curve to a wave
+We're currently coloring everything under <Gl>LINE_Y</Gl> constant white, but the line doesn't need to be determined constant -- we can calculate $y$ using any arbitrary expression. That allows us to draw the area under any curve white.
 
-Currently, we're calculating the Y of our curve like so, producing a slanted line:
+Let's, for example, define the curve $C$ as a slanted line
+
+<p className="mathblock">$$ C = Y + x \times I $$</p>
+
+where $Y$ is the start position of the line, and $I$ is the incline of the line. We can put this into code like so:
 
 ```glsl
-float curve_y = Y_START + (x * INCLINE);
+const float Y = 0.4 * CANVAS_HEIGHT;
+const float I = 0.2;
+
+float x = gl_FragCoord.x;
+
+float curve_y = Y + x * I;
 ```
 
-To instead produce a sine wave-shaped curve, we can define the curve as:
+This produces the slanted line in the canvas below -- I'll let you vary $I$ to see the effect:
 
-<p className="mathblock">$$Y + A \times sin(x \times L')$$</p>
+<WebGLShader fragmentShader="linear_gradient_area_under_slanted_line" height={150} width={150} />
 
-where $x$ is the current pixel's X position, $A$ is the [amplitude][amplitude] of the wave, $Y$ is the _vertical position_ of the wave (the Y position of the wave's center), and $L'$ is the "wave length multiplier", defined as
+We could also do a parabola like so:
+
+```glsl
+// Adjust x=0 to be in the middle of the canvas
+float x = gl_FragCoord.x - CANVAS_WIDTH / 2.0;
+
+float curve_y = Y + pow(x, 2.0) / 40.0;
+```
+
+<WebGLShader fragmentShader="linear_gradient_area_under_exponential" height={150} width={150} showControls={false} />
+
+We're still calculating the alpha in the same, simple manner:
+
+```glsl
+float dist_signed = curve_y - gl_FragCoord.y;
+float alpha = (sign(dist) + 1.0) / 2.0;
+```
+
+The point is that we can calculate the curve's $y$ in any way we see fit.
+
+### Producing an animate wave
+
+To produce a sine wave, we can define the curve as:
+
+<p className="mathblock">$$C = Y + A \times sin(x \times \dfrac{2\pi}{L})$$</p>
+
+where $Y$ is the wave's center (it's $y$ position), $L$ is the wave's length in pixels, and $A$ is the [amplitude][amplitude] of the wave.
 
 [amplitude]: https://www.mathsisfun.com/algebra/amplitude-period-frequency-phase-shift.html
-
-<p className="mathblock">$$L' = \dfrac{1}{L}2\pi $$</p>
-
-where $L$ is the wave length in pixels.
 
 Putting this into code, we get:
 
 ```glsl
-const float WAVE_Y = 0.5;
-const float WAVE_AMP = 15.0;
-const float WAVE_LEN = 75.0;
+const float Y = 0.5 * CANVAS_HEIGHT;
+const float A = 15.0;
+const float L = 75.0;
 
-const float toWaveLength = (1.0 / WAVE_LEN) * 2.0 * PI;
+const float W = (2.0 * PI) / L; // Wave length multiplier
 
-float y_base = CANVAS_HEIGHT * WAVE_Y;
-float curve_y = y_base + sin(x * toWaveLength) * WAVE_AMP;
+float curve_y = Y + sin(x * W) * A;
 ```
 
 Which produces a sine wave:
 
 <WebGLShader fragmentShader="linear_gradient_area_under_wave" height={150} width={150} showControls={false} />
 
-Here's a canvas that makes the $Y$, $A$ and $L$ components configurable:
+At the moment, the wave is completely static. For the shader to produce any motion, we'll need to provide the shader with a time variable. We can do that using [uniforms][uniform].
 
-<WebGLShader fragmentShader="linear_gradient_area_under_wave" height={150} width={150} />
+[uniform]: https://www.khronos.org/opengl/wiki/Uniform_(GLSL)
+
+```glsl
+uniform float u_time;
+```
+
+Uniforms can be thought of as global variables that the shader has _read-only_ access to. The actual values of uniforms are controlled on the JavaScript side (we'll see how later).
+
+For any given draw call, each shader invocation will have uniforms set to the same values. This is what the name "uniform" is referring to -- the values of uniforms are _uniform_ across shader invocations. You can think of uniforms as per-draw-call constants.
+
+<SmallNote label="">Uniforms are constant across a draw-call, but uniforms are [not compile-time constant][uniform_const], so you cannot use the value of a uniform in `const` variables.</SmallNote>
+
+[uniform_const]: https://www.khronos.org/opengl/wiki/Type_Qualifier_(GLSL)#Uniforms
+
+Uniform variables can be of many types, such as floats, vectors and textures (we'll cover textures later). They can even be of custom struct types:
+
+```glsl
+struct Foo {
+  vec3 position;
+  vec4 color;
+}
+
+uniform Foo u_foo;
+```
+
+But what's up with the <Gl>u_</Gl> prefix of <Gl>u_time</Gl>?
+
+```glsl
+uniform float u_time;
+```
+
+Prefixing uniform names with <Gl>u_</Gl> is a GLSL convention. You won't encounter compiler errors if you don't, but using the <Gl>u_</Gl> prefix for uniform names is a very established pattern.
+
+Anyway, with <Gl>u_time</Gl> now accessible in our shader we can start producing motion. As a refresher, we're currently calculating our curve's $y$ value like so:
+
+```glsl
+float curve_y = Y + sin(x * W) * A;
+```
+
+Like we did early on in the post, we can add <Gl>time</Gl> to the $x$ position, multiplied by some constant that controls the speed, to shift the wave to the left:
+
+```glsl
+const float S = 25.0;
+
+float curve_y = Y + sin((x + time * S) * W) * A;
+```
+
+Since <Gl>u_time</Gl> is the elapsed time in seconds, an $S$ value of $25$ causes the wave to move 25 pixels to the left per second. I'll let you vary $S$ to see the effect:
+
+<WebGLShader fragmentShader="wave_animated" height={150} width={150} />
+
+We've got a moving wave -- awesome!
 
 
 ### Applying a gradient to the wave
@@ -503,86 +576,6 @@ Secondly, we layered the masked foreground onto the background, giving us our fi
 
 <Image src="~/alpha-compositing-final.svg" plain />
 
-
-### Animating the wave
-
-For the shader to produce motion, we'll need to provide the shader with a time variable. We can do that using [uniforms][uniform].
-
-[uniform]: https://www.khronos.org/opengl/wiki/Uniform_(GLSL)
-
-```glsl
-uniform float time; // Time in seconds
-```
-
-Uniforms can be thought of as global variables that the shader has read-only access to. The values of the uniforms are set by the user prior to rendering, and the values are read by the shader during rendering.
-
-You can think of uniforms as per-draw-call constants. For any given draw call, each shader invocation will have each uniform set to the same value.
-
-<SmallNote label="">Uniforms are constant, but [not compile-time constant][uniform_const], so you cannot use the `const` keyword.</SmallNote>
-
-[uniform_const]: https://www.khronos.org/opengl/wiki/Type_Qualifier_(GLSL)#Uniforms
-
-Uniform variables can be of many types, such floats, vectors and textures (we'll discuss textures later). They can also be of custom struct types:
-
-```glsl
-struct Foo {
-  vec3 position;
-  vec3 color;
-}
-
-uniform Foo foo;
-```
-
-Anyway, with <Gl>time</Gl> now accessible in our shader as a uniform we can start animating the wave. As a refresher, we're currently calculating our curve's Y value like so:
-
-```glsl
-float curve_y = WAVE_CENTER + sin(x * toWaveLength) * WAVE_AMPLITUDE;
-```
-
-This is getting a bit long, so let's extract the input to <Gl method>sin</Gl> into a variable called <Gl>sine_input</Gl>.
-
-```glsl
-float sine_input = x * toWaveLength;
-float curve_y = WAVE_CENTER + sin(sine_input) * WAVE_AMPLITUDE;
-```
-
-Now let's add <Gl>time * PI</Gl> to the sine input:
-
-```glsl
-float sine_input = x * toWaveLength + time * PI;
-```
-
-<WebGLShader fragmentShader="wave_animated_slow" height={150} width={150} />
-
-Adding <Gl>time * PI</Gl> shifts the phase of the wave by half a wavelength per second. To instead shift the wave by a full wavelength per second, we'd multiply <Gl>time</Gl> by $2\pi$.
-
-However, instead of thinking in "wavelengths per second", I'd like to be able to specify a number of pixels that the wave will move per second -- let $S$ be the pixels to move per second.
-
-Since $2\pi$ moves the wave by one wavelength per second, we can multiply $2\pi$ by the proportion of the wave's speed $S$ and wave's length $L$:
-
-<p className="mathblock">$time \times 2\pi\dfrac{S}{L}$</p>
-
-which will cause the wave to move by $S$ pixels per second.
-
-Let's define a constant, <Gl>WAVE_SPEED</Gl>, for the wave's speed, $S$:
-
-```glsl
-const float WAVE_LEN = 75.0; // Length in pixels
-const float WAVE_SPEED = 20.0; // Pixels per seconds
-```
-
-Putting our equation into code, we get:
-
-```glsl
-const float toWaveLength = (1.0 / WAVE_LEN) * 2.0 * PI;
-const float toPhase = (WAVE_SPEED / WAVE_LEN) * 2.0 * PI;
-
-float wave_fac = sin(x * toWaveLength + time * toPhase);
-```
-
-We now have a constant that we can use to control the speed of the wave:
-
-<WebGLShader fragmentShader="wave_animated" height={150} width={150} />
 
 ## Adding blur
 

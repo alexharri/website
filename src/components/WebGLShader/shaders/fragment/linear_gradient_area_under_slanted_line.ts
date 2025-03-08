@@ -1,12 +1,21 @@
 import { CreateFragmentShader, FragmentShaderUniforms } from "../types";
 
 const createFragmentShader: CreateFragmentShader = (_) => {
-  const uniforms: FragmentShaderUniforms = {};
+  const uniforms: FragmentShaderUniforms = {
+    u_incline: {
+      label: "I",
+      value: 0.2,
+      range: [0, 1],
+    },
+  };
   const shader = /* glsl */ `
     precision mediump float;
 
+    uniform float u_incline;
+
     const float CANVAS_HEIGHT = 150.0;
-    const float LINE_Y = CANVAS_HEIGHT * 0.5;
+    const float Y = 0.4 * CANVAS_HEIGHT;
+    float I = u_incline;
     const vec3 white = vec3(1.0, 1.0, 1.0);
 
     void main() {
@@ -20,7 +29,8 @@ const createFragmentShader: CreateFragmentShader = (_) => {
       vec3 color = mix(color_1, color_2, t);
 
       // Y position of curve at current X coordinate
-      float dist = LINE_Y - y;
+      float curve_y = Y + x * I;
+      float dist = curve_y - y;
       float dist_sign = sign(dist);
       float alpha = (dist_sign + 1.0) / 2.0;
 
