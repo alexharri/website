@@ -9,8 +9,8 @@ const createFragmentShader: CreateFragmentShader = () => {
     uniform float u_h;
 
     void main() {
-      float t = 1.0 - gl_FragCoord.y / (u_h - 1.0);
-      gl_FragColor = texture2D(u_gradient, vec2(t, 0.5));
+      float t = gl_FragCoord.y / (u_h - 1.0);
+      gl_FragColor = texture2D(u_gradient, vec2(1.0 - t, 0.5));
     }
   `;
   return { shader, uniforms };

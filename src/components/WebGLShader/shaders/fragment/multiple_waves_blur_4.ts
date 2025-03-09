@@ -93,7 +93,7 @@ const createFragmentShader: CreateFragmentShader = () => {
       
       float w2_alpha = wave_alpha(WAVE_Y, WAVE_HEIGHT);
 
-      vec3 color = w1_color;
+      vec3 color = bg_color;
       color = mix(color, w2_color, w2_alpha);
       return color;
     }
