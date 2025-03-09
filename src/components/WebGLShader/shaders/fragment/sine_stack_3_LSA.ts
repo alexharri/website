@@ -16,24 +16,16 @@ const createFragmentShader: CreateFragmentShader = (_) => {
       format: "multiplier",
       width: "small",
     },
-    u_A: {
-      label: "math:A",
-      value: 1,
-      range: [0, 3],
-      format: "multiplier",
-      width: "small",
-    },
   };
   const shader = /* glsl */ `
     precision mediump float;
 
     uniform float u_time;
     uniform float u_L;
-    uniform float u_A;
 
     const float HEIGHT = 200.0;
     const float PI = 3.14159, TAU = PI * 2.0;
-    float WAVE_HEIGHT = 32.0 * u_A;
+    float WAVE_HEIGHT = 32.0;
 
     float noise(float x) {
       float L = 0.011 * u_L;

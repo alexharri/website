@@ -11,8 +11,8 @@ import linear_gradient_area_under_line from "./fragment/linear_gradient_area_und
 import linear_gradient_area_under_slanted_line from "./fragment/linear_gradient_area_under_slanted_line";
 import linear_gradient_area_under_exponential from "./fragment/linear_gradient_area_under_exponential";
 import linear_gradient_area_under_wave from "./fragment/linear_gradient_area_under_wave";
-import linear_gradient_area_under_wave_2 from "./fragment/linear_gradient_area_under_wave_2";
 import wave_animated from "./fragment/wave_animated";
+import wave_animated_2 from "./fragment/wave_animated_2";
 import wave_animated_blur_left_to_right from "./fragment/wave_animated_blur_left_to_right";
 import wave_animated_blur_down from "./fragment/wave_animated_blur_down";
 import wave_animated_blur_down_even from "./fragment/wave_animated_blur_down_even";
@@ -72,8 +72,8 @@ export const fragmentShaderRegistry: Partial<Record<string, CreateFragmentShader
   linear_gradient_area_under_slanted_line,
   linear_gradient_area_under_exponential,
   linear_gradient_area_under_wave,
-  linear_gradient_area_under_wave_2,
   wave_animated,
+  wave_animated_2,
   wave_animated_blur_left_to_right,
   wave_animated_blur_down,
   wave_animated_blur_down_even,

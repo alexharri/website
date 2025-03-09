@@ -331,15 +331,15 @@ We can then determine the pixel's [signed][signed_distance] distance from the li
 ```glsl
 float y = gl_FragCoord.y;
 
-float dist_signed = LINE_Y - y;
+float dist = LINE_Y - y;
 ```
 
 What determines whether our pixel should be white is whether it's below the line, which we can determine by reading the sign of the distance via the <Gl method>sign</Gl> function. It returns $-1.0$ if the value is negative and $1.0$ if the value is positive.
 
 ```glsl
-float dist_signed = LINE_Y - y;
+float dist = LINE_Y - y;
 
-float dist_sign = sign(dist_signed); // -1.0 or 1.0
+sign(dist); // -1.0 or 1.0
 ```
 
 We can use the sign to calculate an alpha (blend) by normalizing the sign to $0.0$ or $1.0$, which we can do via $(dist\_sign + 1)\,/\,2$ since:
@@ -350,7 +350,7 @@ We can use the sign to calculate an alpha (blend) by normalizing the sign to $0.
 \end{align}$$</p>
 
 ```glsl
-float alpha = (dist_sign + 1.0) / 2.0;
+float alpha = (sign(dist) + 1.0) / 2.0;
 ```
 
 This <Gl>alpha</Gl> represents how white our pixel should be. If <Gl>alpha == 1.0</Gl> we want to color the pixel white, but if <Gl>alpha == 0.0</Gl> we want the pixel to retain the color from the linear gradient.
@@ -369,7 +369,7 @@ As we can see, this colors the bottom half of the canvas white:
 Calculating an alpha value by normalizing the sign and passing that to the <Gl method>mix</Gl> function may seem overly roundabout -- couldn't you just use an if statement?
 
 ```glsl
-if (sign(dist_signed) == 1.0) {
+if (sign(dist) == 1.0) {
   color = white;
 }
 ```
@@ -420,7 +420,7 @@ float curve_y = Y + pow(x, 2.0) / 40.0;
 We're still calculating the alpha in the same, simple manner:
 
 ```glsl
-float dist_signed = curve_y - gl_FragCoord.y;
+float dist = curve_y - gl_FragCoord.y;
 float alpha = (sign(dist) + 1.0) / 2.0;
 ```
 
@@ -493,12 +493,12 @@ Anyway, with <Gl>u_time</Gl> now accessible in our shader we can start producing
 float curve_y = Y + sin(x * W) * A;
 ```
 
-Like we did early on in the post, we can add <Gl>time</Gl> to the $x$ position, multiplied by some constant that controls the speed, to shift the wave to the left:
+Like we did early on in the post, we can add <Gl>u_time</Gl> to the $x$ position, multiplied by some constant that controls the speed, to shift the wave to the left:
 
 ```glsl
 const float S = 25.0;
 
-float curve_y = Y + sin((x + time * S) * W) * A;
+float curve_y = Y + sin((x + u_time * S) * W) * A;
 ```
 
 Since <Gl>u_time</Gl> is the elapsed time in seconds, an $S$ value of $25$ causes the wave to move 25 pixels to the left per second. I'll let you vary $S$ to see the effect:
@@ -526,7 +526,7 @@ vec3 fg_color_1 = vec3(1.0, 0.7, 0.5);
 vec3 fg_color_2 = vec3(1.0, 1.0, 0.9);
 ```
 
-We can calculate both the background color and foreground color for the current pixel using the same $t$ value (calculated via the pixel's Y position):
+We can calculate both the background color and foreground color for the current pixel using the same $t$ value (calculated via the pixel's $y$ position):
 
 ```glsl
 float t = y / (CANVAS_HEIGHT - 1.0);
@@ -535,53 +535,24 @@ vec3 bg_color = mix(bg_color_1, bg_color_2, t);
 vec3 fg_color = mix(fg_color_1, fg_color_2, t);
 ```
 
-Let's also rename the <Gl>alpha</Gl> value to <Gl>fg_alpha</Gl> since it's the alpha value of the foreground.
+With the background color and foreground color calculated, we can blend them using <Gl>alpha</Gl>:
 
 ```glsl
-float fg_alpha = (dist_sign + 1.0) / 2.0;
+float alpha = (sign(curve_y - y) + 1.0) / 2.0;
+
+vec3 color = mix(bg_color, fg_color, alpha);
 ```
 
-With the background color, foreground color, and foreground alpha calculated, we can calculate the final color via the <Gl method>mix</Gl> function -- assigning the result to <Gl>gl_FragColor</Gl>:
+Which applies the foreground gradient to the wave:
 
-```glsl
-float fg_alpha = (dist_sign + 1.0) / 2.0;
-
-vec3 color = mix(bg_color, fg_color, fg_alpha);
-gl_FragColor = vec4(color, 1.0);
-```
-
-<WebGLShader fragmentShader="linear_gradient_area_under_wave_2" height={150} width={150} />
-
-
-#### Alpha compositing
-
-What we just did -- combining two images using an alpha mask -- is a form of [alpha compositing][alpha_compositing].
-
-[alpha_compositing]: https://ciechanow.ski/alpha-compositing/
-
-<Image src="~/alpha-compositing.svg" plain />
-
-In calculating our two color values and an alpha value, we produced three assets:
-
- * For each pixel, we calculated both a foreground color and a background color. Together, those pixels form two images -- our foreground and background gradients.
- * The alpha values we calculated for each pixel constitute our alpha mask. Each pixel in an alpha mask has a value from $0$ to $1$, denoting how transparent or opaque that pixel is.
-
-We then combined those three assets into a final image using the <Gl method>mix</Gl> function.
-
-Even though the compositing was done with a single <Gl method>mix</Gl> invocation, I like to think of this as two operations. First, we applied the alpha mask to our foreground image.
-
-<Image src="~/alpha-compositing-alpha-mask.svg" plain />
-
-Secondly, we layered the masked foreground onto the background, giving us our final image:
-
-<Image src="~/alpha-compositing-final.svg" plain />
+<WebGLShader fragmentShader="wave_animated_2" height={150} width={150} showControls={false} />
 
 
 ## Adding blur
 
-Take another look at the final animation and consider the role that blur plays. The waves in the animation slowly fluctuate between a blurry and a sharp state, providing contrast and visual interest.
+Take another look at the final animation and consider the role that blur plays. The waves in the animation slowly fluctuate between a blurry and a sharp state.
 
-<WebGLShader fragmentShader="final" width={1000} height={250} />
+<WebGLShader fragmentShader="final" skew />
 
 The blur isn't applied uniformly. The wave slowly transitions from being fully blurred to being only partially blurred -- or not blurred at all.
 
@@ -591,18 +562,16 @@ To simulate this effect, we'll need to be able to apply variable amounts of blur
 
 ### Gaussian blur
 
-When thinking about how I'd approach the blur problem, my first thought was to use a [gaussian blur][gaussian_blur]. I figured I'd determine the amount of blur to apply via a [noise function][perlin_noise] and then sampling neighboring pixels according to the blur amount.
+When thinking about how I'd approach the blur problem, my first thought was to use a [gaussian blur][gaussian_blur]. I figured I'd determine the amount of blur to apply via a [noise function][perlin_noise] and then sample neighboring pixels according to the blur amount.
 
 [gaussian_blur]: https://en.wikipedia.org/wiki/Gaussian_blur
 [perlin_noise]: https://en.wikipedia.org/wiki/Perlin_noise
 
-That's a valid approach -- progressive blur in WebGL is certainly [feasible][progressive_blur]. However, this approach turned out to be expensive in terms of both performance and complexity. 
+That's a valid approach -- progressive blur in WebGL is certainly [feasible][progressive_blur] -- but in order to get a decent blur we'd need to sample lots of neighboring pixels, and the amount of pixels to sample only increases as the blur radius gets larger. Pur effect requires a very large blur, so that becomes expensive very quickly.
 
 [progressive_blur]: https://tympanus.net/Tutorials/WebGLProgressiveBlur/
 
-First off, in order to get a decent blur you need to sample lots of neighboring pixels, and the amount of pixels to sample only increases as the blur radius gets larger (our effect requires a very large blur). This becomes very expensive, very quickly.
-
-Secondly, for us to be able to sample neighboring pixels we'd need to calculate their values up front. To do that we'd pre-render the alpha channel [into a texture][render_to_a_texture] for us to sample, which would require setting up another shader and complicating our pipeline.
+<SmallNote label="">Additionally, for us to be able to sample neighboring pixel alpha with any reasonable performance we'd need to calculate their alpha values up front. To do that we'd need to pre-render the alpha channel [into a texture][render_to_a_texture] for us to sample, which would require setting up another shader and render pass. Not a big deal, but it would add complexity.</SmallNote>
 
 [render_to_a_texture]: https://webglfundamentals.org/webgl/lessons/webgl-render-to-texture.html
 
@@ -612,74 +581,78 @@ I opted to take a different approach that doesn't require sampling neighboring p
 ### Calculate blur using signed distance
 
 
-Let's look at how we're calculating the <Gl>fg_alpha</Gl> again:
+Let's look at how we're calculating the <Gl>alpha</Gl> again:
 
 ```glsl
-float dist_signed = curve_y - y;
-float dist_sign = sign(dist_signed);
-
-float fg_alpha = (dist_sign + 1.0) / 2.0;
+float dist = curve_y - y;
+float alpha = (sign(dist) + 1.0) / 2.0;
 ```
 
-By taking the sign of our distance, we always get 0% or 100% opacity -- either fully transparent or opaque. Instead, let's make the alpha gradually increase from $0$ to $1$ over a given amount of pixels, e.g. 50px. Let's define a constant for that.
+By taking the sign of our distance, we always get 0% or 100% opacity -- either fully transparent or completely opaque. Let's instead make <Gl>alpha</Gl> gradually transition from $0$ to $1$ over a certain distance of pixels, e.g. 50px. Let's define a constant for that:
 
 ```glsl
 const float BLUR_AMOUNT = 50.0;
 ```
 
-We'll change the calculation for <Gl>fg_alpha</Gl> to start at $0.0$ and then add <Gl>dist_signed / BLUR_AMOUNT</Gl>.
+We'll then change the calculation for <Gl>alpha</Gl> to just be <Gl>dist / BLUR_AMOUNT</Gl>.
 
 ```glsl
-float fg_alpha = 0.0 + dist_signed / BLUR_AMOUNT;
+float alpha = dist / BLUR_AMOUNT;
 ```
 
-When <Gl>dist_signed == 0.0</Gl>, the alpha will be $0.0$, and as <Gl>dist_signed</Gl> approaches <Gl>BLUR_AMOUNT</Gl> the alpha approaches $1.0$. However, when <Gl>dist_signed</Gl> exceeds <Gl>BLUR_AMOUNT</Gl> the alpha will go over $1.0$. The alpha can also become negative when <Gl>dist_signed</Gl> is negative. Neither of those are desirable -- alpha values should only range from $0$ to $1$ -- so let's clamp <Gl>fg_alpha</Gl> to the range $[0.0, 1.0]$ using the built-in <Gl method>clamp</Gl> function:
+When <Gl>dist == 0.0</Gl>, the alpha will be $0.0$, and as <Gl>dist</Gl> approaches <Gl>BLUR_AMOUNT</Gl> the alpha approaches $1.0$. This will cause <Gl>alpha</Gl> to transition from $0$ to $1$ over the desired number of pixels, but we need to consider that
+
+ * when <Gl>dist</Gl> exceeds <Gl>BLUR_AMOUNT</Gl> the alpha will go over $1.0$, and
+ * the alpha becomes negative when <Gl>dist</Gl> is negative.
+ 
+Neither of those are desirable -- alpha values should only range from $0$ to $1$ -- so we'll clamp <Gl>alpha</Gl> to the range $[0.0, 1.0]$ using the built-in <Gl method>clamp</Gl> function:
 
 ```glsl
-fg_alpha = clamp(fg_alpha, 0.0, 1.0);
+float alpha = dist / BLUR_AMOUNT;
+alpha = clamp(alpha, 0.0, 1.0);
 ```
 
-This produces a blur effect, though you might notice that the wave shifts down as the blur increases -- try varying the amount of blur using the slider.
+This produces a blur effect, though you might notice that the wave "shifts down" as the blur increases -- try varying the amount of blur using the slider:
 
 <WebGLShader fragmentShader="wave_animated_blur_down_even" height={150} width={250} />
 
-Let's put that aside for the time being and make the blur gradually increasing from left to right. To do that, we can calculate a $t$ value for the blur by taking <Gl>gl_FragCoord.x / (CANVAS_WIDTH - 1)</Gl>:
-
-```glsl
-float blur_fac = gl_FragCoord.x / (CANVAS_WIDTH - 1);
-```
-
-We'll then calculate the blur amount by [linearly interpolating][lerp] (lerping) between <Gl>1.0</Gl> and <Gl>BLUR_AMOUNT</Gl> using the $t$ value and the <Gl method>mix</Gl> function:
+Let's put that aside for the time being and make the blur gradually increasing from left to right. To gradually increase the blur, we can [linearly interpolate][lerp] from no blur to <Gl>BLUR_AMOUNT</Gl> over the $x$ axis like so:
 
 [lerp]: https://en.wikipedia.org/wiki/Linear_interpolation
 
 ```glsl
-float blur_amount = mix(1.0, BLUR_AMOUNT, blur_fac);
+float tx = gl_FragCoord.x / (CANVAS_WIDTH - 1)
+float blur_amount = mix(1.0, BLUR_AMOUNT, tx);
 ```
 
 By using <Gl>blur_amount</Gl> to calculate the alpha, we get a gradually increasing blur:
 
 ```glsl
-float fg_alpha = dist_signed / blur_amount;
-fg_alpha = clamp(fg_alpha, 0.0, 1.0);
+float alpha = dist / blur_amount;
+alpha = clamp(alpha, 0.0, 1.0);
 ```
 
 <WebGLShader fragmentShader="wave_animated_blur_down" height={150} width={250} />
 
-Let's now fix how the wave shifts down as <Gl>blur_amount</Gl> increases.
+Let's now fix how the wave shifts down as <Gl>blur_amount</Gl> increases. Consider why the wave shifts down as the blur increases:
 
-Consider why the down-shift occurs. For pixels where <Gl>{"dist_signed <= 0"}</Gl> the alpha is $0$ regardless of the value of <Gl>blur_amount</Gl>, thus the top of the wave stays fixed. At the same time, the alpha is $1$ for all pixels where <Gl>{"dist_signed >= blur_amount"}</Gl>, which shifts the "bottom" of the wave down as the blur increases.
+ * For pixels where <Gl>{"dist <= 0"}</Gl> the alpha is $0$ regardless of the value of <Gl>blur_amount</Gl>, thus the top of the wave stays fixed.
+ * At the same time, the alpha is $1$ for all pixels where <Gl>{"dist >= blur_amount"}</Gl>, which shifts the bottom of the wave down as the blur increases.
 
-What we want is for the alpha to be $0.5$ when <Gl>{"dist_signed == 0"}</Gl>, which we can do by starting <Gl>fg_alpha</Gl> at $0.5$:
+What we want is for <Gl>alpha</Gl> to be $0.5$ when <Gl>{"dist == 0"}</Gl>, which we can do by starting <Gl>alpha</Gl> at $0.5$:
 
 ```glsl
-float fg_alpha = 0.5 + dist_signed / blur_amount;
-fg_alpha = clamp(fg_alpha, 0.0, 1.0);
+float alpha = 0.5 + dist / blur_amount;
+alpha = clamp(alpha, 0.0, 1.0);
 ```
 
-This shifts the "top" and "bottom" of the wave up and down equally as the amount of blur increases:
+This causes the top of the wave to shift up by <Gl>-blur_amount / 2</Gl> and the bottom of the wave to shift down by <Gl>blur_amount / 2</Gl>, keeping the wave centered:
 
 <WebGLShader fragmentShader="wave_animated_blur_left_to_right" height={150} width={250} />
+
+We'll tweak the blur later on to make it look really good, but this forms the basis for how we'll calculate our blur.
+
+Let's now and work on creating a natural-looking wave effect.
 
 
 ## Creating a natural wave
@@ -699,15 +672,15 @@ I often reach for stacked sine waves when I need a simple and natural wave-like 
 
 The idea is to sum the output of multiple sine waves with different wave lengths, amplitudes, and phase speeds.
 
-<p align="center">Take the following sine waves:</p>
+<p align="center">Take the following pure sine waves:</p>
 
 <WebGLShader fragmentShader="sine_stack_decomposed" width={600} height={250} />
 
-<p align="center" style={{ marginBottom: -40 }}>If you sum their output, you get a fairly interesting final wave:</p>
+<p align="center" style={{ marginBottom: -40 }}>If you sum their output, you get an interesting final wave:</p>
 
 <WebGLShader fragmentShader="sine_stack_composed" width={600} height={170} />
 
-<p style={{ marginTop: -24 }}>Each individual wave is a pure sine wave whose input components -- an $x$ position and a time value -- have been scaled differently. An individual wave's equation can be described as</p>
+<p style={{ marginTop: -24 }}>Each individual pure sine has input components -- an $x$ position and a time value -- that been scaled differently. An individual wave's equation can be described as</p>
 
 <p className="mathblock">$$\sin(x \times L + \text{time} \times S) \times A$$</p>
 
@@ -723,46 +696,47 @@ The final wave can be described as the sum of $N$ such waves:
 \sum_{n=1}^{N}\ \sin(x \times L_n + \text{time} \times S_n) \times A_n\\
 \end{align}$$</p>
 
-Which put in code looks like so:
+Which put into code, looks like so:
 
 ```glsl
 float sum = 0.0;
-sum += sin(x * L1 + time * S1) * A1;
-sum += sin(x * L2 + time * S2) * A2;
-sum += sin(x * L3 + time * S3) * A3;
+sum += sin(x * L1 + u_time * S1) * A1;
+sum += sin(x * L2 + u_time * S2) * A2;
+sum += sin(x * L3 + u_time * S3) * A3;
 ...
 return sum;
 ```
 
-The problem is finding $L$, $S$, $A$ scalars for each individual sine wave that, when stacked, produce a nice looking final wave.
+The problem, then, is finding $L$, $S$, $A$ scalars for each individual sine wave that, when stacked, produce a nice looking final wave.
 
-In finding those values, I first create a "baseline wave" with the $L$, $S$, $A$ components set to a value that feels right.
+In finding those values, I first create a "baseline wave" with the $L$, $S$, $A$ components set to values that _feel_ right.
 
 ```glsl
 const float L = 0.011;
 const float S = 0.28;
 const float A = 32.0;
 
-float sum = 0.0;
-sum += sin(x * L + time * S) * A;
+float y = sin(x * L + u_time * S) * A;
 ```
 
-These constants produce the following wave. The length, speed and amplitude feel along the lines of what I want the final wave to look like.
+These constants produce the following wave:
 
 <WebGLShader fragmentShader="sine_stack_0" width={800} height={200} />
+
+The wave looks roughly what I want the final wave to look like, so these are good basline values for the $L$, $S$, $A$ components.
 
 I then add more sine waves that use the baseline $L$, $S$, $A$ components, scaled by some constants. After some trial and error, I ended up with the following:
 
 ```glsl
-float sum = 0.0;
-sum += sin(x * (L / 1.000) + time * 0.90 * S) * A * 0.64;
-sum += sin(x * (L / 1.153) + time * 1.15 * S) * A * 0.40;
-sum += sin(x * (L / 1.622) + time * 0.75 * S) * A * 0.48;
-sum += sin(x * (L / 1.871) + time * 0.65 * S) * A * 0.43;
-sum += sin(x * (L / 2.013) + time * 1.05 * S) * A * 0.32;
+float y = 0.0;
+y += sin(x * (L / 1.000) + u_time * 0.90 * S) * A * 0.64;
+y += sin(x * (L / 1.153) + u_time * 1.15 * S) * A * 0.40;
+y += sin(x * (L / 1.622) + u_time * 0.75 * S) * A * 0.48;
+y += sin(x * (L / 1.871) + u_time * 0.65 * S) * A * 0.43;
+y += sin(x * (L / 2.013) + u_time * 1.05 * S) * A * 0.32;
 ```
 
-<SmallNote label="">The "unevenness" of the wavelength and phase speed scalars ($L$ and $S$) is intentional. The idea is to make it unlikely for the waves to converge at the same time because that would result in excessive amounts of [constructive and destructive interference][interference].</SmallNote>
+<SmallNote label="">The "unevenness" of the wavelength and phase speed scalars ($L$, $S$) is intentional. The idea is to make it unlikely for many of the waves to converge at the same time because that would result in excessive amounts of [constructive and destructive interference][interference].</SmallNote>
 
 [interference]: https://en.wikipedia.org/wiki/Wave_interference
 
@@ -770,50 +744,32 @@ These five sine waves give us quite a fairly natural looking final wave:
 
 <WebGLShader fragmentShader="sine_stack_2" width={800} height={200} />
 
-But there's one aspect that I don't like: the wave feels like it's moving left at a fairly even speed. That's not surprising considering that each individual wave is moving left at a constant rate.
+But there's one aspect that I don't like: the wave feels like it's moving left at a fairly even rate. That's not surprising considering that each individual wave is moving left at a constant rate.
 
 We can counteract that by making the phase evolution of some waves negative:
 
 ```glsl
-float sum = 0.0;
-sum += sin(x * (L / 1.000) + time *  0.90 * S) * A * 0.64;
-sum += sin(x * (L / 1.153) + time *  1.15 * S) * A * 0.40;
-sum += sin(x * (L / 1.622) + time * -0.75 * S) * A * 0.48;
-sum += sin(x * (L / 1.871) + time *  0.65 * S) * A * 0.43;
-sum += sin(x * (L / 2.013) + time * -1.05 * S) * A * 0.32;
+float y = 0.0;
+y += sin(x * (L / 1.000) + u_time *  0.90 * S) * A * 0.64;
+y += sin(x * (L / 1.153) + u_time *  1.15 * S) * A * 0.40;
+y += sin(x * (L / 1.622) + u_time * -0.75 * S) * A * 0.48;
+y += sin(x * (L / 1.871) + u_time *  0.65 * S) * A * 0.43;
+y += sin(x * (L / 2.013) + u_time * -1.05 * S) * A * 0.32;
 ```
 
 Looking at the wave now, it fluctuates between flowing to the left or right with periods of relative stillness.
 
 <WebGLShader fragmentShader="sine_stack_3" width={800} height={200} />
 
-Because all of the sine waves are relative to $L$, $S$, $A$ we can tune the waves as a whole by adjusting those constants. Increase $S$ to make the wave faster, $L$ to make the waves shorter, and $A$ to make the waves taller.
+Because all of the sine waves are relative to $L$, $S$, $A$, we can tune the waves as a whole by adjusting those constants -- increase $S$ to make the wave faster, $L$ to make the waves shorter, and $A$ to make the waves taller -- I'll let you vary $L$ and $S$ to see the effect:
 
 <WebGLShader fragmentShader="sine_stack_3_LSA" width={800} height={200} />
 
+We've gotten a pretty natural looking wave by stacking pure sine waves, but we won't actually make use of stacked sine waves in our final effect.
 
-### Tide
+However, we _will_ use the idea of stacking noise of different scales and speeds. It's a really powerful idea. When used with better noise functions, stacking will help us achieve _really_ good looking noise.
 
-The wave is looking good, but it stays relatively still on the vertical axis. I want to make it more dynamic by adding periods of high and low tide. We can do that by adding a few more sine invocations with the $L$ component removed:
-
-```glsl
-float sum = 0.0;
-// ...
-
-sum += sin(time *  0.46 * S) * A * 0.64;
-sum += sin(time * -0.68 * S) * A * 0.48;
-sum += sin(time *  0.59 * S) * A * 0.72;
-```
-
-Removing the $L$ component makes the waves flat. They still fluctuate, but they do so uniformly over the width of the canvas. Here's the result of only including these waves:
-
-<WebGLShader fragmentShader="sine_stack_4" width={800} height={200} />
-
-Here's the final wave with the tide component added:
-
-<WebGLShader fragmentShader="sine_stack_final" width={800} height={200} />
-
-It's a pretty good wave -- definitely passable for our purposes. But we can create a better, more natural wave using simplex noise.
+With that being said, let's look at some real noise functions.
 
 
 ### Simplex noise
@@ -825,7 +781,7 @@ It's a pretty good wave -- definitely passable for our purposes. But we can crea
 [ken_perlin]: https://en.wikipedia.org/wiki/Ken_Perlin
 [perlin_drawbacks]: https://noiseposti.ng/posts/2022-01-16-The-Perlin-Problem-Moving-Past-Square-Noise.html
 
-The dimensionality of a simplex noise functions refers to how many numeric input values the function takes -- the 2D simplex noise function takes in two values while the 3D function takes in three values. However, all simplex noise functions return a single numeric value between $-1$ and $1$.
+The dimensionality of a simplex noise functions refers to how many numeric input values the function takes (the 2D simplex noise function takes in two numeric arguments while the 3D function takes three). However, all simplex noise functions return a single numeric value between $1$ and $-1$.
 
 2D simplex noise is frequently used, for example, to [procedurally generate terrain][generate_terrain] in video games. Here's an example texture created using 2D simplex noise that could be used as a height map:
 
@@ -843,15 +799,14 @@ float y = gl_FragCoord.y * L;
 
 float lightness = (simplex_noise(x, y) + 1.0) / 2.0;
 
-vec3 color = vec3(lightness);
-gl_FragColor = vec4(color, 1.0);
+gl_FragColor = vec4(vec3(lightness), 1.0);
 ```
 
-The $L$ scalar controls the scale of the $(x, y)$ coordinates. As $L$ increases, the noise becomes more granular. Here's a canvas that let's you adjust the value of $L$:
+The $L$ scalar controls the scale of the $(x, y)$ coordinates. As $L$ increases, the noise becomes more granular. Here's a canvas that let's you adjust $L$ to see the effect:
 
 <WebGLShader fragmentShader="simplex_noise" width={400} height={250} animate={false} />
 
-We'll use 2D simplex noise to create an animated 1D wave.
+We'll use 2D simplex noise to create an animated 1D wave. How exactly we'll do that may be very obvious, so let's visualize and break it down.
 
 
 ## 1D animation using 2D noise
@@ -869,11 +824,9 @@ for (const point of points) {
 }
 ```
 
-<SmallNote label="" center>I'm omitting the scalars used for clarity.</SmallNote>
-
 But how does all of this relate to generating an animated wave?
 
-Consider what happens if we use $\text{time}$ as the $z$ position. As $\text{time}$ passes, the $z$ position moves forward, giving us different 1D slices of the $y$ values of the surface along the $x$ axis. Here's a visualization:
+Consider what happens if we use time as the $z$ position. As time passes, the $z$ position moves forward, giving us different 1D slices of the $y$ values of the surface along the $x$ axis. Here's a visualization:
 
 <Scene autoRotate scene="simplex" height={480} angle={-18} xRotation={154} />
 
@@ -882,7 +835,7 @@ Consider what happens if we use $\text{time}$ as the $z$ position. As $\text{tim
 Putting this in code for our 2D canvas is quite simple:
 
 ```glsl
-uniform float time;
+uniform float u_time;
 
 const float L = 0.0015;
 const float S = 0.12;
@@ -890,63 +843,63 @@ const float A = 40.0;
 
 float x = gl_FragCoord.x;
 
-float curve_y = Y_START + simplex_noise(x * L, time * S) * A;
+float curve_y = Y + simplex_noise(x * L, u_time * S) * A;
 ```
 
 This gives us a smooth animated wave:
 
 <WebGLShader fragmentShader="simplex_wave" width={800} height={200} />
 
-<SmallNote label="" center>Just a single simplex noise function call already produces a very natural-looking wave.</SmallNote>
+<SmallNote label="" center>Just a single simplex noise function call already produces a very natural-looking wave!</SmallNote>
 
-Like before, there are three scalars that determine the characteristics of our wave: $L$, $S$ and $A$. Firstly, we scale $x$ by $L$ to make the wave shorter or longer on the horizontal axis:
+Like before, there are three scalars that determine the characteristics of our wave: $L$, $S$ and $A$. We scale $x$ by $L$ to make the wave shorter or longer on the horizontal axis:
 
 <p className="mathblock">$$\text{simplex}(x \times L,\ \text{time})$$</p>
 
-We then scale $\text{time}$ by $S$ to speed up or slow down the evolution of our wave -- the speed at which we move over the $z$ axis in the prior visualization:
+We then scale $\text{time}$ by $S$ to speed up or slow down the evolution of our wave -- the speed at which we move across the $z$ axis in the visualization above:
 
 <p className="mathblock">$$\text{simplex}(x \times L,\ \text{time} \times S)$$</p>
 
-Lastly, we scale the output of the $\text{simplex}$ function by $A$, which determines the amplitude of our wave.
+Lastly, we scale the output of the $\text{simplex}$ function by $A$, which determines the amplitude (height) of our wave.
 
 <p className="mathblock">$$\text{simplex}(x \times L,\ \text{time} \times S) \times A$$</p>
 
-As mentioned before, simplex noise returns a value from $1$ and $-1$. So to make a wave with a height of $96$ you'd set $A$ to $48$.
+<SmallNote label="" center>As mentioned before, simplex noise returns a value between $1$ and $-1$, so to make a wave with a height of $96$ you'd set $A$ to $48$.</SmallNote>
 
 All of this produces a pretty good looking wave, though it feels a bit simple. The peaks and valleys look too evenly spaced and predictable.
 
 <WebGLShader fragmentShader="simplex_wave" width={800} height={200} />
 
-Like sine waves, we can stack simplex waves of various lengths and speeds to get a more interesting final wave. I tweaked the constants and added a few increasingly large waves -- some slower and some faster. Here's what I ended up with:
+This is where stacking comes in. We can stack simplex waves of various lengths and speeds to get a more interesting final wave. I tweaked the constants and added a few increasingly large waves -- some slower and some faster. Here's what I ended up with:
 
 ```glsl
 const float L = 0.0018;
 const float S = 0.04;
 const float A = 32.0;
 
-float sum = 0.0;
-sum += simplex_noise(x * (L / 1.00), time * S * 1.00)) * A * 0.85;
-sum += simplex_noise(x * (L / 1.30), time * S * 1.26)) * A * 1.15;
-sum += simplex_noise(x * (L / 1.86), time * S * 1.09)) * A * 0.60;
-sum += simplex_noise(x * (L / 3.25), time * S * 0.89)) * A * 0.40;
+float y = 0.0;
+y += simplex_noise(x * (L / 1.00), u_time * S * 1.00)) * A * 0.85;
+y += simplex_noise(x * (L / 1.30), u_time * S * 1.26)) * A * 1.15;
+y += simplex_noise(x * (L / 1.86), u_time * S * 1.09)) * A * 0.60;
+y += simplex_noise(x * (L / 3.25), u_time * S * 0.89)) * A * 0.40;
 ```
 
-This produces a wave that feels natural yet visually interesting.
+This produces a wave that feels natural, yet visually interesting.
 
 <WebGLShader fragmentShader="simplex_stack_1" width={800} height={200} />
 
-I don't feel that this wave needs a tide component -- constructive interference seems to do a good enough job of introducing ebbs and flows. But there _is_ one component I feel is missing, which is directional flow. The wave is too "still", which makes it feel a bit artificial.
+Looks awesome, but there is one component I feel is missing, which is directional flow. The wave is too "still", which makes it feel a bit artificial.
 
-To make the wave flow left, we can add <Gl>time</Gl> to the <Gl>x</Gl> component, scaled by some constant that determines the amount of flow. Let's name that constant $F$.
+To make the wave flow left, we can add <Gl>u_time</Gl> to the <Gl>x</Gl> component, scaled by some constant that determines the amount of flow. Let's name that constant $F$.
 
 ```glsl
 const float F = 0.031;
 
-float sum = 0.0;
-sum += simplex_noise(x * (L / 1.00) + F * time, ...) * ...;
-sum += simplex_noise(x * (L / 1.30) + F * time, ...) * ...;
-sum += simplex_noise(x * (L / 1.86) + F * time, ...) * ...;
-sum += simplex_noise(x * (L / 3.25) + F * time, ...) * ...;
+float y = 0.0;
+y += simplex_noise(x * (L / 1.00) + F * u_time, ...) * ...;
+y += simplex_noise(x * (L / 1.30) + F * u_time, ...) * ...;
+y += simplex_noise(x * (L / 1.86) + F * u_time, ...) * ...;
+y += simplex_noise(x * (L / 3.25) + F * u_time, ...) * ...;
 ```
 
 This adds a subtle flow to the wave. I'll let you vary the amount of flow to feel the difference it makes:
@@ -955,16 +908,12 @@ This adds a subtle flow to the wave. I'll let you vary the amount of flow to fee
 
 <SmallNote label="" center>The amount of flow at 1x may feel a bit suble, but that's intentional. If the flow is easily noticeable, there's too much of it.</SmallNote>
 
-The wave is starting to feel really good. Let's move onto adding multiple waves.
+I think we've got a good looking wave. Let's move onto the next step.
 
 
 ## Multiple waves
 
-We've created a natural looking wave using simplex noise. Let's now update our shader to include multiple waves.
-
-<WebGLShader fragmentShader="multiple_waves" width={800} height={200} />
-
-As a first step, I'll create a <Gl>wave_alpha</Gl> function that takes in a <Gl>Y</Gl> position and height for the wave.
+Let's now update our shader to include multiple waves. As a first step, I'll create a reusable <Gl>wave_alpha</Gl> function that takes in a $y$ position and height for the wave.
 
 ```glsl
 float wave_alpha(float Y, float height) {
@@ -972,20 +921,38 @@ float wave_alpha(float Y, float height) {
 }
 ```
 
-We'll calculate the alpha like before: take the distance between the Y position of the wave's and the current pixel's Y positions (<Gl>gl_FragCoord.y</Gl>) and use the distance to calculate the alpha.
+To keep things clean, I'll create a <Gl method>wave_noise</Gl> function that returns the stacked simplex wave we defined in the last section:
+
+```glsl
+float wave_noise() {
+  float noise = 0.0;
+  noise += simplex_noise(...) * ...;
+  noise += simplex_noise(...) * ...;
+  // ...
+  return noise;
+}
+```
+
+We'll use that to calculate the wave's $y$ position:
 
 ```glsl
 float wave_alpha(float Y, float wave_height) {
-  float wave_y = Y + wave_noise(gl_FragCoord.x) * wave_height;
-  float dist_signed = wave_y - gl_FragCoord.y;
-  float alpha = clamp(0.5 + dist_signed, 0.0, 1.0);
+  float wave_y = Y + wave_noise() * wave_height;
+}
+```
+
+which we'll then use to calculate the distance from the wave to the pixel's $y$ position, using that to calculate the value of <Gl>alpha</Gl>:
+
+```glsl
+float wave_alpha(float Y, float wave_height) {
+  float wave_y = Y + wave_noise() * wave_height;
+  float dist = (wave_y - y);
+  float alpha = clamp(0.5 + dist, 0.0, 1.0);
   return alpha;
 }
 ```
 
-<SmallNote label="">The <Gl method>wave_noise</Gl> function contains the simplex noise we were calculating earlier.</SmallNote>
-
-We use this to calculate the alpha values of two waves, each with their separate Y positions and heights:
+We can then use the <Gl>wave_alpha</Gl> function to calculate alpha values for two waves, each with their separate $y$ positions and heights:
 
 ```glsl
 const float WAVE1_HEIGHT = 24.0;
@@ -997,15 +964,15 @@ float w1_alpha = wave_alpha(WAVE1_Y, WAVE1_HEIGHT);
 float w2_alpha = wave_alpha(WAVE2_Y, WAVE2_HEIGHT);
 ```
 
-We'll pick three colors -- one for the background, two for the waves
+To render a background and two waves, we'll need three colors. I picked these blue colors that I find nice to look at:
 
 ```glsl
-vec3 bg_color = vec3(...);
-vec3 w1_color = vec3(...);
-vec3 w2_color = vec3(...);
+vec3 bg_color = vec3(0.102, 0.208, 0.761);
+vec3 w1_color = vec3(0.094, 0.502, 0.910);
+vec3 w2_color = vec3(0.384, 0.827, 0.898);
 ```
 
-and composite those into a final image using the alphas returned from the <Gl method>wave_alpha</Gl> calls:
+We can composite those into a final image by blending them using the two wave alpha values:
 
 ```glsl
 vec3 color = bg_color;
@@ -1018,13 +985,13 @@ This gives us the following result:
 
 <WebGLShader fragmentShader="multiple_waves" width={800} height={200} fragmentShaderOptions={{ offsetScalar: 0 }} />
 
-We do get two waves, but they're completely in sync. This makes sense because the only input we're passing to the <Gl method>wave_noise</Gl> function is the pixel's $x$ position.
+We do get two waves, but they're completely in sync with each other. This makes sense because the only inputs to our noise functions are the pixel's $x$ position and time, which are identical for both waves.
 
-We'll need to introduce an offset for the noise to make the waves distinct. One way to do that is just to provide each wave with a literal <Gl>offset</Gl> value and pass that to the noise function:
+To fix this we'll introduce wave-specific offsets that we pass to the noise functions. One way to do that is just to provide each wave with a literal <Gl>offset</Gl> value and pass that to the noise function:
 
 ```glsl
 float wave_alpha(float Y, float wave_height, float offset) {
-  wave_noise(..., offset);
+  wave_noise(offset);
   // ...
 }
 
@@ -1032,16 +999,14 @@ float w1_alpha = wave_alpha(WAVE1_Y, WAVE1_HEIGHT, -72.2);
 float w2_alpha = wave_alpha(WAVE2_Y, WAVE2_HEIGHT, 163.9);
 ```
 
-The <Gl method>wave_noise</Gl> function could then add <Gl>offset</Gl> to <Gl>time</Gl> and use that when calculating the noise.
+The <Gl method>wave_noise</Gl> function could then add <Gl>offset</Gl> to <Gl>u_time</Gl> and use that when calculating the noise.
 
 ```glsl
-float wave_noise(float x, float offset) {
-  // ...
+float wave_noise(float offset) {
+  float time = u_time + offset;
 
-  float t = time + offset;
-
-  float sum = 0.0;
-  sum += simplex_noise(x * L + F * t, t * S * 1.00);
+  float noise = 0.0;
+  noise += simplex_noise(x * L + F * time, time * S) * A;
   // ...
 }
 ```
@@ -1052,8 +1017,8 @@ But we don't actually need to provide the offset manually. We can just calculate
 
 ```glsl
 float wave_alpha(float Y, float wave_height) {
-  float noise_offset = Y * wave_height;
-  wave_noise(..., noise_offset);
+  float offset = Y * wave_height;
+  wave_noise(offset);
   // ...
 }
 ```
@@ -1069,16 +1034,20 @@ With these offsets added to $\text{time}$, the two waves become spaced apart by 
 
 <SmallNote label="">How random and far apart your offsets needs to be ultimately depend on your application. If you need really random offsets, you can use more complicated methods to calculate them, but we just need the offsets not to be very close (a difference of 50 would do the trick).</SmallNote>
 
+With the offsets added, we get two distinct waves:
+
 <WebGLShader fragmentShader="multiple_waves" width={800} height={200} />
 
-Having updated our shader to handle multiple waves, let's move onto adding noise to our colors.
+Having updated our shader to handle multiple waves, let's move onto making the color of our waves dynamic.
 
 
 ## Background noise
 
-In generating the waves above we used a 2D noise function to generate animated 1D noise. That pattern holds for higher dimensions as well -- when generating $n$ dimensional noise, we need use an $n + 1$ dimensional noise function with $\text{time}$ as the value of the last dimension.
+To generate the noise for the waves above, we used a 2D noise function to generate animated 1D noise.
 
-So let's build animated 2D background noise! Here's the static 2D simplex noise we saw earlier:
+That pattern holds for higher dimensions as well -- when generating $n$ dimensional noise, we need use an $n + 1$-dimensional noise function with $\text{time}$ as the value of the last dimension.
+
+Here's the static 2D simplex noise we saw earlier:
 
 <WebGLShader fragmentShader="simplex_noise" width={350} height={250} animate={false} showControls={false} />
 
@@ -1088,13 +1057,24 @@ To animate it, we'll use a 3D simplex noise function with the signature:
 float simplex_noise(float x, float y, float z);
 ```
 
-We'll pass the pixel's $x$ and $y$ positions as the first two arguments, and $\text{time}$ as the third argument:
+We'll pass the pixel's $x$ and $y$ positions as the first two arguments, and $\text{time}$ as the third argument.
 
 ```glsl
+const float L = 0.02;
+const float S = 0.6;
+
 float x = gl_FragCoord.x;
 float y = gl_FragCoord.y;
 
-simplex_noise(x, y, time);
+simplex_noise(x * L, y * L, time * S);
+```
+
+We use the simplex noise to calculate a lightness value, which we use as the color of the pixel:
+
+```glsl
+float lightness = (simplex_noise(...) + 1.0) / 2.0;
+
+gl_FragColor = vec4(vec3(lightness), 1.0);
 ```
 
 This gives us animated 2D noise:
@@ -1107,35 +1087,25 @@ It's worth mentioning that we could use classic perlin noise instead of simplex.
 
 <SmallNote label="" center>Perlin noise is left, simplex noise is right.</SmallNote>
 
-Anyway, here's a more complete implementation of the shader with scalars included:
+Anyway, our goal is for this noise to eventually be used to create the background color of our final gradient:
 
-```glsl
-const float L = 0.02;
-const float S = 0.6;
+<WebGLShader fragmentShader="final" skew />
 
-float x = gl_FragCoord.x * L;
-float y = gl_FragCoord.y * L;
+For our background noise to start looking like that we'll need to make some adjustments. Let's scale up the noise and also make the scale of the noise larger on the $x$ axis than the $y$ axis.
 
-float lightness = (simplex_noise(x, y, time * S) + 1.0) / 2.0;
-
-vec3 color = vec3(lightness):
-gl_FragColor = vec4(color, 1.0);
-```
-
-Our goal is for this noise to used to create the background color of our final gradient:
-
-<WebGLShader fragmentShader="final" width={1000} height={250} />
-
-For our noise to start looking like that, we'll need to make some adjustments. Here is a canvas with the noise >11x larger on the X axis and ~3.3x larger on the Y axis. I also slowed the evolution down by 3x:
+Here is a canvas where the noise has been scaled up by $11$, and the $y$ scale is $3$ times smaller than the $x$
+ scale -- I'll let you control the scale ($L$) to see the effect. I also slowed the evolution down to a fifth of its prior speed.
 
 <WebGLShader
   fragmentShader="simplex_noise"
   width={800}
   height={250}
-  fragmentShaderOptions={{ L: 0.0017, yScale: 3.5, timeScale: 0.2 }}
+  fragmentShaderOptions={{ L: 0.0017, yScale: 3.0, timeScale: 0.2 }}
 />
 
-We can stack 2D simplex noise like we did when building the wave (layering noise of different scales, speeds and amplitudes). After some tweaking, here's what I came up with:
+Looks pretty good, but the noise feels a bit too evenly spaced. Yet again, we'll use stacking to make the noise more interesting.
+
+After some constant tweaking, here's what I came up with:
 
 ```glsl
 const float L = 0.0015;
@@ -1145,19 +1115,19 @@ const float Y_SCALE = 3.0;
 float x = gl_FragCoord.x;
 float y = gl_FragCoord.y * Y_SCALE;
 
-float sum = 0.5;
-sum += simplex_noise(x * L * 1.0, y * L * 1.00, time * S + O1) * 0.30;
-sum += simplex_noise(x * L * 0.6, y * L * 0.85, time * S + O2) * 0.26;
-sum += simplex_noise(x * L * 0.4, y * L * 0.70, time * S + O3) * 0.22;
+float noise = 0.5;
+noise += simplex_noise(x * L * 1.0, y * L * 1.00, time * S + O1) * 0.30;
+noise += simplex_noise(x * L * 0.6, y * L * 0.85, time * S + O2) * 0.26;
+noise += simplex_noise(x * L * 0.4, y * L * 0.70, time * S + O3) * 0.22;
 
-float lightness = clamp(sum, 0.0, 1.0);
+float lightness = clamp(noise, 0.0, 1.0);
 ```
 
 This gives us more interesting noise. The larger noise provides smooth, sweeping fades, and the smaller noise gives us finer detail and visual interest:
 
 <WebGLShader fragmentShader="simplex_noise_stacked_0" width={800} height={250} />
 
-To add a final cherry on top, I want to add a directional flow component. I'll make two of the noises drift left, and the other drift right.
+As a final cherry on top, I want to add a directional flow component. I'll make two of the noises drift left, and the other drift right.
 
 ```glsl
 float F = 0.11 * time;
