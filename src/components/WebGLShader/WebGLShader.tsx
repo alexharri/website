@@ -9,7 +9,9 @@ import { useVisible } from "../../utils/hooks/useVisible";
 import { FragmentShader, FragmentShaderUniform } from "./shaders/types";
 import { NumberVariable } from "../../threejs/NumberVariable";
 import { invLerp, lerp } from "../../math/lerp";
+import { useViewportWidth } from "../../utils/hooks/useViewportWidth";
 
+const BASELINE_WIDTH = 600;
 const DEFAULT_HEIGHT = 250;
 const UNIFORM_MARGIN = 24;
 const UNIFORM_V_GAP = 32;
@@ -43,6 +45,16 @@ const styles = ({ styled }: StyleOptions) => ({
     }
   `,
 
+  canvasWrapper: styled.css`
+    position: relative;
+
+    canvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+    }
+  `,
+
   variables: styled.css`
     position: relative;
     z-index: 2;
@@ -73,6 +85,8 @@ interface Props extends FragmentShaderProps {
   skew?: boolean;
   colorConfiguration: keyof typeof colorConfigurations;
   width?: number;
+  minWidth?: number;
+  maintainHeight?: number;
   height?: number;
   showControls?: boolean;
   animate?: boolean;
@@ -98,7 +112,22 @@ const _WebGLShader: React.FC<Props> = (props) => {
 
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
-  const { height = 250, width, showControls = true, animate = true } = props;
+  const { showControls = true, animate = true } = props;
+  let { height = 250 } = props;
+
+  const viewportWidth = useViewportWidth()!;
+
+  let width = props.width ?? viewportWidth;
+  if (props.minWidth != null) {
+    width = Math.max(width, props.minWidth);
+  }
+
+  const canvasScale = Math.min(1, viewportWidth / width);
+
+  if (props.maintainHeight != null) {
+    const fac = (Math.max(1, width / viewportWidth) - 1) * props.maintainHeight;
+    height *= 1 + fac;
+  }
 
   const fragmentShader = useFragmentShader(props);
 
@@ -145,7 +174,9 @@ const _WebGLShader: React.FC<Props> = (props) => {
       requestAnimationFrame(tick);
 
       if (resized) {
-        renderer.setWidth(props.width ?? window.innerWidth);
+        let { innerWidth } = window;
+        if (props.minWidth != null) innerWidth = Math.max(innerWidth, props.minWidth);
+        renderer.setWidth(props.width ?? innerWidth);
       }
 
       for (let [key, value] of pendingUniformWrites.current) {
@@ -183,7 +214,18 @@ const _WebGLShader: React.FC<Props> = (props) => {
 
   return (
     <>
-      <canvas ref={canvasRef} width={width} height={height} />
+      <div className={s("canvasWrapper")} style={{ width, maxWidth: "100%", background: "blue" }}>
+        <div style={{ paddingTop: `${(height / width) * 100}%` }} />
+        <canvas
+          ref={canvasRef}
+          width={width}
+          height={height}
+          style={{
+            transform: `scale(${canvasScale})`,
+            transformOrigin: "0 0",
+          }}
+        />
+      </div>
       {showControls && (
         <div className={s("variables", { vertical: false && uniformEntries.length > 2 })}>
           {uniformEntries.map(([key, uniform]) => {
@@ -219,9 +261,15 @@ export const WebGLShader: React.FC<Props> = (props) => {
     height += 72;
   }
 
+  const width = props.width ?? BASELINE_WIDTH;
+
   return (
-    <div className={s("container", { skew })} style={{ height }} ref={ref}>
-      {visible && <_WebGLShader {...props} />}
+    <div className={s("container", { skew })} ref={ref}>
+      {visible ? (
+        <_WebGLShader {...props} />
+      ) : (
+        <div style={{ paddingTop: `${(height / width) * 100}%` }} />
+      )}
     </div>
   );
 };

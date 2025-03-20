@@ -8,7 +8,7 @@ tags: []
 
 A few weeks ago I rolled up my sleeves and embarked on a journey to produce a flowing gradient effect. Here's what I ended up with:
 
-<WebGLShader fragmentShader="final" skew />
+<WebGLShader fragmentShader="final" skew minWidth={600} maintainHeight={0.3} />
 
 This effect is written in a WebGL shader, using noise functions to produce the flowing waves and dynamic blur. In this post, I'll break down how I created this effect. We'll learn about WebGL, fragment shaders, and we'll dive into noise functions.
 
@@ -552,7 +552,7 @@ Which applies the foreground gradient to the wave:
 
 Take another look at the final animation and consider the role that blur plays. The waves in the animation slowly fluctuate between a blurry and a sharp state.
 
-<WebGLShader fragmentShader="final" skew />
+<WebGLShader fragmentShader="final" skew minWidth={600} maintainHeight={0.3} />
 
 The blur isn't applied uniformly. The wave slowly transitions from being fully blurred to being only partially blurred -- or not blurred at all.
 
@@ -659,7 +659,8 @@ Let's now and work on creating a natural-looking wave effect.
 
 If you look at the final gradient, you'll see that the waves look a lot more natural than the sine waves we've been working with so far. I'll disable the blur so that you can see the waves better.
 
-<WebGLShader fragmentShader="final" height={250} fragmentShaderOptions={{ blurAmount: 10 }} skew />
+<WebGLShader fragmentShader="final" fragmentShaderOptions={{ blurAmount: 10 }} skew minWidth={600} maintainHeight={0.3} />
+
 
 There's loads of ways that you could go about creating such a wave, but I'll show you the two.
 
@@ -668,17 +669,17 @@ There's loads of ways that you could go about creating such a wave, but I'll sho
 
 I often reach for stacked sine waves when I need a simple and natural wave-like noise function. Here's an example:
 
-<WebGLShader fragmentShader="sine_stack_final" width={800} height={200} />
+<WebGLShader fragmentShader="sine_stack_final" width={800} height={200} maintainHeight={0.7} />
 
 The idea is to sum the output of multiple sine waves with different wave lengths, amplitudes, and phase speeds.
 
 <p align="center">Take the following pure sine waves:</p>
 
-<WebGLShader fragmentShader="sine_stack_decomposed" width={600} height={250} />
+<WebGLShader fragmentShader="sine_stack_decomposed" width={600} height={250} maintainHeight={0.7} />
 
 <p align="center" style={{ marginBottom: -40 }}>If you sum their output, you get an interesting final wave:</p>
 
-<WebGLShader fragmentShader="sine_stack_composed" width={600} height={170} />
+<WebGLShader fragmentShader="sine_stack_composed" width={600} height={170} maintainHeight={0.7} />
 
 <p style={{ marginTop: -24 }}>Each individual pure sine has input components -- an $x$ position and a time value -- that been scaled differently. An individual wave's equation can be described as</p>
 
@@ -1089,7 +1090,7 @@ It's worth mentioning that we could use classic perlin noise instead of simplex.
 
 Anyway, our goal is for this noise to eventually be used to create the background color of our final gradient:
 
-<WebGLShader fragmentShader="final" skew />
+<WebGLShader fragmentShader="final" skew minWidth={600} maintainHeight={0.3} />
 
 For our background noise to start looking like that we'll need to make some adjustments. Let's scale up the noise and also make the scale of the noise larger on the $x$ axis than the $y$ axis.
 
@@ -1476,7 +1477,7 @@ Currently, our waves have sharp edges:
 
 But in the final effect we see varying amounts of blur applied to each wave, with the amount of blur evolving over time.
 
-<WebGLShader fragmentShader="final" skew />
+<WebGLShader fragmentShader="final" skew minWidth={600} maintainHeight={0.3} />
 
 Let's get started building this sort of blur. As a refresher, we're currently calculating the alpha of our waves like so:
 
@@ -1557,7 +1558,7 @@ But honestly, it looks pretty bad. The blur looks harsh -- like it has distinct 
 
 Also, the whole wave feels somewhat blurry, just unevenly so. We don't seem to get those long, sharp edges that appear in the final effect:
 
-<WebGLShader fragmentShader="final" skew />
+<WebGLShader fragmentShader="final" skew minWidth={600} maintainHeight={0.3} />
 
 Let's start off by fixing the harsh edges.
 

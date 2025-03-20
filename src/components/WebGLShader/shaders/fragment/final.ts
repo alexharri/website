@@ -38,18 +38,15 @@ const createFragmentShader: CreateFragmentShader = (options) => {
     precision mediump float;
 
     uniform float u_time; // Time in seconds
-    uniform float u_w;
     uniform float u_h;
     uniform sampler2D u_gradient;
   
     const float PI = 3.14159, TAU = PI * 2.0;
 
     float WAVE1_Y = 0.45 * u_h, WAVE2_Y = 0.9 * u_h;
-    const float WAVE1_HEIGHT = 48.0, WAVE2_HEIGHT = 36.0;
+    float WAVE1_HEIGHT = 0.195 * u_h, WAVE2_HEIGHT = 0.144 * u_h;
 
     const float ACCENT_NOISE_SCALE = 0.4; // Smaller is bigger
-  
-    float DIV_H = 1.0 / u_h, DIV_W = 1.0 / u_w;
   
     // Imports
     ${noiseUtils}
