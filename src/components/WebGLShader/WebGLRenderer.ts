@@ -128,11 +128,12 @@ export class WebGLRenderer {
     this.timeStates[index].timeSpeed = value;
   }
 
-  public setWidth(width: number) {
+  public setDimensions(width: number, height: number) {
     const { gl } = this;
 
     const canvas = gl.canvas;
     canvas.width = width;
+    canvas.height = height;
 
     // Place positions into buffer
     gl.bindBuffer(gl.ARRAY_BUFFER, this.positionBuffer);

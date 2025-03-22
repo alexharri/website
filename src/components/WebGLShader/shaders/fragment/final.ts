@@ -137,8 +137,7 @@ const createFragmentShader: CreateFragmentShader = (options) => {
       return blur_fac;
     }
 
-    float wave_alpha(float Y, float wave_height) {
-      float offset = Y * wave_height;
+    float wave_alpha(float Y, float wave_height, float offset) {
       float wave_y = Y + wave_y_noise(offset) * wave_height;
       float dist_signed = wave_y - gl_FragCoord.y;
       float blur_fac = calc_blur(offset);
@@ -185,8 +184,8 @@ const createFragmentShader: CreateFragmentShader = (options) => {
       float w1_lightness = background_noise( 273.3);
       float w2_lightness = background_noise( 623.1);
 
-      float w1_alpha = wave_alpha(WAVE1_Y, WAVE1_HEIGHT);
-      float w2_alpha = wave_alpha(WAVE2_Y, WAVE2_HEIGHT);
+      float w1_alpha = wave_alpha(WAVE1_Y, WAVE1_HEIGHT, 112.5 * 48.75);
+      float w2_alpha = wave_alpha(WAVE2_Y, WAVE2_HEIGHT, 225.0 * 36.00);
 
       ${includeif(
         accentColor != null,

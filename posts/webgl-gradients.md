@@ -6,11 +6,15 @@ publishedAt: ""
 tags: []
 ---
 
-A few weeks ago I rolled up my sleeves and embarked on a journey to produce a flowing gradient effect. Here's what I ended up with:
+A few weeks ago I embarked on a journey to create a flowing gradient effect -- here's what I ended up making:
 
-<WebGLShader fragmentShader="final" skew minWidth={600} maintainHeight={0.3} seed={16192} />
+<WebGLShader fragmentShader="final" skew height={275} minWidth={600} maintainHeight={0.3} seed={16192} />
 
-This effect is written in a WebGL shader, using noise functions to produce the flowing waves and dynamic blur. In this post, I'll break down how I created this effect. We'll learn about WebGL, fragment shaders, and we'll dive into noise functions.
+This effect is written in a WebGL shader, using noise functions and some clever math to produce the flowing waves and dynamic blur.
+
+In this post I'll break down this effect step-by-step. You need no prior knowledge of WebGL or shaders to read this post -- we'll start by building a mental model for shaders and then move onto more advanced concepts.
+
+In reading this post you'll learn loads about WebGL and writing fragment shaders. We'll also utilize some cool noise functions and math tricks along the way.
 
 Let's get to it!
 
@@ -25,7 +29,7 @@ type Position = { x: number, y: number };
 function pixelColor({ x, y }: Position): Color;
 ```
 
-For every pixel on the canvas, we'll invoke the function with the pixel's position to determine the color of the pixel. You can think of this like so:
+For every pixel on the canvas, we'll invoke the color function with the pixel's position to its color. A canvas frame might be rendered like so:
 
 ```ts
 for (let x = 0; x < canvas.width; x++) {
@@ -60,7 +64,9 @@ function pixelColor({ x, y }: Position): Color {
 }
 ```
 
-<SmallNote>When <Ts>x == 0</Ts>, we get a $t$ value of $0$, which gives us 100% red. When <Ts>x == canvas.width - 1</Ts> we get a $t$ value of $1$, which gives us 100% blue. If $t = 0.3$ we'd get 70% red and 30% blue.</SmallNote>
+The <Ts method>mix</Ts> function is an interpolation function that [linearly interpolates][lerp] between the two input colors using a blend factor between $0$ and $1$.
+
+<SmallNote label="">When <Ts>x == 0</Ts> we get a $t$ value of $0$, giving us 100% red. When <Ts>x == canvas.width - 1</Ts> we get a $t$ value of $1$, giving us 100% blue. If $t = 0.3$ we'd get 70% red and 30% blue.</SmallNote>
 
 This produces red-to-blue gradient over the width of the canvas (the $x$ axis):
 
@@ -76,15 +82,15 @@ function pixelColor({ x, y }: Position): Color {
 }
 ```
 
-<SmallNote>$sin()$ returns a value between $-1$ and $1$, but our mixing function accepts a value from $0$ and $1$. For this reason, we normalize $t$ by remapping $[-1, 1]$ to $[0, 1]$ via $(t + 1)\,/\,2$.</SmallNote>
+<SmallNote><Ts method>sin</Ts> returns a value between $-1$ and $1$, but our mixing function accepts a value from $0$ and $1$. For this reason, we normalize $t$ by remapping $[-1, 1]$ to $[0, 1]$ via $(t + 1)\,/\,2$.</SmallNote>
+
+This produces the following effect:
 
 <WebGLShader fragmentShader="x_sine_lerp" width={150} height={150} fragmentShaderOptions={{ waveLength: Math.PI * 2 }} showControls={false} />
 
 Those waves are quite thin! That's because we're oscillating between red and blue every $\pi$ pixels.
 
-We can control the rate of oscillation by defining a [wave length][wave_len] multiplier. It will determine over how many pixels the gradient oscillates from red to blue and red again.
-
-For a wave length of $L$ pixels the multiplier should be $\dfrac{2\pi}{L}$:
+We can control the rate of oscillation by defining a [wave length][wave_len] multiplier. It will determine over how many pixels the gradient oscillates from red to blue and red again. For a wave length of $L$ pixels the multiplier becomes $\dfrac{2\pi}{L}$:
 
 [wave_len]: https://en.wikipedia.org/wiki/Wavelength
 
@@ -98,22 +104,22 @@ function pixelColor({ x, y }: Position): Color {
 }
 ```
 
-This produces a oscillating gradient with the desired wave length:
+This produces a oscillating gradient with the desired wave length -- I'll let you vary $L$ to see the effect:
 
 <WebGLShader fragmentShader="x_sine_lerp" width={150} height={150} fragmentShaderOptions={{ waveLength: 40 }} />
 
 
 ### Adding motion
 
-So far we've just been producing static images. To introduce motion, we'll update our color function to take in a <Ts>time</Ts> value as well.
+So far we've only produced static images. To introduce motion, we'll update our color function to take in a <Ts>time</Ts> value as well.
 
 ```ts
 function pixelColor({ x, y }: Position, time: number): Color;
 ```
 
-We'll define <Ts>time</Ts> as the "elapsed" time, measured in seconds.
+We'll define <Ts>time</Ts> as the elapsed time, measured in seconds.
 
-If add <Ts>time</Ts> to the pixel's $x$ position, we will simulate the canvas "scrolling" to the right one pixel a second:
+By adding <Ts>time</Ts> to the pixel's $x$ position, we simulate the canvas "scrolling" to the right one pixel a second:
 
 ```ts
 let t = sin((x + time) * toWaveLength);
@@ -131,7 +137,7 @@ Here's the result -- I'll let you vary $S$ so that you can adjust the speed:
 
 <WebGLShader fragmentShader="x_sine_lerp_time" width={150} height={150} />
 
-And voila -- we've got movement!
+Voila -- we've got movement!
 
 <ThreeDots />
 
@@ -139,11 +145,11 @@ These two inputs, time and the pixel's position, will be the main components tha
 
 We'll spend the rest of the post writing a color function that will calculate a color for every pixel -- with the pixel's position and time as the function's inputs. Together, the colors of each pixel constitute a single frame of animation.
 
-<WebGLShader fragmentShader="final" width={1000} height={250} />
+<WebGLShader fragmentShader="final" width={1000} minWidth={600} height={300} maintainHeight={0.3} seed={43394} />
 
-But consider the amount of work that needs to be done. A $1{,}000 \times 250$ canvas, like the one above, contains $250{,}000$ pixels. That's $250{,}000$ invocations of our pixel function every frame -- a lot of work for a CPU thread to perform 60 times a second!
+But consider the amount of work that needs to be done. A $1{,}000 \times 300$ canvas<MediaQuery query="(min-width: 1000px)"> -- like the one above --</MediaQuery><MediaQuery query="(max-width: 999px)">, for example,</MediaQuery> contains $300{,}000$ pixels. That's $300{,}000$ invocations of our pixel function every frame -- a ton of work for a CPU to perform 60 times a second!
 
-That's why we'll write our color function as a WebGL shader: WebGL shaders run on the GPU! The GPU is designed for pararellized work, which allows us to run the color function in parallel.
+That's why we'll write our color function as a WebGL shader. WebGL shaders run on the GPU! The GPU is designed for pararellized work, which allows us to run the color function in parallel.
 
 Conceptually, nothing changes. We're still going to be writing a single color function that takes a position and time value and returns a color. But instead of writing it in JavaScript and running it on the CPU, we'll write it in GLSL (the language for shaders) and run it on the GPU.
 

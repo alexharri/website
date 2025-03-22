@@ -9,7 +9,7 @@ import { cssVariables } from "../../utils/cssVariables";
 import { useVisible } from "../../utils/hooks/useVisible";
 import { FragmentShader, FragmentShaderUniform } from "./shaders/types";
 import { NumberVariable } from "../../threejs/NumberVariable";
-import { invLerp, lerp } from "../../math/lerp";
+import { clamp, invLerp, lerp } from "../../math/lerp";
 import { useViewportWidth } from "../../utils/hooks/useViewportWidth";
 
 const DEFAULT_HEIGHT = 250;
@@ -137,26 +137,32 @@ function useFragmentShader(props: FragmentShaderProps): FragmentShader {
   return fragmentShader;
 }
 
+function calculateCanvasDimensions(props: Props, viewportWidth: number) {
+  let { height = DEFAULT_HEIGHT } = props;
+
+  const width = clamp(
+    viewportWidth,
+    props.minWidth ?? props.width ?? viewportWidth,
+    props.width ?? viewportWidth,
+  );
+  if (props.maintainHeight != null) {
+    const fac = (Math.max(1, width / viewportWidth) - 1) * props.maintainHeight;
+    height *= 1 + fac;
+  }
+  height = Math.round(height); // A fractional canvas height causes visual artifacts
+
+  return [width, height];
+}
+
 const _WebGLShader: React.FC<Props> = (props) => {
   const s = useStyles(styles);
 
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   const { showControls = true, animate = true } = props;
-  let { height = DEFAULT_HEIGHT } = props;
 
   const viewportWidth = useViewportWidth()!;
-
-  let width = props.width ?? viewportWidth;
-  if (props.minWidth != null) {
-    width = Math.max(width, props.minWidth);
-  }
-
-  if (props.maintainHeight != null) {
-    const fac = (Math.max(1, width / viewportWidth) - 1) * props.maintainHeight;
-    height *= 1 + fac;
-  }
-  height = Math.round(height); // A fractional canvas height causes visual artifacts
+  const [width, height] = calculateCanvasDimensions(props, viewportWidth);
 
   const idealScale = Math.min(1, viewportWidth / width);
   const canvasScale = Math.ceil(height * idealScale) / height;
@@ -212,9 +218,10 @@ const _WebGLShader: React.FC<Props> = (props) => {
       requestAnimationFrame(tick);
 
       if (resized) {
-        let { innerWidth } = window;
-        if (props.minWidth != null) innerWidth = Math.max(innerWidth, props.minWidth);
-        renderer.setWidth(props.width ?? innerWidth);
+        const [width, height] = calculateCanvasDimensions(props, window.innerWidth);
+        renderer.setDimensions(width, height);
+        // console.log(width, { width: props.width, minWidth: props.minWidth });
+        resized = false;
       }
 
       for (let [key, value] of pendingUniformWrites.current) {

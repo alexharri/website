@@ -29,6 +29,7 @@ import { usePostWatcher } from "../../utils/watcher-client";
 import { Code } from "../../components/Code/Code";
 import { WebGLShader } from "../../components/WebGLShader/WebGLShader";
 import { ThreeDots } from "../../components/ThreeDots/ThreeDots";
+import { MediaQuery } from "../../components/MediaQuery/MediaQuery";
 
 function firstUpper(s: string) {
   if (s.length === 0) return s;
@@ -79,6 +80,7 @@ const baseComponents = {
   EmDash: () => "—",
   WebGLShader,
   ThreeDots,
+  MediaQuery,
 };
 
 interface Props {
