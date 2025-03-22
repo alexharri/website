@@ -8,7 +8,7 @@ tags: []
 
 A few weeks ago I rolled up my sleeves and embarked on a journey to produce a flowing gradient effect. Here's what I ended up with:
 
-<WebGLShader fragmentShader="final" skew minWidth={600} maintainHeight={0.3} />
+<WebGLShader fragmentShader="final" skew minWidth={600} maintainHeight={0.3} seed={16192} />
 
 This effect is written in a WebGL shader, using noise functions to produce the flowing waves and dynamic blur. In this post, I'll break down how I created this effect. We'll learn about WebGL, fragment shaders, and we'll dive into noise functions.
 

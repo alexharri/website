@@ -80,11 +80,11 @@ const createFragmentShader: CreateFragmentShader = (options) => {
 
     float background_noise(float offset) {
       const float S = 0.064;
-      const float L = 0.0009;
+      const float L = 0.00085;
       const float L1 = 1.5, L2 = 0.9, L3 = 0.6;
       const float LY1 = 1.00, LY2 = 0.85, LY3 = 0.70;
       const float F = 0.04;
-      const float Y_SCALE = 1.0 / 0.225;
+      const float Y_SCALE = 1.0 / 0.27;
 
       float x = gl_FragCoord.x * L;
       float y = gl_FragCoord.y * L * Y_SCALE;
@@ -116,9 +116,9 @@ const createFragmentShader: CreateFragmentShader = (options) => {
     }
 
     float calc_blur_bias() {
-      const float S = 0.3;
+      const float S = 0.261;
       float bias_t = (sin(u_time * S) + 1.0) * 0.5;
-      return lerp(-0.18, 0.06, bias_t);
+      return lerp(-0.13, 0.04, bias_t);
     }
 
     float calc_blur(float offset) {

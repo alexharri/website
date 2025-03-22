@@ -41,6 +41,7 @@ export class WebGLRenderer {
       gradient: string[];
       accentColor?: string | null;
     },
+    seed: number | undefined,
   ) {
     const gl = canvas.getContext("webgl", { premultipliedAlpha: false });
     if (!gl) {
@@ -60,8 +61,9 @@ export class WebGLRenderer {
     this.u_w = gl.getUniformLocation(this.program, "u_w");
     this.u_h = gl.getUniformLocation(this.program, "u_h");
 
+    seed ??= Math.random() * 100_000;
     this.timeStates = Array.from({ length: N_TIME_VALUES }).map(() => ({
-      seed: Math.random() * 100_000,
+      seed,
       lastTime: Date.now(),
       elapsed: 0,
       timeSpeed: 1,
@@ -71,6 +73,16 @@ export class WebGLRenderer {
 
     gl.vertexAttribPointer(this.a_position, /* vec2 */ 2, gl.FLOAT, false, 0, 0);
     gl.useProgram(this.program);
+  }
+
+  public getSeed() {
+    const state = this.timeStates[0];
+    return state.seed;
+  }
+
+  public getTime() {
+    const state = this.timeStates[0];
+    return state.elapsed / 1000;
   }
 
   public render() {

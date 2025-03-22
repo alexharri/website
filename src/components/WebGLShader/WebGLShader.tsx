@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { css } from "@emotion/css";
 import { StyleOptions, useStyles } from "../../utils/styles";
 import { WebGLRenderer } from "./WebGLRenderer";
 import { colorConfigurations } from "./colorConfigurations";
@@ -11,10 +12,11 @@ import { NumberVariable } from "../../threejs/NumberVariable";
 import { invLerp, lerp } from "../../math/lerp";
 import { useViewportWidth } from "../../utils/hooks/useViewportWidth";
 
-const BASELINE_WIDTH = 600;
 const DEFAULT_HEIGHT = 250;
 const UNIFORM_MARGIN = 24;
 const UNIFORM_V_GAP = 32;
+const CONTROLS_HEIGHT = 72;
+const SHOW_SEED_AND_TIME = false;
 
 function parseUniformValue(uniform: FragmentShaderUniform, value: number) {
   if (uniform.remap) {
@@ -90,6 +92,34 @@ interface Props extends FragmentShaderProps {
   height?: number;
   showControls?: boolean;
   animate?: boolean;
+  seed?: number;
+}
+
+function useCanvasHeightPlaceholderClassName(props: Props) {
+  const { height = DEFAULT_HEIGHT, maintainHeight = 0 } = props;
+  const width = props.minWidth ?? props.width;
+
+  return useMemo(() => {
+    const styled = { css };
+    const classNames = [
+      styled.css`
+        padding-top: ${height}px;
+        width: 100vw;
+      `,
+    ];
+    if (typeof width === "number") {
+      const heightProportion = height / width;
+      classNames.push(styled.css`
+        @media (max-width: ${width}px) {
+          padding-top: ${heightProportion * 100}vw;
+          padding-bottom: calc(
+            ${height * maintainHeight}px - ${heightProportion * maintainHeight * 100}vw
+          );
+        }
+      `);
+    }
+    return classNames.join(" ");
+  }, [width, height]);
 }
 
 function useFragmentShader(props: FragmentShaderProps): FragmentShader {
@@ -113,7 +143,7 @@ const _WebGLShader: React.FC<Props> = (props) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   const { showControls = true, animate = true } = props;
-  let { height = 250 } = props;
+  let { height = DEFAULT_HEIGHT } = props;
 
   const viewportWidth = useViewportWidth()!;
 
@@ -122,12 +152,14 @@ const _WebGLShader: React.FC<Props> = (props) => {
     width = Math.max(width, props.minWidth);
   }
 
-  const canvasScale = Math.min(1, viewportWidth / width);
-
   if (props.maintainHeight != null) {
     const fac = (Math.max(1, width / viewportWidth) - 1) * props.maintainHeight;
     height *= 1 + fac;
   }
+  height = Math.round(height); // A fractional canvas height causes visual artifacts
+
+  const idealScale = Math.min(1, viewportWidth / width);
+  const canvasScale = Math.ceil(height * idealScale) / height;
 
   const fragmentShader = useFragmentShader(props);
 
@@ -156,7 +188,13 @@ const _WebGLShader: React.FC<Props> = (props) => {
     if (!createFragmentShader)
       throw new Error(`Could not find '${props.fragmentShader}' fragment shader.`);
 
-    const renderer = new WebGLRenderer(canvas, vertexShader, fragmentShader.shader, colorConfig);
+    const renderer = new WebGLRenderer(
+      canvas,
+      vertexShader,
+      fragmentShader.shader,
+      colorConfig,
+      props.seed,
+    );
     for (const [key, value] of Object.entries(uniformValues)) {
       pendingUniformWrites.current.push([key, value]);
     }
@@ -195,6 +233,15 @@ const _WebGLShader: React.FC<Props> = (props) => {
       pendingUniformWrites.current.length = 0;
 
       renderer.render();
+
+      if (SHOW_SEED_AND_TIME) {
+        const timeEl = document.querySelector(
+          `[data-shader-time="${props.fragmentShader}"]`,
+        ) as HTMLSpanElement | null;
+        if (timeEl) {
+          timeEl.innerText = renderer.getSeed().toFixed(0) + ", " + renderer.getTime().toFixed(0);
+        }
+      }
     }
     tick();
 
@@ -214,7 +261,7 @@ const _WebGLShader: React.FC<Props> = (props) => {
 
   return (
     <>
-      <div className={s("canvasWrapper")} style={{ width, maxWidth: "100%", background: "blue" }}>
+      <div className={s("canvasWrapper")} style={{ width, maxWidth: "100%" }}>
         <div style={{ paddingTop: `${(height / width) * 100}%` }} />
         <canvas
           ref={canvasRef}
@@ -225,8 +272,14 @@ const _WebGLShader: React.FC<Props> = (props) => {
             transformOrigin: "0 0",
           }}
         />
+        {SHOW_SEED_AND_TIME && (
+          <div
+            style={{ position: "absolute", bottom: 16, right: 16, color: "white" }}
+            data-shader-time={props.fragmentShader}
+          />
+        )}
       </div>
-      {showControls && (
+      {showControls && uniformEntries.length > 0 && (
         <div className={s("variables", { vertical: false && uniformEntries.length > 2 })}>
           {uniformEntries.map(([key, uniform]) => {
             return (
@@ -247,28 +300,27 @@ const _WebGLShader: React.FC<Props> = (props) => {
 };
 
 export const WebGLShader: React.FC<Props> = (props) => {
-  let { height = DEFAULT_HEIGHT, skew, showControls = true } = props;
+  let { skew, showControls = true } = props;
   const s = useStyles(styles);
   const ref = useRef<HTMLDivElement>(null);
   const visible = useVisible(ref, "64px");
 
   const fragmentShader = useFragmentShader(props);
   const numUniforms = Object.keys(fragmentShader.uniforms).length;
-  // if (numUniforms > 2) {
-  //   height += UNIFORM_MARGIN * 2 + numUniforms * UNIFORM_HEIGHT + UNIFORM_V_GAP * (numUniforms - 1);
-  // } else
-  if (showControls && numUniforms > 0) {
-    height += 72;
-  }
 
-  const width = props.width ?? BASELINE_WIDTH;
+  const heightClassName = useCanvasHeightPlaceholderClassName(props);
 
   return (
     <div className={s("container", { skew })} ref={ref}>
       {visible ? (
         <_WebGLShader {...props} />
       ) : (
-        <div style={{ paddingTop: `${(height / width) * 100}%` }} />
+        <>
+          <div className={heightClassName} />
+          {showControls && numUniforms > 0 && (
+            <div style={{ paddingBottom: `${CONTROLS_HEIGHT}px` }} />
+          )}
+        </>
       )}
     </div>
   );
