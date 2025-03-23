@@ -318,7 +318,7 @@ export const WebGLShader: React.FC<Props> = (props) => {
   const heightClassName = useCanvasHeightPlaceholderClassName(props);
 
   return (
-    <div className={s("container", { skew })} ref={ref}>
+    <div className={[s("container", { skew }), "canvas"].join(" ")} ref={ref}>
       {visible ? (
         <_WebGLShader {...props} />
       ) : (

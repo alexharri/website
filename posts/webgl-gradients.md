@@ -825,11 +825,11 @@ for (const point of points) {
 
 But how does all of this relate to generating an animated wave?
 
-Consider what happens if we use time as the $z$ position. As time passes, the $z$ position advances, giving us different 1D slices of the $y$ values of the surface along the $x$ axis. Here's a visualization:
+Consider what happens if we use time as the $z$ position. As time passes, the $z$ position advances, giving us different 1D slices of the $y$ value of the surface along the $x$ axis. Here's a visualization:
 
 <Scene autoRotate scene="simplex" height={480} angle={18} xRotation={154} />
 
-Putting this in code for our 2D canvas is quite simple:
+Putting this in code for our 2D canvas is fairly simple:
 
 ```glsl
 uniform float u_time;
@@ -845,15 +845,15 @@ float curve_y = Y + simplex_noise(x * L, u_time * S) * A;
 
 This gives us a smooth animated wave:
 
-<WebGLShader fragmentShader="simplex_wave" width={800} height={200} />
+<WebGLShader fragmentShader="simplex_wave" width={800} height={200} seed={11993} maintainHeight={0.7} />
 
-<SmallNote label="" center>Just a single simplex noise function call already produces a very natural-looking wave!</SmallNote>
+<SmallNote label="" center>A single simplex noise function call already produces a very natural-looking wave!</SmallNote>
 
-Like before, there are three scalars that determine the characteristics of our wave: $L$, $S$ and $A$. We scale $x$ by $L$ to make the wave shorter or longer on the horizontal axis:
+The same three $L$, $S$, $A$ scalars determine the characteristics of our wave. We scale $x$ by $L$ to make the wave shorter or longer on the horizontal axis:
 
 <p className="mathblock">$$\text{simplex}(x \times L,\ \text{time})$$</p>
 
-We then scale $\text{time}$ by $S$ to speed up or slow down the evolution of our wave -- the speed at which we move across the $z$ axis in the visualization above:
+We then scale $\text{time}$ by $S$ to control the evolution speed of our wave -- the speed at which we move across the $z$ axis in the visualization above:
 
 <p className="mathblock">$$\text{simplex}(x \times L,\ \text{time} \times S)$$</p>
 
@@ -861,18 +861,16 @@ Lastly, we scale the output of the $\text{simplex}$ function by $A$, which deter
 
 <p className="mathblock">$$\text{simplex}(x \times L,\ \text{time} \times S) \times A$$</p>
 
-<SmallNote label="" center>As mentioned before, simplex noise returns a value between $1$ and $-1$, so to make a wave with a height of $96$ you'd set $A$ to $48$.</SmallNote>
+<SmallNote label="" center>Simplex noise returns a value between $-1$ and $1$, so to make a wave with a height of $96$ you'd set $A$ to $48$.</SmallNote>
 
 All of this produces a pretty good looking wave, though it feels a bit simple. The peaks and valleys look too evenly spaced and predictable.
 
-<WebGLShader fragmentShader="simplex_wave" width={800} height={200} />
-
-This is where stacking comes in. We can stack simplex waves of various lengths and speeds to get a more interesting final wave. I tweaked the constants and added a few increasingly large waves -- some slower and some faster. Here's what I ended up with:
+That's where stacking comes in. We can stack simplex waves of various lengths and speeds to get a more interesting final wave. I tweaked the constants and added a few increasingly large waves -- some slower and some faster. Here's what I ended up with:
 
 ```glsl
 const float L = 0.0018;
 const float S = 0.04;
-const float A = 32.0;
+const float A = 40.0;
 
 float y = 0.0;
 y += simplex_noise(x * (L / 1.00), u_time * S * 1.00)) * A * 0.85;
@@ -883,14 +881,14 @@ y += simplex_noise(x * (L / 3.25), u_time * S * 0.89)) * A * 0.40;
 
 This produces a wave that feels natural, yet visually interesting.
 
-<WebGLShader fragmentShader="simplex_stack_1" width={800} height={200} />
+<WebGLShader fragmentShader="simplex_stack_1" width={800} height={200} seed={31993} maintainHeight={0.7} />
 
 Looks awesome, but there is one component I feel is missing, which is directional flow. The wave is too "still", which makes it feel a bit artificial.
 
 To make the wave flow left, we can add <Gl>u_time</Gl> to the <Gl>x</Gl> component, scaled by some constant that determines the amount of flow. Let's name that constant $F$.
 
 ```glsl
-const float F = 0.031;
+const float F = 0.043;
 
 float y = 0.0;
 y += simplex_noise(x * (L / 1.00) + F * u_time, ...) * ...;
@@ -901,16 +899,16 @@ y += simplex_noise(x * (L / 3.25) + F * u_time, ...) * ...;
 
 This adds a subtle flow to the wave. I'll let you vary the amount of flow to feel the difference it makes:
 
-<WebGLShader fragmentShader="simplex_stack_final" width={800} height={200} />
+<WebGLShader fragmentShader="simplex_stack_final" width={800} height={200} seed={31993} maintainHeight={0.7} />
 
-<SmallNote label="" center>The amount of flow at 1x may feel a bit suble, but that's intentional. If the flow is easily noticeable, there's too much of it.</SmallNote>
+<SmallNote label="" center>The amount of flow may feel suble, but that's intentional. If the flow is easily noticeable, there's too much of it.</SmallNote>
 
 I think we've got a good looking wave. Let's move onto the next step.
 
 
 ## Multiple waves
 
-Let's now update our shader to include multiple waves. As a first step, I'll create a reusable <Gl>wave_alpha</Gl> function that takes in a $y$ position and height for the wave.
+Let's update our shader to include multiple waves. As a first step, I'll create a reusable <Gl>wave_alpha</Gl> function that takes in a $y$ position and height for the wave and returns an alpha value.
 
 ```glsl
 float wave_alpha(float Y, float height) {

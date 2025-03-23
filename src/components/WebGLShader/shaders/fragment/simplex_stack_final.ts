@@ -8,7 +8,8 @@ const createFragmentShader: CreateFragmentShader = (options) => {
     time2: {
       label: "math:F",
       value: 1,
-      range: [0, 10],
+      range: [0, 4],
+      step: 1,
       format: "multiplier",
     },
   };
@@ -17,9 +18,9 @@ const createFragmentShader: CreateFragmentShader = (options) => {
 
     uniform float u_time;
     uniform float u_time2;
+    uniform float u_h;
 
-    const float HEIGHT = 200.0;
-    const float WAVE_HEIGHT = 40.0;
+    float WAVE_HEIGHT = u_h * 0.2;
 
     ${noiseUtils}
     ${simplexNoise}
@@ -27,7 +28,7 @@ const createFragmentShader: CreateFragmentShader = (options) => {
     float noise(float x) {
       const float L = 0.0018;
       const float S = 0.12;
-      float F = ${0.031 * flowScalar};
+      float F = ${0.043 * flowScalar};
 
       float sum = 0.0;
       sum += simplexNoise(vec2(x * (L / 1.00) + F * u_time2, u_time * S * 1.00)) * 0.85;
@@ -40,18 +41,18 @@ const createFragmentShader: CreateFragmentShader = (options) => {
     void main() {
       float x = gl_FragCoord.x;
 
-      float waveY = HEIGHT / 2.0 + noise(x) * WAVE_HEIGHT;
+      float wave_y = u_h / 2.0 + noise(x) * WAVE_HEIGHT;
       
       vec3 foreground_lower = vec3(0.965,0.992,0.745);
       vec3 foreground_upper = vec3(1.0,0.702,0.443);
       vec3 background_lower = vec3(0.91,0.604,0.412);
       vec3 background_upper = vec3(0.647,0.314,0.204);
       
-      float t_y = gl_FragCoord.y / HEIGHT;
+      float t_y = gl_FragCoord.y / u_h;
       vec3 foreground_color = mix(foreground_lower, foreground_upper, t_y);
       vec3 background_color = mix(background_lower, background_upper, t_y);
 
-      float dist_signed = waveY - gl_FragCoord.y;
+      float dist_signed = wave_y - gl_FragCoord.y;
       float fg_alpha = clamp(0.5 + dist_signed, 0.0, 1.0);
       vec3 color = mix(foreground_color, background_color, fg_alpha);
 

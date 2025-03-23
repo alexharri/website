@@ -42,6 +42,7 @@ const Styles = ({ styled }: StyleOptions) => ({
     & > .pre,
     & > .image,
     & > .chart,
+    & > .canvas,
     & > table {
       & + .note,
       & + [data-script-id] + .note {
