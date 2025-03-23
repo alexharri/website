@@ -24,7 +24,7 @@ const createFragmentShader: CreateFragmentShader = (_) => {
 
       float alpha = 1.0;
 
-      alpha *= clamp(3.0 + dist_signed, 0.0, 1.0);
+      alpha *= clamp(3.7 + dist_signed, 0.0, 1.0);
       alpha *= clamp(0.0 - dist_signed, 0.0, 1.0);
 
       return alpha;

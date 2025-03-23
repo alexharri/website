@@ -107,7 +107,7 @@ export function createScene<V extends VariablesOptions>(
       const dist = -16.8;
       const angleRad = angle * DEG_TO_RAD;
       const xRotationRad = xRotation * DEG_TO_RAD;
-      const rot = new THREE.Euler(angleRad, xRotationRad, 0, "XYZ");
+      const rot = new THREE.Euler(angleRad, xRotationRad, 0, "YXZ");
       const pos = new THREE.Vector3(0, 0, dist);
       pos.applyEuler(rot);
       pos.multiplyScalar(scale);

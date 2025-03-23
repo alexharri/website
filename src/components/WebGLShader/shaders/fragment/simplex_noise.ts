@@ -12,7 +12,7 @@ const createFragmentShader: CreateFragmentShader = (options) => {
     u_L: {
       label: "math:L",
       value: 1,
-      range: [0.1, 3],
+      range: [1, 4],
       format: "multiplier",
     },
   };
