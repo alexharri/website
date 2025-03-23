@@ -1,12 +1,17 @@
 import Highlight, { defaultProps } from "prism-react-renderer";
 import { prismTheme } from "../StaticCodeBlock/prismTheme";
 
-type Variant = "expression" | "method" | "interface";
+type Variant = "expression" | "method" | "interface" | "value";
 
 function getTypeScriptTokenSlice<T>(variant: Variant, tokens: T[]): T[] {
   if (variant === "expression") return tokens.slice(4);
   if (variant === "method") return tokens.slice(4, 5);
   if (variant === "interface") return tokens.slice(2, -2);
+  throw new Error(`Unknown variant '${variant}'`);
+}
+
+function getCSSTokenSlice<T>(variant: Variant, tokens: T[]): T[] {
+  if (variant === "value") return tokens.slice(2);
   throw new Error(`Unknown variant '${variant}'`);
 }
 
@@ -20,6 +25,11 @@ function getTypeScriptCode(variant: Variant, children: React.ReactNode): string 
   if (variant === "expression") return `type X=${children}`;
   if (variant === "method") return `interface X{${children}(): void}`;
   if (variant === "interface") return `interface ${children}{}`;
+  throw new Error(`Unknown variant '${variant}'`);
+}
+
+function getCSSCode(variant: Variant, children: React.ReactNode): string {
+  if (variant === "value") return `value:${children}`;
   throw new Error(`Unknown variant '${variant}'`);
 }
 
@@ -51,6 +61,33 @@ const TypeScript = (props: Props) => {
         }
         const line = lines[0];
         const tokens = getTypeScriptTokenSlice(variant, line);
+        return (
+          <code {...getLineProps({ line: tokens, key: 0 })}>
+            {tokens.map((token, i) => (
+              <span key={i} {...getTokenProps({ token, key: i })} />
+            ))}
+          </code>
+        );
+      }}
+    </Highlight>
+  );
+};
+
+const CSS = (props: Props) => {
+  let { variant = "value", children } = props;
+  return (
+    <Highlight
+      {...defaultProps}
+      code={getCSSCode(variant, children)}
+      language="css"
+      theme={prismTheme}
+    >
+      {({ tokens: lines, getLineProps, getTokenProps }) => {
+        if (lines.length !== 1) {
+          console.warn(`Expected 1 line, got ${lines.length}`);
+        }
+        const line = lines[0];
+        const tokens = getCSSTokenSlice(variant, line);
         return (
           <code {...getLineProps({ line: tokens, key: 0 })}>
             {tokens.map((token, i) => (
@@ -95,4 +132,5 @@ const GLSL = (props: Props) => {
 export const Code = {
   ts: TypeScript,
   gl: GLSL,
+  css: CSS,
 };

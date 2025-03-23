@@ -147,16 +147,16 @@ We'll spend the rest of the post writing a color function that will calculate a 
 
 <WebGLShader fragmentShader="final" width={1000} minWidth={600} height={300} maintainHeight={0.3} seed={43394} />
 
-But consider the amount of work that needs to be done. A $1{,}000 \times 300$ canvas<MediaQuery query="(min-width: 1000px)"> -- like the one above --</MediaQuery><MediaQuery query="(max-width: 999px)">, for example,</MediaQuery> contains $300{,}000$ pixels. That's $300{,}000$ invocations of our pixel function every frame -- a ton of work for a CPU to perform 60 times a second!
+But consider the amount of work that needs to be done. A $1{,}000 \times 300$ canvas<MediaQuery query="(min-width: 1000px)">, like the one above,</MediaQuery><MediaQuery query="(max-width: 999px)">, for example,</MediaQuery> contains $300{,}000$ pixels. That's $300{,}000$ invocations of our pixel function every frame -- a ton of work for a CPU to perform 60 times a second! This is where WebGL comes in.
 
-That's why we'll write our color function as a WebGL shader. WebGL shaders run on the GPU! The GPU is designed for pararellized work, which allows us to run the color function in parallel.
+WebGL shaders run on the GPU, which is useful to us because the GPU is designed for highly parallel computation. A GPU can invoke our color function thousands of times in parallel, making the task of rendering a single frame a breeze.
 
-Conceptually, nothing changes. We're still going to be writing a single color function that takes a position and time value and returns a color. But instead of writing it in JavaScript and running it on the CPU, we'll write it in GLSL (the language for shaders) and run it on the GPU.
+Conceptually, nothing changes. We're still going to be writing a single color function that takes a position and time value and returns a color. But instead of writing it in JavaScript and running it on the CPU, we'll write it in GLSL and run it on the GPU.
 
 
 ## WebGL and GLSL
 
-WebGL can be thought of as a subset of [OpenGL][opengl], a cross-platform API for rendering graphics. WebGL is based on [OpenGL ES][opengl_es] -- an OpenGL spec for embedded systems (like mobile devices).
+WebGL can be thought of as a subset of [OpenGL][opengl], which is a cross-platform API for graphics rendering. WebGL is based on [OpenGL ES][opengl_es] -- an OpenGL spec for embedded systems (like mobile devices).
 
 <SmallNote label="">Here's a page listing [differences between OpenGL and WebGL][opengl_vs_webgl]. We won't encounter those differences in this post.</SmallNote>
 
@@ -170,7 +170,7 @@ OpenGL shaders are written in GLSL, which stands for [OpenGL Shading Language][g
 There are two types of shaders, vertex shaders and fragment shaders, which serve different purposes. Our color function will run in the fragment shader (sometimes referred to as a "pixel shader"). That's where we'll spend most of our time.
 
 <Note>
-<p>There's tons of boilerplate code involved in setting up a WebGL rendering pipeline. I'll mostly omit it so that we can stay focused on our main goal, which is creating a cool gradient shader.</p>
+<p>There's tons of boilerplate code involved in setting up a WebGL rendering pipeline. I'll mostly omit it so that we can stay focused on our main goal, which is creating a cool gradient effect.</p>
 <p>At the end of the post I'll link to resources I found helpful in learning about how to set up and work with WebGL.</p>
 </Note>
 
@@ -189,9 +189,9 @@ void main() {
 
 WebGL fragment shaders have a <Gl method>main</Gl> function that is invoked once for each pixel. The <Gl method>main</Gl> function sets the value of <Gl>gl_FragColor</Gl> -- a special variable that specifies the color of the pixel.
 
-We can think of <Gl method>main</Gl> as our color function and <Gl>gl_FragColor</Gl> as its return value.
+We can think of <Gl method>main</Gl> as the entry point of our color function and <Gl>gl_FragColor</Gl> as its return value.
 
-WebGL colors are represented through vectors with 3 or 4 components: <Gl>vec3</Gl> for RGB and <Gl>vec4</Gl> for RGBA colors. For both types the first three components of the vector are the red, green and blue components (RGB), and for 4D vectors the fourth component is the [alpha][alpha] component of the color.
+WebGL colors are represented through vectors with 3 or 4 components: <Gl>vec3</Gl> for RGB and <Gl>vec4</Gl> for RGBA colors. The first three components (RGB) are the red, green and blue components. For 4D vectors the fourth component is the [alpha][alpha] component of the color.
 
 [rgb]: https://en.wikipedia.org/wiki/RGB_color_model
 [alpha]: https://en.wikipedia.org/wiki/Alpha_compositing
@@ -203,7 +203,7 @@ vec3 white = vec3(1.0, 1.0, 1.0);
 vec4 semi_transparent_green = vec4(0.0, 1.0, 0.0, 0.5);
 ```
 
-The color we saw in the shader above (<Gl>vec3(0.7, 0.1, 0.4)</Gl>) roughly translates to `rgba(178, 25, 102)` in CSS (`#b21966` in hex).
+The color we saw in the shader above (<Gl>vec3(0.7, 0.1, 0.4)</Gl>) roughly translates to <Css>rgb(178, 25, 102)</Css> in CSS.
 
 ```glsl
 void main() {
@@ -216,7 +216,7 @@ If we run the shader, we see that every pixel is set to that color:
 
 <WebGLShader fragmentShader="single_color" height={100} width={100} />
 
-Let's create a linear gradient that fades to another color, such as `#e59919`, which corresponds to <Gl>vec3(0.9, 0.6, 0.1)</Gl>.
+Let's create a linear gradient that fades to another color over the $y$ axis. Let's use <Css>rgb(229, 154, 25)</Css> -- it corresponds to <Gl>vec3(0.9, 0.6, 0.1)</Gl> in GLSL.
 
 [glsl_to_hex]: https://airtightinteractive.com/util/hex-to-glsl/
 
@@ -227,22 +227,21 @@ vec3 color_2 = vec3(0.9, 0.6, 0.1);
 
 <SmallNote label="">I've been using [this tool][glsl_to_hex] to convert from hex to GLSL colors, and vice versa</SmallNote>
 
-To gradually transition from <Gl>color_1</Gl> to <Gl>color_2</Gl> over the $y$ axis, we'll need the $y$ position of the current pixel. In WebGL fragment shaders, we get that via a special input variable called [<Gl>gl_FragCoord</Gl>][frag_coord]:
+To gradually transition from <Gl>color_1</Gl> to <Gl>color_2</Gl> over the $y$ axis, we'll need the $y$ position of the current pixel. In WebGL fragment shaders, we get that via a special variable called [<Gl>gl_FragCoord</Gl>][frag_coord]:
 
 [frag_coord]: https://registry.khronos.org/OpenGL-Refpages/gl4/html/gl_FragCoord.xhtml
 
 ```glsl
 float y = gl_FragCoord.y;
 ```
-<SmallNote label=""><Gl>float</Gl> corresponds to a 32-bit floating point number. We'll only use the <Gl>float</Gl> and <Gl>int</Gl> number types in this post, which both use 32 bits.</SmallNote>
+<SmallNote label=""><Gl>float</Gl> corresponds to a 32-bit floating point number. We'll only use the <Gl>float</Gl> and <Gl>int</Gl> number types in this post, both of which are 32-bit.</SmallNote>
 
 [glsl_data_types]: https://www.khronos.org/opengl/wiki/Data_Type_(GLSL)
 
-We can then calculate a blend value -- which we'll call $t$ -- by dividing the <Gl>y</Gl> coord by the canvas height.
+We'll use <Gl>y</Gl> to calculate a blend value -- which we'll call $t$ -- by dividing the <Gl>y</Gl> coord by the canvas' height.
 
 
 ```glsl
-// We'll learn how to make the canvas width dynamic later
 const float CANVAS_WIDTH = 150.0;
 
 float y = gl_FragCoord.y;
@@ -251,7 +250,7 @@ float t = y / (CANVAS_WIDTH - 1.0);
 
 <SmallNote>I've configured the coordinates such that <Gl>gl_FragCoord</Gl> is <Gl>(0.0, 0.0)</Gl> at the lower-left corner and <Gl>(CANVAS_WIDTH - 1, CANVAS_HEIGHT - 1)</Gl> at the upper right corner. This will stay consistent throughout the post.</SmallNote>
 
-We can then mix the two colors via the [built-in <Gl method>mix</Gl> function][mix]. It takes in two colors and a blend value between 0 and 1.
+We'll mix the two colors with the [built-in <Gl method>mix</Gl> function][mix]. It takes in two colors and a blend value between 0 and 1.
 
 [mix]: https://registry.khronos.org/OpenGL-Refpages/gl4/html/mix.xhtml
 
@@ -263,7 +262,7 @@ vec3 color = mix(color_1, color_2, t);
 
 [built_in]: https://www.khronos.org/files/webgl/webgl-reference-card-1_0.pdf
 
-We can then assign our newly calculated <Gl>color</Gl> to <Gl>gl_FragColor</Gl>:
+We'll assign our newly calculated <Gl>color</Gl> to <Gl>gl_FragColor</Gl>:
 
 ```glsl
 vec3 color = mix(color_1, color_2, t);
@@ -289,7 +288,9 @@ This gives us a linear gradient!
 
 ### Vector constructors
 
-I want to briefly mention how awesome the vector constructor syntax in GLSL is. When passing a vector to a vector [constructor][vector_constructors], the components of the passed vector are read left-to-right -- similar to JavaScript's [spread][spread] syntax.
+You may have raised an eyebrow at the <Gl>vec4(color, 1.0)</Gl> expression above -- it's equivalent to <Gl>vec4(vec3(...), 1.0)</Gl> -- but that's perfectly valid in GLSL!
+
+When passing a vector to a [vector constructor][vector_constructors], the components of the input vector are read left-to-right -- similar to JavaScript's [spread][spread] syntax.
 
 [spread]: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Spread_syntax
 
@@ -305,7 +306,7 @@ vec4 foo = vec4(a, 1.0);
 
 [vector_constructors]: https://www.khronos.org/opengl/wiki/Data_Type_(GLSL)#Vector_constructors
 
-You can pass scalars alongside vectors in any way you see fit, as long as the number of values passed to the vectors is correct:
+You can combine scalar and vector inputs in any way you see fit as long as the total number of values passed to the vector constructor is correct:
 
 ```glsl
 vec4(1.0 vec2(2.0, 3.0), 4.0); // OK
@@ -315,10 +316,10 @@ vec4(vec2(1.0, 2.0), vec2(3.0, 4.0)); // OK
 vec4(vec2(1.0, 2.0), 3.0); // Error, not enough components
 ```
 
-I love this syntax, but enough about that -- back to writing shaders!
+I love this syntax. Anyway, back to writing shaders!
 
 
-### Coloring the lower half white
+### Coloring areas different colors
 
 Let's color the bottom half of our canvas white, like so:
 
@@ -340,7 +341,7 @@ float y = gl_FragCoord.y;
 float dist = LINE_Y - y;
 ```
 
-What determines whether our pixel should be white is whether it's below the line, which we can determine by reading the sign of the distance via the <Gl method>sign</Gl> function. It returns $-1.0$ if the value is negative and $1.0$ if the value is positive.
+What determines whether our pixel should be white or not is whether it's below the line, which we can determine by reading the sign of the distance via the <Gl method>sign</Gl> function. The <Gl method>sign</Gl> function returns $-1.0$ if the value is negative and $1.0$ if the value is positive.
 
 ```glsl
 float dist = LINE_Y - y;
@@ -348,7 +349,7 @@ float dist = LINE_Y - y;
 sign(dist); // -1.0 or 1.0
 ```
 
-We can use the sign to calculate an alpha (blend) by normalizing the sign to $0.0$ or $1.0$, which we can do via $(dist\_sign + 1)\,/\,2$ since:
+We can calculate an alpha (blend) value by normalizing the sign to $0.0$ or $1.0$ via $(\text{sign}(\text{dist}) + 1)\,/\,2$.
 
 <p className="mathblock">$$\begin{align}
 (-1 + 1)\,/\,2 = 0&\\
@@ -361,16 +362,15 @@ float alpha = (sign(dist) + 1.0) / 2.0;
 
 This <Gl>alpha</Gl> represents how white our pixel should be. If <Gl>alpha == 1.0</Gl> we want to color the pixel white, but if <Gl>alpha == 0.0</Gl> we want the pixel to retain the color from the linear gradient.
 
-We can achieve exactly that by blending <Gl>color</Gl> (the linear gradient's color) and <Gl>white</Gl> using the <Gl method>mix</Gl> function:
+We can do just that by blending <Gl>color</Gl> (the linear gradient's color) and <Gl>white</Gl> using the <Gl method>mix</Gl> function:
 
 ```glsl
 color = mix(color, white, alpha);
 ```
 
-As we can see, this colors the bottom half of the canvas white:
+This colors the bottom half of the canvas white:
 
 <WebGLShader fragmentShader="linear_gradient_area_under_line" height={150} width={150} showControls={false} />
-
 
 Calculating an alpha value by normalizing the sign and passing that to the <Gl method>mix</Gl> function may seem overly roundabout -- couldn't you just use an if statement?
 
@@ -380,7 +380,7 @@ if (sign(dist) == 1.0) {
 }
 ```
 
-That works, but only if you want to pick one of the colors. As we extend this to smoothly blend between the colors, using the sign of the distance won't work.
+That works, but only if you want to pick 100% of either color. As we extend this to smoothly blend between the colors, using conditionals won't work.
 
 <Note>
 As an additional point, you generally want to avoid branching in code that runs on the GPU. There are [nuances][branch_nuances] to the performance of branches in shader code, but branchless code is usually preferable. In our case, calculating the <Gl>alpha</Gl> and running the <Gl method>mix</Gl> function boils down to sequential math instructions that GPUs excel at.
@@ -391,11 +391,17 @@ As an additional point, you generally want to avoid branching in code that runs 
 
 ### Drawing arbitrary curves
 
-We're currently coloring everything under <Gl>LINE_Y</Gl> constant white, but the line doesn't need to be determined constant -- we can calculate $y$ using any arbitrary expression. That allows us to draw the area under any curve white.
+We're currently coloring everything under <Gl>LINE_Y</Gl> white, but the line doesn't need to be determined constant -- we can calculate the $y$ of a curve using an arbitrary expression and use that to calculate <Gl>dist</Gl>:
 
-Let's, for example, define the curve $C$ as a slanted line
+```glsl
+float curve_y = <some expression>;
 
-<p className="mathblock">$$ C = Y + x \times I $$</p>
+float dist = curve_y - y;
+```
+
+That allows us to draw the area under any curve white. Let's, for example, define the curve as a slanted line
+
+<p className="mathblock">$$ y = Y + x \times I $$</p>
 
 where $Y$ is the start position of the line, and $I$ is the incline of the line. We can put this into code like so:
 
@@ -411,6 +417,7 @@ float curve_y = Y + x * I;
 This produces the slanted line in the canvas below -- I'll let you vary $I$ to see the effect:
 
 <WebGLShader fragmentShader="linear_gradient_area_under_slanted_line" height={150} width={150} />
+
 
 We could also do a parabola like so:
 
@@ -430,19 +437,17 @@ float dist = curve_y - gl_FragCoord.y;
 float alpha = (sign(dist) + 1.0) / 2.0;
 ```
 
-The point is that we can calculate the curve's $y$ in any way we see fit.
+The point is: we can calculate the curve in any way we see fit.
 
 ### Producing an animate wave
 
 To produce a sine wave, we can define the curve as:
 
-<p className="mathblock">$$C = Y + A \times sin(x \times \dfrac{2\pi}{L})$$</p>
+<p className="mathblock">$$ y = Y + A \times sin(x \times \dfrac{2\pi}{L}) $$</p>
 
-where $Y$ is the wave's center (it's $y$ position), $L$ is the wave's length in pixels, and $A$ is the [amplitude][amplitude] of the wave.
+where $Y$ is the wave's center (its $y$ position), $L$ is the wave's length in pixels, and $A$ is the [amplitude][amplitude] of the wave. Putting this into code, we get:
 
 [amplitude]: https://www.mathsisfun.com/algebra/amplitude-period-frequency-phase-shift.html
-
-Putting this into code, we get:
 
 ```glsl
 const float Y = 0.5 * CANVAS_HEIGHT;
@@ -458,7 +463,7 @@ Which produces a sine wave:
 
 <WebGLShader fragmentShader="linear_gradient_area_under_wave" height={150} width={150} showControls={false} />
 
-At the moment, the wave is completely static. For the shader to produce any motion, we'll need to provide the shader with a time variable. We can do that using [uniforms][uniform].
+At the moment, the wave is completely static. For us to produce any any motion we'll need to introduce a time variable to the shader. We can do that using [uniforms][uniform].
 
 [uniform]: https://www.khronos.org/opengl/wiki/Uniform_(GLSL)
 
@@ -468,9 +473,9 @@ uniform float u_time;
 
 Uniforms can be thought of as global variables that the shader has _read-only_ access to. The actual values of uniforms are controlled on the JavaScript side (we'll see how later).
 
-For any given draw call, each shader invocation will have uniforms set to the same values. This is what the name "uniform" is referring to -- the values of uniforms are _uniform_ across shader invocations. You can think of uniforms as per-draw-call constants.
+For any given draw call, each shader invocation will have uniforms set to the same values. This is what the name "uniform" is referring to -- the values of uniforms are _uniform_ across shader invocations. You can think of uniforms as per-draw call constants.
 
-<SmallNote label="">Uniforms are constant across a draw-call, but uniforms are [not compile-time constant][uniform_const], so you cannot use the value of a uniform in `const` variables.</SmallNote>
+<SmallNote label="">Uniforms are constant across draw calls but they are [not compile-time constant][uniform_const], meaning you cannot use the value of a uniform in `const` variables.</SmallNote>
 
 [uniform_const]: https://www.khronos.org/opengl/wiki/Type_Qualifier_(GLSL)#Uniforms
 
@@ -485,7 +490,7 @@ struct Foo {
 uniform Foo u_foo;
 ```
 
-But what's up with the <Gl>u_</Gl> prefix of <Gl>u_time</Gl>?
+But what's up with the <Gl>u_</Gl> prefix?
 
 ```glsl
 uniform float u_time;
@@ -493,13 +498,21 @@ uniform float u_time;
 
 Prefixing uniform names with <Gl>u_</Gl> is a GLSL convention. You won't encounter compiler errors if you don't, but using the <Gl>u_</Gl> prefix for uniform names is a very established pattern.
 
+<SmallNote>There are similar conventions for the names of attributes and varyings (they are prefixed with <Gl>a_</Gl> and <Gl>v_</Gl>, respectively), but we won't use attributes or varyings in this post.</SmallNote>
+
 Anyway, with <Gl>u_time</Gl> now accessible in our shader we can start producing motion. As a refresher, we're currently calculating our curve's $y$ value like so:
 
 ```glsl
 float curve_y = Y + sin(x * W) * A;
 ```
 
-Like we did early on in the post, we can add <Gl>u_time</Gl> to the $x$ position, multiplied by some constant that controls the speed, to shift the wave to the left:
+Adding <Gl>u_time</Gl> to the pixel's $x$ position shifts the wave to the left over time:
+
+```glsl
+float curve_y = Y + sin((x + u_time) * W) * A;
+```
+
+But moving one pixel a second is quite slow (<Gl>u_time</Gl> is measured in seconds), so we'll add a speed constant $S$ to control the speed:
 
 ```glsl
 const float S = 25.0;
@@ -507,11 +520,9 @@ const float S = 25.0;
 float curve_y = Y + sin((x + u_time * S) * W) * A;
 ```
 
-Since <Gl>u_time</Gl> is the elapsed time in seconds, an $S$ value of $25$ causes the wave to move 25 pixels to the left per second. I'll let you vary $S$ to see the effect:
+I'll let you vary $S$ to see the effect:
 
 <WebGLShader fragmentShader="wave_animated" height={150} width={150} />
-
-We've got a moving wave -- awesome!
 
 
 ### Applying a gradient to the wave

@@ -4,9 +4,9 @@ const createFragmentShader: CreateFragmentShader = () => {
   const uniforms: FragmentShaderUniforms = {
     time: {
       label: "math:S",
-      range: [0, 150],
+      range: [25, 150],
       value: 25,
-      remap: [0, 7.5],
+      remap: [1, 6],
       step: 5,
     },
   };

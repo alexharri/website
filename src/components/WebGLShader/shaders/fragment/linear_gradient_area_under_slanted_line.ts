@@ -3,7 +3,7 @@ import { CreateFragmentShader, FragmentShaderUniforms } from "../types";
 const createFragmentShader: CreateFragmentShader = (_) => {
   const uniforms: FragmentShaderUniforms = {
     u_incline: {
-      label: "I",
+      label: "math:I",
       value: 0.2,
       range: [0, 1],
     },
