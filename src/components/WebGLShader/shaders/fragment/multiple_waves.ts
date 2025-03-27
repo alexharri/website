@@ -9,28 +9,28 @@ const createFragmentShader: CreateFragmentShader = (options) => {
     precision mediump float;
 
     uniform float u_time;
+    uniform float u_h;
 
-    const float HEIGHT = 200.0;
-    const float WAVE1_HEIGHT = 24.0;
-    const float WAVE2_HEIGHT = 32.0;
-    const float WAVE1_Y = 0.80 * HEIGHT;
-    const float WAVE2_Y = 0.35 * HEIGHT;
+    float WAVE1_HEIGHT = u_h * 0.12;
+    float WAVE2_HEIGHT = u_h * 0.16;
+    float WAVE1_Y = 0.80 * u_h;
+    float WAVE2_Y = 0.35 * u_h;
 
     ${noiseUtils}
     ${simplexNoise}
 
     float noise(float x, float offset) {
-      const float L = 0.0012;
-      const float S = 0.04;
-      const float F = 0.031;
+      const float L = 0.0018;
+      const float S = 0.12;
+      const float F = 0.043;
 
-      float t = u_time + offset;
+      float time = u_time + offset;
 
       float sum = 0.0;
-      sum += simplexNoise(vec2(x * (L / 1.00) + F * t, t * S * 1.00)) * 0.85;
-      sum += simplexNoise(vec2(x * (L / 1.30) + F * t, t * S * 1.26)) * 1.15;
-      sum += simplexNoise(vec2(x * (L / 1.86) + F * t, t * S * 1.09)) * 0.60;
-      sum += simplexNoise(vec2(x * (L / 3.25) + F * t, t * S * 0.89)) * 0.40;
+      sum += simplexNoise(vec2(x * (L / 1.00) + F * time, time * S * 1.00)) * 0.85;
+      sum += simplexNoise(vec2(x * (L / 1.30) + F * time, time * S * 1.26)) * 1.15;
+      sum += simplexNoise(vec2(x * (L / 1.86) + F * time, time * S * 1.09)) * 0.60;
+      sum += simplexNoise(vec2(x * (L / 3.25) + F * time, time * S * 0.89)) * 0.40;
       return sum;
     }
 

@@ -928,26 +928,27 @@ float wave_noise() {
 }
 ```
 
-We'll use that to calculate the wave's $y$ position:
+We'll use that to calculate the wave's $y$ position and the pixel's distance to it:
 
 ```glsl
 float wave_alpha(float Y, float wave_height) {
   float wave_y = Y + wave_noise() * wave_height;
+  float dist = wave_y - gl_FragCoord.y;
 }
 ```
 
-which we'll then use to calculate the distance from the wave to the pixel's $y$ position, using that to calculate the value of <Gl>alpha</Gl>:
+Using the distance to compute the <Gl>alpha</Gl> value:
 
 ```glsl
 float wave_alpha(float Y, float wave_height) {
   float wave_y = Y + wave_noise() * wave_height;
-  float dist = (wave_y - y);
+  float dist = wave_y - gl_FragCoord.y;
   float alpha = clamp(0.5 + dist, 0.0, 1.0);
   return alpha;
 }
 ```
 
-We can then use the <Gl>wave_alpha</Gl> function to calculate alpha values for two waves, each with their separate $y$ positions and heights:
+We'll then use the <Gl method>wave_alpha</Gl> function to calculate alpha values for two waves, each with their separate $y$ positions and heights:
 
 ```glsl
 const float WAVE1_HEIGHT = 24.0;
@@ -955,34 +956,36 @@ const float WAVE2_HEIGHT = 32.0;
 const float WAVE1_Y = 0.80 * CANVAS_HEIGHT;
 const float WAVE2_Y = 0.35 * CANVAS_HEIGHT;
 
-float w1_alpha = wave_alpha(WAVE1_Y, WAVE1_HEIGHT);
-float w2_alpha = wave_alpha(WAVE2_Y, WAVE2_HEIGHT);
+float wave1_alpha = wave_alpha(WAVE1_Y, WAVE1_HEIGHT);
+float wave2_alpha = wave_alpha(WAVE2_Y, WAVE2_HEIGHT);
 ```
 
-To render a background and two waves, we'll need three colors. I picked these blue colors that I find nice to look at:
+To draw a background and two waves, we'll need three colors. I picked these nice blue colors:
 
 ```glsl
-vec3 bg_color = vec3(0.102, 0.208, 0.761);
-vec3 w1_color = vec3(0.094, 0.502, 0.910);
-vec3 w2_color = vec3(0.384, 0.827, 0.898);
+vec3 background_color = vec3(0.102, 0.208, 0.761);
+vec3 wave1_color = vec3(0.094, 0.502, 0.910);
+vec3 wave2_color = vec3(0.384, 0.827, 0.898);
 ```
 
-We can composite those into a final image by blending them using the two wave alpha values:
+Finally, we'll calculate the pixel's color by blending these colors using the two waves' alpha values:
 
 ```glsl
-vec3 color = bg_color;
-color = mix(color, w1_color, w1_alpha);
-color = mix(color, w2_color, w2_alpha);
+vec3 color = background_color;
+color = mix(color, wave1_color, wave1_alpha);
+color = mix(color, wave2_color, wave2_alpha);
 gl_FragColor = vec4(color, 1.0);
 ```
 
 This gives us the following result:
 
-<WebGLShader fragmentShader="multiple_waves" width={800} height={200} fragmentShaderOptions={{ offsetScalar: 0 }} />
+<WebGLShader fragmentShader="multiple_waves" width={800} height={200} fragmentShaderOptions={{ offsetScalar: 0 }} maintainHeight={0.7} seed={18367} />
 
-We do get two waves, but they're completely in sync with each other. This makes sense because the only inputs to our noise functions are the pixel's $x$ position and time, which are identical for both waves.
+We do get two waves, but they're completely in sync with each other.
 
-To fix this we'll introduce wave-specific offsets that we pass to the noise functions. One way to do that is just to provide each wave with a literal <Gl>offset</Gl> value and pass that to the noise function:
+This makes sense because the inputs to our noise function are the pixel's $x$ position and the current time, which are the same for both waves.
+
+To fix this we'll introduce wave-specific offset values that we pass to the noise functions. One way to do that is just to provide each wave with a literal <Gl>offset</Gl> value and pass that to the noise function:
 
 ```glsl
 float wave_alpha(float Y, float wave_height, float offset) {
@@ -1006,9 +1009,9 @@ float wave_noise(float offset) {
 }
 ```
 
-This produces identical waves, just offset in time. By making the offset large enough, you get waves far enough apart that no one could possibly notice that they're the same wave.
+This produces identical waves, just offset in time. By making the offset large enough, we get waves far enough apart in time that no one would notice that they're the same wave.
 
-But we don't actually need to provide the offset manually. We can just calculate an offset in the <Gl method>wave_alpha</Gl> function using the Y and height components:
+But we don't actually need to provide the offset manually. We can just calculate an offset in the <Gl method>wave_alpha</Gl> function using the <Gl>Y</Gl> and <Gl>wave_height</Gl> arguments:
 
 ```glsl
 float wave_alpha(float Y, float wave_height) {
@@ -1018,16 +1021,14 @@ float wave_alpha(float Y, float wave_height) {
 }
 ```
 
-Using the constants for our two waves from above, and a canvas height of $200$, we get two offsets:
+Given the wave constants above and a canvas height of $200$, we get the following offsets:
 
 <p className="mathblock">$$\begin{align}
 24 \times 0.80 \times 200 = 3{,}840 &\\
 32 \times 0.35 \times 200 = 2{,}240 &\\
 \end{align}$$</p>
 
-With these offsets added to $\text{time}$, the two waves become spaced apart by $1{,}600$ seconds. No one's gonna notice that.
-
-<SmallNote label="">How random and far apart your offsets needs to be ultimately depend on your application. If you need really random offsets, you can use more complicated methods to calculate them, but we just need the offsets not to be very close (a difference of 50 would do the trick).</SmallNote>
+With these offsets the waves differ in time by $1{,}600$ seconds. No one's gonna notice that.
 
 With the offsets added, we get two distinct waves:
 
@@ -1040,19 +1041,13 @@ Having updated our shader to handle multiple waves, let's move onto making the c
 
 To generate the noise for the waves above, we used a 2D noise function to generate animated 1D noise.
 
-That pattern holds for higher dimensions as well -- when generating $n$ dimensional noise, we need use an $n + 1$-dimensional noise function with $\text{time}$ as the value of the last dimension.
+That pattern holds for higher dimensions as well. When generating $n$-dimensional noise, we use an $n + 1$-dimensional noise function with time as the value of the last dimension.
 
 Here's the static 2D simplex noise we saw earlier:
 
-<WebGLShader fragmentShader="simplex_noise" width={350} height={250} animate={false} showControls={false} />
+<WebGLShader fragmentShader="simplex_noise" width={400} minWidth={200} height={250} animate={false} showControls={false} />
 
-To animate it, we'll use a 3D simplex noise function with the signature:
-
-```glsl
-float simplex_noise(float x, float y, float z);
-```
-
-We'll pass the pixel's $x$ and $y$ positions as the first two arguments, and $\text{time}$ as the third argument.
+To animate it, we'll use the 3D simplex noise function, passing the pixel's $x$ and $y$ positions as the first two arguments and time as the third argument.
 
 ```glsl
 const float L = 0.02;
@@ -1061,41 +1056,52 @@ const float S = 0.6;
 float x = gl_FragCoord.x;
 float y = gl_FragCoord.y;
 
-simplex_noise(x * L, y * L, time * S);
+float noise = simplex_noise(x * L, y * L, u_time * S);
 ```
 
-We use the simplex noise to calculate a lightness value, which we use as the color of the pixel:
+We'll normalise the noise and use it as a lightness value:
 
 ```glsl
-float lightness = (simplex_noise(...) + 1.0) / 2.0;
+float lightness = (noise + 1.0) / 2.0;
 
 gl_FragColor = vec4(vec3(lightness), 1.0);
 ```
 
 This gives us animated 2D noise:
 
-<WebGLShader fragmentShader="simplex_noise" width={350} height={250} showControls={false} />
+<WebGLShader fragmentShader="simplex_noise" width={400} minWidth={200} height={250} showControls={false} />
 
 It's worth mentioning that we could use classic perlin noise instead of simplex. Perlin noise has been in use longer and is more popular than simplex noise, but I find perlin a bit too "blocky". Simplex noise, by comparison, feels more natural to me. Here's a side-by-side comparison:
 
-<WebGLShader fragmentShader="simplex_perlin_split" width={800} height={250} />
+<WebGLShader fragmentShader="simplex_perlin_split" width={800} minWidth={200} height={250} />
 
-<SmallNote label="" center>Perlin noise is left, simplex noise is right.</SmallNote>
+<SmallNote label="" center>Perlin noise is to the left, simplex noise to the right.</SmallNote>
 
 Anyway, our goal is for this noise to eventually be used to create the background color of our final gradient:
 
-<WebGLShader fragmentShader="final" skew minWidth={600} maintainHeight={0.3} />
+<WebGLShader fragmentShader="final" skew height={275} minWidth={600} maintainHeight={0.3} seed={20582} />
 
 For our background noise to start looking like that we'll need to make some adjustments. Let's scale up the noise and also make the scale of the noise larger on the $x$ axis than the $y$ axis.
 
-Here is a canvas where the noise has been scaled up by $11$, and the $y$ scale is $3$ times smaller than the $x$
- scale -- I'll let you control the scale ($L$) to see the effect. I also slowed the evolution down to a fifth of its prior speed.
+```glsl
+const float L = 0.0017;
+const float S = 0.2;
+const float Y_SCALE = 3.0;
+
+float x = gl_FragCoord.x;
+float y = gl_FragCoord.y * Y_SCALE;
+```
+
+I made $L$ around $11$ times smaller and introduced <Gl>Y_SCALE</Gl> to make the noise shorter on $y$ axis. I also reduced the speed ($S$) about 80%.
 
 <WebGLShader
   fragmentShader="simplex_noise"
   width={800}
   height={250}
+  minWidth={600}
+  maintainHeight={0.3}
   fragmentShaderOptions={{ L: 0.0017, yScale: 3.0, timeScale: 0.2 }}
+  showControls={false}
 />
 
 Looks pretty good, but the noise feels a bit too evenly spaced. Yet again, we'll use stacking to make the noise more interesting.
@@ -1120,7 +1126,14 @@ float lightness = clamp(noise, 0.0, 1.0);
 
 This gives us more interesting noise. The larger noise provides smooth, sweeping fades, and the smaller noise gives us finer detail and visual interest:
 
-<WebGLShader fragmentShader="simplex_noise_stacked_0" width={800} height={250} />
+<WebGLShader
+  fragmentShader="simplex_noise_stacked_0"
+  width={800}
+  height={250}
+  minWidth={600}
+  maintainHeight={0.3}
+  seed={10310}
+/>
 
 As a final cherry on top, I want to add a directional flow component. I'll make two of the noises drift left, and the other drift right.
 
@@ -1135,13 +1148,20 @@ sum += simplex_noise(x ... +  F * 0.8, ..., ...) * ...;
 float lightness = clamp(sum, 0.0, 1.0);
 ```
 
-Here's what that looks like (you can vary the amount of flow to better see the effect):
+Here's what that looks like:
 
-<WebGLShader fragmentShader="simplex_noise_stacked_1" width={800} height={250} />
+<WebGLShader
+  fragmentShader="simplex_noise_stacked_1"
+  width={800}
+  height={250}
+  minWidth={600}
+  maintainHeight={0.3}
+  seed={2836}
+/>
 
-This makes the background noise generally flow to the left -- but not uniformly so.
+This makes the background noise feel like it flows to the left -- but not uniformly so.
 
-I think this is looking quite good! We'll make this a bit cleaner by moving these calculations into a <Gl method>background_noise</Gl> method that returns a value between $0$ to $1$:
+I think this is looking quite good! Let's clean things up by moving this into a <Gl method>background_noise</Gl> function that returns a value between $0$ and $1$:
 
 ```glsl
 float background_noise() {
@@ -1162,42 +1182,50 @@ Let's move beyond black and white background noise and add some color to the mix
 
 ## Color mapping
 
-We've saw examples of color mapping earlier when we interpolated between, for example, red and blue:
+<WebGLShader fragmentShader="x_lerp" width={150} height={150} />
+
+This red-to-blue gradient is an example of color mapping that works by calculating a $t$ value based on the pixel's $x$ coordinate
+
+```glsl
+float t = gl_FragCoord.x / (CANVAS_WIDTH - 1.0);
+```
+
+and mapped it to a color -- some blend of red and blue -- using the $t$ value:
 
 ```glsl
 vec3 red  = vec3(1.0, 0.0, 0.0);
 vec3 blue = vec3(0.0, 0.0, 1.0);
-
-float t = gl_FragCoord.x / (CANVAS_WIDTH - 1.0);
-
 vec3 color = mix(red, blue, t);
 ```
 
-In this case, we're mapping the $x$ positions of each pixel to a specific blend of red and blue.
-
-<WebGLShader fragmentShader="x_lerp" width={150} height={150} />
-
-Let's do the same thing for our background noise. Instead of using the background noise as a lightness value, let's map it to a blend of blue and red:
+What we can do is use the <Gl method>background_noise</Gl> function to calculate the $t$ value.
 
 ```glsl
 float t = background_noise();
-vec3 color = mix(blue, red, t);
+vec3 color = mix(red, blue, t);
 ```
 
-This gives us a blue-to-red gradient:
+That has the effect of mapping the background noise to a red-to-blue gradient:
 
-<WebGLShader fragmentShader="simplex_noise_stacked_2" width={800} height={250} />
+<WebGLShader
+  fragmentShader="simplex_noise_stacked_2"
+  width={800}
+  height={250}
+  minWidth={600}
+  maintainHeight={0.3}
+  seed={9526}
+/>
 
 That's pretty cool, but I'd like to be able to map the $t$ value to _any_ gradient, such as this one:
 
 <div className="flow" style={{
-  height: 50,
-  width: 300,
+  height: 64,
+  width: 256,
   background: `linear-gradient(90deg, rgba(8,0,143,1) 0%, rgba(250,0,32,1) 50%, rgba(255,204,43,1) 100%)`,
   margin: "40px auto",
 }} />
 
-The above gradient is a `<div>` element with the following CSS linear gradient as a background:
+This gradient is rendered through a <Html>{"<div>"}</Html> element with this CSS gradient as its background:
 
 ```css
 background: linear-gradient(
@@ -1208,7 +1236,7 @@ background: linear-gradient(
 );
 ```
 
-We can replicate this in a shader by defining the three colors of the gradient as three <Gl>vec3</Gl>s:
+We can replicate this in a shader. First, we'll convert the three colors of the gradient to <Gl>vec3</Gl> colors:
 
 ```glsl
 vec3 color1 = vec3(0.031, 0.0, 0.561);
@@ -1216,7 +1244,7 @@ vec3 color2 = vec3(0.980, 0.0, 0.125);
 vec3 color3 = vec3(1.0,   0.8, 0.169);
 ```
 
-and mixing them using $t$ and some clever math:
+We then mix the colors using $t$ and some clever math:
 
 ```glsl
 float t = gl_FragCoord.x / (CANVAS_WIDTH - 1.0);
@@ -1224,13 +1252,14 @@ float t = gl_FragCoord.x / (CANVAS_WIDTH - 1.0);
 vec3 color = color1;
 color = mix(color, color2, min(1.0, t * 2.0));
 color = mix(color, color3, max(0.0, (t - 0.5) * 2.0));
+gl_FragColor = vec4(color, 1.0);
 ```
 
-With this, we've replicated the CSS gradient in a shader:
+This replicates the CSS gradient perfectly:
 
-<WebGLShader fragmentShader="three_point_gradient" width={300} height={50} />
+<WebGLShader fragmentShader="three_point_gradient" width={256} height={64} />
 
-We can put this into a function and use that function in our simplex background noise shader:
+We can now easily map the background noise to the gradient -- I'll move the color calculations into a <Gl method>calc_color</Gl> function to clean things up:
 
 ```glsl
 vec3 calc_color(float t) {
@@ -1240,15 +1269,22 @@ vec3 calc_color(float t) {
   return color;
 }
 
-vec3 color = calc_color(background_noise());
+float t = background_noise();
 gl_FragColor = vec4(calc_color(t), 1.0);
 ```
 
-Doing that maps the background noise to the gradient:
+Here's the result:
 
-<WebGLShader fragmentShader="simplex_noise_stacked_3" width={800} height={200} />
+<WebGLShader
+  fragmentShader="simplex_noise_stacked_3"
+  width={800}
+  height={250}
+  minWidth={600}
+  maintainHeight={0.3}
+  seed={12926}
+/>
 
-Our <Gl method>calc_color</Gl> function is set up to handle three-step gradients, but we can pretty easily create functions that handle gradients with $n$ stops. Here is an exampe of a 5-stop gradient:
+Our <Gl method>calc_color</Gl> function is set up to handle three-step gradients, but we can trivially create functions that handle gradients with $n$ stops. Here is an exampe of a 5-stop gradient:
 
 ```glsl
 vec3 calc_color(float t) {
@@ -1269,29 +1305,36 @@ vec3 calc_color(float t) {
 }
 ```
 
-This works. The above function produces the following rainbow:
+The above function produces the following:
 
-<WebGLShader fragmentShader="rainbow" width={300} height={50} />
+<WebGLShader fragmentShader="rainbow" width={256} height={64} />
 
-But this way of calculating the gradient is burdensome and not very flexible. If we want to change the gradient, we need to manually hardcode the gradient colors into our shader and adjust the function to handle the correct number of color stops. Hardcoding the colors also makes it impossible to dynamically determine the colors of the gradient at runtime.
+This works, but defining the gradient in code like this is not great. The colors of the gradient are hardcode into our shader, and we need to manually adjust the function to handle the correct number of color stops.
 
-Let's move on from hardcoding the gradient to reading the gradient from a texture.
+We can make this a lot nicer by using a texture for our gradient.
 
 
-## Reading the gradient from a texture
+## Creating a gradient in JavaScript and passing it to a WebGL shader
 
-Textures are arrays of data. We can put many types of data into textures, but in our case we'll store image data in the texture.
+To pass image data -- such as a linear gradient -- from JavaScript to our shader, we can use [textures][opengl_texture]. Textures are arrays of data that can, amongst other things, store image data.
 
-We'll generate an image texture for our gradient in JavaScript and then pass that texture to our WebGL shader. The shader can then read data from that texture.
+[opengl_texture]: https://www.khronos.org/opengl/wiki/texture
 
-Before diving into how we read data from textures in shaders, let's create a image texture containing a gradient.
+Firstly, we'll generate an image containing a linear gradient in JavaScript. We'll write that image to a texture and pass that texture to our WebGL shader. The shader can then read data from the texture.
 
 
 ### Creating a linear gradient
 
-I want to programmatically generate linear gradients for our shader with JavaScript. Doing that gives us full control of the gradient, and allows us to change it dynamically at runtime.
+I used [this gradient generator][gradient_generator] to pick the following gradient:
 
-I used [this gradient generator][gradient_generator] to pick the following colors:
+<div className="flow" style={{
+  height: 50,
+  width: 300,
+  background: "linear-gradient(90deg, hsl(204deg 100% 22%), hsl(199deg 100% 29%), hsl(189deg 100% 32%), hsl(173deg 100% 33%), hsl(154deg 100% 39%), hsl(89deg 70% 56%), hsl(55deg 100% 50%))",
+  margin: "40px auto",
+}} />
+
+It consists of these colors:
 
 ```ts
 const colors = [
@@ -1305,7 +1348,7 @@ const colors = [
 ];
 ```
 
-We'll create a temporary <Ts>canvas</Ts> element to render the gradient to:
+To render the gradient to a canvas, we'll first have to create one. We can do that like so:
 
 ```ts
 const canvas = document.createElement("canvas");
@@ -1314,7 +1357,7 @@ canvas.width = 64;
 const ctx = canvas.getContext("2d");
 ```
 
-We'll then create a [<Ts>CanvasGradient</Ts>][canvas_gradient] via <Ts method>createLinearGradient</Ts> and write the colors to it:
+The gradient is written to a [<Ts>CanvasGradient</Ts>][canvas_gradient] like so:
 
 [canvas_gradient]: https://developer.mozilla.org/en-US/docs/Web/API/CanvasGradient
 
@@ -1330,28 +1373,23 @@ for (const [i, color] of colors.entries()) {
 }
 ```
 
-Lastly, we'll set the newly created <Ts>linearGradient</Ts> as the active fill style and draw a rectangle over the canvas.
+Setting the gradient as the active fill style and drawing a rectangle over the dimensions renders the gradient.
 
 ```ts
 ctx.fillStyle = linearGradient;
-ctx.fillRect(0, 0, width, height);
+ctx.fillRect(0, 0, canvas.width, canvas.height);
 ```
-
-Here's what the canvas looks like after the <Gl method>fillRect</Gl> call:
 
 <WebGLShader fragmentShader="read_texture" width={256} height={64} colorConfiguration="blue_to_yellow" />
 
 [gradient_generator]: https://www.joshwcomeau.com/gradient-generator/
 
-Now that we've rendered a linear gradient onto a canvas element, let's get it into our shader.
+Now that we've rendered a linear gradient onto a canvas element, let's write it into a texture and pass it to our shader.
 
-### Writing canvas contents to a texture
+### Getting a gradient into the shader
 
-I won't cover this in detail -- I want to stay focused on shaders, not the WebGL API. I'll refer you to [this post on rendering to a texture][render_to_texture] if you want to explore this in more detail.
+The following code creates a WebGL texture and writes the canvas contents to it:
 
-Anyway, the following code creates a WebGL texture and writes the canvas contents to it:
-
-[render_to_texture]: https://webglfundamentals.org/webgl/lessons/webgl-render-to-texture.html
 
 ```ts
 const texture = gl.createTexture();
@@ -1360,11 +1398,11 @@ gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, canvas);
 gl.bindTexture(gl.TEXTURE_2D, null);
 ```
 
-Let's look at how we can read this texture in our shader.
+<SmallNote label="">I won't cover how this works -- I want to stay focused on shaders, not the WebGL API. I'll refer you to [this post on rendering to a texture][render_to_texture] if you want to explore this in more detail.</SmallNote>
 
-### Passing the texture our shader and reading from it
+[render_to_texture]: https://webglfundamentals.org/webgl/lessons/webgl-render-to-texture.html
 
-GLSL shaders read data from textures via [samplers][samplers]. Samplers are a function that accept texture coordinates and return the value of the texture at that position.
+GLSL shaders read data from textures using [samplers][samplers]. A sampler is a function that accepts texture coordinates and returns the value of the texture at that position.
 
 [samplers]: https://www.khronos.org/opengl/wiki/Sampler_(GLSL)
 
@@ -1372,23 +1410,28 @@ There are different sampler types for different value types: `isampler` for sign
 
 Samplers also have dimensionality. You can have 1D, 2D or 3D samplers. Since we'll be reading from a 2D image texture, we'll use a `sampler2D`. If you were reading signed integers from a 3D texture, you'd use a `usampler3D`.
 
-In the shader, we'll declare our sampler via a uniform. I'll name it <Gl>u_gradient</Gl>:
+In our shader, we'll declare our sampler via a uniform. I'll name it <Gl>u_gradient</Gl>:
 
 ```glsl
 uniform sampler2D u_gradient;
 ```
 
-I won't cover how to pass the gradient texture to the WebGL shader on the JavaScript side -- I want to stay focused on the shader side -- but I'll refer you to [this post][webgl_textures] on WebGL textures.
+On the JavaScript side, you could set <Gl>u_gradient</Gl> to use our <Gl>texture</Gl> like so:
+
+```ts
+const gradientUniformLocation = gl.getUniformLocation(program, "u_gradient");
+gl.activeTexture(gl.TEXTURE0);
+gl.bindTexture(gl.TEXTURE_2D, texture);
+gl.uniform1i(gradientUniformLocation, 0);
+```
+
+<SmallNote label="">Again, I won't cover how this works -- I want to stay focused on the shader side -- but I'll refer you to [this post][webgl_textures] on WebGL textures.</SmallNote>
 
 [webgl_textures]: https://webglfundamentals.org/webgl/lessons/webgl-3d-textures.html
 
-To read data from samplers, we'll need to use OpenGL's [texture lookup functions][texture_lookup_functions]. In our case, we're reading 2D image data, so we'll use the built-in <Gl method>texture2D</Gl> function.
+To read data from a sampler you'd use one of OpenGL's built-in [texture lookup functions][texture_lookup_functions]. In our case, we're reading 2D image data, so we'll use <Gl method>texture2D</Gl>.
 
 [texture_lookup_functions]: https://www.khronos.org/opengl/wiki/Sampler_(GLSL)#Texture_lookup_functions
-
-```glsl
-texture2D(textureSampler, textureCoordinates2D);
-```
 
 <Gl method>texture2D</Gl> takes two arguments, a sampler and 2D texture coordinates. The coordinates are normalized so $(0, 0)$ is the top-left corner of the texture and $(1, 1)$ is the bottom-right corner of the texture.
 
@@ -1398,7 +1441,7 @@ Here's our texture again, for reference:
 
 <WebGLShader fragmentShader="read_texture" width={256} height={64} colorConfiguration="blue_to_yellow" />
 
-The texture is uniform over the $y$ axis so we can just set the $y$ coordinate to $0.5$. We'll get the same color for any value of $y$ so it doesn't really matter what we choose.
+The texture is uniform over the $y$ axis so we can just set the $y$ coordinate to $0.5$ (we could also use $0.0$ or $1.0$, it wouldn't change the result for this texture).
 
 As for the $x$ axis, reading the color at $x = 0.0$ should yield blue and at $x = 1.0$ we should get yellow. We can verify this with the following shader
 
@@ -1411,15 +1454,15 @@ void main() {
 }
 ```
 
-As you slide $x$ from $0$ to $1$ in the canvas below, the color should change from blue to yellow:
+In the canvas below the $x$ slider controls the value of <Gl>u_x</Gl>. As you slide $x$ from $0$ to $1$ the color should change from blue to yellow:
 
 <WebGLShader fragmentShader="read_texture_t" width={100} height={100} colorConfiguration="blue_to_yellow" />
 
-It works! We can now map values between $0$ and $1$ to colors on the gradient.
+It works! We can now map values between $0$ and $1$ to a color from the gradient.
 
-### Applying a gradient to the background noise
+### Mapping our background noise to the gradient
 
-Let's use this and map the background noise to the gradient. As a refresher, we've defined a <Gl method>background_noise</Gl> function that returns a value between $0$ and $1$:
+As a refresher, we've defined a <Gl method>background_noise</Gl> function that returns a value between $0$ and $1$:
 
 ```glsl
 float background_noise() {
@@ -1432,7 +1475,7 @@ float background_noise() {
 }
 ```
 
-We can map output of <Gl method>background_noise</Gl> to a color from the gradient and return it like so:
+With all our pieces in place, mapping the background noise to the gradient is trivial:
 
 ```glsl
 uniform sampler2D u_gradient;
@@ -1444,7 +1487,7 @@ gl_FragColor = texture2D(u_gradient, vec2(t, 0.5));
 
 As we can see, this has the effect of applying our gradient to the background noise:
 
-<WebGLShader fragmentShader="simplex_noise_stacked_4" width={800} height={200} colorConfiguration="blue_to_yellow" />
+<WebGLShader fragmentShader="simplex_noise_stacked_4" width={800} height={250} colorConfiguration="blue_to_yellow" />
 
 Reading the linear gradient as a texture in our shader gives us a lot of flexibility in how we create the linear gradient. We can easily swap out the gradient dynamically, say, to this funky pastel gradient:
 
@@ -1456,7 +1499,7 @@ linear-gradient(
 );
 ```
 
-<WebGLShader fragmentShader="simplex_noise_stacked_4" width={800} height={200} colorConfiguration="pastel" />
+<WebGLShader fragmentShader="simplex_noise_stacked_4" width={800} height={250} colorConfiguration="pastel" />
 
 We've covered a ton of ground! We've learned how to programmatically generate linear gradient textures and read them in WebGL shaders, using that to generate colorful background noise.
 
@@ -1688,8 +1731,8 @@ We're currently using those alpha values to blend these three blue colors:
 
 ```glsl
 vec3 bg_color = vec3(0.102, 0.208, 0.761);
-vec3 w1_color = vec3(0.094, 0.502, 0.910);
-vec3 w2_color = vec3(0.384, 0.827, 0.898);
+vec3 wave1_color = vec3(0.094, 0.502, 0.910);
+vec3 wave2_color = vec3(0.384, 0.827, 0.898);
 ```
 
 But the trick to our final effect lies in using <Gl method>background_noise</Gl> to generate three different, distinct background noises and blending those instead.

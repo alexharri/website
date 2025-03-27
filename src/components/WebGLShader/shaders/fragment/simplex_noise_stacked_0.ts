@@ -3,14 +3,7 @@ import { simplexNoise } from "../../simplexNoise";
 import { CreateFragmentShader, FragmentShaderUniforms } from "../types";
 
 const createFragmentShader: CreateFragmentShader = () => {
-  const uniforms: FragmentShaderUniforms = {
-    time: {
-      label: "Animation speed",
-      value: 1,
-      range: [0.1, 5],
-      format: "multiplier",
-    },
-  };
+  const uniforms: FragmentShaderUniforms = {};
   const shader = /* glsl */ `
     precision mediump float;
 

@@ -103,9 +103,9 @@ export class WebGLRenderer {
     gl.uniform1f(this.u_h, gl.canvas.height);
 
     // Pass gradient texture
-    gl.activeTexture(gl.TEXTURE1);
+    gl.activeTexture(gl.TEXTURE0);
     gl.bindTexture(gl.TEXTURE_2D, this.gradientTexture);
-    gl.uniform1i(this.u_gradient, 1);
+    gl.uniform1i(this.u_gradient, 0);
 
     // Clear canvas
     this.clear();

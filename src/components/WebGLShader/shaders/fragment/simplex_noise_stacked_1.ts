@@ -7,7 +7,7 @@ const createFragmentShader: CreateFragmentShader = () => {
     time2: {
       label: "math:F",
       value: 1,
-      range: [0.0, 5],
+      range: [1, 5],
       format: "multiplier",
     },
   };

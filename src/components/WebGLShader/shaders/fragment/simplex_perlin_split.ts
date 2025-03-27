@@ -35,7 +35,7 @@ const createFragmentShader: CreateFragmentShader = (options) => {
       float t = (sign(dist) + 1.0) / 2.0;
       float l = mix(l0, l1, t);
 
-      float f = (sign(abs(dist) - 10.0) + 1.0) / 2.0;
+      float f = (sign(abs(dist) - 6.0) + 1.0) / 2.0;
       l *= f;
 
       gl_FragColor = vec4(l, l, l, 1.0);
