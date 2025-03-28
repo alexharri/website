@@ -1750,7 +1750,7 @@ float w1_alpha = wave_alpha(WAVE1_Y, WAVE1_HEIGHT);
 float w2_alpha = wave_alpha(WAVE2_Y, WAVE2_HEIGHT);
 ```
 
-We're currently using those alpha values to blend these three blue colors:
+We're currently using those alpha values to blend three colors -- these three shades of blue from the previous section:
 
 ```glsl
 vec3 bg_color = vec3(0.102, 0.208, 0.761);
@@ -1758,9 +1758,9 @@ vec3 wave1_color = vec3(0.094, 0.502, 0.910);
 vec3 wave2_color = vec3(0.384, 0.827, 0.898);
 ```
 
-But the trick to our final effect lies in using <Gl method>background_noise</Gl> to generate three different, distinct background noises and blending those instead.
+The trick to our final effect lies in substituting each of those colors with a unique background noise and blending those.
 
-To be able to generate three distinct background noises, we'll have to update the <Gl method>background_noise</Gl> method to take an offset and add that to <Gl>u_time</Gl>. We've done this twice before, so at this point this is just routine:
+We need our three background noises to be distinct. In order to that we'll update our <Gl method>background_noise</Gl> function to take an offset value and add that to <Gl>u_time</Gl>. We've done this twice before so at this point this is just routine:
 
 ```glsl
 float background_noise(float offset) {
@@ -1774,7 +1774,7 @@ float background_noise(float offset) {
 }
 ```
 
-This allows us to generate multiple distinct background noises. Let's start off by interpreting the background noise as lightness values:
+We can now easily generate multiple distinct background noises. Let's start off by interpreting the background noises as lightness values:
 
 ```glsl
 float bg_lightness = background_noise(0.0);
@@ -1794,11 +1794,11 @@ gl_FragColor = vec4(vec3(lightness), 1.0);
 
 This gives us the following effect:
 
-<WebGLShader fragmentShader="final_effect_0" width={800} height={200} />
+<WebGLShader fragmentShader="final_effect_0" width={800} minWidth={600} height={200} maintainHeight={0.7} seed={30005} />
 
-Just try to tell me that this effect doesn't look _absolutely sick_! The effect we get is flowing, smooth and quite dramatic at times.
+Just try to tell me that this effect doesn't look _absolutely sick!_ It's smooth, flowing, and quite dramatic at times.
 
-The only thing that's really left to do is mapping the final <Gl>lightness</Gl> value to a gradient. Let's use this one:
+The obvious next step is to map the final <Gl>lightness</Gl> value to a gradient. Let's use this one:
 
 <WebGLShader fragmentShader="read_texture" width={256} height={64} colorConfiguration="default" />
 
@@ -1808,7 +1808,7 @@ Like before, we'll get the texture into our shader via a <Gl>uniform sampler2D</
 uniform sampler2D u_gradient;
 ```
 
-We then map the lightness value to the gradient, assigning the result to <Gl>gl_FragColor</Gl>:
+We then map the lightness value to the gradient like so:
 
 ```glsl
 gl_FragColor = texture2D(u_gradient, vec2(lightness, 0.5));
@@ -1816,14 +1816,16 @@ gl_FragColor = texture2D(u_gradient, vec2(lightness, 0.5));
 
 This applies the gradient to our effect:
 
-<WebGLShader fragmentShader="final_effect_1" width={800} height={200} />
+<WebGLShader fragmentShader="final_effect_1" width={800} minWidth={600} height={200} maintainHeight={0.7} seed={30005} />
 
 Looks gorgeous. We can make this more sleek by increasing the height of the canvas a bit and adding a skew:
 
-<WebGLShader fragmentShader="final_effect_1" height={250} skew />
+<WebGLShader fragmentShader="final_effect_1" skew minWidth={600} height={250} maintainHeight={0.7} seed={24560} />
 
 Sick, right? This effect could be used to add a modern and elegant touch to any landing page.
 
+By the way, the skew effect is deceptively simple. It's just <Css>skewY(-6deg)</Css>.
+
 We can apply any gradient to this effect. Below is a canvas that lets you pick the gradient:
 
-<WebGLShader fragmentShader="final_effect_1" height={200} colorConfiguration="blue_to_yellow" />
+<WebGLShader fragmentShader="final_effect_1" skew minWidth={600} height={250} maintainHeight={0.7} seed={30005} colorConfiguration="blue_to_yellow" />

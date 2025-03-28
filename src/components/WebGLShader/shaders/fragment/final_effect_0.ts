@@ -8,13 +8,13 @@ const createFragmentShader: CreateFragmentShader = () => {
     precision mediump float;
 
     uniform float u_time;
+    uniform float u_h;
     uniform sampler2D u_gradient;
 
-    const float HEIGHT = 200.0;
-    const float WAVE1_HEIGHT = 24.0;
-    const float WAVE2_HEIGHT = 32.0;
-    const float WAVE1_Y = 0.80 * HEIGHT;
-    const float WAVE2_Y = 0.35 * HEIGHT;
+    float WAVE1_HEIGHT = u_h * 0.12;
+    float WAVE2_HEIGHT = u_h * 0.16;
+    float WAVE1_Y = 0.80 * u_h;
+    float WAVE2_Y = 0.35 * u_h;
 
     float PI = ${Math.PI.toFixed(10)};
 
@@ -57,17 +57,16 @@ const createFragmentShader: CreateFragmentShader = () => {
       return sum;
     }
 
-    float wave_alpha(float Y, float wave_height) {
+    float wave_alpha(float Y, float wave_height, float offset) {
       float x = gl_FragCoord.x;
       float y = gl_FragCoord.y;
 
       // Calculate distance to curve Y
-      float noise_offset = Y * wave_height;
-      float wave_y = Y + noise(x, noise_offset) * wave_height;
+      float wave_y = Y + noise(x, offset) * wave_height;
       float dist_signed = wave_y - y;
       
       // Calculate alpha
-      float blur = calc_blur(noise_offset);
+      float blur = calc_blur(offset);
 
       float delta = clamp(dist_signed / blur, -0.5, 0.5);
       delta = smooth_step(delta + 0.5) - 0.5;
@@ -95,8 +94,8 @@ const createFragmentShader: CreateFragmentShader = () => {
     }
 
     void main() {
-      float w1_alpha = wave_alpha(WAVE1_Y, WAVE1_HEIGHT);
-      float w2_alpha = wave_alpha(WAVE2_Y, WAVE2_HEIGHT);
+      float w1_alpha = wave_alpha(WAVE1_Y, WAVE1_HEIGHT, 3840.0);
+      float w2_alpha = wave_alpha(WAVE2_Y, WAVE2_HEIGHT, 2240.0);
       
       float bg_lightness = background_noise(0.0);
       float w1_lightness = background_noise(200.0);

@@ -11,12 +11,13 @@ import { FragmentShader, FragmentShaderUniform } from "./shaders/types";
 import { NumberVariable } from "../../threejs/NumberVariable";
 import { clamp, invLerp, lerp } from "../../math/lerp";
 import { useViewportWidth } from "../../utils/hooks/useViewportWidth";
+import { useRandomId } from "../../utils/hooks/useRandomId";
 
 const DEFAULT_HEIGHT = 250;
 const UNIFORM_MARGIN = 24;
 const UNIFORM_V_GAP = 32;
 const CONTROLS_HEIGHT = 72;
-const SHOW_SEED_AND_TIME = false;
+const SHOW_SEED_AND_TIME = true;
 
 function parseUniformValue(uniform: FragmentShaderUniform, value: number) {
   if (uniform.remap) {
@@ -43,7 +44,6 @@ const styles = ({ styled }: StyleOptions) => ({
     &--skew {
       margin: calc(32px + min(100vw, ${cssVariables.contentWidth}px) * 0.04) -${cssVariables.contentPadding}px
         calc(48px + min(100vw, ${cssVariables.contentWidth}px) * 0.04);
-      transform: skewY(-6deg);
     }
   `,
 
@@ -54,6 +54,10 @@ const styles = ({ styled }: StyleOptions) => ({
       position: absolute;
       top: 0;
       left: 0;
+    }
+
+    &--skew {
+      transform: skewY(-6deg);
     }
   `,
 
@@ -157,6 +161,7 @@ function calculateCanvasDimensions(props: Props, viewportWidth: number) {
 const _WebGLShader: React.FC<Props> = (props) => {
   const s = useStyles(styles);
 
+  const shaderTimeId = useRandomId();
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   const { showControls = true, animate = true } = props;
@@ -243,7 +248,7 @@ const _WebGLShader: React.FC<Props> = (props) => {
 
       if (SHOW_SEED_AND_TIME) {
         const timeEl = document.querySelector(
-          `[data-shader-time="${props.fragmentShader}"]`,
+          `[data-shader-time="${shaderTimeId}"]`,
         ) as HTMLSpanElement | null;
         if (timeEl) {
           timeEl.innerText = renderer.getSeed().toFixed(0) + ", " + renderer.getTime().toFixed(0);
@@ -268,7 +273,7 @@ const _WebGLShader: React.FC<Props> = (props) => {
 
   return (
     <>
-      <div className={s("canvasWrapper")} style={{ width, maxWidth: "100%" }}>
+      <div className={s("canvasWrapper", { skew: props.skew })} style={{ width, maxWidth: "100%" }}>
         <div style={{ paddingTop: `${(height / width) * 100}%` }} />
         <canvas
           ref={canvasRef}
@@ -282,7 +287,7 @@ const _WebGLShader: React.FC<Props> = (props) => {
         {SHOW_SEED_AND_TIME && (
           <div
             style={{ position: "absolute", bottom: 16, right: 16, color: "white" }}
-            data-shader-time={props.fragmentShader}
+            data-shader-time={shaderTimeId}
           />
         )}
       </div>
