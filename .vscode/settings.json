@@ -5,4 +5,7 @@
   "[mdx]": {
     "editor.formatOnSave": false
   },
+  "[python]": {
+    "editor.formatOnSave": true
+  }
 }

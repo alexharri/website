@@ -19,13 +19,14 @@ const createFragmentShader: CreateFragmentShader = (options) => {
 
     uniform float u_time;
     uniform float u_w;
+    uniform float u_h;
     uniform float u_blur;
 
-    const float HEIGHT = 200.0;
-    const float WAVE1_HEIGHT = 24.0;
-    const float WAVE2_HEIGHT = 32.0;
-    const float WAVE1_Y = 0.80 * HEIGHT;
-    const float WAVE2_Y = 0.35 * HEIGHT;
+    float WAVE1_HEIGHT = u_h * 0.12;
+    float WAVE2_HEIGHT = u_h * 0.16;
+    float WAVE1_Y = 0.80 * u_h;
+    float WAVE2_Y = 0.35 * u_h;
+
 
     ${noiseUtils}
     ${simplexNoise}

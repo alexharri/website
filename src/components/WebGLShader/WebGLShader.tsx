@@ -16,7 +16,7 @@ const DEFAULT_HEIGHT = 250;
 const UNIFORM_MARGIN = 24;
 const UNIFORM_V_GAP = 32;
 const CONTROLS_HEIGHT = 72;
-const SHOW_SEED_AND_TIME = true;
+const SHOW_SEED_AND_TIME = false;
 
 function parseUniformValue(uniform: FragmentShaderUniform, value: number) {
   if (uniform.remap) {

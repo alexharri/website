@@ -979,7 +979,7 @@ gl_FragColor = vec4(color, 1.0);
 
 This gives us the following result:
 
-<WebGLShader fragmentShader="multiple_waves" width={800} height={200} fragmentShaderOptions={{ offsetScalar: 0 }} maintainHeight={0.7} seed={18367} />
+<WebGLShader fragmentShader="multiple_waves" width={800} minWidth={600} height={200} fragmentShaderOptions={{ offsetScalar: 0 }} maintainHeight={0.7} seed={18367} />
 
 We do get two waves, but they're completely in sync with each other.
 
@@ -1032,7 +1032,7 @@ With these offsets the waves differ in time by $1{,}600$ seconds. No one's gonna
 
 With the offsets added, we get two distinct waves:
 
-<WebGLShader fragmentShader="multiple_waves" width={800} height={200} />
+<WebGLShader fragmentShader="multiple_waves" width={800} minWidth={600} height={200} maintainHeight={0.7} seed={20367} />
 
 Having updated our shader to handle multiple waves, let's move onto making the color of our waves dynamic.
 
@@ -1344,7 +1344,7 @@ const colors = [
   "hsl(173deg 100% 33%)",
   "hsl(154deg 100% 39%)",
   "hsl( 89deg  70% 56%)",
-  "hsl( 55deg 100% 50%)"
+  "hsl( 55deg 100% 50%)",
 ];
 ```
 
@@ -1487,36 +1487,50 @@ gl_FragColor = texture2D(u_gradient, vec2(t, 0.5));
 
 As we can see, this has the effect of applying our gradient to the background noise:
 
-<WebGLShader fragmentShader="simplex_noise_stacked_4" width={800} height={250} colorConfiguration="blue_to_yellow" />
+<WebGLShader
+  fragmentShader="simplex_noise_stacked_4"
+  width={800}
+  height={250}
+  minWidth={600}
+  maintainHeight={0.3}
+  seed={12926}
+  colorConfiguration="blue_to_yellow"
+/>
 
-Reading the linear gradient as a texture in our shader gives us a lot of flexibility in how we create the linear gradient. We can easily swap out the gradient dynamically, say, to this funky pastel gradient:
+Defining the gradient in JavaScript and generating it dynamically gives us a lot of flexibility. We can easily change the gradient, say, to this funky pastel gradient:
 
-```css
-linear-gradient(
-  hsl(141 75% 72%) 0%,
-  hsl(41 90% 62%) 50%,
-  hsl(358 64% 50%) 100%
-);
+```ts
+const colors = [
+  "hsl(141 75% 72%)",
+  "hsl(41 90% 62%)",
+  "hsl(358 64% 50%)",
+];
 ```
 
-<WebGLShader fragmentShader="simplex_noise_stacked_4" width={800} height={250} colorConfiguration="pastel" />
+<WebGLShader
+  fragmentShader="simplex_noise_stacked_4"
+  width={800}
+  height={250}
+  minWidth={600}
+  maintainHeight={0.3}
+  seed={12926}
+  colorConfiguration="pastel"
+/>
 
-We've covered a ton of ground! We've learned how to programmatically generate linear gradient textures and read them in WebGL shaders, using that to generate colorful background noise.
-
-We'll soon use all of this in the final effect, but before we get to that, let's look at blending the waves.
+We'll soon use this in the final effect, but before we get to that, let's look at blending the waves.
 
 
 ## Dynamic blur
 
-Currently, our waves have sharp edges:
+In the final effect we see varying amounts of blur applied to each wave, with the amount of blur evolving over time.
 
-<WebGLShader fragmentShader="multiple_waves" width={800} height={200} />
+<WebGLShader fragmentShader="final" skew height={275} minWidth={600} maintainHeight={0.3} seed={16192} />
 
-But in the final effect we see varying amounts of blur applied to each wave, with the amount of blur evolving over time.
+Our current waves, however, have sharp edges:
 
-<WebGLShader fragmentShader="final" skew minWidth={600} maintainHeight={0.3} />
+<WebGLShader fragmentShader="multiple_waves" width={800} minWidth={600} height={200} maintainHeight={0.7} seed={20367} />
 
-Let's get started building this sort of blur. As a refresher, we're currently calculating the alpha of our waves like so:
+Let's get started building a dynamic blur blur. As a refresher, we're currently calculating the alpha of our waves like so:
 
 ```glsl
 float x = gl_FragCoord.x;
@@ -1532,14 +1546,12 @@ float wave_alpha(float Y, float wave_height) {
 }
 ```
 
-To add blur we'll define a <Gl method>calc_blur</Gl> function to calculate the amount of blur to apply. We'll use it to calculate a <Gl>blur</Gl> value and divide <Gl>dist</Gl> by it, like so:
+To add blur we'll define a <Gl method>calc_blur</Gl> function to calculate the amount of blur to apply. We'll use it to calculate a blur value and divide <Gl>dist</Gl> by it -- like we did earlier in this post -- like so:
 
 ```glsl
 float blur = calc_blur();
 float alpha = clamp(0.5 + dist / blur, 0.0, 1.0);
 ```
-
-This mimics how we applied blur in an earlier section.
 
 Still, we've yet to define the <Gl method>calc_blur</Gl> function. Let's start off by applying a progressively increasing left-to-right blur over the width of the canvas like we did before:
 
@@ -1551,9 +1563,9 @@ float calc_blur() {
 }
 ```
 
-<WebGLShader fragmentShader="multiple_waves_blur_0" width={800} height={200} />
+<WebGLShader fragmentShader="multiple_waves_blur_0" width={800} minWidth={600} height={200} maintainHeight={0.7} seed={20367} />
 
-Looks good! To make the blur dynamic, we'll yet again reach for simplex noise function. The setup should feel familiar -- it's almost identical to the <Gl method>wave_noise</Gl> function we defined earlier:
+To make the blur dynamic, we'll yet again reach for simplex noise function. The setup should feel familiar, it's almost identical to the <Gl method>wave_noise</Gl> function we defined earlier:
 
 ```glsl
 float calc_blur() {
@@ -1573,29 +1585,29 @@ If we were to apply this as-is to our waves, each wave's blur would look identic
 Conveniently for us, we can reuse the same offset we calculated for the <Gl method>wave_noise</Gl> function:
 
 ```glsl
-float wave_alpha(float Y, float wave_height) {
-  float offset = Y * wave_height;
-  float wave_y = Y + wave_noise(x, offset) * wave_height;
-  float blur = calc_blur(offset);
+float calc_blur(float offset) {
+  float time = u_time * offset;
+  float noise = simplexNoise(x * L + F * time, time * S);
   // ...
 }
 
-float calc_blur(float offset) {
-  float time = u_time * offset;
-  float blur_fac = (simplexNoise(x * L + F * time, time * S) + 1.0) / 2.0;
+float wave_alpha(float Y, float wave_height) {
+  float offset = Y * wave_height;
+  float wave_y = Y + wave_noise(offset) * wave_height;
+  float blur = calc_blur(offset);
   // ...
 }
 ```
 
-This works, we get a dynamic blur:
+This gives us a dynamic blur:
 
-<WebGLShader fragmentShader="multiple_waves_blur_1" width={800} height={200} />
+<WebGLShader fragmentShader="multiple_waves_blur_1" width={800} minWidth={600} height={200} maintainHeight={0.7} seed={21367} />
 
-But honestly, it looks pretty bad. The blur looks harsh -- like it has distinct "edges" at the top and bottom.
+But, honestly, the blur looks pretty bad. It feels like it has distinct "edges" at the top and bottom of each wave.
 
-Also, the whole wave feels somewhat blurry, just unevenly so. We don't seem to get those long, sharp edges that appear in the final effect:
+Also, the waves feels somewhat blurry all over, just unevenly so. We don't seem to get those long, sharp edges that appear in the final effect:
 
-<WebGLShader fragmentShader="final" skew minWidth={600} maintainHeight={0.3} />
+<WebGLShader fragmentShader="final" skew minWidth={600} maintainHeight={0.3} seed={16192} />
 
 Let's start off by fixing the harsh edges.
 
@@ -1605,39 +1617,53 @@ Let's start off by fixing the harsh edges.
 Consider how we're calculating the alpha:
 
 ```glsl
-float alpha = clamp(0.5 + dist_signed / blur, 0.0, 1.0);
+float alpha = clamp(0.5 + dist / blur, 0.0, 1.0);
 ```
 
-The alpha equals $0.5$ when the distance is $0$, and it then linearly increases or decreases until it hits either $0.0$ or $1.0$, at which point the <Gl method>clamp</Gl> function kicks in.
+The alpha equals $0.5$ when the distance is $0$. It then linearly increases or decreases until it hits either $0.0$ or $1.0$, at which point the <Gl method>clamp</Gl> function kicks in.
 
-This produces an alpha curve that looks like so:
+Let's chart the alpha curve so that we can see this visually:
 
-<WebGLShader fragmentShader="alpha_curve_0" width={330} height={200} />
+<Image src="~/linear-clamped-chart.png" plain width={560} />
 
 The harsh stops at $0.0$ and $1.0$ produce the sharp-feeling edges that we observe at the edges of the blur.
 
-<WebGLShader fragmentShader="multiple_waves_blur_1" width={800} height={200} showControls={false} />
+<WebGLShader fragmentShader="multiple_waves_blur_1" width={800} minWidth={600} height={200} showControls={false} maintainHeight={0.7} seed={21367} />
 
-The [smoothstep][smoothstep] function can help here. Smoothstep is a family of interpolation functions that, as the name suggests, smooth the transition from $0$ to $1$. Here's a chart showing the output:
+The [smoothstep][smoothstep] function can help here. Smoothstep is a family of interpolation functions that, as the name suggests, smooth the transition from $0$ to $1$.
 
-[smoothstep]: https://en.wikipedia.org/wiki/Smoothstep
+I'm defining <Gl method>smoothstep</Gl> like so:
 
-<WebGLShader fragmentShader="alpha_curve_1" width={330} height={200} />
+```glsl
+float smoothstep(float t) {
+  return t * t * t * (t * (6.0 * t - 15.0) + 10.0);
+}
+```
 
-Applying it is simple -- we'll assign the result of <Gl>smoothstep(alpha)</Gl> to <Gl>alpha</Gl>:
+<SmallNote label="" center>This is the ["quintic" variant][smoothstep_variants] of the smoothstep function. It applies a bit more smoothing than the "default" smoothstep implementation.</SmallNote>
+
+[smoothstep_variants]: https://iquilezles.org/articles/smoothsteps/
+
+Applying <Gl method>smoothstep</Gl> to our alpha curve is quite simple:
 
 ```glsl
 float alpha = clamp(0.5 + dist_signed / blur, 0.0, 1.0);
 alpha = smoothstep(alpha);
 ```
 
-This results in a smooth blur:
+Below is a chart showing the smoothed alpha curve -- I'll include the original non-smoothed curve for comparison:
 
-<WebGLShader fragmentShader="multiple_waves_blur_2" width={800} height={200} />
+[smoothstep]: https://en.wikipedia.org/wiki/Smoothstep
+
+<Image src="~/smoothstep-chart.png" plain width={560} />
+
+This results in a _much_ smoother blur:
+
+<WebGLShader fragmentShader="multiple_waves_blur_2" width={800} minWidth={600} height={200} showControls={false} maintainHeight={0.7} seed={21367} />
 
 Following is a side-by-side comparison. The blur to the left is smoothed, while the right one is not.
 
-<WebGLShader fragmentShader="multiple_waves_blur_2_side_by_side" width={800} height={200} />
+<WebGLShader fragmentShader="multiple_waves_blur_2_side_by_side" width={800} minWidth={600} height={200} maintainHeight={0.7} seed={21367} />
 
 That takes care of the sharp edges. Let's now tackle the issue of the wave as a whole being too blurry.
 
@@ -1658,37 +1684,28 @@ float calc_blur() {
 
 The edge becomes sharper as $t$ approaches $0$, and blurrier as $t$ approaches $1$. However, the wave only becomes sharp when $t$ is _very_ close to zero.
 
-Consider the visualization below. It visualizes the value of $t$ over the wave in the chart below the canvas:
+The canvas below has a visualization that illustrate this. The lower half is a chart showing the value of $t$ over the $x$ axis (with $t=0$ at the bottom to $t=1$ at the top):
 
-<WebGLShader fragmentShader="multiple_waves_blur_4" width={800} height={320} showControls={false} />
+<WebGLShader fragmentShader="multiple_waves_blur_4" width={800} minWidth={600} height={320} maintainHeight={0.7} seed={32839} showControls={false} />
 
-<SmallNote label="" center>$t=1$ at the top of the chart, and $t=0$ at the bottom</SmallNote>
+You'll notice that the wave becomes sharp when the chart gets close to touching the bottom -- at values near zero -- but it rarely reaches values of near-zero. The value of $t$ lingers around the middle too much, causing the wave to be _somewhat_ blurry over its entire length.
 
-You'll notice that the wave gets sharp when the chart gets close to touching the bottom -- at values close to zero -- but it rarely gets close to zero. The $t$ value spends too much time around the middle, which causes the wave to be _somewhat_ blurry over its entire length.
 
-We want to somehow bias $t$ such that it spends more time at values very close to zero, while still reaching values close to one. We can do this by applying an exponent to $t$.
+<Image src="~/x-pow-2-chart.png" plain width={500} />
 
-Consider the what applying an exponent does to values in the range $[0, 1]$. Applying a power of $2$ to a value close to zero, such as $0.1$, gives us $0.01$:
+We can bias values close to $0$ to be _very_ close $0$ by exponentiating $t$. Consider how an exponent affects values between $0$ and $1$. Numbers close to $0$ get pulled very close towards $0$ while larger numbers experience less pull.
 
-<p className="mathblock">$$0.1^2=0.01$$</p>
+The level of pull depends on the exponent. For example, $0.1^2 = 0.01$, a 90% reduction, while $0.9^2 = 0.81$, only a reduction of 10%.
 
-while for $0.9$ we get $0.81$:
-
-<p className="mathblock">$$0.9^2=0.81$$</p>
-
-When exponentiating numbers between zero and one, numbers close to zero approach zero way faster than numbers close to one. Here's a chart for $x^2$ for values of $x$ between zero and one:
-
-<WebGLShader fragmentShader="alpha_curve_2" width={330} height={200} showControls={false} />
-
-This effect only gets more extreme as we increase the exponent. $0.1^3$ gives us $0.001$ while $0.9^3$ results in roughly $0.73$:
+This effect becomes more pronounced as we increase the exponent:
 
 <p className="mathblock">$$0.1^3=0.001$$<br />$$0.9^3=0.729$$</p>
 
 <SmallNote label="" center>$0.1$ got $99\%$ smaller while $0.9$ got roughly $20\%$ smaller!</SmallNote>
 
-To get a feel for this, here's a chart of $x^n$ that lets you vary $n$:
+To get a feel for this, here's a chart of $x^n$ for various values of $n$:
 
-<WebGLShader fragmentShader="alpha_curve_3" width={330} height={200} />
+<Image src="~/x-pow-n-chart.png" plain width={500} />
 
 <SmallNote label="" center>Notice how an exponent of $1$ has no effect.</SmallNote>
 
@@ -1699,19 +1716,25 @@ float t = (noise + 1.0) / 2.0;
 t = pow(t, exponent);
 ```
 
-Here's a canvas that lets you vary the value of <Gl>exponent</Gl> from $0$ to $4$. I intentionally set <Gl>exponent</Gl> to a default value of $1$ (no effect) so that you can see the change occur as you increase it.
+Below is a canvas that lets you vary the value of <Gl>exponent</Gl> from $0$ to $4$. I intentionally set <Gl>exponent</Gl> to a default value of $1$ (no effect) so that you can see the effect of increasing the exponent directly (the light-blue line that stays behind represents the value of $t$ prior to applying the exponent).
 
-<WebGLShader fragmentShader="multiple_waves_blur_4" width={800} height={320} />
+<WebGLShader fragmentShader="multiple_waves_blur_4" width={800} minWidth={600} height={320} maintainHeight={0.7} seed={32839} />
 
-As you increase the exponent, $t$ tends to "hug" the floor of the chart more and more. This produces noticeable periods of relative sharpness while not muting higher values of $t$ too much. I feel like an exponent of $2.0$ to $2.7$ gives good results -- I'll go with $2.5$.
+As you increase the exponent, $t$ tends to "hug" the floor of the chart more and more. This produces noticeable periods of relative sharpness while not muting higher values of $t$ _too_ much. I feel like an exponent of $2.0$ to $2.7$ gives good results -- I'll go with $2.5$.
+
+With <Gl method>smoothstep</Gl> and an exponent of $2.5$ applied, our final alpha curve becomes:
+
+<Image src="~/smoothstep-pow-2p5-chart.png" plain width={560} />
+
+<SmallNote label="" center>Notice how the exponent </SmallNote>
 
 Let's bring back the other wave and see what we've got:
 
-<WebGLShader fragmentShader="multiple_waves_blur_5" width={800} height={200} showControls={false} fragmentShaderOptions={{ value: 50 }} />
+<WebGLShader fragmentShader="multiple_waves_blur_5" width={800} minWidth={600} height={200} maintainHeight={0.7} seed={32839} showControls={false} fragmentShaderOptions={{ value: 50 }} />
 
-Hmm, the blur now feels a bit weak. Let's ramp it up -- I'll change the blur amount from $50$ to $130$:
+Applying an exponent does put a damp on the strength of the blur, so let's ramp the blur amount up -- I'll increase it from $50$ to $130$.
 
-<WebGLShader fragmentShader="multiple_waves_blur_5" width={800} height={200} />
+<WebGLShader fragmentShader="multiple_waves_blur_5" width={800} minWidth={600} height={200} maintainHeight={0.7} seed={32839} showControls={false} />
 
 Now we're talking! We've got a pretty great looking blur going!
 

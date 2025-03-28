@@ -5,7 +5,7 @@ import { CreateFragmentShader, FragmentShaderUniforms } from "../types";
 const createFragmentShader: CreateFragmentShader = () => {
   const uniforms: FragmentShaderUniforms = {
     u_pow: {
-      label: "Pow",
+      label: "Exponent",
       value: 1,
       range: [1, 4],
       step: 0.1,
@@ -19,11 +19,12 @@ const createFragmentShader: CreateFragmentShader = () => {
     uniform float u_h;
     uniform float u_pow;
 
-    const float BLUR_AMOUNT = 60.0;
-    const float LOWER_HEIGHT = 140.0;
-    const float BOTTOM_PADDING = 0.0;
-    const float WAVE_HEIGHT = 24.0;
-    float WAVE_Y = 0.80 * u_h;
+    float LOWER_HEIGHT = u_h * 0.44;
+    float UPPER_HEIGHT = u_h - LOWER_HEIGHT;
+    float BLUR_AMOUNT = UPPER_HEIGHT * 0.333;
+    float BOTTOM_PADDING = 0.0;
+    float WAVE_HEIGHT = UPPER_HEIGHT * 0.12;
+    float WAVE_Y = LOWER_HEIGHT + UPPER_HEIGHT * 0.5;
 
     ${noiseUtils}
     ${simplexNoise}

@@ -30,6 +30,7 @@ import { Code } from "../../components/Code/Code";
 import { WebGLShader } from "../../components/WebGLShader/WebGLShader";
 import { ThreeDots } from "../../components/ThreeDots/ThreeDots";
 import { MediaQuery } from "../../components/MediaQuery/MediaQuery";
+import { usePreserveViewportOnResize } from "../../utils/hooks/usePreserveViewportOnScroll";
 
 function firstUpper(s: string) {
   if (s.length === 0) return s;
@@ -97,6 +98,7 @@ export function createPage(customComponents: Record<string, React.FC<any>>) {
   };
   return function PostPage(props: Props) {
     const source = usePostWatcher({ ...props, postsPath: "posts/" });
+    usePreserveViewportOnResize();
     const scope = source.scope! as unknown as FrontMatter;
 
     const pathName = scope.publishedAt ? `/blog/${props.slug}` : `/blog/draft/${props.slug}`;
