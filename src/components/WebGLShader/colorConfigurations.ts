@@ -56,6 +56,22 @@ export const colorConfigurations = {
     // accentColor: "#ff5338",
   },
 
+  green: {
+    gradient: [
+      "hsl(170deg 31% 19%)",
+      "hsl(163deg 48% 24%)",
+      "hsl(152deg 49% 30%)",
+      "hsl(133deg 38% 40%)",
+      "hsl(105deg 39% 47%)",
+      "hsl(83deg 52% 49%)",
+      "hsl(68deg 68% 49%)",
+      "hsl(56deg 100% 48%)",
+      "hsl(54deg 95% 63%)",
+      "hsl(53deg 99% 71%)",
+      "hsl(52deg 100% 77%)",
+    ],
+  },
+
   pastel: {
     gradient: ["hsl(141 75% 72%)", "hsl(41 90% 62%)", "hsl(358 64% 50%)"],
   },

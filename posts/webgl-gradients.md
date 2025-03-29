@@ -8,7 +8,7 @@ tags: []
 
 A few weeks ago I embarked on a journey to create a flowing gradient effect -- here's what I ended up making:
 
-<WebGLShader fragmentShader="final" skew height={275} minWidth={600} maintainHeight={0.3} seed={16192} colorConfiguration={["default", "blue_to_yellow", "orange"]} />
+<WebGLShader fragmentShader="final" skew height={275} minWidth={600} maintainHeight={0.3} seed={16192} colorConfiguration={["default", "blue_to_yellow", "green"]} />
 
 This effect is written in a WebGL shader, using noise functions and some clever math to produce the flowing waves and dynamic blur.
 

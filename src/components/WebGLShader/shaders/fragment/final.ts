@@ -24,7 +24,7 @@ const createFragmentShader: CreateFragmentShader = (options) => {
     accentColor,
     blurAmount = 345,
     blurQuality = 7,
-    blurExponentRange = [0.96, 1.15],
+    blurExponentRange = [0.9, 1.2],
   } = options as Partial<{
     blurAmount: number;
     blurQuality: number;
@@ -39,6 +39,7 @@ const createFragmentShader: CreateFragmentShader = (options) => {
 
     uniform float u_time; // Time in seconds
     uniform float u_h;
+    uniform float u_w;
     uniform sampler2D u_gradient;
   
     const float PI = 3.14159, TAU = PI * 2.0;
@@ -52,6 +53,10 @@ const createFragmentShader: CreateFragmentShader = (options) => {
     ${noiseUtils}
     ${perlinNoise}
     ${simplexNoise}
+
+    float get_x() {
+      return 900.0 + gl_FragCoord.x - u_w / 2.0;
+    }
   
     // Various utility functions
     float smooth_step(float t)
@@ -86,7 +91,7 @@ const createFragmentShader: CreateFragmentShader = (options) => {
       const float F = 0.04;
       const float Y_SCALE = 1.0 / 0.27;
 
-      float x = gl_FragCoord.x * L;
+      float x = get_x() * L;
       float y = gl_FragCoord.y * L * Y_SCALE;
       float time = u_time + offset;
       float x_shift = time * F;
@@ -103,7 +108,7 @@ const createFragmentShader: CreateFragmentShader = (options) => {
       const float F = 0.026;
 
       float time = u_time + offset;
-      float x = gl_FragCoord.x * 0.000845;
+      float x = get_x() * 0.000845;
       float y = time * S;
       float x_shift = time * 0.026;
 
@@ -118,7 +123,7 @@ const createFragmentShader: CreateFragmentShader = (options) => {
     float calc_blur_bias() {
       const float S = 0.261;
       float bias_t = (sin(u_time * S) + 1.0) * 0.5;
-      return lerp(-0.13, 0.04, bias_t);
+      return lerp(-0.17, -0.04, bias_t);
     }
 
     float calc_blur(float offset) {
@@ -128,7 +133,7 @@ const createFragmentShader: CreateFragmentShader = (options) => {
       
       float time = u_time + offset;
 
-      float x = gl_FragCoord.x * L;
+      float x = get_x() * L;
       float blur_fac = calc_blur_bias();
       blur_fac += simplexNoise(vec2(x * 0.60 + time * F *  1.0, time * S * 0.7)) * 0.5;
       blur_fac += simplexNoise(vec2(x * 1.30 + time * F * -0.8, time * S * 1.0)) * 0.4;
@@ -154,7 +159,7 @@ const createFragmentShader: CreateFragmentShader = (options) => {
     float accent_lightness(float offset) {
       const float S = 0.064;
       const float F = 0.04;
-      float x = gl_FragCoord.x * 0.001;
+      float x = get_x() * 0.001;
       float y = gl_FragCoord.y * 0.001;
       float noise_x = x * ACCENT_NOISE_SCALE;
       float noise_y = y * ACCENT_NOISE_SCALE * 1.0;
