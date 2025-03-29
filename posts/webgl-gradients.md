@@ -1,9 +1,9 @@
 ---
-title: "WebGL gradients"
+title: "Building a flowing gradient effect with WebGL"
 description: ""
 image: ""
 publishedAt: ""
-tags: []
+tags: ["WebGL", "GLSL", "Mathematics", "TypeScript"]
 ---
 
 A few weeks ago I embarked on a journey to create a flowing gradient effect -- here's what I ended up making:

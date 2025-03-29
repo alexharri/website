@@ -17,7 +17,16 @@ export const colorConfigurations = {
     ],
   },
 
-  black_white: { gradient: ["hsl(0deg 0% 0%)", "hsl(0deg 0% 100%)"] },
+  black_white: {
+    gradient: [
+      "hsl(0deg 0% 0%)",
+      "hsl(0deg 0% 20%)",
+      "hsl(0deg 0% 40%)",
+      "hsl(0deg 0% 60%)",
+      "hsl(0deg 0% 80%)",
+      "hsl(0deg 0% 100%)",
+    ],
+  },
 
   lightgreen: {
     gradient: [
@@ -105,24 +114,6 @@ export const colorConfigurations = {
       "hsl(154deg 100% 39%)",
       "hsl( 89deg  70% 56%)",
       "hsl( 55deg 100% 50%)",
-    ],
-  },
-
-  new: {
-    gradient: [
-      "hsl(281deg 100% 20%)",
-      "hsl(302deg 100% 21%)",
-      "hsl(317deg 100% 28%)",
-      "hsl(327deg 100% 34%)",
-      "hsl(335deg 100% 39%)",
-      "hsl(343deg 88% 46%)",
-      "hsl(0deg 83% 57%)",
-      "hsl(22deg 78% 53%)",
-      "hsl(36deg 69% 52%)",
-      "hsl(51deg 54% 55%)",
-      "hsl(74deg 49% 66%)",
-      "hsl(109deg 60% 80%)",
-      "hsl(147deg 100% 88%)",
     ],
   },
 };
