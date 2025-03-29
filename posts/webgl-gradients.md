@@ -12,9 +12,13 @@ A few weeks ago I embarked on a journey to create a flowing gradient effect -- h
 
 This effect is written in a WebGL shader, using noise functions and some clever math to produce the flowing waves and dynamic blur.
 
-In this post I'll break down this effect step-by-step. You need no prior knowledge of WebGL or shaders to read this post -- we'll start by building a mental model for shaders and then move onto more advanced concepts.
+In this post I'll break down this effect step-by-step. You need no prior knowledge of WebGL or shaders to read this post; we'll start by building a mental model for writing shaders and then move onto implementing the effect.
 
-In reading this post you'll learn loads about WebGL and writing fragment shaders. We'll also utilize some cool noise functions and math tricks along the way.
+We'll touch on a lot in this post: what WebGL is, writing shaders, interpolation, color mapping, and gradient noise functions. My intention is for this post to introduce and build an intuition for the concepts needed to implement such an effect from scratch -- we'll build that intuition using dozens of interactive visualizations.
+
+If you just want to see the final code, I'll include a link to the shader code at the end of the post (this blog is [open source][alexharri_website] so you can just take a look).
+
+[alexharri_website]: https://github.com/alexharri/website/
 
 Let's get to it!
 
@@ -29,7 +33,7 @@ type Position = { x: number, y: number };
 function pixelColor({ x, y }: Position): Color;
 ```
 
-For every pixel on the canvas, we'll invoke the color function with the pixel's position to its color. A canvas frame might be rendered like so:
+For every pixel on the canvas, we'll invoke the color function with the pixel's position to calculate its color. A canvas frame might be rendered like so:
 
 ```ts
 for (let x = 0; x < canvas.width; x++) {
@@ -64,11 +68,11 @@ function pixelColor({ x, y }: Position): Color {
 }
 ```
 
-The <Ts method>mix</Ts> function is an interpolation function that [linearly interpolates][lerp] between the two input colors using a blend factor between $0$ and $1$.
+The <Ts method>mix</Ts> function is an interpolation function that [linearly interpolates][lerp] between the two input colors using a blend factor between $0$ and $1$ ($t$ in our case).
 
-<SmallNote label="">When <Ts>x == 0</Ts> we get a $t$ value of $0$, giving us 100% red. When <Ts>x == canvas.width - 1</Ts> we get a $t$ value of $1$, giving us 100% blue. If $t = 0.3$ we'd get 70% red and 30% blue.</SmallNote>
+<SmallNote label="">When <Ts>x == 0</Ts> we get a $t$ value of $0$, giving us 100% red. When <Ts>x == canvas.width - 1</Ts> we get a $t$ value of $1$, giving us 100% blue. If $t = 0.3$ we get 70% red and 30% blue.</SmallNote>
 
-This produces red-to-blue gradient over the width of the canvas (the $x$ axis):
+This produces a red-to-blue gradient over the width of the canvas (the $x$ axis):
 
 <WebGLShader fragmentShader="x_lerp" width={150} height={150} />
 
@@ -1817,10 +1821,30 @@ Looks gorgeous. We can make this more sleek by increasing the height of the canv
 
 <WebGLShader fragmentShader="final_effect_1" skew minWidth={600} height={250} maintainHeight={0.7} seed={24560} />
 
-Sick, right? This effect could be used to add a modern and elegant touch to any landing page.
+Sick, right? This could be used to add a modern and elegant touch to any landing page. Implementing the skew effect is deceptively simple -- it's just a transform of <Css>skewY(-6deg)</Css>.
 
-By the way, the skew effect is deceptively simple. It's just <Css>skewY(-6deg)</Css>.
+Since we're generating the gradient in JavaScript, we can easily swap out the gradient. Here's a canvas with a few cool gradients I picked:
 
-We can apply any gradient to this effect. Below is a canvas that lets you pick the gradient:
+<WebGLShader fragmentShader="final_effect_1" skew minWidth={600} height={250} maintainHeight={0.7} seed={30005} colorConfiguration={["blue_to_yellow", "green", "orange"]} />
 
-<WebGLShader fragmentShader="final_effect_1" skew minWidth={600} height={250} maintainHeight={0.7} seed={30005} colorConfiguration={["blue_to_yellow", "default", "orange", "pastel", "new"]} />
+It took a long time to get here, but we've ended up with something really cool.
+
+## Final words
+
+I hope this was a good introduction to writing shaders, and I hope I provided you the tools and intuition to get started writing shaders yourself!
+
+At the beginning of the post I promised to link to the final shader code, so [here it is][final_shader_code].
+
+[final_shader_code]: https://github.com/alexharri/website/blob/156a9e3ca021f5abc4b8a55fd66c4a16657bf50d/src/components/WebGLShader/shaders/fragment/final.ts
+
+The final shader includes a few additional elements that were not covered in the post. For example, the blur is calculated in multiple parts using an exponent range, adding a haziness element to the blur that I like, and also an oscillating "blur bias" that helps introduce periods of global blurriness and sharpness.
+
+Take a look at this black-and-white version of the final effect and see if you can spot those elements (it's much easier to see without color):
+
+<WebGLShader fragmentShader="final" skew height={275} minWidth={600} maintainHeight={0.3} seed={16192} fragmentShaderOptions={{ blackAndWhite: true }} />
+
+I didn't cover these additional elements because they're not core to the effect -- they just add a layer of refinement. There are loads of ways in which you could tweak or add to the effect. I tried tons of ideas and kept those around because they worked really well. I suggest tweaking the code and trying to adding some refinements yourself!
+
+Anyway, thanks so much for reading. I hope this was interesting.
+
+-- Alex Harri

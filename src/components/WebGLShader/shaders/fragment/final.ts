@@ -25,11 +25,13 @@ const createFragmentShader: CreateFragmentShader = (options) => {
     blurAmount = 345,
     blurQuality = 7,
     blurExponentRange = [0.9, 1.2],
+    blackAndWhite = false,
   } = options as Partial<{
     blurAmount: number;
     blurQuality: number;
     blurExponentRange: [number, number];
     accentColor: string;
+    blackAndWhite: boolean;
   }>;
 
   const uniforms: FragmentShaderUniforms = {};
@@ -228,7 +230,11 @@ const createFragmentShader: CreateFragmentShader = (options) => {
       float lightness = bg_lightness;
       lightness = lerp(lightness, w2_lightness, w2_alpha);
       lightness = lerp(lightness, w1_lightness, w1_alpha);
-      vec3 color = color_from_lightness(lightness);
+      ${includeif(
+        blackAndWhite,
+        () => /* glsl */ `vec3 color = vec3(lightness);`,
+        () => /* glsl */ `vec3 color = color_from_lightness(lightness);`,
+      )}
         `,
       )}
     
