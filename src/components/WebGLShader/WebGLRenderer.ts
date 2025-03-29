@@ -15,6 +15,11 @@ interface TimeState {
   timeSpeed: number;
 }
 
+interface ColorConfiguration {
+  gradient: string[];
+  accentColor?: string | null;
+}
+
 export class WebGLRenderer {
   private gl: WebGLRenderingContext;
 
@@ -37,10 +42,7 @@ export class WebGLRenderer {
     canvas: HTMLCanvasElement,
     vertexShader: string,
     fragmentShader: string,
-    colorConfig: {
-      gradient: string[];
-      accentColor?: string | null;
-    },
+    colorConfig: ColorConfiguration,
     seed: number | undefined,
   ) {
     const gl = canvas.getContext("webgl", { premultipliedAlpha: false });
@@ -73,6 +75,11 @@ export class WebGLRenderer {
 
     gl.vertexAttribPointer(this.a_position, /* vec2 */ 2, gl.FLOAT, false, 0, 0);
     gl.useProgram(this.program);
+  }
+
+  public setColorConfig(colorConfig: ColorConfiguration) {
+    const { gl } = this;
+    WebGLRenderer.writeGradientToTexture(gl, colorConfig.gradient, this.gradientTexture, 1000, 2);
   }
 
   public getSeed() {

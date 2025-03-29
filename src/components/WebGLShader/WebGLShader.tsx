@@ -13,11 +13,13 @@ import { clamp, invLerp, lerp } from "../../math/lerp";
 import { useViewportWidth } from "../../utils/hooks/useViewportWidth";
 import { useRandomId } from "../../utils/hooks/useRandomId";
 
+type ColorConfiguration = keyof typeof colorConfigurations;
+
 const DEFAULT_HEIGHT = 250;
 const UNIFORM_MARGIN = 24;
 const UNIFORM_V_GAP = 32;
 const CONTROLS_HEIGHT = 72;
-const SHOW_SEED_AND_TIME = true;
+const SHOW_SEED_AND_TIME = false;
 
 function parseUniformValue(uniform: FragmentShaderUniform, value: number) {
   if (uniform.remap) {
@@ -29,7 +31,7 @@ function parseUniformValue(uniform: FragmentShaderUniform, value: number) {
   return value;
 }
 
-const styles = ({ styled }: StyleOptions) => ({
+const styles = ({ styled, theme }: StyleOptions) => ({
   container: styled.css`
     width: 100vw;
     margin: 40px -${cssVariables.contentPadding}px;
@@ -80,6 +82,44 @@ const styles = ({ styled }: StyleOptions) => ({
       gap: ${UNIFORM_V_GAP}px;
     }
   `,
+
+  colorButtonWrapper: styled.css`
+    margin-top: 40px;
+    padding: 0 ${cssVariables.contentPadding}px;
+    display: flex;
+    gap: 24px;
+    flex-wrap: wrap;
+    justify-content: center;
+
+    &--skew {
+      transform: skewY(-6deg);
+    }
+
+    @media (max-width: 600px) {
+      margin-top: 32px;
+    }
+
+    @media (max-width: 450px) {
+      margin-top: 24px;
+    }
+  `,
+
+  colorButton: styled.css`
+    width: 64px;
+    height: 48px;
+    border-radius: 8px;
+    transition: outline 0.2s;
+    border: 3px solid ${theme.background};
+    outline: 0px solid ${theme.background};
+
+    &--skew {
+      transform: skewY(6deg) skewX(-12deg);
+    }
+
+    @media (max-width: 450px) {
+      width: 56px;
+    }
+  `,
 });
 
 interface FragmentShaderProps {
@@ -89,7 +129,7 @@ interface FragmentShaderProps {
 
 interface Props extends FragmentShaderProps {
   skew?: boolean;
-  colorConfiguration: keyof typeof colorConfigurations;
+  colorConfiguration: ColorConfiguration;
   width?: number;
   minWidth?: number;
   maintainHeight?: number;
@@ -99,7 +139,9 @@ interface Props extends FragmentShaderProps {
   seed?: number;
 }
 
-function useCanvasHeightPlaceholderClassName(props: Props) {
+function useCanvasHeightPlaceholderClassName(
+  props: Pick<Props, "height" | "maintainHeight" | "width" | "minWidth">,
+) {
   const { height = DEFAULT_HEIGHT, maintainHeight = 0 } = props;
   const width = props.minWidth ?? props.width;
 
@@ -164,7 +206,7 @@ const _WebGLShader: React.FC<Props> = (props) => {
   const shaderTimeId = useRandomId();
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
-  const { showControls = true, animate = true } = props;
+  const { showControls = true, animate = true, colorConfiguration } = props;
 
   const viewportWidth = useViewportWidth()!;
   const [width, height] = calculateCanvasDimensions(props, viewportWidth);
@@ -183,6 +225,8 @@ const _WebGLShader: React.FC<Props> = (props) => {
   });
 
   const pendingUniformWrites = useRef<[string, number][]>([]);
+  const colorConfigurationRef = useRef(colorConfiguration);
+  colorConfigurationRef.current = colorConfiguration;
 
   useEffect(() => {
     let stop = false;
@@ -190,8 +234,7 @@ const _WebGLShader: React.FC<Props> = (props) => {
     const canvas = canvasRef.current;
     if (!canvas) return () => {};
 
-    const colorConfig =
-      colorConfigurations[props.colorConfiguration] ?? colorConfigurations.default;
+    const colorConfig = colorConfigurations[colorConfiguration];
 
     const vertexShader = vertexShaderRegistry.default!;
 
@@ -218,6 +261,8 @@ const _WebGLShader: React.FC<Props> = (props) => {
       resized = true;
     };
 
+    let lastColorConfiguration = colorConfiguration;
+
     function tick() {
       if (stop) return;
       requestAnimationFrame(tick);
@@ -227,6 +272,11 @@ const _WebGLShader: React.FC<Props> = (props) => {
         renderer.setDimensions(width, height);
         // console.log(width, { width: props.width, minWidth: props.minWidth });
         resized = false;
+      }
+
+      if (lastColorConfiguration !== colorConfigurationRef.current) {
+        lastColorConfiguration = colorConfigurationRef.current;
+        renderer.setColorConfig(colorConfigurations[lastColorConfiguration]);
       }
 
       for (let [key, value] of pendingUniformWrites.current) {
@@ -311,7 +361,11 @@ const _WebGLShader: React.FC<Props> = (props) => {
   );
 };
 
-export const WebGLShader: React.FC<Props> = (props) => {
+export const WebGLShader: React.FC<
+  Omit<Props, "colorConfiguration"> & {
+    colorConfiguration?: ColorConfiguration | ColorConfiguration[];
+  }
+> = (props) => {
   let { skew, showControls = true } = props;
   const s = useStyles(styles);
   const ref = useRef<HTMLDivElement>(null);
@@ -322,10 +376,16 @@ export const WebGLShader: React.FC<Props> = (props) => {
 
   const heightClassName = useCanvasHeightPlaceholderClassName(props);
 
+  const [colorConfiguration, setColorConfiguration] = useState<keyof typeof colorConfigurations>(
+    Array.isArray(props.colorConfiguration)
+      ? props.colorConfiguration[0]
+      : props.colorConfiguration ?? "default",
+  );
+
   return (
     <div className={[s("container", { skew }), "canvas"].join(" ")} ref={ref}>
       {visible ? (
-        <_WebGLShader {...props} />
+        <_WebGLShader {...props} colorConfiguration={colorConfiguration} />
       ) : (
         <>
           <div className={heightClassName} />
@@ -334,6 +394,39 @@ export const WebGLShader: React.FC<Props> = (props) => {
           )}
         </>
       )}
+      {Array.isArray(props.colorConfiguration) && (
+        <div className={s("colorButtonWrapper", { skew })}>
+          {props.colorConfiguration.map((key) => {
+            const gradient = colorConfigurations[key].gradient;
+            const selected = key === colorConfiguration;
+            return (
+              <button
+                className={s("colorButton", { skew })}
+                key={key}
+                style={{
+                  background: gradientToThreeStopGradient(gradient),
+                  outline: selected
+                    ? `5px solid ${gradient[Math.floor(gradient.length / 2)]}`
+                    : undefined,
+                }}
+                onClick={() => setColorConfiguration(key)}
+              />
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 };
+
+function gradientToThreeStopGradient(gradient: string[]) {
+  const [a, b, c] = pick3(gradient);
+  return `linear-gradient(90deg, ${a} 0%, ${a} 33.2%, ${b} 33.3%, ${b} 66.5%, ${c} 66.6%, ${c} 100%)`;
+}
+
+function pick3<T>(arr: T[]): T[] {
+  const N = arr.length;
+  if (N < 3) throw new Error("Array must have at least 3 elements");
+  if (N === 3) return arr;
+  return [0.25, 0.5, 0.75].map((t) => arr[Math.floor((N - 1) * t)]);
+}

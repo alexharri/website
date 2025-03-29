@@ -8,7 +8,7 @@ tags: []
 
 A few weeks ago I embarked on a journey to create a flowing gradient effect -- here's what I ended up making:
 
-<WebGLShader fragmentShader="final" skew height={275} minWidth={600} maintainHeight={0.3} seed={16192} />
+<WebGLShader fragmentShader="final" skew height={275} minWidth={600} maintainHeight={0.3} seed={16192} colorConfiguration={["default", "blue_to_yellow", "orange"]} />
 
 This effect is written in a WebGL shader, using noise functions and some clever math to produce the flowing waves and dynamic blur.
 
@@ -1328,8 +1328,8 @@ Firstly, we'll generate an image containing a linear gradient in JavaScript. We'
 I used [this gradient generator][gradient_generator] to pick the following gradient:
 
 <div className="flow" style={{
-  height: 50,
-  width: 300,
+  height: 64,
+  width: 256,
   background: "linear-gradient(90deg, hsl(204deg 100% 22%), hsl(199deg 100% 29%), hsl(189deg 100% 32%), hsl(173deg 100% 33%), hsl(154deg 100% 39%), hsl(89deg 70% 56%), hsl(55deg 100% 50%))",
   margin: "40px auto",
 }} />
@@ -1690,12 +1690,11 @@ The canvas below has a visualization that illustrate this. The lower half is a c
 
 You'll notice that the wave becomes sharp when the chart gets close to touching the bottom -- at values near zero -- but it rarely reaches values of near-zero. The value of $t$ lingers around the middle too much, causing the wave to be _somewhat_ blurry over its entire length.
 
+We can bias values of $t$ close to $0$ to become _very_ close $0$ by exponentiating $t$. Consider how an exponent affects values between $0$ and $1$. Numbers close to $0$ get pulled very close towards $0$ while larger numbers experience less pull.
+
+The level of pull depends on the exponent. For example, $0.1^2 = 0.01$, a 90% reduction, while $0.9^2 = 0.81$, only a reduction of 10%. This show this visually, here's a chart of $x^2$ for values of $x$ between $0$ and $1$:
 
 <Image src="~/x-pow-2-chart.png" plain width={500} />
-
-We can bias values close to $0$ to be _very_ close $0$ by exponentiating $t$. Consider how an exponent affects values between $0$ and $1$. Numbers close to $0$ get pulled very close towards $0$ while larger numbers experience less pull.
-
-The level of pull depends on the exponent. For example, $0.1^2 = 0.01$, a 90% reduction, while $0.9^2 = 0.81$, only a reduction of 10%.
 
 This effect becomes more pronounced as we increase the exponent:
 
@@ -1703,11 +1702,13 @@ This effect becomes more pronounced as we increase the exponent:
 
 <SmallNote label="" center>$0.1$ got $99\%$ smaller while $0.9$ got roughly $20\%$ smaller!</SmallNote>
 
-To get a feel for this, here's a chart of $x^n$ for various values of $n$:
+The following chart shows $x^n$ over the range $[0, 1]$ for different values of $n$:
 
 <Image src="~/x-pow-n-chart.png" plain width={500} />
 
 <SmallNote label="" center>Notice how an exponent of $1$ has no effect.</SmallNote>
+
+As you can see, a higher exponent translates to a stronger pull towards zero.
 
 With that, let's apply an exponent to $t$. We can do that with the built-in <Gl method>pow</Gl> function:
 
@@ -1720,13 +1721,7 @@ Below is a canvas that lets you vary the value of <Gl>exponent</Gl> from $0$ to 
 
 <WebGLShader fragmentShader="multiple_waves_blur_4" width={800} minWidth={600} height={320} maintainHeight={0.7} seed={32839} />
 
-As you increase the exponent, $t$ tends to "hug" the floor of the chart more and more. This produces noticeable periods of relative sharpness while not muting higher values of $t$ _too_ much. I feel like an exponent of $2.0$ to $2.7$ gives good results -- I'll go with $2.5$.
-
-With <Gl method>smoothstep</Gl> and an exponent of $2.5$ applied, our final alpha curve becomes:
-
-<Image src="~/smoothstep-pow-2p5-chart.png" plain width={560} />
-
-<SmallNote label="" center>Notice how the exponent </SmallNote>
+As the exponent increases, $t$ tends to "hug" the floor of the chart more and more. This produces noticeable periods of relative sharpness while not muting higher values of $t$ _too_ much. I feel like an exponent of $2.0$ to $2.7$ gives good results -- I'll go with $2.5$.
 
 Let's bring back the other wave and see what we've got:
 
@@ -1828,4 +1823,4 @@ By the way, the skew effect is deceptively simple. It's just <Css>skewY(-6deg)</
 
 We can apply any gradient to this effect. Below is a canvas that lets you pick the gradient:
 
-<WebGLShader fragmentShader="final_effect_1" skew minWidth={600} height={250} maintainHeight={0.7} seed={30005} colorConfiguration="blue_to_yellow" />
+<WebGLShader fragmentShader="final_effect_1" skew minWidth={600} height={250} maintainHeight={0.7} seed={30005} colorConfiguration={["blue_to_yellow", "default", "orange", "pastel", "new"]} />
