@@ -10,17 +10,17 @@ A few weeks ago I embarked on a journey to create a flowing gradient effect -- h
 
 <WebGLShader fragmentShader="final" skew height={275} minWidth={600} maintainHeight={0.3} seed={16192} colorConfiguration={["default", "blue_to_yellow", "green"]} />
 
-This effect is written in a WebGL shader using noise functions and some clever math to produce the flowing waves and dynamic blur.
+This effect is written in a WebGL shader using noise functions and some clever math.
 
-In this post, I'll break down this effect step-by-step. You need no prior knowledge of WebGL or shaders to read this post; we'll start by building a mental model for writing shaders and then move on to implementing the effect.
+In this post, I'll break it down step by step. You need no prior knowledge of WebGL or shaders -- we'll start by building a mental model for writing shaders and then recreate the effect from scratch.
 
-We'll touch on a lot in this post: what WebGL is, writing shaders, interpolation, color mapping, and gradient noise functions. My intention for this post is to introduce and build an intuition for the concepts needed to implement such an effect from scratch -- we'll build that intuition using dozens of interactive visualizations.
+We'll cover a lot in this post: writing shaders, interpolation, color mapping, gradient noise, and more. I'll help you develop an intuition for these concepts using dozens of visual (and interactive!) explanations.
 
 If you just want to see the final code, I'll include a link to the shader code at the end of the post (this blog is [open source][alexharri_website] so you can just take a look).
 
 [alexharri_website]: https://github.com/alexharri/website/
 
-Let's get to it!
+Let's get started!
 
 
 ## Color as a function of position
