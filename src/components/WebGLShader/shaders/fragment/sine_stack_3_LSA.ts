@@ -28,8 +28,8 @@ const createFragmentShader: CreateFragmentShader = (_) => {
     float WAVE_HEIGHT = u_h * 0.16;
 
     float noise(float x) {
-      float L = 0.011 * u_L;
-      float S = 0.4;
+      float L = 0.015 * u_L;
+      float S = 0.6;
       
       float sum = 0.0;
       sum += sin(x * (L / 1.000) + u_time *  0.90 * S) * 0.64;

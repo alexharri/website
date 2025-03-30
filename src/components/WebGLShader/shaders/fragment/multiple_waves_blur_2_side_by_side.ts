@@ -7,7 +7,7 @@ const createFragmentShader: CreateFragmentShader = () => {
     u_blur: {
       label: "Blur amount",
       value: 50,
-      range: [0, 100],
+      range: [0, 120],
     },
   };
   const shader = /* glsl */ `
@@ -64,21 +64,20 @@ const createFragmentShader: CreateFragmentShader = () => {
       return blur;
     }
 
-    float wave_alpha(float Y, float wave_height) {
-      float x = gl_FragCoord.x;
+    float wave_alpha(float Y, float wave_height, float offset) {
+      float x = gl_FragCoord.x - u_w * 0.5;
       float y = gl_FragCoord.y;
 
       // Calculate distance to curve Y
-      float noise_offset = Y * wave_height;
-      float wave_y = Y + noise(x, noise_offset) * wave_height;
+      float wave_y = Y + noise(x, offset) * wave_height;
       float dist_signed = wave_y - y;
       
       // Calculate alpha
-      float blur = calc_blur(noise_offset);
+      float blur = calc_blur(offset);
       
       float alpha = clamp(0.5 + dist_signed / blur, 0.0, 1.0);
 
-      float smoothing_fac = (sign(u_w / 2.0 - x) + 1.0) / 2.0;
+      float smoothing_fac = (sign(u_w / 2.0 - gl_FragCoord.x) + 1.0) / 2.0;
       alpha = mix(alpha, smooth_step(alpha), smoothing_fac);
 
       return alpha;
@@ -89,8 +88,8 @@ const createFragmentShader: CreateFragmentShader = () => {
       vec3 w1_color = vec3(0.094, 0.502, 0.910);
       vec3 w2_color = vec3(0.384, 0.827, 0.898);
       
-      float w1_alpha = wave_alpha(WAVE1_Y, WAVE1_HEIGHT);
-      float w2_alpha = wave_alpha(WAVE2_Y, WAVE2_HEIGHT);
+      float w1_alpha = wave_alpha(WAVE1_Y, WAVE1_HEIGHT, 3840.0);
+      float w2_alpha = wave_alpha(WAVE2_Y, WAVE2_HEIGHT, 2240.0);
 
       vec3 color = bg_color;
       color = mix(color, w1_color, w1_alpha);

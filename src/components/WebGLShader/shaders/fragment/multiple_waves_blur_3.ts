@@ -7,7 +7,7 @@ const createFragmentShader: CreateFragmentShader = () => {
     u_blur: {
       label: "Blur amount",
       value: 50,
-      range: [0, 100],
+      range: [0, 120],
     },
   };
   const shader = /* glsl */ `

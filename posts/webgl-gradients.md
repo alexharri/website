@@ -10,11 +10,11 @@ A few weeks ago I embarked on a journey to create a flowing gradient effect -- h
 
 <WebGLShader fragmentShader="final" skew height={275} minWidth={600} maintainHeight={0.3} seed={16192} colorConfiguration={["default", "blue_to_yellow", "green"]} />
 
-This effect is written in a WebGL shader, using noise functions and some clever math to produce the flowing waves and dynamic blur.
+This effect is written in a WebGL shader using noise functions and some clever math to produce the flowing waves and dynamic blur.
 
-In this post I'll break down this effect step-by-step. You need no prior knowledge of WebGL or shaders to read this post; we'll start by building a mental model for writing shaders and then move onto implementing the effect.
+In this post, I'll break down this effect step-by-step. You need no prior knowledge of WebGL or shaders to read this post; we'll start by building a mental model for writing shaders and then move on to implementing the effect.
 
-We'll touch on a lot in this post: what WebGL is, writing shaders, interpolation, color mapping, and gradient noise functions. My intention is for this post to introduce and build an intuition for the concepts needed to implement such an effect from scratch -- we'll build that intuition using dozens of interactive visualizations.
+We'll touch on a lot in this post: what WebGL is, writing shaders, interpolation, color mapping, and gradient noise functions. My intention for this post is to introduce and build an intuition for the concepts needed to implement such an effect from scratch -- we'll build that intuition using dozens of interactive visualizations.
 
 If you just want to see the final code, I'll include a link to the shader code at the end of the post (this blog is [open source][alexharri_website] so you can just take a look).
 
@@ -86,15 +86,15 @@ function pixelColor({ x, y }: Position): Color {
 }
 ```
 
-<SmallNote><Ts method>sin</Ts> returns a value between $-1$ and $1$, but our mixing function accepts a value from $0$ and $1$. For this reason, we normalize $t$ by remapping $[-1, 1]$ to $[0, 1]$ via $(t + 1)\,/\,2$.</SmallNote>
+<SmallNote><Ts method>sin</Ts> returns a value between $-1$ and $1$, but the <Ts method>mix</Ts> function accepts a value between $0$ and $1$. For this reason, we normalize $t$ by remapping $[-1, 1]$ to $[0, 1]$ via $(t + 1)\,/\,2$.</SmallNote>
 
 This produces the following effect:
 
 <WebGLShader fragmentShader="x_sine_lerp" width={150} height={150} fragmentShaderOptions={{ waveLength: Math.PI * 2 }} showControls={false} />
 
-Those waves are quite thin! That's because we're oscillating between red and blue every $\pi$ pixels.
+Those waves are very thin! That's because we're oscillating between red and blue every $\pi$ pixels.
 
-We can control the rate of oscillation by defining a [wave length][wave_len] multiplier. It will determine over how many pixels the gradient oscillates from red to blue and red again. For a wave length of $L$ pixels the multiplier becomes $\dfrac{2\pi}{L}$:
+We can control the rate of oscillation by defining a [wavelength][wave_len] multiplier. It will determine over how many pixels the gradient oscillates from red to blue and red again. For a wavelength of $L$ pixels, the multiplier becomes $\dfrac{2\pi}{L}$:
 
 [wave_len]: https://en.wikipedia.org/wiki/Wavelength
 
@@ -108,7 +108,7 @@ function pixelColor({ x, y }: Position): Color {
 }
 ```
 
-This produces a oscillating gradient with the desired wave length -- I'll let you vary $L$ to see the effect:
+This produces an oscillating gradient with the desired wavelength -- I'll let you vary $L$ to see the effect:
 
 <WebGLShader fragmentShader="x_sine_lerp" width={150} height={150} fragmentShaderOptions={{ waveLength: 40 }} />
 
@@ -141,11 +141,9 @@ Here's the result -- I'll let you vary $S$ so that you can adjust the speed:
 
 <WebGLShader fragmentShader="x_sine_lerp_time" width={150} height={150} />
 
-Voila -- we've got movement!
+Voila, we've got movement!
 
-<ThreeDots />
-
-These two inputs, time and the pixel's position, will be the main components that drive our final effect.
+These two inputs -- time and the pixel's position -- will be the main components that drive our final effect.
 
 We'll spend the rest of the post writing a color function that will calculate a color for every pixel -- with the pixel's position and time as the function's inputs. Together, the colors of each pixel constitute a single frame of animation.
 
@@ -162,7 +160,7 @@ Conceptually, nothing changes. We're still going to be writing a single color fu
 
 WebGL can be thought of as a subset of [OpenGL][opengl], which is a cross-platform API for graphics rendering. WebGL is based on [OpenGL ES][opengl_es] -- an OpenGL spec for embedded systems (like mobile devices).
 
-<SmallNote label="">Here's a page listing [differences between OpenGL and WebGL][opengl_vs_webgl]. We won't encounter those differences in this post.</SmallNote>
+<SmallNote label="">Here's a page listing the [differences between OpenGL and WebGL][opengl_vs_webgl]. We won't encounter those differences in this post.</SmallNote>
 
 OpenGL shaders are written in GLSL, which stands for [OpenGL Shading Language][glsl]. It's a strongly typed language with a C-like syntax.
 
@@ -175,7 +173,7 @@ There are two types of shaders, vertex shaders and fragment shaders, which serve
 
 <Note>
 <p>There's tons of boilerplate code involved in setting up a WebGL rendering pipeline. I'll mostly omit it so that we can stay focused on our main goal, which is creating a cool gradient effect.</p>
-<p>At the end of the post I'll link to resources I found helpful in learning about how to set up and work with WebGL.</p>
+<p>At the end of the post, I'll link to resources I found helpful in learning about how to set up and work with WebGL.</p>
 </Note>
 
 
@@ -195,7 +193,7 @@ WebGL fragment shaders have a <Gl method>main</Gl> function that is invoked once
 
 We can think of <Gl method>main</Gl> as the entry point of our color function and <Gl>gl_FragColor</Gl> as its return value.
 
-WebGL colors are represented through vectors with 3 or 4 components: <Gl>vec3</Gl> for RGB and <Gl>vec4</Gl> for RGBA colors. The first three components (RGB) are the red, green and blue components. For 4D vectors the fourth component is the [alpha][alpha] component of the color.
+WebGL colors are represented through vectors with 3 or 4 components: <Gl>vec3</Gl> for RGB and <Gl>vec4</Gl> for RGBA colors. The first three components (RGB) are the red, green, and blue components. For 4D vectors, the fourth component is the [alpha][alpha] component of the color.
 
 [rgb]: https://en.wikipedia.org/wiki/RGB_color_model
 [alpha]: https://en.wikipedia.org/wiki/Alpha_compositing
@@ -231,7 +229,7 @@ vec3 color_2 = vec3(0.9, 0.6, 0.1);
 
 <SmallNote label="">I've been using [this tool][glsl_to_hex] to convert from hex to GLSL colors, and vice versa</SmallNote>
 
-To gradually transition from <Gl>color_1</Gl> to <Gl>color_2</Gl> over the $y$ axis, we'll need the $y$ position of the current pixel. In WebGL fragment shaders, we get that via a special variable called [<Gl>gl_FragCoord</Gl>][frag_coord]:
+To gradually transition from <Gl>color_1</Gl> to <Gl>color_2</Gl> over the $y$ axis, we'll need the $y$ coordinate of the current pixel. In WebGL fragment shaders, we get that via a special variable called [<Gl>gl_FragCoord</Gl>][frag_coord]:
 
 [frag_coord]: https://registry.khronos.org/OpenGL-Refpages/gl4/html/gl_FragCoord.xhtml
 
@@ -242,7 +240,7 @@ float y = gl_FragCoord.y;
 
 [glsl_data_types]: https://www.khronos.org/opengl/wiki/Data_Type_(GLSL)
 
-We'll use <Gl>y</Gl> to calculate a blend value -- which we'll call $t$ -- by dividing the <Gl>y</Gl> coord by the canvas' height.
+Similar to before, we'll use the pixel's $y$ coordinate to calculate a blend value $t$ by dividing $y$ by the canvas height.
 
 
 ```glsl
@@ -254,7 +252,7 @@ float t = y / (CANVAS_WIDTH - 1.0);
 
 <SmallNote>I've configured the coordinates such that <Gl>gl_FragCoord</Gl> is <Gl>(0.0, 0.0)</Gl> at the lower-left corner and <Gl>(CANVAS_WIDTH - 1, CANVAS_HEIGHT - 1)</Gl> at the upper right corner. This will stay consistent throughout the post.</SmallNote>
 
-We'll mix the two colors with the [built-in <Gl method>mix</Gl> function][mix]. It takes in two colors and a blend value between 0 and 1.
+We'll mix the two colors with the [built-in <Gl method>mix</Gl> function][mix].
 
 [mix]: https://registry.khronos.org/OpenGL-Refpages/gl4/html/mix.xhtml
 
@@ -279,7 +277,7 @@ But wait -- we get a compile-time error.
 
 This error is a bit obtuse, but it's telling us that we can't assign our <Gl>vec3 color</Gl> to <Gl>gl_FragColor</Gl> because <Gl>gl_FragColor</Gl> is of type <Gl>vec4</Gl>.
 
-In other words, we need to add an alpha component to <Gl>color</Gl> prior to passing it to <Gl>gl_FragColor</Gl>. We can do that like so:
+In other words, we need to add an alpha component to <Gl>color</Gl> before passing it to <Gl>gl_FragColor</Gl>. We can do that like so:
 
 ```glsl
 vec3 color = mix(color_1, color_2, t);
@@ -292,7 +290,7 @@ This gives us a linear gradient!
 
 ### Vector constructors
 
-You may have raised an eyebrow at the <Gl>vec4(color, 1.0)</Gl> expression above -- it's equivalent to <Gl>vec4(vec3(...), 1.0)</Gl> -- but that's perfectly valid in GLSL!
+You may have raised an eyebrow at the <Gl>vec4(color, 1.0)</Gl> expression above -- it's equivalent to <Gl>vec4(vec3(...), 1.0)</Gl>, which is perfectly valid in GLSL!
 
 When passing a vector to a [vector constructor][vector_constructors], the components of the input vector are read left-to-right -- similar to JavaScript's [spread][spread] syntax.
 
@@ -320,8 +318,6 @@ vec4(vec2(1.0, 2.0), vec2(3.0, 4.0)); // OK
 vec4(vec2(1.0, 2.0), 3.0); // Error, not enough components
 ```
 
-I love this syntax. Anyway, back to writing shaders!
-
 
 ### Coloring areas different colors
 
@@ -345,7 +341,7 @@ float y = gl_FragCoord.y;
 float dist = LINE_Y - y;
 ```
 
-What determines whether our pixel should be white or not is whether it's below the line, which we can determine by reading the sign of the distance via the <Gl method>sign</Gl> function. The <Gl method>sign</Gl> function returns $-1.0$ if the value is negative and $1.0$ if the value is positive.
+What determines whether our pixel should be white or not is whether it's below the line, which we can determine by reading the sign of the distance via the <Gl method>sign</Gl> function. The <Gl method>sign</Gl> function returns $-1.0$ if the value is negative and $1.0$ if it's positive.
 
 ```glsl
 float dist = LINE_Y - y;
@@ -364,19 +360,17 @@ We can calculate an alpha (blend) value by normalizing the sign to $0.0$ or $1.0
 float alpha = (sign(dist) + 1.0) / 2.0;
 ```
 
-This <Gl>alpha</Gl> represents how white our pixel should be. If <Gl>alpha == 1.0</Gl> we want to color the pixel white, but if <Gl>alpha == 0.0</Gl> we want the pixel to retain the color from the linear gradient.
-
-We can do just that by blending <Gl>color</Gl> (the linear gradient's color) and <Gl>white</Gl> using the <Gl method>mix</Gl> function:
+Blending <Gl>color</Gl> and <Gl>white</Gl> using <Gl>alpha</Gl> colors the bottom half of the canvas white:
 
 ```glsl
 color = mix(color, white, alpha);
 ```
 
-This colors the bottom half of the canvas white:
-
 <WebGLShader fragmentShader="linear_gradient_area_under_line" height={150} width={150} showControls={false} />
 
-Calculating an alpha value by normalizing the sign and passing that to the <Gl method>mix</Gl> function may seem overly roundabout -- couldn't you just use an if statement?
+Here, <Gl>alpha</Gl> represents how white our pixel is. If <Gl>alpha == 1.0</Gl> the pixel is colored white, but if <Gl>alpha == 0.0</Gl> the original value of <Gl>color</Gl> is retained.
+
+Calculating an alpha value by normalizing the sign and passing that to the <Gl method>mix</Gl> function may seem overly roundabout. Couldn't you just use an if statement?
 
 ```glsl
 if (sign(dist) == 1.0) {
@@ -384,7 +378,7 @@ if (sign(dist) == 1.0) {
 }
 ```
 
-That works, but only if you want to pick 100% of either color. As we extend this to smoothly blend between the colors, using conditionals won't work.
+You could, but only if you want to pick 100% of either color. As we extend this to smoothly blend between the colors, using conditionals won't work.
 
 <Note>
 As an additional point, you generally want to avoid branching in code that runs on the GPU. There are [nuances][branch_nuances] to the performance of branches in shader code, but branchless code is usually preferable. In our case, calculating the <Gl>alpha</Gl> and running the <Gl method>mix</Gl> function boils down to sequential math instructions that GPUs excel at.
@@ -407,7 +401,7 @@ That allows us to draw the area under any curve white. Let's, for example, defin
 
 <p className="mathblock">$$ y = Y + x \times I $$</p>
 
-where $Y$ is the start position of the line, and $I$ is the incline of the line. We can put this into code like so:
+where $Y$ is the start position of the line, and $I$ is the _incline_ of the line. We can put this into code like so:
 
 ```glsl
 const float Y = 0.4 * CANVAS_HEIGHT;
@@ -423,7 +417,7 @@ This produces the slanted line in the canvas below -- I'll let you vary $I$ to s
 <WebGLShader fragmentShader="linear_gradient_area_under_slanted_line" height={150} width={150} />
 
 
-We could also do a parabola like so:
+We could also draw a parabola like so:
 
 ```glsl
 // Adjust x=0 to be in the middle of the canvas
@@ -434,22 +428,15 @@ float curve_y = Y + pow(x, 2.0) / 40.0;
 
 <WebGLShader fragmentShader="linear_gradient_area_under_exponential" height={150} width={150} showControls={false} />
 
-We're still calculating the alpha in the same, simple manner:
+The point is that we can define the curve however we want.
 
-```glsl
-float dist = curve_y - gl_FragCoord.y;
-float alpha = (sign(dist) + 1.0) / 2.0;
-```
+### Producing an animated wave
 
-The point is: we can calculate the curve in any way we see fit.
-
-### Producing an animate wave
-
-To produce a sine wave, we can define the curve as:
+To draw a sine wave, we can define the curve as:
 
 <p className="mathblock">$$ y = Y + A \times sin(x \times \dfrac{2\pi}{L}) $$</p>
 
-where $Y$ is the wave's center (its $y$ position), $L$ is the wave's length in pixels, and $A$ is the [amplitude][amplitude] of the wave. Putting this into code, we get:
+where $Y$ is the wave's baseline $y$ position, $A$ is the [amplitude][amplitude] of the wave, and $L$ is the wave's length in pixels. Putting this into code, we get:
 
 [amplitude]: https://www.mathsisfun.com/algebra/amplitude-period-frequency-phase-shift.html
 
@@ -458,16 +445,16 @@ const float Y = 0.5 * CANVAS_HEIGHT;
 const float A = 15.0;
 const float L = 75.0;
 
-const float W = (2.0 * PI) / L; // Wave length multiplier
+const float W = (2.0 * PI) / L; // Wavelength multiplier
 
 float curve_y = Y + sin(x * W) * A;
 ```
 
-Which produces a sine wave:
+This draws a sine wave:
 
 <WebGLShader fragmentShader="linear_gradient_area_under_wave" height={150} width={150} showControls={false} />
 
-At the moment, the wave is completely static. For us to produce any any motion we'll need to introduce a time variable to the shader. We can do that using [uniforms][uniform].
+At the moment, things are completely static. For our shader to produce any motion we'll need to introduce a time variable. We can do that using [uniforms][uniform].
 
 [uniform]: https://www.khronos.org/opengl/wiki/Uniform_(GLSL)
 
@@ -483,26 +470,15 @@ For any given draw call, each shader invocation will have uniforms set to the sa
 
 [uniform_const]: https://www.khronos.org/opengl/wiki/Type_Qualifier_(GLSL)#Uniforms
 
-Uniform variables can be of many types, such as floats, vectors and textures (we'll cover textures later). They can even be of custom struct types:
-
-```glsl
-struct Foo {
-  vec3 position;
-  vec4 color;
-}
-
-uniform Foo u_foo;
-```
-
-But what's up with the <Gl>u_</Gl> prefix?
+Uniform variables can be of many types, such as floats, vectors, and textures (we'll cover textures later). But what's up with the <Gl>u_</Gl> prefix?
 
 ```glsl
 uniform float u_time;
 ```
 
-Prefixing uniform names with <Gl>u_</Gl> is a GLSL convention. You won't encounter compiler errors if you don't, but using the <Gl>u_</Gl> prefix for uniform names is a very established pattern.
+Prefixing uniform names with <Gl>u_</Gl> is a GLSL convention. You won't encounter compiler errors if you don't, but prefixing uniform names with <Gl>u_</Gl> is a very established pattern.
 
-<SmallNote>There are similar conventions for the names of attributes and varyings (they are prefixed with <Gl>a_</Gl> and <Gl>v_</Gl>, respectively), but we won't use attributes or varyings in this post.</SmallNote>
+<SmallNote>There are similar conventions for the names of attributes and varyings (they're prefixed with <Gl>a_</Gl> and <Gl>v_</Gl>, respectively), but we won't use attributes or varyings in this post.</SmallNote>
 
 Anyway, with <Gl>u_time</Gl> now accessible in our shader we can start producing motion. As a refresher, we're currently calculating our curve's $y$ value like so:
 
@@ -533,7 +509,7 @@ I'll let you vary $S$ to see the effect:
 
 Instead of the wave being a flat white color, let's make it a gradient.
 
-The background is current composed of two colors: <Gl>color_1</Gl> and <Gl>color_2</Gl>. Let's rename those to <Gl>bg_color_1</Gl> and <Gl>bg_color_2</Gl>:
+The background is currently composed of two colors: <Gl>color_1</Gl> and <Gl>color_2</Gl>. Let's rename those to <Gl>bg_color_1</Gl> and <Gl>bg_color_2</Gl>:
 
 ```glsl
 vec3 bg_color_1 = vec3(0.7, 0.1, 0.4);
@@ -571,19 +547,17 @@ This applies the foreground gradient to the wave:
 
 ## Adding blur
 
-Take another look at the final animation and consider the role that blur plays. The waves in the animation slowly fluctuate between a blurry and a sharp state.
+Take another look at the final animation and consider the role that blur plays:
 
 <WebGLShader fragmentShader="final" skew height={275} minWidth={600} maintainHeight={0.3} seed={16192} />
 
-The blur isn't applied uniformly. The wave slowly transitions from being fully blurred to being only partially blurred -- or not blurred at all.
+The blur isn't applied uniformly over the wave -- a variable amount of blur is applied to different parts of the wave, and the amount fluctuates over time.
 
-To simulate this effect, we'll need to be able to apply variable amounts of blur. As a step towards that, let's apply a gradually increasing blur across the horizontal axis, from left to right.
-
-<WebGLShader fragmentShader="wave_animated_blur_left_to_right" height={150} width={250} />
+How might be we do that?
 
 ### Gaussian blur
 
-When thinking about how I'd approach the blur problem, my first thought was to use [gaussian blur][gaussian_blur]. I figured I'd determine the amount of blur to apply via a [noise function][perlin_noise] and then sample neighboring pixels according to the blur amount.
+When thinking about how I'd approach the blur problem, my first thought was to use [Gaussian blur][gaussian_blur]. I figured I'd determine the amount of blur to apply via a [noise function][perlin_noise] and then sample neighboring pixels according to the blur amount.
 
 [gaussian_blur]: https://en.wikipedia.org/wiki/Gaussian_blur
 [perlin_noise]: https://en.wikipedia.org/wiki/Perlin_noise
@@ -601,8 +575,7 @@ I opted to take a different approach that doesn't require sampling neighboring p
 
 ### Calculate blur using signed distance
 
-
-Let's look at how we're calculating the <Gl>alpha</Gl> again:
+Here's how we're currently calculating <Gl>alpha</Gl>:
 
 ```glsl
 float dist = curve_y - y;
@@ -621,7 +594,7 @@ We'll change the calculation for <Gl>alpha</Gl> to just be <Gl>dist / BLUR_AMOUN
 float alpha = dist / BLUR_AMOUNT;
 ```
 
-When <Gl>dist == 0.0</Gl>, the alpha will be $0.0$, and as <Gl>dist</Gl> approaches <Gl>BLUR_AMOUNT</Gl> the alpha approaches $1.0$. This will cause <Gl>alpha</Gl> to transition from $0$ to $1$ over the desired number of pixels, but we need to consider that
+When <Gl>dist == 0.0</Gl>, the alpha will be $0$, and as <Gl>dist</Gl> approaches <Gl>BLUR_AMOUNT</Gl> the alpha approaches $1$. This will cause <Gl>alpha</Gl> to transition from $0$ to $1$ over the desired number of pixels, but we need to consider that
 
  1. when <Gl>dist</Gl> exceeds <Gl>BLUR_AMOUNT</Gl> the alpha will exceed $1.0$, and
  2. the alpha becomes negative when <Gl>dist</Gl> is negative.
@@ -659,8 +632,8 @@ Let's now fix how the wave shifts down as <Gl>blur_amount</Gl> increases.
 
 Consider why the wave shifts down as the blur increases:
 
- * For pixels where <Gl>{"dist <= 0"}</Gl> the alpha is $0$ regardless of the value of <Gl>blur_amount</Gl>, thus the top of the wave stays fixed.
- * At the same time, the alpha is $1$ for all pixels where <Gl>{"dist >= blur_amount"}</Gl>, which shifts the bottom of the wave down as the blur increases.
+ * For pixels where <Gl>{"dist <= 0"}</Gl> the alpha is $0$ regardless of the value of <Gl>blur_amount</Gl> so the top of the wave stays fixed.
+ * At the same time, the alpha is $1$ for all pixels where <Gl>{"dist >= blur_amount"}</Gl>, which shifts the bottom of the wave down as <Gl>blur_amount</Gl> increases.
 
 What we want is for <Gl>alpha</Gl> to be $0.5$ when <Gl>{"dist == 0"}</Gl>, which we can do by starting <Gl>alpha</Gl> at $0.5$:
 
@@ -673,28 +646,20 @@ This causes the top of the wave to shift up by <Gl>-blur_amount / 2</Gl> and the
 
 <WebGLShader fragmentShader="wave_animated_blur_left_to_right" height={150} width={250} />
 
-This forms the basis for how we'll produce the blur in the final effect. The blur currently looks a bit "raw", but we'll put that aside for the time being -- we'll make it look great later in the post.
+This forms the basis for how we'll produce the blur in the final effect.
+
+The blur currently looks a bit "raw", but let's put that aside for the time being. We'll make it look awesome later in the post.
 
 Let's now work on creating a natural-looking wave.
 
 
-## Creating a natural wave
+## Stacking sine waves
 
-If you look at the final gradient, you'll see that the waves look a lot more natural than the sine waves we've been working with so far. I'll disable the blur so that you can see the waves better.
+I often reach for stacked sine waves when I need a simple and natural wave-like noise function. Here's an example of a wave created using stacked sine waves:
 
-<WebGLShader fragmentShader="final" fragmentShaderOptions={{ blurAmount: 10 }} skew height={275} minWidth={600} maintainHeight={0.3} seed={16192} />
+<WebGLShader fragmentShader="sine_stack_final" width={800} height={200} maintainHeight={0.7} seed={30511} />
 
-
-There's loads of ways that you could go about creating such a wave, but I'll show you the two.
-
-
-### Stacked sine waves
-
-I often reach for stacked sine waves when I need a simple and natural wave-like noise function. Here's an example:
-
-<WebGLShader fragmentShader="sine_stack_final" width={800} height={200} maintainHeight={0.7} seed={80511} />
-
-The idea is to sum the output of multiple sine waves with different wave lengths, amplitudes, and phase speeds.
+The idea is to sum the output of multiple sine waves with different wavelengths, amplitudes, and phase speeds.
 
 <p align="center">Take the following pure sine waves:</p>
 
@@ -708,9 +673,9 @@ The idea is to sum the output of multiple sine waves with different wave lengths
 
 <p className="mathblock">$$\sin(x \times L + \text{time} \times S) \times A$$</p>
 
-where the $L$, $S$ and $A$ components are scalars controlling different aspects of the wave:
+where the $L$, $S$ and $A$ scalars control different aspects of the wave:
 
- * $L$ determines the wave length,
+ * $L$ determines the wavelength,
  * $S$ determines the phase evolution speed, and
  * $A$ determines the amplitude of the wave.
 
@@ -731,25 +696,25 @@ sum += sin(x * L3 + u_time * S3) * A3;
 return sum;
 ```
 
-The problem, then, is finding $L$, $S$, $A$ scalars for each individual sine wave that, when stacked, produce a nice looking final wave.
+The problem, then, is finding $L$, $S$, $A$ scalars for each sine wave that, when stacked, produce a nice-looking final wave.
 
-In finding those values, I first create a "baseline wave" with the $L$, $S$, $A$ components set to values that _feel_ right.
+In finding those values, I first create a "baseline wave" with the $L$, $S$, $A$ components set to values that feel right. I picked these values:
 
 ```glsl
-const float L = 0.011;
-const float S = 0.28;
+const float L = 0.015;
+const float S = 0.6;
 const float A = 32.0;
 
 float y = sin(x * L + u_time * S) * A;
 ```
 
-These constants produce the following wave:
+They produce the following wave:
 
-<WebGLShader fragmentShader="sine_stack_0" width={800} height={200} maintainHeight={0.7} seed={80511} />
+<WebGLShader fragmentShader="sine_stack_0" width={800} height={200} maintainHeight={0.7} seed={30511} />
 
-This wave has the rough shape of what I want the final wave to look like, so these are good basline values for the $L$, $S$, $A$ components.
+This wave has the rough shape of what I want the final wave to look like, so these values serve as a good baseline.
 
-I then add more sine waves that use the baseline $L$, $S$, $A$ components, scaled by some constants. After some trial and error, I ended up with the following:
+I then add more sine waves that use the baseline $L$, $S$, $A$ scalars multiplied by some constants. After some trial and error, I ended up with the following:
 
 ```glsl
 float y = 0.0;
@@ -760,31 +725,29 @@ y += sin(x * (L / 1.871) + u_time *  0.65 * S) * A * 0.43;
 y += sin(x * (L / 2.013) + u_time * -1.05 * S) * A * 0.32;
 ```
 
-<SmallNote label="">Observe how some of the scalars for $S$ are negative (waves 3 and 5). Making some of the waves travel in the opposite direction prevents the final wave feeling as if it's moving in one direction at a constant rate.</SmallNote>
+<SmallNote label="">Observe how some of the scalars for $S$ are negative (waves 3 and 5). Making some of the waves travel in the opposite direction prevents the final wave from feeling as if it's moving in one direction at a constant rate.</SmallNote>
 
-These five sine waves give us quite a fairly natural looking final wave:
+These five sine waves give us quite a pretty natural-looking final wave:
 
-<WebGLShader fragmentShader="sine_stack_3" width={800} height={200} seed={80511} maintainHeight={0.7} />
+<WebGLShader fragmentShader="sine_stack_3" width={800} height={200} seed={30511} maintainHeight={0.7} />
 
 Because all of the sine waves are relative to $L$, $S$, $A$, we can tune the waves together by adjusting those constants. Increase $S$ to make the wave faster, $L$ to make the waves shorter, and $A$ to make the waves taller. Try varying $L$ and $S$:
 
-<WebGLShader fragmentShader="sine_stack_3_LSA" width={800} height={200} seed={80511} maintainHeight={0.7} />
+<WebGLShader fragmentShader="sine_stack_3_LSA" width={800} height={200} seed={30511} maintainHeight={0.7} />
 
-We've gotten a pretty natural looking wave by stacking pure sine waves, but we won't actually make use of stacked sine waves in our final effect. We _will_, however, use the idea of stacking waves of different scales and speeds.
-
-Let's move onto using a real noise function for the wave.
+We won't actually make use of stacked sine waves in our final effect. We _will_, however, use the idea of stacking waves of different scales and speeds.
 
 
-### Simplex noise
+## Simplex noise
 
-[Simplex noise][simplex_noise] is a family of $n$-dimensional gradient noise functions designed by [Ken Perlin][ken_perlin], the inventor of "classic" [perlin noise][perlin_noise]. Simplex noise was designed to address some of the [drawbacks][perlin_drawbacks] of perlin noise.
+[Simplex noise][simplex_noise] is a family of $n$-dimensional gradient noise functions designed by [Ken Perlin][ken_perlin], the inventor of "classic" [Perlin noise][perlin_noise]. Simplex noise was designed to address some of the [drawbacks][perlin_drawbacks] of Perlin noise.
 
 [simplex_noise]: https://en.wikipedia.org/wiki/Simplex_noise
 [perlin_noise]: https://en.wikipedia.org/wiki/Perlin_noise
 [ken_perlin]: https://en.wikipedia.org/wiki/Ken_Perlin
 [perlin_drawbacks]: https://noiseposti.ng/posts/2022-01-16-The-Perlin-Problem-Moving-Past-Square-Noise.html
 
-The dimensionality of a simplex noise function refers to how many numeric input values the function takes (the 2D simplex noise function takes two numeric arguments, while the 3D function takes three). However, all simplex noise functions return a single numeric value between $-1$ and $1$.
+The dimensionality of a simplex noise function refers to how many numeric input values the function takes (the 2D simplex noise function takes two numeric arguments, the 3D function takes three). However, all simplex noise functions return a single numeric value between $-1$ and $1$.
 
 2D simplex noise is frequently used, for example, to [procedurally generate terrain][generate_terrain] in video games. Here's an example texture created using 2D simplex noise that could be used as a height map:
 
@@ -805,35 +768,37 @@ float lightness = (simplex_noise(x, y) + 1.0) / 2.0;
 gl_FragColor = vec4(vec3(lightness), 1.0);
 ```
 
-The $L$ scalar controls the scale of the $(x, y)$ coordinates. As $L$ increases, the noise becomes more granular. Here's a canvas that let's you adjust $L$ to see the effect:
+The $L$ scalar controls the scale of the $(x, y)$ coordinates. As $L$ increases, the noise becomes smaller. Here's a canvas that let's you adjust $L$ to see the effect:
 
 <WebGLShader fragmentShader="simplex_noise" width={400} minWidth={200} height={250} animate={false} />
 
-We'll use 2D simplex noise to create an animated 1D wave. How exactly we'll do that may be very obvious, so let's visualize and break it down.
+We'll use 2D simplex noise to create an animated 1D wave. The idea behind that may not be very obvious, so let's see how it works.
 
 
-## 1D animation using 2D noise
+### 1D animation using 2D noise
 
-Interpreting the output of a 2D gradient noise function as a third coordinate gives us a 3D surface. Take this array of points:
+Consider the following points:
 
 <Scene autoRotate scene="simplex-point-array" height={350} />
 
-The points are arranged in a grid configuration on the $x$ and $z$ axes, with the $y$ position of each point calculated via <Gl>simplex_noise(x, z)</Gl>:
+The points are arranged in a grid configuration on the $x$ and $z$ axes, with the $y$ coordinate of each point calculated via <Gl>simplex_noise(x, z)</Gl>:
 
 ```ts
 for (const point of points) {
-  const { x, z } = point.position;
-  point.position.y = simplex_noise(x, z);
+  const { x, z } = point;
+  point.y = simplex_noise(x, z);
 }
 ```
 
-But how does all of this relate to generating an animated wave?
+By doing this we've effectively created a 3D surface from a 2D input (the $x$ and $z$ coordinates).
 
-Consider what happens if we use time as the $z$ position. As time passes, the $z$ position advances, giving us different 1D slices of the $y$ value of the surface along the $x$ axis. Here's a visualization:
+Fair enough, but how does that relate to generating an animated wave?
+
+Consider what happens if we use time as the $z$ coordinate. As time passes, the value of $z$ increases, giving us different 1D slices of the $y$ values of the surface along the $x$ axis. Here's a visualization:
 
 <Scene autoRotate scene="simplex" height={480} angle={18} xRotation={154} />
 
-Putting this in code for our 2D canvas is fairly simple:
+Putting this into code for our 2D canvas is fairly simple:
 
 ```glsl
 uniform float u_time;
@@ -857,7 +822,7 @@ The same three $L$, $S$, $A$ scalars determine the characteristics of our wave. 
 
 <p className="mathblock">$$\text{simplex}(x \times L,\ \text{time})$$</p>
 
-We then scale $\text{time}$ by $S$ to control the evolution speed of our wave -- the speed at which we move across the $z$ axis in the visualization above:
+We scale $\text{time}$ by $S$ to control the evolution speed of our wave -- the speed at which we move across the $z$ axis in the visualization above:
 
 <p className="mathblock">$$\text{simplex}(x \times L,\ \text{time} \times S)$$</p>
 
@@ -867,7 +832,7 @@ Lastly, we scale the output of the $\text{simplex}$ function by $A$, which deter
 
 <SmallNote label="" center>Simplex noise returns a value between $-1$ and $1$, so to make a wave with a height of $96$ you'd set $A$ to $48$.</SmallNote>
 
-All of this produces a pretty good looking wave, though it feels a bit simple. The peaks and valleys look too evenly spaced and predictable.
+Even though the simplex wave feels natural, I find the peaks and valleys to look too evenly spaced and predictable.
 
 That's where stacking comes in. We can stack simplex waves of various lengths and speeds to get a more interesting final wave. I tweaked the constants and added a few increasingly large waves -- some slower and some faster. Here's what I ended up with:
 
@@ -889,7 +854,7 @@ This produces a wave that feels natural, yet visually interesting.
 
 Looks awesome, but there is one component I feel is missing, which is directional flow. The wave is too "still", which makes it feel a bit artificial.
 
-To make the wave flow left, we can add <Gl>u_time</Gl> to the <Gl>x</Gl> component, scaled by some constant that determines the amount of flow. Let's name that constant $F$.
+To make the wave flow left, we can add <Gl>u_time</Gl> to the <Gl>x</Gl> component, scaled by a constant $F$ that determines the amount of flow.
 
 ```glsl
 const float F = 0.043;
@@ -905,9 +870,9 @@ This adds a subtle flow to the wave. I'll let you vary the amount of flow to fee
 
 <WebGLShader fragmentShader="simplex_stack_final" width={800} height={200} seed={31993} maintainHeight={0.7} />
 
-<SmallNote label="" center>The amount of flow may feel suble, but that's intentional. If the flow is easily noticeable, there's too much of it.</SmallNote>
+<SmallNote label="" center>The amount of flow may feel subtle, but that's intentional. If the flow is easily noticeable, there's too much of it.</SmallNote>
 
-I think we've got a good looking wave. Let's move onto the next step.
+I think we've got a good-looking wave. Let's move on to the next step.
 
 
 ## Multiple waves
@@ -1001,7 +966,7 @@ float w1_alpha = wave_alpha(WAVE1_Y, WAVE1_HEIGHT, -72.2);
 float w2_alpha = wave_alpha(WAVE2_Y, WAVE2_HEIGHT, 163.9);
 ```
 
-The <Gl method>wave_noise</Gl> function could then add <Gl>offset</Gl> to <Gl>u_time</Gl> and use that when calculating the noise.
+The <Gl method>wave_noise</Gl> function can then add <Gl>offset</Gl> to <Gl>u_time</Gl> and use that when calculating the noise.
 
 ```glsl
 float wave_noise(float offset) {
@@ -1013,9 +978,9 @@ float wave_noise(float offset) {
 }
 ```
 
-This produces identical waves, just offset in time. By making the offset large enough, we get waves far enough apart in time that no one would notice that they're the same wave.
+This produces identical waves, but offset in time. By making the offset large enough, we get waves far enough apart in time that no one would notice that they're the same wave.
 
-But we don't actually need to provide the offset manually. We can just calculate an offset in the <Gl method>wave_alpha</Gl> function using the <Gl>Y</Gl> and <Gl>wave_height</Gl> arguments:
+But we don't actually need to provide the offset manually. We can derive an offset in the <Gl method>wave_alpha</Gl> function using the <Gl>Y</Gl> and <Gl>wave_height</Gl> arguments:
 
 ```glsl
 float wave_alpha(float Y, float wave_height) {
@@ -1032,18 +997,17 @@ Given the wave constants above and a canvas height of $200$, we get the followin
 32 \times 0.35 \times 200 = 2{,}240 &\\
 \end{align}$$</p>
 
-With these offsets the waves differ in time by $1{,}600$ seconds. No one's gonna notice that.
+With these offsets, the waves differ in time by $1{,}600$ seconds. No one's gonna notice that.
 
 With the offsets added, we get two distinct waves:
 
 <WebGLShader fragmentShader="multiple_waves" width={800} minWidth={600} height={200} maintainHeight={0.7} seed={20367} />
 
-Having updated our shader to handle multiple waves, let's move onto making the color of our waves dynamic.
+Now that we've updated our shader to handle multiple waves, let's move onto making the waves not be a single solid color.
 
+## Animated 2D noise
 
-## Background noise
-
-To generate the noise for the waves above, we used a 2D noise function to generate animated 1D noise.
+When generating the animated waves above, we used a 2D noise function to generate animated 1D noise.
 
 That pattern holds for higher dimensions as well. When generating $n$-dimensional noise, we use an $n + 1$-dimensional noise function with time as the value of the last dimension.
 
@@ -1063,7 +1027,7 @@ float y = gl_FragCoord.y;
 float noise = simplex_noise(x * L, y * L, u_time * S);
 ```
 
-We'll normalise the noise and use it as a lightness value:
+We'll normalize the noise to $[0, 1]$ and use it as a lightness value:
 
 ```glsl
 float lightness = (noise + 1.0) / 2.0;
@@ -1075,17 +1039,17 @@ This gives us animated 2D noise:
 
 <WebGLShader fragmentShader="simplex_noise" width={400} minWidth={200} height={250} showControls={false} />
 
-It's worth mentioning that we could use classic perlin noise instead of simplex. Perlin noise has been in use longer and is more popular than simplex noise, but I find perlin a bit too "blocky". Simplex noise, by comparison, feels more natural to me. Here's a side-by-side comparison:
+It's worth mentioning that we could use classic Perlin noise instead of simplex. Perlin noise has been in use longer and is more popular than simplex noise, but I find Perlin a bit too "blocky". Simplex noise, by comparison, feels more natural to me. Here's a side-by-side comparison:
 
 <WebGLShader fragmentShader="simplex_perlin_split" width={800} minWidth={200} height={250} />
 
-<SmallNote label="" center>Perlin noise is to the left, simplex noise to the right.</SmallNote>
+<SmallNote label="" center>Left is Perlin noise, right is simplex.</SmallNote>
 
-Anyway, our goal is for this noise to eventually be used to create the background color of our final gradient:
+Anyway, our goal for this animated 2D noise is for it to eventually be used to create the colors of the waves in our final gradient:
 
 <WebGLShader fragmentShader="final" skew height={275} minWidth={600} maintainHeight={0.3} seed={20582} />
 
-For our background noise to start looking like that we'll need to make some adjustments. Let's scale up the noise and also make the scale of the noise larger on the $x$ axis than the $y$ axis.
+For the noise to start looking like that we'll need to make some adjustments. Let's scale up the noise and also make the scale of the noise larger on the $x$ axis than the $y$ axis.
 
 ```glsl
 const float L = 0.0017;
@@ -1096,7 +1060,9 @@ float x = gl_FragCoord.x;
 float y = gl_FragCoord.y * Y_SCALE;
 ```
 
-I made $L$ around $11$ times smaller and introduced <Gl>Y_SCALE</Gl> to make the noise shorter on $y$ axis. I also reduced the speed ($S$) about 80%.
+I made $L$ around $11$ times smaller and introduced <Gl>Y_SCALE</Gl> to make the noise shorter on $y$ axis. I also reduced the speed $S$ by about 80%.
+
+With these adjustments, we get the following noise:
 
 <WebGLShader
   fragmentShader="simplex_noise"
@@ -1108,9 +1074,7 @@ I made $L$ around $11$ times smaller and introduced <Gl>Y_SCALE</Gl> to make the
   showControls={false}
 />
 
-Looks pretty good, but the noise feels a bit too evenly spaced. Yet again, we'll use stacking to make the noise more interesting.
-
-After some constant tweaking, here's what I came up with:
+Looks pretty good, but the noise feels a bit too evenly spaced. Yet again, we'll use stacking to make the noise more interesting. Here's what I came up with:
 
 ```glsl
 const float L = 0.0015;
@@ -1128,7 +1092,7 @@ noise += simplex_noise(x * L * 0.4, y * L * 0.70, time * S + O3) * 0.22;
 float lightness = clamp(noise, 0.0, 1.0);
 ```
 
-This gives us more interesting noise. The larger noise provides smooth, sweeping fades, and the smaller noise gives us finer detail and visual interest:
+The larger noise provides larger, sweeping fades, and the smaller noise gives us the finer details:
 
 <WebGLShader
   fragmentShader="simplex_noise_stacked_0"
@@ -1163,9 +1127,9 @@ Here's what that looks like:
   seed={2836}
 />
 
-This makes the background noise feel like it flows to the left -- but not uniformly so.
+This makes the noise feel like it flows to the left -- but not uniformly so.
 
-I think this is looking quite good! Let's clean things up by moving this into a <Gl method>background_noise</Gl> function that returns a value between $0$ and $1$:
+I think this is looking quite good! Let's clean things up putting this into a <Gl method>background_noise</Gl> function:
 
 ```glsl
 float background_noise() {
@@ -1181,35 +1145,31 @@ float lightness = background_noise()
 gl_FragColor = vec4(vec3(lightness), 1.0);
 ```
 
-Let's move beyond black and white background noise and add some color to the mix!
+Now let's move beyond black and white and add some color to the mix!
 
 
-## Color mapping
+### Color mapping
 
 <WebGLShader fragmentShader="x_lerp" width={150} height={150} />
 
-This red-to-blue gradient is an example of color mapping that works by calculating a $t$ value based on the pixel's $x$ coordinate
-
-```glsl
-float t = gl_FragCoord.x / (CANVAS_WIDTH - 1.0);
-```
-
-and mapped it to a color -- some blend of red and blue -- using the $t$ value:
+This red-to-blue gradient works by calculating a $t$ value based on the pixel's $x$ coordinate and mapping it to a color -- some blend of red and blue -- using the $t$ value:
 
 ```glsl
 vec3 red  = vec3(1.0, 0.0, 0.0);
 vec3 blue = vec3(0.0, 0.0, 1.0);
+
+float t = gl_FragCoord.x / (CANVAS_WIDTH - 1.0);
 vec3 color = mix(red, blue, t);
 ```
 
-What we can do is use the <Gl method>background_noise</Gl> function to calculate the $t$ value.
+What we can do is use our new <Gl method>background_noise</Gl> function to calculate the $t$ value.
 
 ```glsl
 float t = background_noise();
 vec3 color = mix(red, blue, t);
 ```
 
-That has the effect of mapping the background noise to a red-to-blue gradient:
+That has the effect of mapping the noise to a red-to-blue gradient:
 
 <WebGLShader
   fragmentShader="simplex_noise_stacked_2"
@@ -1229,7 +1189,7 @@ That's pretty cool, but I'd like to be able to map the $t$ value to _any_ gradie
   margin: "40px auto",
 }} />
 
-This gradient is rendered through a <Html>{"<div>"}</Html> element with this CSS gradient as its background:
+This gradient is a <Html>{"<div>"}</Html> element with its background set to this CSS gradient:
 
 ```css
 background: linear-gradient(
@@ -1263,7 +1223,7 @@ This replicates the CSS gradient perfectly:
 
 <WebGLShader fragmentShader="three_point_gradient" width={256} height={64} />
 
-We can now easily map the background noise to the gradient -- I'll move the color calculations into a <Gl method>calc_color</Gl> function to clean things up:
+I'll move the color calculations into a <Gl method>calc_color</Gl> function to clean things up:
 
 ```glsl
 vec3 calc_color(float t) {
@@ -1272,7 +1232,11 @@ vec3 calc_color(float t) {
   color = mix(color, color3, max(0.0, (t - 0.5) * 2.0));
   return color;
 }
+```
 
+Now that we have a function <Gl method>calc_color</Gl> that maps $t$ values to the gradient, we can easily map <Gl method>background_noise</Gl> to it:
+
+```glsl
 float t = background_noise();
 gl_FragColor = vec4(calc_color(t), 1.0);
 ```
@@ -1288,7 +1252,7 @@ Here's the result:
   seed={12926}
 />
 
-Our <Gl method>calc_color</Gl> function is set up to handle three-step gradients, but we can trivially create functions that handle gradients with $n$ stops. Here is an exampe of a 5-stop gradient:
+Our <Gl method>calc_color</Gl> function is set up to handle three-step gradients, but we can update it to handle gradients with $n$ stops. Here is an example of a 5-stop gradient:
 
 ```glsl
 vec3 calc_color(float t) {
@@ -1313,21 +1277,21 @@ The above function produces the following:
 
 <WebGLShader fragmentShader="rainbow" width={256} height={64} />
 
-This works, but defining the gradient in code like this is not great. The colors of the gradient are hardcode into our shader, and we need to manually adjust the function to handle the correct number of color stops.
+This works, but defining the gradient in code like this is (obviously) not great. The colors of the gradient are hardcoded into our shader, and we need to manually adjust the function to handle the correct number of color stops.
 
-We can make this a lot nicer by using a texture for our gradient.
+We can make this more dynamic by reading the gradient from a texture.
 
 
-## Creating a gradient in JavaScript and passing it to a WebGL shader
+## Gradient texture
 
-To pass image data -- such as a linear gradient -- from JavaScript to our shader, we can use [textures][opengl_texture]. Textures are arrays of data that can, amongst other things, store image data.
+To pass image data -- such as a linear gradient -- from JavaScript to our shader, we can use [textures][opengl_texture]. Textures are arrays of data that can, amongst other things, store a 2D image.
 
 [opengl_texture]: https://www.khronos.org/opengl/wiki/texture
 
 Firstly, we'll generate an image containing a linear gradient in JavaScript. We'll write that image to a texture and pass that texture to our WebGL shader. The shader can then read data from the texture.
 
 
-### Creating a linear gradient
+### Rendering a gradient to a canvas
 
 I used [this gradient generator][gradient_generator] to pick the following gradient:
 
@@ -1390,10 +1354,9 @@ ctx.fillRect(0, 0, canvas.width, canvas.height);
 
 Now that we've rendered a linear gradient onto a canvas element, let's write it into a texture and pass it to our shader.
 
-### Getting a gradient into the shader
+### Reading canvas contents from a shader
 
 The following code creates a WebGL texture and writes the canvas contents to it:
-
 
 ```ts
 const texture = gl.createTexture();
@@ -1447,7 +1410,7 @@ Here's our texture again, for reference:
 
 The texture is uniform over the $y$ axis so we can just set the $y$ coordinate to $0.5$ (we could also use $0.0$ or $1.0$, it wouldn't change the result for this texture).
 
-As for the $x$ axis, reading the color at $x = 0.0$ should yield blue and at $x = 1.0$ we should get yellow. We can verify this with the following shader
+As for the $x$ axis, reading the color at $x = 0.0$ should yield blue, and at $x = 1.0$ we should get yellow. We can verify this with the following shader
 
 ```glsl
 uniform sampler2D u_gradient;
@@ -1462,24 +1425,7 @@ In the canvas below the $x$ slider controls the value of <Gl>u_x</Gl>. As you sl
 
 <WebGLShader fragmentShader="read_texture_t" width={100} height={100} colorConfiguration="blue_to_yellow" />
 
-It works! We can now map values between $0$ and $1$ to a color from the gradient.
-
-### Mapping our background noise to the gradient
-
-As a refresher, we've defined a <Gl method>background_noise</Gl> function that returns a value between $0$ and $1$:
-
-```glsl
-float background_noise() {
-  float noise = 0.5;
-  noise += simplex_noise(...);
-  noise += simplex_noise(...);
-  // ...
-
-  return clamp(noise, 0.0, 1.0);
-}
-```
-
-With all our pieces in place, mapping the background noise to the gradient is trivial:
+It works! We can now map values between $0$ and $1$ to the gradient texture. This makes mapping <Gl method>background_noise</Gl> to the gradient trivial:
 
 ```glsl
 uniform sampler2D u_gradient;
@@ -1521,20 +1467,20 @@ const colors = [
   colorConfiguration="pastel"
 />
 
-We'll soon use this in the final effect, but before we get to that, let's look at blending the waves.
+We'll soon use this in the final effect, but before we get to that, let's finish blending our waves.
 
 
 ## Dynamic blur
 
-In the final effect we see varying amounts of blur applied to each wave, with the amount of blur evolving over time.
+In the final effect, we see varying amounts of blur applied to each wave, with the amount of blur evolving:
 
 <WebGLShader fragmentShader="final" skew height={275} minWidth={600} maintainHeight={0.3} seed={16192} />
 
 Our current waves, however, have sharp edges:
 
-<WebGLShader fragmentShader="multiple_waves" width={800} minWidth={600} height={200} maintainHeight={0.7} seed={20367} />
+<WebGLShader fragmentShader="multiple_waves" width={800} minWidth={600} height={200} maintainHeight={0.7} seed={9581} />
 
-Let's get started building a dynamic blur blur. As a refresher, we're currently calculating the alpha of our waves like so:
+Let's get started building a dynamic blur. As a refresher, we're currently calculating the alpha of our waves like so:
 
 ```glsl
 float x = gl_FragCoord.x;
@@ -1550,14 +1496,7 @@ float wave_alpha(float Y, float wave_height) {
 }
 ```
 
-To add blur we'll define a <Gl method>calc_blur</Gl> function to calculate the amount of blur to apply. We'll use it to calculate a blur value and divide <Gl>dist</Gl> by it -- like we did earlier in this post -- like so:
-
-```glsl
-float blur = calc_blur();
-float alpha = clamp(0.5 + dist / blur, 0.0, 1.0);
-```
-
-Still, we've yet to define the <Gl method>calc_blur</Gl> function. Let's start off by applying a progressively increasing left-to-right blur over the width of the canvas like we did before:
+Let's define a <Gl method>calc_blur</Gl> function that calculates the amount of blur to apply. We'll start simple with an increasing left-to-right blur over the width of the canvas:
 
 ```glsl
 float calc_blur() {
@@ -1567,9 +1506,18 @@ float calc_blur() {
 }
 ```
 
-<WebGLShader fragmentShader="multiple_waves_blur_0" width={800} minWidth={600} height={200} maintainHeight={0.7} seed={20367} />
+We'll use it to calculate a <Gl>blur</Gl> value and divide <Gl>dist</Gl> by it -- like we did earlier in this post:
 
-To make the blur dynamic, we'll yet again reach for simplex noise function. The setup should feel familiar, it's almost identical to the <Gl method>wave_noise</Gl> function we defined earlier:
+```glsl
+float blur = calc_blur();
+float alpha = clamp(0.5 + dist / blur, 0.0, 1.0);
+```
+
+This gives us a left-to-right blur:
+
+<WebGLShader fragmentShader="multiple_waves_blur_0" width={800} minWidth={600} height={200} maintainHeight={0.7} seed={9581} />
+
+To make the blur dynamic, we'll yet again reach for the simplex noise function. The setup should feel familiar, it's almost identical to the <Gl method>wave_noise</Gl> function we defined earlier:
 
 ```glsl
 float calc_blur() {
@@ -1584,7 +1532,7 @@ float calc_blur() {
 }
 ```
 
-If we were to apply this as-is to our waves, each wave's blur would look identical. For the wave blurs to be distinct we'll need to apply an offset to <Gl>u_time</Gl>.
+If we were to apply this as-is to our waves, each wave's blur would look identical. For the wave blurs to be distinct we'll need to add an offset to <Gl>u_time</Gl>.
 
 Conveniently for us, we can reuse the same offset we calculated for the <Gl method>wave_noise</Gl> function:
 
@@ -1605,18 +1553,18 @@ float wave_alpha(float Y, float wave_height) {
 
 This gives us a dynamic blur:
 
-<WebGLShader fragmentShader="multiple_waves_blur_1" width={800} minWidth={600} height={200} maintainHeight={0.7} seed={21367} />
+<WebGLShader fragmentShader="multiple_waves_blur_1" width={800} minWidth={600} height={200} maintainHeight={0.7} seed={9581} />
 
 But, honestly, the blur looks pretty bad. It feels like it has distinct "edges" at the top and bottom of each wave.
 
-Also, the waves feels somewhat blurry all over, just unevenly so. We don't seem to get those long, sharp edges that appear in the final effect:
+Also, the waves feel somewhat blurry all over, just unevenly so. We don't seem to get those long, sharp edges that appear in the final effect:
 
 <WebGLShader fragmentShader="final" skew minWidth={600} maintainHeight={0.3} seed={16192} />
 
-Let's start off by fixing the harsh edges.
+Let's start by fixing the harsh edges.
 
 
-## Making our blur look better
+### Making our blur look better
 
 Consider how we're calculating the alpha:
 
@@ -1632,7 +1580,7 @@ Let's chart the alpha curve so that we can see this visually:
 
 The harsh stops at $0.0$ and $1.0$ produce the sharp-feeling edges that we observe at the edges of the blur.
 
-<WebGLShader fragmentShader="multiple_waves_blur_1" width={800} minWidth={600} height={200} showControls={false} maintainHeight={0.7} seed={21367} />
+<WebGLShader fragmentShader="multiple_waves_blur_1" width={800} minWidth={600} height={200} maintainHeight={0.7} seed={9581} />
 
 The [smoothstep][smoothstep] function can help here. Smoothstep is a family of interpolation functions that, as the name suggests, smooth the transition from $0$ to $1$.
 
@@ -1663,11 +1611,11 @@ Below is a chart showing the smoothed alpha curve -- I'll include the original n
 
 This results in a _much_ smoother blur:
 
-<WebGLShader fragmentShader="multiple_waves_blur_2" width={800} minWidth={600} height={200} showControls={false} maintainHeight={0.7} seed={21367} />
+<WebGLShader fragmentShader="multiple_waves_blur_2" width={800} minWidth={600} height={200} showControls={false} maintainHeight={0.7} seed={9581} />
 
 Following is a side-by-side comparison. The blur to the left is smoothed, while the right one is not.
 
-<WebGLShader fragmentShader="multiple_waves_blur_2_side_by_side" width={800} minWidth={600} height={200} maintainHeight={0.7} seed={21367} />
+<WebGLShader fragmentShader="multiple_waves_blur_2_side_by_side" width={800} minWidth={600} height={200} maintainHeight={0.7} seed={9581} />
 
 That takes care of the sharp edges. Let's now tackle the issue of the wave as a whole being too blurry.
 
@@ -1688,15 +1636,17 @@ float calc_blur() {
 
 The edge becomes sharper as $t$ approaches $0$, and blurrier as $t$ approaches $1$. However, the wave only becomes sharp when $t$ is _very_ close to zero.
 
-The canvas below has a visualization that illustrate this. The lower half is a chart showing the value of $t$ over the $x$ axis (with $t=0$ at the bottom to $t=1$ at the top):
+The canvas below has a visualization that illustrates this. The lower half is a chart showing the value of $t$ over the $x$ axis (with $t=0$ at the bottom to $t=1$ at the top):
 
 <WebGLShader fragmentShader="multiple_waves_blur_4" width={800} minWidth={600} height={320} maintainHeight={0.7} seed={32839} showControls={false} />
 
-You'll notice that the wave becomes sharp when the chart gets close to touching the bottom -- at values near zero -- but it rarely reaches values of near-zero. The value of $t$ lingers around the middle too much, causing the wave to be _somewhat_ blurry over its entire length.
+You'll notice that the wave becomes sharp when the chart gets close to touching the bottom -- at values near zero -- but it rarely dips that low. The value of $t$ lingers around the middle too much, causing the wave to be _somewhat_ blurry over its entire length.
 
-We can bias values of $t$ close to $0$ to become _very_ close $0$ by exponentiating $t$. Consider how an exponent affects values between $0$ and $1$. Numbers close to $0$ get pulled very close towards $0$ while larger numbers experience less pull.
+We can bias low values of $t$ to get close to $0$ by exponentiating $t$.
 
-The level of pull depends on the exponent. For example, $0.1^2 = 0.01$, a 90% reduction, while $0.9^2 = 0.81$, only a reduction of 10%. This show this visually, here's a chart of $x^2$ for values of $x$ between $0$ and $1$:
+Consider how an exponent affects values between $0$ and $1$. Numbers close to $0$ experiece a strong pull towards $0$ while larger numbers experience less pull. For example, $0.1^2 = 0.01$, a 90% reduction, while $0.9^2 = 0.81$, only a reduction of 10%.
+
+The level of pull depends on the exponent. Here's a chart of $x^2$ for values of $x$ between $0$ and $1$:
 
 <Image src="~/x-pow-2-chart.png" plain width={500} />
 
@@ -1723,19 +1673,19 @@ t = pow(t, exponent);
 
 Below is a canvas that lets you vary the value of <Gl>exponent</Gl> from $0$ to $4$. I intentionally set <Gl>exponent</Gl> to a default value of $1$ (no effect) so that you can see the effect of increasing the exponent directly (the light-blue line that stays behind represents the value of $t$ prior to applying the exponent).
 
-<WebGLShader fragmentShader="multiple_waves_blur_4" width={800} minWidth={600} height={320} maintainHeight={0.7} seed={32839} />
+<WebGLShader fragmentShader="multiple_waves_blur_4" width={800} minWidth={600} height={320} maintainHeight={0.7} seed={18399} />
 
-As the exponent increases, $t$ tends to "hug" the floor of the chart more and more. This produces noticeable periods of relative sharpness while not muting higher values of $t$ _too_ much. I feel like an exponent of $2.0$ to $2.7$ gives good results -- I'll go with $2.5$.
+As the exponent increases, $t$ tends to "hug" the bottom of the chart more and more. This produces noticeable periods of relative sharpness while not muting higher values of $t$ _too_ much. I feel like an exponent of $2.0$ to $2.7$ gives good results -- I'll go with $2.5$.
 
 Let's bring back the other wave and see what we've got:
 
-<WebGLShader fragmentShader="multiple_waves_blur_5" width={800} minWidth={600} height={200} maintainHeight={0.7} seed={32839} showControls={false} fragmentShaderOptions={{ value: 50 }} />
+<WebGLShader fragmentShader="multiple_waves_blur_5" width={800} minWidth={600} height={200} maintainHeight={0.7} seed={18399} showControls={false} fragmentShaderOptions={{ value: 50 }} />
 
-Applying an exponent does put a damp on the strength of the blur, so let's ramp the blur amount up -- I'll increase it from $50$ to $130$.
+Applying an exponent does dampen the strength of the blur, so let's ramp the blur amount up -- I'll increase it from $50$ to $130$.
 
-<WebGLShader fragmentShader="multiple_waves_blur_5" width={800} minWidth={600} height={200} maintainHeight={0.7} seed={32839} showControls={false} />
+<WebGLShader fragmentShader="multiple_waves_blur_5" width={800} minWidth={600} height={200} maintainHeight={0.7} seed={18399} showControls={false} />
 
-Now we're talking! We've got a pretty great looking blur going!
+Now we're talking! We've got a pretty great-looking blur going!
 
 
 ## Putting it all together
@@ -1759,7 +1709,7 @@ vec3 wave2_color = vec3(0.384, 0.827, 0.898);
 
 The trick to our final effect lies in substituting each of those colors with a unique background noise and blending those.
 
-We need our three background noises to be distinct. In order to that we'll update our <Gl method>background_noise</Gl> function to take an offset value and add that to <Gl>u_time</Gl>. We've done this twice before so at this point this is just routine:
+We need our three background noises to be distinct. To support that we'll update our <Gl method>background_noise</Gl> function to take an offset value and add that to <Gl>u_time</Gl>. We've done this twice before so at this point this is just routine:
 
 ```glsl
 float background_noise(float offset) {
@@ -1773,7 +1723,7 @@ float background_noise(float offset) {
 }
 ```
 
-We can now easily generate multiple distinct background noises. Let's start off by interpreting the background noises as lightness values:
+We can now easily generate multiple distinct background noises. Let's start by interpreting the background noises as lightness values:
 
 ```glsl
 float bg_lightness = background_noise(0.0);
@@ -1831,7 +1781,7 @@ It took a long time to get here, but we've ended up with something really cool.
 
 ## Final words
 
-I hope this was a good introduction to writing shaders, and I hope I provided you the tools and intuition to get started writing shaders yourself!
+I hope this was a good introduction to writing shaders, and I hope I provided you with the tools and intuition to get started writing shaders yourself!
 
 At the beginning of the post I promised to link to the final shader code, so [here it is][final_shader_code].
 
@@ -1843,7 +1793,7 @@ Take a look at this black-and-white version of the final effect and see if you c
 
 <WebGLShader fragmentShader="final" skew height={275} minWidth={600} maintainHeight={0.3} seed={16192} fragmentShaderOptions={{ blackAndWhite: true }} />
 
-I didn't cover these additional elements because they're not core to the effect -- they just add a layer of refinement. There are loads of ways in which you could tweak or add to the effect. I tried tons of ideas and kept those around because they worked really well. I suggest tweaking the code and trying to adding some refinements yourself!
+I didn't cover these additional elements because they're not core to the effect -- they just add a layer of refinement. There are loads of ways in which you could tweak or add to the effect. I tried tons of ideas and kept those around because they worked very well. I suggest tweaking the code and trying to add some refinements yourself!
 
 Anyway, thanks so much for reading. I hope this was interesting.
 

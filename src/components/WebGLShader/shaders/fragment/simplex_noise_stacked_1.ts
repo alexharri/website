@@ -8,6 +8,7 @@ const createFragmentShader: CreateFragmentShader = () => {
       label: "math:F",
       value: 1,
       range: [1, 5],
+      step: 1,
       format: "multiplier",
     },
   };

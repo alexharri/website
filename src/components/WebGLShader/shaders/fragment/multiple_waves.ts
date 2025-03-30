@@ -10,6 +10,7 @@ const createFragmentShader: CreateFragmentShader = (options) => {
 
     uniform float u_time;
     uniform float u_h;
+    uniform float u_w;
 
     float WAVE1_HEIGHT = u_h * 0.12;
     float WAVE2_HEIGHT = u_h * 0.16;
@@ -34,9 +35,9 @@ const createFragmentShader: CreateFragmentShader = (options) => {
       return sum;
     }
 
-    float wave_alpha(float Y, float wave_height) {
-      float noise_offset = Y * wave_height * ${offsetScalar.toFixed(1)};
-      float wave_y = Y + noise(gl_FragCoord.x, noise_offset) * wave_height;
+    float wave_alpha(float Y, float wave_height, float offset) {
+      float x = gl_FragCoord.x - u_w * 0.5;
+      float wave_y = Y + noise(x, offset * ${offsetScalar.toFixed(1)}) * wave_height;
       float dist_signed = wave_y - gl_FragCoord.y;
       float alpha = clamp(0.5 + dist_signed, 0.0, 1.0);
       return alpha;
@@ -47,8 +48,8 @@ const createFragmentShader: CreateFragmentShader = (options) => {
       vec3 w1_color = vec3(0.094, 0.502, 0.910);
       vec3 w2_color = vec3(0.384, 0.827, 0.898);
       
-      float w1_alpha = wave_alpha(WAVE1_Y, WAVE1_HEIGHT);
-      float w2_alpha = wave_alpha(WAVE2_Y, WAVE2_HEIGHT);
+      float w1_alpha = wave_alpha(WAVE1_Y, WAVE1_HEIGHT, 3840.0);
+      float w2_alpha = wave_alpha(WAVE2_Y, WAVE2_HEIGHT, 2240.0);
 
       vec3 color = bg_color;
       color = mix(color, w1_color, w1_alpha);

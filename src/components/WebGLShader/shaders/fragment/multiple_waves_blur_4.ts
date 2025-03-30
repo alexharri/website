@@ -19,6 +19,7 @@ const createFragmentShader: CreateFragmentShader = () => {
     uniform float u_h;
     uniform float u_pow;
 
+    const float OFFSET = 3840.0;
     float LOWER_HEIGHT = u_h * 0.44;
     float UPPER_HEIGHT = u_h - LOWER_HEIGHT;
     float BLUR_AMOUNT = UPPER_HEIGHT * 0.333;
@@ -71,17 +72,16 @@ const createFragmentShader: CreateFragmentShader = () => {
       return mix(1.0, 1.0 + BLUR_AMOUNT, calc_blur_t(offset, u_pow));
     }
 
-    float wave_alpha(float Y, float wave_height) {
-      float x = gl_FragCoord.x;
+    float wave_alpha(float Y, float wave_height, float offset) {
+      float x = gl_FragCoord.x - u_w * 0.5;
       float y = gl_FragCoord.y;
 
       // Calculate distance to curve Y
-      float noise_offset = Y * wave_height;
-      float wave_y = Y + noise(x, noise_offset) * wave_height;
+      float wave_y = Y + noise(x, offset) * wave_height;
       float dist_signed = wave_y - y;
       
       // Calculate alpha
-      float blur = calc_blur(noise_offset);
+      float blur = calc_blur(offset);
       float alpha = clamp(0.5 + dist_signed / blur, 0.0, 1.0);
       alpha = smooth_step(alpha);
       return alpha;
@@ -92,18 +92,17 @@ const createFragmentShader: CreateFragmentShader = () => {
       vec3 w1_color = vec3(0.094, 0.502, 0.910);
       vec3 w2_color = vec3(0.384, 0.827, 0.898);
       
-      float w2_alpha = wave_alpha(WAVE_Y, WAVE_HEIGHT);
+      float w2_alpha = wave_alpha(WAVE_Y, WAVE_HEIGHT, OFFSET);
 
       vec3 color = bg_color;
       color = mix(color, w2_color, w2_alpha);
       return color;
     }
 
-    vec3 lower_color() {
+    vec3 lower_color(float offset) {
       float y = gl_FragCoord.y;
-      float noise_offset = WAVE_Y * WAVE_HEIGHT;
-      float blur_t = calc_blur_t(noise_offset, u_pow);
-      float blur_t_org = calc_blur_t(noise_offset, 1.0);
+      float blur_t = calc_blur_t(offset, u_pow);
+      float blur_t_org = calc_blur_t(offset, 1.0);
 
       float wave_y_org = BOTTOM_PADDING + blur_t_org * LOWER_HEIGHT;
       float wave_y = BOTTOM_PADDING + blur_t * LOWER_HEIGHT;
@@ -140,7 +139,7 @@ const createFragmentShader: CreateFragmentShader = () => {
       float split_dist = (LOWER_HEIGHT + P * 2.0) - gl_FragCoord.y;
 
       float t = (sign(split_dist) + 1.0) / 2.0;
-      vec3 color = mix(upper_color(), lower_color(), t);
+      vec3 color = mix(upper_color(), lower_color(OFFSET), t);
 
       float black_t = 1.0 - (sign(abs(split_dist) - P) + 1.0) / 2.0;
       color = mix(color, vec3(0.0), black_t);
