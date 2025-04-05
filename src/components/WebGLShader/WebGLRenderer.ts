@@ -1,5 +1,3 @@
-type ShaderType = WebGLRenderingContext["VERTEX_SHADER"] | WebGLRenderingContext["FRAGMENT_SHADER"];
-
 const N_TIME_VALUES = 2;
 
 function timeKey(index: number) {
@@ -21,20 +19,14 @@ interface ColorConfiguration {
 }
 
 export class WebGLRenderer {
-  private gl: WebGLRenderingContext;
-
-  // private seed = 5983; // Math.random() * 100_000;
   private timeStates: TimeState[];
 
+  private gl: WebGLRenderingContext;
   private program: WebGLProgram;
   private positionBuffer: WebGLBuffer | null;
-  private numPositions: number;
   private gradientTexture: WebGLTexture | null;
+
   private a_position: number;
-  private u_timeList: Array<WebGLUniformLocation | null>;
-  private u_w: WebGLUniformLocation | null;
-  private u_h: WebGLUniformLocation | null;
-  private u_gradient: WebGLUniformLocation | null;
 
   private uniformLocations = new Map<string, WebGLUniformLocation | null>();
 
@@ -50,18 +42,10 @@ export class WebGLRenderer {
       throw new Error("Failed to acquire WebGL context");
     }
     this.gl = gl;
-    this.numPositions = this.positions().length / 2; // Positions are vec2
-
     this.program = WebGLRenderer.createProgram(gl, vertexShader, fragmentShader);
-    this.a_position = gl.getAttribLocation(this.program, "a_position");
     this.positionBuffer = gl.createBuffer();
     this.gradientTexture = gl.createTexture();
-    this.u_gradient = gl.getUniformLocation(this.program, "u_gradient");
-    this.u_timeList = Array.from({ length: N_TIME_VALUES }).map((_, i) =>
-      gl.getUniformLocation(this.program, timeKey(i)),
-    );
-    this.u_w = gl.getUniformLocation(this.program, "u_w");
-    this.u_h = gl.getUniformLocation(this.program, "u_h");
+    this.a_position = gl.getAttribLocation(this.program, "a_position");
 
     seed ??= Math.random() * 100_000;
     this.timeStates = Array.from({ length: N_TIME_VALUES }).map(() => ({
@@ -104,15 +88,15 @@ export class WebGLRenderer {
       state.elapsed += (now - state.lastTime) * state.timeSpeed;
       state.lastTime = now;
       const time = state.seed + state.elapsed / 1000;
-      gl.uniform1f(this.u_timeList[i], time);
+      gl.uniform1f(this.getUniformLocation(timeKey(i)), time);
     }
-    gl.uniform1f(this.u_w, gl.canvas.width);
-    gl.uniform1f(this.u_h, gl.canvas.height);
+    gl.uniform1f(this.getUniformLocation("u_w"), gl.canvas.width);
+    gl.uniform1f(this.getUniformLocation("u_h"), gl.canvas.height);
 
     // Pass gradient texture
     gl.activeTexture(gl.TEXTURE0);
     gl.bindTexture(gl.TEXTURE_2D, this.gradientTexture);
-    gl.uniform1i(this.u_gradient, 0);
+    gl.uniform1i(this.getUniformLocation("u_gradient"), 0);
 
     // Clear canvas
     this.clear();
@@ -121,7 +105,7 @@ export class WebGLRenderer {
     gl.vertexAttribPointer(this.a_position, /* vec2 */ 2, gl.FLOAT, false, 0, 0);
     gl.enableVertexAttribArray(this.a_position);
     gl.bindBuffer(gl.ARRAY_BUFFER, this.positionBuffer);
-    gl.drawArrays(gl.TRIANGLES, 0, this.numPositions);
+    gl.drawArrays(gl.TRIANGLES, 0, this.positions().length / 2);
   }
 
   public setUniform(key: string, value: number) {
@@ -207,7 +191,7 @@ export class WebGLRenderer {
 
   private static createShader(
     gl: WebGLRenderingContext,
-    type: ShaderType,
+    type: WebGLRenderingContext["VERTEX_SHADER"] | WebGLRenderingContext["FRAGMENT_SHADER"],
     source: string,
   ): WebGLShader {
     const shader = gl.createShader(type);
