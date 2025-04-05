@@ -1,24 +1,36 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { css } from "@emotion/css";
 import { StyleOptions, useStyles } from "../../utils/styles";
 import { WebGLRenderer } from "./WebGLRenderer";
-import { colorConfigurations } from "./colorConfigurations";
+import { ColorConfiguration, colorConfigurations } from "./colorConfigurations";
 import { vertexShaderRegistry } from "./shaders/vertexShaders";
 import { fragmentShaderRegistry } from "./shaders/fragmentShaders";
 import { cssVariables } from "../../utils/cssVariables";
-import { useVisible } from "../../utils/hooks/useVisible";
 import { FragmentShader, FragmentShaderUniform } from "./shaders/types";
 import { NumberVariable } from "../../threejs/NumberVariable";
 import { clamp, invLerp, lerp } from "../../math/lerp";
 import { useViewportWidth } from "../../utils/hooks/useViewportWidth";
 import { useRandomId } from "../../utils/hooks/useRandomId";
+import { DEFAULT_HEIGHT, SKEW_DEG } from "./utils";
 
-type ColorConfiguration = keyof typeof colorConfigurations;
+function calculateWebGLCanvasDimensions(props: WebGLShaderProps, viewportWidth: number) {
+  let { height = DEFAULT_HEIGHT } = props;
 
-const DEFAULT_HEIGHT = 250;
+  const width = clamp(
+    viewportWidth,
+    props.minWidth ?? props.width ?? viewportWidth,
+    props.width ?? viewportWidth,
+  );
+  if (props.maintainHeight != null) {
+    const fac = (Math.max(1, width / viewportWidth) - 1) * props.maintainHeight;
+    height *= 1 + fac;
+  }
+  height = Math.round(height); // A fractional canvas height causes visual artifacts
+
+  return [width, height];
+}
+
 const UNIFORM_MARGIN = 24;
 const UNIFORM_V_GAP = 32;
-const CONTROLS_HEIGHT = 72;
 const SHOW_SEED_AND_TIME = false;
 
 function parseUniformValue(uniform: FragmentShaderUniform, value: number) {
@@ -31,24 +43,7 @@ function parseUniformValue(uniform: FragmentShaderUniform, value: number) {
   return value;
 }
 
-const styles = ({ styled, theme }: StyleOptions) => ({
-  container: styled.css`
-    width: 100vw;
-    margin: 40px -${cssVariables.contentPadding}px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-
-    canvas {
-      border-radius: 0;
-    }
-
-    &--skew {
-      margin: calc(32px + min(100vw, ${cssVariables.contentWidth}px) * 0.04) -${cssVariables.contentPadding}px
-        calc(48px + min(100vw, ${cssVariables.contentWidth}px) * 0.04);
-    }
-  `,
-
+const styles = ({ styled }: StyleOptions) => ({
   canvasWrapper: styled.css`
     position: relative;
 
@@ -59,7 +54,7 @@ const styles = ({ styled, theme }: StyleOptions) => ({
     }
 
     &--skew {
-      transform: skewY(-6deg);
+      transform: skewY(-${SKEW_DEG}deg);
     }
   `,
 
@@ -82,44 +77,6 @@ const styles = ({ styled, theme }: StyleOptions) => ({
       gap: ${UNIFORM_V_GAP}px;
     }
   `,
-
-  colorButtonWrapper: styled.css`
-    margin-top: 40px;
-    padding: 0 ${cssVariables.contentPadding}px;
-    display: flex;
-    gap: 24px;
-    flex-wrap: wrap;
-    justify-content: center;
-
-    &--skew {
-      transform: skewY(-6deg);
-    }
-
-    @media (max-width: 600px) {
-      margin-top: 32px;
-    }
-
-    @media (max-width: 450px) {
-      margin-top: 24px;
-    }
-  `,
-
-  colorButton: styled.css`
-    width: 64px;
-    height: 48px;
-    border-radius: 8px;
-    transition: outline 0.2s;
-    border: 3px solid ${theme.background};
-    outline: 0px solid ${theme.background};
-
-    &--skew {
-      transform: skewY(6deg) skewX(-12deg);
-    }
-
-    @media (max-width: 450px) {
-      width: 56px;
-    }
-  `,
 });
 
 interface FragmentShaderProps {
@@ -127,7 +84,7 @@ interface FragmentShaderProps {
   fragmentShaderOptions?: Partial<Record<string, unknown>>;
 }
 
-interface Props extends FragmentShaderProps {
+export interface WebGLShaderProps extends FragmentShaderProps {
   skew?: boolean;
   colorConfiguration: ColorConfiguration;
   width?: number;
@@ -137,35 +94,7 @@ interface Props extends FragmentShaderProps {
   showControls?: boolean;
   animate?: boolean;
   seed?: number;
-}
-
-function useCanvasHeightPlaceholderClassName(
-  props: Pick<Props, "height" | "maintainHeight" | "width" | "minWidth">,
-) {
-  const { height = DEFAULT_HEIGHT, maintainHeight = 0 } = props;
-  const width = props.minWidth ?? props.width;
-
-  return useMemo(() => {
-    const styled = { css };
-    const classNames = [
-      styled.css`
-        padding-top: ${height}px;
-        width: 100vw;
-      `,
-    ];
-    if (typeof width === "number") {
-      const heightProportion = height / width;
-      classNames.push(styled.css`
-        @media (max-width: ${width}px) {
-          padding-top: ${heightProportion * 100}vw;
-          padding-bottom: calc(
-            ${height * maintainHeight}px - ${heightProportion * maintainHeight * 100}vw
-          );
-        }
-      `);
-    }
-    return classNames.join(" ");
-  }, [width, height]);
+  usesVariables?: boolean;
 }
 
 function useFragmentShader(props: FragmentShaderProps): FragmentShader {
@@ -183,24 +112,7 @@ function useFragmentShader(props: FragmentShaderProps): FragmentShader {
   return fragmentShader;
 }
 
-function calculateCanvasDimensions(props: Props, viewportWidth: number) {
-  let { height = DEFAULT_HEIGHT } = props;
-
-  const width = clamp(
-    viewportWidth,
-    props.minWidth ?? props.width ?? viewportWidth,
-    props.width ?? viewportWidth,
-  );
-  if (props.maintainHeight != null) {
-    const fac = (Math.max(1, width / viewportWidth) - 1) * props.maintainHeight;
-    height *= 1 + fac;
-  }
-  height = Math.round(height); // A fractional canvas height causes visual artifacts
-
-  return [width, height];
-}
-
-const _WebGLShader: React.FC<Props> = (props) => {
+export const WebGLShader: React.FC<WebGLShaderProps> = (props) => {
   const s = useStyles(styles);
 
   const shaderTimeId = useRandomId();
@@ -209,7 +121,7 @@ const _WebGLShader: React.FC<Props> = (props) => {
   const { showControls = true, animate = true, colorConfiguration } = props;
 
   const viewportWidth = useViewportWidth()!;
-  const [width, height] = calculateCanvasDimensions(props, viewportWidth);
+  const [width, height] = calculateWebGLCanvasDimensions(props, viewportWidth);
 
   const idealScale = Math.min(1, viewportWidth / width);
   const canvasScale = Math.ceil(height * idealScale) / height;
@@ -268,7 +180,7 @@ const _WebGLShader: React.FC<Props> = (props) => {
       requestAnimationFrame(tick);
 
       if (resized) {
-        const [width, height] = calculateCanvasDimensions(props, window.innerWidth);
+        const [width, height] = calculateWebGLCanvasDimensions(props, window.innerWidth);
         renderer.setDimensions(width, height);
         // console.log(width, { width: props.width, minWidth: props.minWidth });
         resized = false;
@@ -321,6 +233,16 @@ const _WebGLShader: React.FC<Props> = (props) => {
 
   const uniformEntries = Object.entries(fragmentShader.uniforms);
 
+  useEffect(() => {
+    const shouldHaveUsesVariablesProp = uniformEntries.length > 0 && showControls;
+    const usesVariables = props.usesVariables ?? false;
+    if (shouldHaveUsesVariablesProp !== usesVariables) {
+      console.warn(
+        `'usesVariables' should be ${shouldHaveUsesVariablesProp} for fragment shader '${props.fragmentShader}'`,
+      );
+    }
+  }, [fragmentShader, showControls]);
+
   return (
     <>
       <div className={s("canvasWrapper", { skew: props.skew })} style={{ width, maxWidth: "100%" }}>
@@ -360,73 +282,3 @@ const _WebGLShader: React.FC<Props> = (props) => {
     </>
   );
 };
-
-export const WebGLShader: React.FC<
-  Omit<Props, "colorConfiguration"> & {
-    colorConfiguration?: ColorConfiguration | ColorConfiguration[];
-  }
-> = (props) => {
-  let { skew, showControls = true } = props;
-  const s = useStyles(styles);
-  const ref = useRef<HTMLDivElement>(null);
-  const visible = useVisible(ref, "64px");
-
-  const fragmentShader = useFragmentShader(props);
-  const numUniforms = Object.keys(fragmentShader.uniforms).length;
-
-  const heightClassName = useCanvasHeightPlaceholderClassName(props);
-
-  const [colorConfiguration, setColorConfiguration] = useState<keyof typeof colorConfigurations>(
-    Array.isArray(props.colorConfiguration)
-      ? props.colorConfiguration[0]
-      : props.colorConfiguration ?? "default",
-  );
-
-  return (
-    <div className={[s("container", { skew }), "canvas"].join(" ")} ref={ref}>
-      {visible ? (
-        <_WebGLShader {...props} colorConfiguration={colorConfiguration} />
-      ) : (
-        <>
-          <div className={heightClassName} />
-          {showControls && numUniforms > 0 && (
-            <div style={{ paddingBottom: `${CONTROLS_HEIGHT}px` }} />
-          )}
-        </>
-      )}
-      {Array.isArray(props.colorConfiguration) && (
-        <div className={s("colorButtonWrapper", { skew })}>
-          {props.colorConfiguration.map((key) => {
-            const gradient = colorConfigurations[key].gradient;
-            const selected = key === colorConfiguration;
-            return (
-              <button
-                className={s("colorButton", { skew })}
-                key={key}
-                style={{
-                  background: gradientToThreeStopGradient(gradient),
-                  outline: selected
-                    ? `5px solid ${gradient[Math.floor(gradient.length / 2)]}`
-                    : undefined,
-                }}
-                onClick={() => setColorConfiguration(key)}
-              />
-            );
-          })}
-        </div>
-      )}
-    </div>
-  );
-};
-
-function gradientToThreeStopGradient(gradient: string[]) {
-  const [a, b, c] = pick3(gradient);
-  return `linear-gradient(90deg, ${a} 0%, ${a} 33.2%, ${b} 33.3%, ${b} 66.5%, ${c} 66.6%, ${c} 100%)`;
-}
-
-function pick3<T>(arr: T[]): T[] {
-  const N = arr.length;
-  if (N < 3) throw new Error("Array must have at least 3 elements");
-  if (N === 3) return arr;
-  return [0.25, 0.5, 0.75].map((t) => arr[Math.floor((N - 1) * t)]);
-}

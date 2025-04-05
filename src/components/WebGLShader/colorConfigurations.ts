@@ -1,3 +1,5 @@
+export type ColorConfiguration = keyof typeof colorConfigurations;
+
 export const colorConfigurations = {
   default: {
     gradient: [

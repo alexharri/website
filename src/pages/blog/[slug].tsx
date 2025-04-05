@@ -27,9 +27,9 @@ import { PostDataStore } from "../../types/Post";
 import { SubscribeToNewsletter } from "../../components/SubscribeToNewsletter/SubscribeToNewsletter";
 import { usePostWatcher } from "../../utils/watcher-client";
 import { Code } from "../../components/Code/Code";
-import { WebGLShader } from "../../components/WebGLShader/WebGLShader";
 import { MediaQuery } from "../../components/MediaQuery/MediaQuery";
 import { usePreserveViewportOnResize } from "../../utils/hooks/usePreserveViewportOnScroll";
+import { WebGLShaderLoader } from "../../components/WebGLShader/WebGLShaderLoader";
 
 function firstUpper(s: string) {
   if (s.length === 0) return s;
@@ -78,7 +78,7 @@ const baseComponents = {
   Scene,
   BarChart,
   EmDash: () => "—",
-  WebGLShader,
+  WebGLShader: WebGLShaderLoader,
   MediaQuery,
 };
 

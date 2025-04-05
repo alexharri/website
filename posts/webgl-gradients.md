@@ -110,7 +110,7 @@ function pixelColor({ x, y }: Position): Color {
 
 This produces an oscillating gradient with the desired wavelength -- I'll let you vary $L$ to see the effect:
 
-<WebGLShader fragmentShader="x_sine_lerp" width={150} height={150} fragmentShaderOptions={{ waveLength: 40 }} />
+<WebGLShader fragmentShader="x_sine_lerp" width={150} height={150} fragmentShaderOptions={{ waveLength: 40 }} usesVariables />
 
 
 ### Adding motion
@@ -139,7 +139,7 @@ let t = sin((x + time * S) * toWaveLength);
 
 Here's the result -- I'll let you vary $S$ so that you can adjust the speed:
 
-<WebGLShader fragmentShader="x_sine_lerp_time" width={150} height={150} />
+<WebGLShader fragmentShader="x_sine_lerp_time" width={150} height={150} usesVariables />
 
 Voila, we've got movement!
 
@@ -414,7 +414,7 @@ float curve_y = Y + x * I;
 
 This produces the slanted line in the canvas below -- I'll let you vary $I$ to see the effect:
 
-<WebGLShader fragmentShader="linear_gradient_area_under_slanted_line" height={150} width={150} />
+<WebGLShader fragmentShader="linear_gradient_area_under_slanted_line" height={150} width={150} usesVariables />
 
 
 We could also draw a parabola like so:
@@ -502,7 +502,7 @@ float curve_y = Y + sin((x + u_time * S) * W) * A;
 
 I'll let you vary $S$ to see the effect:
 
-<WebGLShader fragmentShader="wave_animated" height={150} width={150} />
+<WebGLShader fragmentShader="wave_animated" height={150} width={150} usesVariables />
 
 
 ### Applying a gradient to the wave
@@ -608,7 +608,7 @@ alpha = clamp(alpha, 0.0, 1.0);
 
 This produces a blur effect, but we can observe the wave "shifting down" as the blur increases -- try varying the amount of blur using the slider:
 
-<WebGLShader fragmentShader="wave_animated_blur_down_even" height={150} width={250} />
+<WebGLShader fragmentShader="wave_animated_blur_down_even" height={150} width={250} usesVariables />
 
 Let's put that aside for the time being and make the blur gradually increasing from left to right. To gradually increase the blur, we can [linearly interpolate][lerp] from no blur to <Gl>BLUR_AMOUNT</Gl> over the $x$ axis like so:
 
@@ -626,7 +626,7 @@ float alpha = dist / blur_amount;
 alpha = clamp(alpha, 0.0, 1.0);
 ```
 
-<WebGLShader fragmentShader="wave_animated_blur_down" height={150} width={250} />
+<WebGLShader fragmentShader="wave_animated_blur_down" height={150} width={250} usesVariables />
 
 Let's now fix how the wave shifts down as <Gl>blur_amount</Gl> increases.
 
@@ -644,7 +644,7 @@ alpha = clamp(alpha, 0.0, 1.0);
 
 This causes the top of the wave to shift up by <Gl>-blur_amount / 2</Gl> and the bottom of the wave to shift down by <Gl>blur_amount / 2</Gl>, keeping the wave centered:
 
-<WebGLShader fragmentShader="wave_animated_blur_left_to_right" height={150} width={250} />
+<WebGLShader fragmentShader="wave_animated_blur_left_to_right" height={150} width={250} usesVariables />
 
 This forms the basis for how we'll produce the blur in the final effect.
 
@@ -733,7 +733,7 @@ These five sine waves give us quite a pretty natural-looking final wave:
 
 Because all of the sine waves are relative to $L$, $S$, $A$, we can tune the waves together by adjusting those constants. Increase $S$ to make the wave faster, $L$ to make the waves shorter, and $A$ to make the waves taller. Try varying $L$ and $S$:
 
-<WebGLShader fragmentShader="sine_stack_3_LSA" width={800} height={200} seed={30511} maintainHeight={0.7} />
+<WebGLShader fragmentShader="sine_stack_3_LSA" width={800} height={200} seed={30511} maintainHeight={0.7} usesVariables />
 
 We won't actually make use of stacked sine waves in our final effect. We _will_, however, use the idea of stacking waves of different scales and speeds.
 
@@ -770,7 +770,7 @@ gl_FragColor = vec4(vec3(lightness), 1.0);
 
 The $L$ scalar controls the scale of the $(x, y)$ coordinates. As $L$ increases, the noise becomes smaller. Here's a canvas that let's you adjust $L$ to see the effect:
 
-<WebGLShader fragmentShader="simplex_noise" width={400} minWidth={200} height={250} animate={false} />
+<WebGLShader fragmentShader="simplex_noise" width={400} minWidth={200} height={250} animate={false} usesVariables />
 
 We'll use 2D simplex noise to create an animated 1D wave. The idea behind that may not be very obvious, so let's see how it works.
 
@@ -868,7 +868,7 @@ y += simplex_noise(x * (L / 3.25) + F * u_time, ...) * ...;
 
 This adds a subtle flow to the wave. I'll let you vary the amount of flow to feel the difference it makes:
 
-<WebGLShader fragmentShader="simplex_stack_final" width={800} height={200} seed={31993} maintainHeight={0.7} />
+<WebGLShader fragmentShader="simplex_stack_final" width={800} height={200} seed={31993} maintainHeight={0.7} usesVariables />
 
 <SmallNote label="" center>The amount of flow may feel subtle, but that's intentional. If the flow is easily noticeable, there's too much of it.</SmallNote>
 
@@ -1125,6 +1125,7 @@ Here's what that looks like:
   minWidth={600}
   maintainHeight={0.3}
   seed={2836}
+  usesVariables
 />
 
 This makes the noise feel like it flows to the left -- but not uniformly so.
@@ -1423,7 +1424,7 @@ void main() {
 
 In the canvas below the $x$ slider controls the value of <Gl>u_x</Gl>. As you slide $x$ from $0$ to $1$ the color should change from blue to yellow:
 
-<WebGLShader fragmentShader="read_texture_t" width={100} height={100} colorConfiguration="blue_to_yellow" />
+<WebGLShader fragmentShader="read_texture_t" width={100} height={100} colorConfiguration="blue_to_yellow" usesVariables />
 
 It works! We can now map values between $0$ and $1$ to the gradient texture. This makes mapping <Gl method>background_noise</Gl> to the gradient trivial:
 
@@ -1515,7 +1516,7 @@ float alpha = clamp(0.5 + dist / blur, 0.0, 1.0);
 
 This gives us a left-to-right blur:
 
-<WebGLShader fragmentShader="multiple_waves_blur_0" width={800} minWidth={600} height={200} maintainHeight={0.7} seed={9581} />
+<WebGLShader fragmentShader="multiple_waves_blur_0" width={800} minWidth={600} height={200} maintainHeight={0.7} seed={9581} usesVariables />
 
 To make the blur dynamic, we'll yet again reach for the simplex noise function. The setup should feel familiar, it's almost identical to the <Gl method>wave_noise</Gl> function we defined earlier:
 
@@ -1553,7 +1554,7 @@ float wave_alpha(float Y, float wave_height) {
 
 This gives us a dynamic blur:
 
-<WebGLShader fragmentShader="multiple_waves_blur_1" width={800} minWidth={600} height={200} maintainHeight={0.7} seed={9581} />
+<WebGLShader fragmentShader="multiple_waves_blur_1" width={800} minWidth={600} height={200} maintainHeight={0.7} seed={9581} usesVariables />
 
 But, honestly, the blur looks pretty bad. It feels like it has distinct "edges" at the top and bottom of each wave.
 
@@ -1580,7 +1581,7 @@ Let's chart the alpha curve so that we can see this visually:
 
 The harsh stops at $0.0$ and $1.0$ produce the sharp-feeling edges that we observe at the edges of the blur.
 
-<WebGLShader fragmentShader="multiple_waves_blur_1" width={800} minWidth={600} height={200} maintainHeight={0.7} seed={9581} />
+<WebGLShader fragmentShader="multiple_waves_blur_1" width={800} minWidth={600} height={200} maintainHeight={0.7} seed={9581} usesVariables />
 
 The [smoothstep][smoothstep] function can help here. Smoothstep is a family of interpolation functions that, as the name suggests, smooth the transition from $0$ to $1$.
 
@@ -1615,7 +1616,7 @@ This results in a _much_ smoother blur:
 
 Following is a side-by-side comparison. The blur to the left is smoothed, while the right one is not.
 
-<WebGLShader fragmentShader="multiple_waves_blur_2_side_by_side" width={800} minWidth={600} height={200} maintainHeight={0.7} seed={9581} />
+<WebGLShader fragmentShader="multiple_waves_blur_2_side_by_side" width={800} minWidth={600} height={200} maintainHeight={0.7} seed={9581} usesVariables />
 
 That takes care of the sharp edges. Let's now tackle the issue of the wave as a whole being too blurry.
 
@@ -1673,7 +1674,7 @@ t = pow(t, exponent);
 
 Below is a canvas that lets you vary the value of <Gl>exponent</Gl> from $0$ to $4$. I intentionally set <Gl>exponent</Gl> to a default value of $1$ (no effect) so that you can see the effect of increasing the exponent directly (the light-blue line that stays behind represents the value of $t$ prior to applying the exponent).
 
-<WebGLShader fragmentShader="multiple_waves_blur_4" width={800} minWidth={600} height={320} maintainHeight={0.7} seed={18399} />
+<WebGLShader fragmentShader="multiple_waves_blur_4" width={800} minWidth={600} height={320} maintainHeight={0.7} seed={18399} usesVariables />
 
 As the exponent increases, $t$ tends to "hug" the bottom of the chart more and more. This produces noticeable periods of relative sharpness while not muting higher values of $t$ _too_ much. I feel like an exponent of $2.0$ to $2.7$ gives good results -- I'll go with $2.5$.
 
