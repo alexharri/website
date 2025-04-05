@@ -1,6 +1,6 @@
 ---
 title: "Building a flowing gradient effect with WebGL"
-description: "Learn how to writing cool WebGL shaders using gradient noise and clever math."
+description: ""
 image: ""
 publishedAt: ""
 tags: ["WebGL", "GLSL", "Mathematics", "TypeScript"]
@@ -1576,7 +1576,7 @@ The alpha equals $0.5$ when the distance is $0$. It then linearly increases or d
 
 Let's chart the alpha curve so that we can see this visually:
 
-<Image src="~/linear-clamped-chart.png" plain width={560} />
+<Image src="~/dist-blur-linear-clamped.png" plain width={560} />
 
 The harsh stops at $0.0$ and $1.0$ produce the sharp-feeling edges that we observe at the edges of the blur.
 
@@ -1607,7 +1607,7 @@ Below is a chart showing the smoothed alpha curve -- I'll include the original n
 
 [smoothstep]: https://en.wikipedia.org/wiki/Smoothstep
 
-<Image src="~/smoothstep-chart.png" plain width={560} />
+<Image src="~/dist-blur-smoothstep.png" plain width={560} />
 
 This results in a _much_ smoother blur:
 

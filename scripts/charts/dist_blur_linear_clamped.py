@@ -10,7 +10,7 @@ lines = [
 ]
 
 create_chart(
-    file_path="public/images/posts/webgl-gradients/linear-clamped-chart.png",
+    file_path="public/images/posts/webgl-gradients/dist-blur-linear-clamped.png",
     lines=lines,
     size=(6, 4),
     range=[-0.7, 0.7],
