@@ -28,7 +28,6 @@ import { SubscribeToNewsletter } from "../../components/SubscribeToNewsletter/Su
 import { usePostWatcher } from "../../utils/watcher-client";
 import { Code } from "../../components/Code/Code";
 import { WebGLShader } from "../../components/WebGLShader/WebGLShader";
-import { ThreeDots } from "../../components/ThreeDots/ThreeDots";
 import { MediaQuery } from "../../components/MediaQuery/MediaQuery";
 import { usePreserveViewportOnResize } from "../../utils/hooks/usePreserveViewportOnScroll";
 
@@ -80,7 +79,6 @@ const baseComponents = {
   BarChart,
   EmDash: () => "—",
   WebGLShader,
-  ThreeDots,
   MediaQuery,
 };
 
