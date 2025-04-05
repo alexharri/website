@@ -5,7 +5,6 @@ import { ImageStyles } from "./Image.styles";
 interface Props {
   src?: string;
   noMargin?: boolean;
-
   plain?: boolean;
   width?: number | "auto";
 }
