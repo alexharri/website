@@ -5,7 +5,7 @@ import { ImageStyles } from "./Image.styles";
 interface Props {
   src?: string;
   noMargin?: boolean;
-  marginTop?: number;
+
   plain?: boolean;
   width?: number | "auto";
 }
@@ -35,7 +35,7 @@ export const Image = (props: Props) => {
   const s = useStyles(ImageStyles);
   const router = useRouter();
 
-  const { noMargin, marginTop, plain } = props;
+  const { noMargin, plain } = props;
   let src = props.src || "";
 
   const srcParts = src.split(".");
@@ -67,7 +67,7 @@ export const Image = (props: Props) => {
   }
 
   return (
-    <div className={containerClassName} style={{ width, marginTop }}>
+    <div className={containerClassName} style={{ width }}>
       {video ? (
         <video
           {...commonProps}
