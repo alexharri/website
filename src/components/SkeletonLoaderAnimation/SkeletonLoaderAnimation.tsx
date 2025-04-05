@@ -21,13 +21,6 @@ const styles = ({ styled }: StyleOptions) => ({
       width: 100%;
       border-radius: 0;
     }
-
-    p {
-      position: relative;
-      z-index: 3;
-      padding: 0 32px;
-      text-align: center;
-    }
   `,
 
   shadeContainer: styled.css`

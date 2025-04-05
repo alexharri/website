@@ -56,8 +56,12 @@ const styles = ({ styled, theme }: StyleOptions) => ({
   `,
 
   loadingMessage: styled.css`
-    margin: 0;
     color: ${theme.text400};
+    margin: 0;
+    position: relative;
+    z-index: 3;
+    padding: 0 32px;
+    text-align: center;
 
     &--skew {
       transform: skewY(${SKEW_DEG}deg) skewX(-12deg);
