@@ -2,12 +2,8 @@ import numpy as np
 from ..chart import create_chart, Line
 
 
-def smoothstep(t):
+def quartic_smoothstep(t):
     return t * t * t * (t * (6.0 * t - 15.0) + 10.0)
-
-
-def normal_smoothstep(t):
-    return t * t * (3.0 - 2.0 * t)
 
 
 lines = [
@@ -20,7 +16,7 @@ lines = [
     ),
     Line(
         label="With smoothstep",
-        fn=lambda t: smoothstep(np.clip(0.5 + t, 0, 1)),
+        fn=lambda t: quartic_smoothstep(np.clip(0.5 + t, 0, 1)),
     ),
 ]
 
