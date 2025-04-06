@@ -29,7 +29,6 @@ const createFragmentShader: CreateFragmentShader = () => {
       
       float x = gl_FragCoord.x;
       float y = gl_FragCoord.y * Y_SCALE;
-    
 
       float sum = 0.5;
       sum += simplex_noise(vec3(x * L * 1.0 +  F * 1.0, y * L * 1.00, u_time * S)) * 0.30;
