@@ -10,9 +10,8 @@ import { NumberVariable } from "../../threejs/NumberVariable";
 import { clamp, invLerp, lerp } from "../../math/lerp";
 import { useViewportWidth } from "../../utils/hooks/useViewportWidth";
 import { useRandomId } from "../../utils/hooks/useRandomId";
-import { DEFAULT_HEIGHT, SKEW_DEG } from "./utils";
+import { CONTROLS_HEIGHT, DEFAULT_HEIGHT, SKEW_DEG } from "./utils";
 
-const UNIFORM_MARGIN = 24;
 const SHOW_SEED_AND_TIME = false;
 
 function calculateWebGLCanvasDimensions(props: WebGLShaderProps, viewportWidth: number) {
@@ -45,6 +44,7 @@ function parseUniformValue(uniform: FragmentShaderUniform, value: number) {
 const styles = ({ styled }: StyleOptions) => ({
   canvasWrapper: styled.css`
     position: relative;
+    max-width: 100%;
 
     canvas {
       position: absolute;
@@ -62,14 +62,13 @@ const styles = ({ styled }: StyleOptions) => ({
     z-index: 2;
     display: flex;
     gap: 32px;
-    align-items: center;
+    align-items: flex-start;
     padding-left: ${cssVariables.contentPadding}px;
     padding-right: ${cssVariables.contentPadding}px;
-    margin-top: ${UNIFORM_MARGIN}px;
-    padding-bottom: ${UNIFORM_MARGIN * 2}px;
-    margin-bottom: ${-UNIFORM_MARGIN}px;
+    padding-top: 20px;
+    height: ${CONTROLS_HEIGHT}px;
     max-width: 100%;
-    overflow-x: auto;
+    box-sizing: border-box;
   `,
 });
 
@@ -112,7 +111,7 @@ export const WebGLShader: React.FC<WebGLShaderProps> = (props) => {
   const shaderTimeId = useRandomId();
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
-  const { showControls = true, animate = true, colorConfiguration } = props;
+  const { showControls = true, animate = true, colorConfiguration, skew } = props;
 
   const viewportWidth = useViewportWidth()!;
   const [width, height] = calculateWebGLCanvasDimensions(props, viewportWidth);
@@ -135,39 +134,24 @@ export const WebGLShader: React.FC<WebGLShaderProps> = (props) => {
   colorConfigurationRef.current = colorConfiguration;
 
   useEffect(() => {
-    let stop = false;
-
     const canvas = canvasRef.current;
-    if (!canvas) return () => {};
-
-    const colorConfig = colorConfigurations[colorConfiguration];
-
-    const vertexShader = vertexShaderRegistry.default!;
-
-    const createFragmentShader = fragmentShaderRegistry[props.fragmentShader];
-    if (!createFragmentShader)
-      throw new Error(`Could not find '${props.fragmentShader}' fragment shader.`);
+    if (!canvas) return;
 
     const renderer = new WebGLRenderer(
       canvas,
-      vertexShader,
+      vertexShaderRegistry.default!,
       fragmentShader.shader,
-      colorConfig,
+      colorConfigurations[colorConfiguration],
       props.seed,
     );
     for (const [key, value] of Object.entries(uniformValues)) {
       pendingUniformWrites.current.push([key, value]);
     }
-    if (!animate) {
-      renderer.setTimeSpeed(0, 0);
-    }
-
-    let resized = true;
-    const resizeListener = () => {
-      resized = true;
-    };
+    if (!animate) renderer.setTimeSpeed(0, 0);
 
     let lastColorConfiguration = colorConfiguration;
+    let resized = true;
+    let stop = false;
 
     function tick() {
       if (stop) return;
@@ -200,6 +184,7 @@ export const WebGLShader: React.FC<WebGLShaderProps> = (props) => {
     }
     tick();
 
+    const resizeListener = () => (resized = true);
     window.addEventListener("resize", resizeListener);
     return () => {
       stop = true;
@@ -212,7 +197,7 @@ export const WebGLShader: React.FC<WebGLShaderProps> = (props) => {
     setUniformValues((values) => ({ ...values, [key]: value }));
   }, []);
 
-  const uniformEntries = Object.entries(fragmentShader.uniforms);
+  const uniformEntries = useMemo(() => Object.entries(fragmentShader.uniforms), [fragmentShader]);
 
   useEffect(() => {
     const shouldHaveUsesVariablesProp = uniformEntries.length > 0 && showControls;
@@ -222,11 +207,11 @@ export const WebGLShader: React.FC<WebGLShaderProps> = (props) => {
         `'usesVariables' should be ${shouldHaveUsesVariablesProp} for fragment shader '${props.fragmentShader}'`,
       );
     }
-  }, [fragmentShader, showControls]);
+  }, [uniformEntries, showControls]);
 
   return (
     <>
-      <div className={s("canvasWrapper", { skew: props.skew })} style={{ width, maxWidth: "100%" }}>
+      <div className={s("canvasWrapper", { skew })} style={{ width }}>
         <div style={{ paddingTop: `${(height / width) * 100}%` }} />
         <canvas
           ref={canvasRef}
