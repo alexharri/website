@@ -31,7 +31,6 @@ import simplex_stack_final from "./fragment/simplex_stack_final";
 import simplex_stack_0 from "./fragment/simplex_stack_0";
 import simplex_stack_1 from "./fragment/simplex_stack_1";
 import multiple_waves from "./fragment/multiple_waves";
-import perlin_noise from "./fragment/perlin_noise";
 import simplex_noise from "./fragment/simplex_noise";
 import simplex_perlin_split from "./fragment/simplex_perlin_split";
 import simplex_noise_stacked from "./fragment/simplex_noise_stacked";
@@ -87,7 +86,6 @@ export const fragmentShaderRegistry: Partial<Record<string, CreateFragmentShader
   simplex_stack_0,
   simplex_stack_1,
   multiple_waves,
-  perlin_noise,
   simplex_noise,
   simplex_perlin_split,
   simplex_noise_stacked,
