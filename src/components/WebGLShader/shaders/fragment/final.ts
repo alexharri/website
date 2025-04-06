@@ -25,13 +25,11 @@ const createFragmentShader: CreateFragmentShader = (options) => {
     blurAmount = 345,
     blurQuality = 7,
     blurExponentRange = [0.9, 1.2],
-    blackAndWhite = false,
   } = options as Partial<{
     blurAmount: number;
     blurQuality: number;
     blurExponentRange: [number, number];
     accentColor: string;
-    blackAndWhite: boolean;
   }>;
 
   const uniforms: FragmentShaderUniforms = {};
@@ -194,11 +192,11 @@ const createFragmentShader: CreateFragmentShader = (options) => {
       float w1_alpha = wave_alpha(WAVE1_Y, WAVE1_HEIGHT, 112.5 * 48.75);
       float w2_alpha = wave_alpha(WAVE2_Y, WAVE2_HEIGHT, 225.0 * 36.00);
 
-      ${includeif(
-        accentColor != null,
+  ${includeif(
+    accentColor != null,
 
-        // if we're using an accent color
-        () => /* glsl */ `
+    // if we're using an accent color
+    () => /* glsl */ `
       vec3 w1_color = color_from_lightness(w1_lightness);
       vec3 w2_color = color_from_lightness(w2_lightness);
       vec3 bg_color = color_from_lightness(bg_lightness);
@@ -221,22 +219,18 @@ const createFragmentShader: CreateFragmentShader = (options) => {
       color = mix(color, w1_color, w1_alpha);
         `,
 
-        // else (we're not using an accent color)
-        //
-        // In this case, we can compute a single lightness value and determine the color for
-        // that lightness. We don't need to perform any color blending, so we avoid washed out
-        // middle colors (see https://www.joshwcomeau.com/css/make-beautiful-gradients/).
-        () => /* glsl */ `
+    // else (we're not using an accent color)
+    //
+    // In this case, we can compute a single lightness value and determine the color for
+    // that lightness. We don't need to perform any color blending, so we avoid washed out
+    // middle colors (see https://www.joshwcomeau.com/css/make-beautiful-gradients/).
+    () => /* glsl */ `
       float lightness = bg_lightness;
       lightness = lerp(lightness, w2_lightness, w2_alpha);
       lightness = lerp(lightness, w1_lightness, w1_alpha);
-      ${includeif(
-        blackAndWhite,
-        () => /* glsl */ `vec3 color = vec3(lightness);`,
-        () => /* glsl */ `vec3 color = color_from_lightness(lightness);`,
-      )}
-        `,
-      )}
+      vec3 color = color_from_lightness(lightness);
+    `,
+  )}
     
       gl_FragColor = vec4(color, 1.0);
     }

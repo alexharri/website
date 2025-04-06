@@ -20,14 +20,7 @@ export const colorConfigurations = {
   },
 
   black_white: {
-    gradient: [
-      "hsl(0deg 0% 0%)",
-      "hsl(0deg 0% 20%)",
-      "hsl(0deg 0% 40%)",
-      "hsl(0deg 0% 60%)",
-      "hsl(0deg 0% 80%)",
-      "hsl(0deg 0% 100%)",
-    ],
+    gradient: ["hsl(0deg 0% 0%)", "hsl(0deg 0% 100%)"],
   },
 
   lightgreen: {

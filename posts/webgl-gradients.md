@@ -1792,7 +1792,7 @@ The final shader includes a few additional elements that were not covered in the
 
 Take a look at this black-and-white version of the final effect and see if you can spot those elements (it's much easier to see without color):
 
-<WebGLShader fragmentShader="final" skew height={275} minWidth={600} maintainHeight={0.3} seed={16192} fragmentShaderOptions={{ blackAndWhite: true }} />
+<WebGLShader fragmentShader="final" skew height={275} minWidth={600} maintainHeight={0.3} seed={16192} colorConfiguration="black_white" />
 
 I didn't cover these additional elements because they're not core to the effect -- they just add a layer of refinement. There are loads of ways in which you could tweak or add to the effect. I tried tons of ideas and kept those around because they worked very well. I suggest tweaking the code and trying to add some refinements yourself!
 
