@@ -215,7 +215,7 @@ WebGL fragment shaders have a <Gl method>main</Gl> function that is invoked once
 
 We can think of <Gl method>main</Gl> as the entry point of our color function and <Gl>gl_FragColor</Gl> as its return value.
 
-WebGL colors are represented through vectors with 3 or 4 components: <Gl>vec3</Gl> for RGB and <Gl>vec4</Gl> for RGBA colors. The first three components (RGB) are the red, green, and blue components. For 4D vectors, the fourth component is the [alpha][alpha] component of the color.
+WebGL colors are represented through vectors with 3 or 4 components: <Gl>vec3</Gl> for RGB and <Gl>vec4</Gl> for RGBA colors. The first three components (RGB) are the red, green, and blue components. For 4D vectors, the fourth component is the [alpha][alpha] component of the color -- its opacity.
 
 [rgb]: https://en.wikipedia.org/wiki/RGB_color_model
 [alpha]: https://en.wikipedia.org/wiki/Alpha_compositing
@@ -227,7 +227,7 @@ vec3 white = vec3(1.0, 1.0, 1.0);
 vec4 semi_transparent_green = vec4(0.0, 1.0, 0.0, 0.5);
 ```
 
-The color we saw in the shader above (<Gl>vec3(0.7, 0.1, 0.4)</Gl>) roughly translates to <Css>rgb(178, 25, 102)</Css> in CSS.
+WebGL colors use a [fractional representation][rgb_representation], where each components is a value between $0$ and $1$. Consider the color in the shader:
 
 ```glsl
 void main() {
@@ -236,7 +236,11 @@ void main() {
 }
 ```
 
-If we run the shader, we see that every pixel is set to that color:
+We can trivially convert the fractional GLSL color <Gl>vec3(0.7, 0.1, 0.4)</Gl> to the percentage-based CSS color <Css>rgb(70%, 10%, 40%)</Css>. We can also multiply the fraction by 255 to get the unsigned integer representation <Css>rgb(178, 25, 102)</Css>.
+
+[rgb_representation]: https://en.wikipedia.org/wiki/RGB_color_model#Numeric_representations
+
+Anyway, if we run the shader we see that every pixel is set to that color:
 
 <WebGLShader fragmentShader="single_color" height={100} width={100} />
 
