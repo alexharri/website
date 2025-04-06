@@ -12,9 +12,6 @@ const createFragmentShader: CreateFragmentShader = () => {
     ${noiseUtils}
     ${simplex_noise}
 
-    float smoothstep(float t)
-      { return t * t * t * (t * (6.0 * t - 15.0) + 10.0); }
-
     vec3 calc_color(float t) {
       const vec3 color1 = vec3(0.031, 0.0, 0.561);
       const vec3 color2 = vec3(0.980, 0.0, 0.125);

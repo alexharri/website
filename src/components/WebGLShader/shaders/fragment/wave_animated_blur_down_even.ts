@@ -24,9 +24,6 @@ const createFragmentShader: CreateFragmentShader = (_) => {
     float BLUR_AMOUNT = B;
     const float PI = ${Math.PI.toFixed(8)};
 
-    float smoothstep(float t)
-      { return t * t * t * (t * (6.0 * t - 15.0) + 10.0); }
-
     void main() {
       float x = gl_FragCoord.x, y = gl_FragCoord.y;
 
