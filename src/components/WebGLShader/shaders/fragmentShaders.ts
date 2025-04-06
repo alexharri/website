@@ -42,7 +42,6 @@ import simplex_noise_stacked_4 from "./fragment/simplex_noise_stacked_4";
 import three_point_gradient from "./fragment/three_point_gradient";
 import rainbow from "./fragment/rainbow";
 import read_texture from "./fragment/read_texture";
-import read_texture_y from "./fragment/read_texture_y";
 import read_texture_t from "./fragment/read_texture_t";
 import multiple_waves_blur_0 from "./fragment/multiple_waves_blur_0";
 import multiple_waves_blur_1 from "./fragment/multiple_waves_blur_1";
@@ -97,7 +96,7 @@ export const fragmentShaderRegistry: Partial<Record<string, CreateFragmentShader
   three_point_gradient,
   rainbow,
   read_texture,
-  read_texture_y,
+
   read_texture_t,
   multiple_waves_blur_0,
   multiple_waves_blur_1,
