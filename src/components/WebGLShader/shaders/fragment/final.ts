@@ -1,5 +1,4 @@
 import { noiseUtils } from "../utils/noiseUtils";
-import { perlinNoise } from "../utils/perlinNoise";
 import { simplex_noise } from "../utils/simplexNoise";
 import { CreateFragmentShader, FragmentShaderUniforms } from "../types";
 
@@ -31,9 +30,7 @@ const createFragmentShader: CreateFragmentShader = (options) => {
 
     const float ACCENT_NOISE_SCALE = 0.4; // Smaller is bigger
   
-    // Imports
     ${noiseUtils}
-    ${perlinNoise}
     ${simplex_noise}
 
     float get_x() {

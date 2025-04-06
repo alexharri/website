@@ -1,6 +1,6 @@
-export const perlinNoise = /* glsl */ `
+export const perlin_noise = /* glsl */ `
 vec3 fade(vec3 t) { return t*t*t*(t*(t*6.0-15.0)+10.0); }
-float perlinNoise(vec3 P) {
+float perlin_noise(vec3 P) {
     vec3 i0 = mod289(floor(P)), i1 = mod289(i0 + vec3(1.0));
     vec3 f0 = fract(P), f1 = f0 - vec3(1.0), f = fade(f0);
     vec4 ix = vec4(i0.x, i1.x, i0.x, i1.x), iy = vec4(i0.yy, i1.yy);
@@ -27,5 +27,5 @@ float perlinNoise(vec3 P) {
             dot(g6, vec3(f0.x, f1.y, f1.z)), dot(g7, vec3(f1.x, f1.y, f1.z))), f.z);
     return 2.2 * mix(mix(nz.x,nz.z,f.y), mix(nz.y,nz.w,f.y), f.x);
 }
-float perlinNoise(vec2 P) { return perlinNoise(vec3(P, 0.0)); }
+float perlin_noise(vec2 P) { return perlin_noise(vec3(P, 0.0)); }
 `;
