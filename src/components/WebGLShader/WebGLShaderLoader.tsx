@@ -25,10 +25,6 @@ const styles = ({ styled, theme }: StyleOptions) => ({
     flex-direction: column;
     align-items: center;
 
-    canvas {
-      border-radius: 0;
-    }
-
     &--skew {
       margin: calc(32px + min(100vw, ${cssVariables.contentWidth}px) * 0.04) -${cssVariables.contentPadding}px
         calc(48px + min(100vw, ${cssVariables.contentWidth}px) * 0.04);
