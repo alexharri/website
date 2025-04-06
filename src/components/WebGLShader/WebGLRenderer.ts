@@ -109,13 +109,18 @@ export class WebGLRenderer {
   }
 
   public setUniform(key: string, value: number) {
-    const { gl } = this;
-
-    const location = this.getUniformLocation(key);
-    gl.uniform1f(location, value);
+    const timeKeyMatch = /^time(?<num>[1-9]?)$/.exec(key);
+    if (timeKeyMatch) {
+      const numString = timeKeyMatch.groups?.num;
+      const index = numString ? Number(numString) - 1 : 0;
+      // The special key "time" controls the renderer time speed
+      this.setTimeSpeed(index, value);
+      return;
+    }
+    this.gl.uniform1f(this.getUniformLocation(key), value);
   }
 
-  public setTimeSpeed(value: number, index: number) {
+  public setTimeSpeed(index: number, value: number) {
     this.timeStates[index].timeSpeed = value;
   }
 

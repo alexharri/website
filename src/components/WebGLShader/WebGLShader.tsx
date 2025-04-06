@@ -12,6 +12,9 @@ import { useViewportWidth } from "../../utils/hooks/useViewportWidth";
 import { useRandomId } from "../../utils/hooks/useRandomId";
 import { DEFAULT_HEIGHT, SKEW_DEG } from "./utils";
 
+const UNIFORM_MARGIN = 24;
+const SHOW_SEED_AND_TIME = false;
+
 function calculateWebGLCanvasDimensions(props: WebGLShaderProps, viewportWidth: number) {
   let { height = DEFAULT_HEIGHT } = props;
 
@@ -28,10 +31,6 @@ function calculateWebGLCanvasDimensions(props: WebGLShaderProps, viewportWidth: 
 
   return [width, height];
 }
-
-const UNIFORM_MARGIN = 24;
-const UNIFORM_V_GAP = 32;
-const SHOW_SEED_AND_TIME = false;
 
 function parseUniformValue(uniform: FragmentShaderUniform, value: number) {
   if (uniform.remap) {
@@ -71,11 +70,6 @@ const styles = ({ styled }: StyleOptions) => ({
     margin-bottom: ${-UNIFORM_MARGIN}px;
     max-width: 100%;
     overflow-x: auto;
-
-    &--vertical {
-      flex-direction: column;
-      gap: ${UNIFORM_V_GAP}px;
-    }
   `,
 });
 
@@ -182,7 +176,6 @@ export const WebGLShader: React.FC<WebGLShaderProps> = (props) => {
       if (resized) {
         const [width, height] = calculateWebGLCanvasDimensions(props, window.innerWidth);
         renderer.setDimensions(width, height);
-        // console.log(width, { width: props.width, minWidth: props.minWidth });
         resized = false;
       }
 
@@ -192,27 +185,15 @@ export const WebGLShader: React.FC<WebGLShaderProps> = (props) => {
       }
 
       for (let [key, value] of pendingUniformWrites.current) {
-        const uniform = fragmentShader.uniforms[key];
-        value = parseUniformValue(uniform, value);
-        const timeKeyMatch = /^time(?<num>[1-9]?)$/.exec(key);
-        if (timeKeyMatch) {
-          const numString = timeKeyMatch.groups?.num;
-          const index = numString ? Number(numString) - 1 : 0;
-          // The special key "time" controls the renderer time speed
-          renderer.setTimeSpeed(value, index);
-        } else {
-          renderer.setUniform(key, value);
-        }
+        renderer.setUniform(key, parseUniformValue(fragmentShader.uniforms[key], value));
       }
       pendingUniformWrites.current.length = 0;
 
       renderer.render();
 
       if (SHOW_SEED_AND_TIME) {
-        const timeEl = document.querySelector(
-          `[data-shader-time="${shaderTimeId}"]`,
-        ) as HTMLSpanElement | null;
-        if (timeEl) {
+        const timeEl = document.querySelector(`[data-shader-time="${shaderTimeId}"]`);
+        if (timeEl && "innerText" in timeEl) {
           timeEl.innerText = renderer.getSeed().toFixed(0) + ", " + renderer.getTime().toFixed(0);
         }
       }
@@ -264,7 +245,7 @@ export const WebGLShader: React.FC<WebGLShaderProps> = (props) => {
         )}
       </div>
       {showControls && uniformEntries.length > 0 && (
-        <div className={s("variables", { vertical: false && uniformEntries.length > 2 })}>
+        <div className={s("variables")}>
           {uniformEntries.map(([key, uniform]) => {
             return (
               <NumberVariable
