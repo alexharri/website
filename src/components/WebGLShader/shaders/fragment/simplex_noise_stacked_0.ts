@@ -1,5 +1,5 @@
 import { noiseUtils } from "../utils/noiseUtils";
-import { simplexNoise } from "../utils/simplexNoise";
+import { simplex_noise } from "../utils/simplexNoise";
 import { CreateFragmentShader, FragmentShaderUniforms } from "../types";
 
 const createFragmentShader: CreateFragmentShader = () => {
@@ -10,7 +10,7 @@ const createFragmentShader: CreateFragmentShader = () => {
     uniform float u_time;
 
     ${noiseUtils}
-    ${simplexNoise}
+    ${simplex_noise}
 
     float smoothstep(float t)
       { return t * t * t * (t * (6.0 * t - 15.0) + 10.0); }
@@ -29,9 +29,9 @@ const createFragmentShader: CreateFragmentShader = () => {
       const float O3 = 258.2;
 
       float sum = 0.5; // Start at 50% lightness
-      sum += simplexNoise(vec3(x * L * 1.0, y * L * 1.00, u_time * S + O1)) * 0.30;
-      sum += simplexNoise(vec3(x * L * 0.6, y * L * 0.85, u_time * S + O2)) * 0.26;
-      sum += simplexNoise(vec3(x * L * 0.4, y * L * 0.70, u_time * S + O3)) * 0.22;
+      sum += simplex_noise(vec3(x * L * 1.0, y * L * 1.00, u_time * S + O1)) * 0.30;
+      sum += simplex_noise(vec3(x * L * 0.6, y * L * 0.85, u_time * S + O2)) * 0.26;
+      sum += simplex_noise(vec3(x * L * 0.4, y * L * 0.70, u_time * S + O3)) * 0.22;
       sum = pow(sum, 1.7);
       sum = clamp(sum, 0.0, 1.0);
 

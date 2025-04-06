@@ -1,5 +1,5 @@
 import { noiseUtils } from "../utils/noiseUtils";
-import { simplexNoise } from "../utils/simplexNoise";
+import { simplex_noise } from "../utils/simplexNoise";
 import { perlinNoise } from "../utils/perlinNoise";
 import { CreateFragmentShader } from "../types";
 
@@ -18,7 +18,7 @@ const createFragmentShader: CreateFragmentShader = (options) => {
     const float CANVAS_HEIGHT = 300.0;
 
     ${noiseUtils}
-    ${simplexNoise}
+    ${simplex_noise}
     ${perlinNoise}
 
     void main() {
@@ -29,7 +29,7 @@ const createFragmentShader: CreateFragmentShader = (options) => {
       float S = 0.6;
 
       float l0 = (perlinNoise(vec3(x, y, z)) + 1.0) / 2.0;
-      float l1 = (simplexNoise(vec3(x * S, y * S, z * S)) + 1.0) / 2.0;
+      float l1 = (simplex_noise(vec3(x * S, y * S, z * S)) + 1.0) / 2.0;
       
       float dist = gl_FragCoord.x - u_w * 0.5;
       float t = (sign(dist) + 1.0) / 2.0;

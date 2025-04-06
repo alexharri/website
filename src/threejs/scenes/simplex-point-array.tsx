@@ -4,7 +4,7 @@ import { createScene } from "../createScene";
 import { Point } from "../Components/primitives/Point";
 
 export default createScene(({}) => {
-  const simplexNoise2D = useMemo(() => createNoise2D(), []);
+  const simplex_noise2D = useMemo(() => createNoise2D(), []);
 
   const points = useMemo(() => {
     const NX = 40;
@@ -22,7 +22,7 @@ export default createScene(({}) => {
             color={0x2e6db0}
             basicMaterial
             radius={0.029}
-            position={[x * 0.3, 1.3 + simplexNoise2D(x * 0.05, z * 0.05) * 0.7, z * 0.3]}
+            position={[x * 0.3, 1.3 + simplex_noise2D(x * 0.05, z * 0.05) * 0.7, z * 0.3]}
           />,
         );
       }

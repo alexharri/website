@@ -1,5 +1,5 @@
 import { noiseUtils } from "../utils/noiseUtils";
-import { simplexNoise } from "../utils/simplexNoise";
+import { simplex_noise } from "../utils/simplexNoise";
 import { CreateFragmentShader, FragmentShaderUniforms } from "../types";
 
 const createFragmentShader: CreateFragmentShader = (_) => {
@@ -20,14 +20,14 @@ const createFragmentShader: CreateFragmentShader = (_) => {
     const float WAVE_HEIGHT = 48.0;
 
     ${noiseUtils}
-    ${simplexNoise}
+    ${simplex_noise}
 
     float noise(float x) {
       const float L = 0.0018;
       const float S = 0.04;
 
       float sum = 0.0;
-      sum += simplexNoise(vec2(x * (L / 1.00), u_time * S * 1.00));
+      sum += simplex_noise(vec2(x * (L / 1.00), u_time * S * 1.00));
       return sum;
     }
 

@@ -1,5 +1,5 @@
 import { noiseUtils } from "../utils/noiseUtils";
-import { simplexNoise } from "../utils/simplexNoise";
+import { simplex_noise } from "../utils/simplexNoise";
 import { CreateFragmentShader, FragmentShaderUniforms } from "../types";
 
 const createFragmentShader: CreateFragmentShader = () => {
@@ -19,7 +19,7 @@ const createFragmentShader: CreateFragmentShader = () => {
     float PI = ${Math.PI.toFixed(10)};
 
     ${noiseUtils}
-    ${simplexNoise}
+    ${simplex_noise}
 
     float smoothstep(float t)
       { return t * t * t * (t * (6.0 * t - 15.0) + 10.0); }
@@ -35,7 +35,7 @@ const createFragmentShader: CreateFragmentShader = () => {
       
       float x = gl_FragCoord.x;
       float time = u_time + offset;
-      float blur_t = (simplexNoise(vec2(x * L + F * time, time * S)) + 1.0) / 2.0;
+      float blur_t = (simplex_noise(vec2(x * L + F * time, time * S)) + 1.0) / 2.0;
       blur_t = ease_in(blur_t);
       
       float blur = mix(1.0, 1.0 + BLUR_AMOUNT, blur_t);
@@ -50,10 +50,10 @@ const createFragmentShader: CreateFragmentShader = () => {
       float t = u_time + offset;
 
       float sum = 0.0;
-      sum += simplexNoise(vec2(x * (L / 1.00) + F * t, t * S * 1.00)) * 0.85;
-      sum += simplexNoise(vec2(x * (L / 1.30) + F * t, t * S * 1.26)) * 1.15;
-      sum += simplexNoise(vec2(x * (L / 1.86) + F * t, t * S * 1.09)) * 0.60;
-      sum += simplexNoise(vec2(x * (L / 3.25) + F * t, t * S * 0.89)) * 0.40;
+      sum += simplex_noise(vec2(x * (L / 1.00) + F * t, t * S * 1.00)) * 0.85;
+      sum += simplex_noise(vec2(x * (L / 1.30) + F * t, t * S * 1.26)) * 1.15;
+      sum += simplex_noise(vec2(x * (L / 1.86) + F * t, t * S * 1.09)) * 0.60;
+      sum += simplex_noise(vec2(x * (L / 3.25) + F * t, t * S * 0.89)) * 0.40;
       return sum;
     }
 
@@ -87,9 +87,9 @@ const createFragmentShader: CreateFragmentShader = () => {
       float time = u_time + offset;
       
       float sum = 0.5; // Start at 50% lightness
-      sum += simplexNoise(vec3(x * L * 1.0 +  F * 1.0, y * L * 1.00, time * S)) * 0.30;
-      sum += simplexNoise(vec3(x * L * 0.6 + -F * 0.6, y * L * 0.85, time * S)) * 0.26;
-      sum += simplexNoise(vec3(x * L * 0.4 +  F * 0.8, y * L * 0.70, time * S)) * 0.22;
+      sum += simplex_noise(vec3(x * L * 1.0 +  F * 1.0, y * L * 1.00, time * S)) * 0.30;
+      sum += simplex_noise(vec3(x * L * 0.6 + -F * 0.6, y * L * 0.85, time * S)) * 0.26;
+      sum += simplex_noise(vec3(x * L * 0.4 +  F * 0.8, y * L * 0.70, time * S)) * 0.22;
       return clamp(sum, 0.0, 1.0);
     }
 

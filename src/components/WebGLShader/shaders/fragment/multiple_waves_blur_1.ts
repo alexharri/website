@@ -1,5 +1,5 @@
 import { noiseUtils } from "../utils/noiseUtils";
-import { simplexNoise } from "../utils/simplexNoise";
+import { simplex_noise } from "../utils/simplexNoise";
 import { CreateFragmentShader, FragmentShaderUniforms } from "../types";
 
 const createFragmentShader: CreateFragmentShader = () => {
@@ -24,7 +24,7 @@ const createFragmentShader: CreateFragmentShader = () => {
     float WAVE2_Y = 0.35 * u_h;
 
     ${noiseUtils}
-    ${simplexNoise}
+    ${simplex_noise}
 
     float smoothstep(float t)
       { return t * t * t * (t * (6.0 * t - 15.0) + 10.0); }
@@ -37,10 +37,10 @@ const createFragmentShader: CreateFragmentShader = () => {
       float t = u_time + offset;
 
       float sum = 0.0;
-      sum += simplexNoise(vec2(x * (L / 1.00) + F * t, t * S * 1.00)) * 0.85;
-      sum += simplexNoise(vec2(x * (L / 1.30) + F * t, t * S * 1.26)) * 1.15;
-      sum += simplexNoise(vec2(x * (L / 1.86) + F * t, t * S * 1.09)) * 0.60;
-      sum += simplexNoise(vec2(x * (L / 3.25) + F * t, t * S * 0.89)) * 0.40;
+      sum += simplex_noise(vec2(x * (L / 1.00) + F * t, t * S * 1.00)) * 0.85;
+      sum += simplex_noise(vec2(x * (L / 1.30) + F * t, t * S * 1.26)) * 1.15;
+      sum += simplex_noise(vec2(x * (L / 1.86) + F * t, t * S * 1.09)) * 0.60;
+      sum += simplex_noise(vec2(x * (L / 3.25) + F * t, t * S * 0.89)) * 0.40;
       return sum;
     }
 
@@ -51,7 +51,7 @@ const createFragmentShader: CreateFragmentShader = () => {
       
       float x = gl_FragCoord.x;
       float t = u_time + offset;
-      float blur_t = (simplexNoise(vec2(x * L + F * t, t * S)) + 1.0) / 2.0;
+      float blur_t = (simplex_noise(vec2(x * L + F * t, t * S)) + 1.0) / 2.0;
       float blur = mix(1.0, 1.0 + u_blur, blur_t);
       return blur;
     }

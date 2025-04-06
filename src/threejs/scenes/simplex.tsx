@@ -18,7 +18,7 @@ const NZ = 20;
 
 export default createScene(({ scene }) => {
   const THREE = useContext(ThreeContext);
-  const simplexNoise2D = useMemo(() => createNoise2D(), []);
+  const simplex_noise2D = useMemo(() => createNoise2D(), []);
 
   const offsets = useMemo(() => {
     const offsets: [number, number][] = [];
@@ -87,7 +87,7 @@ export default createScene(({ scene }) => {
       if (zStep !== lastZStepsRef.current[zOff]) {
         lastZStepsRef.current[zOff] = zStep;
         for (const mesh of zGroup.children) {
-          const y = simplexNoise2D(mesh.position.x * 0.1, zStep);
+          const y = simplex_noise2D(mesh.position.x * 0.1, zStep);
           mesh.position.y = y * 1.1;
         }
       }

@@ -1526,7 +1526,7 @@ float calc_blur() {
   const float S = 0.1;
   const float F = 0.034;
   
-  float noise = simplexNoise(x * L + F * u_time, u_time * S);
+  float noise = simplex_noise(x * L + F * u_time, u_time * S);
   float t = (noise + 1.0) / 2.0;
   float blur = mix(1.0, BLUR_AMOUNT, t);
   return blur;
@@ -1540,7 +1540,7 @@ Conveniently for us, we can reuse the same offset we calculated for the <Gl meth
 ```glsl
 float calc_blur(float offset) {
   float time = u_time * offset;
-  float noise = simplexNoise(x * L + F * time, time * S);
+  float noise = simplex_noise(x * L + F * time, time * S);
   // ...
 }
 
@@ -1628,7 +1628,7 @@ Here's our <Gl method>calc_blur</Gl> method as we left it:
 ```glsl
 float calc_blur() {
   // ...
-  float noise = simplexNoise(x * L + F * u_time, u_time * S);
+  float noise = simplex_noise(x * L + F * u_time, u_time * S);
   float t = (noise + 1.0) / 2.0;
   float blur = mix(1.0, BLUR_AMOUNT, t);
   return blur;
@@ -1717,8 +1717,8 @@ float background_noise(float offset) {
   float time = u_time + offset;
   
   float noise = 0.5;
-  noise += simplexNoise(..., time * S) * ...;
-  noise += simplexNoise(..., time * S) * ...;
+  noise += simplex_noise(..., time * S) * ...;
+  noise += simplex_noise(..., time * S) * ...;
   // ...
   return clamp(noise, 0.0, 1.0);
 }

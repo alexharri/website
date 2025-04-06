@@ -1,6 +1,6 @@
 import { noiseUtils } from "../utils/noiseUtils";
 import { perlinNoise } from "../utils/perlinNoise";
-import { simplexNoise } from "../utils/simplexNoise";
+import { simplex_noise } from "../utils/simplexNoise";
 import { CreateFragmentShader, FragmentShaderUniforms } from "../types";
 
 const createFragmentShader: CreateFragmentShader = (options) => {
@@ -34,7 +34,7 @@ const createFragmentShader: CreateFragmentShader = (options) => {
     // Imports
     ${noiseUtils}
     ${perlinNoise}
-    ${simplexNoise}
+    ${simplex_noise}
 
     float get_x() {
       return 900.0 + gl_FragCoord.x - u_w / 2.0;
@@ -78,9 +78,9 @@ const createFragmentShader: CreateFragmentShader = (options) => {
       float time = u_time + offset;
       float x_shift = time * F;
       float sum = 0.5;
-      sum += simplexNoise(vec3(x * L1 +  x_shift * 1.1, y * L1 * LY1, time * S)) * 0.30;
-      sum += simplexNoise(vec3(x * L2 + -x_shift * 0.6, y * L2 * LY2, time * S)) * 0.25;
-      sum += simplexNoise(vec3(x * L3 +  x_shift * 0.8, y * L3 * LY3, time * S)) * 0.20;
+      sum += simplex_noise(vec3(x * L1 +  x_shift * 1.1, y * L1 * LY1, time * S)) * 0.30;
+      sum += simplex_noise(vec3(x * L2 + -x_shift * 0.6, y * L2 * LY2, time * S)) * 0.25;
+      sum += simplex_noise(vec3(x * L3 +  x_shift * 0.8, y * L3 * LY3, time * S)) * 0.20;
       return sum;
     }
 
@@ -95,10 +95,10 @@ const createFragmentShader: CreateFragmentShader = (options) => {
       float x_shift = time * 0.026;
 
       float sum = 0.0;
-      sum += simplexNoise(vec2(x * 1.30 + x_shift, y * 0.54)) * 0.85;
-      sum += simplexNoise(vec2(x * 1.00 + x_shift, y * 0.68)) * 1.15;
-      sum += simplexNoise(vec2(x * 0.70 + x_shift, y * 0.59)) * 0.60;
-      sum += simplexNoise(vec2(x * 0.40 + x_shift, y * 0.48)) * 0.40;
+      sum += simplex_noise(vec2(x * 1.30 + x_shift, y * 0.54)) * 0.85;
+      sum += simplex_noise(vec2(x * 1.00 + x_shift, y * 0.68)) * 1.15;
+      sum += simplex_noise(vec2(x * 0.70 + x_shift, y * 0.59)) * 0.60;
+      sum += simplex_noise(vec2(x * 0.40 + x_shift, y * 0.48)) * 0.40;
       return sum;
     }
 
@@ -117,8 +117,8 @@ const createFragmentShader: CreateFragmentShader = (options) => {
 
       float x = get_x() * L;
       float blur_fac = calc_blur_bias();
-      blur_fac += simplexNoise(vec2(x * 0.60 + time * F *  1.0, time * S * 0.7)) * 0.5;
-      blur_fac += simplexNoise(vec2(x * 1.30 + time * F * -0.8, time * S * 1.0)) * 0.4;
+      blur_fac += simplex_noise(vec2(x * 0.60 + time * F *  1.0, time * S * 0.7)) * 0.5;
+      blur_fac += simplex_noise(vec2(x * 1.30 + time * F * -0.8, time * S * 1.0)) * 0.4;
       blur_fac = (blur_fac + 1.0) * 0.5;
       blur_fac = clamp(blur_fac, 0.0, 1.0);
       return blur_fac;
@@ -151,9 +151,9 @@ const createFragmentShader: CreateFragmentShader = (options) => {
       // s1 is smaller than s2
       float s1 = 2.5, s2 = 1.8, s3 = 1.0;
       float noise = -0.0;
-      noise += simplexNoise(vec3(noise_x * s1 + time *  F * 1.2, noise_y * s1 + 0.0, time * S)) * 0.7;
-      noise += simplexNoise(vec3(noise_x * s2 + time * -F * 1.5, noise_y * s2 + 0.3, time * S)) * 0.5;
-      noise += simplexNoise(vec3(noise_x * s3 + time *  F * 0.8, noise_y * s3 + 0.7, time * S)) * 0.4;
+      noise += simplex_noise(vec3(noise_x * s1 + time *  F * 1.2, noise_y * s1 + 0.0, time * S)) * 0.7;
+      noise += simplex_noise(vec3(noise_x * s2 + time * -F * 1.5, noise_y * s2 + 0.3, time * S)) * 0.5;
+      noise += simplex_noise(vec3(noise_x * s3 + time *  F * 0.8, noise_y * s3 + 0.7, time * S)) * 0.4;
       noise += 0.45;
       float t = clamp(noise, 0.0, 1.0);
       t = pow(t, 2.0);

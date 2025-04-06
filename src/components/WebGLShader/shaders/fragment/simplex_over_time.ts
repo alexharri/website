@@ -1,5 +1,5 @@
 import { noiseUtils } from "../utils/noiseUtils";
-import { simplexNoise } from "../utils/simplexNoise";
+import { simplex_noise } from "../utils/simplexNoise";
 import { CreateFragmentShader, FragmentShaderUniforms } from "../types";
 
 const createFragmentShader: CreateFragmentShader = (_) => {
@@ -16,7 +16,7 @@ const createFragmentShader: CreateFragmentShader = (_) => {
     const float S = 0.12;
 
     ${noiseUtils}
-    ${simplexNoise}
+    ${simplex_noise}
 
     float noise(float l, float s, float a) {
       float x = gl_FragCoord.x;
@@ -24,7 +24,7 @@ const createFragmentShader: CreateFragmentShader = (_) => {
     }
 
     float noise(int i) {
-      return simplexNoise(vec2(gl_FragCoord.x * L, u_time * S + float(i) * 0.035));
+      return simplex_noise(vec2(gl_FragCoord.x * L, u_time * S + float(i) * 0.035));
     }
 
     float calc_alpha(float noise_fac, int i) {

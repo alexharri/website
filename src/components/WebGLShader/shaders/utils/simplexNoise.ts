@@ -1,4 +1,4 @@
-export const simplexNoise = /* glsl */ `
+export const simplex_noise = /* glsl */ `
 //
 // Description : Array and textureless GLSL 2D/3D/4D simplex 
 //               noise functions.
@@ -10,7 +10,7 @@ export const simplexNoise = /* glsl */ `
 //               https://github.com/ashima/webgl-noise
 //               https://github.com/stegu/webgl-noise
 //
-float simplexNoise(vec3 v)
+float simplex_noise(vec3 v)
 {
   const vec2  C = vec2(1.0/6.0, 1.0/3.0) ;
   const vec4  D = vec4(0.0, 0.5, 1.0, 2.0);
@@ -79,7 +79,7 @@ float simplexNoise(vec3 v)
                                 dot(p2,x2), dot(p3,x3) ) );
 }
 
-float simplexNoise(vec2 v) {
+float simplex_noise(vec2 v) {
   const vec4 C = vec4(0.211324865405187, 0.366025403784439, -0.577350269189626, 0.024390243902439);
   // First corner
   vec2 i  = floor(v + dot(v, C.yy) );

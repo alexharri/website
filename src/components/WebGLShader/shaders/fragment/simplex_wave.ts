@@ -1,5 +1,5 @@
 import { noiseUtils } from "../utils/noiseUtils";
-import { simplexNoise } from "../utils/simplexNoise";
+import { simplex_noise } from "../utils/simplexNoise";
 import { CreateFragmentShader } from "../types";
 
 const createFragmentShader: CreateFragmentShader = (_) => {
@@ -12,12 +12,12 @@ const createFragmentShader: CreateFragmentShader = (_) => {
     float WAVE_HEIGHT = u_h * 0.2;
     
     ${noiseUtils}
-    ${simplexNoise}
+    ${simplex_noise}
 
     void main() {
       const float L = 0.0018;
       const float S = 0.12;
-      float t = simplexNoise(vec2(gl_FragCoord.x * L, u_time * S));
+      float t = simplex_noise(vec2(gl_FragCoord.x * L, u_time * S));
 
       float curve_y = u_h / 2.0 + t * WAVE_HEIGHT;
       float dist_signed = curve_y - gl_FragCoord.y;
