@@ -30,7 +30,7 @@ const createFragmentShader: CreateFragmentShader = () => {
     ${noiseUtils}
     ${simplexNoise}
 
-    float smooth_step(float t)
+    float smoothstep(float t)
       { return t * t * t * (t * (6.0 * t - 15.0) + 10.0); }
 
     float PI = ${Math.PI.toFixed(10)};
@@ -83,7 +83,7 @@ const createFragmentShader: CreateFragmentShader = () => {
       // Calculate alpha
       float blur = calc_blur(offset);
       float alpha = clamp(0.5 + dist_signed / blur, 0.0, 1.0);
-      alpha = smooth_step(alpha);
+      alpha = smoothstep(alpha);
       return alpha;
     }
 

@@ -41,7 +41,7 @@ const createFragmentShader: CreateFragmentShader = (options) => {
     }
   
     // Various utility functions
-    float smooth_step(float t)
+    float smoothstep(float t)
       { return t * t * t * (t * (6.0 * t - 15.0) + 10.0); }
 
     float lerp(float a, float b, float t)
@@ -57,11 +57,11 @@ const createFragmentShader: CreateFragmentShader = (options) => {
       float exp = mix(${blurExponentRange[0].toFixed(5)}, ${blurExponentRange[1].toFixed(5)}, t);
       float v = pow(blur_fac, exp);
       v = ease_in(v);
-      v = smooth_step(v);
+      v = smoothstep(v);
       v = clamp(v, 0.008, 1.0);
       v *= ${blurAmount.toFixed(1)};
       float alpha = clamp(0.5 + dist / v, 0.0, 1.0);
-      alpha = smooth_step(alpha);
+      alpha = smoothstep(alpha);
       return alpha;
     }
 

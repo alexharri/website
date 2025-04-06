@@ -21,7 +21,7 @@ const createFragmentShader: CreateFragmentShader = () => {
     ${noiseUtils}
     ${simplexNoise}
 
-    float smooth_step(float t)
+    float smoothstep(float t)
       { return t * t * t * (t * (6.0 * t - 15.0) + 10.0); }
 
     float ease_in(float x)
@@ -69,7 +69,7 @@ const createFragmentShader: CreateFragmentShader = () => {
       float blur = calc_blur(offset);
 
       float delta = clamp(dist_signed / blur, -0.5, 0.5);
-      delta = smooth_step(delta + 0.5) - 0.5;
+      delta = smoothstep(delta + 0.5) - 0.5;
       
       float alpha = clamp(0.5 + delta, 0.0, 1.0);
       return alpha;

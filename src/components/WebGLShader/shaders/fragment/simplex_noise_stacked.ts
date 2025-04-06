@@ -19,7 +19,7 @@ const createFragmentShader: CreateFragmentShader = () => {
     ${noiseUtils}
     ${simplexNoise}
 
-    float smooth_step(float t)
+    float smoothstep(float t)
       { return t * t * t * (t * (6.0 * t - 15.0) + 10.0); }
 
     void main() {

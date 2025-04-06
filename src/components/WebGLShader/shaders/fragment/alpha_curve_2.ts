@@ -10,7 +10,7 @@ const createFragmentShader: CreateFragmentShader = () => {
 
     const float PI = 3.14159;
 
-    float smooth_step(float t)
+    float smoothstep(float t)
       { return t * t * t * (t * (6.0 * t - 15.0) + 10.0); }
 
     float ease_in(float x)

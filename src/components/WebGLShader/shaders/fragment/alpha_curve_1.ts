@@ -8,7 +8,7 @@ const createFragmentShader: CreateFragmentShader = () => {
     uniform float u_w;
     uniform float u_h;
 
-    float smooth_step(float t)
+    float smoothstep(float t)
       { return t * t * t * (t * (6.0 * t - 15.0) + 10.0); }
 
     float v_line(float x_t, float w) {
@@ -26,7 +26,7 @@ const createFragmentShader: CreateFragmentShader = () => {
       t *= (1.0 / 0.6);
       t = clamp(t, 0.0, 1.0);
 
-      t = smooth_step(t);
+      t = smoothstep(t);
       
       float curve_y = u_h * (0.2 + t * 0.6);
       float dist_signed = (gl_FragCoord.y - curve_y) * 1.5;

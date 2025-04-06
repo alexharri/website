@@ -137,6 +137,9 @@ export const WebGLShader: React.FC<WebGLShaderProps> = (props) => {
     const canvas = canvasRef.current;
     if (!canvas) return;
 
+    if (!colorConfigurations[colorConfiguration]) {
+      console.warn(colorConfiguration);
+    }
     const renderer = new WebGLRenderer(
       canvas,
       vertexShaderRegistry.default!,
