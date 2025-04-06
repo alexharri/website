@@ -1639,7 +1639,7 @@ The edge becomes sharper as $t$ approaches $0$, and blurrier as $t$ approaches $
 
 The canvas below has a visualization that illustrates this. The lower half is a chart showing the value of $t$ over the $x$ axis (with $t=0$ at the bottom to $t=1$ at the top):
 
-<WebGLShader fragmentShader="multiple_waves_blur_4" width={800} minWidth={600} height={320} maintainHeight={0.7} seed={32839} showControls={false} />
+<WebGLShader fragmentShader="multiple_waves_blur_3" width={800} minWidth={600} height={320} maintainHeight={0.7} seed={32839} showControls={false} />
 
 You'll notice that the wave becomes sharp when the chart gets close to touching the bottom -- at values near zero -- but it rarely dips that low. The value of $t$ lingers around the middle too much, causing the wave to be _somewhat_ blurry over its entire length.
 
@@ -1674,17 +1674,17 @@ t = pow(t, exponent);
 
 Below is a canvas that lets you vary the value of <Gl>exponent</Gl> from $0$ to $4$. I intentionally set <Gl>exponent</Gl> to a default value of $1$ (no effect) so that you can see the effect of increasing the exponent directly (the light-blue line that stays behind represents the value of $t$ prior to applying the exponent).
 
-<WebGLShader fragmentShader="multiple_waves_blur_4" width={800} minWidth={600} height={320} maintainHeight={0.7} seed={18399} usesVariables />
+<WebGLShader fragmentShader="multiple_waves_blur_3" width={800} minWidth={600} height={320} maintainHeight={0.7} seed={18399} usesVariables />
 
 As the exponent increases, $t$ tends to "hug" the bottom of the chart more and more. This produces noticeable periods of relative sharpness while not muting higher values of $t$ _too_ much. I feel like an exponent of $2.0$ to $2.7$ gives good results -- I'll go with $2.5$.
 
 Let's bring back the other wave and see what we've got:
 
-<WebGLShader fragmentShader="multiple_waves_blur_5" width={800} minWidth={600} height={200} maintainHeight={0.7} seed={18399} showControls={false} fragmentShaderOptions={{ value: 50 }} />
+<WebGLShader fragmentShader="multiple_waves_blur_4" width={800} minWidth={600} height={200} maintainHeight={0.7} seed={18399} showControls={false} fragmentShaderOptions={{ value: 50 }} />
 
 Applying an exponent does dampen the strength of the blur, so let's ramp the blur amount up -- I'll increase it from $50$ to $130$.
 
-<WebGLShader fragmentShader="multiple_waves_blur_5" width={800} minWidth={600} height={200} maintainHeight={0.7} seed={18399} showControls={false} />
+<WebGLShader fragmentShader="multiple_waves_blur_4" width={800} minWidth={600} height={200} maintainHeight={0.7} seed={18399} showControls={false} />
 
 Now we're talking! We've got a pretty great-looking blur going!
 

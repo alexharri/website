@@ -51,7 +51,6 @@ import multiple_waves_blur_2 from "./fragment/multiple_waves_blur_2";
 import multiple_waves_blur_2_side_by_side from "./fragment/multiple_waves_blur_2_side_by_side";
 import multiple_waves_blur_3 from "./fragment/multiple_waves_blur_3";
 import multiple_waves_blur_4 from "./fragment/multiple_waves_blur_4";
-import multiple_waves_blur_5 from "./fragment/multiple_waves_blur_5";
 import final_effect_0 from "./fragment/final_effect_0";
 import final_effect_1 from "./fragment/final_effect_1";
 
@@ -108,7 +107,6 @@ export const fragmentShaderRegistry: Partial<Record<string, CreateFragmentShader
   multiple_waves_blur_2_side_by_side,
   multiple_waves_blur_3,
   multiple_waves_blur_4,
-  multiple_waves_blur_5,
   final_effect_0,
   final_effect_1,
 };
