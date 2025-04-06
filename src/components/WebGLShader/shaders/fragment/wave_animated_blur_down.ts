@@ -40,9 +40,9 @@ const createFragmentShader: CreateFragmentShader = (_) => {
       vec3 bg_color = mix(bg_color_1, bg_color_2, t);
       vec3 fg_color = mix(fg_color_1, fg_color_2, t);
 
-      const float toLength = 1.0 / (WAVE_LEN / (2.0 * PI));
+      const float frequency = 1.0 / (WAVE_LEN / (2.0 * PI));
       const float toPhase = (WAVE_SPEED / WAVE_LEN) * (2.0 * PI);
-      float sine_input = x * toLength + u_time * toPhase;
+      float sine_input = x * frequency + u_time * toPhase;
       
       // Y position of curve at current X coordinate
       float curve_y = WAVE_Y + sin(sine_input) * WAVE_AMP;

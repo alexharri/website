@@ -15,13 +15,13 @@ const createFragmentShader: CreateFragmentShader = (options) => {
     uniform float u_wavelength;
     
     const float PI = ${Math.PI.toFixed(6)};
-    float to_length = (2.0 * PI) / u_wavelength;
+    float frequency = (2.0 * PI) / u_wavelength;
 
     void main() {
       vec3 red   = vec3(1.0, 0.0, 0.0);
       vec3 blue  = vec3(0.0, 0.0, 1.0);
 
-      float t = sin(gl_FragCoord.x * to_length);
+      float t = sin(gl_FragCoord.x * frequency);
       t = (t + 1.0) * 0.5;
 
       vec3 color = mix(red, blue, t);

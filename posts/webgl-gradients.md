@@ -116,21 +116,21 @@ This produces the following effect:
 
 Those waves are very thin! That's because we're oscillating between red and blue every $\pi$ pixels.
 
-We can control the rate of oscillation by defining a [wavelength][wave_len] multiplier. It will determine over how many pixels the gradient oscillates from red to blue and red again. For a wavelength of $L$ pixels, the multiplier becomes $\dfrac{2\pi}{L}$:
+We can control the rate of oscillation by defining a [frequency][frequency] multiplier. It will determine over how many pixels the gradient oscillates from red to blue and red again. To produce a wavelength of $L$ pixels we set the frequency multiplier to $\dfrac{2\pi}{L}$:
 
-[wave_len]: https://en.wikipedia.org/wiki/Wavelength
+[frequency]: https://en.wikipedia.org/wiki/Frequency
 
 ```ts
 const L = 40;
-const toWaveLength = (2 * PI) / L;
+const frequency = (2 * PI) / L;
 
 function pixelColor({ x, y }: Position): Color {
-  let t = sin(x * toWaveLength);
+  let t = sin(x * frequency);
   // ...
 }
 ```
 
-This produces an oscillating gradient with the desired wavelength -- I'll let you vary $L$ to see the effect:
+This produces an oscillating gradient with the desired wavelength -- try changing the value of $L$ using the slider to see the effect:
 
 <WebGLShader fragmentShader="x_sine_lerp" width={150} height={150} fragmentShaderOptions={{ waveLength: 40 }} usesVariables />
 
@@ -148,7 +148,7 @@ We'll define <Ts>time</Ts> as the elapsed time, measured in seconds.
 By adding <Ts>time</Ts> to the pixel's $x$ position, we simulate the canvas "scrolling" to the right one pixel a second:
 
 ```ts
-let t = sin((x + time) * toWaveLength);
+let t = sin((x + time) * frequency);
 ```
 
 But scrolling one pixel a second is very slow. Let's add a speed constant $S$ to control the speed of the scrolling motion and multiply <Ts>time</Ts> by it:
@@ -156,10 +156,10 @@ But scrolling one pixel a second is very slow. Let's add a speed constant $S$ to
 ```ts
 const S = 20;
 
-let t = sin((x + time * S) * toWaveLength);
+let t = sin((x + time * S) * frequency);
 ```
 
-Here's the result -- I'll let you vary $S$ so that you can adjust the speed:
+Here's the result -- try adjusting the speed via the $S$ slider:
 
 <WebGLShader fragmentShader="x_sine_lerp_time" width={150} height={150} usesVariables />
 
@@ -354,7 +354,7 @@ Let's color the bottom half of our canvas white, like so:
 To do that, we'll first calculate the $y$ position of the canvas' midline:
 
 ```glsl
-const float LINE_Y = CANVAS_HEIGHT * 0.5;
+const float MID_Y = CANVAS_HEIGHT * 0.5;
 ```
 
 We can then determine the pixel's [signed][signed_distance] distance from the line through subtraction:
@@ -364,13 +364,13 @@ We can then determine the pixel's [signed][signed_distance] distance from the li
 ```glsl
 float y = gl_FragCoord.y;
 
-float dist = LINE_Y - y;
+float dist = MID_Y - y;
 ```
 
 What determines whether our pixel should be white or not is whether it's below the line, which we can determine by reading the sign of the distance via the <Gl method>sign</Gl> function. The <Gl method>sign</Gl> function returns $-1.0$ if the value is negative and $1.0$ if it's positive.
 
 ```glsl
-float dist = LINE_Y - y;
+float dist = MID_Y - y;
 
 sign(dist); // -1.0 or 1.0
 ```
@@ -407,7 +407,7 @@ if (sign(dist) == 1.0) {
 You could, but only if you want to pick 100% of either color. As we extend this to smoothly blend between the colors, using conditionals won't work.
 
 <Note>
-As an additional point, you generally want to avoid branching in code that runs on the GPU. There are [nuances][branch_nuances] to the performance of branches in shader code, but branchless code is usually preferable. In our case, calculating the <Gl>alpha</Gl> and running the <Gl method>mix</Gl> function boils down to sequential math instructions that GPUs excel at.
+As an additional point, you generally want to avoid branching (if-else statements) in code that runs on the GPU. There are [nuances][branch_nuances] to the performance of branches in shader code, but branchless code is usually preferable. In our case, calculating the <Gl>alpha</Gl> and running the <Gl method>mix</Gl> function boils down to sequential math instructions that GPUs excel at.
 </Note>
 
 [branch_nuances]: http://www.gamedev.net/forums/topic/712557-is-branching-logic-in-shaders-really-still-a-problem/5448827/
@@ -415,7 +415,7 @@ As an additional point, you generally want to avoid branching in code that runs 
 
 ### Drawing arbitrary curves
 
-We're currently coloring everything under <Gl>LINE_Y</Gl> white, but the line doesn't need to be determined constant -- we can calculate the $y$ of a curve using an arbitrary expression and use that to calculate <Gl>dist</Gl>:
+We're currently coloring everything under <Gl>MID_Y</Gl> white, but the line doesn't need to be determined by a constant -- we can calculate the $y$ of a curve using an arbitrary expression and use that to calculate <Gl>dist</Gl>:
 
 ```glsl
 float curve_y = <some expression>;
@@ -438,7 +438,7 @@ float x = gl_FragCoord.x;
 float curve_y = Y + x * I;
 ```
 
-This produces the slanted line in the canvas below -- I'll let you vary $I$ to see the effect:
+This produces the slanted line in the canvas below -- you can vary $I$ to see the effect:
 
 <WebGLShader fragmentShader="linear_gradient_area_under_slanted_line" height={150} width={150} usesVariables />
 
@@ -471,9 +471,9 @@ const float Y = 0.5 * CANVAS_HEIGHT;
 const float A = 15.0;
 const float L = 75.0;
 
-const float W = (2.0 * PI) / L; // Wavelength multiplier
+const float frequency = (2.0 * PI) / L;
 
-float curve_y = Y + sin(x * W) * A;
+float curve_y = Y + sin(x * frequency) * A;
 ```
 
 This draws a sine wave:
@@ -526,7 +526,7 @@ const float S = 25.0;
 float curve_y = Y + sin((x + u_time * S) * W) * A;
 ```
 
-I'll let you vary $S$ to see the effect:
+Try varying $S$ to see the speed change:
 
 <WebGLShader fragmentShader="wave_animated" height={150} width={150} usesVariables />
 
@@ -892,7 +892,7 @@ y += simplex_noise(x * (L / 1.86) + F * u_time, ...) * ...;
 y += simplex_noise(x * (L / 3.25) + F * u_time, ...) * ...;
 ```
 
-This adds a subtle flow to the wave. I'll let you vary the amount of flow to feel the difference it makes:
+This adds a subtle flow to the wave. Try changing the amount of flow to feel the difference it makes:
 
 <WebGLShader fragmentShader="simplex_stack_final" width={800} height={200} seed={31993} maintainHeight={0.7} usesVariables />
 

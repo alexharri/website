@@ -16,11 +16,11 @@ const createFragmentShader: CreateFragmentShader = (options) => {
     
     const float WAVE_LENGTH = ${waveLength.toFixed(1)};
     const float WAVE_HEIGHT = ${waveHeight.toFixed(1)};
-    const float TO_LENGTH = 1.0 / (WAVE_LENGTH / TAU);
+    const float FREQUENCY = 1.0 / (WAVE_LENGTH / TAU);
     const float SPEED = 1.3;
 
     void main() {
-      float t = sin(gl_FragCoord.x * TO_LENGTH + u_time * SPEED);
+      float t = sin(gl_FragCoord.x * FREQUENCY + u_time * SPEED);
 
       float waveY = HEIGHT / 2.0 + t * WAVE_HEIGHT;
       float offset = gl_FragCoord.y - waveY;

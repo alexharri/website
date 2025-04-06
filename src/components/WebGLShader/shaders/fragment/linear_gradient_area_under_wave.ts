@@ -25,8 +25,8 @@ const createFragmentShader: CreateFragmentShader = (_) => {
       float t = y / (u_h - 1.0);
       vec3 color = mix(color_1, color_2, t);
 
-      float toWaveLength = (1.0 / L) * (2.0 * PI);
-      float curve_y = Y + sin(x * toWaveLength) * A;
+      float frequency = (1.0 / L) * (2.0 * PI);
+      float curve_y = Y + sin(x * frequency) * A;
       float dist = curve_y - y;
       float alpha = (sign(dist) + 1.0) / 2.0;
 
