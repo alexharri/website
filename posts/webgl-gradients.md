@@ -1600,7 +1600,7 @@ float smoothstep(float t) {
 Applying <Gl method>smoothstep</Gl> to our alpha curve is quite simple:
 
 ```glsl
-float alpha = clamp(0.5 + dist_signed / blur, 0.0, 1.0);
+float alpha = clamp(0.5 + dist / blur, 0.0, 1.0);
 alpha = smoothstep(alpha);
 ```
 
