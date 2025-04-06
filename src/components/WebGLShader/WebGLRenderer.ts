@@ -15,7 +15,6 @@ interface TimeState {
 
 interface ColorConfiguration {
   gradient: string[];
-  accentColor?: string | null;
 }
 
 export class WebGLRenderer {

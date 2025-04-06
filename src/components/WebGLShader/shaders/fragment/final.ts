@@ -1,27 +1,10 @@
-import { hexToRgb } from "../../../../utils/color";
 import { noiseUtils } from "../../noiseUtils";
 import { perlinNoise } from "../../perlinNoise";
 import { simplexNoise } from "../../simplexNoise";
 import { CreateFragmentShader, FragmentShaderUniforms } from "../types";
 
-function hexToVec3(hex: string) {
-  const rgb = hexToRgb(hex);
-  return `vec3(${rgb.map((n) => (n / 255).toFixed(1)).join(", ")})`;
-}
-
-function includeif(
-  condition: boolean,
-  ifContent: () => string,
-  elseContent?: () => string,
-): string {
-  if (condition) return ifContent();
-  if (elseContent) return elseContent();
-  return "";
-}
-
 const createFragmentShader: CreateFragmentShader = (options) => {
   const {
-    accentColor,
     blurAmount = 345,
     blurQuality = 7,
     blurExponentRange = [0.9, 1.2],
@@ -29,7 +12,6 @@ const createFragmentShader: CreateFragmentShader = (options) => {
     blurAmount: number;
     blurQuality: number;
     blurExponentRange: [number, number];
-    accentColor: string;
   }>;
 
   const uniforms: FragmentShaderUniforms = {};
@@ -192,46 +174,10 @@ const createFragmentShader: CreateFragmentShader = (options) => {
       float w1_alpha = wave_alpha(WAVE1_Y, WAVE1_HEIGHT, 112.5 * 48.75);
       float w2_alpha = wave_alpha(WAVE2_Y, WAVE2_HEIGHT, 225.0 * 36.00);
 
-  ${includeif(
-    accentColor != null,
-
-    // if we're using an accent color
-    () => /* glsl */ `
-      vec3 w1_color = color_from_lightness(w1_lightness);
-      vec3 w2_color = color_from_lightness(w2_lightness);
-      vec3 bg_color = color_from_lightness(bg_lightness);
-
-      float bg_accent_color_blend_fac = accent_lightness(-397.2,   64.2);
-      float w1_accent_color_blend_fac = accent_lightness( 163.2, -512.3);
-      float w2_accent_color_blend_fac = accent_lightness( 433.2,  127.9);
-  
-      bg_accent_color_blend_fac = clamp(bg_accent_color_blend_fac - pow(bg_lightness, 2.0), 0.0, 1.0);
-      w1_accent_color_blend_fac = clamp(w1_accent_color_blend_fac - pow(w1_lightness, 2.0), 0.0, 1.0);
-      w2_accent_color_blend_fac = clamp(w2_accent_color_blend_fac - pow(w2_lightness, 2.0), 0.0, 1.0);
-  
-      vec3 accent_color = ${hexToVec3(accentColor!)};
-      bg_color = mix(bg_color, accent_color, bg_accent_color_blend_fac);
-      w1_color = mix(w1_color, accent_color, w1_accent_color_blend_fac);
-      w2_color = mix(w2_color, accent_color, w2_accent_color_blend_fac);
-  
-      vec3 color = bg_color;
-      color = mix(color, w2_color, w2_alpha);
-      color = mix(color, w1_color, w1_alpha);
-        `,
-
-    // else (we're not using an accent color)
-    //
-    // In this case, we can compute a single lightness value and determine the color for
-    // that lightness. We don't need to perform any color blending, so we avoid washed out
-    // middle colors (see https://www.joshwcomeau.com/css/make-beautiful-gradients/).
-    () => /* glsl */ `
       float lightness = bg_lightness;
       lightness = lerp(lightness, w2_lightness, w2_alpha);
       lightness = lerp(lightness, w1_lightness, w1_alpha);
       vec3 color = color_from_lightness(lightness);
-    `,
-  )}
-    
       gl_FragColor = vec4(color, 1.0);
     }
   `;
