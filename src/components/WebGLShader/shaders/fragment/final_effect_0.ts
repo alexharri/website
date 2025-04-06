@@ -23,9 +23,6 @@ const createFragmentShader: CreateFragmentShader = () => {
 
     float smoothstep(float t)
       { return t * t * t * (t * (6.0 * t - 15.0) + 10.0); }
-
-    float ease_in(float x)
-      { return 1.0 - cos((x * PI) * 0.5); }
     
     float calc_blur(float offset) {
       const float BLUR_AMOUNT = 130.0;
@@ -36,7 +33,7 @@ const createFragmentShader: CreateFragmentShader = () => {
       float x = gl_FragCoord.x;
       float time = u_time + offset;
       float blur_t = (simplex_noise(vec2(x * L + F * time, time * S)) + 1.0) / 2.0;
-      blur_t = ease_in(blur_t);
+      blur_t = pow(blur_t, 1.8);
       
       float blur = mix(1.0, 1.0 + BLUR_AMOUNT, blur_t);
       return blur;
