@@ -1,6 +1,6 @@
-import { noiseUtils } from "../../noiseUtils";
-import { simplexNoise } from "../../simplexNoise";
-import { perlinNoise } from "../../perlinNoise";
+import { noiseUtils } from "../utils/noiseUtils";
+import { simplexNoise } from "../utils/simplexNoise";
+import { perlinNoise } from "../utils/perlinNoise";
 import { CreateFragmentShader } from "../types";
 
 const createFragmentShader: CreateFragmentShader = (options) => {

@@ -10,7 +10,7 @@ import { NumberVariable } from "../../threejs/NumberVariable";
 import { clamp, invLerp, lerp } from "../../math/lerp";
 import { useViewportWidth } from "../../utils/hooks/useViewportWidth";
 import { useRandomId } from "../../utils/hooks/useRandomId";
-import { CONTROLS_HEIGHT, DEFAULT_HEIGHT, SKEW_DEG } from "./utils";
+import { CONTROLS_HEIGHT, DEFAULT_HEIGHT, SKEW_DEG } from "./constants";
 
 const SHOW_SEED_AND_TIME = false;
 

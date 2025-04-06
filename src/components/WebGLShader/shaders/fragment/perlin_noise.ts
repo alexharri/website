@@ -1,5 +1,5 @@
-import { noiseUtils } from "../../noiseUtils";
-import { perlinNoise } from "../../perlinNoise";
+import { noiseUtils } from "../utils/noiseUtils";
+import { perlinNoise } from "../utils/perlinNoise";
 import { CreateFragmentShader } from "../types";
 
 const createFragmentShader: CreateFragmentShader = (options) => {

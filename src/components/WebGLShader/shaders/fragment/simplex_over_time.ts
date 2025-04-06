@@ -1,5 +1,5 @@
-import { noiseUtils } from "../../noiseUtils";
-import { simplexNoise } from "../../simplexNoise";
+import { noiseUtils } from "../utils/noiseUtils";
+import { simplexNoise } from "../utils/simplexNoise";
 import { CreateFragmentShader, FragmentShaderUniforms } from "../types";
 
 const createFragmentShader: CreateFragmentShader = (_) => {

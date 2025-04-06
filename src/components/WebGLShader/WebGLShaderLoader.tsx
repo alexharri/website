@@ -6,7 +6,7 @@ import { ColorConfiguration, colorConfigurations } from "./colorConfigurations";
 import { useVisible } from "../../utils/hooks/useVisible";
 import { StyleOptions, useStyles } from "../../utils/styles";
 import { cssVariables } from "../../utils/cssVariables";
-import { SKEW_DEG } from "./utils";
+import { SKEW_DEG } from "./constants";
 
 let _WebGLShader: ComponentType<WebGLShaderProps> | null;
 

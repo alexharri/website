@@ -1,6 +1,6 @@
 import { createContext, useContext, useMemo } from "react";
 import { WebGLShaderProps } from "./WebGLShader";
-import { CONTROLS_HEIGHT, DEFAULT_HEIGHT, SKEW_DEG } from "./utils";
+import { CONTROLS_HEIGHT, DEFAULT_HEIGHT, SKEW_DEG } from "./constants";
 import { css } from "@emotion/css";
 import { SkeletonLoaderAnimation } from "../SkeletonLoaderAnimation/SkeletonLoaderAnimation";
 import { cssVariables } from "../../utils/cssVariables";
