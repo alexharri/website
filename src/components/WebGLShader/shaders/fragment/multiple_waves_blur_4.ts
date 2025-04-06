@@ -27,14 +27,11 @@ const createFragmentShader: CreateFragmentShader = (options) => {
     float WAVE1_Y = 0.80 * u_h;
     float WAVE2_Y = 0.35 * u_h;
 
-
     ${noiseUtils}
     ${simplex_noise}
 
     float smoothstep(float t)
       { return t * t * t * (t * (6.0 * t - 15.0) + 10.0); }
-
-    float PI = ${Math.PI.toFixed(10)};
 
     float noise(float x, float offset) {
       const float L = 0.0012;
