@@ -45,9 +45,6 @@ const createFragmentShader: CreateFragmentShader = (options) => {
     float ease_in(float x)
       { return 1.0 - cos((x * PI) * 0.5); }
 
-    float ease_out(float x)
-      { return sin((x * PI) * 0.5); }
-
     float wave_alpha_part(float dist, float blur_fac, float t) {
       float exp = mix(${blurExponentRange[0].toFixed(5)}, ${blurExponentRange[1].toFixed(5)}, t);
       float v = pow(blur_fac, exp);

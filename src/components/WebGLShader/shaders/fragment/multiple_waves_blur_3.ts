@@ -35,12 +35,6 @@ const createFragmentShader: CreateFragmentShader = () => {
 
     float PI = ${Math.PI.toFixed(10)};
 
-    float ease_in(float x)
-      { return 1.0 - cos((x * PI) * 0.5); }
-
-    float ease_out(float x)
-      { return sin((x * PI) * 0.5); }
-
     float noise(float x, float offset) {
       const float L = 0.0012;
       const float S = 0.04;

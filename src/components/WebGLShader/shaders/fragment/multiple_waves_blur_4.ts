@@ -36,12 +36,6 @@ const createFragmentShader: CreateFragmentShader = (options) => {
 
     float PI = ${Math.PI.toFixed(10)};
 
-    float ease_in(float x)
-      { return 1.0 - cos((x * PI) * 0.5); }
-
-    float ease_out(float x)
-      { return sin((x * PI) * 0.5); }
-
     float noise(float x, float offset) {
       const float L = 0.0012;
       const float S = 0.04;
@@ -65,7 +59,7 @@ const createFragmentShader: CreateFragmentShader = (options) => {
       float x = gl_FragCoord.x;
       float t = u_time + offset;
       float blur_t = (simplex_noise(vec2(x * L + F * t, t * S)) + 1.0) / 2.0;
-      blur_t = ease_in(blur_t);
+      blur_t = pow(blur_t, 2.5);
       
       float blur = mix(1.0, 1.0 + u_blur, blur_t);
       return blur;
