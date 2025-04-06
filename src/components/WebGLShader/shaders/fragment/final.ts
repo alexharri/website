@@ -121,14 +121,14 @@ const createFragmentShader: CreateFragmentShader = (options) => {
 
     float wave_alpha(float Y, float wave_height, float offset) {
       float wave_y = Y + wave_y_noise(offset) * wave_height;
-      float dist_signed = wave_y - gl_FragCoord.y;
+      float dist = wave_y - gl_FragCoord.y;
       float blur_fac = calc_blur(offset);
       
       const float PART = 1.0 / float(${blurQuality.toFixed(1)});
       float sum = 0.0;
       for (int i = 0; i < ${blurQuality}; i++) {
         float t = ${blurQuality} == 1 ? 0.5 : PART * float(i);
-        sum += wave_alpha_part(dist_signed, blur_fac, t) * PART;
+        sum += wave_alpha_part(dist, blur_fac, t) * PART;
       }
       return sum;
     }

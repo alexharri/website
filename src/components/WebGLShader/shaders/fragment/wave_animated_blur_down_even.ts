@@ -47,8 +47,8 @@ const createFragmentShader: CreateFragmentShader = (_) => {
       // Y position of curve at current X coordinate
       float curve_y = WAVE_Y + sin(sine_input) * WAVE_AMP;
 
-      float dist_signed = curve_y - y;
-      float fg_alpha = 0.0 + dist_signed / BLUR_AMOUNT;
+      float dist = curve_y - y;
+      float fg_alpha = 0.0 + dist / BLUR_AMOUNT;
       fg_alpha = clamp(fg_alpha, 0.0, 1.0);
 
       vec3 color = mix(bg_color, fg_color, fg_alpha);

@@ -29,12 +29,12 @@ const createFragmentShader: CreateFragmentShader = (_) => {
 
     float calc_alpha(float noise_fac, int i) {
       float waveY = u_h * (0.52 + float(i) * 0.04) + noise_fac * WAVE_HEIGHT;
-      float dist_signed = waveY - gl_FragCoord.y;
+      float dist = waveY - gl_FragCoord.y;
 
       float alpha = 1.0;
 
-      alpha *= clamp(3.0 + dist_signed, 0.0, 1.0);
-      alpha *= clamp(0.0 - dist_signed, 0.0, 1.0);
+      alpha *= clamp(3.0 + dist, 0.0, 1.0);
+      alpha *= clamp(0.0 - dist, 0.0, 1.0);
 
       return alpha;
     }

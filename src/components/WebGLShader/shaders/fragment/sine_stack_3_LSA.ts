@@ -54,8 +54,8 @@ const createFragmentShader: CreateFragmentShader = (_) => {
       vec3 foreground_color = mix(foreground_lower, foreground_upper, t_y);
       vec3 background_color = mix(background_lower, background_upper, t_y);
 
-      float dist_signed = wave_y - gl_FragCoord.y;
-      float fg_alpha = clamp(0.5 + dist_signed, 0.0, 1.0);
+      float dist = wave_y - gl_FragCoord.y;
+      float fg_alpha = clamp(0.5 + dist, 0.0, 1.0);
       vec3 color = mix(foreground_color, background_color, fg_alpha);
 
       gl_FragColor = vec4(color, 1.0);

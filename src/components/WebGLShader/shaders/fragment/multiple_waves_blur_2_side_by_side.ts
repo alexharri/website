@@ -68,14 +68,11 @@ const createFragmentShader: CreateFragmentShader = () => {
       float x = gl_FragCoord.x - u_w * 0.5;
       float y = gl_FragCoord.y;
 
-      // Calculate distance to curve Y
       float wave_y = Y + noise(x, offset) * wave_height;
-      float dist_signed = wave_y - y;
-      
-      // Calculate alpha
+      float dist = wave_y - y;
+
       float blur = calc_blur(offset);
-      
-      float alpha = clamp(0.5 + dist_signed / blur, 0.0, 1.0);
+      float alpha = clamp(0.5 + dist / blur, 0.0, 1.0);
 
       float smoothing_fac = (sign(u_w / 2.0 - gl_FragCoord.x) + 1.0) / 2.0;
       alpha = mix(alpha, smoothstep(alpha), smoothing_fac);

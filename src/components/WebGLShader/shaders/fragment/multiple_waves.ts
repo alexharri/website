@@ -38,8 +38,8 @@ const createFragmentShader: CreateFragmentShader = (options) => {
     float wave_alpha(float Y, float wave_height, float offset) {
       float x = gl_FragCoord.x - u_w * 0.5;
       float wave_y = Y + noise(x, offset * ${offsetScalar.toFixed(1)}) * wave_height;
-      float dist_signed = wave_y - gl_FragCoord.y;
-      float alpha = clamp(0.5 + dist_signed, 0.0, 1.0);
+      float dist = wave_y - gl_FragCoord.y;
+      float alpha = clamp(0.5 + dist, 0.0, 1.0);
       return alpha;
     }
 

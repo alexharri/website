@@ -78,11 +78,11 @@ const createFragmentShader: CreateFragmentShader = () => {
 
       // Calculate distance to curve Y
       float wave_y = Y + noise(x, offset) * wave_height;
-      float dist_signed = wave_y - y;
+      float dist = wave_y - y;
       
       // Calculate alpha
       float blur = calc_blur(offset);
-      float alpha = clamp(0.5 + dist_signed / blur, 0.0, 1.0);
+      float alpha = clamp(0.5 + dist / blur, 0.0, 1.0);
       alpha = smoothstep(alpha);
       return alpha;
     }
@@ -106,25 +106,25 @@ const createFragmentShader: CreateFragmentShader = () => {
 
       float wave_y_org = BOTTOM_PADDING + blur_t_org * LOWER_HEIGHT;
       float wave_y = BOTTOM_PADDING + blur_t * LOWER_HEIGHT;
-      float wave_dist_signed = wave_y - gl_FragCoord.y;
-      float wave_dist_signed_org = wave_y_org - gl_FragCoord.y;
+      float wave_dist = wave_y - gl_FragCoord.y;
+      float wave_dist_org = wave_y_org - gl_FragCoord.y;
 
-      float bottom_dist_signed = BOTTOM_PADDING - gl_FragCoord.y;
-      float top_dist_signed = LOWER_HEIGHT - gl_FragCoord.y;
+      float bottom_dist = BOTTOM_PADDING - gl_FragCoord.y;
+      float top_dist = LOWER_HEIGHT - gl_FragCoord.y;
 
-      float w_alpha = (sign(wave_dist_signed) + 1.0) / 2.0;
+      float w_alpha = (sign(wave_dist) + 1.0) / 2.0;
 
       float w_org_alpha = 1.0;
-      w_org_alpha *= clamp(2.0 + wave_dist_signed_org, 0.0, 1.0);
-      w_org_alpha *= clamp(1.0 - wave_dist_signed_org, 0.0, 1.0);
+      w_org_alpha *= clamp(2.0 + wave_dist_org, 0.0, 1.0);
+      w_org_alpha *= clamp(1.0 - wave_dist_org, 0.0, 1.0);
 
       float b_alpha = 1.0;
-      b_alpha *= clamp(1.5 + bottom_dist_signed, 0.0, 1.0);
-      b_alpha *= clamp(1.5 - bottom_dist_signed, 0.0, 1.0);
+      b_alpha *= clamp(1.5 + bottom_dist, 0.0, 1.0);
+      b_alpha *= clamp(1.5 - bottom_dist, 0.0, 1.0);
 
       float t_alpha = 1.0;
-      t_alpha *= clamp(1.0 + top_dist_signed, 0.0, 1.0);
-      t_alpha *= clamp(1.0 - top_dist_signed, 0.0, 1.0);
+      t_alpha *= clamp(1.0 + top_dist, 0.0, 1.0);
+      t_alpha *= clamp(1.0 - top_dist, 0.0, 1.0);
 
       vec3 color = vec3(0.027,0.11,0.2);
       color = mix(color, vec3(0.133,0.416,0.702), w_alpha);

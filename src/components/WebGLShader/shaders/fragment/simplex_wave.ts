@@ -20,8 +20,8 @@ const createFragmentShader: CreateFragmentShader = (_) => {
       float t = simplex_noise(vec2(gl_FragCoord.x * L, u_time * S));
 
       float curve_y = u_h / 2.0 + t * WAVE_HEIGHT;
-      float dist_signed = curve_y - gl_FragCoord.y;
-      float alpha = clamp(0.5 + dist_signed, 0.0, 1.0);
+      float dist = curve_y - gl_FragCoord.y;
+      float alpha = clamp(0.5 + dist, 0.0, 1.0);
 
       vec3 fg_lower = vec3(0.965,0.992,0.745);
       vec3 fg_upper = vec3(1.0,0.702,0.443);
