@@ -9,7 +9,6 @@ const createFragmentShader: CreateFragmentShader = () => {
 
     uniform float u_time;
     uniform float u_h;
-    uniform sampler2D u_gradient;
 
     float WAVE1_HEIGHT = u_h * 0.12;
     float WAVE2_HEIGHT = u_h * 0.16;
