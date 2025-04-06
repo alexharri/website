@@ -1,16 +1,21 @@
 import dynamic from "next/dynamic";
 import type { WebGLShaderProps } from "./WebGLShader";
 import { WebGLShaderSkeleton, WebGLShaderPropsContext } from "./WebGLShaderSkeleton";
-import { useRef, useState } from "react";
+import { ComponentType, useRef, useState } from "react";
 import { ColorConfiguration, colorConfigurations } from "./colorConfigurations";
 import { useVisible } from "../../utils/hooks/useVisible";
 import { StyleOptions, useStyles } from "../../utils/styles";
 import { cssVariables } from "../../utils/cssVariables";
 import { SKEW_DEG } from "./utils";
 
-const WebGLShader = dynamic(() => import("./WebGLShader").then((module) => module.WebGLShader), {
-  loading: WebGLShaderSkeleton,
-});
+let _WebGLShader: ComponentType<WebGLShaderProps> | null;
+
+function getWebGLShader() {
+  _WebGLShader ||= dynamic(() => import("./WebGLShader").then((module) => module.WebGLShader), {
+    loading: WebGLShaderSkeleton,
+  });
+  return _WebGLShader;
+}
 
 const styles = ({ styled, theme }: StyleOptions) => ({
   container: styled.css`
@@ -85,15 +90,17 @@ export const WebGLShaderLoader = (
   const ref = useRef<HTMLDivElement>(null);
   const visible = useVisible(ref, "64px");
 
+  let content: React.ReactNode;
+  if (visible) {
+    const WebGLShader = getWebGLShader();
+    content = <WebGLShader {...props} colorConfiguration={colorConfiguration} />;
+  } else {
+    content = <WebGLShaderSkeleton />;
+  }
+
   return (
     <div className={[s("container", { skew }), "canvas"].join(" ")} ref={ref}>
-      <WebGLShaderPropsContext.Provider value={props}>
-        {visible ? (
-          <WebGLShader {...props} colorConfiguration={colorConfiguration} />
-        ) : (
-          <WebGLShaderSkeleton />
-        )}
-      </WebGLShaderPropsContext.Provider>
+      <WebGLShaderPropsContext.Provider value={props}>{content}</WebGLShaderPropsContext.Provider>
       {colorConfigurationArr.length > 1 && (
         <div className={s("colorButtonWrapper", { skew })}>
           {colorConfigurationArr.map((key) => {
