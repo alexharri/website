@@ -36,15 +36,11 @@ const createFragmentShader: CreateFragmentShader = () => {
       
       float x = gl_FragCoord.x;
       float y = gl_FragCoord.y * Y_SCALE;
-      
-      const float O1 = 138.0;
-      const float O2 = 39.7;
-      const float O3 = 258.2;
 
       float sum = 0.5;
-      sum += simplex_noise(vec3(x * L * 1.0 +  F * 1.0, y * L * 1.00, u_time * S + O1)) * 0.30;
-      sum += simplex_noise(vec3(x * L * 0.6 + -F * 0.6, y * L * 0.85, u_time * S + O2)) * 0.26;
-      sum += simplex_noise(vec3(x * L * 0.4 +  F * 0.8, y * L * 0.70, u_time * S + O3)) * 0.22;
+      sum += simplex_noise(vec3(x * L * 1.0 +  F * 1.0, y * L * 1.00, u_time * S)) * 0.30;
+      sum += simplex_noise(vec3(x * L * 0.6 + -F * 0.6, y * L * 0.85, u_time * S)) * 0.26;
+      sum += simplex_noise(vec3(x * L * 0.4 +  F * 0.8, y * L * 0.70, u_time * S)) * 0.22;
 
       float t = clamp(sum, 0.0, 1.0);
       vec3 color = calc_color(t);

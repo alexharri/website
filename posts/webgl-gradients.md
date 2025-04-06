@@ -1100,7 +1100,7 @@ The larger noise provides larger, sweeping fades, and the smaller noise gives us
   height={250}
   minWidth={600}
   maintainHeight={0.3}
-  seed={10310}
+  seed={11350}
 />
 
 As a final cherry on top, I want to add a directional flow component. I'll make two of the noises drift left, and the other drift right.
@@ -1124,7 +1124,7 @@ Here's what that looks like:
   height={250}
   minWidth={600}
   maintainHeight={0.3}
-  seed={2836}
+  seed={22836}
   usesVariables
 />
 
@@ -1178,7 +1178,7 @@ That has the effect of mapping the noise to a red-to-blue gradient:
   height={250}
   minWidth={600}
   maintainHeight={0.3}
-  seed={9526}
+  seed={22836}
 />
 
 That's pretty cool, but I'd like to be able to map the $t$ value to _any_ gradient, such as this one:

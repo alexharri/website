@@ -37,7 +37,7 @@ const createFragmentShader: CreateFragmentShader = (options) => {
       float noise = simplex_noise(vec3(x, y, z));
       float lightness = (noise + 1.0) / 2.0;
 
-      vec3 color = vec3(lightness)
+      vec3 color = vec3(lightness);
       gl_FragColor = vec4(color, 1.0);
     }
   `;
