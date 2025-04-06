@@ -70,11 +70,33 @@ function pixelColor({ x, y }: Position): Color {
 
 The <Ts method>mix</Ts> function is an interpolation function that [linearly interpolates][lerp] between the two input colors using a blend factor between $0$ and $1$ ($t$ in our case).
 
-<SmallNote label="">When <Ts>x == 0</Ts> we get a $t$ value of $0$, giving us 100% red. When <Ts>x == canvas.width - 1</Ts> we get a $t$ value of $1$, giving us 100% blue. If $t = 0.3$ we get 70% red and 30% blue.</SmallNote>
+A <Ts method>mix</Ts> function for two scalar values can be implemented like so:
 
-This produces a red-to-blue gradient over the width of the canvas (the $x$ axis):
+```ts
+function mix(a: number, b: number, t: number) {
+  return a * (1 - t) + b * t;
+}
+```
+
+<SmallNote label="">The mix function is often called "lerp" -- short for linear interpolation</SmallNote>
+
+To implement a <Ts method>mix</Ts> function for two colors, we'd mix each component of the colors. To mix two RGB colors, for example, we'd mix the red, green, and blue channels.
+
+```ts
+function mix(a: Color, b: Color, t: number) {
+  return new Color(
+    a.r * (1 - t) + b.r * t,
+    a.g * (1 - t) + b.g * t,
+    a.b * (1 - t) + b.b * t,
+  );
+}
+```
+
+Anyway, <Ts>mix(red, blue, t)</Ts> produces a red-to-blue gradient over the width of the canvas (the $x$ axis):
 
 <WebGLShader fragmentShader="x_lerp" width={150} height={150} />
+
+<SmallNote label="">When <Ts>x == 0</Ts> we get a $t$ value of $0$, giving us 100% red. When <Ts>x == canvas.width - 1</Ts> we get a $t$ value of $1$, giving us 100% blue. If $t = 0.3$ we get 70% red and 30% blue.</SmallNote>
 
 If we want an oscillating gradient (red to blue to red again, repeating), we can do that by using <Ts>sin(x)</Ts> to calculate the blending factor:
 
@@ -169,7 +191,7 @@ OpenGL shaders are written in GLSL, which stands for [OpenGL Shading Language][g
 [opengl_vs_webgl]: https://www.khronos.org/webgl/wiki/WebGL_and_OpenGL_Differences
 [glsl]: https://en.wikipedia.org/wiki/OpenGL_Shading_Language
 
-There are two types of shaders, vertex shaders and fragment shaders, which serve different purposes. Our color function will run in the fragment shader (sometimes referred to as a "pixel shader"). That's where we'll spend most of our time.
+There are two types of shaders, vertex shaders and fragment shaders, which serve different purposes. Our color function will run in a fragment shader (sometimes referred to as a "pixel shader"). That's where we'll spend most of our time.
 
 <Note>
 <p>There's tons of boilerplate code involved in setting up a WebGL rendering pipeline. I'll mostly omit it so that we can stay focused on our main goal, which is creating a cool gradient effect.</p>
@@ -252,7 +274,7 @@ float t = y / (CANVAS_WIDTH - 1.0);
 
 <SmallNote>I've configured the coordinates such that <Gl>gl_FragCoord</Gl> is <Gl>(0.0, 0.0)</Gl> at the lower-left corner and <Gl>(CANVAS_WIDTH - 1, CANVAS_HEIGHT - 1)</Gl> at the upper right corner. This will stay consistent throughout the post.</SmallNote>
 
-We'll mix the two colors with the [built-in <Gl method>mix</Gl> function][mix].
+We'll mix the two colors with GLSL's [built-in <Gl method>mix</Gl> function][mix].
 
 [mix]: https://registry.khronos.org/OpenGL-Refpages/gl4/html/mix.xhtml
 
