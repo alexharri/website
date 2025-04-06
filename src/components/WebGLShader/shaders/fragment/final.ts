@@ -23,12 +23,10 @@ const createFragmentShader: CreateFragmentShader = (options) => {
     uniform float u_w;
     uniform sampler2D u_gradient;
   
-    const float PI = 3.14159, TAU = PI * 2.0;
+    const float PI = 3.14159;
 
     float WAVE1_Y = 0.45 * u_h, WAVE2_Y = 0.9 * u_h;
     float WAVE1_HEIGHT = 0.195 * u_h, WAVE2_HEIGHT = 0.144 * u_h;
-
-    const float ACCENT_NOISE_SCALE = 0.4; // Smaller is bigger
   
     ${noiseUtils}
     ${simplex_noise}
@@ -135,32 +133,9 @@ const createFragmentShader: CreateFragmentShader = (options) => {
       return sum;
     }
   
-    float accent_lightness(float offset) {
-      const float S = 0.064;
-      const float F = 0.04;
-      float x = get_x() * 0.001;
-      float y = gl_FragCoord.y * 0.001;
-      float noise_x = x * ACCENT_NOISE_SCALE;
-      float noise_y = y * ACCENT_NOISE_SCALE * 1.0;
-
-      float time = u_time + offset;
-  
-      // s1 is smaller than s2
-      float s1 = 2.5, s2 = 1.8, s3 = 1.0;
-      float noise = -0.0;
-      noise += simplex_noise(vec3(noise_x * s1 + time *  F * 1.2, noise_y * s1 + 0.0, time * S)) * 0.7;
-      noise += simplex_noise(vec3(noise_x * s2 + time * -F * 1.5, noise_y * s2 + 0.3, time * S)) * 0.5;
-      noise += simplex_noise(vec3(noise_x * s3 + time *  F * 0.8, noise_y * s3 + 0.7, time * S)) * 0.4;
-      noise += 0.45;
-      float t = clamp(noise, 0.0, 1.0);
-      t = pow(t, 2.0);
-      t = ease_out(t);
-      return t;
-    }
-  
-    vec3 color_from_lightness(float lightness) {
+    vec3 calc_color(float lightness) {
       lightness = clamp(lightness, 0.0, 1.0);
-      return vec3(texture2D(u_gradient, vec2(lerp(0.00001, 0.999, lightness), 0.5)));
+      return vec3(texture2D(u_gradient, vec2(lightness, 0.5)));
     }
   
     void main() {
@@ -174,8 +149,8 @@ const createFragmentShader: CreateFragmentShader = (options) => {
       float lightness = bg_lightness;
       lightness = lerp(lightness, w2_lightness, w2_alpha);
       lightness = lerp(lightness, w1_lightness, w1_alpha);
-      vec3 color = color_from_lightness(lightness);
-      gl_FragColor = vec4(color, 1.0);
+
+      gl_FragColor = vec4(calc_color(lightness), 1.0);
     }
   `;
   return { shader, uniforms };
