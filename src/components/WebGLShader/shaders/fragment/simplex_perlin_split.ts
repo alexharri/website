@@ -3,42 +3,37 @@ import { simplex_noise } from "../utils/simplexNoise";
 import { perlin_noise } from "../utils/perlinNoise";
 import { CreateFragmentShader } from "../types";
 
-const createFragmentShader: CreateFragmentShader = (options) => {
-  const {
-    xScale = 0.02,
-    yScale = 0.02,
-    timeScale = 0.6,
-  } = options as { xScale?: number; yScale?: number; timeScale?: number };
+const createFragmentShader: CreateFragmentShader = () => {
   return /* glsl */ `
     precision mediump float;
 
     uniform float u_time;
     uniform float u_w;
 
-    const float CANVAS_HEIGHT = 300.0;
-
     ${noiseUtils}
     ${simplex_noise}
     ${perlin_noise}
 
     void main() {
-      float x = gl_FragCoord.x * ${xScale};
-      float y = gl_FragCoord.y * ${yScale};
-      float z = u_time * ${timeScale};
-
-      float S = 0.6;
-
-      float l0 = (perlin_noise(vec3(x, y, z)) + 1.0) / 2.0;
-      float l1 = (simplex_noise(vec3(x * S, y * S, z * S)) + 1.0) / 2.0;
+      const float L = 0.02;
+      const float S = 0.6;
       
-      float dist = gl_FragCoord.x - u_w * 0.5;
-      float t = (sign(dist) + 1.0) / 2.0;
-      float l = mix(l0, l1, t);
+      float x = gl_FragCoord.x * L;
+      float y = gl_FragCoord.y * L;
+      float z = u_time * S;
 
-      float f = (sign(abs(dist) - 6.0) + 1.0) / 2.0;
-      l *= f;
+      const float perlin_L = 0.6;
 
-      gl_FragColor = vec4(l, l, l, 1.0);
+      float noise_perlin = (perlin_noise(vec3(x, y, z)) + 1.0) / 2.0;
+      float noise_simplex = (simplex_noise(vec3(x * perlin_L, y * perlin_L, z * perlin_L)) + 1.0) / 2.0;
+      
+      float x_dist = u_w * 0.5 - gl_FragCoord.x;
+      float noise = mix(noise_simplex, noise_perlin, (sign(x_dist) + 1.0) / 2.0);
+
+      float black_bar_in_middle_fac = (sign(abs(x_dist) - 6.0) + 1.0) / 2.0;
+      noise *= black_bar_in_middle_fac;
+
+      gl_FragColor = vec4(vec3(noise), 1.0);
     }
   `;
 };
