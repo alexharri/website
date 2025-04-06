@@ -426,7 +426,7 @@ float x = gl_FragCoord.x - CANVAS_WIDTH / 2.0;
 float curve_y = Y + pow(x, 2.0) / 40.0;
 ```
 
-<WebGLShader fragmentShader="linear_gradient_area_under_exponential" height={150} width={150} showControls={false} />
+<WebGLShader fragmentShader="linear_gradient_area_under_exponential" height={150} width={150} />
 
 The point is that we can define the curve however we want.
 
@@ -452,7 +452,7 @@ float curve_y = Y + sin(x * W) * A;
 
 This draws a sine wave:
 
-<WebGLShader fragmentShader="linear_gradient_area_under_wave" height={150} width={150} showControls={false} />
+<WebGLShader fragmentShader="linear_gradient_area_under_wave" height={150} width={150} />
 
 At the moment, things are completely static. For our shader to produce any motion we'll need to introduce a time variable. We can do that using [uniforms][uniform].
 

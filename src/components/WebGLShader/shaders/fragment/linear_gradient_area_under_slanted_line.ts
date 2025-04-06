@@ -12,10 +12,11 @@ const createFragmentShader: CreateFragmentShader = (_) => {
     precision mediump float;
 
     uniform float u_incline;
+    uniform float u_h;
 
-    const float CANVAS_HEIGHT = 150.0;
-    const float Y = 0.4 * CANVAS_HEIGHT;
+    float Y = 0.4 * u_h;
     float I = u_incline;
+
     const vec3 white = vec3(1.0, 1.0, 1.0);
 
     void main() {
@@ -24,15 +25,13 @@ const createFragmentShader: CreateFragmentShader = (_) => {
 
       float x = gl_FragCoord.x;
       float y = gl_FragCoord.y;
-      float t = y / (CANVAS_HEIGHT - 1.0);
-
+      
+      float t = y / (u_h - 1.0);
       vec3 color = mix(color_1, color_2, t);
 
-      // Y position of curve at current X coordinate
       float curve_y = Y + x * I;
       float dist = curve_y - y;
-      float dist_sign = sign(dist);
-      float alpha = (dist_sign + 1.0) / 2.0;
+      float alpha = (sign(dist) + 1.0) / 2.0;
 
       color = mix(color, white, alpha);
 
