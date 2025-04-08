@@ -7,7 +7,7 @@ const createFragmentShader: CreateFragmentShader = (_) => {
 
     uniform float u_h;
 
-    float LINE_Y = u_h * 0.5;
+    float MID_Y = u_h * 0.5;
 
     const vec3 white = vec3(1.0, 1.0, 1.0);
 
@@ -21,7 +21,7 @@ const createFragmentShader: CreateFragmentShader = (_) => {
       float t = y / (u_h - 1.0);
       vec3 color = mix(color_1, color_2, t);
 
-      float dist = LINE_Y - y;
+      float dist = MID_Y - y;
       float alpha = (sign(dist) + 1.0) / 2.0;
 
       color = mix(color, white, alpha);

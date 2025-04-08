@@ -488,11 +488,11 @@ At the moment, things are completely static. For our shader to produce any motio
 uniform float u_time;
 ```
 
-Uniforms can be thought of as global variables that the shader has _read-only_ access to. The actual values of uniforms are controlled on the JavaScript side (we'll see how later).
+You can think of uniforms as per-draw call constants -- global variables that the shader has _read-only_ access to. The actual values of uniforms are controlled on the JavaScript side.
 
-For any given draw call, each shader invocation will have uniforms set to the same values. This is what the name "uniform" is referring to -- the values of uniforms are _uniform_ across shader invocations. You can think of uniforms as per-draw call constants.
+Within a given draw call, each shader invocation will have uniforms set to the same values. This is what the name "uniform" refers to -- the values of uniforms are _uniform_ across shader invocations within a given draw call. The JavaScript side can, however, change the values of uniforms _between_ draw calls.
 
-<SmallNote label="">Uniforms are constant across draw calls but they are [not compile-time constant][uniform_const], meaning you cannot use the value of a uniform in `const` variables.</SmallNote>
+<SmallNote label="">Uniforms are constant within draw calls but they are [not compile-time constant][uniform_const], meaning you cannot use the value of a uniform in `const` variables.</SmallNote>
 
 [uniform_const]: https://www.khronos.org/opengl/wiki/Type_Qualifier_(GLSL)#Uniforms
 
