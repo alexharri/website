@@ -640,7 +640,18 @@ This produces a blur effect, but we can observe the wave "shifting down" as the 
 
 <WebGLShader fragmentShader="wave_animated_blur_down_even" height={150} width={250} usesVariables />
 
-Let's put that aside for the time being and make the blur gradually increasing from left to right. To gradually increase the blur, we can [linearly interpolate][lerp] from no blur to <Gl>BLUR_AMOUNT</Gl> over the $x$ axis like so:
+We can fix the downshift by starting <Gl>alpha</Gl> at $0.5$:
+
+```glsl
+float alpha = 0.5 + dist / BLUR_AMOUNT;
+alpha = clamp(alpha, 0.0, 1.0);
+```
+
+Starting at $0.5$ causes <Gl>alpha</Gl> to transition from $0$ to $1$ as <Gl>dist</Gl> ranges from <Gl>-BLUR_AMOUNT / 2</Gl> to <Gl>BLUR_AMOUNT / 2</Gl>, which keeps the wave centered:
+
+<WebGLShader fragmentShader="wave_animated_blur_middle" height={150} width={250} usesVariables />
+
+Let's now make blur gradually increase from left to right. To gradually increase the blur, we can [linearly interpolate][lerp] from no blur to <Gl>BLUR_AMOUNT</Gl> over the $x$ axis like so:
 
 [lerp]: https://en.wikipedia.org/wiki/Linear_interpolation
 
@@ -655,24 +666,6 @@ Using <Gl>blur_amount</Gl> to calculate the alpha, we get a gradually increasing
 float alpha = dist / blur_amount;
 alpha = clamp(alpha, 0.0, 1.0);
 ```
-
-<WebGLShader fragmentShader="wave_animated_blur_down" height={150} width={250} usesVariables />
-
-Let's now fix how the wave shifts down as <Gl>blur_amount</Gl> increases.
-
-Consider why the wave shifts down as the blur increases:
-
- * For pixels where <Gl>{"dist <= 0"}</Gl> the alpha is $0$ regardless of the value of <Gl>blur_amount</Gl> so the top of the wave stays fixed.
- * At the same time, the alpha is $1$ for all pixels where <Gl>{"dist >= blur_amount"}</Gl>, which shifts the bottom of the wave down as <Gl>blur_amount</Gl> increases.
-
-What we want is for <Gl>alpha</Gl> to be $0.5$ when <Gl>{"dist == 0"}</Gl>, which we can do by starting <Gl>alpha</Gl> at $0.5$:
-
-```glsl
-float alpha = 0.5 + dist / blur_amount;
-alpha = clamp(alpha, 0.0, 1.0);
-```
-
-This causes the top of the wave to shift up by <Gl>-blur_amount / 2</Gl> and the bottom of the wave to shift down by <Gl>blur_amount / 2</Gl>, keeping the wave centered:
 
 <WebGLShader fragmentShader="wave_animated_blur_left_to_right" height={150} width={250} usesVariables />
 

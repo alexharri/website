@@ -14,7 +14,7 @@ import linear_gradient_area_under_wave from "./fragment/linear_gradient_area_und
 import wave_animated from "./fragment/wave_animated";
 import wave_animated_2 from "./fragment/wave_animated_2";
 import wave_animated_blur_left_to_right from "./fragment/wave_animated_blur_left_to_right";
-import wave_animated_blur_down from "./fragment/wave_animated_blur_down";
+import wave_animated_blur_middle from "./fragment/wave_animated_blur_middle";
 import wave_animated_blur_down_even from "./fragment/wave_animated_blur_down_even";
 import sine_stack_final from "./fragment/sine_stack_final";
 import sine_stack_decomposed from "./fragment/sine_stack_decomposed";
@@ -66,7 +66,7 @@ export const fragmentShaderRegistry: Partial<Record<string, CreateFragmentShader
   wave_animated,
   wave_animated_2,
   wave_animated_blur_left_to_right,
-  wave_animated_blur_down,
+  wave_animated_blur_middle,
   wave_animated_blur_down_even,
   sine_stack_final,
   sine_stack_decomposed,
