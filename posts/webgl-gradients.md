@@ -766,14 +766,16 @@ We won't actually make use of stacked sine waves in our final effect. We _will_,
 
 ## Simplex noise
 
-[Simplex noise][simplex_noise] is a family of $n$-dimensional gradient noise functions designed by [Ken Perlin][ken_perlin], the inventor of "classic" [Perlin noise][perlin_noise]. Simplex noise was designed to address some of the [drawbacks][perlin_drawbacks] of Perlin noise.
+[Simplex noise][simplex_noise] is a family of $n$-dimensional gradient noise functions developed by [Ken Perlin][ken_perlin].
+
+<SmallNote label="">Ken first introduced "classic" [Perlin noise][perlin_noise] in 1983 and later created Simplex noise in 2001 to address some of the [drawbacks][perlin_drawbacks] of Perlin noise.</SmallNote>
 
 [simplex_noise]: https://en.wikipedia.org/wiki/Simplex_noise
 [perlin_noise]: https://en.wikipedia.org/wiki/Perlin_noise
 [ken_perlin]: https://en.wikipedia.org/wiki/Ken_Perlin
 [perlin_drawbacks]: https://noiseposti.ng/posts/2022-01-16-The-Perlin-Problem-Moving-Past-Square-Noise.html
 
-The dimensionality of a simplex noise function refers to how many numeric input values the function takes (the 2D simplex noise function takes two numeric arguments, the 3D function takes three). However, all simplex noise functions return a single numeric value between $-1$ and $1$.
+The dimensionality of a simplex noise function refers to how many numeric input values the function takes (the 2D simplex noise function takes two numeric arguments, the 3D function takes three). All simplex noise functions return a single numeric value between $-1$ and $1$.
 
 2D simplex noise is frequently used, for example, to [procedurally generate terrain][generate_terrain] in video games. Here's an example texture created using 2D simplex noise that could be used as a height map:
 
