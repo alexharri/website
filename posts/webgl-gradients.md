@@ -705,7 +705,10 @@ where the $L$, $S$ and $A$ scalars control different aspects of the wave:
 The final wave can be described as the sum of $N$ such waves:
 
 <p className="mathblock">$$\begin{align}
-\sum_{n=1}^{N}\ \sin(x \times L_n + \text{time} \times S_n) \times A_n\\
+      \sin(x \times L_1\,+&\,\text{time} \times S_1) \times A_1 \\
++\,   \sin(x \times L_2\,+&\,\text{time} \times S_2) \times A_2 \\
+      &\vdots \\
++\,   \sin(x \times L_n\,+&\,\text{time} \times S_n) \times A_n
 \end{align}$$</p>
 
 Which put into code, looks like so:
