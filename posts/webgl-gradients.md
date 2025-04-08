@@ -531,42 +531,42 @@ Try varying $S$ to see the speed change:
 <WebGLShader fragmentShader="wave_animated" height={150} width={150} usesVariables />
 
 
-### Applying a gradient to the wave
+### Applying a gradient to the lower half
 
-Instead of the wave being a flat white color, let's make it a gradient.
+Instead of the lower half being a flat white color, let's make it a gradient (like the upper half).
 
-The background is currently composed of two colors: <Gl>color_1</Gl> and <Gl>color_2</Gl>. Let's rename those to <Gl>bg_color_1</Gl> and <Gl>bg_color_2</Gl>:
-
-```glsl
-vec3 bg_color_1 = vec3(0.7, 0.1, 0.4);
-vec3 bg_color_2 = vec3(0.9, 0.6, 0.1);
-```
-
-Let's then introduce two new colors for the foreground: <Gl>fg_color_1</Gl> and <Gl>fg_color_2</Gl>. Those will be used to create a linear gradient we will apply to the wave.
+The upper half's gradient is currently composed of two colors: <Gl>color_1</Gl> and <Gl>color_2</Gl>. Let's rename those to <Gl>upper_color_1</Gl> and <Gl>upper_color_2</Gl>:
 
 ```glsl
-vec3 fg_color_1 = vec3(1.0, 0.7, 0.5);
-vec3 fg_color_2 = vec3(1.0, 1.0, 0.9);
+vec3 upper_color_1 = vec3(0.7, 0.1, 0.4);
+vec3 upper_color_2 = vec3(0.9, 0.6, 0.1);
 ```
 
-We can calculate both the background color and foreground color for the current pixel using the same $t$ value (calculated using the pixel's $y$ position):
+For the lower half's gradient, we'll introduce two new colors: <Gl>lower_color_1</Gl> and <Gl>lower_color_2</Gl>.
+
+```glsl
+vec3 lower_color_1 = vec3(1.0, 0.7, 0.5);
+vec3 lower_color_2 = vec3(1.0, 1.0, 0.9);
+```
+
+We'll calculate a $t$ value using the pixel's $y$ position, using that to gradually mix the colors over the $y$ axis:
 
 ```glsl
 float t = y / (CANVAS_HEIGHT - 1.0);
 
-vec3 bg_color = mix(bg_color_1, bg_color_2, t);
-vec3 fg_color = mix(fg_color_1, fg_color_2, t);
+vec3 upper_color = mix(upper_color_1, upper_color_2, t);
+vec3 lower_color = mix(lower_color_1, lower_color_2, t);
 ```
 
-With the background color and foreground color calculated, we can blend them using <Gl>alpha</Gl>:
+With this, we've effectively calculated two gradients. We'll then determine which gradient to use for the current pixel's color using <Gl>alpha</Gl>:
 
 ```glsl
 float alpha = (sign(curve_y - y) + 1.0) / 2.0;
 
-vec3 color = mix(bg_color, fg_color, alpha);
+vec3 color = mix(upper_color, lower_color, alpha);
 ```
 
-This applies the foreground gradient to the wave:
+This applies the gradients to the halves:
 
 <WebGLShader fragmentShader="wave_animated_2" height={150} width={150} showControls={false} />
 
@@ -579,7 +579,7 @@ Take another look at the final animation and consider the role that blur plays:
 
 The blur isn't applied uniformly over the wave -- a variable amount of blur is applied to different parts of the wave, and the amount fluctuates over time.
 
-How might be we do that?
+How might we achieve that?
 
 ### Gaussian blur
 
