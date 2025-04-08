@@ -570,6 +570,10 @@ This applies the gradients to the halves:
 
 <WebGLShader fragmentShader="wave_animated_2" height={150} width={150} showControls={false} />
 
+Since the value of <Gl>alpha</Gl> is calculated using the sign of the distance, its value will abruptly change from $0.0$ to $1.0$ at the wave's edge -- that's what gives us the sharp split.
+
+Let's look at how we can make the split smoother using blur.
+
 
 ## Adding blur
 
