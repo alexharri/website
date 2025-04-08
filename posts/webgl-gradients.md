@@ -955,6 +955,8 @@ float wave1_alpha = wave_alpha(WAVE1_Y, WAVE1_HEIGHT);
 float wave2_alpha = wave_alpha(WAVE2_Y, WAVE2_HEIGHT);
 ```
 
+Two waves split the canvas in three. I like to think of the upper third as the background, with two waves drawn in front of it (with wave 1 in the middle and wave 2 at the front).
+
 To draw a background and two waves, we'll need three colors. I picked these nice blue colors:
 
 ```glsl
