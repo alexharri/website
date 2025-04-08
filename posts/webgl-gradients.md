@@ -70,7 +70,7 @@ function pixelColor({ x, y }: Position): Color {
 
 The <Ts method>mix</Ts> function is an interpolation function that [linearly interpolates][lerp] between the two input colors using a blend factor between $0$ and $1$ ($t$ in our case).
 
-A <Ts method>mix</Ts> function for two scalar values can be implemented like so:
+A <Ts method>mix</Ts> function for two numbers can be implemented like so:
 
 ```ts
 function mix(a: number, b: number, t: number) {
@@ -334,7 +334,7 @@ vec4 foo = vec4(a, 1.0);
 
 [vector_constructors]: https://www.khronos.org/opengl/wiki/Data_Type_(GLSL)#Vector_constructors
 
-You can combine scalar and vector inputs in any way you see fit as long as the total number of values passed to the vector constructor is correct:
+You can combine number and vector inputs in any way you see fit as long as the total number of values passed to the vector constructor is correct:
 
 ```glsl
 vec4(1.0 vec2(2.0, 3.0), 4.0); // OK
@@ -696,7 +696,7 @@ The idea is to sum the output of multiple sine waves with different wavelengths,
 
 <p className="mathblock">$$\sin(x \times L + \text{time} \times S) \times A$$</p>
 
-where the $L$, $S$ and $A$ scalars control different aspects of the wave:
+where $L$, $S$ and $A$ are variables that control different aspects of the wave:
 
  * $L$ determines the wavelength,
  * $S$ determines the phase evolution speed, and
@@ -722,7 +722,7 @@ sum += sin(x * L3 + u_time * S3) * A3;
 return sum;
 ```
 
-The problem, then, is finding $L$, $S$, $A$ scalars for each sine wave that, when stacked, produce a nice-looking final wave.
+The problem, then, is finding $L$, $S$, $A$ values for each sine wave that, when stacked, produce a nice-looking final wave.
 
 In finding those values, I first create a "baseline wave" with the $L$, $S$, $A$ components set to values that feel right. I picked these values:
 
@@ -740,7 +740,7 @@ They produce the following wave:
 
 This wave has the rough shape of what I want the final wave to look like, so these values serve as a good baseline.
 
-I then add more sine waves that use the baseline $L$, $S$, $A$ scalars multiplied by some constants. After some trial and error, I ended up with the following:
+I then add more sine waves that use the baseline $L$, $S$, $A$ values multiplied by some constants. After some trial and error, I ended up with the following:
 
 ```glsl
 float y = 0.0;
@@ -751,7 +751,7 @@ y += sin(x * (L / 1.871) + u_time *  0.65 * S) * A * 0.43;
 y += sin(x * (L / 2.013) + u_time * -1.05 * S) * A * 0.32;
 ```
 
-<SmallNote label="">Observe how some of the scalars for $S$ are negative (waves 3 and 5). Making some of the waves travel in the opposite direction prevents the final wave from feeling as if it's moving in one direction at a constant rate.</SmallNote>
+<SmallNote label="">Observe how $S$ is multiplied by a negative number for waves 3 and 5. Making some of the waves travel in the opposite direction prevents the final wave from feeling as if it's moving in one direction at a constant rate.</SmallNote>
 
 These five sine waves give us quite a pretty natural-looking final wave:
 
@@ -794,7 +794,7 @@ float lightness = (simplex_noise(x, y) + 1.0) / 2.0;
 gl_FragColor = vec4(vec3(lightness), 1.0);
 ```
 
-The $L$ scalar controls the scale of the $(x, y)$ coordinates. As $L$ increases, the noise becomes smaller. Here's a canvas that let's you adjust $L$ to see the effect:
+$L$ controls the scale of the $(x, y)$ coordinates. As $L$ increases, the noise becomes smaller. Here's a canvas where you can adjust $L$ to see the effect:
 
 <WebGLShader fragmentShader="simplex_noise" width={400} minWidth={200} height={250} animate={false} usesVariables />
 
@@ -844,7 +844,7 @@ This gives us a smooth animated wave:
 
 <SmallNote label="" center>A single simplex noise function call already produces a very natural-looking wave!</SmallNote>
 
-The same three $L$, $S$, $A$ scalars determine the characteristics of our wave. We scale $x$ by $L$ to make the wave shorter or longer on the horizontal axis:
+The same three $L$, $S$, $A$ variables determine the characteristics of our wave. We scale $x$ by $L$ to make the wave shorter or longer on the horizontal axis:
 
 <p className="mathblock">$$\text{simplex}(x \times L,\ \text{time})$$</p>
 
