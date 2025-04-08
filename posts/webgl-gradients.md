@@ -753,7 +753,7 @@ y += sin(x * (L / 2.013) + u_time * -1.05 * S) * A * 0.32;
 
 <SmallNote label="">Observe how $S$ is multiplied by a negative number for waves 3 and 5. Making some of the waves travel in the opposite direction prevents the final wave from feeling as if it's moving in one direction at a constant rate.</SmallNote>
 
-These five sine waves give us quite a pretty natural-looking final wave:
+These five sine waves give us a reasonably natural-looking final wave:
 
 <WebGLShader fragmentShader="sine_stack_3" width={800} height={200} seed={30511} maintainHeight={0.7} />
 
