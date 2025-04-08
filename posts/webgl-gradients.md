@@ -757,7 +757,7 @@ These five sine waves give us a reasonably natural-looking final wave:
 
 <WebGLShader fragmentShader="sine_stack_3" width={800} height={200} seed={30511} maintainHeight={0.7} />
 
-Because all of the sine waves are defined in terms of $L$, $S$, $A$, we can tune the waves together by adjusting those constants. Increase $S$ to make the wave faster, $L$ to make the waves shorter, and $A$ to make the waves taller. Try varying $L$ and $S$:
+Because all of the sine waves are defined by $L$, $S$, $A$, we can tune the waves together by adjusting those constants. Increase $S$ to make the wave faster, $L$ to make the waves shorter, and $A$ to make the waves taller. Try varying $L$ and $S$:
 
 <WebGLShader fragmentShader="sine_stack_3_LSA" width={800} height={200} seed={30511} maintainHeight={0.7} usesVariables />
 
