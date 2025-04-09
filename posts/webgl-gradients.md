@@ -1402,7 +1402,7 @@ GLSL shaders read data from textures using [samplers][samplers]. A sampler is a 
 
 There are different sampler types for different value types: `isampler` for signed integers, `usampler` for unsigned integers, and `sampler` for floats. Our image texture contains floats so we'll use the unprefixed `sampler`.
 
-Samplers also have dimensionality. You can have 1D, 2D or 3D samplers. Since we'll be reading from a 2D image texture, we'll use a `sampler2D`. If you were reading signed integers from a 3D texture, you'd use a `usampler3D`.
+Samplers also have dimensionality. You can have 1D, 2D or 3D samplers. Since we'll be reading from a 2D image texture, we'll use a `sampler2D`. If you were reading unsigned integers from a 3D texture, you'd use a `usampler3D`.
 
 In our shader, we'll declare our sampler via a uniform. I'll name it <Gl>u_gradient</Gl>:
 
