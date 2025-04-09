@@ -1010,7 +1010,7 @@ float wave_noise(float offset) {
 }
 ```
 
-This produces identical waves, but offset in time. By making the offset large enough, we get waves far enough apart in time that no one would notice that they're the same wave.
+This produces identical waves, but offset in time. By making the offset large enough, we get waves spaced far enough apart in time that no one would notice that they're the same wave.
 
 But we don't actually need to provide the offset manually. We can derive an offset in the <Gl method>wave_alpha</Gl> function using the <Gl>Y</Gl> and <Gl>wave_height</Gl> arguments:
 
