@@ -230,6 +230,7 @@ export function createScene<V extends VariablesOptions>(
                     value={value as number}
                     onValueChange={(value) => setVariableValue(key, value)}
                     spec={spec}
+                    showValue={false}
                   />
                 );
               if (spec.type === "normal") {

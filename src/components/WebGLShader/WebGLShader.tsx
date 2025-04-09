@@ -5,9 +5,9 @@ import { ColorConfiguration, colorConfigurations } from "./colorConfigurations";
 import { vertexShaderRegistry } from "./shaders/vertexShaders";
 import { fragmentShaderRegistry } from "./shaders/fragmentShaders";
 import { cssVariables } from "../../utils/cssVariables";
-import { FragmentShader, FragmentShaderUniform } from "./shaders/types";
+import { FragmentShader } from "./shaders/types";
 import { NumberVariable } from "../../threejs/NumberVariable";
-import { clamp, invLerp, lerp } from "../../math/lerp";
+import { clamp } from "../../math/lerp";
 import { useViewportWidth } from "../../utils/hooks/useViewportWidth";
 import { useRandomId } from "../../utils/hooks/useRandomId";
 import { CONTROLS_HEIGHT, DEFAULT_HEIGHT, SKEW_DEG } from "./constants";
@@ -29,16 +29,6 @@ function calculateWebGLCanvasDimensions(props: WebGLShaderProps, viewportWidth: 
   height = Math.round(height); // A fractional canvas height causes visual artifacts
 
   return [width, height];
-}
-
-function parseUniformValue(uniform: FragmentShaderUniform, value: number) {
-  if (uniform.remap) {
-    const [min, max] = uniform.range;
-    const [from, to] = uniform.remap;
-    const t = invLerp(min, max, value);
-    value = lerp(from, to, t);
-  }
-  return value;
 }
 
 const styles = ({ styled }: StyleOptions) => ({
@@ -69,6 +59,10 @@ const styles = ({ styled }: StyleOptions) => ({
     height: ${CONTROLS_HEIGHT}px;
     max-width: 100%;
     box-sizing: border-box;
+
+    @media (max-width: ${cssVariables.mobileWidth}px) {
+      padding-top: 40px;
+    }
   `,
 });
 
@@ -172,7 +166,7 @@ export const WebGLShader: React.FC<WebGLShaderProps> = (props) => {
       }
 
       for (let [key, value] of pendingUniformWrites.current) {
-        renderer.setUniform(key, parseUniformValue(fragmentShader.uniforms[key], value));
+        renderer.setUniform(key, value);
       }
       pendingUniformWrites.current.length = 0;
 
@@ -242,7 +236,7 @@ export const WebGLShader: React.FC<WebGLShaderProps> = (props) => {
                 value={uniformValues[key] ?? uniform.value}
                 onValueChange={(value) => setUniformValue(key, value)}
                 spec={uniform}
-                width={uniform.width}
+                width={uniformEntries.length > 1 ? "small" : "normal"}
               />
             );
           })}

@@ -137,10 +137,10 @@ export function getMathSvg(label: string, scale: number = 2): string | null {
 
     // Useful when adding new SVGs:
     //
-    console.log(
-      "SVG: ",
-      (document.querySelector(`[data-varlabel="${label}"]`)?.firstChild as HTMLElement)?.innerHTML,
-    );
+    // console.log(
+    //   "SVG: ",
+    //   (document.querySelector(`[data-varlabel="${label}"]`)?.firstChild as HTMLElement)?.innerHTML,
+    // );
     return null;
   }
   const dimensions = getMathSvgDimensions(label) || [0, 0];

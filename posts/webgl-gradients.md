@@ -528,7 +528,7 @@ float curve_y = Y + sin((x + u_time * S) * W) * A;
 
 Try varying $S$ to see the speed change:
 
-<WebGLShader fragmentShader="wave_animated" height={150} width={150} usesVariables />
+<WebGLShader fragmentShader="wave_animated_0" height={150} width={150} usesVariables />
 
 
 ### Applying a gradient to the lower half
@@ -568,7 +568,7 @@ vec3 color = mix(upper_color, lower_color, alpha);
 
 This applies the gradients to the halves:
 
-<WebGLShader fragmentShader="wave_animated_2" height={150} width={150} showControls={false} />
+<WebGLShader fragmentShader="wave_animated_1" height={150} width={150} />
 
 Since the value of <Gl>alpha</Gl> is calculated using the sign of the distance, its value will abruptly change from $0.0$ to $1.0$ at the wave's edge -- that's what gives us the sharp split.
 
@@ -766,9 +766,7 @@ We won't actually make use of stacked sine waves in our final effect. We _will_,
 
 ## Simplex noise
 
-[Simplex noise][simplex_noise] is a family of $n$-dimensional gradient noise functions developed by [Ken Perlin][ken_perlin].
-
-<SmallNote label="">Ken first introduced "classic" [Perlin noise][perlin_noise] in 1983 and later created Simplex noise in 2001 to address some of the [drawbacks][perlin_drawbacks] of Perlin noise.</SmallNote>
+[Simplex noise][simplex_noise] is a family of $n$-dimensional gradient noise functions developed by [Ken Perlin][ken_perlin]. Ken first introduced "classic" [Perlin noise][perlin_noise] in 1983 and later created simplex noise in 2001 to address some of the [drawbacks][perlin_drawbacks] of Perlin noise.
 
 [simplex_noise]: https://en.wikipedia.org/wiki/Simplex_noise
 [perlin_noise]: https://en.wikipedia.org/wiki/Perlin_noise
@@ -795,6 +793,10 @@ float lightness = (simplex_noise(x, y) + 1.0) / 2.0;
 
 gl_FragColor = vec4(vec3(lightness), 1.0);
 ```
+
+<SmallNote>The <Gl method>simplex_noise</Gl> implementation I'm using can be found in [this GitHub repository][webgl_noise].</SmallNote>
+
+[webgl_noise]: https://github.com/stegu/webgl-noise
 
 $L$ controls the scale of the $(x, y)$ coordinates. As $L$ increases, the noise becomes smaller. Here's a canvas where you can adjust $L$ to see the effect:
 
@@ -1069,13 +1071,7 @@ This gives us animated 2D noise:
 
 <WebGLShader fragmentShader="simplex_noise" width={400} minWidth={200} height={250} showControls={false} />
 
-It's worth mentioning that we could use classic Perlin noise instead of simplex. Perlin noise has been in use longer and is more popular than simplex noise, but I find Perlin a bit too "blocky". Simplex noise, by comparison, feels more natural to me. Here's a side-by-side comparison:
-
-<WebGLShader fragmentShader="simplex_perlin_split" width={800} minWidth={200} height={250} />
-
-<SmallNote label="" center>Left is Perlin noise, right is simplex.</SmallNote>
-
-Anyway, our goal for this animated 2D noise is for it to eventually be used to create the colors of the waves in our final gradient:
+Our goal for this animated 2D noise is for it to eventually be used to create the colors of the waves in our final gradient:
 
 <WebGLShader fragmentShader="final" skew height={275} minWidth={600} maintainHeight={0.3} seed={20582} />
 
@@ -1283,7 +1279,7 @@ Here's the result:
   seed={12926}
 />
 
-Our <Gl method>calc_color</Gl> function is set up to handle three-step gradients, but we can update it to handle gradients with $n$ stops. Here is an example of a 5-stop gradient:
+Our <Gl method>calc_color</Gl> function is set up to handle 3-stop gradients, but we can update it to handle gradients with $n$ stops. Here is an example of a 5-stop gradient:
 
 ```glsl
 vec3 calc_color(float t) {
@@ -1400,7 +1396,7 @@ gl.bindTexture(gl.TEXTURE_2D, null);
 
 [render_to_texture]: https://webglfundamentals.org/webgl/lessons/webgl-render-to-texture.html
 
-GLSL shaders read data from textures using [samplers][samplers]. A sampler is a function that accepts texture coordinates and returns the value of the texture at that position.
+GLSL shaders read data from textures using [samplers][samplers]. A sampler is a function that takes texture coordinates and returns _a_ value for the texture at that position. Emphasis on "_a_" value because when texture coordinates fall _between_ data points, the sampler returns an interpolated result derived from surrounding values.
 
 [samplers]: https://www.khronos.org/opengl/wiki/Sampler_(GLSL)
 
@@ -1427,19 +1423,21 @@ gl.uniform1i(gradientUniformLocation, 0);
 
 [webgl_textures]: https://webglfundamentals.org/webgl/lessons/webgl-3d-textures.html
 
-To read data from a sampler you'd use one of OpenGL's built-in [texture lookup functions][texture_lookup_functions]. In our case, we're reading 2D image data, so we'll use <Gl method>texture2D</Gl>.
+To read data from a texture (via a sampler) we'll use one of OpenGL's built-in [texture lookup functions][texture_lookup_functions]. In our case, we're reading 2D image data, so we'll use <Gl method>texture2D</Gl>.
 
 [texture_lookup_functions]: https://www.khronos.org/opengl/wiki/Sampler_(GLSL)#Texture_lookup_functions
 
 <Gl method>texture2D</Gl> takes two arguments, a sampler and 2D texture coordinates. The coordinates are normalized so $(0, 0)$ is the top-left corner of the texture and $(1, 1)$ is the bottom-right corner of the texture.
 
-<SmallNote>texture2D coordinates are typically normalized, but samplers may also use "texel space" coordinates which range from $[0, S]$ where $S$ is the size of the texture for that dimension.</SmallNote>
+<SmallNote><Gl method>texture2D</Gl> coordinates are typically normalized, but samplers may also use "texel space" coordinates which range from $[0, S]$ where $S$ is the size of the texture for that dimension.</SmallNote>
 
 Here's our texture again, for reference:
 
 <WebGLShader fragmentShader="read_texture" width={256} height={64} colorConfiguration="blue_to_yellow" />
 
-The texture is uniform over the $y$ axis so we can just set the $y$ coordinate to $0.5$ (we could also use $0.0$ or $1.0$, it wouldn't change the result for this texture).
+The texture is uniform over the $y$ axis so we can just set the $y$ coordinate to $0.5$ (we could also use $0.0$ or $1.0$, the result would be the same).
+
+<SmallNote label="">Since the texture is uniform over the $y$ axis, its height doesn't matter. I'm using a height of $64$ because it looks nice for this post, but you could use a height of $1$ instead.</SmallNote>
 
 As for the $x$ axis, reading the color at $x = 0.0$ should yield blue, and at $x = 1.0$ we should get yellow. We can verify this with the following shader
 
@@ -1452,7 +1450,7 @@ void main() {
 }
 ```
 
-In the canvas below the $x$ slider controls the value of <Gl>u_x</Gl>. As you slide $x$ from $0$ to $1$ the color should change from blue to yellow:
+In the canvas below, the $x$ slider controls the value of <Gl>u_x</Gl>. As you slide $x$ from $0$ to $1$ the color should change from blue to yellow:
 
 <WebGLShader fragmentShader="read_texture_t" width={100} height={100} colorConfiguration="blue_to_yellow" usesVariables />
 
@@ -1673,7 +1671,7 @@ The canvas below has a visualization that illustrates this. The lower half is a 
 
 You'll notice that the wave becomes sharp when the chart gets close to touching the bottom -- at values near zero -- but it rarely dips that low. The value of $t$ lingers around the middle too much, causing the wave to be _somewhat_ blurry over its entire length.
 
-We can bias low values of $t$ to get close to $0$ by exponentiating $t$.
+We can bias low values of $t$ to get close to $0$ by raising $t$ to a power — i.e. applying an exponent.
 
 Consider how an exponent affects values between $0$ and $1$. Numbers close to $0$ experiece a strong pull towards $0$ while larger numbers experience less pull. For example, $0.1^2 = 0.01$, a 90% reduction, while $0.9^2 = 0.81$, only a reduction of 10%.
 
@@ -1818,7 +1816,7 @@ At the beginning of the post I promised to link to the final shader code, so [he
 
 [final_shader_code]: https://github.com/alexharri/website/blob/156a9e3ca021f5abc4b8a55fd66c4a16657bf50d/src/components/WebGLShader/shaders/fragment/final.ts
 
-The final shader includes a few additional elements that were not covered in the post. For example, the blur is calculated in multiple parts using an exponent range, adding a haziness element to the blur that I like, and also an oscillating "blur bias" that helps introduce periods of global blurriness and sharpness.
+The final shader includes a few additional elements that were not covered in the post. For example, the blur is calculated in multiple parts using an exponent range, adding a "haziness" element to the effect. I also added an oscillating "blur bias" to introduce periods of global blurriness and sharpness.
 
 Take a look at this black-and-white version of the final effect and see if you can spot those elements (it's much easier to see without color):
 
@@ -1826,6 +1824,6 @@ Take a look at this black-and-white version of the final effect and see if you c
 
 I didn't cover these additional elements because they're not core to the effect -- they just add a layer of refinement. There are loads of ways in which you could tweak or add to the effect. I tried tons of ideas and kept those around because they worked very well. I suggest tweaking the code and trying to add some refinements yourself!
 
-Anyway, thanks so much for reading. I hope this was interesting.
+Anyway, thanks so much for reading. Take what you learned and go write some awesome shaders!
 
 -- Alex Harri

@@ -3,6 +3,7 @@ import { StyleOptions, useStyles } from "../utils/styles";
 import { MathSVG } from "./MathSVG";
 import { lerp } from "../math/lerp";
 import { clamp } from "../math/math";
+import { cssVariables } from "../utils/cssVariables";
 
 const firstUpper = (s: string) => s[0].toUpperCase() + s.slice(1);
 
@@ -58,6 +59,19 @@ const styles = ({ styled, theme }: StyleOptions) => ({
     pointer-events: none;
     transition: opacity 0.3s, transform 0.1s;
 
+    @media (max-width: ${cssVariables.mobileWidth}px) {
+      bottom: initial;
+      top: -8px;
+      transform-origin: 50% 100%;
+    }
+
+    &--left,
+    &--right {
+      @media (max-width: ${cssVariables.mobileWidth}px) {
+        top: -16px;
+      }
+    }
+
     &--value {
       background: linear-gradient(
         90deg,
@@ -68,6 +82,10 @@ const styles = ({ styled, theme }: StyleOptions) => ({
       );
       z-index: 101;
       padding: 0 32px;
+
+      @media (max-width: ${cssVariables.mobileWidth}px) {
+        opacity: 0.7;
+      }
     }
     &--left {
       left: 11px;
@@ -84,6 +102,10 @@ const styles = ({ styled, theme }: StyleOptions) => ({
 
     &--value&--down {
       transform: translate(-50%, -50%) scale(1.2);
+
+      @media (max-width: ${cssVariables.mobileWidth}px) {
+        transform: translate(-50%, -50%) translateY(-6px) scale(1.2);
+      }
     }
   `,
 });
@@ -102,6 +124,7 @@ interface NumberVariableProps {
   value: number;
   onValueChange: (value: number) => void;
   spec: Omit<NumberVariableSpec, "type">;
+  showValue?: boolean;
   width?: "small" | "normal";
 }
 
@@ -116,7 +139,7 @@ function defaultStep(min: number, max: number) {
 }
 
 export const NumberVariable: React.FC<NumberVariableProps> = (props) => {
-  const { dataKey, spec, value, onValueChange } = props;
+  const { dataKey, spec, value, onValueChange, showValue = true } = props;
   const [min, max] = spec.range;
 
   const s = useStyles(styles);
@@ -153,6 +176,8 @@ export const NumberVariable: React.FC<NumberVariableProps> = (props) => {
         onMouseUp={() => setDown(false)}
         onMouseEnter={() => setHover(true)}
         onMouseLeave={() => setHover(false)}
+        onTouchStart={() => setDown(true)}
+        onTouchEnd={() => setDown(false)}
       >
         <input
           type="range"
@@ -162,18 +187,25 @@ export const NumberVariable: React.FC<NumberVariableProps> = (props) => {
           onChange={(e) => onValueChange(Number(e.target.value))}
           step={step}
         />
-        <span className={s("label", { left: true, down, hover })} style={{ opacity: lOpacity }}>
-          {format(min, step, spec.format)}
-        </span>
-        <span className={s("label", { right: true, down, hover })} style={{ opacity: rOpacity }}>
-          {format(max, step, spec.format)}
-        </span>
-        <span
-          className={s("label", { value: true, down, hover })}
-          style={{ left: `calc(${lerp(11, -11, t)}px + ${t * 100}%)` }}
-        >
-          {format(value, step, spec.format)}
-        </span>
+        {showValue && (
+          <>
+            <span className={s("label", { left: true, down, hover })} style={{ opacity: lOpacity }}>
+              {format(min, step, spec.format)}
+            </span>
+            <span
+              className={s("label", { right: true, down, hover })}
+              style={{ opacity: rOpacity }}
+            >
+              {format(max, step, spec.format)}
+            </span>
+            <span
+              className={s("label", { value: true, down, hover })}
+              style={{ left: `calc(${lerp(11, -11, t)}px + ${t * 100}%)` }}
+            >
+              {format(value, step, spec.format)}
+            </span>
+          </>
+        )}
       </div>
     </label>
   );

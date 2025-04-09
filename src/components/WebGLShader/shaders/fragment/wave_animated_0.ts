@@ -6,27 +6,28 @@ const createFragmentShader: CreateFragmentShader = () => {
       label: "math:S",
       range: [25, 150],
       value: 25,
-      remap: [1, 6],
       step: 5,
     },
   };
   const shader = /* glsl */ `
     precision mediump float;
 
-    uniform float u_time; // Time in seconds
+    uniform float u_time;
+    uniform float u_w;
+    uniform float u_h;
+
+    float time = u_time / 25.0;
 
     const float PI = ${Math.PI.toFixed(8)};
 
-    const float CANVAS_HEIGHT = 150.0;
-    const float Y = CANVAS_HEIGHT * 0.5;
-    const float A = 15.0;
-    const float L = 75.0;
-    const float S = 25.0;
+    float MID_Y = u_h * 0.5;
+    float A = u_h * 0.1;
+    float L = u_w * 0.5;
+    float S = 25.0;
 
-    const float W = (2.0 * PI) / L; // Wave length multiplier
+    float FREQUENCY = (2.0 * PI) / L;
 
     const vec3 white = vec3(1.0, 1.0, 1.0);
-
 
     void main() {
       vec3 color_1 = vec3(0.7, 0.1, 0.4);
@@ -34,15 +35,14 @@ const createFragmentShader: CreateFragmentShader = () => {
       
       float x = gl_FragCoord.x;
       float y = gl_FragCoord.y;
-      float t = y / (CANVAS_HEIGHT - 1.0);
+      float t = y / (u_h - 1.0);
 
       vec3 color = mix(color_1, color_2, t);
 
-      float curve_y = Y + sin((x + u_time * S) * W) * A;
+      float curve_y = MID_Y + sin((x + time * S) * FREQUENCY) * A;
       float alpha = (sign(curve_y - y) + 1.0) / 2.0;
 
       color = mix(color, white, alpha);
-
       gl_FragColor = vec4(color, 1.0);
     }
   `;

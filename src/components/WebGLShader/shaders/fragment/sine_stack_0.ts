@@ -7,7 +7,6 @@ const createFragmentShader: CreateFragmentShader = (_) => {
     uniform float u_time;
     uniform float u_h;
     
-    const float PI = 3.14159, TAU = PI * 2.0;
     float WAVE_HEIGHT = u_h * 0.16;
 
     float noise(float x) {
@@ -16,8 +15,6 @@ const createFragmentShader: CreateFragmentShader = (_) => {
       
       float sum = 0.0;
       sum += sin(x * L * 1.0 + u_time * 1.0 * S) * 1.0;
-      
-      // up-down wave
       return sum;
     }
 

@@ -28,7 +28,6 @@ import { SubscribeToNewsletter } from "../../components/SubscribeToNewsletter/Su
 import { usePostWatcher } from "../../utils/watcher-client";
 import { Code } from "../../components/Code/Code";
 import { MediaQuery } from "../../components/MediaQuery/MediaQuery";
-import { usePreserveViewportOnResize } from "../../utils/hooks/usePreserveViewportOnScroll";
 import { WebGLShaderLoader } from "../../components/WebGLShader/WebGLShaderLoader";
 
 function firstUpper(s: string) {
@@ -36,11 +35,11 @@ function firstUpper(s: string) {
   return s[0].toUpperCase() + s.slice(1);
 }
 
-function propertiesToFirstUpper<K extends string, T>(record: Record<K, T>): Record<K, T> {
+function propertiesToFirstUpper<T extends Record<string, any>>(record: T): T {
   return Object.entries(record).reduce((out, [key, value]) => {
-    out[firstUpper(key) as K] = value as T;
+    out[firstUpper(key) as keyof T] = value;
     return out;
-  }, {} as Record<K, T>);
+  }, {} as T);
 }
 
 // Custom components/renderers to pass to MDX.
@@ -49,7 +48,6 @@ function propertiesToFirstUpper<K extends string, T>(record: Record<K, T>): Reco
 // here.
 const baseComponents = {
   ...propertiesToFirstUpper(Code),
-  Code,
   a: Link,
   pre: withScriptedEditor(Pre, (props) => {
     const language = props.children.props.className?.split("-")[1] ?? "text";
@@ -96,7 +94,6 @@ export function createPage(customComponents: Record<string, React.FC<any>>) {
   };
   return function PostPage(props: Props) {
     const source = usePostWatcher({ ...props, postsPath: "posts/" });
-    usePreserveViewportOnResize();
     const scope = source.scope! as unknown as FrontMatter;
 
     const pathName = scope.publishedAt ? `/blog/${props.slug}` : `/blog/draft/${props.slug}`;

@@ -8,25 +8,21 @@ const createFragmentShader: CreateFragmentShader = (_) => {
     uniform float u_time;
     uniform float u_h;
 
-    const float PI = 3.14159, TAU = PI * 2.0;
-    const float L = 0.019;
-    const float S = 0.5;
     float WAVE_HEIGHT = 0.128 * u_h;
-
+    
     float noise(float l, float s, float a) {
-      float x = gl_FragCoord.x;
-      return sin(x * (L / l) + u_time * s * S) * a;
+      const float L = 0.019;
+      const float S = 0.5;
+      return sin(gl_FragCoord.x * (L / l) + u_time * s * S) * a;
     }
 
     float calc_alpha(float noise_fac, float h, int i) {
-      float waveY = u_h * (0.52 + float(i) * 0.21) + noise_fac * WAVE_HEIGHT * h;
-      float dist = waveY - gl_FragCoord.y;
+      float wave_y = u_h * (0.52 + float(i) * 0.21) + noise_fac * WAVE_HEIGHT * h;
+      float dist = wave_y - gl_FragCoord.y;
 
       float alpha = 1.0;
-
       alpha *= clamp(3.7 + dist, 0.0, 1.0);
       alpha *= clamp(0.0 - dist, 0.0, 1.0);
-
       return alpha;
     }
 

@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { cssVariables } from "../cssVariables";
 
 const createUseViewportWidth = (isomorphic: boolean) => () => {
   const [width, setWidth] = useState<number | null>(() => {
@@ -25,5 +26,5 @@ export const useIsomorphicViewportWidth = createUseViewportWidth(true);
 
 export const useIsMobile = () => {
   const width = useViewportWidth();
-  return !!(width && width <= 800);
+  return !!(width && width <= cssVariables.mobileWidth);
 };

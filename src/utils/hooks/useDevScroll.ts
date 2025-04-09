@@ -1,10 +1,50 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 
-const key = "__scroll_dev__";
+const SCROLL_KEY = "__scroll_dev__";
+const IS_DEV = process.env.NODE_ENV === "development";
 
-export function useDevScroll() {
+function usePreserveScrollOnResize() {
+  const topElementRef = useRef<Element | null>(null);
+  const topOffsetRef = useRef(0);
+
   useEffect(() => {
-    const initialScrollY = Number(sessionStorage.getItem(key));
+    if (!IS_DEV) return;
+
+    const findTopElement = () => {
+      const main = document.querySelector("main")!;
+      for (const el of [...main.children]) {
+        const { top } = el.getBoundingClientRect();
+        if (top >= 0) {
+          topElementRef.current = el;
+          topOffsetRef.current = top;
+          break;
+        }
+      }
+    };
+
+    const handleResize = () => {
+      if (topElementRef.current) {
+        const rect = topElementRef.current.getBoundingClientRect();
+        const offsetChange = rect.top - topOffsetRef.current;
+        window.scrollBy(0, offsetChange);
+      }
+    };
+
+    window.addEventListener("resize", handleResize);
+    window.addEventListener("scroll", findTopElement);
+
+    return () => {
+      window.removeEventListener("resize", handleResize);
+      window.removeEventListener("scroll", findTopElement);
+    };
+  }, []);
+}
+
+function useRestoreScrollOnReload() {
+  useEffect(() => {
+    if (!IS_DEV) return;
+
+    const initialScrollY = Number(sessionStorage.getItem(SCROLL_KEY));
     if (Number.isFinite(initialScrollY)) {
       window.scrollTo(0, initialScrollY);
     }
@@ -14,7 +54,7 @@ export function useDevScroll() {
 
     const interval = window.setInterval(() => {
       if (scrolled) {
-        sessionStorage.setItem(key, String(window.scrollY));
+        sessionStorage.setItem(SCROLL_KEY, String(window.scrollY));
       }
       scrolled = false;
     }, 500);
@@ -25,4 +65,9 @@ export function useDevScroll() {
       window.clearInterval(interval);
     };
   }, []);
+}
+
+export function useDevScroll() {
+  useRestoreScrollOnReload();
+  usePreserveScrollOnResize();
 }

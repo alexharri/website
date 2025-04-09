@@ -38,7 +38,7 @@ const createFragmentShader: CreateFragmentShader = () => {
       sum = clamp(sum, 0.0, 1.0);
 
       float lightness = clamp(0.0, 1.0, sum);
-      gl_FragColor = vec4(lightness, lightness, lightness, 1.0);
+      gl_FragColor = vec4(vec3(lightness), 1.0);
     }
   `;
   return { shader, uniforms };

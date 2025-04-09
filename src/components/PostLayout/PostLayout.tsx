@@ -25,6 +25,7 @@ const Styles = ({ styled }: StyleOptions) => ({
       max-width: ${cssVariables.contentWidth - cssVariables.contentPadding * 2}px;
       margin-left: auto;
       margin-right: auto;
+      text-wrap: pretty;
     }
 
     & > iframe {
