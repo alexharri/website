@@ -8,7 +8,6 @@ const createFragmentShader: CreateFragmentShader = (_) => {
     uniform float u_time;
     uniform float u_h;
 
-    const float PI = 3.14159, TAU = PI * 2.0;
     const float L = 0.019;
     const float S = 0.5;
     float WAVE_HEIGHT = 0.188 * u_h;
