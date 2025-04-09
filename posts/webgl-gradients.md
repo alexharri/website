@@ -1221,9 +1221,9 @@ This gradient is a <Html>{"<div>"}</Html> element with its background set to thi
 ```css
 background: linear-gradient(
   90deg,
-  rgb(8, 0, 143) 0%,
-  rgb(250, 0, 32) 50%,
-  rgb(255, 204, 43) 100%
+  rgb(  8,   0, 143)   0%,
+  rgb(250,   0,  32)  50%,
+  rgb(255, 204,  43) 100%
 );
 ```
 
