@@ -731,7 +731,7 @@ const float L = 0.015;
 const float S = 0.6;
 const float A = 32.0;
 
-float y = sin(x * L + u_time * S) * A;
+float sum = sin(x * L + u_time * S) * A;
 ```
 
 They produce the following wave:
@@ -743,12 +743,12 @@ This wave has the rough shape of what I want the final wave to look like, so the
 I then add more sine waves that use the baseline $L$, $S$, $A$ values multiplied by some constants. After some trial and error, I ended up with the following:
 
 ```glsl
-float y = 0.0;
-y += sin(x * (L / 1.000) + u_time *  0.90 * S) * A * 0.64;
-y += sin(x * (L / 1.153) + u_time *  1.15 * S) * A * 0.40;
-y += sin(x * (L / 1.622) + u_time * -0.75 * S) * A * 0.48;
-y += sin(x * (L / 1.871) + u_time *  0.65 * S) * A * 0.43;
-y += sin(x * (L / 2.013) + u_time * -1.05 * S) * A * 0.32;
+float sum = 0.0;
+sum += sin(x * (L / 1.000) + u_time *  0.90 * S) * A * 0.64;
+sum += sin(x * (L / 1.153) + u_time *  1.15 * S) * A * 0.40;
+sum += sin(x * (L / 1.622) + u_time * -0.75 * S) * A * 0.48;
+sum += sin(x * (L / 1.871) + u_time *  0.65 * S) * A * 0.43;
+sum += sin(x * (L / 2.013) + u_time * -1.05 * S) * A * 0.32;
 ```
 
 <SmallNote label="">Observe how $S$ is multiplied by a negative number for waves 3 and 5. Making some of the waves travel in the opposite direction prevents the final wave from feeling as if it's moving in one direction at a constant rate.</SmallNote>
@@ -839,7 +839,7 @@ const float A = 40.0;
 
 float x = gl_FragCoord.x;
 
-float curve_y = Y + simplex_noise(x * L, u_time * S) * A;
+float curve_y = MID_Y + simplex_noise(x * L, u_time * S) * A;
 ```
 
 This gives us a smooth animated wave:
@@ -871,11 +871,11 @@ const float L = 0.0018;
 const float S = 0.04;
 const float A = 40.0;
 
-float y = 0.0;
-y += simplex_noise(x * (L / 1.00), u_time * S * 1.00)) * A * 0.85;
-y += simplex_noise(x * (L / 1.30), u_time * S * 1.26)) * A * 1.15;
-y += simplex_noise(x * (L / 1.86), u_time * S * 1.09)) * A * 0.60;
-y += simplex_noise(x * (L / 3.25), u_time * S * 0.89)) * A * 0.40;
+float noise = 0.0;
+noise += simplex_noise(x * (L / 1.00), u_time * S * 1.00)) * A * 0.85;
+noise += simplex_noise(x * (L / 1.30), u_time * S * 1.26)) * A * 1.15;
+noise += simplex_noise(x * (L / 1.86), u_time * S * 1.09)) * A * 0.60;
+noise += simplex_noise(x * (L / 3.25), u_time * S * 0.89)) * A * 0.40;
 ```
 
 This produces a wave that feels natural, yet visually interesting.
@@ -889,11 +889,11 @@ To make the wave flow left, we can add <Gl>u_time</Gl> to the <Gl>x</Gl> compone
 ```glsl
 const float F = 0.043;
 
-float y = 0.0;
-y += simplex_noise(x * (L / 1.00) + F * u_time, ...) * ...;
-y += simplex_noise(x * (L / 1.30) + F * u_time, ...) * ...;
-y += simplex_noise(x * (L / 1.86) + F * u_time, ...) * ...;
-y += simplex_noise(x * (L / 3.25) + F * u_time, ...) * ...;
+float noise = 0.0;
+noise += simplex_noise(x * (L / 1.00) + F * u_time, ...) * ...;
+noise += simplex_noise(x * (L / 1.30) + F * u_time, ...) * ...;
+noise += simplex_noise(x * (L / 1.86) + F * u_time, ...) * ...;
+noise += simplex_noise(x * (L / 3.25) + F * u_time, ...) * ...;
 ```
 
 This adds a subtle flow to the wave. Try changing the amount of flow to feel the difference it makes:
