@@ -1410,7 +1410,7 @@ In our shader, we'll declare our sampler via a uniform. I'll name it <Gl>u_gradi
 uniform sampler2D u_gradient;
 ```
 
-On the JavaScript side, you could set <Gl>u_gradient</Gl> to use our <Gl>texture</Gl> like so:
+On the JavaScript side, we'll make <Gl>u_gradient</Gl> point to our <Gl>texture</Gl> like so:
 
 ```ts
 const gradientUniformLocation = gl.getUniformLocation(program, "u_gradient");
