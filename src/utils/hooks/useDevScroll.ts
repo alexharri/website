@@ -30,6 +30,8 @@ function usePreserveScrollOnResize() {
       }
     };
 
+    findTopElement();
+
     window.addEventListener("resize", handleResize);
     window.addEventListener("scroll", findTopElement);
 
