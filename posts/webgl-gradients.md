@@ -907,7 +907,7 @@ I think we've got a good-looking wave. Let's move on to the next step.
 
 ## Multiple waves
 
-Let's update our shader to include multiple waves. As a first step, I'll create a reusable <Gl>wave_alpha</Gl> function that takes in a $y$ position and height for the wave and returns an alpha value.
+Let's update our shader to include multiple waves. As a first step, I'll create a reusable <Gl method>wave_alpha</Gl> function that takes in a $y$ position and height for the wave and returns an alpha value.
 
 ```glsl
 float wave_alpha(float Y, float height) {
@@ -927,7 +927,7 @@ float wave_noise() {
 }
 ```
 
-We'll use that to calculate the wave's $y$ position and the pixel's distance to it:
+We'll use that in <Gl method>wave_alpha</Gl> to calculate the wave's $y$ position and the pixel's distance to it:
 
 ```glsl
 float wave_alpha(float Y, float wave_height) {
