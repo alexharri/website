@@ -4,6 +4,7 @@ import { MathSVG } from "./MathSVG";
 import { lerp } from "../math/lerp";
 import { clamp } from "../math/math";
 import { cssVariables } from "../utils/cssVariables";
+import { useIsMobile } from "../utils/hooks/useViewportWidth";
 
 const firstUpper = (s: string) => s[0].toUpperCase() + s.slice(1);
 
@@ -57,7 +58,7 @@ const styles = ({ styled, theme }: StyleOptions) => ({
     line-height: 1;
     transform-origin: 50% 0%;
     pointer-events: none;
-    transition: opacity 0.3s, transform 0.1s;
+    transition: opacity 0.3s, transform 0.1s, top 0.1s;
 
     @media (max-width: ${cssVariables.mobileWidth}px) {
       bottom: initial;
@@ -68,7 +69,13 @@ const styles = ({ styled, theme }: StyleOptions) => ({
     &--left,
     &--right {
       @media (max-width: ${cssVariables.mobileWidth}px) {
-        top: -16px;
+        top: -8px;
+      }
+    }
+    @media (max-width: ${cssVariables.mobileWidth}px) {
+      &--left&--down,
+      &--right&--down {
+        top: -15px !important;
       }
     }
 
@@ -158,13 +165,19 @@ export const NumberVariable: React.FC<NumberVariableProps> = (props) => {
   const t = (value - min) / (max - min);
   const step = spec.step ?? defaultStep(min, max);
 
+  const isMobile = useIsMobile();
+
   const ldist = t;
   const rdist = 1 - t;
   let lOpacity = clamp(ldist * 12 - 3, 0, 1);
   let rOpacity = clamp(rdist * 12 - 3, 0, 1);
-  if (!down && !hover) {
+  if (!down && !(hover && !isMobile)) {
     lOpacity = 0;
     rOpacity = 0;
+  }
+  if (isMobile) {
+    lOpacity *= 0.7;
+    rOpacity *= 0.7;
   }
 
   return (
@@ -189,13 +202,10 @@ export const NumberVariable: React.FC<NumberVariableProps> = (props) => {
         />
         {showValue && (
           <>
-            <span className={s("label", { left: true, down, hover })} style={{ opacity: lOpacity }}>
+            <span className={s("label", { left: true, down })} style={{ opacity: lOpacity }}>
               {format(min, step, spec.format)}
             </span>
-            <span
-              className={s("label", { right: true, down, hover })}
-              style={{ opacity: rOpacity }}
-            >
+            <span className={s("label", { right: true, down })} style={{ opacity: rOpacity }}>
               {format(max, step, spec.format)}
             </span>
             <span

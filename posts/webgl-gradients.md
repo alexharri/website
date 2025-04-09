@@ -78,9 +78,9 @@ function mix(a: number, b: number, t: number) {
 }
 ```
 
-<SmallNote label="">The mix function is often called "lerp" -- short for linear interpolation</SmallNote>
+<SmallNote label="">The mix function is often called "lerp" -- short for linear interpolation.</SmallNote>
 
-To implement a <Ts method>mix</Ts> function for two colors, we'd mix each component of the colors. To mix two RGB colors, for example, we'd mix the red, green, and blue channels.
+A <Ts method>mix</Ts> function for two colors works the same way, except we mix the color components. To mix two RGB colors, for example, we'd mix the red, green, and blue channels.
 
 ```ts
 function mix(a: Color, b: Color, t: number) {
@@ -116,7 +116,7 @@ This produces the following effect:
 
 Those waves are very thin! That's because we're oscillating between red and blue every $\pi$ pixels.
 
-We can control the rate of oscillation by defining a [frequency][frequency] multiplier. It will determine over how many pixels the gradient oscillates from red to blue and red again. To produce a wavelength of $L$ pixels we set the frequency multiplier to $\dfrac{2\pi}{L}$:
+We can control the rate of oscillation by defining a [frequency][frequency] multiplier. It will determine over how many pixels the gradient oscillates from red to blue and red again. To produce a wavelength of $L$ pixels, we'll set the frequency multiplier to $\dfrac{2\pi}{L}$:
 
 [frequency]: https://en.wikipedia.org/wiki/Frequency
 
