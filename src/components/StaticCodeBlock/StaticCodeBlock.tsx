@@ -12,6 +12,7 @@ import { parseColor } from "../../utils/color";
 // Add C# syntax highlighting
 (typeof global !== "undefined" ? global : (window as any)).Prism = Prism;
 require("prismjs/components/prism-csharp");
+require("prismjs/components/prism-glsl");
 
 /**
  * A markdown code block like so:

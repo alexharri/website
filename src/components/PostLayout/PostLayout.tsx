@@ -1,5 +1,6 @@
 import { cssVariables } from "../../utils/cssVariables";
 import { StyleOptions, useStyles } from "../../utils/styles";
+import { useDevScroll } from "../../utils/hooks/useDevScroll";
 
 const Styles = ({ styled }: StyleOptions) => ({
   main: styled.css`
@@ -24,6 +25,7 @@ const Styles = ({ styled }: StyleOptions) => ({
       max-width: ${cssVariables.contentWidth - cssVariables.contentPadding * 2}px;
       margin-left: auto;
       margin-right: auto;
+      text-wrap: pretty;
     }
 
     & > iframe {
@@ -41,6 +43,7 @@ const Styles = ({ styled }: StyleOptions) => ({
     & > .pre,
     & > .image,
     & > .chart,
+    & > .canvas,
     & > table {
       & + .note,
       & + [data-script-id] + .note {
@@ -68,6 +71,10 @@ const Styles = ({ styled }: StyleOptions) => ({
         max-width: initial;
       }
     }
+
+    .monospace {
+      font-family: ${cssVariables.fontMonospace};
+    }
   `,
 });
 
@@ -77,6 +84,8 @@ interface Props {
 
 export const PostLayout: React.FC<Props> = (props) => {
   const s = useStyles(Styles);
+
+  useDevScroll();
 
   return <main className={s("main")}>{props.children}</main>;
 };

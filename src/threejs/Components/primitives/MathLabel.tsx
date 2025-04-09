@@ -12,10 +12,13 @@ interface Props {
   position: IVector3;
   normal?: IVector3;
   scale?: number;
+  autoScale?: boolean;
   offset?: IVector3;
 }
 
 export const MathLabel: React.FC<Props> = (props) => {
+  const autoScale = props.autoScale ?? true;
+
   const userScale = props.scale ?? 1;
 
   const THREE = useContext(ThreeContext);
@@ -64,9 +67,9 @@ export const MathLabel: React.FC<Props> = (props) => {
 
     // Make label appear fixed-size
     const distance = group.position.distanceTo(state.camera.position);
-    const scale = distance * userScale * scaleFac;
-    const { x, y, z } = parseVector(THREE, props.position);
+    const scale = autoScale ? distance * userScale * scaleFac : userScale * 0.06;
     group.scale.set(scale, scale, scale);
+    const { x, y, z } = parseVector(THREE, props.position);
     group.position.set(x, y, z);
 
     if (props.normal) {

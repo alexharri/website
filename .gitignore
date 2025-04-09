@@ -42,3 +42,6 @@ next-env.d.ts
 
 # posts not tracked in git yet
 posts/encoding-icelandic-language-rules.md
+
+# Python
+__pycache__

@@ -50,6 +50,7 @@ type Variables<V extends VariablesOptions> = {
 };
 
 interface SceneComponentProps<V extends VariablesOptions> {
+  scene: THREE.Scene;
   camera: THREE.PerspectiveCamera;
   variables: Variables<V>;
 }
@@ -94,6 +95,10 @@ export function createScene<V extends VariablesOptions>(
 
     const [down, setDown] = useState(false);
 
+    const threeScene = useMemo(() => {
+      return new THREE.Scene();
+    }, [visible]);
+
     const camera = useMemo(() => {
       const scale = 1 - (targetHeight / 500) * 0.13;
       const fov = targetHeight / 10;
@@ -102,7 +107,7 @@ export function createScene<V extends VariablesOptions>(
       const dist = -16.8;
       const angleRad = angle * DEG_TO_RAD;
       const xRotationRad = xRotation * DEG_TO_RAD;
-      const rot = new THREE.Euler(angleRad, xRotationRad, 0, "XYZ");
+      const rot = new THREE.Euler(angleRad, xRotationRad, 0, "YXZ");
       const pos = new THREE.Vector3(0, 0, dist);
       pos.applyEuler(rot);
       pos.multiplyScalar(scale);
@@ -179,6 +184,7 @@ export function createScene<V extends VariablesOptions>(
                 userSelect: "none",
                 cursor: down ? "grabbing" : "grab",
               }}
+              scene={threeScene}
               camera={camera}
               onMouseDown={() => setDown(true)}
               onMouseUp={() => setDown(false)}
@@ -205,7 +211,7 @@ export function createScene<V extends VariablesOptions>(
               />
 
               <mesh position={[0, yOffset, 0]}>
-                <Component camera={camera} variables={variables} />
+                <Component camera={camera} variables={variables} scene={threeScene} />
               </mesh>
             </FIBER.Canvas>
           )}
@@ -224,6 +230,7 @@ export function createScene<V extends VariablesOptions>(
                     value={value as number}
                     onValueChange={(value) => setVariableValue(key, value)}
                     spec={spec}
+                    showValue={false}
                   />
                 );
               if (spec.type === "normal") {

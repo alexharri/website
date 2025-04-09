@@ -77,7 +77,7 @@ export default createScene(
   },
   {
     variables: {
-      rot: { label: "Angle of red plane", type: "number", value: 0.3, range: [0, 1] },
+      rot: { label: "Angle of red plane", type: "number", value: 0.3, range: [0, 1], step: 0.01 },
     },
   },
 );

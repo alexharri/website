@@ -3,6 +3,7 @@ export const cssVariables = {
   fontFamily: "'Fira Sans', sans-serif",
   contentWidth: 750,
   contentPadding: 24,
+  mobileWidth: 800,
 };
 
 const text400 = "#6691b5";
