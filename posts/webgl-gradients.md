@@ -1814,7 +1814,7 @@ I hope this was a good introduction to writing shaders, and I hope I provided yo
 
 At the beginning of the post I promised to link to the final shader code, so [here it is][final_shader_code].
 
-[final_shader_code]: https://github.com/alexharri/website/blob/156a9e3ca021f5abc4b8a55fd66c4a16657bf50d/src/components/WebGLShader/shaders/fragment/final.ts
+[final_shader_code]: https://github.com/alexharri/website/blob/eb9551dd73126857045035b378b194dbf923c675/src/components/WebGLShader/shaders/fragment/final.ts
 
 The final shader includes a few additional elements that were not covered in the post. For example, the blur is calculated in multiple parts using an exponent range, adding a "haziness" element to the effect. I also added an oscillating "blur bias" to introduce periods of global blurriness and sharpness.
 
