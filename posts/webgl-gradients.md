@@ -1261,7 +1261,7 @@ vec3 calc_color(float t) {
 }
 ```
 
-Now that we have a function <Gl method>calc_color</Gl> that maps $t$ values to the gradient, we can easily map <Gl method>background_noise</Gl> to it:
+Now that we have a <Gl method>calc_color</Gl> function that maps $t$ values to the gradient, we can easily map <Gl method>background_noise</Gl> to it:
 
 ```glsl
 float t = background_noise();
