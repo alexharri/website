@@ -1824,6 +1824,11 @@ Take a look at this black-and-white version of the final effect and see if you c
 
 I didn't cover these additional elements because they're not core to the effect -- they just add a layer of refinement. There are loads of ways in which you could tweak or add to the effect. I tried tons of ideas and kept those around because they worked very well. I suggest tweaking the code and trying to add some refinements yourself!
 
-Anyway, thanks so much for reading. Take what you learned and go write some awesome shaders!
+Huge thanks to my friends, [Gunnlaugur Þór Briem][gthb_linkedin] and [Eiríkur Fannar Torfason][eirikur_dev], for reading a draft version of this post -- they provided great feedback.
+
+[gthb_linkedin]: https://www.linkedin.com/in/gunnlaugur-briem/
+[eirikur_dev]: https://eirikur.dev/
+
+Thanks so much for reading. Take what you learned and go write some awesome shaders!
 
 -- Alex Harri
