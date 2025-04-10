@@ -1,7 +1,7 @@
 ---
 title: "Let's build a flowing WebGL gradient"
 description: "An introduction to writing WebGL shaders using gradient noise and cool math."
-image: ""
+image: "/images/og-webgl-gradients.png"
 publishedAt: ""
 tags: ["WebGL", "GLSL", "Mathematics", "TypeScript"]
 ---
