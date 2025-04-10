@@ -1,6 +1,6 @@
 ---
-title: "Building a flowing gradient effect with WebGL"
-description: ""
+title: "Let's build a flowing WebGL gradient"
+description: "An introduction to writing WebGL shaders using gradient noise and cool math."
 image: ""
 publishedAt: ""
 tags: ["WebGL", "GLSL", "Mathematics", "TypeScript"]
