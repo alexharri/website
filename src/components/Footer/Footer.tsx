@@ -17,7 +17,7 @@ export const Footer = () => {
             <p className={s("title")}>
               <a href="/">Alex Harri</a>
             </p>
-            <p className={s("copyright")}>© 2024 Alex Harri Jónsson</p>
+            <p className={s("copyright")}>© 2025 Alex Harri Jónsson</p>
           </section>
           <section>
             <p className={s("sectionTitle")}>Links</p>
@@ -46,10 +46,10 @@ export const Footer = () => {
               <Link href="/">Home</Link>
             </p>
             <p className={s("link")}>
-              <Link href="/about">About</Link>
+              <Link href="/blog">Blog</Link>
             </p>
             <p className={s("link")}>
-              <Link href="/blog">Blog</Link>
+              <Link href="/about">About</Link>
             </p>
             <p className={s("link")}>
               <Link href="/snippets">Snippets</Link>

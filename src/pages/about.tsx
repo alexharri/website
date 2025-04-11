@@ -1,29 +1,20 @@
 import Head from "next/head";
-import { useEffect, useRef } from "react";
 import { Layout } from "../components/Layout";
 import { Link } from "../components/Link";
 import { PostLayout } from "../components/PostLayout/PostLayout";
 import { LINKS } from "../constants";
 import { StyleOptions, useStyles } from "../utils/styles";
 
-const SHOW_IMAGE_CAROUSEL = false;
-const images = [
-  "/images/me/iceland.jpg",
-  "/images/me/yellow-house.jpg",
-  "/images/me/tent.jpg",
-  "/images/me/waterfall.jpg",
-  "/images/me/at-sea.jpg",
-  "/images/me/budapest.jpg",
-];
-const N = images.length;
-const IMG_W = 130;
-const GAP = 32;
-const TOTAL_W = IMG_W * N + GAP * N;
-
 const Styles = ({ styled }: StyleOptions) => ({
+  imageWrapper: styled.css`
+    display: flex;
+    justify-content: center;
+    margin-bottom: 32px;
+  `,
+
   headline: styled.css`
-    margin-bottom: 16px;
     text-align: center;
+    margin-bottom: 8px;
   `,
 
   heading: styled.css`
@@ -31,47 +22,10 @@ const Styles = ({ styled }: StyleOptions) => ({
     text-align: center;
   `,
 
-  arkioVideo: styled.css`
-    width: 400px;
-    height: 230px;
-    border: 1px solid red;
-  `,
-
-  imageCarousel: styled.css`
-    margin: 0 auto 24px;
-    height: 360px;
-    display: flex;
-    flex-wrap: nowrap;
-    align-items: center;
-    justify-content: center;
-    gap: ${GAP}px;
-  `,
-
-  imageContainer: styled.css`
-    width: ${IMG_W}px;
-
-    &:nth-child(1) > img {
-      transform: translateX(0) rotate(2deg);
-    }
-    &:nth-child(2) > img {
-      transform: translateX(0) rotate(-1deg);
-    }
-    &:nth-child(3) > img {
-      transform: translateX(-3px) rotate(1.8deg);
-    }
-    &:nth-child(4) > img {
-      transform: translateX(4px) rotate(0.3deg);
-    }
-    &:nth-child(5) > img {
-      transform: translateX(7px) rotate(-1.4deg);
-    }
-    &:nth-child(6) > img {
-      transform: translateX(-4px) rotate(0.8deg);
-    }
-  `,
-
   image: styled.css`
-    width: 130px;
+    width: 160px;
+    border-radius: 8px;
+    margin: 0 auto;
   `,
 
   blockImage: styled.css`
@@ -110,109 +64,106 @@ const Styles = ({ styled }: StyleOptions) => ({
 export default function Page() {
   const s = useStyles(Styles);
 
-  const imageCarouselRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const imageCarousel = imageCarouselRef.current;
-    if (!imageCarousel) return;
-
-    const items = [...imageCarousel.children] as HTMLDivElement[];
-
-    let start = -1;
-
-    let unmounted = false;
-    const tick = () => {
-      if (unmounted) return;
-      requestAnimationFrame(tick);
-
-      if (window.innerWidth > TOTAL_W - IMG_W) {
-        imageCarousel.style.transform = "";
-        for (const item of items) {
-          item.style.transform = "";
-        }
-        start = -1;
-        return;
-      }
-
-      if (start === -1) start = Date.now();
-      const off = ((Date.now() - start) / 30) % TOTAL_W;
-
-      imageCarousel.style.transform = `translateX(${off}px)`;
-
-      for (const [i, item] of items.entries()) {
-        const pos = off + (IMG_W + GAP) * i;
-        const x = pos > TOTAL_W - (IMG_W + GAP) / 2 ? -TOTAL_W : 0;
-        item.style.transform = `translateX(${x}px)`;
-      }
-    };
-    tick();
-
-    return () => {
-      unmounted = true;
-    };
-  }, []);
-
   return (
     <Layout>
       <Head>
         <title>About me | Alex Harri Jónsson</title>
       </Head>
-      <h1 className={s("headline")}>About me</h1>
       <PostLayout>
+        <div className={s("imageWrapper")}>
+          <img src="/images/me.png" alt="An image of me" className={s("image")} />
+        </div>
+
+        <h1 className={s("headline")}>About me</h1>
         <p>
-          Hey, I'm Alex Harri. I write about software engineering topics like TypeScript,
-          performance, and mathematics. <Link href="/blog">View blog</Link>.
+          Hey, I'm Alex. I'm super interested in software & design — I've been writing about
+          software-adjacent topics since 2019 (<Link href="/blog">see blog</Link>
+          ).
         </p>
-        {SHOW_IMAGE_CAROUSEL && (
-          <div className={s("imageCarousel")} ref={imageCarouselRef}>
-            {images.map((image) => (
-              <div key={image} className={s("imageContainer")}>
-                <img src={image} className={s("image")} />
-              </div>
-            ))}
-          </div>
-        )}
+        <p>
+          I've been working as a software developer since early 2018, mostly at early-stage
+          startups. I'm currently working at <Link href="https://neckcare.com/">NeckCare</Link>.
+        </p>
+        <p>
+          Aside from that, I'm a soon-to-be father of one and I love physical activities of all
+          forms — I've been playing <Link href="https://en.wikipedia.org/wiki/Padel">padel</Link> a
+          lot lately with friends from GRID.
+        </p>
+
         <h2 className={s("heading")}>Career</h2>
         <p>
-          As a very early employee at <Link href="https://www.taktikal.com/">Taktikal</Link>—and
-          subsequently as a Tech Lead—I built our first front-end applications, their supporting web
-          services, and their CI/CD pipelines. That gave me valuable experience in building
-          applications from scratch and maintaining them as they evolve. I worked at Taktikal for 4
-          years.
+          As a very early employee at <Link href="https://www.taktikal.com/">Taktikal</Link> — and
+          subsequently as a Tech Lead — I played a big part in the development of Taktikal's first
+          products. I worked there for 4 years. Those were incredibly formative years — I gained
+          invaluable experience in building applications from scratch and maintaining them as they
+          evolve.
         </p>
         <p>
-          At <Link href="https://grid.is/">GRID</Link>, I worked on their JavaScript-based
-          spreadsheet engine running in the browser, their formula parser written in Rust, and wrote
-          some Python for the back-end.{" "}
+          I joined <Link href="https://grid.is/">GRID</Link> in 2022. I worked on their
+          JavaScript-based spreadsheet engine running in the browser, their formula parser written
+          in Rust, and I wrote some Python for the back-end.{" "}
           <Link href="/blog/grid-engine-performance" target="_blank">
             See <em>"Making GRID's spreadsheet engine 10% faster"</em>
           </Link>
           .
         </p>
         <p>
-          Right now I'm leading the development of <Link href="https://www.arkio.is/">Arkio's</Link>{" "}
-          modelling tools. Arkio is an architectural modeler and model reviewer written in C#. My
-          work involves lots of 3D geometry, mathematics (
+          After GRID, I spent a year and a half developing{" "}
+          <Link href="https://www.arkio.is/">Arkio's</Link> modeling tools (Arkio is an
+          architectural modeler and model reviewer written in C#). I learned a ton of 3D geometry
+          and mathematics there. A few months into the job I wrote{" "}
           <Link href="/blog/planes" target="_blank">
-            see <em>"Planes in 3D space"</em>
-          </Link>
-          ), and some fairly low-level C# code.
+            <em>"Planes in 3D space"</em>
+          </Link>{" "}
+          to share what I learned about the math behind planes.
+        </p>
+        <p>
+          I'm now working at <Link href="https://neckcare.com/">NeckCare</Link> with two of my
+          coworkers from GRID — they, and the rest of the team at NeckCare, are awesome people to
+          work with. I'm enjoying life a lot right now.
         </p>
         <h2 className={s("heading")}>Writing</h2>
         <p>
-          I've written about topics ranging from performance and mathematics to TypeScript and
-          monorepos.
+          My most popular post so far has been{" "}
+          <Link href="/blog/clipboard" target="_blank">
+            <em>"The web’s clipboard, and how it stores data of different types"</em>
+          </Link>
+          , which I wrote in 2024 . It looks at the evolution of the web's clipboard APIs, and their
+          limitations.
         </p>
         <p>
-          My first really popular post was{" "}
+          My first post of note was{" "}
           <Link href="/blog/vector-networks" target="_blank">
             <em>"The Engineering behind Figma's Vector Networks"</em>
           </Link>
-          , which I wrote back in 2019. It's a lengthy post covering multiple topics and it contains
-          over 200 diagrams and illustrations.
+          . It's a <em>lengthy</em> post covering many topics, containing over 200 diagrams and
+          illustrations.
         </p>
-        <p>I've written three posts about TypeScript so far:</p>
+        <p>
+          The first post I wrote containing interactive elements is{" "}
+          <Link href="/blog/multi-cursor-code-editing-animated-introduction" target="_blank">
+            <em>"Multi-cursor code editing: An animated introduction"</em>
+          </Link>
+          . Written in 2022, it uses animated instances of the VS code editor to demonstrate use
+          cases and techniques for multi-cursor code editing. This was quite a popular post!
+        </p>
+        <p>
+          I'm incredibly proud of my work on{" "}
+          <Link href="/blog/planes" target="_blank">
+            <em>"Planes in 3D space"</em>
+          </Link>
+          . That post contains over 50 interactive 3D illustrations, intended to provide a visual
+          and intuitive understanding of planes.
+        </p>
+        <p>I've written three posts about TypeScript:</p>
         <ul>
+          <li>
+            <Link href="/blog/typescript-structural-typing" target="_blank">
+              <em>"Why doesn't TypeScript properly type Object.keys?"</em>
+            </Link>{" "}
+            looks at TypeScript's structural type system and its constraints. This one was very
+            popular.
+          </li>
           <li>
             <Link href="/blog/build-schema-language-with-infer" target="_blank">
               <em>"Build your own schema language with TypeScript's infer keyword"</em>
@@ -220,34 +171,13 @@ export default function Page() {
             is a deep dive into TypeScript's <code>infer</code> keyword.
           </li>
           <li>
-            <Link href="/blog/typescript-structural-typing" target="_blank">
-              <em>"Why doesn't TypeScript properly type Object.keys?"</em>
-            </Link>{" "}
-            looks at TypeScript's structural type system and its constraints.
-          </li>
-          <li>
             <Link href="/blog/jsdoc-as-an-alternative-typescript-syntax" target="_blank">
               <em>"JSDoc as an alternative TypeScript syntax"</em>
             </Link>{" "}
-            explores how you can express TypeScript features using JSDoc comments.
+            explores how you can express TypeScript features using JSDoc comments. This one gets a
+            lot of traffic from Google, people look this up quite a bit.
           </li>
         </ul>
-        <p>
-          My first post containing interactive elements is{" "}
-          <Link href="/blog/multi-cursor-code-editing-animated-introduction" target="_blank">
-            <em>"Multi-cursor code editing: An animated introduction"</em>
-          </Link>
-          , which uses animated instances of the VS code editor to demonstrate use cases and
-          techniques for multi-cursor code editing.
-        </p>
-        <p>
-          Another post containing a lot of interactivity is{" "}
-          <Link href="/blog/planes" target="_blank">
-            <em>"Planes in 3D space"</em>
-          </Link>
-          . It contains over 50 interactive 3D illustrations, intended to provide a visual and
-          intuitive understanding of planes.
-        </p>
         <p>
           I've also written about{" "}
           <Link href="/blog/move-to-monorepo" target="_blank">
@@ -269,16 +199,9 @@ export default function Page() {
         </p>
         <h2 className={s("heading")}>Projects</h2>
         <p>
-          My personal projects can be found on{" "}
-          <Link href="https://github.com/alexharri">my GitHub page</Link>.
-        </p>
-        <p>
-          Notable project include an{" "}
-          <Link href="https://github.com/alexharri/animation-editor">animation editor</Link>, a
-          helper for Icelandic name declension called{" "}
-          <Link href="https://github.com/alexharri/beygla">Beygla</Link>, an experimental schema
-          builder called <Link href="https://github.com/alexharri/strema">Strema</Link>, and{" "}
-          <Link href="https://github.com/alexharri/website">this website</Link>.
+          Many of my personal projects, including{" "}
+          <Link href="https://github.com/alexharri/website">this website</Link>, can be found on my{" "}
+          <Link href="https://github.com/alexharri">GitHub page</Link>.
         </p>
         <h2 className={s("heading")}>Contact</h2>
         <p>
