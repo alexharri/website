@@ -92,8 +92,8 @@ export default function Page() {
 
         <h2 className={s("heading")}>Career</h2>
         <p>
-          As a very early employee at <Link href="https://www.taktikal.com/">Taktikal</Link> — and
-          subsequently as a Tech Lead — I played a big part in the development of Taktikal's first
+          As a very early employee at <Link href="https://www.taktikal.com/">Taktikal</Link>, and
+          subsequently as a Tech Lead, I played a big part in the development of Taktikal's first
           products. I worked there for 4 years. Those were incredibly formative years — I gained
           invaluable experience in building applications from scratch and maintaining them as they
           evolve.
@@ -128,7 +128,7 @@ export default function Page() {
           <Link href="/blog/clipboard" target="_blank">
             <em>"The web’s clipboard, and how it stores data of different types"</em>
           </Link>
-          , which I wrote in 2024 . It looks at the evolution of the web's clipboard APIs, and their
+          , which I wrote in 2024. It looks at the evolution of the web's clipboard APIs and their
           limitations.
         </p>
         <p>
