@@ -32,7 +32,7 @@ export default function Page(props: Props) {
         <title>Blog | Alex Harri Jónsson</title>
       </Head>
 
-      <h2>Popular posts</h2>
+      <h2 style={{ marginTop: 0 }}>Popular posts</h2>
 
       <div className={s("list")}>
         {props.popularPosts.map((post) => (
