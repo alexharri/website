@@ -175,7 +175,7 @@ export default function Page() {
               <em>"JSDoc as an alternative TypeScript syntax"</em>
             </Link>{" "}
             explores how you can express TypeScript features using JSDoc comments. This one gets a
-            lot of traffic from Google, people look this up quite a bit.
+            surprising amount of traffic from Google.
           </li>
         </ul>
         <p>
