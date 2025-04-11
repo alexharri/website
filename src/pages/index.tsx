@@ -14,13 +14,15 @@ const Styles = ({ styled }: StyleOptions) => ({
     display: flex;
     justify-content: space-between;
     align-items: flex-end;
-    margin-bottom: 32px;
+    margin-bottom: 16px;
 
     h1 {
+      font-size: 32px;
       margin: 0;
     }
+
     div {
-      margin-bottom: 6px;
+      margin-bottom: 3px;
       a {
         font-size: 18px;
       }
@@ -73,7 +75,7 @@ export default function Page(props: Props) {
         </Link>
       </div>
 
-      <hr style={{ margin: "80px 0" }} />
+      <div style={{ height: 96 }} />
 
       <AboutMe />
     </Layout>
