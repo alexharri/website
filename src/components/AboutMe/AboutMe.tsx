@@ -11,19 +11,20 @@ export const AboutMe = () => {
         <img src="/images/me.png" className={s("image")} />
       </div>
       <div className={s("right")}>
-        <p>Hey, I'm Alex Harri.</p>
         <p>
-          I write about software engineering topics like TypeScript, monorepos, performance, and
-          mathematics.
+          Hey, I'm Alex. I'm super interested in software and design. I've been writing about
+          software-adjacent topics since 2019.
         </p>
         <p>
-          I've been working as a software engineer in Iceland's vibrant startup scene for over 6
-          years. I'm currently working as a senior software engineer at Arkio, where I'm developing
-          Arkio's geometry core and editing tools.
-        </p>
-        <p>
-          You can read more about me, my writing, and my projects on my{" "}
-          <Link href="/about">about page</Link>.
+          You can checkout my writing on{" "}
+          <Link href="/blog">
+            <span className="monospace">/blog</span>
+          </Link>{" "}
+          or learn about me on my{" "}
+          <Link href="/about">
+            <span className="monospace">/about</span>
+          </Link>{" "}
+          page .
         </p>
       </div>
     </section>

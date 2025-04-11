@@ -76,7 +76,7 @@ export default function Page() {
 
         <h1 className={s("headline")}>About me</h1>
         <p>
-          Hey, I'm Alex. I'm super interested in software & design — I've been writing about
+          Hey, I'm Alex. I'm super interested in software and design — I've been writing about
           software-adjacent topics since 2019 (<Link href="/blog">see blog</Link>
           ).
         </p>

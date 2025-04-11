@@ -59,7 +59,7 @@ export default function Page(props: Props) {
       <div className={s("header")}>
         <h1>Popular posts</h1>
         <div>
-          <Link href="/blog">View all posts</Link>
+          <Link href="/blog#all-posts">View all posts</Link>
         </div>
       </div>
       <PostCarousel>
@@ -68,7 +68,7 @@ export default function Page(props: Props) {
         ))}
       </PostCarousel>
       <div className={s("viewAllPostsMobile")}>
-        <Link href="/blog">
+        <Link href="/blog#all-posts">
           View all posts <ArrowIcon16 direction="right" />
         </Link>
       </div>

@@ -6,6 +6,7 @@ import { Post } from "../../types/Post";
 import { getPopularPosts, getPosts } from "../../utils/blogPageUtils";
 import { StyleOptions, useStyles } from "../../utils/styles";
 import { PostListItem } from "../../components/PostListItem/PostListItem";
+import { SectionAnchor } from "../../components/SectionAnchor/SectionAnchor";
 
 interface Props {
   posts: Post[];
@@ -39,7 +40,9 @@ export default function Page(props: Props) {
         ))}
       </div>
 
-      <h2>All posts</h2>
+      <SectionAnchor id="all-posts">
+        <h2>All posts</h2>
+      </SectionAnchor>
 
       <div className={s("list")}>
         {props.posts.map((post) => (

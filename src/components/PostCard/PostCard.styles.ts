@@ -2,6 +2,7 @@ import { StyleOptions } from "../../utils/styles";
 
 export const PostCardStyles = ({ styled, theme }: StyleOptions) => ({
   container: styled.css`
+    width: 100%;
     display: flex;
     justify-content: stretch;
     align-items: stretch;
@@ -10,6 +11,7 @@ export const PostCardStyles = ({ styled, theme }: StyleOptions) => ({
   link: styled.css`
     color: inherit;
     display: block;
+    width: 100%;
     background: ${theme.background100};
     border: 1px solid ${theme.darkBlue400};
     border-radius: 4px;

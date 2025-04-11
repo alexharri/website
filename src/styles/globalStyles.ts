@@ -267,4 +267,8 @@ input[type="range"]::-moz-range-thumb {
   background: ${theme.text};
   border: 3px solid ${theme.background};
 }
+
+.monospace {
+  font-family: ${cssVariables.fontMonospace};
+}
 `;
