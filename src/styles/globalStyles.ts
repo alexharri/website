@@ -55,18 +55,30 @@ h1 {
   font-size: 40px;
   margin-top: 0;
   margin-bottom: 32px;
+  @media (max-width: ${cssVariables.mobileWidth}px) {
+    font-size: 32px;
+  }
 }
 h2 {
   font-size: 32px;
   margin: 32px 0 8px;
+  @media (max-width: ${cssVariables.mobileWidth}px) {
+    font-size: 26px;
+  }
 }
 h3 {
   font-size: 24px;
   margin: 28px 0 8px;
+  @media (max-width: ${cssVariables.mobileWidth}px) {
+    font-size: 22px;
+  }
 }
 h4 {
   font-size: 20px;
   margin: 24px 0 8px;
+  @media (max-width: ${cssVariables.mobileWidth}px) {
+    font-size: 18px;
+  }
 }
 h5 {
   font-size: 16px;
