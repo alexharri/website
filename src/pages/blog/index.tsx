@@ -2,24 +2,23 @@ import { GetStaticProps } from "next";
 import Head from "next/head";
 import { AboutMe } from "../../components/AboutMe/AboutMe";
 import { Layout } from "../../components/Layout";
-import { PostCard } from "../../components/PostCard/PostCard";
 import { Post } from "../../types/Post";
-import { getPosts } from "../../utils/blogPageUtils";
+import { getPopularPosts, getPosts } from "../../utils/blogPageUtils";
 import { StyleOptions, useStyles } from "../../utils/styles";
+import { PostListItem } from "../../components/PostListItem/PostListItem";
 
 interface Props {
   posts: Post[];
+  popularPosts: Post[];
 }
 
 const Styles = ({ styled }: StyleOptions) => ({
   list: styled.css`
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
+    margin-top: 16px;
+    margin-bottom: 48px;
+    display: flex;
+    flex-direction: column;
     gap: 16px;
-
-    @media (max-width: 670px) {
-      grid-template-columns: repeat(1, 1fr);
-    }
   `,
 });
 
@@ -31,11 +30,20 @@ export default function Page(props: Props) {
       <Head>
         <title>Blog | Alex Harri Jónsson</title>
       </Head>
-      <h1>All posts</h1>
+
+      <h2>Popular posts</h2>
+
+      <div className={s("list")}>
+        {props.popularPosts.map((post) => (
+          <PostListItem post={post} key={post.slug} />
+        ))}
+      </div>
+
+      <h2>All posts</h2>
 
       <div className={s("list")}>
         {props.posts.map((post) => (
-          <PostCard post={post} key={post.slug} />
+          <PostListItem post={post} key={post.slug} />
         ))}
       </div>
 
@@ -47,5 +55,10 @@ export default function Page(props: Props) {
 }
 
 export const getStaticProps: GetStaticProps<Props> = async () => {
-  return { props: { posts: getPosts("published") } };
+  return {
+    props: {
+      posts: getPosts("published"),
+      popularPosts: getPopularPosts(),
+    },
+  };
 };
