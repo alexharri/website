@@ -1,5 +1,5 @@
 ---
-title: "Let's build a flowing WebGL gradient"
+title: "A flowing WebGL gradient, deconstructed"
 description: "An introduction to writing WebGL shaders using gradient noise and cool math."
 image: "/images/og-webgl-gradients.png"
 publishedAt: ""
@@ -169,7 +169,7 @@ These two inputs -- time and the pixel's position -- will be the main components
 
 We'll spend the rest of the post writing a color function that will calculate a color for every pixel -- with the pixel's position and time as the function's inputs. Together, the colors of each pixel constitute a single frame of animation.
 
-<WebGLShader fragmentShader="final" width={1000} minWidth={600} height={300} maintainHeight={0.3} seed={43394} />
+<WebGLShader fragmentShader="final" width={1000} minWidth={600} height={300} maintainHeight={0.3} seed={43414} />
 
 But consider the amount of work that needs to be done. A $1{,}000 \times 300$ canvas<MediaQuery query="(min-width: 1000px)">, like the one above,</MediaQuery><MediaQuery query="(max-width: 999px)">, for example,</MediaQuery> contains $300{,}000$ pixels. That's $300{,}000$ invocations of our pixel function every frame -- a ton of work for a CPU to perform 60 times a second! This is where WebGL comes in.
 
@@ -195,7 +195,7 @@ There are two types of shaders, vertex shaders and fragment shaders, which serve
 
 <Note>
 <p>There's tons of boilerplate code involved in setting up a WebGL rendering pipeline. I'll mostly omit it so that we can stay focused on our main goal, which is creating a cool gradient effect.</p>
-<p>At the end of the post, I'll link to resources I found helpful in learning about how to set up and work with WebGL.</p>
+<p>Throughout this post, I'll link to resources I found helpful in learning about how to set up and work with WebGL.</p>
 </Note>
 
 
