@@ -2,7 +2,7 @@
 title: "A flowing WebGL gradient, deconstructed"
 description: "An introduction to writing WebGL shaders using gradient noise and cool math."
 image: "/images/og-webgl-gradients.png"
-publishedAt: ""
+publishedAt: "2025-04-12"
 tags: ["WebGL", "GLSL", "Mathematics", "TypeScript"]
 ---
 
