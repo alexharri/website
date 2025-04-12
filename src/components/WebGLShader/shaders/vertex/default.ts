@@ -1,5 +1,5 @@
 export default /* glsl */ `
-precision mediump float;
+precision highp float;
 attribute vec2 a_position;
 
 uniform vec2 u_resolution;

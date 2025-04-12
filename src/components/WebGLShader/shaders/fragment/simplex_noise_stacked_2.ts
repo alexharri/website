@@ -5,7 +5,7 @@ import { CreateFragmentShader, FragmentShaderUniforms } from "../types";
 const createFragmentShader: CreateFragmentShader = () => {
   const uniforms: FragmentShaderUniforms = {};
   const shader = /* glsl */ `
-    precision mediump float;
+    precision highp float;
 
     uniform float u_time;
 

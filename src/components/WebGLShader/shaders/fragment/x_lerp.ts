@@ -2,7 +2,7 @@ import { CreateFragmentShader } from "../types";
 
 const createFragmentShader: CreateFragmentShader = (_) => {
   return /* glsl */ `
-    precision mediump float;
+    precision highp float;
 
     uniform float u_w;
 

@@ -16,7 +16,7 @@ const createFragmentShader: CreateFragmentShader = (options) => {
   const uniforms: FragmentShaderUniforms = {};
 
   const shader = /* glsl */ `
-    precision mediump float;
+    precision highp float;
 
     uniform float u_time; // Time in seconds
     uniform float u_h;

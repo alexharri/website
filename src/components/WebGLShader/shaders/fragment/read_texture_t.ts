@@ -9,7 +9,7 @@ const createFragmentShader: CreateFragmentShader = () => {
     },
   };
   const shader = /* glsl */ `
-    precision mediump float;
+    precision highp float;
 
     uniform sampler2D u_gradient;
     uniform float u_x;

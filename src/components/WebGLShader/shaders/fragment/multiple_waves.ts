@@ -6,7 +6,7 @@ const createFragmentShader: CreateFragmentShader = (options) => {
   const { offsetScalar = 1 } = options as { offsetScalar?: number };
 
   return /* glsl */ `
-    precision mediump float;
+    precision highp float;
 
     uniform float u_time;
     uniform float u_h;
