@@ -51,6 +51,7 @@ export function getPopularPosts() {
   }, {} as Record<string, Post>);
 
   const popularPosts = [
+    "webgl-gradients",
     "planes",
     "clipboard",
     "typescript-structural-typing",
