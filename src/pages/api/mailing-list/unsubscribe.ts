@@ -2,7 +2,7 @@ import type { NextApiRequest, NextApiResponse } from "next";
 import { emailRegex } from "../../../utils/regex";
 import { MailingList } from "../../../mailing-list";
 
-export default async function subscribeHandler(req: NextApiRequest, res: NextApiResponse) {
+export default async function unsubscribeHandler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== "POST") {
     res.status(405).end();
     return;
@@ -25,10 +25,10 @@ export default async function subscribeHandler(req: NextApiRequest, res: NextApi
 
   try {
     const mailingList = new MailingList();
-    await mailingList.subscribe(email);
+    await mailingList.unsubscribe(email);
     res.status(200).end();
   } catch (e) {
     console.log(e);
-    res.status(500).json({ error: { message: "Failed to subscribe" } });
+    res.status(500).json({ error: { message: "Failed to unsubscribe" } });
   }
 }
