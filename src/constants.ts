@@ -6,3 +6,6 @@ export const LINKS = {
 export const IS_SERVER = typeof window === "undefined";
 
 export const WATCHER_PORT = 3000;
+
+export const POSTS_DIRNAME = "./posts";
+export const SNIPPETS_DIRNAME = "./snippets";

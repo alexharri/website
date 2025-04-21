@@ -1,17 +1,16 @@
 import fs from "fs";
 import path from "path";
 import matter from "gray-matter";
-import { postFileNames, POSTS_PATH } from "./mdxUtils";
 import { Post, PostDataStore } from "../types/Post";
 import { getMdxOptions } from "./mdx";
 import { adjustPostMetadata } from "./postMetadata";
+import { getPostContent, getPostFilePaths, getPostsDirectory } from "../helpers/content";
 
 export const getPosts = (type: "published" | "draft") => {
   const posts: Post[] = [];
 
-  for (const fileName of postFileNames) {
-    const filePath = path.join(POSTS_PATH, fileName);
-    const fileContent = fs.readFileSync(filePath);
+  for (const fileName of getPostFilePaths()) {
+    const fileContent = getPostContent(fileName);
 
     const { data } = matter(fileContent);
     adjustPostMetadata(data);
@@ -70,9 +69,9 @@ export function getPopularPosts() {
 
 export function getPostPaths(options: { type: "published" | "draft" }) {
   const draft = options.type === "draft";
-  const paths = postFileNames
+  const paths = getPostFilePaths()
     .filter((filePath) => {
-      const fileContent = fs.readFileSync(path.resolve(POSTS_PATH, filePath));
+      const fileContent = getPostContent(filePath);
       const { data } = matter(fileContent);
       adjustPostMetadata(data);
 
@@ -120,9 +119,10 @@ type Context = {
 export const getPostProps = async (ctx: Context) => {
   const params = ctx.params!;
 
-  let filePath = path.join(POSTS_PATH, `${params.slug}.mdx`);
+  const postsDirectory = getPostsDirectory();
+  let filePath = path.join(postsDirectory, `${params.slug}.mdx`);
   if (!fs.existsSync(filePath)) {
-    filePath = path.join(POSTS_PATH, `${params.slug}.md`);
+    filePath = path.join(postsDirectory, `${params.slug}.md`);
   }
 
   if (!fs.existsSync(filePath)) {
@@ -142,7 +142,7 @@ export const getPostProps = async (ctx: Context) => {
 
   let version = "0";
 
-  const versionFilePath = path.resolve(POSTS_PATH, "./.version", params.slug);
+  const versionFilePath = path.resolve(postsDirectory, "./.version", params.slug);
 
   if (fs.existsSync(versionFilePath)) {
     version = fs.readFileSync(versionFilePath, "utf-8");

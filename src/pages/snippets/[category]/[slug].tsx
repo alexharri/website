@@ -15,8 +15,8 @@ import { Pre, StaticCodeBlock } from "../../../components/StaticCodeBlock/Static
 import { FrontMatter } from "../../../types/FrontMatter";
 import { usePostWatcher } from "../../../utils/hooks/usePostWatcher";
 import { getMdxOptions } from "../../../utils/mdx";
-import { snippetFileNames, SNIPPETS_PATH } from "../../../utils/mdxUtils";
 import { adjustPostMetadata } from "../../../utils/postMetadata";
+import { getSnippetFilePaths, getSnippetsDirectory } from "../../../helpers/content";
 
 // Custom components/renderers to pass to MDX.
 // Since the MDX files aren't loaded by webpack, they have no knowledge of how
@@ -67,9 +67,10 @@ type Params = {
 export const getStaticProps: GetStaticProps<Props, Params> = async (ctx) => {
   const params = ctx.params!;
 
-  let filePath = path.join(SNIPPETS_PATH, params.category, `${params.slug}.mdx`);
+  const snippetsDirectory = getSnippetsDirectory();
+  let filePath = path.join(snippetsDirectory, params.category, `${params.slug}.mdx`);
   if (!fs.existsSync(filePath)) {
-    filePath = path.join(SNIPPETS_PATH, params.category, `${params.slug}.md`);
+    filePath = path.join(snippetsDirectory, params.category, `${params.slug}.md`);
   }
   const fileContent = fs.readFileSync(filePath);
 
@@ -83,7 +84,7 @@ export const getStaticProps: GetStaticProps<Props, Params> = async (ctx) => {
 
   let version = "0";
 
-  const versionFilePath = path.resolve(SNIPPETS_PATH, "./.version", params.slug);
+  const versionFilePath = path.resolve(snippetsDirectory, "./.version", params.slug);
 
   if (fs.existsSync(versionFilePath)) {
     version = fs.readFileSync(versionFilePath, "utf-8");
@@ -93,7 +94,7 @@ export const getStaticProps: GetStaticProps<Props, Params> = async (ctx) => {
 };
 
 export const getStaticPaths: GetStaticPaths<Params> = async () => {
-  const paths = snippetFileNames
+  const paths = getSnippetFilePaths()
     .map((path) => path.replace(/\.mdx?$/, ""))
     .map((path) => path.split("/"))
     .map(([category, slug]) => ({ params: { category, slug } }));
