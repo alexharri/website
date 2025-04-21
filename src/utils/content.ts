@@ -1,10 +1,7 @@
 import fs from "fs";
 import path from "path";
 
-export const POSTS_PATH = path.resolve(process.cwd(), "./posts");
-export const SNIPPETS_PATH = path.resolve(process.cwd(), "./snippets");
-
-function findMdFiles(rootPath: string) {
+export function findMarkdownFilePaths(rootPath: string) {
   const out: string[] = [];
   const stack: string[] = [];
 
@@ -27,7 +24,3 @@ function findMdFiles(rootPath: string) {
   dfs(rootPath);
   return out;
 }
-
-export const postFileNames = findMdFiles(POSTS_PATH);
-
-export const snippetFileNames = findMdFiles(SNIPPETS_PATH);

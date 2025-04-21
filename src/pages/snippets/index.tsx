@@ -1,13 +1,11 @@
-import fs from "fs";
 import matter from "gray-matter";
 import { GetStaticProps } from "next";
-import path from "path";
 import { Layout } from "../../components/Layout";
 import { SnippetLink } from "../../components/Snippet/Snippet";
 import { SnippetList } from "../../components/SnippetList/SnippetList";
 import { Snippet } from "../../types/Snippet";
-import { snippetFileNames, SNIPPETS_PATH } from "../../utils/mdxUtils";
 import { adjustPostMetadata } from "../../utils/postMetadata";
+import { getSnippetContent, getSnippetFilePaths } from "../../helpers/content";
 
 interface Props {
   snippets: Snippet[];
@@ -29,10 +27,8 @@ export default function Page(props: Props) {
 export const getStaticProps: GetStaticProps<Props> = async () => {
   const snippets: Snippet[] = [];
 
-  for (const fileName of snippetFileNames) {
-    const filePath = path.join(SNIPPETS_PATH, fileName);
-    const fileContent = fs.readFileSync(filePath, "utf8");
-
+  for (const filePath of getSnippetFilePaths()) {
+    const fileContent = getSnippetContent(filePath);
     const { data } = matter(fileContent);
     adjustPostMetadata(data);
 
@@ -60,7 +56,7 @@ export const getStaticProps: GetStaticProps<Props> = async () => {
       snippet = { text: content.join("\n") + "\n", language };
     }
 
-    const slug = fileName.replace(/\.mdx?$/, "");
+    const slug = filePath.replace(/\.mdx?$/, "");
 
     snippets.push({ title, description, slug, snippet });
   }
