@@ -1111,9 +1111,9 @@ float x = gl_FragCoord.x;
 float y = gl_FragCoord.y * Y_SCALE;
 
 float noise = 0.5;
-noise += simplex_noise(x * L * 1.0, y * L * 1.00, time * S + O1) * 0.30;
-noise += simplex_noise(x * L * 0.6, y * L * 0.85, time * S + O2) * 0.26;
-noise += simplex_noise(x * L * 0.4, y * L * 0.70, time * S + O3) * 0.22;
+noise += simplex_noise(x * L * 1.0, y * L * 1.00, u_time * S) * 0.30;
+noise += simplex_noise(x * L * 0.6, y * L * 0.85, u_time * S) * 0.26;
+noise += simplex_noise(x * L * 0.4, y * L * 0.70, u_time * S) * 0.22;
 
 float lightness = clamp(noise, 0.0, 1.0);
 ```
