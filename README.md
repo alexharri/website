@@ -1,32 +1,36 @@
+<div align="center"><img align="center" width="520" src="public/images/screenshots/webgl-gradient.png"></div>
+
 <h1 align="center">
   alexharri.com
 </h1>
 
 <p align="center">
-  Source code for my personal website and blog. 
+  <a href="https://alexharri.com" target="_blank">Home</a> · <a href="https://alexharri.com/blog" target="_blank">Blog</a> · <a href="https://alexharri.com/about" target="_blank">About</a>
 </p>
 
-## My writing
 
-I mostly write about topics relating to web development. I've written about TypeScript, monorepos, multi-cursor editing and performance.
+## Notable posts
 
- - [Why doesn't TypeScript properly type Object.keys?](https://alexharri.com/blog/typescript-structural-typing)
- - [Multi-cursor code editing: An animated introduction](https://alexharri.com/blog/multi-cursor-code-editing-animated-introduction)
- - [Build your own schema language with TypeScript's infer keyword](https://alexharri.com/blog/build-schema-language-with-infer)
- - [Making GRID's spreadsheet engine 10% faster](https://alexharri.com/blog/grid-engine-performance)
+I've written over 15 posts on topics including TypeScript, mathematics, web APIs, performance and WebGL. Here are a few posts that I'm particularly proud of:
 
-## Technical implementation
+| Description | Screenshot |
+|---|---|
+| <p>[A flowing WebGL gradient, deconstructed][post_webgl]</p><p>An introduction to writing WebGL shaders using gradient noise and cool math using dozens of interactive examples.</p> | <img width="1000" src="public/images/screenshots/shaders-interactive-example.png"> |
+| <p>[Planes in 3D space][post_planes]</p><p>Visual and interactive introduction to 2D planes in 3D space. Contains over 50 interactive examples and visualizations.</p> | <img width="1000" src="public/images/screenshots/planes-interactive-example.png"> |
+| <p>[The web’s clipboard, and how it stores data of different types][post_clipboard]</p><p>Explores the web's clipboard APIs, their limitations, and their history.</p> | <img width="1000" src="public/images/screenshots/clipboard.png"> |
+| <p>[Why doesn’t TypeScript properly type Object.keys?][post_structural_typing]</p><p>Introduces TypeScript's structural type system using a common TypeScript error as an entry point.</p> | <img width="1000" src="public/images/screenshots/code-example.png"> |
 
-This website is written in TypeScript and React using Next.js.
+[post_webgl]: https://alexharri.com/blogz/webgl-gradients
+[post_planes]: https://alexharri.com/blog/planes
+[post_clipboard]: https://alexharri.com/blog/clipboard
+[post_structural_typing]: https://alexharri.com/blog/typescript-structural-typing
 
-The [blog posts][posts] themselves are written as [MDX](https://mdxjs.com/) files. MDX enables the use of React components in markdown:
+
+## Implementation
+
+This website is built using Next.js, React and TypeScript.
+
+The [posts][posts] themselves are written as [MDX][mdx] files. MDX enables the use of React components in markdown, which I use to inject interactive components into my posts.
 
 [posts]: https://github.com/alexharri/website/tree/master/posts
-
-```md
-<Note type="info">
-  Here is a note
-</Note>
-```
-
-This is used to add the interactive components seen in posts such as [Multi-cursor code editing: An animated introduction](https://alexharri.com/blog/multi-cursor-code-editing-animated-introduction).
+[mdx]: https://mdxjs.com/
