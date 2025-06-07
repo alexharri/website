@@ -13,7 +13,7 @@ export const AboutMe = () => {
       <div className={s("right")}>
         <p>
           Hey, I'm Alex. I'm super interested in software and design. I've been writing about
-          software-adjacent topics since 2019.
+          software-related topics since 2019.
         </p>
         <p>
           You can checkout my writing on{" "}
