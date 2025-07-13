@@ -33,6 +33,10 @@ export const ImageStyles = ({ styled }: StyleOptions) => ({
       margin-right: -${cssVariables.contentPadding}px;
       max-width: calc(100% + ${cssVariables.contentPadding * 2}px);
     }
+
+    &--allowScroll {
+      overflow-x: scroll;
+    }
   `,
 
   image: styled.css`

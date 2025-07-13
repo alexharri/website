@@ -7,6 +7,7 @@ interface Props {
   noMargin?: boolean;
   plain?: boolean;
   width?: number | "auto";
+  minWidth?: number;
 }
 
 const videoExtensions = new Set(["mp4"]);
@@ -34,7 +35,7 @@ export const Image = (props: Props) => {
   const s = useStyles(ImageStyles);
   const router = useRouter();
 
-  const { noMargin, plain } = props;
+  const { noMargin, plain, minWidth } = props;
   let src = props.src || "";
 
   const srcParts = src.split(".");
@@ -53,7 +54,10 @@ export const Image = (props: Props) => {
     flow = false;
   }
 
-  let containerClassName = ["image", s("container", { plain, noMargin })].join(" ");
+  let containerClassName = [
+    "image",
+    s("container", { plain, noMargin, allowScroll: typeof minWidth === "number" }),
+  ].join(" ");
   if (flow) containerClassName += " flow";
 
   const className = s("image", { plain });
@@ -67,20 +71,22 @@ export const Image = (props: Props) => {
 
   return (
     <div className={containerClassName} style={{ width }}>
-      {video ? (
-        <video
-          {...commonProps}
-          autoPlay
-          muted
-          playsInline
-          preload=""
-          tabIndex={-1}
-          loop
-          onClick={onClickVideo}
-        />
-      ) : (
-        <img {...commonProps} />
-      )}
+      <div style={{ minWidth }}>
+        {video ? (
+          <video
+            {...commonProps}
+            autoPlay
+            muted
+            playsInline
+            preload=""
+            tabIndex={-1}
+            loop
+            onClick={onClickVideo}
+          />
+        ) : (
+          <img {...commonProps} />
+        )}
+      </div>
     </div>
   );
 };

@@ -255,6 +255,81 @@ But that quickly breaks down. There are other names ending with _"ður"_ or _"du
 * _"Baldur"_ has a forms encoding of <Ts>{'"2;ur,ur,ri,urs"'}</Ts>
 * _"Hlöður"_ and _"Lýður"_ both have a forms encoding of <Ts>{'"2;ur,,,s"'}</Ts>
 
-In fact, take a look at this [gist][names_by_forms_encoding] showing every approved Icelandic personal name grouped by their forms encoding. You'll immediately find distinct groups and patterns, but if you take a closer look you'll find numerous exceptions. Capturing all of these groups and exceptions in code would be a tedious and brittle affair.
+In fact, take a look at this [gist][names_by_forms_encoding] showing every approved Icelandic personal name grouped by their forms encoding (there are 124 unique encodings). You'll immediately find distinct groups and patterns, but if you take a closer look you'll find numerous exceptions. Capturing all of these groups and exceptions in code would be a tedious and brittle affair.
 
 [names_by_forms_encoding]: https://gist.github.com/alexharri/b35b40d27db664d6e0dcb9a2ac511090
+
+Instead of trying to code up the rules manually, we can use a data structure that lends itself perfectly to this problem. That data structure is the _trie_. Let's see how.
+
+
+## Tries
+
+The [trie][trie] data structure, also know as a prefix tree, is a tree data structure that maps string keys to values. In tries, each character in the key becomes a node in the tree that points to the previous character (or the root in the case of the first character).
+
+Take for example the name _"Heimir"_, which has a forms encoding of <Ts>{'"1;r,,,s"'}</Ts>. If inserted into a trie, the trie becomes:
+
+<Image plain src="~/heimir-trie.svg" minWidth={620} width={680} />
+
+Let's insert _"Heiðar"_ to the trie, which has a forms encoding of <Ts>{'"1;r,,i,s"'}</Ts>. The names share the first three characters, so they share the first three nodes in the trie:
+
+<Image plain src="~/heimir-heidar-trie.svg" minWidth={620} width={680} />
+
+[trie]: https://en.wikipedia.org/wiki/Trie
+
+Retrieving a value from a trie is simple -- let's define a <Ts method>trieLookup</Ts> that takes a trie <Ts>root</Ts> node and a <Ts>key</Ts> to look up:
+
+```ts
+interface TrieNode {
+  children?: { [key: string]: TrieNode };
+  value?: string;
+}
+
+function trieLookup(root: TrieNode, key: string) {
+  // ...
+}
+```
+
+For each character in the key, we'll traverse to the child <Ts>node</Ts> for that character, stopping if no such <Ts>node</Ts> exists:
+
+```ts
+let node: TrieNode | undefined = root;
+
+for (const char of key) {
+  node = node.children?.[char];
+  if (!node) {
+    break;
+  }
+}
+```
+
+We'll return the value of the resulting <Ts>node</Ts>, if present
+
+```ts
+return node?.value;
+```
+
+giving us the following implementation:
+
+```ts
+interface TrieNode {
+  children?: { [key: string]: TrieNode };
+  value?: string;
+}
+
+function trieLookup(root: TrieNode, key: string) {
+  let node: TrieNode | undefined = root;
+  for (const char of key) {
+    node = node.children?.[char];
+    if (!node) {
+      break;
+    }
+  }
+  return node?.value;
+}
+```
+
+We'll look at how to construct tries later. For now I want to make tries work for _our use case_ of retrieving the encodings for names.
+
+
+## Retrieving name encodings from tries
+
