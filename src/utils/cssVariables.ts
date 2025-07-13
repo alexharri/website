@@ -45,4 +45,12 @@ export const colors = {
   commit: "#4f9fff",
   command: "#21c5c7",
   "cli-arg": text400,
+
+  // Aliases
+  get string() {
+    return this.token.string;
+  },
+  get comment() {
+    return this.token.comment;
+  },
 };
