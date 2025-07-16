@@ -2,6 +2,7 @@ from ..trie import create_trie_chart
 
 create_trie_chart(
     file_path="public/images/posts/encoding-declension/heimir-trie",
+    quote_values=True,
     trie={
         "H": {
             "e": {

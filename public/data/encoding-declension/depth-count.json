@@ -1,0 +1,106 @@
+{
+  "keys": [
+    "Uncompressed",
+    "Subtrees with common value merged",
+    "Subtrees with common value merged, weighted"
+  ],
+  "colors": ["#399ef4", "#ff9948"],
+  "data": [
+    {
+      "label": "1",
+      "values": {
+        "Uncompressed": 0,
+        "Subtrees with common value merged": 8,
+        "Subtrees with common value merged, weighted": 38
+      }
+    },
+    {
+      "label": "2",
+      "values": {
+        "Uncompressed": 5,
+        "Subtrees with common value merged": 120,
+        "Subtrees with common value merged, weighted": 582
+      }
+    },
+    {
+      "label": "3",
+      "values": {
+        "Uncompressed": 102,
+        "Subtrees with common value merged": 419,
+        "Subtrees with common value merged, weighted": 1441
+      }
+    },
+    {
+      "label": "4",
+      "values": {
+        "Uncompressed": 375,
+        "Subtrees with common value merged": 415,
+        "Subtrees with common value merged, weighted": 917
+      }
+    },
+    {
+      "label": "5",
+      "values": {
+        "Uncompressed": 680,
+        "Subtrees with common value merged": 193,
+        "Subtrees with common value merged, weighted": 533
+      }
+    },
+    {
+      "label": "6",
+      "values": {
+        "Uncompressed": 708,
+        "Subtrees with common value merged": 71,
+        "Subtrees with common value merged, weighted": 87
+      }
+    },
+    {
+      "label": "7",
+      "values": {
+        "Uncompressed": 572,
+        "Subtrees with common value merged": 25,
+        "Subtrees with common value merged, weighted": 30
+      }
+    },
+    {
+      "label": "8",
+      "values": {
+        "Uncompressed": 489,
+        "Subtrees with common value merged": 8,
+        "Subtrees with common value merged, weighted": 8
+      }
+    },
+    {
+      "label": "9",
+      "values": {
+        "Uncompressed": 406,
+        "Subtrees with common value merged": 2,
+        "Subtrees with common value merged, weighted": 2
+      }
+    },
+    {
+      "label": "10",
+      "values": {
+        "Uncompressed": 217,
+        "Subtrees with common value merged": 0,
+        "Subtrees with common value merged, weighted": 0
+      }
+    },
+    {
+      "label": "11",
+      "values": {
+        "Uncompressed": 75,
+        "Subtrees with common value merged": 0,
+        "Subtrees with common value merged, weighted": 0
+      }
+    },
+    {
+      "label": "12",
+      "values": {
+        "Uncompressed": 9,
+        "Subtrees with common value merged": 0,
+        "Subtrees with common value merged, weighted": 0
+      }
+    }
+  ]
+}

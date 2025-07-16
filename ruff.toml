@@ -1,0 +1,15 @@
+line-length = 100
+target-version = "py312"
+
+[lint]
+# See https://docs.astral.sh/ruff/rules/
+select = ["E4", "E7", "E9", "F", "B", "I", "FAST"]
+ignore = ["E712","E731","B024","B904","B905"]
+
+[lint.isort]
+combine-as-imports = true
+section-order = ["future", "typing", "standard-library", "third-party", "spine", "first-party", "local-folder"]
+
+[lint.isort.sections]
+"typing" = ["typing", "typing_extensions"]
+"spine" = ["spine"]

@@ -175,6 +175,10 @@ table {
   white-space: nowrap;
 }
 
+.align-left {
+  text-align: left !important;
+}
+
 tbody tr:nth-child(even) {
   background-color: ${colors.background200};
 }

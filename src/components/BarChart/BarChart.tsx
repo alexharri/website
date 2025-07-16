@@ -23,7 +23,7 @@ interface Data2DJson {
 }
 
 interface Data1DJson {
-  keys: string[];
+  keys?: string[];
   data: number[];
   colors?: string[];
   total?: number;
@@ -41,6 +41,7 @@ interface Props {
   percentage?: boolean;
   minWidth?: number;
   minHeight?: number;
+  disableNormalization?: boolean;
 }
 
 function normalize2D(json: Data2DJson): Data2DJson {
@@ -63,9 +64,9 @@ function minResponses2D(json: Data2DJson, min: number) {
 function minResponses1D(json: Data1DJson, min: number) {
   const keys: typeof json.keys = [];
   const data: typeof json.data = [];
-  for (let i = 0; i < json.keys.length; i++) {
+  for (let i = 0; i < json.data.length; i++) {
     if (json.data[i] >= min) {
-      keys.push(json.keys[i]);
+      keys.push(json.keys?.[i] || "");
       data.push(json.data[i]);
     }
   }
@@ -150,7 +151,7 @@ export function BarChart(props: Props) {
   }
 
   const displayLegend = is2D;
-  const allowNormalize = is2D && !props.percentage;
+  const allowNormalize = is2D && !props.percentage && !props.disableNormalization;
 
   let defaultHeight = 400;
   if (props.horizontal) {
