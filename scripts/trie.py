@@ -1,80 +1,102 @@
 import os
+
 from graphviz import Digraph
 
 FONT = "monospace"
+NODE_COLOR = "#486d8c"
 COLOR = "#B9DBFA"
 
+
 def create_trie_chart(
-    *,
-    file_path: str,
-    trie,
-    quote_values: bool = False,
-    horizontal: bool = False
+    *, file_path: str, trie, quote_values: bool = False, horizontal: bool = False
 ):
-  dot = Digraph(format='svg')
-  
-  if horizontal:
-      # Horizontal layout: top-to-bottom with adjusted spacing
-      dot.attr(bgcolor='transparent', rankdir='TB', fontname=FONT, fontpath="", nodesep='0.4', ranksep='0.6')
-  else:
-      # Vertical layout: left-to-right (original)
-      dot.attr(bgcolor='transparent', rankdir='LR', fontname=FONT, fontpath="", nodesep='0.3', ranksep='0.4')
-  
-  dot.attr('node', shape='circle', color=COLOR, fontname=FONT, fontcolor=COLOR, penwidth='2')
-  dot.attr('edge', color=COLOR, fontname=FONT, fontcolor=COLOR, penwidth='2', arrowhead='normal', arrowsize='0.8')
+    dot = Digraph(format="svg")
 
-  # Collect nodes by their depth level for proper alignment
-  levels = {}
-  value_nodes = []
+    rankdir = "TB" if horizontal else "LR"
+    nodesep = "0.4" if horizontal else "0.3"
+    ranksep = "0.6" if horizontal else "0.4"
 
-  def add_nodes(trie, parent_name, counter, depth=0):
-      if depth not in levels:
-          levels[depth] = []
-      
-      for key, value in trie.items():
-          if key == "value":
-              # Add value node
-              value_node = f"{parent_name}_val"
-              dot.node(
-                value_node,
-                f'"{value}"' if quote_values else str(value), 
-                shape='box', 
-                color=COLOR, 
-                fontname=FONT, 
-                fontcolor=COLOR
-              )
-              dot.edge(parent_name, value_node)
-              value_nodes.append(value_node)
-          else:
-              node_name = f"{parent_name}_{counter[0]}"
-              counter[0] += 1
-              dot.node(node_name, key)
-              dot.edge(parent_name, node_name)
-              levels[depth].append(node_name)
-              add_nodes(value, node_name, counter, depth + 1)
+    dot.attr(
+        bgcolor="transparent",
+        rankdir=rankdir,
+        fontname=FONT,
+        fontpath="",
+        nodesep=nodesep,
+        ranksep=ranksep,
+    )
 
-  dot.node("root", "root")
-  levels[0] = ["root"]
-  add_nodes(trie, "root", [0], 1)
+    dot.attr(
+        "node",
+        shape="box",
+        style="rounded",
+        color=NODE_COLOR,
+        fontname=FONT,
+        fontcolor=COLOR,
+        penwidth="2",
+        height="0.5",
+        width="0.5",
+        fixedsize="false",
+        margin="0.15,0.05",
+    )
 
-  # Align nodes at each depth level
-  for level, nodes in levels.items():
-      if len(nodes) > 1:
-          with dot.subgraph() as s:
-              s.attr(rank='same')
-              for node in nodes:
-                  s.node(node)
+    dot.attr(
+        "edge",
+        color=COLOR,
+        fontname=FONT,
+        fontcolor=COLOR,
+        penwidth="2",
+        arrowhead="normal",
+        arrowsize="0.8",
+    )
 
-  # Align value boxes based on layout direction
-  if value_nodes:
-      with dot.subgraph() as s:
-          s.attr(rank='same')
-          for value_node in value_nodes:
-              s.node(value_node)
+    levels = {}
+    value_nodes = []
+    counter = [0]
 
-  relative_file_path = file_path
-  file_path = os.path.abspath(os.path.join(os.getcwd(), file_path))
+    def add_nodes(trie_node, parent_name, depth=0):
+        if depth not in levels:
+            levels[depth] = []
 
-  dot.render(file_path, view=False, cleanup=True)
+        for key, value in trie_node.items():
+            if key == "value":
+                value_node = f"{parent_name}_val"
+                value_text = f'"{value}"' if quote_values else str(value)
+                dot.node(
+                    value_node,
+                    value_text,
+                    shape="box",
+                    style="",
+                    color=NODE_COLOR,
+                    fontname=FONT,
+                    fontcolor=COLOR,
+                )
+                dot.edge(parent_name, value_node)
+                value_nodes.append(value_node)
+            else:
+                node_name = f"{parent_name}_{counter[0]}"
+                counter[0] += 1
+                dot.node(node_name, key)
+                dot.edge(parent_name, node_name)
+                levels[depth].append(node_name)
+                add_nodes(value, node_name, depth + 1)
 
-  print(f"\n\n\tCreated SVG file at {relative_file_path}.svg\n")
+    dot.node("root", "root")
+    levels[0] = ["root"]
+    add_nodes(trie, "root", 1)
+
+    for nodes in levels.values():
+        if len(nodes) > 1:
+            with dot.subgraph() as s:
+                s.attr(rank="same")
+                for node in nodes:
+                    s.node(node)
+
+    if value_nodes:
+        with dot.subgraph() as s:
+            s.attr(rank="same")
+            for value_node in value_nodes:
+                s.node(value_node)
+
+    abs_file_path = os.path.abspath(os.path.join(os.getcwd(), file_path))
+    dot.render(abs_file_path, view=False, cleanup=True)
+    print(f"\n\n\tCreated SVG file at {file_path}.svg\n")

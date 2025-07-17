@@ -226,7 +226,7 @@ With the `ìf (word === 0) continue;` optimization, we get:
 
 Let's put this into a table and compare the performance:
 
-{<table data-align="right">
+{<table className="nowrap" data-align="right">
   <tbody>
     <tr>
       <th></th>
@@ -373,7 +373,7 @@ for (let i = start; i < end; i++) {
 
 Let's see the difference this makes:
 
-{<table data-align="right">
+{<table className="nowrap" data-align="right">
   <tbody>
     <tr>
       <th></th>
@@ -500,7 +500,7 @@ That would be true if signed integers were represented using [sign-magnitude][si
 
 [sign_magnitude]: https://en.wikipedia.org/wiki/Signed_number_representations#Sign%E2%80%93magnitude
 
-{<table data-pad-heading data-align="center">
+{<table className="nowrap" data-pad-heading data-align="center">
   <tbody>
     <tr>
       <th colSpan="4">Numbers represented using sign-magnitude</th>
@@ -558,7 +558,7 @@ But as I learned, signed integers are most commonly represented using [two's com
 
 Two's complement is different from sign-magnitude (and [one's complement][ones_complement]) in that it only has one representation for 0 (there's no -0).
 
-{<table data-pad-heading data-align="center">
+{<table className="nowrap" data-pad-heading data-align="center">
   <tbody>
     <tr>
       <th colSpan="4">Numbers represented using two's complement</th>
@@ -779,7 +779,7 @@ forEach(callback: (index: number) => void) {
 
 But how fast is this optimized version? Let's run our benchmark and compare.
 
-{<table data-align="right">
+{<table className="nowrap" data-align="right">
   <tbody>
     <tr>
       <th></th>

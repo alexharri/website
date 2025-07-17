@@ -172,7 +172,6 @@ table {
   max-width: fit-content;
   margin: 32px 0;
   overflow-x: auto;
-  white-space: nowrap;
 }
 
 .align-left {
@@ -186,9 +185,28 @@ tbody tr:nth-child(even) {
 th, td {
   border: 1px solid ${colors.darkBlue400};
   padding: 8px 16px;
+  max-width: 200px;
+  overflow-wrap: anywhere;
+  word-wrap: break-word;
 }
 table[data-pad-heading="true"] th {
   padding: 8px 32px;
+}
+
+table.nowrap {
+  white-space: nowrap;
+  td {
+    overflow-wrap: initial;
+    word-wrap: initial;
+  }
+}
+
+.table-1000 {
+  margin: 0 auto;
+  width: 1000px;
+  max-width: 100%;
+  display: flex;
+  justify-content: center;
 }
 
 button {

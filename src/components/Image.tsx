@@ -11,7 +11,7 @@ interface Props {
 }
 
 const videoExtensions = new Set(["mp4"]);
-const customPosts = new Set(["stabilizing-noisy-inputs"]);
+const customPosts = new Set(["stabilizing-noisy-inputs", "encoding-declension"]);
 
 export function imgSrcToHref(src: string, router: NextRouter) {
   const { slug } = router.query;

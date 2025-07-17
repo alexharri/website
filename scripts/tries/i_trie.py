@@ -2,25 +2,25 @@ from ..trie import create_trie_chart
 
 trie = {
     "i": {
-        "bdfjklmnpstvxðóú": {"value": "1;i,a,a,a (166 names)"},
+        "bdfjklmnpstvxðóú": {"value": "1;i,a,a,a (166)"},
         "r": {
-            "Aadefgimrtáóúý": {"value": "1;i,a,a,a (33 names)"},
-            "y": {"value": "0;,,, (1 names)"},
+            "Aadefgimrtáóúý": {"value": "1;i,a,a,a (33)"},
+            "y": {"value": "0;,,, (1)"},
         },
         "g": {
-            "alnou": {"value": "1;i,a,a,a (14 names)"},
+            "alnou": {"value": "1;i,a,a,a (14)"},
             "g": {
-                "Uaiouö": {"value": "1;i,a,a,a (6 names)"},
-                "e": {"value": "1;i,ja,ja,ja (1 names)"},
+                "Uaiouö": {"value": "1;i,a,a,a (6)"},
+                "e": {"value": "1;i,ja,ja,ja (1)"},
             },
         },
-        "u": {"value": "1;i,ja,ja,ja (1 names)"},
-        "a": {"value": "0;,,,s (1 names)"},
+        "u": {"value": "1;i,ja,ja,ja (1)"},
+        "a": {"value": "0;,,,s (1)"},
     }
 }
 
 create_trie_chart(
     file_path="public/images/posts/encoding-declension/i-trie",
-    quote_values=True,
+    quote_values=False,
     trie=trie,
 )

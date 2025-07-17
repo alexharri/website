@@ -11,7 +11,7 @@ export const prismTheme: PrismTheme = {
       style: { color: colors.token.function },
     },
     {
-      types: ["string"],
+      types: ["string", "regex"],
       style: { color: colors.token.string },
     },
     {
