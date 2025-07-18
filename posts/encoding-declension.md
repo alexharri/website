@@ -4,11 +4,11 @@ description: ""
 publishedAt: ""
 ---
 
-Displaying personal names in Icelandic user interfaces is surprisingly hard. This is because of _declension_ -- a language feature that changes the form of words to communicate a syntatic function.
+Displaying personal names in Icelandic user interfaces is surprisingly hard. This is because of _declension_ -- a language feature where the form of words change to communicate a syntatic function.
 
 In Icelandic, there are four forms for every personal name. Take the name _"Guðmundur"_:
 
-{<table>
+{<div className="table-1000"><table>
 <tbody>
   <tr><th>Case</th><th>Form</th></tr>
   <tr><td>Nominative</td><td>Guðmundur</td></tr>
@@ -16,7 +16,7 @@ In Icelandic, there are four forms for every personal name. Take the name _"Guð
   <tr><td>Dative</td><td>Guðmundi</td></tr>
   <tr><td>Genitive</td><td>Guðmundar</td></tr>
 </tbody>
-</table>}
+</table></div>}
 
 You always want to use the correct form. Using the wrong form results in a "broken" feel that native speakers associate with non-native speakers not yet fluent in the language.
 
@@ -40,7 +40,7 @@ When building this library, I did not code _any_ rules by hand. Instead, the rul
 The rest of this post is a deep dive into the problem, and the compression techniques I used to solve it.
 
 
-## Data for Icelandic names
+## Data for Icelandic name declension
 
 Iceland has a publically run institution, [Árnastofnun][arnastofnun_en], that manages the [Database of Icelandic Morphology][dim] (DIM). The database was created, amongst other things, to support Icelandic language technology.
 
@@ -355,31 +355,57 @@ Notice how every leaf in the subtree `r->u->t` has the same value of <Ts>{'"2;ur
 
 <Image plain src="~/ur-divergence.svg" minWidth={620} width={680} />
 
-When every leaf in a subtree has a common value, we can _compress_ the subtree.
+When every leaf in a subtree has a common value, we can _compress_ the subtree. We do that by setting the value of the subtree's root to the value of its leaves, and then deleting every child of the root.
 
-We do that by setting the value of the subtree's root to the value of its leaves, and then deleting every child of the root. We can perform that operation for the entire trie like so:
+Let's quickly implement a recursive <Ts method>compress</Ts> function that performs this operation:
 
 ```ts
-function compress(root: TrieNode) {
-  function dfs(node: TrieNode): string | null {
-    const values = Object.values(node.children).map(dfs);
+function compress(node: TrieNode): string | null
+```
 
-    if (node.value != null) {
-      values.push(node.value);
-    }
+The <Ts method>compress</Ts> function will return <Ts>null</Ts> and do nothing if <Ts>node</Ts>'s children do not have a common value. If they _do_ share a common value, it will delete all of it's children and assign their common value to itself.
 
-    if (new Set(values).size !== 1 || values[0] == null) {
-      // Value is not same for every leaf
-      return null;
-    }
+The first step is to collect its childrens' common values by invoking <Ts method>compress</Ts> recursively, using a [depth-first][dfs] traversal:
 
-    // All leaves have same value so compress subtree
-    node.value = values[0];
-    node.children = {};
-    return node.value;
-  }
-  dfs(root);
+```ts
+const values = Object.values(node.children).map(compress);
+values.push(node.value);
+```
+
+[dfs]: https://en.wikipedia.org/wiki/Depth-first_search
+
+After that, return null if there is not a common value:
+
+```ts
+if (new Set(values).size !== 1 || values[0] == null) {
+  return null;
 }
+```
+
+Otherwise, assign the common value to <Ts>node</Ts>, remove the children, and return the common value.
+
+```ts
+node.value = values[0];
+node.children = {};
+return node.value;
+```
+
+This gives us:
+
+```ts
+function compress(node: TrieNode) {
+  const values = Object.values(node.children).map(compress);
+  values.push(node.value);
+
+  if (new Set(values).size !== 1 || values[0] == null) {
+    return null;
+  }
+
+  node.value = values[0];
+  node.children = {};
+  return node.value;
+}
+compress(root);
 ```
 
 Here's the trie from above, compressed:
@@ -481,17 +507,44 @@ If every name in the trie's input data ending in `*ur` resolved to the same valu
 
 In the case of such ambiguity, at maximum one of the branches resolves to the correct value, and in many cases, none of the branches resolve to the correct value. The natural conclusion, then, is to _not_ return a value.
 
-### Can we trust values that _are_ returned?
+## Quantifying subtree compression
 
-But what about names that match a branch but are not in the original input data? Take _"Leifur"_ as an example.
+Let's get a sense of the degree of compression we get from merging subtrees with common values.
+
+Inserting every approved Icelandic name that we have declension data for into the trie gives us an uncompressed trie with 10,284 nodes, 3,638 of which are leaves. As a reminder, the name is the key and the forms encoding the value.
+
+Merging subtrees with common values reduces the total number of nodes to 1,588. Of those 1,261 are leaves and 327 are not.
+
+{<table data-align="right">
+<tbody>
+    <tr><th></th><th>Uncompressed</th><th>Compressed</th><th>Compressed as % of uncompressed</th></tr>
+    <tr><td className="align-left">Total nodes</td><td>10,284</td><td>1,588</td><td>15.4%</td></tr>
+    <tr><td className="align-left">Non-leaf nodes</td><td>6,646</td><td>327</td><td>4.9%</td></tr>
+    <tr><td className="align-left">Leaf nodes</td><td>3,638</td><td>1,261</td><td>34.6%</td></tr>
+</tbody>
+</table>}
+
+6,319 non-leaf nodes were removed, which is __over 95%__. The removal of so many non-leaf nodes must mean that the paths from the root to the leaf nodes got significantly shorter.
+
+Let's see how much shorter — here's a chart showing the traversal depth of lookups for the keys in the input data, both for the uncompressed and compressed tries:
+
+<BarChart data="depth-count-weighted" width={500} minWidth={280} height={300} minHeight={200} disableNormalization />
+
+This is a significant drop in lookup depths -- the lookup depth for the _majority_ of names in the original input data is now three or lower.
+
+### Can we trust values returned by the compressed trie?
+
+When considering how short of a suffix match is required for a value to be returned from the trie, a natural question arises: how often will the trie return values that are incorrect?
+
+Consider the trie from earlier, which we constructed from only four names:
 
 <Image plain src="~/ur-divergence-merged.svg" minWidth={470} width={470} />
 
-Leifur hits the `r->u->f` path so the <Ts>{'"2;ur,i,i,ar"'}</Ts> encoding is returned. This is actually the [_incorrect_][leifur] encoding for Leifur.
+If we look up the name _"Leifur"_, we hit the <Node>r->u->f</Node> node so the <Ts>{'"2;ur,i,i,ar"'}</Ts> encoding is returned. That is [not][leifur] the correct encoding for Leifur.
 
 [leifur]: https://bin.arnastofnun.is/leit/Leifur
 
-Still, that's just because our trie was only created using declension data for four names ending in `*ur`. In the K-format data there are 648 approved Icelandic personal names that match `*ur` (and 67 that match `*fur`).
+Still, that's just because our trie was only created using declension data for four names ending in `*ur`. In the K-format data there are 648 approved Icelandic personal names that match `*ur` (67 of which match `*fur`).
 
 Here's the compressed trie built from the declension data for _all_ names ending in `*fur`:
 
@@ -499,7 +552,7 @@ Here's the compressed trie built from the declension data for _all_ names ending
 
 <SmallNote center>I've hidden the full `*lfur` subtree to simplify this view.</SmallNote>
 
-Looking up _"Leifur"_ in this trie hits the `r->u->f->i` node, returning an encoding of <Ts>{'"2;ur,,i,s"'}</Ts>, which _is_ correct. There are, in fact, 21 names that end in _"ifur"_, and all of them have an encoding of <Ts>{'"2;ur,,i,s"'}</Ts> which enabled the compression of the `r->u->f->i` subtree.
+Looking up _"Leifur"_ in this trie hits the <Node>r->u->f->i</Node> node, returning an encoding of <Ts>{'"2;ur,,i,s"'}</Ts>, which _is_ correct. There are, in fact, 21 names that end in _"ifur"_, and all of them have an encoding of <Ts>{'"2;ur,,i,s"'}</Ts> which enabled the compression of the <Node>r->u->f->i</Node> subtree.
 
 So for the question
 
@@ -507,27 +560,24 @@ So for the question
 
 the answer depends on the degree to which the input data exhibits the following two characteristics:
 
- * _Comprehensiveness_ — how well the input data captures rules _and_ exceptions to them.
  * _Regularity_ — the degree to which similar key suffixes map to the same values.
+ * _Comprehensiveness_ — how well the input data captures rules _and_ exceptions to them.
 
 ### Regularity
 
 If the input data were _irregular_ -- meaning that there's no significant relationship between suffixes and associated values -- the values of leaves in subtrees would frequently differ. That would prevent subtree compression, resulting in not-very-compressed trie that is similar, if not identical, to the original trie. The less a trie is compressed, the longer the suffix match needs to be for a value to be returned.
 
-The opposite happens as the input data becomes more _regular_. Subtrees will be more frequently compressed, leading to shorter suffix matches being required for values to be returned. Shorter matches leads to more lookups returning values. In the extreme, a fully compressed trie will _always_ return the same value for all lookup keys.
+The opposite happens as the input data becomes more regular. Subtrees will be more frequently compressed, leading to shorter suffix matches being required for values to be returned. Shorter matches leads to more lookups returning values. In the extreme, a fully compressed trie will _always_ return the same value for all lookup keys.
 
-Now, the whole point of the compressed trie is to capture the rules in data that is fairly regular, but not completely. If a dataset is either fully regular, or not regular at all, a compressed trie is not a good fit. Icelandic name declension is a great fit since similar name suffixes tend to follow similar patterns of declension (I will demonstrate that in a later chapter).
+If a dataset is either extremely regular or irregular, a compressed trie is not a good fit.
 
 ### Comprehensiveness
 
-Let's now consider comprehensiveness. If we pick 15 Icelandic names at random, we may get a sample that is perfectly irregular, leading to a fully uncompressed trie. We might also get a sample where every name follows the same pattern of declension, leading to a fully compressed trie.
+Subtrees are only ever incorrectly compressed if the original trie lacks a counterexample to the regularity that led to compression. If a counterexample had been present, it would have prevented compression and created an exception to the rule.
 
-If we increases the sample to 450 names, we will definitely see patterns emerge. Depending on chance, we might see many counterexamples to the patterns in our sample, but we might happen to see few. With a total of 4,500 approved Icelandic names, I'd expect a sample of 450 to capture the rules of the most common Icelandic name suffixes, but I'd expect lots of incorrect values. The sample of 450 is not comprehensive enough.
+If we pick, say, 450 Icelandic names at random, we will capture many of the rules of Icelandic name declension, and some counterexamples to them. Still, 450 names is only 10% of approved Icelandic names, so we can expect loads of declension rules _not_ to be covered by that sample.
 
-But with 3,700 samples, like in our case, we have over 80% coverage. With data that comprehensive, the compressed trie captures the rules, and exceptions to those rules, incredibly well.
-
-Subtrees are only ever incorrectly compressed if the original trie lacks a counterexample to the regularity that led to compression. If a counterexample were present, it would have prevented compression and created an exception to the rule. As comprehensiveness increases, so does the number of counterexamples. The more comprehensive the input data, the better the rules are captured.
-
+But with 3,700 samples, like in our case, we have over 80% coverage. With data that comprehensive, the compressed trie captures the rules, and exceptions to those rules, incredibly well. The compressed trie is a great fit for Icelandic name declension _because_ the data we have on Icelandic name declension is both fairly regular and very comprehensive.
 
 ## Merging sibling leaves with common suffixes
 
@@ -535,15 +585,13 @@ You might have noticed an opportunity for optimization in this graph from earlie
 
 <Image plain src="~/fur-trie.svg" minWidth={560} width={560} />
 
-The <Node>i</Node>, <Node>ó</Node>, <Node>ú</Node>, <Node>a</Node> sibling leaves following <Node>r->u->f</Node> all resolve to the same value of <Ts>{'"2;ur,,i,s"'}</Ts>.
+The <Node>i</Node>, <Node>ó</Node>, <Node>ú</Node>, <Node>a</Node> sibling leaves following <Node>r->u->f</Node> all resolve to the same value of <Ts>{'"2;ur,,i,s"'}</Ts>, but the <Node>l</Node> and <Node>i</Node> nodes have leaves with different values, which prevented the <Node>r->u->f</Node> subtree from being compressed.
 
-The <Node>l</Node> and <Node>i</Node> nodes have leaves with different values, which prevented the <Node>r->u->f</Node> subtree from being compressed. We can introduce another layer of compression where we merge sibling leaves with common values.
-
-That results in the <Node>i</Node>, <Node>ó</Node>, <Node>ú</Node>, <Node>a</Node> leaves being merged into a single <Node>ióúa</Node> leaf node:
+What we can do here is merge sibling leaves with common values. That results in the <Node>i</Node>, <Node>ó</Node>, <Node>ú</Node>, <Node>a</Node> leaves being merged into a single <Node>ióúa</Node> leaf node:
 
 <Image plain src="~/fur-trie-leaves-merged.svg" minWidth={560} width={560} />
 
-Merging sibling leaves with common leaves saves us some repetition, but we need to consider this case in trie lookups. We can handle merged leaves like so in our <Ts method>trieLookup</Ts> function:
+This reduces repetition, but we need to consider this case in our <Ts method>trieLookup</Ts> function. We can do that like so:
 
 ```ts
 function findChild({ children }: TrieNode, char: string) {
@@ -567,38 +615,25 @@ function trieLookup(root: TrieNode, key: string) {
 }
 ```
 
-It's worth mentioning that, unlike merging subtrees with common values, merging sibling leaves has no effect on the behavior of the trie.
+It's worth mentioning that, unlike merging subtrees with common values, merging sibling leaves has no functional effect on the trie. This layer of compression is purely to make the trie's footprint smaller.
 
 
-## Quantifying trie compression
+## Savings from merging sibling leaves
 
-I've said that the level of compression we get depends on the regularity and comprehensiveness of the trie's input data,  but I haven't demonstrated that yet.
+Here is the node count table from before, with a new column that shows the results for the trie that has also had its sibling leaves merged:
 
-Let's make this all less abstract by looking at some data and quantifying the level of compression we get. We'll use the Icelandic personal name declension data for that purpose.
-
-We start by inserting each name and it's forms encoding into the trie. Doing that gives us an uncompressed trie with 10,284 nodes, 3,638 of which are leaves.
-
-Merging subtrees with common values -- without merging sibling leaves -- reduces the number of nodes to 1,588 with 1,261 of which are leaves. If we merge sibling leaves with common values leaves as well, that shrinks to 972 total nodes with 645 leaves.
-
-{<div className="table-1000"><table data-align="right">
+{<table data-align="right">
 <tbody>
-  <tr><th>Trie state</th><th>Total nodes</th><th>Total nodes<br />(% of original)</th><th>Non-leaf nodes</th><th>Non-leaf nodes<br />(% of original)</th><th>Leaf nodes</th><th>Leaf nodes<br />(% of original)</th></tr>
-  <tr><td className="align-left">Uncompressed</td><td>10,284</td><td>100.0%</td><td>6,646</td><td>100.0%</td><td>3,638</td><td>100.0%</td></tr>
-  <tr><td className="align-left">Subtrees with common suffix merged</td><td>1,588</td><td>15.4%</td><td>327</td><td>4.9%</td><td>1,261</td><td>34.6%</td></tr>
-  <tr><td className="align-left">Subtrees and sibling leaves with common suffix merged</td><td>972</td><td>9.4%</td><td>327</td><td>4.9%</td><td>645</td><td>17.7%</td></tr>
+    <tr><th></th><th>Uncompressed</th><th>Only subtrees merged</th><th>Subtrees and sibling leaves merged</th></tr>
+    <tr><td className="align-left">Total nodes</td><td>10,284</td><td>1,588</td><td>972</td></tr>
+    <tr><td className="align-left">Non-leaf nodes</td><td>6,646</td><td>327</td><td>327</td></tr>
+    <tr><td className="align-left">Leaf nodes</td><td>3,638</td><td>1,261</td><td>645</td></tr>
 </tbody>
-</table></div>}
+</table>}
 
+Merging sibling leaf nodes with common values almost cuts the number of leaf nodes in half! Since we're only touching the leaf nodes, the number of non-leaf nodes stays the same. Lookup depth is also not effected.
 
-When we merged subtrees with common values, total nodes were reduced by 8,696, and of those, 2,377 were leaves. This corresponds to 6,319 _non-leaf_ nodes being removed, which is __over 95%__ of non-leaf nodes. The removal of so many non-leaf nodes must mean that the paths from the root to the leaf nodes gets significantly shorter -- let's see how much shorter.
-
-Here's a chart showing the _traversal depth_ of lookups for the keys in the input data, both for the uncompressed and compressed tries:
-
-<BarChart data="depth-count-weighted" width={500} minWidth={280} height={300} minHeight={200} disableNormalization />
-
-You can see a significant drop in lookup depths. The lookup depth for the _majority_ of names in the original input data is now three or lower.
-
-We can also take a look at how many names in the original input data each leaf node now represents. Here are the top 50 leaf nodes:
+One interesting statistic is how many names in the original input data each leaf node now represents. Here are the top 50 leaf nodes by the number of names it represents:
 
 <BarChart data="leaf-key-count" width={540} minWidth={400} height={1000} minHeight={300} horizontal />
 
@@ -609,17 +644,3 @@ The top node <Node>i->bdfjklmnpstvxðóú</Node> is the result of merging 166 le
 
 The <Node>i</Node> subtree is built from declension data for 223 names. Only four of those names don't follow the declension pattern of <Ts>{'"1;i,a,a,a"'}</Ts>. That's a really high degree of regularity! Those four names serve as important counterexamples to the general rule that names ending in _"i"_ have a forms encoding of <Ts>{'"1;i,a,a,a"'}</Ts>. Without them the <Node>i</Node> subtree would have been compressed to a single value node.
 
-I could continue showing examples, but I think the numbers in the table above speak volumes. Let's move on and see how we can compactly serialize the trie.
-
-
-## Serializing the trie
-
-The easy thing to do would be to store the trie as JSON in our library code:
-
-```ts
-const TRIE_JSON = { /* ... */ }
-
-function applyCase(name, grammaticalCase) {
-  // ...
-}
-```
