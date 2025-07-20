@@ -554,14 +554,63 @@ Here's the compressed trie built from the declension data for _all_ names ending
 
 Looking up _"Leifur"_ in this trie hits the <Node>r->u->f->i</Node> node, returning an encoding of <Ts>{'"2;ur,,i,s"'}</Ts>, which _is_ correct. There are, in fact, 21 names that end in _"ifur"_, and all of them have an encoding of <Ts>{'"2;ur,,i,s"'}</Ts> which enabled the compression of the <Node>r->u->f->i</Node> subtree.
 
-So for the question
+The correct encoding is returned for _"Leifur"_, sure, but that doesn't tell us much about the correctness of the full compressed trie for names it hasn't encountered before.
 
-> _Can we trust values returned by the the compressed trie?_
+### Testing the trie on not-before-seen names
 
-the answer depends on the degree to which the input data exhibits the following two characteristics:
+Since not-before-seen names, by definition, don't have declension data available for them, I went ahead and manually reviewed results.
 
- * _Regularity_ — the degree to which similar key suffixes map to the same values.
- * _Comprehensiveness_ — how well the input data captures rules _and_ exceptions to them.
+The list of approved Icelandic names that don't have declension data gives us roughly 800 names to work with. I wrote a function to pick 100 of those names at random categorized the results. Here they are:
+
+{<table className="nowrap" data-align="right">
+<tbody>
+    <tr><th>Result</th><th>Count</th></tr>
+    <tr><td className="align-left">Perfect (declension applied)</td><td>62</td></tr>
+    <tr><td className="align-left">Perfect (no declension applied)</td><td>12</td></tr>
+    <tr><td className="align-left">Should have applied declension</td><td>23</td></tr>
+    <tr><td className="align-left">Wrong, should not be declined</td><td>2</td></tr>
+    <tr><td className="align-left">Wrong declension</td><td>1</td></tr>
+</tbody>
+</table>}
+
+This gives us a rough indication that, for not-before-seen names, the full compressed trie gives us a good or neutral result 97% of the time. The _"Should have applied declension"_ case results in <Ts method>applyCase</Ts> not applying declension to the name and returning it as-is, which I'd consider a neutral result. 3% of the results are incorrect.
+
+But still, these are just 100 random names. Some names are far more common than other so it'd be interesting to see how well the compressed trie performs for the most common names.
+
+Luckily for us, [Statistics Iceland][statice] publishes data on [how many individuals have specific names][names]. Using this data, I created the chart below. It shows the number of people holding each name in the approved names list as a first name. Names covered by DIM are colored blue while names not covered are colored red:
+
+[names]: https://statice.is/statistics/population/births-and-deaths/names/
+
+[statice]: https://www.statice.is/
+
+<BarChart data="names-count" width={1200} minWidth={800} height={400} minHeight={375} logarithmic toggleLogarithmic />
+
+<SmallNote>Since relatively few names dominate this list, I made the chart logarithmic by default. You can use the toggle to see the non-logarithmic chart.</SmallNote>
+
+363,314 people hold a name from the approved list of Icelandic names as a first name. Of those, 5,833 have names that don't have declension data available.
+
+As we can see from the chart, the commonality of names is far from evenly distributed. In fact, the top 100 names not covered by the DIM data covers 4,990 people (about 86%). I went ahead and categorized the declension results for those 100 names. Here are the results:
+
+{<table className="nowrap" data-align="right">
+<tbody>
+    <tr><th>Result</th><th>Count</th></tr>
+    <tr><td className="align-left">Perfect (declension applied)</td><td>3,489</td></tr>
+    <tr><td className="align-left">Perfect (no declension applied)</td><td>440</td></tr>
+    <tr><td className="align-left">Should have applied declension</td><td>915</td></tr>
+    <tr><td className="align-left">Wrong, should not be declined</td><td>101</td></tr>
+    <tr><td className="align-left">Wrong declension</td><td>45</td></tr>
+    <tr><td className="align-left">Total</td><td>4,990</td></tr>
+</tbody>
+</table>}
+
+The error rate here is 2.9%. If we extrapolate that 2.9% error rate across the 5,833 people not covered by DIM data we get 170 wrong results. So for the 363,314 people holding names in the approved list of Icelandic names, that corresponds to an error rate of __0.046%__.
+
+## Regularity and comprehensiveness
+
+As we can see, the compressed trie captures the rules of Icelandic name declension to an impressive degree. I believe this is due to the _regularity_ and _comprehensiveness_ of the data on Icelandic name declension, where
+
+ * _regularity_ is the degree to which similar key suffixes map to the same values, and
+ * _comprehensiveness_ is how well the input data captures rules _and_ exceptions to them.
 
 ### Regularity
 
@@ -569,15 +618,13 @@ If the input data were _irregular_ -- meaning that there's no significant relati
 
 The opposite happens as the input data becomes more regular. Subtrees will be more frequently compressed, leading to shorter suffix matches being required for values to be returned. Shorter matches leads to more lookups returning values. In the extreme, a fully compressed trie will _always_ return the same value for all lookup keys.
 
-If a dataset is either extremely regular or irregular, a compressed trie is not a good fit.
-
 ### Comprehensiveness
 
 Subtrees are only ever incorrectly compressed if the original trie lacks a counterexample to the regularity that led to compression. If a counterexample had been present, it would have prevented compression and created an exception to the rule.
 
 If we pick, say, 450 Icelandic names at random, we will capture many of the rules of Icelandic name declension, and some counterexamples to them. Still, 450 names is only 10% of approved Icelandic names, so we can expect loads of declension rules _not_ to be covered by that sample.
 
-But with 3,700 samples, like in our case, we have over 80% coverage. With data that comprehensive, the compressed trie captures the rules, and exceptions to those rules, incredibly well. The compressed trie is a great fit for Icelandic name declension _because_ the data we have on Icelandic name declension is both fairly regular and very comprehensive.
+But with 3,700 samples, like in our case, we have over 80% coverage. With data that comprehensive, the compressed trie captures the rules, and exceptions to those rules, incredibly well.
 
 ## Merging sibling leaves with common suffixes
 

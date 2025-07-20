@@ -37,6 +37,8 @@ interface Props {
   width?: number;
   height?: number;
   stacked?: boolean;
+  logarithmic?: boolean;
+  toggleLogarithmic?: boolean;
   horizontal?: boolean;
   percentage?: boolean;
   minWidth?: number;
@@ -95,6 +97,7 @@ export function BarChart(props: Props) {
   const s = useStyles(BarChartStyles);
   const _json = usePostData<Data1DJson | Data2DJson>(props.data);
   const [normalize, setNormalize] = useState(props.normalize ?? false);
+  const [log, setLog] = useState(props.logarithmic ?? false);
 
   let is2D = false;
   let yStyle: Intl.NumberFormatOptions["style"] = undefined;
@@ -199,6 +202,13 @@ export function BarChart(props: Props) {
           </Toggle>
         </div>
       )}
+      {props.toggleLogarithmic && (
+        <div className={s("controls")}>
+          <Toggle checked={log} onValueChange={setLog}>
+            Logarithmic
+          </Toggle>
+        </div>
+      )}
       <div className={s("container")}>
         <div
           className={s("wrapper")}
@@ -219,6 +229,7 @@ export function BarChart(props: Props) {
                       format: !props.horizontal ? valueAxisFormat : undefined,
                     },
                     grid: !props.horizontal ? gridLineOptions : undefined,
+                    ...(log ? { type: "logarithmic" } : {}),
                   },
                   x: {
                     stacked: props.stacked,

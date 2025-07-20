@@ -185,7 +185,6 @@ tbody tr:nth-child(even) {
 th, td {
   border: 1px solid ${colors.darkBlue400};
   padding: 8px 16px;
-  max-width: 200px;
   overflow-wrap: anywhere;
   word-wrap: break-word;
 }
@@ -195,7 +194,8 @@ table[data-pad-heading="true"] th {
 
 table.nowrap {
   white-space: nowrap;
-  td {
+  th, td {
+    max-width: initial;
     overflow-wrap: initial;
     word-wrap: initial;
   }
