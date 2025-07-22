@@ -1,6 +1,6 @@
 {
-  "keys": ["Uncompressed", "Compressed"],
-  "colors": ["#399ef4", "#ff9948"],
+  "keys": ["Compressed", "Uncompressed"],
+  "colors": ["#ff9948", "#399ef4"],
   "data": [
     {
       "label": "1",

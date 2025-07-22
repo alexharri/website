@@ -1,3 +1,4 @@
+import React from "react";
 import { createPage } from "../[slug]";
 import { getPostProps, getSlugFromFilePath } from "../../../utils/blogPageUtils";
 import { StyleOptions, useStyles } from "../../../utils/styles";
@@ -49,12 +50,10 @@ function Node({ children }: { children: string }) {
   return (
     <span className={s("wrapper")}>
       {parts.map((part, i) => (
-        <>
-          <span key={i} className={s("node")}>
-            {part}
-          </span>
+        <React.Fragment key={i}>
+          <span className={s("node")}>{part}</span>
           {i === parts.length - 1 ? null : <span className={s("arrow")} />}
-        </>
+        </React.Fragment>
       ))}
     </span>
   );
