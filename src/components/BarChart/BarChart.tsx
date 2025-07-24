@@ -23,7 +23,7 @@ interface Data2DJson {
 }
 
 interface Data1DJson {
-  keys?: string[];
+  keys: string[];
   data: number[];
   colors?: string[];
   total?: number;
@@ -68,7 +68,7 @@ function minResponses1D(json: Data1DJson, min: number) {
   const data: typeof json.data = [];
   for (let i = 0; i < json.data.length; i++) {
     if (json.data[i] >= min) {
-      keys.push(json.keys?.[i] || "");
+      keys.push(json.keys[i]);
       data.push(json.data[i]);
     }
   }
