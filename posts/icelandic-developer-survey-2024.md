@@ -120,7 +120,7 @@ We can glean _some_ patterns from this data, such as Java being used more by exp
 
 Icelandic developers are compensated well. Respondents were asked about their monthly salary in Icelandic króna (ISK), with the possible answers being one of six salary brackets:
 
-{<table data-align="right">
+{<table className="nowrap" data-align="right">
 <tbody>
   <tr><th>ISK</th><th>EUR</th><th>USD</th></tr>
   <tr><td>0 - 800,000</td><td>0 - 5,360</td><td>0 - 5,760</td></tr>
@@ -136,7 +136,7 @@ Icelandic developers are compensated well. Respondents were asked about their mo
 
 In Iceland, we generally discuss monthly salaries instead of yearly. But in the US, and other countries, yearly salary figures are more common. Here is the same table with yearly salary figures.
 
-{<table data-align="right">
+{<table className="nowrap" data-align="right">
 <tbody>
   <tr><th>ISK</th><th>EUR</th><th>USD</th></tr>
   <tr><td>0 - 9,600,000</td><td>0 - 64,320</td><td>0 - 69,120</td></tr>
@@ -200,7 +200,7 @@ Salary numbers are interesting, but there are other important factors that canno
 
 We've been looking at gross salaries so far. In figuring out net salaries we need to look at Icelandic taxes. In 2024, Iceland had three tax brackets:
 
-{<table data-align="right">
+{<table className="nowrap" data-align="right">
 <tbody>
   <tr><th>Income, per month</th><th>Tax rate</th></tr>
   <tr><td>ISK 0 - 446,136</td><td>31.48%</td></tr>

@@ -345,32 +345,6 @@ for (let i = start; i < end; i++) {
 }
 ```
 
-{null && <table data-pad-heading>
-  <tbody>
-    <tr>
-      <th><code>iterFirstHalf</code></th>
-      <th><code>iterLatterHalf</code></th>
-      <th>Start and end</th>
-    </tr>
-    <tr>
-      <td>True</td>
-      <td>True</td>
-      <td>0 - 32</td>
-    </tr>
-    <tr>
-      <td>False</td>
-      <td>True</td>
-      <td>16 - 32</td>
-    </tr>
-    <tr>
-      <td>True</td>
-      <td>False</td>
-      <td>0 - 16</td>
-    </tr>
-  </tbody>
-</table>}
-
-
 Let's see the difference this makes:
 
 {<table className="nowrap" data-align="right">
