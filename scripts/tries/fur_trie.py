@@ -19,5 +19,7 @@ trie = {
 
 
 create_trie_chart(
-    file_path="public/images/posts/encoding-declension/fur-trie", quote_values=True, trie=trie
+    file_path="public/images/posts/icelandic-name-declension-trie/fur-trie",
+    quote_values=True,
+    trie=trie,
 )

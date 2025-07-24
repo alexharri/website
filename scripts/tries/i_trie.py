@@ -20,7 +20,7 @@ trie = {
 }
 
 create_trie_chart(
-    file_path="public/images/posts/encoding-declension/i-trie",
+    file_path="public/images/posts/icelandic-name-declension-trie/i-trie",
     quote_values=False,
     trie=trie,
 )
