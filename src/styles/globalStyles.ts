@@ -201,14 +201,6 @@ table.nowrap {
   }
 }
 
-.table-1000 {
-  margin: 0 auto;
-  width: 1000px;
-  max-width: 100%;
-  display: flex;
-  justify-content: center;
-}
-
 button {
   cursor: pointer;
   padding: 0;
