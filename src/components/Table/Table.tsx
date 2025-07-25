@@ -51,7 +51,7 @@ export function Table(props: Props) {
     headers = [
       colSpec.map<HeaderSpec>((column) => {
         if (typeof column === "string") column = { title: column };
-        return { title: column.title };
+        return { title: column.title, width: column.width };
       }),
     ];
   }
