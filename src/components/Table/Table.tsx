@@ -62,7 +62,6 @@ export function Table(props: Props) {
     return { ...col, key };
   });
 
-  // Get cell style
   const getCellStyle = (column: ColumnSpec): React.CSSProperties => {
     if (typeof column === "string") column = { title: column };
     return {
