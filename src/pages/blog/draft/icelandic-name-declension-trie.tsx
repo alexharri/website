@@ -19,7 +19,7 @@ const styles = ({ styled, theme }: StyleOptions) => ({
     margin: 1px 0;
     font-size: 18px;
     line-height: 30px;
-    border-radius: 10px;
+    border-radius: 12px;
   `,
 
   arrow: styled.css`
