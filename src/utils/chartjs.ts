@@ -5,6 +5,7 @@ import {
   BarElement,
   Tooltip,
   Legend,
+  LogarithmicScale,
 } from "chart.js";
 
-ChartJS.register(CategoryScale, LinearScale, BarElement, Tooltip, Legend);
+ChartJS.register(CategoryScale, LogarithmicScale, LinearScale, BarElement, Tooltip, Legend);

@@ -156,23 +156,10 @@ li {
 
 table {
   border-collapse: collapse;
-
-  &[data-align="right"] {
-    td {
-      text-align: right;
-    }
-  }
-  &[data-align="center"] {
-    td {
-      text-align: center;
-    }
-  }
-
   display: block;
   max-width: fit-content;
   margin: 32px 0;
   overflow-x: auto;
-  white-space: nowrap;
 }
 
 tbody tr:nth-child(even) {
@@ -183,9 +170,7 @@ th, td {
   border: 1px solid ${colors.darkBlue400};
   padding: 8px 16px;
 }
-table[data-pad-heading="true"] th {
-  padding: 8px 32px;
-}
+
 
 button {
   cursor: pointer;

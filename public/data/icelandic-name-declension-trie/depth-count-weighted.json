@@ -1,0 +1,90 @@
+{
+  "keys": ["Compressed", "Uncompressed"],
+  "colors": ["#ff9948", "#399ef4"],
+  "data": [
+    {
+      "label": "1",
+      "values": {
+        "Uncompressed": 0,
+        "Compressed": 38
+      }
+    },
+    {
+      "label": "2",
+      "values": {
+        "Uncompressed": 5,
+        "Compressed": 582
+      }
+    },
+    {
+      "label": "3",
+      "values": {
+        "Uncompressed": 102,
+        "Compressed": 1441
+      }
+    },
+    {
+      "label": "4",
+      "values": {
+        "Uncompressed": 375,
+        "Compressed": 917
+      }
+    },
+    {
+      "label": "5",
+      "values": {
+        "Uncompressed": 680,
+        "Compressed": 533
+      }
+    },
+    {
+      "label": "6",
+      "values": {
+        "Uncompressed": 708,
+        "Compressed": 87
+      }
+    },
+    {
+      "label": "7",
+      "values": {
+        "Uncompressed": 572,
+        "Compressed": 30
+      }
+    },
+    {
+      "label": "8",
+      "values": {
+        "Uncompressed": 489,
+        "Compressed": 8
+      }
+    },
+    {
+      "label": "9",
+      "values": {
+        "Uncompressed": 406,
+        "Compressed": 2
+      }
+    },
+    {
+      "label": "10",
+      "values": {
+        "Uncompressed": 217,
+        "Compressed": 0
+      }
+    },
+    {
+      "label": "11",
+      "values": {
+        "Uncompressed": 75,
+        "Compressed": 0
+      }
+    },
+    {
+      "label": "12",
+      "values": {
+        "Uncompressed": 9,
+        "Compressed": 0
+      }
+    }
+  ]
+}
