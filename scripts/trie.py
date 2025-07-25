@@ -1,8 +1,9 @@
 import os
+import subprocess
 
 from graphviz import Digraph
 
-FONT = "monospace"
+FONT = "Fira Code"
 NODE_COLOR = "#486d8c"
 COLOR = "#B9DBFA"
 
@@ -13,8 +14,8 @@ def create_trie_chart(
     dot = Digraph(format="svg")
 
     rankdir = "TB" if horizontal else "LR"
-    nodesep = "0.4" if horizontal else "0.3"
-    ranksep = "0.6" if horizontal else "0.4"
+    nodesep = "0.3" if horizontal else "0.2"
+    ranksep = "0.5" if horizontal else "0.4"
 
     dot.attr(
         bgcolor="transparent",
@@ -33,10 +34,10 @@ def create_trie_chart(
         fontname=FONT,
         fontcolor=COLOR,
         penwidth="2",
-        height="0.5",
-        width="0.5",
+        height="0.4",
+        width="0.4",
         fixedsize="false",
-        margin="0.15,0.05",
+        margin="0.12,0.02",
     )
 
     dot.attr(
@@ -99,4 +100,17 @@ def create_trie_chart(
 
     abs_file_path = os.path.abspath(os.path.join(os.getcwd(), file_path))
     dot.render(abs_file_path, view=False, cleanup=True)
-    print(f"\n\n\tCreated SVG file at {file_path}.svg\n")
+
+    subprocess.run(
+        [
+            "inkscape",
+            "--export-text-to-path",
+            "--export-plain-svg",
+            f"--export-filename={abs_file_path}.svg",
+            f"{abs_file_path}.svg",
+        ],
+        check=True,
+        capture_output=True,
+    )
+
+    print(f"\n\n\tCreated SVG file with text as paths at {file_path}.svg\n")

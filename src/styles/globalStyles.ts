@@ -156,26 +156,10 @@ li {
 
 table {
   border-collapse: collapse;
-
-  &[data-align="right"] {
-    td {
-      text-align: right;
-    }
-  }
-  &[data-align="center"] {
-    td {
-      text-align: center;
-    }
-  }
-
   display: block;
   max-width: fit-content;
   margin: 32px 0;
   overflow-x: auto;
-}
-
-.align-left {
-  text-align: left !important;
 }
 
 tbody tr:nth-child(even) {
@@ -185,21 +169,8 @@ tbody tr:nth-child(even) {
 th, td {
   border: 1px solid ${colors.darkBlue400};
   padding: 8px 16px;
-  overflow-wrap: anywhere;
-  word-wrap: break-word;
-}
-table[data-pad-heading="true"] th {
-  padding: 8px 32px;
 }
 
-table.nowrap {
-  white-space: nowrap;
-  th, td {
-    max-width: initial;
-    overflow-wrap: initial;
-    word-wrap: initial;
-  }
-}
 
 button {
   cursor: pointer;

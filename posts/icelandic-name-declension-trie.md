@@ -8,15 +8,15 @@ In Icelandic, personal names have four forms, one for each of the [grammatical c
 
 [icelandic_cases]: https://en.wikipedia.org/wiki/Icelandic_grammar#Nouns
 
-{<table>
-<tbody>
-  <tr><th>Grammatical case</th><th>Form</th></tr>
-  <tr><td>Nominative</td><td>Guðmundur</td></tr>
-  <tr><td>Accusative</td><td>Guðmund</td></tr>
-  <tr><td>Dative</td><td>Guðmundi</td></tr>
-  <tr><td>Genitive</td><td>Guðmundar</td></tr>
-</tbody>
-</table>}
+<Table
+  columns={["Grammatical case", "Form"]}
+  data={[
+    ["Nominative", "Guðmundur"],
+    ["Accusative", "Guðmund"],
+    ["Dative", "Guðmundi"],
+    ["Genitive", "Guðmundar"],
+  ]}
+/>
 
 When including a name in a sentence, the sentence's structure determines the grammatical case, and correspondingly, a certain form of the name should be used. Using the wrong form results in a "broken" feel that native speakers associate with non-native speakers not yet fluent in the language.
 
@@ -542,14 +542,15 @@ Of the 4,500 approved Icelandic names, we have declensions data for roughly 3,60
 
 Inserting those names and their form encodings into a new trie gives us a trie with 10,284 nodes, 3,638 of which are leaves. Compressing the trie by merging subtrees with common values reduces the total number of nodes to 1,588. Of those 1,261 are leaves and 327 are not.
 
-{<table data-align="right">
-<tbody>
-    <tr><th></th><th>Uncompressed</th><th>Compressed</th><th>Compressed (%)</th></tr>
-    <tr><td className="align-left">Total nodes</td><td>10,284</td><td>1,588</td><td>15.4%</td></tr>
-    <tr><td className="align-left">Non-leaf nodes</td><td>6,646</td><td>327</td><td>4.9%</td></tr>
-    <tr><td className="align-left">Leaf nodes</td><td>3,638</td><td>1,261</td><td>34.6%</td></tr>
-</tbody>
-</table>}
+<Table
+  align="right"
+  columns={[{ title: "", align: "left" }, "Uncompressed", "Compressed", "Compressed (%)"]}
+  data={[
+    ["Total nodes", "10,284", "1,588", "15.4%"],
+    ["Non-leaf nodes", "6,646", "327", "4.9%"],
+    ["Leaf nodes", "3,638", "1,261", "34.6%"]
+  ]}
+/>
 
 Compressing the trie resulted in 6,319 non-leaf nodes were removed, which is __over 95%__.
 
@@ -565,16 +566,19 @@ In testing how well the compressed trie predicts the declension patterns of not-
 
 I wrote a function to pick 100 of those names at random and (manually) categorized the declension pattern returned when looking those names up in the trie:
 
-{<table className="nowrap" data-align="right">
-<tbody>
-    <tr><th>Result</th><th>Count</th></tr>
-    <tr><td className="align-left">Perfect (declension applied)</td><td>62</td></tr>
-    <tr><td className="align-left">Perfect (no declension applied)</td><td>12</td></tr>
-    <tr><td className="align-left">Should have applied declension</td><td>23</td></tr>
-    <tr><td className="align-left">Wrong, should not be declined</td><td>2</td></tr>
-    <tr><td className="align-left">Wrong declension</td><td>1</td></tr>
-</tbody>
-</table>}
+<Table
+  columns={[
+    "Result",
+    { title: "Count", align: "right" },
+  ]}
+  data={[
+    ["Perfect (declension applied)", 62],
+    ["Perfect (no declension applied)", 12],
+    ["Should have applied declension", 23],
+    ["Wrong, should not be declined", 2],
+    ["Wrong declension", 1],
+  ]}
+/>
 
 This gives us a rough indication that, for not-before-seen Icelandic names, the compressed trie gives us a good or neutral result 97% of the time. 3% of the results are incorrect.
 
@@ -598,17 +602,20 @@ As we can see from the chart, the commonality of names is far from evenly distri
 
 I went ahead and categorized the declension results for those 100 names, multiplying the result by the number of people holding the name:
 
-{<table className="nowrap" data-align="right">
-<tbody>
-    <tr><th>Result</th><th>Number of people</th></tr>
-    <tr><td className="align-left">Perfect (declension applied)</td><td>3,489</td></tr>
-    <tr><td className="align-left">Perfect (no declension applied)</td><td>440</td></tr>
-    <tr><td className="align-left">Should have applied declension</td><td>915</td></tr>
-    <tr><td className="align-left">Wrong, should not be declined</td><td>101</td></tr>
-    <tr><td className="align-left">Wrong declension</td><td>45</td></tr>
-    <tr><td className="align-left">Total</td><td>4,990</td></tr>
-</tbody>
-</table>}
+<Table
+  columns={[
+    { title: "Result", align: "left" },
+    { title: "Number of people", align: "right" },
+  ]}
+  data={[
+    ["Perfect (declension applied)", "3,489"],
+    ["Perfect (no declension applied)", "440"],
+    ["Should have applied declension", "915"],
+    ["Wrong, should not be declined", "101"],
+    ["Wrong declension", "45"],
+    ["Total", "4,990"],
+  ]}
+/>
 
 The error rate here is 2.9%. If we extrapolate that 2.9% error rate across the 5,833 people holding names without declension data available we get 170 wrong results. Dividing 170 wrong results by the 363,314 people holding names in the approved list of Icelandic names gives us an error rate of 0.046%.
 
@@ -780,14 +787,20 @@ It's worth mentioning that, unlike merging subtrees with common values, merging 
 
 Here is the node count table from before with a new column that shows the results for the trie that has also had its sibling leaves merged:
 
-{<table data-align="right">
-<tbody>
-    <tr><th></th><th>Uncompressed</th><th>Only subtrees merged</th><th>Subtrees and sibling leaves merged</th></tr>
-    <tr><td className="align-left">Total nodes</td><td>10,284</td><td>1,588</td><td>972</td></tr>
-    <tr><td className="align-left">Non-leaf nodes</td><td>6,646</td><td>327</td><td>327</td></tr>
-    <tr><td className="align-left">Leaf nodes</td><td>3,638</td><td>1,261</td><td>645</td></tr>
-</tbody>
-</table>}
+<Table
+  align="right"
+  columns={[
+    { title: "", align: "left" },
+    "Uncompressed",
+    { title: "Only subtrees merged", width: 150 },
+    { title: "Subtrees and sibling leaves merged", width: 200 }
+  ]}
+  data={[
+    ["Total nodes", "10,284", "1,588", "972"],
+    ["Non-leaf nodes", "6,646", "327", "327"],
+    ["Leaf nodes", "3,638", "1,261", "645"],
+  ]}
+/>
 
 Merging sibling leaf nodes with common values almost cuts the number of leaf nodes in half! Since we're only touching the leaf nodes, the number of non-leaf nodes stays the same. Lookup depth is also not effected.
 

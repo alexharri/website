@@ -226,78 +226,23 @@ With the `ìf (word === 0) continue;` optimization, we get:
 
 Let's put this into a table and compare the performance:
 
-{<table className="nowrap" data-align="right">
-  <tbody>
-    <tr>
-      <th></th>
-      <th colSpan="2">Unoptimized (baseline)</th>
-      <th colSpan="2">Skip 0s</th>
-    </tr>
-    <tr data-reduce-padding>
-      <th>Density</th>
-      <th>Runtime</th>
-      <th>Speed <sup>*</sup></th>
-      <th>Runtime</th>
-      <th>Speed <sup>*</sup></th>
-    </tr>
-    <tr>
-      <td>100.0%</td>
-      <td>95.2 ms</td>
-      <td>1.0x</td>
-      <td>95.4 ms</td>
-      <td>1.0x</td>
-    </tr>
-    <tr>
-      <td>75.0%</td>
-      <td>250.7 ms</td>
-      <td>1.0x</td>
-      <td>245.5 ms</td>
-      <td>1.0x</td>
-    </tr>
-    <tr>
-      <td>50.0%</td>
-      <td>343.3 ms</td>
-      <td>1.0x</td>
-      <td>336.3 ms</td>
-      <td>1.0x</td>
-    </tr>
-    <tr>
-      <td>25.0%</td>
-      <td>221.8 ms</td>
-      <td>1.0x</td>
-      <td>213.9 ms</td>
-      <td>1.0x</td>
-    </tr>
-    <tr>
-      <td>10.0%</td>
-      <td>141.6 ms</td>
-      <td>1.0x</td>
-      <td>132.4 ms</td>
-      <td>1.0x</td>
-    </tr>
-    <tr>
-      <td>5.0%</td>
-      <td>114.5 ms</td>
-      <td>1.0x</td>
-      <td>95.9 ms</td>
-      <td>1.2x</td>
-    </tr>
-    <tr>
-      <td>1.0%</td>
-      <td>78.5 ms</td>
-      <td>1.0x</td>
-      <td>34.6 ms</td>
-      <td>2.3x</td>
-    </tr>
-    <tr>
-      <td>0.1%</td>
-      <td>66.7 ms</td>
-      <td>1.0x</td>
-      <td>5.6 ms</td>
-      <td>11.9x</td>
-    </tr>
-  </tbody>
-</table>}
+<Table
+  align="right"
+  headers={[
+    ["", { title: "Unoptimized (baseline)", colSpan: 2 }, { title: "Skip 0s", colSpan: 2 }],
+    ["Density", "Runtime", "Speed *", "Runtime", "Speed *"],
+  ]}
+  data={[
+    ["100.0%", "95.2 ms", "1.0x", "95.4 ms", "1.0x"],
+    ["75.0%", "250.7 ms", "1.0x", "245.5 ms", "1.0x"],
+    ["50.0%", "343.3 ms", "1.0x", "336.3 ms", "1.0x"],
+    ["25.0%", "221.8 ms", "1.0x", "213.9 ms", "1.0x"],
+    ["10.0%", "141.6 ms", "1.0x", "132.4 ms", "1.0x"],
+    ["5.0%", "114.5 ms", "1.0x", "95.9 ms", "1.2x"],
+    ["1.0%", "78.5 ms", "1.0x", "34.6 ms", "2.3x"],
+    ["0.1%", "66.7 ms", "1.0x", "5.6 ms", "11.9x"],
+  ]}
+/>
 
 <SmallNote label="">* Speed compared to baseline</SmallNote>
 
@@ -347,97 +292,23 @@ for (let i = start; i < end; i++) {
 
 Let's see the difference this makes:
 
-{<table className="nowrap" data-align="right">
-  <tbody>
-    <tr>
-      <th></th>
-      <th colSpan="2">Unoptimized (baseline)</th>
-      <th colSpan="2">Skip 0s</th>
-      <th colSpan="2">Skip 0s and halves</th>
-    </tr>
-    <tr data-reduce-padding>
-      <th>Density</th>
-      <th>Runtime</th>
-      <th>Speed <sup>*</sup></th>
-      <th>Runtime</th>
-      <th>Speed <sup>*</sup></th>
-      <th>Runtime</th>
-      <th>Speed <sup>*</sup></th>
-    </tr>
-    <tr>
-      <td>100.0%</td>
-      <td>95.2 ms</td>
-      <td>1.0x</td>
-      <td>95.4 ms</td>
-      <td>1.0x</td>
-      <td>99.2 ms</td>
-      <td>1.0x</td>
-    </tr>
-    <tr>
-      <td>75.0%</td>
-      <td>250.7 ms</td>
-      <td>1.0x</td>
-      <td>245.5 ms</td>
-      <td>1.0x</td>
-      <td>246.3 ms</td>
-      <td>1.0x</td>
-    </tr>
-    <tr>
-      <td>50.0%</td>
-      <td>343.3 ms</td>
-      <td>1.0x</td>
-      <td>336.3 ms</td>
-      <td>1.0x</td>
-      <td>346.3 ms</td>
-      <td>1.0x</td>
-    </tr>
-    <tr>
-      <td>25.0%</td>
-      <td>221.8 ms</td>
-      <td>1.0x</td>
-      <td>213.9 ms</td>
-      <td>1.0x</td>
-      <td>215.5 ms</td>
-      <td>1.0x</td>
-    </tr>
-    <tr>
-      <td>10.0%</td>
-      <td>141.6 ms</td>
-      <td>1.0x</td>
-      <td>132.4 ms</td>
-      <td>1.0x</td>
-      <td>133.6 ms</td>
-      <td>1.1x</td>
-    </tr>
-    <tr>
-      <td>5.0%</td>
-      <td>114.5 ms</td>
-      <td>1.0x</td>
-      <td>95.9 ms</td>
-      <td>1.2x</td>
-      <td>93.7 ms</td>
-      <td>1.2x</td>
-    </tr>
-    <tr>
-      <td>1.0%</td>
-      <td>78.5 ms</td>
-      <td>1.0x</td>
-      <td>34.6 ms</td>
-      <td>2.3x</td>
-      <td>28.5 ms</td>
-      <td>2.8x</td>
-    </tr>
-    <tr>
-      <td>0.1%</td>
-      <td>66.7 ms</td>
-      <td>1.0x</td>
-      <td>5.6 ms</td>
-      <td>11.9x</td>
-      <td>5.7 ms</td>
-      <td>11.7x</td>
-    </tr>
-  </tbody>
-</table>}
+<Table
+  align="right"
+  headers={[
+    ["", { title: "Unoptimized (baseline)", colSpan: 2 }, { title: "Skip 0s", colSpan: 2 }, { title: "Skip 0s and halves", colSpan: 2 }],
+    ["Density", "Runtime", "Speed *", "Runtime", "Speed *", "Runtime", "Speed *"],
+  ]}
+  data={[
+    ["100.0%", "95.2 ms", "1.0x", "95.4 ms", "1.0x", "99.2 ms", "1.0x"],
+    ["75.0%", "250.7 ms", "1.0x", "245.5 ms", "1.0x", "246.3 ms", "1.0x"],
+    ["50.0%", "343.3 ms", "1.0x", "336.3 ms", "1.0x", "346.3 ms", "1.0x"],
+    ["25.0%", "221.8 ms", "1.0x", "213.9 ms", "1.0x", "215.5 ms", "1.0x"],
+    ["10.0%", "141.6 ms", "1.0x", "132.4 ms", "1.0x", "133.6 ms", "1.1x"],
+    ["5.0%", "114.5 ms", "1.0x", "95.9 ms", "1.2x", "93.7 ms", "1.2x"],
+    ["1.0%", "78.5 ms", "1.0x", "34.6 ms", "2.3x", "28.5 ms", "2.8x"],
+    ["0.1%", "66.7 ms", "1.0x", "5.6 ms", "11.9x", "5.7 ms", "11.7x"],
+  ]}
+/>
 
 <SmallNote label="">* Speed compared to baseline</SmallNote>
 
@@ -474,123 +345,56 @@ That would be true if signed integers were represented using [sign-magnitude][si
 
 [sign_magnitude]: https://en.wikipedia.org/wiki/Signed_number_representations#Sign%E2%80%93magnitude
 
-{<table className="nowrap" data-pad-heading data-align="center">
-  <tbody>
-    <tr>
-      <th colSpan="4">Numbers represented using sign-magnitude</th>
-    </tr>
-    <tr>
-      <th colSpan="2">Positive</th>
-      <th colSpan="2">Negative</th>
-    </tr>
-    <tr>
-      <th>Bits</th>
-      <th>Value</th>
-      <th>Bits</th>
-      <th>Value</th>
-    </tr>
-    <tr>
-      <td style={{ fontFamily: "var(--font-monospace)" }}>00000000</td>
-      <td>0</td>
-      <td style={{ fontFamily: "var(--font-monospace)" }}>10000000</td>
-      <td>-0</td>
-    </tr>
-    <tr>
-      <td style={{ fontFamily: "var(--font-monospace)" }}>00000001</td>
-      <td>1</td>
-      <td style={{ fontFamily: "var(--font-monospace)" }}>10000001</td>
-      <td>-1</td>
-    </tr>
-    <tr>
-      <td style={{ fontFamily: "var(--font-monospace)" }}>00000010</td>
-      <td>2</td>
-      <td style={{ fontFamily: "var(--font-monospace)" }}>10000010</td>
-      <td>-2</td>
-    </tr>
-    <tr>
-      <td style={{ fontFamily: "var(--font-monospace)" }}>00000011</td>
-      <td>3</td>
-      <td style={{ fontFamily: "var(--font-monospace)" }}>10000011</td>
-      <td>-3</td>
-    </tr>
-    <tr>
-      <td style={{ fontFamily: "var(--font-monospace)" }}>00001001</td>
-      <td>9</td>
-      <td style={{ fontFamily: "var(--font-monospace)" }}>10001001</td>
-      <td>-9</td>
-    </tr>
-    <tr>
-      <td style={{ fontFamily: "var(--font-monospace)" }}>01111111</td>
-      <td>127</td>
-      <td style={{ fontFamily: "var(--font-monospace)" }}>11111111</td>
-      <td>−127</td>
-    </tr>
-  </tbody>
-</table>}
+<Table
+  align="center"
+  headers={[
+    [{ title: "Numbers represented using sign-magnitude", colSpan: 4 }],
+    [{ title: "Positive", colSpan: 2 }, { title: "Negative", colSpan: 2 }],
+    ["Bits", "Value", "Bits", "Value"],
+  ]}
+  columns={[
+    { title: "Bits", monospace: true },
+    { title: "Value" }, 
+    { title: "Bits", monospace: true },
+    { title: "Value" },
+  ]}
+  data={[
+    ["00000000", "0", "10000000", "-0"],
+    ["00000001", "1", "10000001", "-1"],
+    ["00000010", "2", "10000010", "-2"],
+    ["00000011", "3", "10000011", "-3"],
+    ["00001001", "9", "10001001", "-9"],
+    ["01111111", "127", "11111111", "-127"],
+  ]}
+/>
 
 But as I learned, signed integers are most commonly represented using [two's complement][twos_complement].
 
 Two's complement is different from sign-magnitude (and [one's complement][ones_complement]) in that it only has one representation for 0 (there's no -0).
 
-{<table className="nowrap" data-pad-heading data-align="center">
-  <tbody>
-    <tr>
-      <th colSpan="4">Numbers represented using two's complement</th>
-    </tr>
-    <tr>
-      <th colSpan="2">Positive</th>
-      <th colSpan="2">Negative</th>
-    </tr>
-    <tr>
-      <th>Bits</th>
-      <th>Value</th>
-      <th>Bits</th>
-      <th>Value</th>
-    </tr>
-    <tr>
-      <td style={{ fontFamily: "var(--font-monospace)" }}>00000000</td>
-      <td>0</td>
-      <td style={{ fontFamily: "var(--font-monospace)" }}></td>
-      <td></td>
-    </tr>
-    <tr>
-      <td style={{ fontFamily: "var(--font-monospace)" }}>00000001</td>
-      <td>1</td>
-      <td style={{ fontFamily: "var(--font-monospace)" }}>11111111</td>
-      <td>-1</td>
-    </tr>
-    <tr>
-      <td style={{ fontFamily: "var(--font-monospace)" }}>00000010</td>
-      <td>2</td>
-      <td style={{ fontFamily: "var(--font-monospace)" }}>11111110</td>
-      <td>-2</td>
-    </tr>
-    <tr>
-      <td style={{ fontFamily: "var(--font-monospace)" }}>00000011</td>
-      <td>3</td>
-      <td style={{ fontFamily: "var(--font-monospace)" }}>11111101</td>
-      <td>-3</td>
-    </tr>
-    <tr>
-      <td style={{ fontFamily: "var(--font-monospace)" }}>00001001</td>
-      <td>9</td>
-      <td style={{ fontFamily: "var(--font-monospace)" }}>11110111</td>
-      <td>-9</td>
-    </tr>
-    <tr>
-      <td style={{ fontFamily: "var(--font-monospace)" }}>01111111</td>
-      <td>127</td>
-      <td style={{ fontFamily: "var(--font-monospace)" }}>10000001</td>
-      <td>−127</td>
-    </tr>
-    <tr>
-      <td style={{ fontFamily: "var(--font-monospace)" }}></td>
-      <td></td>
-      <td style={{ fontFamily: "var(--font-monospace)" }}>10000000</td>
-      <td>−128</td>
-    </tr>
-  </tbody>
-</table>}
+<Table
+  align="center"
+  headers={[
+    [{ title: "Numbers represented using two's complement", colSpan: 4 }],
+    [{ title: "Positive", colSpan: 2 }, { title: "Negative", colSpan: 2 }],
+    ["Bits", "Value", "Bits", "Value"],
+  ]}
+  columns={[
+    { title: "Bits", monospace: true },
+    { title: "Value" }, 
+    { title: "Bits", monospace: true },
+    { title: "Value" },
+  ]}
+  data={[
+    ["00000000","0","",""],
+    ["00000001","1","11111111","-1"],
+    ["00000010","2","11111110","-2"],
+    ["00000011","3","11111101","-3"],
+    ["00001001","9","11110111","-9"],
+    ["01111111","127","10000001","−127"],
+    ["","","10000000","−128"],
+  ]}
+/>
 
 [ones_complement]: https://en.wikipedia.org/wiki/Signed_number_representations#Ones'_complement
 
@@ -753,97 +557,23 @@ forEach(callback: (index: number) => void) {
 
 But how fast is this optimized version? Let's run our benchmark and compare.
 
-{<table className="nowrap" data-align="right">
-  <tbody>
-    <tr>
-      <th></th>
-      <th colSpan="2">Unoptimized (baseline)</th>
-      <th colSpan="2">Skip 0s</th>
-      <th colSpan="2">Optimized</th>
-    </tr>
-    <tr data-reduce-padding>
-      <th>Density</th>
-      <th>Runtime</th>
-      <th>Speed <sup>*</sup></th>
-      <th>Runtime</th>
-      <th>Speed <sup>*</sup></th>
-      <th>Runtime</th>
-      <th>Speed <sup>*</sup></th>
-    </tr>
-    <tr>
-      <td>100.0%</td>
-      <td>95.2 ms</td>
-      <td>1.0x</td>
-      <td>95.4 ms</td>
-      <td>1.0x</td>
-      <td>53.4 ms</td>
-      <td>1.8x</td>
-    </tr>
-    <tr>
-      <td>75.0%</td>
-      <td>250.7 ms</td>
-      <td>1.0x</td>
-      <td>245.5 ms</td>
-      <td>1.0x</td>
-      <td>91.9 ms</td>
-      <td>2.7x</td>
-    </tr>
-    <tr>
-      <td>50.0%</td>
-      <td>343.3 ms</td>
-      <td>1.0x</td>
-      <td>336.3 ms</td>
-      <td>1.0x</td>
-      <td>68.4 ms</td>
-      <td>5.0x</td>
-    </tr>
-    <tr>
-      <td>25.0%</td>
-      <td>221.8 ms</td>
-      <td>1.0x</td>
-      <td>213.9 ms</td>
-      <td>1.0x</td>
-      <td>44.4 ms</td>
-      <td>5.0x</td>
-    </tr>
-    <tr>
-      <td>10.0%</td>
-      <td>141.6 ms</td>
-      <td>1.0x</td>
-      <td>132.4 ms</td>
-      <td>1.0x</td>
-      <td>30.1 ms</td>
-      <td>4.7x</td>
-    </tr>
-    <tr>
-      <td>5.0%</td>
-      <td>114.5 ms</td>
-      <td>1.0x</td>
-      <td>95.9 ms</td>
-      <td>1.2x</td>
-      <td>24.8 ms</td>
-      <td>4.6x</td>
-    </tr>
-    <tr>
-      <td>1.0%</td>
-      <td>78.5 ms</td>
-      <td>1.0x</td>
-      <td>34.6 ms</td>
-      <td>2.3x</td>
-      <td>10.0 ms</td>
-      <td>7.8x</td>
-    </tr>
-    <tr>
-      <td>0.1%</td>
-      <td>66.7 ms</td>
-      <td>1.0x</td>
-      <td>5.6 ms</td>
-      <td>11.9x</td>
-      <td>4.0 ms</td>
-      <td>16.7x</td>
-    </tr>
-  </tbody>
-</table>}
+<Table
+  align="right"
+  headers={[
+    ["", { title: "Unoptimized (baseline)", colSpan: 2 }, { title: "Skip 0s", colSpan: 2 }, { title: "Optimized", colSpan: 2 }],
+    ["Density", "Runtime", "Speed *", "Runtime", "Speed *", "Runtime", "Speed *"],
+  ]}
+  data={[
+    ["100.0%", "95.2 ms", "1.0x", "95.4 ms", "1.0x", "53.4 ms", "1.8x"],
+    ["75.0%", "250.7 ms", "1.0x", "245.5 ms", "1.0x", "91.9 ms", "2.7x"],
+    ["50.0%", "343.3 ms", "1.0x", "336.3 ms", "1.0x", "68.4 ms", "5.0x"],
+    ["25.0%", "221.8 ms", "1.0x", "213.9 ms", "1.0x", "44.4 ms", "5.0x"],
+    ["10.0%", "141.6 ms", "1.0x", "132.4 ms", "1.0x", "30.1 ms", "4.7x"],
+    ["5.0%", "114.5 ms", "1.0x", "95.9 ms", "1.2x", "24.8 ms", "4.6x"],
+    ["1.0%", "78.5 ms", "1.0x", "34.6 ms", "2.3x", "10.0 ms", "7.8x"],
+    ["0.1%", "66.7 ms", "1.0x", "5.6 ms", "11.9x", "4.0 ms", "16.7x"],
+  ]}
+/>
 
 <SmallNote label="">* Speed compared to baseline</SmallNote>
 
