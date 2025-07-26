@@ -1,13 +1,14 @@
 import { NextRouter, useRouter } from "next/router";
 import { useStyles } from "../utils/styles";
 import { ImageStyles } from "./Image.styles";
+import { cssVariables } from "../utils/cssVariables";
 
 interface Props {
   src?: string;
   noMargin?: boolean;
   plain?: boolean;
   width?: number | "auto";
-  minWidth?: number;
+  scrollable?: boolean;
 }
 
 const videoExtensions = new Set(["mp4"]);
@@ -35,7 +36,7 @@ export const Image = (props: Props) => {
   const s = useStyles(ImageStyles);
   const router = useRouter();
 
-  const { noMargin, plain, minWidth } = props;
+  const { noMargin, plain, scrollable = false } = props;
   let src = props.src || "";
 
   const srcParts = src.split(".");
@@ -54,10 +55,7 @@ export const Image = (props: Props) => {
     flow = false;
   }
 
-  let containerClassName = [
-    "image",
-    s("container", { plain, noMargin, allowScroll: typeof minWidth === "number" }),
-  ].join(" ");
+  let containerClassName = ["image", s("container", { plain, noMargin, scrollable })].join(" ");
   if (flow) containerClassName += " flow";
 
   const className = s("image", { plain });
@@ -69,9 +67,18 @@ export const Image = (props: Props) => {
     else video.pause();
   }
 
+  if (scrollable && typeof width !== "number") {
+    throw new Error(`Width must be specified for scrollable images`);
+  }
+
   return (
-    <div className={containerClassName} style={{ width }}>
-      <div style={{ minWidth }}>
+    <div className={containerClassName} style={{ width: scrollable ? undefined : width }}>
+      <div
+        className={s("wrapper", { scrollable })}
+        style={{
+          minWidth: scrollable ? (width as number) + cssVariables.contentPadding * 2 : undefined,
+        }}
+      >
         {video ? (
           <video
             {...commonProps}

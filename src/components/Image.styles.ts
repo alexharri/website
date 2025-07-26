@@ -28,14 +28,24 @@ export const ImageStyles = ({ styled }: StyleOptions) => ({
     }
 
     &--fullWidth,
-    &--noMargin {
+    &--noMargin,
+    &--scrollable {
       margin-left: -${cssVariables.contentPadding}px;
       margin-right: -${cssVariables.contentPadding}px;
       max-width: calc(100% + ${cssVariables.contentPadding * 2}px);
     }
 
-    &--allowScroll {
+    &--scrollable {
       overflow-x: scroll;
+    }
+  `,
+
+  wrapper: styled.css`
+    &--scrollable {
+      padding-top: 8px;
+      padding-bottom: 8px;
+      padding-left: ${cssVariables.contentPadding}px;
+      padding-right: ${cssVariables.contentPadding}px;
     }
   `,
 

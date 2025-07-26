@@ -277,11 +277,11 @@ The [trie][trie] data structure, also known as a prefix tree, is a tree data str
 
 Take, for example, the name _"Heimir"_, which has a forms encoding of <Ts>{'"1;r,,,s"'}</Ts>. If we create an empty trie and insert _"Heimir"_ and <Ts>{'"1;r,,,s"'}</Ts> as a key-value pair into it, we get:
 
-<Image plain src="~/heimir-trie.svg" width={630} minWidth={630} />
+<Image plain src="~/heimir-trie.svg" width={630} scrollable />
 
 Let's now insert _"Heiðar"_ into the trie, which has a forms encoding of <Ts>{'"1;r,,i,s"'}</Ts>. The names share the first three characters, so they share the first three nodes in the trie:
 
-<Image plain src="~/heimir-heidar-trie.svg" width={630} minWidth={630} />
+<Image plain src="~/heimir-heidar-trie.svg" width={630} scrollable />
 
 However, we actually want to insert the keys _backwards_ into the trie. That is because, like I mentioned earlier, similar suffixes tend to have similar form encodings. Inserting keys backwards results in the values for all names sharing a certain suffix being grouped within that suffix's subtree.
 
@@ -298,7 +298,7 @@ Let's take a concrete example -- consider the following names that end with _"ur
 
 Inserting them _backwards_ into a new trie gives us the following:
 
-<Image plain src="~/ur-divergence.svg" width={630} minWidth={630} />
+<Image plain src="~/ur-divergence.svg" width={630} scrollable />
 
 Once we start inserting the names backwards, every node in the trie corresponds to a specific suffix match:
 
@@ -377,11 +377,11 @@ trieLookup(root, "Loftur")
 
 In our trie from earlier, every leaf in the <Node>r->u->t</Node> subtree has the same value of <Ts>{'"2;ur,,i,s"'}</Ts>:
 
-<Image plain src="~/ur-divergence.svg" width={630} minWidth={630} />
+<Image plain src="~/ur-divergence.svg" width={630} scrollable />
 
 When every leaf in a subtree has a common value, we can _compress_ the subtree. We do that by setting the value of the subtree's root to the value of its leaves, and then deleting every child of the root.
 
-<Image plain src="~/ur-divergence-merged.svg" width={450} minWidth={450} />
+<Image plain src="~/ur-divergence-merged.svg" width={450} scrollable />
 
 <SmallNote label="" center>The trie from above, compressed.</SmallNote>
 
@@ -439,7 +439,7 @@ compress(root);
 
 Here's the trie from above, compressed:
 
-<Image plain src="~/ur-divergence-merged.svg" width={450} minWidth={450} />
+<Image plain src="~/ur-divergence-merged.svg" width={450} scrollable />
 
 After compressing the trie, it communicates the following information:
 
@@ -515,7 +515,7 @@ The compressed trie has, in some sense, "learned" the suffix patterns of the inp
 
 Names in the input data ending in `*tur` always resolved to the same value so the <Node>r->u->t</Node> subtree was compressed — same with `*fur`. However, there were multiple values for names ending in `*ur` so the tree diverges after <Node>r->u</Node>:
 
-<Image plain src="~/ur-divergence-merged.svg" width={430} minWidth={430} />
+<Image plain src="~/ur-divergence-merged.svg" width={430} scrollable />
 
 This divergence raises a question: what about names matching `*ur` but neither `*fur` nor `*tur`?
 
@@ -675,7 +675,7 @@ Trie (compressed)
 
 Take a look at the <Node>r->u->f</Node> subtree from the compressed trie -- it represents names matching `*fur`:
 
-<Image plain src="~/fur-trie.svg" width={595} minWidth={595} />
+<Image plain src="~/fur-trie.svg" width={595} scrollable />
 
 <SmallNote center>I've hidden the full `*lfur` subtree to simplify this view.</SmallNote>
 
@@ -683,7 +683,7 @@ The <Node>i</Node>, <Node>ó</Node>, <Node>ú</Node>, <Node>a</Node> sibling lea
 
 What we can do here is merge sibling leaves with common values. That results in the <Node>i</Node>, <Node>ó</Node>, <Node>ú</Node>, <Node>a</Node> leaves being merged into a single <Node>ióúa</Node> leaf node:
 
-<Image plain src="~/fur-trie-leaves-merged.svg" width={640} minWidth={640} />
+<Image plain src="~/fur-trie-leaves-merged.svg" width={640} scrollable />
 
 Let's implement a <Ts method>mergeLeavesWithCommonValues</Ts> function that performs this compression.
 
@@ -812,7 +812,7 @@ The top node <Node>i->bdfjklmnpstvxðóú</Node> is the result of merging 166 le
 
 Let's take a closer look at the <Node>i</Node> subtree. Next to each value node, I've added the number of names that the leaf node represents in parentheses.
 
-<Image plain src="~/i-trie.svg" width={860} minWidth={860} />
+<Image plain src="~/i-trie.svg" width={860} scrollable />
 
 The <Node>i</Node> subtree is built from 223 names starting with _"i"_. Only four of those names don't follow the declension pattern of <Ts>{'"1;i,a,a,a"'}</Ts>. That's a really high degree of regularity!
 
