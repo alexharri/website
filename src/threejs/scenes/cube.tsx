@@ -1,5 +1,4 @@
 import { useContext } from "react";
-import { Grid } from "../Components/primitives/Grid";
 import { createScene } from "../createScene";
 import { ThreeContext } from "../Components/ThreeProvider";
 
@@ -24,7 +23,6 @@ export default createScene(() => {
       <primitive object={directionalLight1} />
       <primitive object={directionalLight2} />
       <mesh geometry={cubeGeometry} material={cubeMaterial} />
-      {/* <Grid size={6} /> */}
     </>
   );
 });

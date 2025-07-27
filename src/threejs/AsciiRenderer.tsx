@@ -6,18 +6,23 @@ interface Props {
   canvasRef: React.RefObject<HTMLCanvasElement>;
 }
 
-function readPixelColor(
-  canvas: HTMLCanvasElement,
-  gl: WebGLRenderingContext | WebGL2RenderingContext,
+function readPixelFromBuffer(
+  pixelBuffer: Uint8Array,
+  canvasWidth: number,
+  canvasHeight: number,
   x: number,
   y: number,
 ) {
-  const pixels = new Uint8Array(4);
-  const pixelX = Math.floor(x * canvas.width);
-  const pixelY = Math.floor((1 - y) * canvas.height);
-  gl.readPixels(pixelX, pixelY, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, pixels);
+  const pixelX = Math.floor(x * canvasWidth);
+  const pixelY = Math.floor((1 - y) * canvasHeight);
+  const index = (pixelY * canvasWidth + pixelX) * 4;
 
-  return 0x000000 | (pixels[0] << 16) | (pixels[1] << 8) | pixels[2];
+  if (index >= 0 && index < pixelBuffer.length - 3) {
+    return (
+      0x000000 | (pixelBuffer[index] << 16) | (pixelBuffer[index + 1] << 8) | pixelBuffer[index + 2]
+    );
+  }
+  return 0x000000;
 }
 
 function lightness(hexColor: number): number {
@@ -33,8 +38,37 @@ function getAsciiChar(lightness: number): string {
   return chars[index] === " " ? "&nbsp;" : chars[index];
 }
 
+function samplePixelWithAntiAliasing(
+  pixelBuffer: Uint8Array,
+  canvasWidth: number,
+  canvasHeight: number,
+  x: number,
+  y: number,
+  quality: number,
+): number {
+  let totalLightness = 0;
+  let sampleCount = 0;
+
+  for (let sy = 0; sy < quality; sy++) {
+    for (let sx = 0; sx < quality; sx++) {
+      const offsetX = (sx + 0.5) / quality;
+      const offsetY = (sy + 0.5) / quality;
+
+      const x_t = (x + offsetX) / W;
+      const y_t = (y + offsetY) / H;
+
+      const hexColor = readPixelFromBuffer(pixelBuffer, canvasWidth, canvasHeight, x_t, y_t);
+      totalLightness += lightness(hexColor);
+      sampleCount++;
+    }
+  }
+
+  return totalLightness / sampleCount;
+}
+
 const H = 20;
 const W = 50;
+const ANTI_ALIASING_QUALITY = 3;
 
 export function AsciiRenderer(props: Props) {
   const ref = useRef<HTMLDivElement>(null);
@@ -75,15 +109,22 @@ export function AsciiRenderer(props: Props) {
       const gl = canvas?.getContext("webgl") || canvas?.getContext("webgl2");
       if (!canvas || !gl) return;
 
+      const pixelBuffer = new Uint8Array(canvas.width * canvas.height * 4);
+      gl.readPixels(0, 0, canvas.width, canvas.height, gl.RGBA, gl.UNSIGNED_BYTE, pixelBuffer);
+
       for (let y = 0; y < H; y++) {
         const row = rows[y];
         for (let x = 0; x < W; x++) {
-          let x_t = x / (W - 1);
-          let y_t = y / (H - 1);
-          const hexColor = readPixelColor(canvas, gl, x_t, y_t);
-          const lightnessValue = lightness(hexColor);
+          const avgLightness = samplePixelWithAntiAliasing(
+            pixelBuffer,
+            canvas.width,
+            canvas.height,
+            x,
+            y,
+            ANTI_ALIASING_QUALITY,
+          );
           const char = row[x];
-          char.innerHTML = getAsciiChar(lightnessValue);
+          char.innerHTML = getAsciiChar(avgLightness);
           char.style.color = "white";
         }
       }
