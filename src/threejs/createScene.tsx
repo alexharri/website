@@ -7,6 +7,7 @@ import { useDidUpdate } from "../utils/hooks/useDidUpdate";
 import { DreiContext, FiberContext, ThreeContext } from "./Components/ThreeProvider";
 import { useSceneHeight } from "./hooks";
 import { SceneProps } from "./scenes";
+import { AsciiRenderer } from "./AsciiRenderer";
 
 const FADE_HEIGHT = 80;
 
@@ -69,6 +70,7 @@ export function createScene<V extends VariablesOptions>(
 ) {
   return ({
     scene,
+    ascii,
     visible,
     height: targetHeight,
     usesVariables,
@@ -171,26 +173,37 @@ export function createScene<V extends VariablesOptions>(
     const { height, scale } = useSceneHeight(targetHeight);
     const fadeHeight = Math.round(FADE_HEIGHT * scale);
 
+    const canvasRef = useRef<HTMLCanvasElement>(null);
+
     return (
       <>
         <div style={{ position: "relative", height }}>
           <div className={s("fade", { upper: true })} style={{ height: fadeHeight }} />
           <div className={s("fade", { lower: true })} style={{ height: fadeHeight }} />
 
+          {ascii && <AsciiRenderer canvasRef={canvasRef} />}
+
           {visible && (
             <FIBER.Canvas
+              shadows
+              onCreated={({ gl }) => {
+                gl.shadowMap.enabled = true;
+                gl.shadowMap.type = THREE.PCFSoftShadowMap;
+              }}
               style={{
                 height,
                 userSelect: "none",
                 cursor: down ? "grabbing" : "grab",
+                opacity: ascii ? 0 : 1,
               }}
               scene={threeScene}
               camera={camera}
               onMouseDown={() => setDown(true)}
               onMouseUp={() => setDown(false)}
               resize={{ scroll: false }}
+              ref={canvasRef}
             >
-              <ambientLight intensity={Math.PI / 2} />
+              {/* <ambientLight intensity={Math.PI / 2} />
               <spotLight
                 position={[10, 10, 10]}
                 angle={0.15}
@@ -198,7 +211,7 @@ export function createScene<V extends VariablesOptions>(
                 decay={0}
                 intensity={Math.PI}
               />
-              <pointLight position={[-10, -10, -10]} decay={0} intensity={Math.PI} />
+              <pointLight position={[-10, -10, -10]} decay={0} intensity={Math.PI} /> */}
 
               <DREI.OrbitControls
                 rotateSpeed={0.3}
