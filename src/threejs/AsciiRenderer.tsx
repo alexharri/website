@@ -17,12 +17,20 @@ function readPixelColor(
   const pixelY = Math.floor((1 - y) * canvas.height);
   gl.readPixels(pixelX, pixelY, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, pixels);
 
-  return {
-    r: pixels[0],
-    g: pixels[1],
-    b: pixels[2],
-    a: pixels[3],
-  };
+  return 0x000000 | (pixels[0] << 16) | (pixels[1] << 8) | pixels[2];
+}
+
+function lightness(hexColor: number): number {
+  const r = (hexColor >> 16) & 0xff;
+  const g = (hexColor >> 8) & 0xff;
+  const b = hexColor & 0xff;
+  return (0.2126 * r + 0.7152 * g + 0.0722 * b) / 255;
+}
+
+function getAsciiChar(lightness: number): string {
+  const chars = " .:-=+*#%@";
+  const index = Math.floor(lightness * (chars.length - 1));
+  return chars[index] === " " ? "&nbsp;" : chars[index];
 }
 
 const H = 20;
@@ -72,9 +80,11 @@ export function AsciiRenderer(props: Props) {
         for (let x = 0; x < W; x++) {
           let x_t = x / (W - 1);
           let y_t = y / (H - 1);
-          const { r, g, b } = readPixelColor(canvas, gl, x_t, y_t);
+          const hexColor = readPixelColor(canvas, gl, x_t, y_t);
+          const lightnessValue = lightness(hexColor);
           const char = row[x];
-          char.style.color = `rgb(${r}, ${g}, ${b})`;
+          char.innerHTML = getAsciiChar(lightnessValue);
+          char.style.color = "white";
         }
       }
     }
