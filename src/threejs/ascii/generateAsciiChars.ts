@@ -58,7 +58,88 @@ function samplePixelWithAntiAliasing(
   return totalLightness / sampleCount;
 }
 
+import { CharacterMatcher, SamplingPoint } from './CharacterMatcher';
+
 const ANTI_ALIASING_QUALITY = 3;
+
+function sampleCircularRegion(
+  pixelBuffer: Uint8Array,
+  canvasWidth: number,
+  canvasHeight: number,
+  centerX: number,
+  centerY: number,
+  radius: number,
+): number {
+  // Much smaller radius and no anti-aliasing for speed
+  const actualRadius = Math.min(radius, 3);
+  let totalLightness = 0;
+  let sampleCount = 0;
+  
+  // Sample fewer points, no anti-aliasing
+  for (let sy = -actualRadius; sy <= actualRadius; sy += 2) {
+    for (let sx = -actualRadius; sx <= actualRadius; sx += 2) {
+      // Check if point is within circle
+      if (sx * sx + sy * sy > actualRadius * actualRadius) continue;
+      
+      const sampleX = centerX + sx;
+      const sampleY = centerY + sy;
+      
+      // Convert to normalized coordinates
+      const x_t = sampleX / canvasWidth;
+      const y_t = sampleY / canvasHeight;
+      
+      const hexColor = readPixelFromBuffer(pixelBuffer, canvasWidth, canvasHeight, x_t, y_t);
+      totalLightness += lightness(hexColor);
+      sampleCount++;
+    }
+  }
+  
+  return sampleCount > 0 ? totalLightness / sampleCount : 0;
+}
+
+function createSamplingVector(
+  pixelBuffer: Uint8Array,
+  canvasWidth: number,
+  canvasHeight: number,
+  charX: number,
+  charY: number,
+  charWidth: number,
+  charHeight: number,
+  samplingPoints: SamplingPoint[],
+  samplingRadius: number,
+): number[] {
+  const vector: number[] = [];
+  
+  for (const point of samplingPoints) {
+    // Convert normalized character coordinates to pixel coordinates
+    const pixelX = charX * charWidth + point.x * charWidth;
+    const pixelY = charY * charHeight + point.y * charHeight;
+    
+    // Sample the circular region at this point
+    const lightness = sampleCircularRegion(
+      pixelBuffer,
+      canvasWidth,
+      canvasHeight,
+      pixelX,
+      pixelY,
+      samplingRadius,
+    );
+    
+    vector.push(lightness);
+  }
+  
+  return vector;
+}
+
+// Global character matcher instance (created once for performance)
+let characterMatcher: CharacterMatcher | null = null;
+
+function getCharacterMatcher(): CharacterMatcher {
+  if (!characterMatcher) {
+    characterMatcher = new CharacterMatcher();
+  }
+  return characterMatcher;
+}
 
 export function generateAsciiChars(
   pixelBuffer: Uint8Array,
@@ -67,25 +148,35 @@ export function generateAsciiChars(
   outputWidth: number,
   outputHeight: number,
 ): string {
+  const matcher = getCharacterMatcher();
+  const samplingConfig = matcher.getSamplingConfig();
   const chars: string[] = [];
+
+  // Calculate character dimensions in pixels
+  const charWidth = canvasWidth / outputWidth;
+  const charHeight = canvasHeight / outputHeight;
 
   for (let y = 0; y < outputHeight; y++) {
     for (let x = 0; x < outputWidth; x++) {
-      const avgLightness = samplePixelWithAntiAliasing(
+      // Create sampling vector for this character position
+      const samplingVector = createSamplingVector(
         pixelBuffer,
         canvasWidth,
         canvasHeight,
         x,
         y,
-        outputWidth,
-        outputHeight,
-        ANTI_ALIASING_QUALITY,
+        charWidth,
+        charHeight,
+        samplingConfig.points,
+        samplingConfig.circleRadius,
       );
-      const char = getChar(avgLightness);
+      
+      // Find best matching character using K-d tree
+      const char = matcher.findBestCharacter(samplingVector);
       chars.push(char === "&nbsp;" ? " " : char);
     }
     chars.push("\n");
   }
 
-  return chars.join(" ");
+  return chars.join("");
 }
