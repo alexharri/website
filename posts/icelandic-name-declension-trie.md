@@ -580,11 +580,11 @@ I wrote a function to pick 100 of those names at random and (manually) categoriz
   ]}
 />
 
-This gives us a rough indication that, for not-before-seen Icelandic names, the compressed trie gives us a good or neutral result 97% of the time. 3% of the results are incorrect.
+This gives us a rough indication that, for not-before-seen Icelandic names, the compressed trie gives us correct results 74% of the time and wrong results 3% of the time.
 
-<SmallNote label="">The _"Should have applied declension"_ case results in <Ts method>applyCase</Ts> not applying declension to the name and returning it as-is. I consider that a neutral result.</SmallNote>
+The _"Should have applied declension"_ case, which constitutes 23% of results, lives in a sort of gray area. That case results in <Ts method>applyCase</Ts> not applying declension to the name and returning it as-is. That result is not wrong, per se, but it's not 100% correct either. I consider it a neutral result.
 
-But still, these are just 100 random names. Some names are far more common than others. It'd be more interesting to see how well the compressed trie performs for the most common names.
+Either way, these are just 100 random names. Some names are far more common than others. It'd be more interesting to see how well the compressed trie performs for the most common names.
 
 Luckily for us, [Statistics Iceland][statice] publishes data on [how many individuals have specific names][names]. Using that data, I created the chart below. It shows the number of people holding each name in the approved list of names as a first name. The 3,600 names with declension data available are colored blue. The 800 names without declension data are colored red:
 
@@ -598,7 +598,7 @@ Luckily for us, [Statistics Iceland][statice] publishes data on [how many indivi
 
 363,314 people hold a name from the approved list of Icelandic names as a first name. Of those, 5,833 have names that don't have declension data available.
 
-As we can see from the chart, the commonality of names is far from evenly distributed. In fact, the top 100 names without declension data are held by 4,990 people. That corresponds to about 86% of the people holding one of the 800 names without declension data available.
+As we can see from the chart, the commonality of names is far from evenly distributed. In fact, the top 100 names without declension data are held by 4,990 people. Those 4,990 people constitute 86% of the 5,833 people that hold one of the 800 names without declension data available.
 
 I went ahead and categorized the declension results for those 100 names, multiplying the result by the number of people holding the name:
 
@@ -617,7 +617,7 @@ I went ahead and categorized the declension results for those 100 names, multipl
   ]}
 />
 
-The error rate here is 2.9%. If we extrapolate that 2.9% error rate across the 5,833 people holding names without declension data available, we get 170 wrong results. Dividing 170 wrong results by the 363,314 people holding names in the approved list of Icelandic names gives us an error rate of 0.046%.
+146 wrong results gives us an error rate of 2.9%. If we extrapolate that 2.9% error rate across the 5,833 people holding names without declension data available, we get 170 wrong results. Dividing 170 wrong results by the 363,314 people holding names in the approved list of Icelandic names gives us an error rate of 0.046%.
 
 ## Regularity and comprehensiveness
 
@@ -882,16 +882,15 @@ Because of that, if I were developing the library again today, I probably would 
 
 ## Final words
 
-I also wonder whether there's a better term for the data structure I've been describing than "compressed trie". Google and LLMs point to some related data structures (such as [radix trees][radix_tree]), but I haven't found anything similar to what I'm describing in this post. I'm sure there's something out there, but I don't know the terms to look for (if you do, please let me know!).
+There are many languages with declension as a language feature (such as Slavic and Balkan languages), so there is an opportunity to apply the ideas explored in this post to those languages. Native speakers of said languages are well suited to explore that.
 
-[radix_tree]: https://en.wikipedia.org/wiki/Radix_tree
+I also expect there to be many non-linguistic applications for the ideas explored in this post -- hopefully you can use some of these ideas in your own work!
 
-I wonder what applications the compressed trie could be used for. There are probably datasets out there that exhibit a similar regularity in suffix-to-value mappings where the compressed trie could be useful.
+I'd like to thank [Eiríkur Fannar Torfason][eirikur_dev] and [Vilhjálmur Thorsteinsson][villi] for reading and providing feedback on draft versions of this post.
 
-As for linguistic applications, there are other languages with declension as a language feature, so there might be an opportunity to build beygla-like libraries for those languages. Native speakers of said languages would be better suited to explore that.
+[eirikur_dev]: https://eirikur.dev/
+[villi]: https://www.linkedin.com/in/villithorsteinsson/
 
-Anyway, thanks for reading. Hopefully you can use some ideas from this post in your own work!
+Thanks for reading, I hope this was interesting.
 
 -- Alex Harri
-
-
