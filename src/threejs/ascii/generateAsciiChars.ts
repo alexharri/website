@@ -1,3 +1,10 @@
+import { CharacterMatcher, SamplingPoint } from "./CharacterMatcher";
+
+const CONTRAST_EXPONENT_GLOBAL = 3;
+const CONTRAST_EXPONENT_LOCAL = 7;
+const STICKINESS_THRESHOLD = 0.02;
+// const STICKINESS_THRESHOLD = 0;
+
 function readPixelFromBuffer(
   pixelBuffer: Uint8Array,
   canvasWidth: number,
@@ -22,46 +29,6 @@ function lightness(hexColor: number): number {
   return (0.2126 * r + 0.7152 * g + 0.0722 * b) / 255;
 }
 
-function getChar(lightness: number): string {
-  const chars = " .'`^\",:;Il!i><~+_-?]";
-  const index = Math.floor(lightness * (chars.length - 1));
-  return chars[index] === " " ? "&nbsp;" : chars[index];
-}
-
-function samplePixelWithAntiAliasing(
-  pixelBuffer: Uint8Array,
-  canvasWidth: number,
-  canvasHeight: number,
-  x: number,
-  y: number,
-  W: number,
-  H: number,
-  quality: number,
-): number {
-  let totalLightness = 0;
-  let sampleCount = 0;
-
-  for (let sy = 0; sy < quality; sy++) {
-    for (let sx = 0; sx < quality; sx++) {
-      const offsetX = (sx + 0.5) / quality;
-      const offsetY = (sy + 0.5) / quality;
-
-      const x_t = (x + offsetX) / W;
-      const y_t = (y + offsetY) / H;
-
-      const hexColor = readPixelFromBuffer(pixelBuffer, canvasWidth, canvasHeight, x_t, y_t);
-      totalLightness += lightness(hexColor);
-      sampleCount++;
-    }
-  }
-
-  return totalLightness / sampleCount;
-}
-
-import { CharacterMatcher, SamplingPoint } from './CharacterMatcher';
-
-const ANTI_ALIASING_QUALITY = 3;
-
 function sampleCircularRegion(
   pixelBuffer: Uint8Array,
   canvasWidth: number,
@@ -74,26 +41,26 @@ function sampleCircularRegion(
   const actualRadius = Math.min(radius, 3);
   let totalLightness = 0;
   let sampleCount = 0;
-  
+
   // Sample fewer points, no anti-aliasing
   for (let sy = -actualRadius; sy <= actualRadius; sy += 2) {
     for (let sx = -actualRadius; sx <= actualRadius; sx += 2) {
       // Check if point is within circle
       if (sx * sx + sy * sy > actualRadius * actualRadius) continue;
-      
+
       const sampleX = centerX + sx;
       const sampleY = centerY + sy;
-      
+
       // Convert to normalized coordinates
       const x_t = sampleX / canvasWidth;
       const y_t = sampleY / canvasHeight;
-      
+
       const hexColor = readPixelFromBuffer(pixelBuffer, canvasWidth, canvasHeight, x_t, y_t);
       totalLightness += lightness(hexColor);
       sampleCount++;
     }
   }
-  
+
   return sampleCount > 0 ? totalLightness / sampleCount : 0;
 }
 
@@ -109,12 +76,12 @@ function createSamplingVector(
   samplingRadius: number,
 ): number[] {
   const vector: number[] = [];
-  
+
   for (const point of samplingPoints) {
     // Convert normalized character coordinates to pixel coordinates
     const pixelX = charX * charWidth + point.x * charWidth;
     const pixelY = charY * charHeight + point.y * charHeight;
-    
+
     // Sample the circular region at this point
     const lightness = sampleCircularRegion(
       pixelBuffer,
@@ -124,15 +91,98 @@ function createSamplingVector(
       pixelY,
       samplingRadius,
     );
-    
+
     vector.push(lightness);
   }
-  
+
   return vector;
+}
+
+function sampleDirectionalContext(
+  pixelBuffer: Uint8Array,
+  canvasWidth: number,
+  canvasHeight: number,
+  charX: number,
+  charY: number,
+  charWidth: number,
+  charHeight: number,
+  externalPoints: SamplingPoint[],
+  samplingRadius: number,
+): number[] {
+  const contextValues: number[] = [];
+
+  for (const externalPoint of externalPoints) {
+    // Calculate actual external sampling position in pixels
+    const externalX = charX * charWidth + externalPoint.x * charWidth;
+    const externalY = charY * charHeight + externalPoint.y * charHeight;
+
+    // Sample the external context point
+    const contextLightness = sampleCircularRegion(
+      pixelBuffer,
+      canvasWidth,
+      canvasHeight,
+      externalX,
+      externalY,
+      samplingRadius,
+    );
+
+    contextValues.push(contextLightness);
+  }
+
+  return contextValues;
+}
+
+function crunchSamplingVector(vector: number[], exponent: number): number[] {
+  const maxValue = Math.max(...vector);
+
+  // If all values are zero, return as-is
+  if (maxValue === 0) return vector;
+
+  return vector.map((value) => {
+    // Normalize to 0-1 range
+    const normalized = value / maxValue;
+    // Apply power-law enhancement
+    const enhanced = Math.pow(normalized, exponent);
+    // Rescale back to original range
+    return enhanced * maxValue;
+  });
+}
+
+function crunchSamplingVectorDirectional(
+  vector: number[],
+  contextValues: number[],
+  exponent: number,
+): number[] {
+  if (vector.length !== contextValues.length) {
+    throw new Error("Vector and context values must have the same length");
+  }
+
+  return vector.map((value, index) => {
+    const contextValue = contextValues[index];
+    if (contextValue <= value) return value;
+
+    // Normalize using the contextual max
+    const normalized = value / contextValue;
+    // Apply power-law enhancement
+    const enhanced = Math.pow(normalized, exponent);
+    // Rescale back to original value's scale (not context scale)
+    return enhanced * contextValue;
+  });
+}
+
+function vectorDistance(a: number[], b: number[]): number {
+  if (a.length !== b.length) return Infinity;
+  return Math.sqrt(a.reduce((sum, val, i) => sum + Math.pow(val - b[i], 2), 0));
 }
 
 // Global character matcher instance (created once for performance)
 let characterMatcher: CharacterMatcher | null = null;
+
+// Persistent storage for character stickiness
+let previousCharacters: string[][] = [];
+let previousVectors: number[][][] = [];
+let previousOutputWidth = 0;
+let previousOutputHeight = 0;
 
 function getCharacterMatcher(): CharacterMatcher {
   if (!characterMatcher) {
@@ -152,14 +202,38 @@ export function generateAsciiChars(
   const samplingConfig = matcher.getSamplingConfig();
   const chars: string[] = [];
 
+  // Check if dimensions changed and clear storage if needed
+  if (outputWidth !== previousOutputWidth || outputHeight !== previousOutputHeight) {
+    previousCharacters = [];
+    previousVectors = [];
+    previousOutputWidth = outputWidth;
+    previousOutputHeight = outputHeight;
+  }
+
+  // Initialize storage arrays if empty
+  if (previousCharacters.length === 0) {
+    previousCharacters = Array(outputHeight)
+      .fill(null)
+      .map(() => Array(outputWidth).fill(""));
+    previousVectors = Array(outputHeight)
+      .fill(null)
+      .map(() =>
+        Array(outputWidth)
+          .fill(null)
+          .map(() => []),
+      );
+  }
+
   // Calculate character dimensions in pixels
   const charWidth = canvasWidth / outputWidth;
   const charHeight = canvasHeight / outputHeight;
 
+  // Get external points from config (pre-calculated)
+
   for (let y = 0; y < outputHeight; y++) {
     for (let x = 0; x < outputWidth; x++) {
       // Create sampling vector for this character position
-      const samplingVector = createSamplingVector(
+      const rawSamplingVector = createSamplingVector(
         pixelBuffer,
         canvasWidth,
         canvasHeight,
@@ -170,10 +244,48 @@ export function generateAsciiChars(
         samplingConfig.points,
         samplingConfig.circleRadius,
       );
-      
+
+      // Sample directional context for anti-aliasing
+      const contextValues = sampleDirectionalContext(
+        pixelBuffer,
+        canvasWidth,
+        canvasHeight,
+        x,
+        y,
+        charWidth,
+        charHeight,
+        samplingConfig.externalPoints,
+        samplingConfig.circleRadius,
+      );
+
+      // Apply two-stage crunching: directional first, then global
+      let samplingVector = rawSamplingVector;
+      samplingVector = crunchSamplingVectorDirectional(
+        rawSamplingVector,
+        contextValues,
+        CONTRAST_EXPONENT_LOCAL,
+      );
+      samplingVector = crunchSamplingVector(samplingVector, CONTRAST_EXPONENT_GLOBAL);
+
       // Find best matching character using K-d tree
-      const char = matcher.findBestCharacter(samplingVector);
-      chars.push(char === "&nbsp;" ? " " : char);
+      let selectedChar = matcher.findBestCharacter(samplingVector);
+
+      // Apply stickiness to reduce jitter
+      const previousChar = previousCharacters[y][x];
+      const previousVector = previousVectors[y][x];
+
+      if (previousChar && previousVector.length > 0) {
+        const distance = vectorDistance(samplingVector, previousVector);
+        if (distance < STICKINESS_THRESHOLD) {
+          selectedChar = previousChar;
+        }
+      }
+
+      // Update storage with current frame data
+      previousCharacters[y][x] = selectedChar;
+      previousVectors[y][x] = [...samplingVector];
+
+      chars.push(selectedChar === "&nbsp;" ? " " : selectedChar);
     }
     chars.push("\n");
   }

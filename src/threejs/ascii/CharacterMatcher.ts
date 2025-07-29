@@ -13,6 +13,7 @@ export interface SamplingPoint {
 
 export interface SamplingConfig {
   points: SamplingPoint[];
+  externalPoints: SamplingPoint[];
   circleRadius: number;
 }
 
