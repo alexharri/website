@@ -15,6 +15,7 @@ export interface SceneProps {
   xRotation?: number;
   usesVariables?: boolean;
   zoom?: number;
+  ascii?: boolean;
   yOffset?: number;
   errorLoadingThreeJs: boolean;
 }
@@ -82,9 +83,10 @@ export const threeJsScenes: Partial<Record<string, React.ComponentType<SceneProp
   
   "simplex": dynamic(() => import("./scenes/simplex"), { loading }),
   "simplex-point-array": dynamic(() => import("./scenes/simplex-point-array"), { loading }),
-  
 
   "vr-controller": dynamic(() => import("./scenes/vr-controller"), { loading }),
+
+  "cube": dynamic(() => import("./scenes/cube"), { loading })
 };
 
 interface Props {
@@ -96,10 +98,12 @@ interface Props {
   zoom?: number;
   yOffset?: number;
   xRotation?: number;
+  ascii?: boolean;
 }
 
 export const Scene: React.FC<Props> = (props) => {
-  const { scene, height, usesVariables, angle, zoom, yOffset, autoRotate, xRotation } = props;
+  const { scene, height, usesVariables, angle, zoom, yOffset, autoRotate, xRotation, ascii } =
+    props;
   const containerRef = useRef<HTMLDivElement>(null);
   const visible = useVisible(containerRef, "350px");
   const render = useVisible(containerRef, "50px");
@@ -132,6 +136,7 @@ export const Scene: React.FC<Props> = (props) => {
     yOffset,
     zoom,
     xRotation,
+    ascii,
     errorLoadingThreeJs: error,
   };
 
