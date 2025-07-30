@@ -6,10 +6,10 @@ create_trie_chart(
     trie={
         "r": {
             "u": {
-                "f": {"l": {"Y": {"value": "2;ur,i,i,ar"}}},
+                "f": {"l": {"Y": {"value": "ur,i,i,ar"}}},
                 "t": {
-                    "ú": {"n": {"K": {"value": "2;ur,,i,s"}}, "r": {"H": {"value": "2;ur,,i,s"}}},
-                    "f": {"o": {"L": {"value": "2;ur,,i,s"}}},
+                    "ú": {"n": {"K": {"value": "ur,,i,s"}}, "r": {"H": {"value": "ur,,i,s"}}},
+                    "f": {"o": {"L": {"value": "ur,,i,s"}}},
                 },
             }
         }
