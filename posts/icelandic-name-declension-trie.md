@@ -616,7 +616,7 @@ I went ahead and categorized the declension results for those 100 names, multipl
 
 1,061 wrong results gives us an error rate of 21%. If we extrapolate that 21% error rate across the 5,833 people holding names without declension data available, we get 1,240 wrong results. Dividing 1,240 wrong results by the 363,314 people holding names in the approved list of Icelandic names gives us an error rate of 0.34%.
 
-If we do the same math with only the names that were _incorrectly_ declined, we get an error rate of 0.046%.
+<SmallNote label="">If we do the same math with only the names that were _incorrectly_ declined, we get an error rate of 0.046%.</SmallNote>
 
 ## Regularity and comprehensiveness
 
