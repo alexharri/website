@@ -577,11 +577,11 @@ I wrote a function to pick 100 of those names at random and (manually) categoriz
   ]}
 />
 
-This gives us a rough indication that, for not-before-seen Icelandic names, the compressed trie gives us correct results 74% of the time and wrong results 3% of the time.
+This gives us a rough indication that, for not-before-seen Icelandic names, the compressed trie gives us correct results 74% of the time and wrong results 26% of the time.
 
-The _"Should have applied declension"_ case, which constitutes 23% of results, lives in a sort of gray area. That case results in <Ts method>applyCase</Ts> not applying declension to the name and returning it as-is. That result is not wrong, per se, but it's not 100% correct either. I consider it a neutral result.
+<SmallNote label="">The _"Should have applied declension"_ case, which constitutes 23% of results, results in <Ts method>applyCase</Ts> not applying declension to the name and returning it as-is. That result _is_ wrong, but I consider it a lesser kind of wrong.</SmallNote>
 
-Either way, these are just 100 random names. Some names are far more common than others. It'd be more interesting to see how well the compressed trie performs for the most common names.
+Still, these are just 100 random names. Some names are far more common than others. It'd be more interesting to see how well the compressed trie performs for the most common names.
 
 Luckily for us, [Statistics Iceland][statice] publishes data on [how many individuals have specific names][names]. Using that data, I created the chart below. It shows the number of people holding each name in the approved list of names as a first name. The 3,600 names with declension data available are colored blue. The 800 names without declension data are colored red:
 
@@ -614,7 +614,9 @@ I went ahead and categorized the declension results for those 100 names, multipl
   ]}
 />
 
-146 wrong results gives us an error rate of 2.9%. If we extrapolate that 2.9% error rate across the 5,833 people holding names without declension data available, we get 170 wrong results. Dividing 170 wrong results by the 363,314 people holding names in the approved list of Icelandic names gives us an error rate of 0.046%.
+1,061 wrong results gives us an error rate of 21%. If we extrapolate that 21% error rate across the 5,833 people holding names without declension data available, we get 1,240 wrong results. Dividing 1,240 wrong results by the 363,314 people holding names in the approved list of Icelandic names gives us an error rate of 0.34%.
+
+If we do the same math with only the names that were _incorrectly_ declined, we get an error rate of 0.046%.
 
 ## Regularity and comprehensiveness
 
@@ -665,7 +667,7 @@ Trie (compressed)
 [serializer]: https://github.com/alexharri/beygla/blob/77f63a3132275fe58509a024f33b478bb3e54e38/lib/compress/trie/serialize.ts
 [deserializer]: https://github.com/alexharri/beygla/blob/77f63a3132275fe58509a024f33b478bb3e54e38/lib/read/deserialize.ts
 
-4.23 kB is very compact, but we can take the compression one step further.
+4.01 kB is very compact, but we can take the compression one step further.
 
 
 ## Merging sibling leaves with common suffixes
@@ -834,7 +836,7 @@ Trie (subtrees and leaves merged)
     3.27 kB gzipped (9.3 kB minified)
 ```
 
-It saves us 0.8 kB. That's a small number in absolute terms, but hey, it's a 19% improvement!
+It saves us 0.74 kB. That's a small number in absolute terms, but hey, it's an 18% improvement!
 
 
 ## The beygla library
@@ -879,13 +881,15 @@ Because of that, if I were developing the library again today, I probably would 
 
 ## Final words
 
-Building beygla was a super fun problem to solve. When I first started the project, I didn't expect to be able to get the bundle size so low. But the trick of constructing a trie that groups names with similar endings and (lossily) compressing it based on the values of leaf nodes ended up being incredibly effective for Icelandic declension data.
+Building beygla was a super fun problem to solve. When I first started the project, I didn't expect to be able to get the bundle size so low. The compressed trie ended up being really effective for encoding Icelandic declension patterns.
+
+If Icelandic language technology is something that's interesting to you, I'd suggest checking out [Miðeind][mideind] -- they have a lot of open source projects around AI and natural language processing for Icelandic.
+
+[mideind]: https://github.com/mideind
 
 [suffix_trie]: https://en.wikipedia.org/wiki/Suffix_tree
 
 There are many languages with declension as a language feature (such as Slavic and Balkan languages), so there is an opportunity to apply the ideas explored in this post to those languages. Native speakers of said languages are well suited to explore that.
-
-I also expect there to be many non-linguistic applications for the ideas explored in this post -- hopefully you can use some of these ideas in your own work!
 
 I'd like to thank [Eiríkur Fannar Torfason][eirikur_dev] and [Vilhjálmur Thorsteinsson][villi] for reading and providing feedback on draft versions of this post. Vilhjálmur actually identified an optimization opportunity in beygla that reduced the size of the trie from 3.43 kB to 3.27 kB ([see PR][beygla_pr_25]).
 
