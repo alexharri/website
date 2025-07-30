@@ -222,14 +222,14 @@ But the suffix encoding doesn't encode the name itself, so we need a way to retr
 
 ```ts
 const nameToFormsEncoding = {
-  Guðmundur: "2;ur,,i,ar",
+  Guðmundur: "ur,,i,ar",
   // ...3,600 more lines
 };
 ```
 
 Putting bundle size concerns aside, a hash map doesn't solve the problem of names not in the list of approved Icelandic names being excluded.
 
-Here, one helpful fact about Icelandic declension is that names with similar suffixes _tend_ to follow the same pattern of declension. These names ending in _"ur"_ all have the same suffix encoding of <Ts>{'"2;ur,,i,ar"'}</Ts>:
+Here, one helpful fact about Icelandic declension is that names with similar suffixes _tend_ to follow the same pattern of declension. These names ending in _"ur"_ all have the same suffix encoding of <Ts>{'"ur,,i,ar"'}</Ts>:
 
 ```
 Ástvaldur
@@ -247,7 +247,7 @@ The naive approach, then, would be to implement a <Ts method>getSuffixEncoding</
 ```ts
 function getSuffixEncoding(name) {
   if (/(d|ð|t)ur$/.test(name)) {
-    return "2;ur,,i,ar";
+    return "ur,,i,ar";
   }
   // ...
 }
@@ -255,9 +255,9 @@ function getSuffixEncoding(name) {
 
 But that quickly breaks down. There are other names ending with _"ður"_ or _"dur"_ that follow a different pattern of declension:
 
-* _"Aðalráður"_ and _"Arnmóður"_ have a suffix encoding of <Ts>{'"2;ur,,i,s"'}</Ts>
-* _"Baldur"_ has a suffix encoding of <Ts>{'"2;ur,ur,ri,urs"'}</Ts>
-* _"Hlöður"_ and _"Lýður"_ both have a suffix encoding of <Ts>{'"2;ur,,,s"'}</Ts>
+* _"Aðalráður"_ and _"Arnmóður"_ have a suffix encoding of <Ts>{'"ur,,i,s"'}</Ts>
+* _"Baldur"_ has a suffix encoding of <Ts>{'"ur,ur,ri,urs"'}</Ts>
+* _"Hlöður"_ and _"Lýður"_ both have a suffix encoding of <Ts>{'"ur,,,s"'}</Ts>
 
 In fact, take a look at this [gist][names_by_suffix_encoding] showing every approved Icelandic personal name grouped by their suffix encoding (there are 124 unique encodings). You'll immediately find patterns, but if you take a closer look you'll find numerous counterexamples to those patterns. Capturing all of these rules and their exceptions in code would be a tedious and brittle affair.
 
@@ -272,11 +272,11 @@ The [trie][trie] data structure, also known as a prefix tree, is a tree data str
 
 [trie]: https://en.wikipedia.org/wiki/Trie
 
-Take, for example, the name _"Heimir"_, which has a suffix encoding of <Ts>{'"1;r,,,s"'}</Ts>. If we create an empty trie and insert _"Heimir"_ and <Ts>{'"1;r,,,s"'}</Ts> as a key-value pair into it, we get:
+Take, for example, the name _"Heimir"_, which has a suffix encoding of <Ts>{'"r,,,s"'}</Ts>. If we create an empty trie and insert _"Heimir"_ and <Ts>{'"r,,,s"'}</Ts> as a key-value pair into it, we get:
 
 <Image plain src="~/heimir-trie.svg" width={630} scrollable />
 
-Let's now insert _"Heiðar"_ into the trie, which has a suffix encoding of <Ts>{'"1;r,,i,s"'}</Ts>. The names share the first three characters, so they share the first three nodes in the trie:
+Let's now insert _"Heiðar"_ into the trie, which has a suffix encoding of <Ts>{'"r,,i,s"'}</Ts>. The names share the first three characters, so they share the first three nodes in the trie:
 
 <Image plain src="~/heimir-heidar-trie.svg" width={630} scrollable />
 
@@ -285,10 +285,10 @@ However, we actually want to insert the keys _backwards_ into the trie. That is 
 Let's take a concrete example -- consider the following names that end with _"ur"_ and their encodings:
 
 ```
-<@blue>Ylfur</@>    <@string>2;ur,i,i,ar</@>
-<@blue>Knútur</@>   <@string>2;ur,,i,s</@>
-<@blue>Hrútur</@>   <@string>2;ur,,i,s</@>
-<@blue>Loftur</@>   <@string>2;ur,,i,s</@>
+<@blue>Ylfur</@>    <@string>ur,i,i,ar</@>
+<@blue>Knútur</@>   <@string>ur,,i,s</@>
+<@blue>Hrútur</@>   <@string>ur,,i,s</@>
+<@blue>Loftur</@>   <@string>ur,,i,s</@>
 
 <@blue>Name</@>     <@string>Suffix encoding</@>
 ```
@@ -366,13 +366,13 @@ This returns the value for the name, as expected:
 
 ```ts
 trieLookup(root, "Loftur")
-//=> "2;ur,,i,s"
+//=> "ur,,i,s"
 ```
 
 
 ## Compressing the trie
 
-In our trie from earlier, every leaf in the <Node>r->u->t</Node> subtree has the same value of <Ts>{'"2;ur,,i,s"'}</Ts>:
+In our trie from earlier, every leaf in the <Node>r->u->t</Node> subtree has the same value of <Ts>{'"ur,,i,s"'}</Ts>:
 
 <Image plain src="~/ur-divergence.svg" width={630} scrollable />
 
@@ -440,8 +440,8 @@ Here's the trie from above, compressed:
 
 After compressing the trie, it communicates the following information:
 
- * All names ending in _"fur"_ resolve to a value of <Ts>{'"2;ur,i,i,ar"'}</Ts>
- * All names ending in _"tur"_ resolve to a value of <Ts>{'"2;ur,,i,s"'}</Ts>
+ * All names ending in _"fur"_ resolve to a value of <Ts>{'"ur,i,i,ar"'}</Ts>
+ * All names ending in _"tur"_ resolve to a value of <Ts>{'"ur,,i,s"'}</Ts>
 
 When we originally inserted _"Ylfur"_ into the trie, the associated value was stored under <Node>r->u->f->l->Y</Node>, but after compressing the trie, only the <Node>r->u->f</Node> part of that path remains.
 
@@ -480,7 +480,7 @@ function trieLookup(root: TrieNode, key: string) {
 }
 
 trieLookup(root, "Ylfur")
-//=> "2;ur,i,i,ar"
+//=> "ur,i,i,ar"
 ```
 
 <SmallNote label="" center>We only override <Ts>node</Ts> if there is a <Ts>next</Ts> node.</SmallNote>
@@ -488,25 +488,25 @@ trieLookup(root, "Ylfur")
 Now, looking up the original four input names returns the values for those names:
 
 ```ts
-trieLookup(trie, "Ylfur")  //=> "2;ur,i,i,ar"
-trieLookup(trie, "Knútur") //=> "2;ur,,i,s"
-trieLookup(trie, "Hrútur") //=> "2;ur,,i,s"
-trieLookup(trie, "Loftur") //=> "2;ur,,i,s"
+trieLookup(trie, "Ylfur")  //=> "ur,i,i,ar"
+trieLookup(trie, "Knútur") //=> "ur,,i,s"
+trieLookup(trie, "Hrútur") //=> "ur,,i,s"
+trieLookup(trie, "Loftur") //=> "ur,,i,s"
 ```
 
 However, we also get values for lookup keys not in the original input data:
 
 ```ts
 trieLookup(trie, "Bjartur")
-//=> "2;ur,,i,s"
+//=> "ur,,i,s"
 ```
 
 This was not the case prior to compressing the trie -- only the original input keys returned a value in the original trie. 
 
 Lookups in the compressed trie return
 
- * <Ts>{'"2;ur,i,i,ar"'}</Ts> for all lookup keys matching `*fur`, and
- * <Ts>{'"2;ur,,i,s"'}</Ts> for all lookup keys matching `*tur`.
+ * <Ts>{'"ur,i,i,ar"'}</Ts> for all lookup keys matching `*fur`, and
+ * <Ts>{'"ur,,i,s"'}</Ts> for all lookup keys matching `*tur`.
 
 The compressed trie has, in some sense, "learned" the suffix patterns of the input data, and returns values based on that.
 
@@ -678,7 +678,7 @@ Take a look at the <Node>r->u->f</Node> subtree from the compressed trie -- it r
 
 <SmallNote center>I've hidden the full `*lfur` subtree to simplify this view.</SmallNote>
 
-The <Node>i</Node>, <Node>ó</Node>, <Node>ú</Node>, <Node>a</Node> sibling leaves following <Node>r->u->f</Node> all resolve to the same value of <Ts>{'"2;ur,,i,s"'}</Ts>. However, the <Node>l</Node> and <Node>i</Node> subtrees have leaves with different values, which prevented the <Node>r->u->f</Node> subtree from being compressed.
+The <Node>i</Node>, <Node>ó</Node>, <Node>ú</Node>, <Node>a</Node> sibling leaves following <Node>r->u->f</Node> all resolve to the same value of <Ts>{'"ur,,i,s"'}</Ts>. However, the <Node>l</Node> and <Node>i</Node> subtrees have leaves with different values, which prevented the <Node>r->u->f</Node> subtree from being compressed.
 
 What we can do here is merge sibling leaves with common values. That results in the <Node>i</Node>, <Node>ó</Node>, <Node>ú</Node>, <Node>a</Node> leaves being merged into a single <Node>ióúa</Node> leaf node:
 
@@ -813,9 +813,9 @@ Let's take a closer look at the <Node>i</Node> subtree. Next to each value node,
 
 <Image plain src="~/i-trie.svg" width={860} scrollable />
 
-The <Node>i</Node> subtree is built from 223 names starting with _"i"_. Only four of those names don't follow the declension pattern of <Ts>{'"1;i,a,a,a"'}</Ts>. That's a really high degree of regularity!
+The <Node>i</Node> subtree is built from 223 names starting with _"i"_. Only four of those names don't follow the declension pattern of <Ts>{'"i,a,a,a"'}</Ts>. That's a really high degree of regularity!
 
-Those four names serve as important counterexamples to the general rule that names ending in _"i"_ have a suffix encoding of <Ts>{'"1;i,a,a,a"'}</Ts>. Without them, the <Node>i</Node> subtree would have been compressed to a single value node.
+Those four names serve as important counterexamples to the general rule that names ending in _"i"_ have a suffix encoding of <Ts>{'"i,a,a,a"'}</Ts>. Without them, the <Node>i</Node> subtree would have been compressed to a single value node.
 
 
 ## Final bundle size
