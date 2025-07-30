@@ -883,7 +883,7 @@ Because of that, if I were developing the library again today, I probably would 
 
 Building beygla was a super fun problem to solve. When I first started the project, I didn't expect to be able to get the bundle size so low. The compressed trie ended up being really effective for encoding Icelandic declension patterns.
 
-If Icelandic language technology is something that's interesting to you, I'd suggest checking out [Miðeind][mideind] -- they have a lot of open source projects around AI and natural language processing for Icelandic.
+<SmallNote label="">If Icelandic language technology is something that's interesting to you, I'd suggest checking out [Miðeind][mideind] -- they have a lot of open source projects around AI and natural language processing for Icelandic.</SmallNote>
 
 [mideind]: https://github.com/mideind
 
