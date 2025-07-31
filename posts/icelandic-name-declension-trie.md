@@ -1,5 +1,5 @@
 ---
-title: "Compressing Icelandic name declension patterns into a 3.3kB trie"
+title: "Compressing Icelandic name declension patterns into a 3.27 kB trie"
 ---
 
 Displaying personal names in Icelandic user interfaces is surprisingly hard. This is because of _declension_ -- a language feature where the forms of nouns change to communicate a syntactic function.
@@ -35,14 +35,14 @@ applyCase("Guðmundur", "accusative")
 //=> "Guðmund"
 ```
 
-When building this library, I did not code _any_ declension rules by hand. Instead, the rules of Icelandic name declension are _derived_ from public Icelandic data for personal names and their forms. The rules are encoded in a trie-like data structure that uses clever compression techniques to get the bundle size under 5 kB gzipped. This lets the library be included in web apps without increasing bundle size significantly.
+When building this library, I did not code _any_ declension rules by hand. Instead, the rules of Icelandic name declension are derived from public Icelandic data for personal names and their forms. The rules are encoded in a trie-like data structure that uses clever compression techniques to get the library's bundle size under 4.5 kB gzipped. This lets the library be included in web apps without increasing bundle size significantly.
 
-The rest of the post will walk through this problem in a ton of detail, and go over the compression techniques I used to get the trie to such a small size.
+The rest of the post will walk through this problem in detail, and go over the compression techniques I used to get the trie to such a small size.
 
 
 ## Data for Icelandic name declension
 
-Iceland has a publicly run institution, [Árnastofnun][arnastofnun_en], that manages the [Database of Icelandic Morphology][dim] (DIM). The database was created, amongst other things, to support Icelandic language technology.
+Iceland has a publicly run institution, [Árnastofnun][arnastofnun_en], that manages the [Database of Icelandic Morphology][dim] (DIM). The database was created, amongst other reasons, to support Icelandic language technology.
 
 [arnastofnun_en]: https://www.arnastofnun.is/en
 [dim]: https://bin.arnastofnun.is/DMII/
@@ -74,9 +74,9 @@ From the K-format data, we can construct an array for each name containing its f
 [dim_datasets]: https://bin.arnastofnun.is/DMII/LTdata/
 [k_format]: https://bin.arnastofnun.is/DMII/LTdata/k-format/
 
-However, the K-format has data for most words in the Icelandic language, not just names. With over _7 million_ entries, this data set is huge. We'll need some way to whittle the list down.
+However, the K-format has data for most words in the Icelandic language, not just personal names. With over __7 million__ entries, this data set is huge. We'll need some way to whittle the list down.
 
-Luckily for us, Iceland has the [Personal Names Register][icelandic_name_registry] that lists all Icelandic personal names approved (and rejected) by the [Personal Names Committee][personal_names_committee] (yes, that exists).
+Luckily for us, Iceland has the [Personal Names Register][icelandic_name_registry]. It lists all Icelandic personal names approved -- and rejected -- by the [Personal Names Committee][personal_names_committee] (yes, that exists).
 
 [personal_names_committee]: https://en.wikipedia.org/wiki/Icelandic_Naming_Committee
 
@@ -115,17 +115,7 @@ applyCase("Guðmundur", "accusative")
 //=> "Guðmund"
 ```
 
-The naive implementation would be to find the forms of the name:
-
-```ts
-const NAME_FORMS = [ ... ]
-
-function applyCase(name: string, grammaticalCase: Case) {
-  const nameForms = NAME_FORMS.find(forms => forms[0] === name);
-}
-```
-
-and the index of the form to return:
+The naive implementation would be to find the forms of the name and the index of the form to return:
 
 ```ts
 const CASES = ["nominative", "accusative", "dative", "genitive"];
@@ -136,7 +126,7 @@ function applyCase(name: string, grammaticalCase: Case) {
 }
 ```
 
-With those in hand, we can return the form at <Ts>caseIndex</Ts> if <Ts>nameForms</Ts> was found for the input <Ts>name</Ts>, otherwise returning <Ts>name</Ts> as a fallback:
+and, with those in hand, return the form at <Ts>caseIndex</Ts> if <Ts>nameForms</Ts> was found for the input <Ts>name</Ts>, otherwise returning <Ts>name</Ts> as a fallback:
 
 ```ts
 function applyCase(name: string, grammaticalCase: Case) {
@@ -154,7 +144,7 @@ Let's see how we can solve both of those.
 
 ## Encoding the forms compactly
 
-We're currently storing the four different forms of each name in full. We can remove the redundancy by finding the [longest common prefix][longest_common_prefix] of the name and the suffixes of each form.
+We're currently storing the four forms of each name in full. We can remove a lot of redundancy by finding the [longest common prefix][longest_common_prefix] of the name and the suffixes of each form.
 
 Consider the forms of "Guðmundur":
 
@@ -326,28 +316,7 @@ function trieLookup(root: TrieNode, key: string) {
 }
 ```
 
-For each character in the key, we'll traverse to the child <Ts>node</Ts> for that character, stopping if no such <Ts>node</Ts> exists:
-
-```ts
-let node: TrieNode | undefined = root;
-
-for (const char of reverse(key)) {
-  node = node.children?.[char];
-  if (!node) {
-    break;
-  }
-}
-```
-
-<SmallNote>We reverse the lookup key because names are inserted into the trie backwards.</SmallNote>
-
-After that, we'll return the value of the resulting <Ts>node</Ts>, if present:
-
-```ts
-return node?.value;
-```
-
-giving us the following implementation:
+For each character in the key, we traverse to the child <Ts>node</Ts> for that character, stopping if no such <Ts>node</Ts> exists. After that, we return the value of the resulting <Ts>node</Ts>, if present:
 
 ```ts
 function trieLookup(root: TrieNode, key: string) {
@@ -362,7 +331,9 @@ function trieLookup(root: TrieNode, key: string) {
 }
 ```
 
-This returns the value for the name, as expected:
+<SmallNote>We reverse the lookup key because names are inserted into the trie backwards.</SmallNote>
+
+Looking up a name that we insert into the trie returns its suffix encoding, as expected:
 
 ```ts
 trieLookup(root, "Loftur")
@@ -434,11 +405,11 @@ function compress(node: TrieNode) {
 compress(root);
 ```
 
-Here's the trie from above, compressed:
+Let's take a second look at the compressed trie:
 
 <Image plain src="~/ur-divergence-merged.svg" width={450} scrollable />
 
-After compressing the trie, it communicates the following information:
+After compression, it communicates the following information:
 
  * All names ending in _"fur"_ resolve to a value of <Ts>{'"ur,i,i,ar"'}</Ts>
  * All names ending in _"tur"_ resolve to a value of <Ts>{'"ur,,i,s"'}</Ts>
@@ -523,7 +494,7 @@ trieLookup(trie, "Sakur")
 //=> null
 ```
 
-If every key in the trie's input data ending in `*ur` resolves to the same value, then _"Sakur"_ should resolve to that value. However, not every key ending in `*ur` resolves to the same value -- keys ending in `*tur` resolve to one value and keys ending in `*fur` to another.
+If every key in the trie's input data ending in `*ur` were to resolve to the same value, then _"Sakur"_ should resolve to that value. However, not every key ending in `*ur` resolves to the same value -- keys ending in `*tur` resolve to one value and keys ending in `*fur` to another.
 
 For a key matching `*ur` but not `*(t|f)ur`, we _could_ just pick one of the branches. However, at most one of the branches resolves to the correct value (and in many cases, none of the branches do). The natural conclusion, then, is to _not_ return a value.
 
@@ -531,7 +502,7 @@ For a key matching `*ur` but not `*(t|f)ur`, we _could_ just pick one of the bra
 
 The compressed trie acts as a sort of suffix-to-value pattern matcher. If a certain suffix in the input data always maps to a certain value, the compressed trie always returns that value for keys matching the suffix. But for "ambiguous" suffix matches, no value is returned.
 
-The idea is to apply this to Icelandic name declension. Since Icelandic names with similar suffixes _tend_ to have the same pattern of declension, the theory is that the compressed trie should be able to predict the correct pattern of declension for not-before-seen names. Let's see how well that theory holds.
+Since Icelandic names with similar suffixes _tend_ to have the same pattern of declension, the theory is that the compressed trie should be able to predict the correct pattern of declension for not-before-seen names. Let's see how well that theory holds.
 
 ## Compressing 3,600 names
 
@@ -665,7 +636,7 @@ Trie (compressed)
 <SmallNote>The trie is serialized to a compact string representation to make its size smaller (see [serializer][serializer] and [deserializer][deserializer]). For comparison, the compressed trie represented as JSON is 4.75 kB.</SmallNote>
 
 [serializer]: https://github.com/alexharri/beygla/blob/77f63a3132275fe58509a024f33b478bb3e54e38/lib/compress/trie/serialize.ts
-[deserializer]: https://github.com/alexharri/beygla/blob/77f63a3132275fe58509a024f33b478bb3e54e38/lib/read/deserialize.ts
+[deserializer]: https://github.com/alexharri/beygla/blob/7f5948dac9ff56c4f1293bf845a3331dffdc0a8b/lib/read/deserialize.ts
 
 4.01 kB is very compact, but we can take the compression one step further.
 
