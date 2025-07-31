@@ -1,6 +1,7 @@
 ---
 title: "Compressing Icelandic name declension patterns into a 3.27 kB trie"
 description: "How I used a compressed trie data structure to encode Icelandic declension data."
+image: "/images/og-icelandic-name-declension-trie.png"
 ---
 
 Displaying personal names in Icelandic user interfaces is surprisingly hard. This is because of _declension_ -- a language feature where the forms of nouns change to communicate a syntactic function.
