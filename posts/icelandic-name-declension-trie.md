@@ -254,7 +254,7 @@ But that quickly breaks down. There are other names ending with _"ður"_ or _"du
 
 In fact, take a look at this [gist][names_by_suffix_encoding] showing every approved Icelandic personal name grouped by their suffix encoding (there are 124 unique encodings). You'll immediately find patterns, but if you take a closer look you'll find numerous counterexamples to those patterns. Capturing all of these rules and their exceptions in code would be a tedious and brittle affair.
 
-[names_by_suffix_encoding]: https://gist.github.com/alexharri/b35b40d27db664d6e0dcb9a2ac511090
+[names_by_suffix_encoding]: https://gist.github.com/alexharri/2102bad44fbce8f4c41615304b09e1fe
 
 Instead of trying to code up the rules manually, we can use a data structure that lends itself perfectly to this problem.
 
@@ -722,7 +722,7 @@ node.children = newChildren;
 
 This concludes the implementation. The full implementation is a bit long, so I won't show it in full here -- you can view it in this [gist on GitHub][mergeLeavesWithCommonValues].
 
-[mergeLeavesWithCommonValues]: https://gist.github.com/alexharri/5dfc904643ac22c76bf913adae40a3a8
+[mergeLeavesWithCommonValues]: https://gist.github.com/alexharri/82e96a93ff2b5c3137adddd3483a16c3
 
 We need to consider merged keys in our <Ts method>trieLookup</Ts> function. To do that, we'll update the <Ts method>trieLookup</Ts> function to use a new <Ts method>findChild</Ts> function instead of <Ts>node.children?.[char]</Ts> when finding the next node.
 
