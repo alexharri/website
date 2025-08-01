@@ -7,7 +7,6 @@ import { useDidUpdate } from "../utils/hooks/useDidUpdate";
 import { DreiContext, FiberContext, ThreeContext } from "./Components/ThreeProvider";
 import { useSceneHeight } from "./hooks";
 import { SceneProps } from "./scenes";
-import { AsciiRenderer } from "../components/AsciiRenderer";
 
 const FADE_HEIGHT = 80;
 
@@ -70,7 +69,6 @@ export function createScene<V extends VariablesOptions>(
 ) {
   return ({
     scene,
-    ascii,
     visible,
     height: targetHeight,
     usesVariables,
@@ -79,6 +77,7 @@ export function createScene<V extends VariablesOptions>(
     yOffset = 0,
     xRotation = 0,
     zoom = 1,
+    canvasRef: externalCanvasRef,
   }: SceneProps) => {
     const THREE = useContext(ThreeContext);
     const DREI = useContext(DreiContext);
@@ -173,15 +172,14 @@ export function createScene<V extends VariablesOptions>(
     const { height, scale } = useSceneHeight(targetHeight);
     const fadeHeight = Math.round(FADE_HEIGHT * scale);
 
-    const canvasRef = useRef<HTMLCanvasElement>(null);
+    const internalCanvasRef = useRef<HTMLCanvasElement>(null);
+    const canvasRef = externalCanvasRef || internalCanvasRef;
 
     return (
       <>
         <div style={{ position: "relative", height }}>
           <div className={s("fade", { upper: true })} style={{ height: fadeHeight }} />
           <div className={s("fade", { lower: true })} style={{ height: fadeHeight }} />
-
-          {ascii && <AsciiRenderer canvasRef={canvasRef} />}
 
           {visible && (
             <FIBER.Canvas
@@ -194,7 +192,6 @@ export function createScene<V extends VariablesOptions>(
                 height,
                 userSelect: "none",
                 cursor: down ? "grabbing" : "grab",
-                opacity: ascii ? 0 : 1,
               }}
               scene={threeScene}
               camera={camera}

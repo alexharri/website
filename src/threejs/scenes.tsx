@@ -17,6 +17,7 @@ export interface SceneProps {
   zoom?: number;
   ascii?: boolean;
   yOffset?: number;
+  canvasRef?: React.RefObject<HTMLCanvasElement>;
   errorLoadingThreeJs: boolean;
 }
 
@@ -99,10 +100,11 @@ interface Props {
   yOffset?: number;
   xRotation?: number;
   ascii?: boolean;
+  canvasRef?: React.RefObject<HTMLCanvasElement>;
 }
 
 export const Scene: React.FC<Props> = (props) => {
-  const { scene, height, usesVariables, angle, zoom, yOffset, autoRotate, xRotation, ascii } =
+  const { scene, height, usesVariables, angle, zoom, yOffset, autoRotate, xRotation, ascii, canvasRef } =
     props;
   const containerRef = useRef<HTMLDivElement>(null);
   const visible = useVisible(containerRef, "350px");
@@ -137,6 +139,7 @@ export const Scene: React.FC<Props> = (props) => {
     zoom,
     xRotation,
     ascii,
+    canvasRef,
     errorLoadingThreeJs: error,
   };
 
