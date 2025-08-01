@@ -1,4 +1,5 @@
 import { CharacterMatcher, SamplingPoint } from "./CharacterMatcher";
+import { AlphabetName } from "../alphabets/AlphabetManager";
 
 const CONTRAST_EXPONENT_GLOBAL = 3;
 const CONTRAST_EXPONENT_LOCAL = 7;
@@ -197,8 +198,15 @@ export function generateAsciiChars(
   canvasHeight: number,
   outputWidth: number,
   outputHeight: number,
+  alphabet?: AlphabetName,
 ): string {
   const matcher = getCharacterMatcher();
+  
+  // Switch to the requested alphabet if provided
+  if (alphabet && alphabet !== matcher.getCurrentAlphabet()) {
+    matcher.switchAlphabet(alphabet);
+  }
+  
   const samplingConfig = matcher.getSamplingConfig();
   const chars: string[] = [];
 

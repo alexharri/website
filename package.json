@@ -10,7 +10,8 @@
     "watcher": "NODE_NO_WARNINGS=1 NODE_OPTIONS=\"--experimental-require-module\" ts-node -T ./src/watcher-server.ts",
     "typecheck": "tsc --noEmit --skipLibCheck",
     "generate-sitemap": "ts-node -T ./scripts/generate-sitemap.ts",
-    "generate-rss": "ts-node -T ./scripts/generate-rss.ts"
+    "generate-rss": "ts-node -T ./scripts/generate-rss.ts",
+    "generate-alphabets": "ts-node -T ./scripts/ascii/index.ts"
   },
   "dependencies": {
     "@emotion/css": "^11.11.2",
@@ -45,6 +46,7 @@
   "devDependencies": {
     "@types/rss": "^0.0.32",
     "@types/three": "^0.162.0",
+    "canvas": "^3.1.2",
     "prettier": "^2.8.0",
     "ts-node": "^10.9.1",
     "typescript": "^5.6.3",

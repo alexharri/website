@@ -7,7 +7,7 @@ import { useDidUpdate } from "../utils/hooks/useDidUpdate";
 import { DreiContext, FiberContext, ThreeContext } from "./Components/ThreeProvider";
 import { useSceneHeight } from "./hooks";
 import { SceneProps } from "./scenes";
-import { AsciiRenderer } from "./AsciiRenderer";
+import { AsciiRenderer } from "../components/AsciiRenderer";
 
 const FADE_HEIGHT = 80;
 
