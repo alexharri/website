@@ -1,8 +1,8 @@
 import React from "react";
-import { createPage } from "../[slug]";
-import { getPostProps, getSlugFromFilePath } from "../../../utils/blogPageUtils";
-import { StyleOptions, useStyles } from "../../../utils/styles";
-import { cssVariables } from "../../../utils/cssVariables";
+import { createPage } from "./[slug]";
+import { getPostProps, getSlugFromFilePath } from "../../utils/blogPageUtils";
+import { StyleOptions, useStyles } from "../../utils/styles";
+import { cssVariables } from "../../utils/cssVariables";
 
 const styles = ({ styled, theme }: StyleOptions) => ({
   wrapper: styled.css`
