@@ -1,12 +1,12 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import { AsciiRendererStyles } from "./AsciiRenderer.styles";
 import { generateAsciiChars } from "./ascii/generateAsciiChars";
-import { AlphabetName, getAvailableAlphabets } from "./alphabets/AlphabetManager";
+import { AlphabetName } from "./alphabets/AlphabetManager";
 import { useStyles } from "../../utils/styles";
 
 interface Props {
   canvasRef: React.RefObject<HTMLCanvasElement>;
-  alphabet?: AlphabetName;
+  alphabet: AlphabetName;
 }
 
 function measureCharacterSize(element: HTMLElement): { width: number; height: number } {
@@ -28,16 +28,6 @@ function measureCharacterSize(element: HTMLElement): { width: number; height: nu
 export function AsciiRenderer(props: Props) {
   const ref = useRef<HTMLDivElement>(null);
   const s = useStyles(AsciiRendererStyles);
-  const [selectedAlphabet, setSelectedAlphabet] = useState<AlphabetName>(
-    props.alphabet || "default",
-  );
-  const [availableAlphabets] = useState<AlphabetName[]>(getAvailableAlphabets());
-
-  // Handle alphabet switching
-  const handleAlphabetChange = async (newAlphabet: AlphabetName) => {
-    setSelectedAlphabet(newAlphabet);
-    // The alphabet switching will be handled in the CharacterMatcher
-  };
 
   useEffect(() => {
     const container = ref.current;
@@ -95,7 +85,7 @@ export function AsciiRenderer(props: Props) {
         canvas.height,
         W,
         H,
-        selectedAlphabet,
+        props.alphabet,
       );
       preEl.textContent = asciiString;
     }
@@ -104,41 +94,14 @@ export function AsciiRenderer(props: Props) {
     return () => {
       mounted = false;
     };
-  }, [selectedAlphabet]);
+  }, [props.alphabet]);
 
   return (
-    <>
-      {/* Alphabet selector dropdown */}
-      <select
-        value={selectedAlphabet}
-        onChange={(e) => handleAlphabetChange(e.target.value as AlphabetName)}
-        style={{
-          position: "absolute",
-          top: "10px",
-          right: "10px",
-          zIndex: 1000,
-          padding: "4px 8px",
-          fontSize: "12px",
-          backgroundColor: "rgba(0, 0, 0, 0.8)",
-          color: "white",
-          border: "1px solid #333",
-          borderRadius: "4px",
-        }}
-      >
-        {availableAlphabets.map((alphabet) => (
-          <option key={alphabet} value={alphabet}>
-            {alphabet.charAt(0).toUpperCase() + alphabet.slice(1)}
-          </option>
-        ))}
-      </select>
-
-      {/* ASCII output container */}
-      <div
-        data-ascii
-        ref={ref}
-        style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0 }}
-        className={s("container")}
-      ></div>
-    </>
+    <div
+      data-ascii
+      ref={ref}
+      style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0 }}
+      className={s("container")}
+    ></div>
   );
 }

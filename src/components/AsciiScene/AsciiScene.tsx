@@ -2,6 +2,7 @@ import React, { useRef, useState } from "react";
 import { Scene } from "../../threejs/scenes";
 import { StyleOptions, useStyles } from "../../utils/styles";
 import { AsciiRenderer } from "../AsciiRenderer";
+import { AlphabetName, getAvailableAlphabets } from "../AsciiRenderer/alphabets/AlphabetManager";
 
 const styles = ({ styled, theme }: StyleOptions) => ({
   container: styled.css`
@@ -68,6 +69,26 @@ const styles = ({ styled, theme }: StyleOptions) => ({
     font-size: 12px;
     color: ${theme.text400};
   `,
+
+  select: styled.css`
+    background: ${theme.background300};
+    border: 1px solid ${theme.text400};
+    color: ${theme.text};
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    min-width: 100px;
+
+    &:hover {
+      background: ${theme.background500};
+      border-color: ${theme.text700};
+    }
+
+    option {
+      background: ${theme.background300};
+      color: ${theme.text};
+    }
+  `,
 });
 
 interface AsciiSceneProps {
@@ -82,6 +103,7 @@ interface AsciiSceneProps {
   showControls?: boolean;
   defaultSplitView?: boolean;
   splitDirection?: "horizontal" | "vertical";
+  alphabet?: AlphabetName;
 }
 
 export const AsciiScene: React.FC<AsciiSceneProps> = ({
@@ -96,9 +118,16 @@ export const AsciiScene: React.FC<AsciiSceneProps> = ({
   showControls = true,
   defaultSplitView = false,
   splitDirection = "horizontal",
+  alphabet = "default",
 }) => {
   const s = useStyles(styles);
   const [splitView, setSplitView] = useState(defaultSplitView);
+  const [selectedAlphabet, setSelectedAlphabet] = useState<AlphabetName>(alphabet);
+  const [availableAlphabets] = useState<AlphabetName[]>(getAvailableAlphabets());
+
+  const handleAlphabetChange = (newAlphabet: AlphabetName) => {
+    setSelectedAlphabet(newAlphabet);
+  };
 
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
@@ -126,6 +155,19 @@ export const AsciiScene: React.FC<AsciiSceneProps> = ({
           >
             {splitView ? "ON" : "OFF"}
           </button>
+
+          <span className={s("label")}>Alphabet:</span>
+          <select
+            className={s("select")}
+            value={selectedAlphabet}
+            onChange={(e) => handleAlphabetChange(e.target.value as AlphabetName)}
+          >
+            {availableAlphabets.map((alphabetOption) => (
+              <option key={alphabetOption} value={alphabetOption}>
+                {alphabetOption.charAt(0).toUpperCase() + alphabetOption.slice(1)}
+              </option>
+            ))}
+          </select>
         </div>
       )}
 
@@ -133,7 +175,7 @@ export const AsciiScene: React.FC<AsciiSceneProps> = ({
         {splitView ? (
           <div className={s("splitViewContainer", { [splitDirection]: true })}>
             <div className={s("sceneWrapper")}>
-              <AsciiRenderer canvasRef={canvasRef} />
+              <AsciiRenderer canvasRef={canvasRef} alphabet={selectedAlphabet} />
             </div>
             <div className={s("sceneWrapper")}>
               <Scene {...sceneProps} />
@@ -141,7 +183,7 @@ export const AsciiScene: React.FC<AsciiSceneProps> = ({
           </div>
         ) : (
           <div style={{ position: "relative" }}>
-            <AsciiRenderer canvasRef={canvasRef} />
+            <AsciiRenderer canvasRef={canvasRef} alphabet={selectedAlphabet} />
             <div style={{ opacity: 0 }}>
               <Scene {...sceneProps} />
             </div>

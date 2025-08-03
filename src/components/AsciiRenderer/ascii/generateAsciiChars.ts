@@ -3,8 +3,7 @@ import { AlphabetName } from "../alphabets/AlphabetManager";
 
 const CONTRAST_EXPONENT_GLOBAL = 3;
 const CONTRAST_EXPONENT_LOCAL = 7;
-const STICKINESS_THRESHOLD = 0.02;
-// const STICKINESS_THRESHOLD = 0;
+const STICKINESS_THRESHOLD = 0; // 0.02;
 
 function readPixelFromBuffer(
   pixelBuffer: Uint8Array,
