@@ -11,7 +11,8 @@ function usePreserveScrollOnResize() {
     if (!IS_DEV) return;
 
     const findTopElement = () => {
-      const main = document.querySelector("main")!;
+      const main = document.querySelector("main");
+      if (!main) return;
       for (const el of [...main.children]) {
         const { top } = el.getBoundingClientRect();
         if (top >= 0) {
