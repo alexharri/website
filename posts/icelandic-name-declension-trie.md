@@ -1,5 +1,9 @@
 ---
-title: "Compressing Icelandic name declension patterns into a 3.4kB trie"
+title: "Compressing Icelandic name declension patterns into a 3.27 kB trie"
+description: "How I used a compressed trie data structure to encode Icelandic declension data."
+image: "/images/og-icelandic-name-declension-trie.png"
+tags: ["Compression", "Language technology"]
+publishedAt: "2025-08-02"
 ---
 
 Displaying personal names in Icelandic user interfaces is surprisingly hard. This is because of _declension_ -- a language feature where the forms of nouns change to communicate a syntactic function.
@@ -35,14 +39,14 @@ applyCase("Guðmundur", "accusative")
 //=> "Guðmund"
 ```
 
-When building this library, I did not code _any_ declension rules by hand. Instead, the rules of Icelandic name declension are _derived_ from public Icelandic data for personal names and their forms. The rules are encoded in a trie-like data structure that uses clever compression techniques to get the bundle size under 5 kB gzipped. This lets the library be included in web apps without increasing bundle size significantly.
+When building this library, I did not code _any_ declension rules by hand. Instead, the rules of Icelandic name declension are derived from public Icelandic data for personal names and their forms. The rules are encoded in a trie-like data structure that uses clever compression techniques to get the library's bundle size under 4.5 kB gzipped. This lets the library be included in web apps without increasing bundle size significantly.
 
-The rest of the post will walk through this problem in a ton of detail, and go over the compression techniques I used to get the trie to such a small size.
+The rest of the post will walk through this problem in detail, and go over the compression techniques I used to get the trie to such a small size.
 
 
 ## Data for Icelandic name declension
 
-Iceland has a publicly run institution, [Árnastofnun][arnastofnun_en], that manages the [Database of Icelandic Morphology][dim] (DIM). The database was created, amongst other things, to support Icelandic language technology.
+Iceland has a publicly run institution, [Árnastofnun][arnastofnun_en], that manages the [Database of Icelandic Morphology][dim] (DIM). The database was created, amongst other reasons, to support Icelandic language technology.
 
 [arnastofnun_en]: https://www.arnastofnun.is/en
 [dim]: https://bin.arnastofnun.is/DMII/
@@ -74,9 +78,9 @@ From the K-format data, we can construct an array for each name containing its f
 [dim_datasets]: https://bin.arnastofnun.is/DMII/LTdata/
 [k_format]: https://bin.arnastofnun.is/DMII/LTdata/k-format/
 
-However, the K-format has data for most words in the Icelandic language, not just names. With over _7 million_ entries, this data set is huge. We'll need some way to whittle the list down.
+However, the K-format has data for most words in the Icelandic language, not just personal names. With over __7 million__ entries, this data set is huge. We'll need some way to whittle the list down.
 
-Luckily for us, Iceland has the [Personal Names Register][icelandic_name_registry] that lists all Icelandic personal names approved (and rejected) by the [Personal Names Committee][personal_names_committee] (yes, that exists).
+Luckily for us, Iceland has the [Personal Names Register][icelandic_name_registry]. It lists all Icelandic personal names approved -- and rejected -- by the [Personal Names Committee][personal_names_committee] (yes, that exists).
 
 [personal_names_committee]: https://en.wikipedia.org/wiki/Icelandic_Naming_Committee
 
@@ -115,17 +119,7 @@ applyCase("Guðmundur", "accusative")
 //=> "Guðmund"
 ```
 
-The naive implementation would be to find the forms of the name:
-
-```ts
-const NAME_FORMS = [ ... ]
-
-function applyCase(name: string, grammaticalCase: Case) {
-  const nameForms = NAME_FORMS.find(forms => forms[0] === name);
-}
-```
-
-and the index of the form to return:
+The naive implementation would be to find the forms of the name and the index of the form to return:
 
 ```ts
 const CASES = ["nominative", "accusative", "dative", "genitive"];
@@ -136,7 +130,7 @@ function applyCase(name: string, grammaticalCase: Case) {
 }
 ```
 
-With those in hand, we can return the form at <Ts>caseIndex</Ts> if <Ts>nameForms</Ts> was found for the input <Ts>name</Ts>, otherwise returning <Ts>name</Ts> as a fallback:
+and, with those in hand, return the form at <Ts>caseIndex</Ts> if <Ts>nameForms</Ts> was found for the input <Ts>name</Ts>, otherwise returning <Ts>name</Ts> as a fallback:
 
 ```ts
 function applyCase(name: string, grammaticalCase: Case) {
@@ -154,7 +148,7 @@ Let's see how we can solve both of those.
 
 ## Encoding the forms compactly
 
-We're currently storing the four different forms of each name in full. We can remove a lot of the redundancy by instead storing the [longest common prefix][longest_common_prefix] of the name and the suffixes of each form.
+We're currently storing the four forms of each name in full. We can remove a lot of redundancy by finding the [longest common prefix][longest_common_prefix] of the name and the suffixes of each form.
 
 Consider the forms of "Guðmundur":
 
@@ -179,41 +173,38 @@ The longest common prefix is "Guðmund", and the suffixes are as follows:
 [root]: https://en.wikipedia.org/wiki/Root_(linguistics)
 [longest_common_prefix]: https://leetcode.com/problems/longest-common-prefix
 
-We can encode this like so:
+We can store the suffixes compactly in a string like so:
 
 ```ts
-`${prefix};${suffixes.join(",")}`
+suffixes.join(",")
 ```
 
 Which for Guðmundur, gives us:
 
 ```ts
-"Guðmund;ur,,i,ar"
+"ur,,i,ar"
 ```
 
-That's more compact, but we can take this further. Since <Ts method>applyCase</Ts> receives the nominative case of the name as input we can store the length of nominative form's _suffix length_, instead of the prefix, since we can derive the prefix from the nominative form and its suffix length.
+Since <Ts method>applyCase</Ts> receives the nominative case of the name as input, we can derive the prefix from the length of the nominative suffix's length.
 
 ```ts
 function getPrefix(nameNominative, suffixLength) {
   return nameNominative.slice(0, -suffixLength);
 }
 
-getPrefix("Guðmundur", 2)
+const suffixes = "ur,,i,ar";
+const nominativeSuffix = suffixes.split(",")[0];
+
+getPrefix("Guðmundur", nominativeSuffix.length)
 //=> "Guðmund"
 ```
 
-Storing the suffix length of the nominative form instead of the root gives us:
+We'll call this method of encoding the suffixes of each form in a string the "suffix encoding", or just "encoding", from here on.
 
-```ts
-"2;ur,,i,ar"
-```
-
-This gives us a very compact way to encode the forms of a name. We'll call this the "forms encoding", or just "encoding", from here on.
-
-A feature of this way of encoding forms is that the encoding is not tied to any specific name ("Guðmund" appears nowhere). Instead, the forms encoding describes a _pattern_ of declension, which we'll use to our advantage later.
+A feature of the suffix encoding is that the encoding is not tied to any specific name ("Guðmund" appears nowhere). Instead, the suffix encoding describes a _pattern_ of declension, which we'll use to our advantage later.
 
 
-## Retrieving encodings by name
+## Retrieving the suffixes by name
 
 When we were storing the raw forms in an array, it was very easy to find the forms of any given name:
 
@@ -221,18 +212,18 @@ When we were storing the raw forms in an array, it was very easy to find the for
 NAME_FORMS.find(forms => forms[0] === name)
 ```
 
-But the compact forms encoding doesn't encode the name itself, so we need a way to retrieve the encoding. The simplest method would be a plain hash map:
+But the suffix encoding doesn't encode the name itself, so we need a way to retrieve the encoding. The simplest method would be a plain hash map:
 
 ```ts
 const nameToFormsEncoding = {
-  Guðmundur: "2;ur,,i,ar",
+  Guðmundur: "ur,,i,ar",
   // ...3,600 more lines
 };
 ```
 
 Putting bundle size concerns aside, a hash map doesn't solve the problem of names not in the list of approved Icelandic names being excluded.
 
-Here, one helpful fact about Icelandic declension is that names with similar suffixes _tend_ to follow the same pattern of declension. These names ending in _"ur"_ all have the same forms encoding of <Ts>{'"2;ur,,i,ar"'}</Ts>:
+Here, one helpful fact about Icelandic declension is that names with similar suffixes _tend_ to follow the same pattern of declension. These names ending in _"ur"_ all have the same suffix encoding of <Ts>{'"ur,,i,ar"'}</Ts>:
 
 ```
 Ástvaldur
@@ -245,12 +236,12 @@ Sigurður
 
 There are, in fact, 88 approved Icelandic names with this exact pattern of declension, and they all end with _"dur"_, _"tur"_ or "_ður_".
 
-The naive approach, then, would be to implement a <Ts method>getFormsEncoding</Ts> function that encodes these patterns:
+The naive approach, then, would be to implement a <Ts method>getSuffixEncoding</Ts> function that captures these patterns:
 
 ```ts
-function getFormsEncoding(name) {
+function getSuffixEncoding(name) {
   if (/(d|ð|t)ur$/.test(name)) {
-    return "2;ur,,i,ar";
+    return "ur,,i,ar";
   }
   // ...
 }
@@ -258,13 +249,13 @@ function getFormsEncoding(name) {
 
 But that quickly breaks down. There are other names ending with _"ður"_ or _"dur"_ that follow a different pattern of declension:
 
-* _"Aðalráður"_ and _"Arnmóður"_ have a forms encoding of <Ts>{'"2;ur,,i,s"'}</Ts>
-* _"Baldur"_ has a forms encoding of <Ts>{'"2;ur,ur,ri,urs"'}</Ts>
-* _"Hlöður"_ and _"Lýður"_ both have a forms encoding of <Ts>{'"2;ur,,,s"'}</Ts>
+* _"Aðalráður"_ and _"Arnmóður"_ have a suffix encoding of <Ts>{'"ur,,i,s"'}</Ts>
+* _"Baldur"_ has a suffix encoding of <Ts>{'"ur,ur,ri,urs"'}</Ts>
+* _"Hlöður"_ and _"Lýður"_ both have a suffix encoding of <Ts>{'"ur,,,s"'}</Ts>
 
-In fact, take a look at this [gist][names_by_forms_encoding] showing every approved Icelandic personal name grouped by their forms encoding (there are 124 unique encodings). You'll immediately find patterns, but if you take a closer look you'll find numerous counterexamples to those patterns. Capturing all of these rules and their exceptions in code would be a tedious and brittle affair.
+In fact, take a look at this [gist][names_by_suffix_encoding] showing every approved Icelandic personal name grouped by their suffix encoding (there are 124 unique encodings). You'll immediately find patterns, but if you take a closer look you'll find numerous counterexamples to those patterns. Capturing all of these rules and their exceptions in code would be a tedious and brittle affair.
 
-[names_by_forms_encoding]: https://gist.github.com/alexharri/b35b40d27db664d6e0dcb9a2ac511090
+[names_by_suffix_encoding]: https://gist.github.com/alexharri/2102bad44fbce8f4c41615304b09e1fe
 
 Instead of trying to code up the rules manually, we can use a data structure that lends itself perfectly to this problem.
 
@@ -275,25 +266,25 @@ The [trie][trie] data structure, also known as a prefix tree, is a tree data str
 
 [trie]: https://en.wikipedia.org/wiki/Trie
 
-Take, for example, the name _"Heimir"_, which has a forms encoding of <Ts>{'"1;r,,,s"'}</Ts>. If we create an empty trie and insert _"Heimir"_ and <Ts>{'"1;r,,,s"'}</Ts> as a key-value pair into it, we get:
+Take, for example, the name _"Heimir"_, which has a suffix encoding of <Ts>{'"r,,,s"'}</Ts>. If we create an empty trie and insert _"Heimir"_ and <Ts>{'"r,,,s"'}</Ts> as a key-value pair into it, we get:
 
 <Image plain src="~/heimir-trie.svg" width={630} scrollable />
 
-Let's now insert _"Heiðar"_ into the trie, which has a forms encoding of <Ts>{'"1;r,,i,s"'}</Ts>. The names share the first three characters, so they share the first three nodes in the trie:
+Let's now insert _"Heiðar"_ into the trie, which has a suffix encoding of <Ts>{'"r,,i,s"'}</Ts>. The names share the first three characters, so they share the first three nodes in the trie:
 
 <Image plain src="~/heimir-heidar-trie.svg" width={630} scrollable />
 
-However, we actually want to insert the keys _backwards_ into the trie. That is because, like I mentioned earlier, similar suffixes tend to have similar form encodings. Inserting keys backwards results in the values for all names sharing a certain suffix being grouped within that suffix's subtree.
+However, we actually want to insert the keys _backwards_ into the trie. That is because, like I mentioned earlier, names with similar endings (suffixes) tend to have similar suffix encodings. Inserting keys backwards results in the values for all names sharing a certain suffix being grouped within that suffix's subtree.
 
 Let's take a concrete example -- consider the following names that end with _"ur"_ and their encodings:
 
 ```
-<@blue>Ylfur</@>    <@string>2;ur,i,i,ar</@>
-<@blue>Knútur</@>   <@string>2;ur,,i,s</@>
-<@blue>Hrútur</@>   <@string>2;ur,,i,s</@>
-<@blue>Loftur</@>   <@string>2;ur,,i,s</@>
+<@blue>Ylfur</@>    <@string>ur,i,i,ar</@>
+<@blue>Knútur</@>   <@string>ur,,i,s</@>
+<@blue>Hrútur</@>   <@string>ur,,i,s</@>
+<@blue>Loftur</@>   <@string>ur,,i,s</@>
 
-<@blue>Name</@>     <@string>Forms encoding</@>
+<@blue>Name</@>     <@string>Suffix encoding</@>
 ```
 
 Inserting them _backwards_ into a new trie gives us the following:
@@ -329,28 +320,7 @@ function trieLookup(root: TrieNode, key: string) {
 }
 ```
 
-For each character in the key, we'll traverse to the child <Ts>node</Ts> for that character, stopping if no such <Ts>node</Ts> exists:
-
-```ts
-let node: TrieNode | undefined = root;
-
-for (const char of reverse(key)) {
-  node = node.children?.[char];
-  if (!node) {
-    break;
-  }
-}
-```
-
-<SmallNote>We reverse the lookup key because names are inserted into the trie backwards.</SmallNote>
-
-After that, we'll return the value of the resulting <Ts>node</Ts>, if present:
-
-```ts
-return node?.value;
-```
-
-giving us the following implementation:
+For each character in the key, we traverse to the child <Ts>node</Ts> for that character, stopping if no such <Ts>node</Ts> exists. After that, we return the value of the resulting <Ts>node</Ts>, if present:
 
 ```ts
 function trieLookup(root: TrieNode, key: string) {
@@ -365,17 +335,19 @@ function trieLookup(root: TrieNode, key: string) {
 }
 ```
 
-This returns the value for the name, as expected:
+<SmallNote>We reverse the lookup key because names are inserted into the trie backwards.</SmallNote>
+
+Looking up a name that we insert into the trie returns its suffix encoding, as expected:
 
 ```ts
 trieLookup(root, "Loftur")
-//=> "2;ur,,i,s"
+//=> "ur,,i,s"
 ```
 
 
 ## Compressing the trie
 
-In our trie from earlier, every leaf in the <Node>r->u->t</Node> subtree has the same value of <Ts>{'"2;ur,,i,s"'}</Ts>:
+In our trie from earlier, every leaf in the <Node>r->u->t</Node> subtree has the same value of <Ts>{'"ur,,i,s"'}</Ts>:
 
 <Image plain src="~/ur-divergence.svg" width={630} scrollable />
 
@@ -437,14 +409,14 @@ function compress(node: TrieNode) {
 compress(root);
 ```
 
-Here's the trie from above, compressed:
+Let's take a second look at the compressed trie:
 
 <Image plain src="~/ur-divergence-merged.svg" width={450} scrollable />
 
-After compressing the trie, it communicates the following information:
+After compression, it communicates the following information:
 
- * All names ending in _"fur"_ resolve to a value of <Ts>{'"2;ur,i,i,ar"'}</Ts>
- * All names ending in _"tur"_ resolve to a value of <Ts>{'"2;ur,,i,s"'}</Ts>
+ * All names ending in _"fur"_ resolve to a value of <Ts>{'"ur,i,i,ar"'}</Ts>
+ * All names ending in _"tur"_ resolve to a value of <Ts>{'"ur,,i,s"'}</Ts>
 
 When we originally inserted _"Ylfur"_ into the trie, the associated value was stored under <Node>r->u->f->l->Y</Node>, but after compressing the trie, only the <Node>r->u->f</Node> part of that path remains.
 
@@ -483,7 +455,7 @@ function trieLookup(root: TrieNode, key: string) {
 }
 
 trieLookup(root, "Ylfur")
-//=> "2;ur,i,i,ar"
+//=> "ur,i,i,ar"
 ```
 
 <SmallNote label="" center>We only override <Ts>node</Ts> if there is a <Ts>next</Ts> node.</SmallNote>
@@ -491,25 +463,25 @@ trieLookup(root, "Ylfur")
 Now, looking up the original four input names returns the values for those names:
 
 ```ts
-trieLookup(trie, "Ylfur")  //=> "2;ur,i,i,ar"
-trieLookup(trie, "Knútur") //=> "2;ur,,i,s"
-trieLookup(trie, "Hrútur") //=> "2;ur,,i,s"
-trieLookup(trie, "Loftur") //=> "2;ur,,i,s"
+trieLookup(trie, "Ylfur")  //=> "ur,i,i,ar"
+trieLookup(trie, "Knútur") //=> "ur,,i,s"
+trieLookup(trie, "Hrútur") //=> "ur,,i,s"
+trieLookup(trie, "Loftur") //=> "ur,,i,s"
 ```
 
 However, we also get values for lookup keys not in the original input data:
 
 ```ts
 trieLookup(trie, "Bjartur")
-//=> "2;ur,,i,s"
+//=> "ur,,i,s"
 ```
 
 This was not the case prior to compressing the trie -- only the original input keys returned a value in the original trie. 
 
 Lookups in the compressed trie return
 
- * <Ts>{'"2;ur,i,i,ar"'}</Ts> for all lookup keys matching `*fur`, and
- * <Ts>{'"2;ur,,i,s"'}</Ts> for all lookup keys matching `*tur`.
+ * <Ts>{'"ur,i,i,ar"'}</Ts> for all lookup keys matching `*fur`, and
+ * <Ts>{'"ur,,i,s"'}</Ts> for all lookup keys matching `*tur`.
 
 The compressed trie has, in some sense, "learned" the suffix patterns of the input data, and returns values based on that.
 
@@ -526,7 +498,7 @@ trieLookup(trie, "Sakur")
 //=> null
 ```
 
-If every key in the trie's input data ending in `*ur` resolves to the same value, then _"Sakur"_ should resolve to that value. However, not every key ending in `*ur` resolves to the same value -- keys ending in `*tur` resolve to one value and keys ending in `*fur` to another.
+If every key in the trie's input data ending in `*ur` were to resolve to the same value, then _"Sakur"_ should resolve to that value. However, not every key ending in `*ur` resolves to the same value -- keys ending in `*tur` resolve to one value and keys ending in `*fur` to another.
 
 For a key matching `*ur` but not `*(t|f)ur`, we _could_ just pick one of the branches. However, at most one of the branches resolves to the correct value (and in many cases, none of the branches do). The natural conclusion, then, is to _not_ return a value.
 
@@ -534,13 +506,13 @@ For a key matching `*ur` but not `*(t|f)ur`, we _could_ just pick one of the bra
 
 The compressed trie acts as a sort of suffix-to-value pattern matcher. If a certain suffix in the input data always maps to a certain value, the compressed trie always returns that value for keys matching the suffix. But for "ambiguous" suffix matches, no value is returned.
 
-The idea is to apply this to Icelandic name declension. Since Icelandic names with similar suffixes _tend_ to have the same pattern of declension, the theory is that the compressed trie should be able to predict the correct pattern of declension for not-before-seen names. Let's see how well that theory holds.
+Since Icelandic names with similar suffixes _tend_ to have the same pattern of declension, the theory is that the compressed trie should be able to predict the correct pattern of declension for not-before-seen names. Let's see how well that theory holds.
 
 ## Compressing 3,600 names
 
 Of the 4,500 approved Icelandic names, we have declension data for roughly 3,600.
 
-Inserting those names and their form encodings into a new trie gives us a trie with 10,284 nodes, 3,638 of which are leaves. Compressing the trie by merging subtrees with common values reduces the total number of nodes to 1,588. Of those, 1,261 are leaves and 327 are not.
+Inserting those names and their suffix encodings into a new trie gives us a trie with 10,284 nodes, 3,638 of which are leaves. Compressing the trie by merging subtrees with common values reduces the total number of nodes to 1,588. Of those, 1,261 are leaves and 327 are not.
 
 <Table
   align="right"
@@ -580,11 +552,11 @@ I wrote a function to pick 100 of those names at random and (manually) categoriz
   ]}
 />
 
-This gives us a rough indication that, for not-before-seen Icelandic names, the compressed trie gives us a good or neutral result 97% of the time. 3% of the results are incorrect.
+This gives us a rough indication that, for not-before-seen Icelandic names, the compressed trie gives us correct results 74% of the time and wrong results 26% of the time.
 
-<SmallNote label="">The _"Should have applied declension"_ case results in <Ts method>applyCase</Ts> not applying declension to the name and returning it as-is. I consider that a neutral result.</SmallNote>
+<SmallNote label="">The _"Should have applied declension"_ case, which constitutes 23% of results, results in <Ts method>applyCase</Ts> not applying declension to the name and returning it as-is. That result _is_ wrong, but I consider it a lesser kind of wrong.</SmallNote>
 
-But still, these are just 100 random names. Some names are far more common than others. It'd be more interesting to see how well the compressed trie performs for the most common names.
+Still, these are just 100 random names. Some names are far more common than others. It'd be more interesting to see how well the compressed trie performs for the most common names.
 
 Luckily for us, [Statistics Iceland][statice] publishes data on [how many individuals have specific names][names]. Using that data, I created the chart below. It shows the number of people holding each name in the approved list of names as a first name. The 3,600 names with declension data available are colored blue. The 800 names without declension data are colored red:
 
@@ -598,7 +570,7 @@ Luckily for us, [Statistics Iceland][statice] publishes data on [how many indivi
 
 363,314 people hold a name from the approved list of Icelandic names as a first name. Of those, 5,833 have names that don't have declension data available.
 
-As we can see from the chart, the commonality of names is far from evenly distributed. In fact, the top 100 names without declension data are held by 4,990 people. That corresponds to about 86% of the people holding one of the 800 names without declension data available.
+As we can see from the chart, the commonality of names is far from evenly distributed. In fact, the top 100 names without declension data are held by 4,990 people. Those 4,990 people constitute 86% of the 5,833 people that hold one of the 800 names without declension data available.
 
 I went ahead and categorized the declension results for those 100 names, multiplying the result by the number of people holding the name:
 
@@ -617,7 +589,9 @@ I went ahead and categorized the declension results for those 100 names, multipl
   ]}
 />
 
-The error rate here is 2.9%. If we extrapolate that 2.9% error rate across the 5,833 people holding names without declension data available, we get 170 wrong results. Dividing 170 wrong results by the 363,314 people holding names in the approved list of Icelandic names gives us an error rate of 0.046%.
+1,061 wrong results gives us an error rate of 21%. If we extrapolate that 21% error rate across the 5,833 people holding names without declension data available, we get 1,240 wrong results. Dividing 1,240 wrong results by the 363,314 people holding names in the approved list of Icelandic names gives us an error rate of 0.34%.
+
+<SmallNote label="">If we do the same math with only the names that were _incorrectly_ declined, we get an error rate of 0.046%.</SmallNote>
 
 ## Regularity and comprehensiveness
 
@@ -644,7 +618,7 @@ But with over 3,600 samples, as in our case, we have over 80% coverage. With dat
 
 I've mentioned bundle time a few times — let's finally measure it!
 
-I measured the size of storing the four forms of the 3,600 names that we have declension data for in the following ways:
+I measured the size of storing the declension data for the 3,600 names that we have declension data for in the following ways:
 
  * List (the <Ts>NAME_FORMS</Ts> list from before)
  * Trie (uncompressed)
@@ -657,18 +631,18 @@ List
     30.17 kB gzipped (152.48 kB minified)
 
 Trie (uncompressed)
-    14.95 kB gzipped (73.73 kB minified)
+    14.47 kB gzipped (66.68 kB minified)
 
 Trie (compressed)
-    4.23 kB gzipped (16.78 kB minified)
+    4.01 kB gzipped (14.41 kB minified)
 ```
 
 <SmallNote>The trie is serialized to a compact string representation to make its size smaller (see [serializer][serializer] and [deserializer][deserializer]). For comparison, the compressed trie represented as JSON is 4.75 kB.</SmallNote>
 
 [serializer]: https://github.com/alexharri/beygla/blob/77f63a3132275fe58509a024f33b478bb3e54e38/lib/compress/trie/serialize.ts
-[deserializer]: https://github.com/alexharri/beygla/blob/77f63a3132275fe58509a024f33b478bb3e54e38/lib/read/deserialize.ts
+[deserializer]: https://github.com/alexharri/beygla/blob/7f5948dac9ff56c4f1293bf845a3331dffdc0a8b/lib/read/deserialize.ts
 
-4.23 kB is very compact, but we can take the compression one step further.
+4.01 kB is very compact, but we can take the compression one step further.
 
 
 ## Merging sibling leaves with common suffixes
@@ -679,7 +653,7 @@ Take a look at the <Node>r->u->f</Node> subtree from the compressed trie -- it r
 
 <SmallNote center>I've hidden the full `*lfur` subtree to simplify this view.</SmallNote>
 
-The <Node>i</Node>, <Node>ó</Node>, <Node>ú</Node>, <Node>a</Node> sibling leaves following <Node>r->u->f</Node> all resolve to the same value of <Ts>{'"2;ur,,i,s"'}</Ts>. However, the <Node>l</Node> and <Node>i</Node> subtrees have leaves with different values, which prevented the <Node>r->u->f</Node> subtree from being compressed.
+The <Node>i</Node>, <Node>ó</Node>, <Node>ú</Node>, <Node>a</Node> sibling leaves following <Node>r->u->f</Node> all resolve to the same value of <Ts>{'"ur,,i,s"'}</Ts>. However, the <Node>l</Node> and <Node>i</Node> subtrees have leaves with different values, which prevented the <Node>r->u->f</Node> subtree from being compressed.
 
 What we can do here is merge sibling leaves with common values. That results in the <Node>i</Node>, <Node>ó</Node>, <Node>ú</Node>, <Node>a</Node> leaves being merged into a single <Node>ióúa</Node> leaf node:
 
@@ -749,7 +723,7 @@ node.children = newChildren;
 
 This concludes the implementation. The full implementation is a bit long, so I won't show it in full here -- you can view it in this [gist on GitHub][mergeLeavesWithCommonValues].
 
-[mergeLeavesWithCommonValues]: https://gist.github.com/alexharri/5dfc904643ac22c76bf913adae40a3a8
+[mergeLeavesWithCommonValues]: https://gist.github.com/alexharri/82e96a93ff2b5c3137adddd3483a16c3
 
 We need to consider merged keys in our <Ts method>trieLookup</Ts> function. To do that, we'll update the <Ts method>trieLookup</Ts> function to use a new <Ts method>findChild</Ts> function instead of <Ts>node.children?.[char]</Ts> when finding the next node.
 
@@ -814,9 +788,9 @@ Let's take a closer look at the <Node>i</Node> subtree. Next to each value node,
 
 <Image plain src="~/i-trie.svg" width={860} scrollable />
 
-The <Node>i</Node> subtree is built from 223 names starting with _"i"_. Only four of those names don't follow the declension pattern of <Ts>{'"1;i,a,a,a"'}</Ts>. That's a really high degree of regularity!
+The <Node>i</Node> subtree is built from 223 names starting with _"i"_. Only four of those names don't follow the declension pattern of <Ts>{'"i,a,a,a"'}</Ts>. That's a really high degree of regularity!
 
-Those four names serve as important counterexamples to the general rule that names ending in _"i"_ have a forms encoding of <Ts>{'"1;i,a,a,a"'}</Ts>. Without them, the <Node>i</Node> subtree would have been compressed to a single value node.
+Those four names serve as important counterexamples to the general rule that names ending in _"i"_ have a suffix encoding of <Ts>{'"i,a,a,a"'}</Ts>. Without them, the <Node>i</Node> subtree would have been compressed to a single value node.
 
 
 ## Final bundle size
@@ -828,21 +802,21 @@ List
     30.17 kB gzipped (152.48 kB minified)
 
 Trie (uncompressed)
-    14.95 kB gzipped (73.73 kB minified)
+    14.47 kB gzipped (66.68 kB minified)
 
 Trie (subtrees merged)
-    4.23 kB gzipped (16.78 kB minified)
+    4.01 kB gzipped (14.41 kB minified)
 
 Trie (subtrees and leaves merged)
-    3.43 kB gzipped (10.49 kB minified)
+    3.27 kB gzipped (9.3 kB minified)
 ```
 
-It saves us 0.8 kB. That's a small number in absolute terms, but hey, it's a 19% improvement!
+It saves us 0.74 kB. That's a small number in absolute terms, but hey, it's an 18% improvement!
 
 
 ## The beygla library
 
-I use the compressed trie in a declension library for Icelandic names called [beygla][beygla]. The library is 4.7 kB gzipped, 3.43 kB of which is the serialized trie. As described, it exports an <Ts method>applyCase</Ts> function that is used to apply grammatical cases to Icelandic names.
+I use the compressed trie in a declension library for Icelandic names called [beygla][beygla]. The library is 4.46 kB gzipped, 3.27 kB of which is the serialized trie. As described, it exports an <Ts method>applyCase</Ts> function that is used to apply grammatical cases to Icelandic names.
 
 [beygla]: https://github.com/alexharri/beygla
 
@@ -882,16 +856,22 @@ Because of that, if I were developing the library again today, I probably would 
 
 ## Final words
 
-I also wonder whether there's a better term for the data structure I've been describing than "compressed trie". Google and LLMs point to some related data structures (such as [radix trees][radix_tree]), but I haven't found anything similar to what I'm describing in this post. I'm sure there's something out there, but I don't know the terms to look for (if you do, please let me know!).
+Building beygla was a super fun problem to solve. When I first started the project, I didn't expect to be able to get the bundle size so low. The compressed trie ended up being really effective for encoding Icelandic declension patterns.
 
-[radix_tree]: https://en.wikipedia.org/wiki/Radix_tree
+<SmallNote label="">If Icelandic language technology is something that's interesting to you, I'd suggest checking out [Miðeind][mideind] -- they have a lot of open source projects around AI and natural language processing for Icelandic.</SmallNote>
 
-I wonder what applications the compressed trie could be used for. There are probably datasets out there that exhibit a similar regularity in suffix-to-value mappings where the compressed trie could be useful.
+[mideind]: https://github.com/mideind
 
-As for linguistic applications, there are other languages with declension as a language feature, so there might be an opportunity to build beygla-like libraries for those languages. Native speakers of said languages would be better suited to explore that.
+[suffix_trie]: https://en.wikipedia.org/wiki/Suffix_tree
 
-Anyway, thanks for reading. Hopefully you can use some ideas from this post in your own work!
+There are many languages with declension as a language feature (such as Slavic and Balkan languages), so there is an opportunity to apply the ideas explored in this post to those languages. Native speakers of said languages are well suited to explore that.
+
+I'd like to thank [Eiríkur Fannar Torfason][eirikur_dev] and [Vilhjálmur Thorsteinsson][villi] for reading and providing feedback on draft versions of this post. Vilhjálmur actually identified an optimization opportunity in beygla that reduced the size of the trie from 3.43 kB to 3.27 kB ([see PR][beygla_pr_25]).
+
+[eirikur_dev]: https://eirikur.dev/
+[villi]: https://www.linkedin.com/in/villithorsteinsson/
+[beygla_pr_25]: https://github.com/alexharri/beygla/pull/25
+
+Thanks for reading, I hope this was interesting.
 
 -- Alex Harri
-
-

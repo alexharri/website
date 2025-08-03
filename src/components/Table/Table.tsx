@@ -67,7 +67,8 @@ export function Table(props: Props) {
     return {
       textAlign: column.align || align,
       fontFamily: column.monospace ? cssVariables.fontMonospace : undefined,
-      width: column.width,
+      minWidth: column.width,
+      maxWidth: column.width,
       whiteSpace: column.width ? "normal" : "nowrap",
     };
   };
@@ -86,7 +87,8 @@ export function Table(props: Props) {
                   rowSpan={headerCell.rowSpan}
                   style={{
                     textAlign: "center",
-                    width: headerCell.width,
+                    minWidth: headerCell.width,
+                    maxWidth: headerCell.width,
                     whiteSpace: headerCell.width ? "normal" : "nowrap",
                   }}
                 >

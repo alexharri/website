@@ -7,8 +7,8 @@ trie = {
                 "l": {
                     "value": "7 leaf nodes",
                 },
-                "í": {"v": {"value": "2;ur,ur,ri,urs"}, "l": {"value": "2;ur,,i,s"}},
-                "ióúa": {"value": "2;ur,,i,s"},
+                "í": {"v": {"value": "ur,ur,ri,urs"}, "l": {"value": "ur,,i,s"}},
+                "ióúa": {"value": "ur,,i,s"},
             }
         }
     }

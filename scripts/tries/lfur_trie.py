@@ -5,13 +5,13 @@ trie = {
         "u": {
             "f": {
                 "l": {
-                    "ú": {"value": "2;ur,,i,s"},
-                    "ó": {"value": "2;ur,,i,s"},
-                    "Á": {"value": "2;ur,,i,s"},
-                    "E": {"value": "2;ur,i,i,ar"},
-                    "Ú": {"value": "2;ur,,i,s"},
-                    "Y": {"value": "2;ur,i,i,ar"},
-                    "e": {"value": "2;ur,i,i,ar"},
+                    "ú": {"value": "ur,,i,s"},
+                    "ó": {"value": "ur,,i,s"},
+                    "Á": {"value": "ur,,i,s"},
+                    "E": {"value": "ur,i,i,ar"},
+                    "Ú": {"value": "ur,,i,s"},
+                    "Y": {"value": "ur,i,i,ar"},
+                    "e": {"value": "ur,i,i,ar"},
                 }
             }
         }

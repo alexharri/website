@@ -2,20 +2,20 @@ from ..trie import create_trie_chart
 
 trie = {
     "i": {
-        "bdfjklmnpstvxðóú": {"value": "1;i,a,a,a (166)"},
+        "bdfjklmnpstvxðóú": {"value": "i,a,a,a (166)"},
         "r": {
-            "Aadefgimrtáóúý": {"value": "1;i,a,a,a (33)"},
-            "y": {"value": "0;,,, (1)"},
+            "Aadefgimrtáóúý": {"value": "i,a,a,a (33)"},
+            "y": {"value": ",,, (1)"},
         },
         "g": {
-            "alnou": {"value": "1;i,a,a,a (14)"},
+            "alnou": {"value": "i,a,a,a (14)"},
             "g": {
-                "Uaiouö": {"value": "1;i,a,a,a (6)"},
-                "e": {"value": "1;i,ja,ja,ja (1)"},
+                "Uaiouö": {"value": "i,a,a,a (6)"},
+                "e": {"value": "i,ja,ja,ja (1)"},
             },
         },
-        "u": {"value": "1;i,ja,ja,ja (1)"},
-        "a": {"value": "0;,,,s (1)"},
+        "u": {"value": "i,ja,ja,ja (1)"},
+        "a": {"value": ",,,s (1)"},
     }
 }
 
