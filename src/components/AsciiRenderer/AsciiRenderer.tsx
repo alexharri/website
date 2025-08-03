@@ -28,7 +28,9 @@ function measureCharacterSize(element: HTMLElement): { width: number; height: nu
 export function AsciiRenderer(props: Props) {
   const ref = useRef<HTMLDivElement>(null);
   const s = useStyles(AsciiRendererStyles);
-  const [selectedAlphabet, setSelectedAlphabet] = useState<AlphabetName>(props.alphabet || 'default');
+  const [selectedAlphabet, setSelectedAlphabet] = useState<AlphabetName>(
+    props.alphabet || "default",
+  );
   const [availableAlphabets] = useState<AlphabetName[]>(getAvailableAlphabets());
 
   // Handle alphabet switching
@@ -56,22 +58,23 @@ export function AsciiRenderer(props: Props) {
 
       const canvas = props.canvasRef.current;
       if (!canvas) return;
-      
+
       // Try to get the existing WebGL context from the canvas
       // Three.js should have already created this context
       let gl: WebGLRenderingContext | WebGL2RenderingContext | null = null;
-      
+
       // Try to access the existing context without creating a new one
       try {
         // This will return the existing context if one exists
-        gl = (canvas as any).__webglContext || 
-             canvas.getContext("webgl2") || 
-             canvas.getContext("webgl");
+        gl =
+          (canvas as any).__webglContext ||
+          canvas.getContext("webgl2") ||
+          canvas.getContext("webgl");
       } catch (error) {
         console.warn("Could not access WebGL context:", error);
         return;
       }
-      
+
       if (!gl) return;
 
       if (!charDimensions) {
@@ -86,7 +89,14 @@ export function AsciiRenderer(props: Props) {
       const pixelBuffer = new Uint8Array(canvas.width * canvas.height * 4);
       gl.readPixels(0, 0, canvas.width, canvas.height, gl.RGBA, gl.UNSIGNED_BYTE, pixelBuffer);
 
-      const asciiString = generateAsciiChars(pixelBuffer, canvas.width, canvas.height, W, H, selectedAlphabet);
+      const asciiString = generateAsciiChars(
+        pixelBuffer,
+        canvas.width,
+        canvas.height,
+        W,
+        H,
+        selectedAlphabet,
+      );
       preEl.textContent = asciiString;
     }
     tick();

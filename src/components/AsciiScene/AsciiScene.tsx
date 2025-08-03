@@ -7,7 +7,7 @@ const styles = ({ styled, theme }: StyleOptions) => ({
   container: styled.css`
     position: relative;
   `,
-  
+
   controls: styled.css`
     position: absolute;
     top: 16px;
@@ -23,27 +23,27 @@ const styles = ({ styled, theme }: StyleOptions) => ({
     border: 1px solid ${theme.text400};
     font-size: 14px;
   `,
-  
+
   splitViewContainer: styled.css`
     display: flex;
     gap: 16px;
-    
+
     &--vertical {
       flex-direction: column;
     }
-    
+
     &--horizontal {
       flex-direction: row;
     }
   `,
-  
+
   sceneWrapper: styled.css`
     flex: 1;
     min-width: 0;
     position: relative;
     overflow: hidden;
   `,
-  
+
   button: styled.css`
     background: ${theme.background300};
     border: 1px solid ${theme.text400};
@@ -52,18 +52,18 @@ const styles = ({ styled, theme }: StyleOptions) => ({
     border-radius: 4px;
     cursor: pointer;
     font-size: 12px;
-    
+
     &:hover {
       background: ${theme.background500};
       border-color: ${theme.text700};
     }
-    
+
     &--active {
       background: ${theme.background700};
       border-color: ${theme.text800};
     }
   `,
-  
+
   label: styled.css`
     font-size: 12px;
     color: ${theme.text400};
@@ -101,7 +101,7 @@ export const AsciiScene: React.FC<AsciiSceneProps> = ({
   const [splitView, setSplitView] = useState(defaultSplitView);
 
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  
+
   const sceneProps = {
     scene,
     height: splitView ? height / (splitDirection === "vertical" ? 2 : 1) : height,

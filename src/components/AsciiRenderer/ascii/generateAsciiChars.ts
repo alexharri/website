@@ -201,12 +201,12 @@ export function generateAsciiChars(
   alphabet?: AlphabetName,
 ): string {
   const matcher = getCharacterMatcher();
-  
+
   // Switch to the requested alphabet if provided
   if (alphabet && alphabet !== matcher.getCurrentAlphabet()) {
     matcher.switchAlphabet(alphabet);
   }
-  
+
   const samplingConfig = matcher.getSamplingConfig();
   const chars: string[] = [];
 
