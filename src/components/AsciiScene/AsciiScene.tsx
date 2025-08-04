@@ -33,6 +33,7 @@ export const AsciiScene: React.FC<AsciiSceneProps> = ({
 }) => {
   const s = useStyles(AsciiSceneStyles);
   const [split, setSplit] = useState(false);
+  const [splitPosition, setSplitPosition] = useState(50);
   const [selectedAlphabet, setSelectedAlphabet] = useState<AlphabetName>(alphabet);
   const [availableAlphabets] = useState<AlphabetName[]>(getAvailableAlphabets());
 
@@ -69,6 +70,21 @@ export const AsciiScene: React.FC<AsciiSceneProps> = ({
             {split ? "ON" : "OFF"}
           </button>
 
+          {split && (
+            <>
+              <span className={s("label")}>Position:</span>
+              <input
+                type="range"
+                min="10"
+                max="90"
+                value={splitPosition}
+                onChange={(e) => setSplitPosition(Number(e.target.value))}
+                className={s("slider")}
+              />
+              <span className={s("sliderValue")}>{splitPosition}%</span>
+            </>
+          )}
+
           <span className={s("label")}>Alphabet:</span>
           <select
             className={s("select")}
@@ -85,9 +101,23 @@ export const AsciiScene: React.FC<AsciiSceneProps> = ({
       )}
 
       <div className={s("wrapper")}>
-        <div className={s("border", { split })} />
-        <div data-ascii-container className={s("ascii", { split })}>
-          <div className={s("asciiInner", { split })}>
+        <div
+          className={s("border")}
+          style={{
+            transform: split
+              ? `translateX(calc(${splitPosition}vw - 50vw - 50%))`
+              : "translateX(50vw)",
+          }}
+        />
+        <div
+          data-ascii-container
+          className={s("ascii")}
+          style={split ? { transform: `translateX(calc(-${100 - splitPosition}vw))` } : {}}
+        >
+          <div
+            className={s("asciiInner")}
+            style={split ? { transform: `translateX(calc(${-splitPosition / 2}% + 50%))` } : {}}
+          >
             <AsciiRenderer
               onFrameRef={onFrameRef}
               canvasRef={canvasRef}
@@ -95,8 +125,18 @@ export const AsciiScene: React.FC<AsciiSceneProps> = ({
             />
           </div>
         </div>
-        <div data-canvas-container className={s("canvas", { split })} style={{ height }}>
-          <div className={s("canvasInner", { split })}>
+        <div
+          data-canvas-container
+          className={s("canvas", { split })}
+          style={{
+            height,
+            transform: split ? `translateX(${splitPosition}vw)` : undefined,
+          }}
+        >
+          <div
+            className={s("canvasInner", { split })}
+            style={split ? { transform: `translateX(calc(-${50 + splitPosition / 2}%))` } : {}}
+          >
             <Scene {...sceneProps} />
           </div>
         </div>

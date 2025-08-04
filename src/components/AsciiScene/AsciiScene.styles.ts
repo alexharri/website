@@ -37,10 +37,6 @@ export default ({ styled, theme }: StyleOptions) => ({
     z-index: 50;
     transform: translateX(50vw);
     transition: all 0.5s;
-
-    &--split {
-      transform: translateX(-50%);
-    }
   `,
 
   ascii: styled.css`
@@ -54,10 +50,6 @@ export default ({ styled, theme }: StyleOptions) => ({
     user-select: none;
     pointer-events: none;
     transition: all 0.5s;
-
-    &--split {
-      transform: translateX(-50vw);
-    }
   `,
 
   asciiInner: styled.css`
@@ -65,27 +57,20 @@ export default ({ styled, theme }: StyleOptions) => ({
     background: ${theme.background200};
     top: 0;
     bottom: 0;
-    left: 50%;
+    left: 0;
+    right: 0;
     width: 100vw;
-    transform: translateX(-50%);
+    transform: translateX(0);
     transition: all 0.5s;
-
-    &--split {
-      transform: translateX(-25%);
-    }
   `,
 
   canvas: styled.css`
-    width: 50vw;
+    width: 100vw;
     margin-left: auto;
     transform: translateX(100%);
     overflow: hidden;
     transition: all 0.5s;
     position: relative;
-
-    &--split {
-      transform: translateX(0px);
-    }
   `,
 
   canvasInner: styled.css`
@@ -95,10 +80,6 @@ export default ({ styled, theme }: StyleOptions) => ({
     width: 100vw;
     transform: translateX(-75%);
     transition: all 0.5s;
-
-    &--split {
-      transform: translateX(-50%);
-    }
   `,
 
   button: styled.css`
@@ -144,5 +125,39 @@ export default ({ styled, theme }: StyleOptions) => ({
       background: ${theme.background300};
       color: ${theme.text};
     }
+  `,
+
+  slider: styled.css`
+    width: 100px;
+    height: 4px;
+    border-radius: 2px;
+    background: ${theme.background300};
+    outline: none;
+    cursor: pointer;
+
+    &::-webkit-slider-thumb {
+      appearance: none;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: ${theme.text};
+      cursor: pointer;
+    }
+
+    &::-moz-range-thumb {
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: ${theme.text};
+      cursor: pointer;
+      border: none;
+    }
+  `,
+
+  sliderValue: styled.css`
+    font-size: 12px;
+    color: ${theme.text400};
+    min-width: 30px;
+    text-align: center;
   `,
 });
