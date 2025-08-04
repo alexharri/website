@@ -1,16 +1,33 @@
 import { cssVariables } from "../../utils/cssVariables";
 import { StyleOptions } from "../../utils/styles";
 
+export const CONTENT_WIDTH = 1080;
+export const BREAKPOINT = 1200;
+
 export default ({ styled, theme }: StyleOptions) => ({
   container: styled.css`
     position: relative;
+    max-width: 100%;
+    width: ${CONTENT_WIDTH}px;
+    margin: 0 auto;
+    border: 1px solid ${theme.medium400};
+    border-radius: 16px;
+    overflow: hidden;
+
+    @media (max-width: ${BREAKPOINT}px) {
+      margin: 0 -${cssVariables.contentPadding}px;
+      border-radius: 0;
+      border: none;
+      min-width: 100vw;
+    }
   `,
 
   controls: styled.css`
     position: absolute;
     top: 16px;
-    left: 16px;
-    z-index: 10;
+    left: 50%;
+    z-index: 100;
+    transform: translateX(-50%);
     display: flex;
     gap: 8px;
     align-items: center;
@@ -24,7 +41,10 @@ export default ({ styled, theme }: StyleOptions) => ({
 
   wrapper: styled.css`
     position: relative;
-    margin: 0 -${cssVariables.contentPadding}px;
+
+    @media (max-width: ${BREAKPOINT}px) {
+      border-radius: 0;
+    }
   `,
 
   border: styled.css`
@@ -34,7 +54,7 @@ export default ({ styled, theme }: StyleOptions) => ({
     left: 50%;
     bottom: 0;
     width: 20px;
-    z-index: 50;
+    z-index: 20;
     transform: translateX(50vw);
     transition: all 0.5s;
     cursor: grab;
@@ -85,13 +105,13 @@ export default ({ styled, theme }: StyleOptions) => ({
     bottom: 0;
     left: 0;
     right: 0;
-    width: 100vw;
+    width: 100%;
     transform: translateX(0);
     transition: all 0.5s;
   `,
 
   canvas: styled.css`
-    width: 100vw;
+    width: 100%;
     margin-left: auto;
     transform: translateX(100%);
     overflow: hidden;
@@ -103,7 +123,7 @@ export default ({ styled, theme }: StyleOptions) => ({
     position: absolute;
     top: 0;
     left: 50%;
-    width: 100vw;
+    width: 100%;
     transform: translateX(-75%);
     transition: all 0.5s;
   `,

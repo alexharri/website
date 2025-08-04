@@ -3,9 +3,10 @@ import { Scene } from "../../threejs/scenes";
 import { useStyles } from "../../utils/styles";
 import { AsciiRenderer } from "../AsciiRenderer";
 import { AlphabetName, getAvailableAlphabets } from "../AsciiRenderer/alphabets/AlphabetManager";
-import AsciiSceneStyles from "./AsciiScene.styles";
+import AsciiSceneStyles, { BREAKPOINT, CONTENT_WIDTH } from "./AsciiScene.styles";
 import { useSceneHeight } from "../../threejs/hooks";
 import { clamp } from "../../math/math";
+import { useViewportWidth } from "../../utils/hooks/useViewportWidth";
 
 interface AsciiSceneProps {
   scene: string;
@@ -37,6 +38,16 @@ export const AsciiScene: React.FC<AsciiSceneProps> = ({
   const [isDragging, setIsDragging] = useState(false);
   const [selectedAlphabet, setSelectedAlphabet] = useState<AlphabetName>("default");
   const [availableAlphabets] = useState<AlphabetName[]>(getAvailableAlphabets());
+
+  const viewportWidth = useViewportWidth();
+  let width: number;
+  if (viewportWidth == null) {
+    width = CONTENT_WIDTH;
+  } else if (viewportWidth < BREAKPOINT) {
+    width = viewportWidth;
+  } else {
+    width = CONTENT_WIDTH;
+  }
 
   const handleAlphabetChange = (newAlphabet: AlphabetName) => {
     setSelectedAlphabet(newAlphabet);
@@ -87,7 +98,13 @@ export const AsciiScene: React.FC<AsciiSceneProps> = ({
       {showControls && (
         <div className={s("controls")}>
           <span className={s("label")}>Split:</span>
-          <button className={s("button", { active: split })} onClick={() => setSplit(!split)}>
+          <button
+            className={s("button", { active: split })}
+            onClick={() => {
+              setSplit(!split);
+              setSplitT(0.5);
+            }}
+          >
             {split ? "ON" : "OFF"}
           </button>
 
@@ -116,8 +133,8 @@ export const AsciiScene: React.FC<AsciiSceneProps> = ({
           className={s("border", { dragging: isDragging, split })}
           style={{
             transform: split
-              ? `translateX(calc(${splitPercentage}vw - 50vw - 50%))`
-              : "translateX(50vw)",
+              ? `translateX(calc(${splitT * width}px - ${width / 2}px - 50%))`
+              : `translateX(${width / 2}px)`,
             transition: isDragging ? "none" : "all 0.5s",
           }}
           onMouseDown={handleMouseDown}
@@ -128,7 +145,7 @@ export const AsciiScene: React.FC<AsciiSceneProps> = ({
           data-ascii-container
           className={s("ascii")}
           style={{
-            transform: split ? `translateX(calc(-${100 - splitPercentage}vw))` : "translateX(0)",
+            transform: split ? `translateX(calc(-${width * (1 - splitT)}px))` : "translateX(0)",
             transition: isDragging ? "none" : "all 0.5s",
           }}
         >
@@ -153,7 +170,7 @@ export const AsciiScene: React.FC<AsciiSceneProps> = ({
           className={s("canvas", { split })}
           style={{
             height,
-            transform: split ? `translateX(${splitPercentage}vw)` : "translateX(100%)",
+            transform: split ? `translateX(${width * splitT}px)` : "translateX(100%)",
             transition: isDragging ? "none" : "all 0.5s",
           }}
         >
