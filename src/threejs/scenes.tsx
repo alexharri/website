@@ -20,6 +20,8 @@ export interface SceneProps {
   canvasRef?: React.RefObject<HTMLCanvasElement>;
   errorLoadingThreeJs: boolean;
   onFrame?: (buffer: Uint8Array) => void;
+  orbitControlsRef?: React.RefObject<any>;
+  orbitControlsTargetRef?: React.RefObject<HTMLDivElement>;
 }
 
 export const ScenePropsContext = createContext<SceneProps>(null!);
@@ -104,6 +106,8 @@ interface Props {
   canvasRef?: React.RefObject<HTMLCanvasElement>;
   onReady?: () => void;
   onFrame?: (buffer: Uint8Array) => void;
+  orbitControlsRef?: React.RefObject<any>;
+  orbitControlsTargetRef?: React.RefObject<HTMLDivElement>;
 }
 
 export const Scene: React.FC<Props> = (props) => {
@@ -119,6 +123,8 @@ export const Scene: React.FC<Props> = (props) => {
     ascii,
     canvasRef,
     onFrame,
+    orbitControlsRef,
+    orbitControlsTargetRef,
   } = props;
   const containerRef = useRef<HTMLDivElement>(null);
   const visible = useVisible(containerRef, "350px");
@@ -155,6 +161,8 @@ export const Scene: React.FC<Props> = (props) => {
     ascii,
     canvasRef,
     onFrame,
+    orbitControlsRef,
+    orbitControlsTargetRef,
     errorLoadingThreeJs: error,
   };
 

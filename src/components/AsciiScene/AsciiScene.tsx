@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import React, { useRef, useState, useContext } from "react";
 import { Scene } from "../../threejs/scenes";
 import { useStyles } from "../../utils/styles";
 import { AsciiRenderer } from "../AsciiRenderer";
@@ -7,6 +7,7 @@ import AsciiSceneStyles, { BREAKPOINT, CONTENT_WIDTH } from "./AsciiScene.styles
 import { useSceneHeight } from "../../threejs/hooks";
 import { clamp } from "../../math/math";
 import { useViewportWidth } from "../../utils/hooks/useViewportWidth";
+import { ThreeContext } from "../../threejs/Components/ThreeProvider";
 
 interface AsciiSceneProps {
   scene: string;
@@ -32,6 +33,7 @@ export const AsciiScene: React.FC<AsciiSceneProps> = ({
   xRotation,
   showControls = true,
 }) => {
+  const THREE = useContext(ThreeContext);
   const s = useStyles(AsciiSceneStyles);
   const [split, setSplit] = useState(false);
   const [splitT, setSplitT] = useState(0.5);
@@ -75,6 +77,7 @@ export const AsciiScene: React.FC<AsciiSceneProps> = ({
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   const onFrameRef = useRef<null | ((buffer: Uint8Array) => void)>(null);
+  const orbitControlsTargetRef = useRef<HTMLDivElement>(null);
 
   const { height } = useSceneHeight(targetHeight);
 
@@ -89,6 +92,7 @@ export const AsciiScene: React.FC<AsciiSceneProps> = ({
     xRotation,
     canvasRef,
     onFrame: (buffer: Uint8Array) => onFrameRef.current?.(buffer),
+    orbitControlsTargetRef,
   };
 
   const splitPercentage = splitT * 100;
@@ -128,6 +132,7 @@ export const AsciiScene: React.FC<AsciiSceneProps> = ({
         onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUp}
         onMouseLeave={handleMouseUp}
+        style={{ cursor: "grab" }}
       >
         <div
           className={s("border", { dragging: isDragging, split })}
@@ -141,49 +146,52 @@ export const AsciiScene: React.FC<AsciiSceneProps> = ({
         >
           <div data-handle />
         </div>
-        <div
-          data-ascii-container
-          className={s("ascii")}
-          style={{
-            transform: split ? `translateX(calc(-${width * (1 - splitT)}px))` : "translateX(0)",
-            transition: isDragging ? "none" : "all 0.5s",
-          }}
-        >
+
+        <div ref={orbitControlsTargetRef}>
           <div
-            className={s("asciiInner")}
+            data-ascii-container
+            className={s("ascii")}
             style={{
-              transform: split
-                ? `translateX(calc(${-splitPercentage / 2}% + 50%))`
-                : "translateX(0)",
+              transform: split ? `translateX(calc(-${width * (1 - splitT)}px))` : "translateX(0)",
               transition: isDragging ? "none" : "all 0.5s",
             }}
           >
-            <AsciiRenderer
-              onFrameRef={onFrameRef}
-              canvasRef={canvasRef}
-              alphabet={selectedAlphabet}
-            />
+            <div
+              className={s("asciiInner")}
+              style={{
+                transform: split
+                  ? `translateX(calc(${-splitPercentage / 2}% + 50%))`
+                  : "translateX(0)",
+                transition: isDragging ? "none" : "all 0.5s",
+              }}
+            >
+              <AsciiRenderer
+                onFrameRef={onFrameRef}
+                canvasRef={canvasRef}
+                alphabet={selectedAlphabet}
+              />
+            </div>
           </div>
-        </div>
-        <div
-          data-canvas-container
-          className={s("canvas", { split })}
-          style={{
-            height,
-            transform: split ? `translateX(${width * splitT}px)` : "translateX(100%)",
-            transition: isDragging ? "none" : "all 0.5s",
-          }}
-        >
           <div
-            className={s("canvasInner", { split })}
+            data-canvas-container
+            className={s("canvas", { split })}
             style={{
-              transform: split
-                ? `translateX(calc(-${50 + splitPercentage / 2}%))`
-                : "translateX(-75%)",
+              height,
+              transform: split ? `translateX(${width * splitT}px)` : "translateX(100%)",
               transition: isDragging ? "none" : "all 0.5s",
             }}
           >
-            <Scene {...sceneProps} />
+            <div
+              className={s("canvasInner", { split })}
+              style={{
+                transform: split
+                  ? `translateX(calc(-${50 + splitPercentage / 2}%))`
+                  : "translateX(-75%)",
+                transition: isDragging ? "none" : "all 0.5s",
+              }}
+            >
+              <Scene {...sceneProps} />
+            </div>
           </div>
         </div>
       </div>

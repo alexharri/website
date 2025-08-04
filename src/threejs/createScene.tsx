@@ -80,6 +80,8 @@ export function createScene<V extends VariablesOptions>(
     zoom = 1,
     canvasRef: externalCanvasRef,
     onFrame,
+    orbitControlsRef: externalOrbitControlsRef,
+    orbitControlsTargetRef,
   }: SceneProps) => {
     const THREE = useContext(ThreeContext);
     const DREI = useContext(DreiContext);
@@ -149,7 +151,7 @@ export function createScene<V extends VariablesOptions>(
       setVariables((obj) => ({ ...obj, [key]: value }));
     };
 
-    const orbitRef = useRef<any>(null);
+    const orbitRef = externalOrbitControlsRef || useRef<any>(null);
 
     const rotationCallbacks = useRef(new Set<(vec: THREE.Camera) => void>());
 
@@ -180,8 +182,8 @@ export function createScene<V extends VariablesOptions>(
     return (
       <>
         <div style={{ position: "relative", height }}>
-          <div className={s("fade", { upper: true })} style={{ height: fadeHeight }} />
-          <div className={s("fade", { lower: true })} style={{ height: fadeHeight }} />
+          {/* <div className={s("fade", { upper: true })} style={{ height: fadeHeight }} />
+          <div className={s("fade", { lower: true })} style={{ height: fadeHeight }} /> */}
 
           {visible && (
             <FIBER.Canvas
@@ -223,6 +225,7 @@ export function createScene<V extends VariablesOptions>(
                 enablePan={false}
                 enableZoom={false}
                 ref={orbitRef}
+                domElement={orbitControlsTargetRef?.current || undefined}
               />
 
               <mesh position={[0, yOffset, 0]}>
