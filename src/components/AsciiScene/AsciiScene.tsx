@@ -38,11 +38,31 @@ const styles = ({ styled, theme }: StyleOptions) => ({
     }
   `,
 
-  sceneWrapper: styled.css`
-    flex: 1;
-    min-width: 0;
-    position: relative;
-    overflow: hidden;
+  ascii: styled.css`
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 5;
+    user-select: none;
+    pointer-events: none;
+
+    transition: all 0.5s;
+
+    &--split {
+      transform: translateX(-25%);
+    }
+  `,
+
+  canvas: styled.css`
+    transition: all 0.5s;
+    opacity: 0;
+
+    &--split {
+      opacity: 1;
+      transform: translateX(25%);
+    }
   `,
 
   button: styled.css`
@@ -101,8 +121,6 @@ interface AsciiSceneProps {
   yOffset?: number;
   xRotation?: number;
   showControls?: boolean;
-  defaultSplitView?: boolean;
-  splitDirection?: "horizontal" | "vertical";
   alphabet?: AlphabetName;
 }
 
@@ -116,12 +134,10 @@ export const AsciiScene: React.FC<AsciiSceneProps> = ({
   yOffset,
   xRotation,
   showControls = true,
-  defaultSplitView = false,
-  splitDirection = "horizontal",
   alphabet = "default",
 }) => {
   const s = useStyles(styles);
-  const [splitView, setSplitView] = useState(defaultSplitView);
+  const [split, setSplit] = useState(false);
   const [selectedAlphabet, setSelectedAlphabet] = useState<AlphabetName>(alphabet);
   const [availableAlphabets] = useState<AlphabetName[]>(getAvailableAlphabets());
 
@@ -131,9 +147,11 @@ export const AsciiScene: React.FC<AsciiSceneProps> = ({
 
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
+  const onFrameRef = useRef<null | ((buffer: Uint8Array) => void)>(null);
+
   const sceneProps = {
     scene,
-    height: splitView ? height / (splitDirection === "vertical" ? 2 : 1) : height,
+    height,
     angle,
     autoRotate,
     usesVariables,
@@ -142,6 +160,7 @@ export const AsciiScene: React.FC<AsciiSceneProps> = ({
     xRotation,
     ascii: false, // Scene component no longer handles ASCII rendering
     canvasRef: canvasRef,
+    onFrame: (buffer: Uint8Array) => onFrameRef.current?.(buffer),
   };
 
   return (
@@ -149,11 +168,8 @@ export const AsciiScene: React.FC<AsciiSceneProps> = ({
       {showControls && (
         <div className={s("controls")}>
           <span className={s("label")}>Split:</span>
-          <button
-            className={s("button", { active: splitView })}
-            onClick={() => setSplitView(!splitView)}
-          >
-            {splitView ? "ON" : "OFF"}
+          <button className={s("button", { active: split })} onClick={() => setSplit(!split)}>
+            {split ? "ON" : "OFF"}
           </button>
 
           <span className={s("label")}>Alphabet:</span>
@@ -172,23 +188,20 @@ export const AsciiScene: React.FC<AsciiSceneProps> = ({
       )}
 
       <div style={{ position: "relative" }}>
-        {splitView ? (
-          <div className={s("splitViewContainer", { [splitDirection]: true })}>
-            <div className={s("sceneWrapper")}>
-              <AsciiRenderer canvasRef={canvasRef} alphabet={selectedAlphabet} />
-            </div>
-            <div className={s("sceneWrapper")}>
+        <div style={{ position: "relative" }}>
+          <div className={s("ascii", { split })}>
+            <AsciiRenderer
+              onFrameRef={onFrameRef}
+              canvasRef={canvasRef}
+              alphabet={selectedAlphabet}
+            />
+          </div>
+          <div className={s("canvas", { split })}>
+            <div style={{ opacity: 0.5 }}>
               <Scene {...sceneProps} />
             </div>
           </div>
-        ) : (
-          <div style={{ position: "relative" }}>
-            <AsciiRenderer canvasRef={canvasRef} alphabet={selectedAlphabet} />
-            <div style={{ opacity: 0 }}>
-              <Scene {...sceneProps} />
-            </div>
-          </div>
-        )}
+        </div>
       </div>
     </div>
   );

@@ -7,6 +7,7 @@ import { useDidUpdate } from "../utils/hooks/useDidUpdate";
 import { DreiContext, FiberContext, ThreeContext } from "./Components/ThreeProvider";
 import { useSceneHeight } from "./hooks";
 import { SceneProps } from "./scenes";
+import { FrameReader } from "./Components/FrameReader";
 
 const FADE_HEIGHT = 80;
 
@@ -78,6 +79,7 @@ export function createScene<V extends VariablesOptions>(
     xRotation = 0,
     zoom = 1,
     canvasRef: externalCanvasRef,
+    onFrame,
   }: SceneProps) => {
     const THREE = useContext(ThreeContext);
     const DREI = useContext(DreiContext);
@@ -187,7 +189,9 @@ export function createScene<V extends VariablesOptions>(
               onCreated={({ gl }) => {
                 gl.shadowMap.enabled = true;
                 gl.shadowMap.type = THREE.PCFSoftShadowMap;
+                canvasRef.current?.setAttribute("data-ready", "true");
               }}
+              gl={{ preserveDrawingBuffer: true }}
               style={{
                 height,
                 userSelect: "none",
@@ -200,6 +204,7 @@ export function createScene<V extends VariablesOptions>(
               resize={{ scroll: false }}
               ref={canvasRef}
             >
+              {onFrame && <FrameReader onFrame={onFrame} />}
               {/* <ambientLight intensity={Math.PI / 2} />
               <spotLight
                 position={[10, 10, 10]}

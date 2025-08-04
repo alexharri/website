@@ -1,5 +1,5 @@
 import dynamic from "next/dynamic";
-import { createContext, useContext, useEffect, useRef } from "react";
+import React, { createContext, useContext, useEffect, useRef } from "react";
 import { useVisible } from "../utils/hooks/useVisible";
 import { LoadThreeContext } from "./Components/ThreeProvider";
 import { SceneSkeleton } from "./SceneSkeleton";
@@ -19,6 +19,7 @@ export interface SceneProps {
   yOffset?: number;
   canvasRef?: React.RefObject<HTMLCanvasElement>;
   errorLoadingThreeJs: boolean;
+  onFrame?: (buffer: Uint8Array) => void;
 }
 
 export const ScenePropsContext = createContext<SceneProps>(null!);
@@ -101,11 +102,24 @@ interface Props {
   xRotation?: number;
   ascii?: boolean;
   canvasRef?: React.RefObject<HTMLCanvasElement>;
+  onReady?: () => void;
+  onFrame?: (buffer: Uint8Array) => void;
 }
 
 export const Scene: React.FC<Props> = (props) => {
-  const { scene, height, usesVariables, angle, zoom, yOffset, autoRotate, xRotation, ascii, canvasRef } =
-    props;
+  const {
+    scene,
+    height,
+    usesVariables,
+    angle,
+    zoom,
+    yOffset,
+    autoRotate,
+    xRotation,
+    ascii,
+    canvasRef,
+    onFrame,
+  } = props;
   const containerRef = useRef<HTMLDivElement>(null);
   const visible = useVisible(containerRef, "350px");
   const render = useVisible(containerRef, "50px");
@@ -140,6 +154,7 @@ export const Scene: React.FC<Props> = (props) => {
     xRotation,
     ascii,
     canvasRef,
+    onFrame,
     errorLoadingThreeJs: error,
   };
 
