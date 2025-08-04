@@ -45,8 +45,8 @@ export default createScene(({ scene }) => {
   directionalLight3.position.set(2, -2, 6);
 
   // Darker background and more dramatic fog
-  scene.fog = new THREE.Fog(0x0a0a0a, 3, 12);
-  scene.background = new THREE.Color(0x0a0a0a);
+  scene.fog = new THREE.Fog(0x0e1824, 3, 12);
+  scene.background = new THREE.Color(0x0e1824);
 
   return (
     <>

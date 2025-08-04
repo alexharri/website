@@ -34,11 +34,32 @@ export const AsciiScene: React.FC<AsciiSceneProps> = ({
   const s = useStyles(AsciiSceneStyles);
   const [split, setSplit] = useState(false);
   const [splitPosition, setSplitPosition] = useState(50);
+  const [isDragging, setIsDragging] = useState(false);
   const [selectedAlphabet, setSelectedAlphabet] = useState<AlphabetName>(alphabet);
   const [availableAlphabets] = useState<AlphabetName[]>(getAvailableAlphabets());
 
   const handleAlphabetChange = (newAlphabet: AlphabetName) => {
     setSelectedAlphabet(newAlphabet);
+  };
+
+  const handleMouseDown = (e: React.MouseEvent) => {
+    if (split) {
+      setIsDragging(true);
+      e.preventDefault();
+    }
+  };
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (isDragging && split) {
+      const rect = e.currentTarget.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const percentage = Math.min(90, Math.max(10, (x / rect.width) * 100));
+      setSplitPosition(percentage);
+    }
+  };
+
+  const handleMouseUp = () => {
+    setIsDragging(false);
   };
 
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -70,21 +91,6 @@ export const AsciiScene: React.FC<AsciiSceneProps> = ({
             {split ? "ON" : "OFF"}
           </button>
 
-          {split && (
-            <>
-              <span className={s("label")}>Position:</span>
-              <input
-                type="range"
-                min="10"
-                max="90"
-                value={splitPosition}
-                onChange={(e) => setSplitPosition(Number(e.target.value))}
-                className={s("slider")}
-              />
-              <span className={s("sliderValue")}>{splitPosition}%</span>
-            </>
-          )}
-
           <span className={s("label")}>Alphabet:</span>
           <select
             className={s("select")}
@@ -100,23 +106,38 @@ export const AsciiScene: React.FC<AsciiSceneProps> = ({
         </div>
       )}
 
-      <div className={s("wrapper")}>
+      <div
+        className={s("wrapper")}
+        onMouseMove={handleMouseMove}
+        onMouseUp={handleMouseUp}
+        onMouseLeave={handleMouseUp}
+      >
         <div
-          className={s("border")}
+          className={s("border", { dragging: isDragging, split })}
           style={{
             transform: split
               ? `translateX(calc(${splitPosition}vw - 50vw - 50%))`
               : "translateX(50vw)",
+            transition: isDragging ? "none" : "all 0.5s",
           }}
-        />
+          onMouseDown={handleMouseDown}
+        >
+          <div data-handle />
+        </div>
         <div
           data-ascii-container
           className={s("ascii")}
-          style={split ? { transform: `translateX(calc(-${100 - splitPosition}vw))` } : {}}
+          style={{
+            transform: split ? `translateX(calc(-${100 - splitPosition}vw))` : "translateX(0)",
+            transition: isDragging ? "none" : "all 0.5s",
+          }}
         >
           <div
             className={s("asciiInner")}
-            style={split ? { transform: `translateX(calc(${-splitPosition / 2}% + 50%))` } : {}}
+            style={{
+              transform: split ? `translateX(calc(${-splitPosition / 2}% + 50%))` : "translateX(0)",
+              transition: isDragging ? "none" : "all 0.5s",
+            }}
           >
             <AsciiRenderer
               onFrameRef={onFrameRef}
@@ -130,12 +151,18 @@ export const AsciiScene: React.FC<AsciiSceneProps> = ({
           className={s("canvas", { split })}
           style={{
             height,
-            transform: split ? `translateX(${splitPosition}vw)` : undefined,
+            transform: split ? `translateX(${splitPosition}vw)` : "translateX(100%)",
+            transition: isDragging ? "none" : "all 0.5s",
           }}
         >
           <div
             className={s("canvasInner", { split })}
-            style={split ? { transform: `translateX(calc(-${50 + splitPosition / 2}%))` } : {}}
+            style={{
+              transform: split
+                ? `translateX(calc(-${50 + splitPosition / 2}%))`
+                : "translateX(-75%)",
+              transition: isDragging ? "none" : "all 0.5s",
+            }}
           >
             <Scene {...sceneProps} />
           </div>

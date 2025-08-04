@@ -33,10 +33,36 @@ export default ({ styled, theme }: StyleOptions) => ({
     top: 0;
     left: 50%;
     bottom: 0;
-    width: 16px;
+    width: 20px;
     z-index: 50;
     transform: translateX(50vw);
     transition: all 0.5s;
+    cursor: grab;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-left: 1px solid ${theme.medium400};
+    border-right: 1px solid ${theme.medium400};
+
+    &--dragging {
+      cursor: grabbing;
+    }
+
+    & *[data-handle] {
+      width: 4px;
+      height: 40px;
+      background: ${theme.medium700};
+      border-radius: 2px;
+      pointer-events: none;
+      transition: all 0.3s;
+    }
+
+    &:hover {
+      & *[data-handle] {
+        background: ${theme.text400};
+        height: 64px;
+      }
+    }
   `,
 
   ascii: styled.css`
