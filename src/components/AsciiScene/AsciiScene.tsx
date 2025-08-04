@@ -5,6 +5,7 @@ import { AsciiRenderer } from "../AsciiRenderer";
 import { AlphabetName, getAvailableAlphabets } from "../AsciiRenderer/alphabets/AlphabetManager";
 import AsciiSceneStyles from "./AsciiScene.styles";
 import { useSceneHeight } from "../../threejs/hooks";
+import { clamp } from "../../math/math";
 
 interface AsciiSceneProps {
   scene: string;
@@ -29,13 +30,12 @@ export const AsciiScene: React.FC<AsciiSceneProps> = ({
   yOffset,
   xRotation,
   showControls = true,
-  alphabet = "default",
 }) => {
   const s = useStyles(AsciiSceneStyles);
   const [split, setSplit] = useState(false);
-  const [splitPosition, setSplitPosition] = useState(50);
+  const [splitT, setSplitT] = useState(0.5);
   const [isDragging, setIsDragging] = useState(false);
-  const [selectedAlphabet, setSelectedAlphabet] = useState<AlphabetName>(alphabet);
+  const [selectedAlphabet, setSelectedAlphabet] = useState<AlphabetName>("default");
   const [availableAlphabets] = useState<AlphabetName[]>(getAvailableAlphabets());
 
   const handleAlphabetChange = (newAlphabet: AlphabetName) => {
@@ -53,8 +53,7 @@ export const AsciiScene: React.FC<AsciiSceneProps> = ({
     if (isDragging && split) {
       const rect = e.currentTarget.getBoundingClientRect();
       const x = e.clientX - rect.left;
-      const percentage = Math.min(90, Math.max(10, (x / rect.width) * 100));
-      setSplitPosition(percentage);
+      setSplitT(clamp(x / rect.width, 0.2, 0.8));
     }
   };
 
@@ -77,10 +76,11 @@ export const AsciiScene: React.FC<AsciiSceneProps> = ({
     zoom,
     yOffset,
     xRotation,
-    ascii: false, // Scene component no longer handles ASCII rendering
-    canvasRef: canvasRef,
+    canvasRef,
     onFrame: (buffer: Uint8Array) => onFrameRef.current?.(buffer),
   };
+
+  const splitPercentage = splitT * 100;
 
   return (
     <div className={s("container")}>
@@ -116,7 +116,7 @@ export const AsciiScene: React.FC<AsciiSceneProps> = ({
           className={s("border", { dragging: isDragging, split })}
           style={{
             transform: split
-              ? `translateX(calc(${splitPosition}vw - 50vw - 50%))`
+              ? `translateX(calc(${splitPercentage}vw - 50vw - 50%))`
               : "translateX(50vw)",
             transition: isDragging ? "none" : "all 0.5s",
           }}
@@ -128,14 +128,16 @@ export const AsciiScene: React.FC<AsciiSceneProps> = ({
           data-ascii-container
           className={s("ascii")}
           style={{
-            transform: split ? `translateX(calc(-${100 - splitPosition}vw))` : "translateX(0)",
+            transform: split ? `translateX(calc(-${100 - splitPercentage}vw))` : "translateX(0)",
             transition: isDragging ? "none" : "all 0.5s",
           }}
         >
           <div
             className={s("asciiInner")}
             style={{
-              transform: split ? `translateX(calc(${-splitPosition / 2}% + 50%))` : "translateX(0)",
+              transform: split
+                ? `translateX(calc(${-splitPercentage / 2}% + 50%))`
+                : "translateX(0)",
               transition: isDragging ? "none" : "all 0.5s",
             }}
           >
@@ -151,7 +153,7 @@ export const AsciiScene: React.FC<AsciiSceneProps> = ({
           className={s("canvas", { split })}
           style={{
             height,
-            transform: split ? `translateX(${splitPosition}vw)` : "translateX(100%)",
+            transform: split ? `translateX(${splitPercentage}vw)` : "translateX(100%)",
             transition: isDragging ? "none" : "all 0.5s",
           }}
         >
@@ -159,7 +161,7 @@ export const AsciiScene: React.FC<AsciiSceneProps> = ({
             className={s("canvasInner", { split })}
             style={{
               transform: split
-                ? `translateX(calc(-${50 + splitPosition / 2}%))`
+                ? `translateX(calc(-${50 + splitPercentage / 2}%))`
                 : "translateX(-75%)",
               transition: isDragging ? "none" : "all 0.5s",
             }}
