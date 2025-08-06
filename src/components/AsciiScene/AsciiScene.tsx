@@ -1,4 +1,4 @@
-import React, { useRef, useState, useContext } from "react";
+import React, { useRef, useState } from "react";
 import { Scene } from "../../threejs/scenes";
 import { useStyles } from "../../utils/styles";
 import { AsciiRenderer } from "../AsciiRenderer";
@@ -7,7 +7,6 @@ import AsciiSceneStyles, { BREAKPOINT, CONTENT_WIDTH } from "./AsciiScene.styles
 import { useSceneHeight } from "../../threejs/hooks";
 import { clamp } from "../../math/math";
 import { useViewportWidth } from "../../utils/hooks/useViewportWidth";
-import { ThreeContext } from "../../threejs/Components/ThreeProvider";
 
 interface AsciiSceneProps {
   scene: string;
@@ -33,9 +32,8 @@ export const AsciiScene: React.FC<AsciiSceneProps> = ({
   xRotation,
   showControls = true,
 }) => {
-  const THREE = useContext(ThreeContext);
   const s = useStyles(AsciiSceneStyles);
-  const [viewMode, setViewMode] = useState<'ascii' | 'split' | 'canvas'>('ascii');
+  const [viewMode, setViewMode] = useState<"ascii" | "split" | "canvas">("ascii");
   const [splitT, setSplitT] = useState(0.5);
   const [isDragging, setIsDragging] = useState(false);
   const [selectedAlphabet, setSelectedAlphabet] = useState<AlphabetName>("default");
@@ -56,14 +54,14 @@ export const AsciiScene: React.FC<AsciiSceneProps> = ({
   };
 
   const handleMouseDown = (e: React.MouseEvent) => {
-    if (viewMode === 'split') {
+    if (viewMode === "split") {
       setIsDragging(true);
       e.preventDefault();
     }
   };
 
   const handleMouseMove = (e: React.MouseEvent) => {
-    if (isDragging && viewMode === 'split') {
+    if (isDragging && viewMode === "split") {
       const rect = e.currentTarget.getBoundingClientRect();
       const x = e.clientX - rect.left;
       setSplitT(clamp(x / rect.width, 0.2, 0.8));
@@ -104,23 +102,23 @@ export const AsciiScene: React.FC<AsciiSceneProps> = ({
           <span className={s("label")}>View:</span>
           <div className={s("splitButtonGroup")}>
             <button
-              className={s("button", { active: viewMode === 'ascii' })}
-              onClick={() => setViewMode('ascii')}
+              className={s("button", { active: viewMode === "ascii" })}
+              onClick={() => setViewMode("ascii")}
             >
               ASCII
             </button>
             <button
-              className={s("button", { active: viewMode === 'split' })}
+              className={s("button", { active: viewMode === "split" })}
               onClick={() => {
-                setViewMode('split');
+                setViewMode("split");
                 setSplitT(0.5);
               }}
             >
               Split
             </button>
             <button
-              className={s("button", { active: viewMode === 'canvas' })}
-              onClick={() => setViewMode('canvas')}
+              className={s("button", { active: viewMode === "canvas" })}
+              onClick={() => setViewMode("canvas")}
             >
               Canvas
             </button>
@@ -149,13 +147,14 @@ export const AsciiScene: React.FC<AsciiSceneProps> = ({
         style={{ cursor: "grab" }}
       >
         <div
-          className={s("border", { dragging: isDragging, split: viewMode === 'split' })}
+          className={s("border", { dragging: isDragging, split: viewMode === "split" })}
           style={{
-            transform: viewMode === 'split'
-              ? `translateX(calc(${splitT * width}px - ${width / 2}px - 50%))`
-              : viewMode === 'canvas'
-              ? `translateX(calc(-${width / 2}px - 100%))`
-              : `translateX(${width / 2}px)`,
+            transform:
+              viewMode === "split"
+                ? `translateX(calc(${splitT * width}px - ${width / 2}px - 50%))`
+                : viewMode === "canvas"
+                ? `translateX(calc(-${width / 2}px - 100%))`
+                : `translateX(${width / 2}px)`,
             transition: isDragging ? "none" : "all 0.5s",
           }}
           onMouseDown={handleMouseDown}
@@ -168,16 +167,24 @@ export const AsciiScene: React.FC<AsciiSceneProps> = ({
             data-ascii-container
             className={s("ascii")}
             style={{
-              transform: viewMode === 'split' ? `translateX(calc(-${width * (1 - splitT)}px))` : viewMode === 'ascii' ? "translateX(0)" : "translateX(-100%)",
+              transform:
+                viewMode === "split"
+                  ? `translateX(calc(-${width * (1 - splitT)}px))`
+                  : viewMode === "canvas"
+                  ? "translateX(-100%)"
+                  : "translateX(0)",
               transition: isDragging ? "none" : "all 0.5s",
             }}
           >
             <div
               className={s("asciiInner")}
               style={{
-                transform: viewMode === 'split'
-                  ? `translateX(calc(${-splitPercentage / 2}% + 50%))`
-                  : "translateX(0)",
+                transform:
+                  viewMode === "split"
+                    ? `translateX(calc(${-splitPercentage / 2}% + 50%))`
+                    : viewMode === "canvas"
+                    ? "translateX(100%)"
+                    : "translateX(0)",
                 transition: isDragging ? "none" : "all 0.5s",
               }}
             >
@@ -190,19 +197,20 @@ export const AsciiScene: React.FC<AsciiSceneProps> = ({
           </div>
           <div
             data-canvas-container
-            className={s("canvas", { split: viewMode === 'split' })}
+            className={s("canvas", { split: viewMode === "split" })}
             style={{
               height,
-              transform: viewMode === 'split' ? `translateX(${width * splitT}px)` : viewMode === 'canvas' ? "translateX(0)" : "translateX(100%)",
+              transform: viewMode === "split" ? `translateX(${width * splitT}px)` : "translateX(0)",
               transition: isDragging ? "none" : "all 0.5s",
             }}
           >
             <div
-              className={s("canvasInner", { split: viewMode === 'split' })}
+              className={s("canvasInner", { split: viewMode === "split" })}
               style={{
-                transform: viewMode === 'split'
-                  ? `translateX(calc(-${50 + splitPercentage / 2}%))`
-                  : viewMode === 'canvas' ? "translateX(-50%)" : "translateX(-75%)",
+                transform:
+                  viewMode === "split"
+                    ? `translateX(calc(-${50 + splitPercentage / 2}%))`
+                    : "translateX(-50%)",
                 transition: isDragging ? "none" : "all 0.5s",
               }}
             >
