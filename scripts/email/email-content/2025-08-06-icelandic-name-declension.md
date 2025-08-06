@@ -13,7 +13,6 @@ The post did quite well on HN, reaching the top spot for a few hours. You can [c
 Feel free to reply directly to this email with any questions or feedback you might have about this post!
 
 Best,
-
 — Alex Harri
 
 ---
