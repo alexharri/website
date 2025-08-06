@@ -2,4 +2,4 @@
 title: "Canvas to ASCII renderer"
 ---
 
-<AsciiScene scene="cube" height={750} autoRotate zoom={3} />
+<AsciiScene scene="cube" height={550} autoRotate zoom={3} />
