@@ -7,6 +7,7 @@ import AsciiSceneStyles, { BREAKPOINT, CONTENT_WIDTH } from "./AsciiScene.styles
 import { useSceneHeight } from "../../threejs/hooks";
 import { clamp } from "../../math/math";
 import { useViewportWidth } from "../../utils/hooks/useViewportWidth";
+import { SegmentedControl } from "../SegmentedControl";
 
 interface AsciiSceneProps {
   scene: string;
@@ -100,29 +101,20 @@ export const AsciiScene: React.FC<AsciiSceneProps> = ({
       {showControls && (
         <div className={s("controls")}>
           <span className={s("label")}>View:</span>
-          <div className={s("splitButtonGroup")}>
-            <button
-              className={s("button", { active: viewMode === "ascii" })}
-              onClick={() => setViewMode("ascii")}
-            >
-              ASCII
-            </button>
-            <button
-              className={s("button", { active: viewMode === "split" })}
-              onClick={() => {
-                setViewMode("split");
+          <SegmentedControl
+            options={[
+              { value: "ascii", label: "ASCII" },
+              { value: "split", label: "Split" },
+              { value: "canvas", label: "Canvas" },
+            ]}
+            value={viewMode}
+            setValue={(value) => {
+              setViewMode(value);
+              if (value === "split") {
                 setSplitT(0.5);
-              }}
-            >
-              Split
-            </button>
-            <button
-              className={s("button", { active: viewMode === "canvas" })}
-              onClick={() => setViewMode("canvas")}
-            >
-              Canvas
-            </button>
-          </div>
+              }
+            }}
+          />
 
           <span className={s("label")}>Alphabet:</span>
           <select

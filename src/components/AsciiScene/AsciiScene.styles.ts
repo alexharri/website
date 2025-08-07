@@ -128,13 +128,6 @@ export default ({ styled, theme }: StyleOptions) => ({
     transition: all 0.5s;
   `,
 
-  splitButtonGroup: styled.css`
-    display: flex;
-    border-radius: 4px;
-    overflow: hidden;
-    border: 1px solid ${theme.text400};
-  `,
-
   button: styled.css`
     background: ${theme.background300};
     border: 1px solid ${theme.text400};
@@ -152,16 +145,6 @@ export default ({ styled, theme }: StyleOptions) => ({
     &--active {
       background: ${theme.background700};
       border-color: ${theme.text800};
-    }
-
-    .splitButtonGroup & {
-      border-radius: 0;
-      border: none;
-      border-right: 1px solid ${theme.text400};
-
-      &:last-child {
-        border-right: none;
-      }
     }
   `,
 
