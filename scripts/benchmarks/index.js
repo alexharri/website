@@ -94,12 +94,12 @@ function benchmark(name, fn, bitsets, iterations) {
 }
 
 const warmups = [0.5, 0.1, 0.9]; // Perform a few warmups at different densities
+const densities = [0.001, 0.01, 0.05, 0.1, 0.25, 0.5, 0.75, 0.9, 0.99];
 
-const densities = [...warmups, 0.001, 0.01, 0.05, 0.1, 0.25, 0.5, 0.75, 0.9, 0.99];
 const bitsetCount = 50000;
 const iterations = 300;
 
-for (const [i, density] of densities.entries()) {
+for (const [i, density] of [...warmups, ...densities].entries()) {
   const bitsets = generateBitsets(bitsetCount, density);
 
   const results = [
