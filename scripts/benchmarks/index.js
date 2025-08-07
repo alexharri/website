@@ -1,5 +1,3 @@
-const WORD_LOG = 5;
-
 function buildLUT() {
   const lut = new Uint8Array(256);
   for (let i = 0; i < 256; i++) {
