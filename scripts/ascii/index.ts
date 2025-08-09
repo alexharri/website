@@ -130,7 +130,6 @@ class AsciiVectorBuilder {
         fontSize: this.renderer["fontSize"],
         blurRadius: this.renderer["blurRadius"],
         charactersCount: characterVectors.length,
-        buildDate: new Date().toISOString(),
       },
       characters: characterVectors,
     };
