@@ -1,12 +1,8 @@
 import { defaultConfig } from "./default";
-import { denseConfig } from "./dense";
 import { programmingConfig } from "./programming";
-
-export { Config } from "../types";
 
 export const configs = {
   default: defaultConfig,
-  dense: denseConfig,
   programming: programmingConfig,
 } as const;
 

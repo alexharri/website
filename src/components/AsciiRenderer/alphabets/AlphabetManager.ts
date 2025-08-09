@@ -1,10 +1,8 @@
 import defaultAlphabet from "./default.json";
-import denseAlphabet from "./dense.json";
 import programmingAlphabet from "./programming.json";
 
 const alphabets = {
   default: defaultAlphabet,
-  dense: denseAlphabet,
   programming: programmingAlphabet,
 } as const;
 

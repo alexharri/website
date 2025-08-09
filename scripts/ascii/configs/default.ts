@@ -4,23 +4,21 @@ import { Alphabet } from "../alphabets";
 export const defaultConfig: Config = {
   name: "default",
   SAMPLING_CONFIG: {
-    // prettier-ignore
     points: [
-      { x: 0.3, y: 0.23 }, // top-left quadrant
-      { x: 0.7, y: 0.18 }, // top-right quadrant
-      { x: 0.3, y: 0.5 }, // center
-      { x: 0.7, y: 0.5 }, // center
-      { x: 0.3, y: 0.82 }, // bottom-left quadrant
-      { x: 0.7, y: 0.77 }, // bottom-right quadrant
+      { x: 0.3, y: 0.23 },
+      { x: 0.7, y: 0.18 },
+      { x: 0.3, y: 0.5 },
+      { x: 0.7, y: 0.5 },
+      { x: 0.3, y: 0.82 },
+      { x: 0.7, y: 0.77 },
     ],
-    // prettier-ignore
     externalPoints: [
-      { x: -0.3,  y: -0.23 }, // top-left quadrant
-      { x:  1.3,  y: -0.23 }, // top-right quadrant
-      { x: -0.3,  y:  0.5 }, // center
-      { x:  1.3,  y:  0.5 }, // center
-      { x: -0.3,  y:  1.23 }, // bottom-left quadrant
-      { x:  1.3,  y:  1.23 }, // bottom-right quadrant
+      { x: -0.3, y: -0.23 },
+      { x: 1.3, y: -0.23 },
+      { x: -0.3, y: 0.5 },
+      { x: 1.3, y: 0.5 },
+      { x: -0.3, y: 1.23 },
+      { x: 1.3, y: 1.23 },
     ],
     circleRadius: 13.5,
   },
@@ -31,8 +29,8 @@ export const defaultConfig: Config = {
   CUSTOM_FONT_PATHS: {
     "Fira Code": ["/Users/alex/Library/Fonts/FiraCode-Regular.ttf"],
   },
-  GENERATE_DEBUG_IMAGES: false,
-  GENERATE_COMPOSITE_DEBUG_IMAGE: false,
+  GENERATE_DEBUG_IMAGES: true,
+  GENERATE_COMPOSITE_DEBUG_IMAGE: true,
   ALPHABETS: [Alphabet.ASCII],
   MAX_CHARACTERS: null,
   BLUR_RADIUS: 0,

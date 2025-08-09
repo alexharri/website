@@ -244,10 +244,16 @@ async function buildConfigurationVectors(config: Config) {
   );
 
   try {
+    const debugDir = getDebugDirectory(config.name);
     const characterVectors = await builder.buildVectors(
       config.GENERATE_DEBUG_IMAGES,
-      getDebugDirectory(config.name),
+      debugDir,
     );
+
+    // Generate composite debug image if requested
+    if (config.GENERATE_DEBUG_IMAGES && config.GENERATE_COMPOSITE_DEBUG_IMAGE) {
+      AsciiRenderer.createCompositeDebugImage(debugDir);
+    }
 
     // Ensure output directory exists
     ensureOutputDirectory();

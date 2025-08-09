@@ -424,7 +424,7 @@ export class AsciiRenderer {
 
     // Save composite image
     const compositeBuffer = compositeCanvas.toBuffer("image/png");
-    const compositeOutputPath = path.join(debugDir, "composite.png");
+    const compositeOutputPath = path.join(debugDir, "!composite.png");
     fs.writeFileSync(compositeOutputPath, compositeBuffer);
 
     console.log(`Created composite debug image: ${compositeOutputPath}`);
