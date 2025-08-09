@@ -252,26 +252,25 @@ export function generateAsciiChars(
         samplingConfig.circleRadius,
       );
 
-      // Sample directional context for anti-aliasing
-      const contextValues = sampleDirectionalContext(
-        pixelBuffer,
-        canvasWidth,
-        canvasHeight,
-        x,
-        y,
-        charWidth,
-        charHeight,
-        samplingConfig.externalPoints,
-        samplingConfig.circleRadius,
-      );
-
-      // Apply two-stage crunching: directional first, then global
       let samplingVector = rawSamplingVector;
-      samplingVector = crunchSamplingVectorDirectional(
-        rawSamplingVector,
-        contextValues,
-        CONTRAST_EXPONENT_LOCAL,
-      );
+      if (samplingConfig.externalPoints) {
+        const contextValues = sampleDirectionalContext(
+          pixelBuffer,
+          canvasWidth,
+          canvasHeight,
+          x,
+          y,
+          charWidth,
+          charHeight,
+          samplingConfig.externalPoints,
+          samplingConfig.circleRadius,
+        );
+        samplingVector = crunchSamplingVectorDirectional(
+          rawSamplingVector,
+          contextValues,
+          CONTRAST_EXPONENT_LOCAL,
+        );
+      }
       samplingVector = crunchSamplingVector(samplingVector, CONTRAST_EXPONENT_GLOBAL);
 
       // Find best matching character using K-d tree

@@ -12,6 +12,7 @@ export interface Config {
   GENERATE_DEBUG_IMAGES: boolean;
   GENERATE_COMPOSITE_DEBUG_IMAGE: boolean;
   ALPHABETS: Alphabet[];
+  CUSTOM_CHARACTERS?: string; // Optional custom character set
   MAX_CHARACTERS: number | null;
   BLUR_RADIUS: number;
 }

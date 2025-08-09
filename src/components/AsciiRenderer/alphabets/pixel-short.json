@@ -1,0 +1,82 @@
+{
+  "metadata": {
+    "samplingConfig": {
+      "points": [
+        {
+          "x": 0.5,
+          "y": 0.5
+        }
+      ],
+      "circleRadius": 100
+    },
+    "canvasWidth": 48,
+    "canvasHeight": 64,
+    "fontFamily": "Fira Code",
+    "fontSize": 48,
+    "blurRadius": 0,
+    "charactersCount": 10,
+    "buildDate": "2025-08-09T21:27:47.345Z"
+  },
+  "characters": [
+    {
+      "char": " ",
+      "vector": [
+        0
+      ]
+    },
+    {
+      "char": ".",
+      "vector": [
+        0.13248640432952907
+      ]
+    },
+    {
+      "char": ":",
+      "vector": [
+        0.22335556082689773
+      ]
+    },
+    {
+      "char": "-",
+      "vector": [
+        0.15905396976006606
+      ]
+    },
+    {
+      "char": "=",
+      "vector": [
+        0.3077058239547364
+      ]
+    },
+    {
+      "char": "+",
+      "vector": [
+        0.34935821406921264
+      ]
+    },
+    {
+      "char": "*",
+      "vector": [
+        0.47368282333096073
+      ]
+    },
+    {
+      "char": "#",
+      "vector": [
+        0.7538985969443783
+      ]
+    },
+    {
+      "char": "%",
+      "vector": [
+        0.855222582430615
+      ]
+    },
+    {
+      "char": "@",
+      "vector": [
+        1
+      ]
+    }
+  ]
+}

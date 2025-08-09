@@ -1,7 +1,7 @@
 import * as fs from "fs";
 import * as path from "path";
 import { AsciiRenderer, SamplingConfig } from "./ascii-renderer";
-import { getAllConfigs, Config, ConfigName, getConfig } from "./configs";
+import { getAllConfigs, Config, ConfigName, getConfig, validateConfigs } from "./configs";
 import { combineAlphabets, Alphabet } from "./alphabets";
 import { CharacterVector } from "./types";
 import { ALPHABETS_OUTPUT_DIR, ensureOutputDirectory, getOutputFilename, getDebugDirectory } from "./constants";
@@ -188,7 +188,7 @@ class AsciiVectorBuilder {
       metadata: {
         samplingConfig: {
           points: this.samplingConfig.points,
-          externalPoints: this.samplingConfig.externalPoints,
+          ...(this.samplingConfig.externalPoints && { externalPoints: this.samplingConfig.externalPoints }),
           circleRadius: this.samplingConfig.circleRadius,
         },
         canvasWidth: this.renderer["width"],
@@ -245,6 +245,13 @@ async function buildConfigurationVectors(config: Config) {
 
   try {
     const debugDir = getDebugDirectory(config.name);
+    
+    // Clear existing debug images if generating new ones
+    if (config.GENERATE_DEBUG_IMAGES && fs.existsSync(debugDir)) {
+      console.log(`Clearing existing debug images in ${debugDir}`);
+      fs.rmSync(debugDir, { recursive: true, force: true });
+    }
+    
     const characterVectors = await builder.buildVectors(
       config.GENERATE_DEBUG_IMAGES,
       debugDir,
@@ -276,6 +283,14 @@ async function buildConfigurationVectors(config: Config) {
 }
 
 async function main() {
+  // Validate that configs match alphabets
+  try {
+    validateConfigs();
+  } catch (error) {
+    console.error('Configuration validation failed:', error);
+    process.exit(1);
+  }
+
   const args = process.argv.slice(2);
 
   if (args.length > 0) {
