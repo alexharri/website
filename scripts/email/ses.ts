@@ -59,18 +59,45 @@ async function sendBulkEmail(
   fromEmail: string,
   fromName: string,
 ): Promise<void> {
-  const command = new SendBulkTemplatedEmailCommand({
-    Source: `${fromName} <${fromEmail}>`,
-    Template: templateName,
-    Destinations: toEmails.map((email) => ({
-      Destination: {
-        ToAddresses: [email],
-      },
-      ReplacementTemplateData: "{}",
-    })),
-    DefaultTemplateData: "{}",
-  });
-  await sesClient.send(command);
+  // AWS limits to 50 per batch
+  const batches = createBatches(toEmails, 50);
+
+  console.log(`Sending to ${toEmails.length} recipients in ${batches.length} batch(es)`);
+
+  for (let i = 0; i < batches.length; i++) {
+    const batch = batches[i];
+    const start = i * 50 + 1;
+    const end = start + batch.length - 1;
+
+    console.log(`Sending batch ${i + 1}/${batches.length} (emails ${start}-${end})`);
+
+    const command = new SendBulkTemplatedEmailCommand({
+      Source: `${fromName} <${fromEmail}>`,
+      Template: templateName,
+      Destinations: batch.map((email) => ({
+        Destination: {
+          ToAddresses: [email],
+        },
+        ReplacementTemplateData: "{}",
+      })),
+      DefaultTemplateData: "{}",
+    });
+
+    await sesClient.send(command);
+
+    // Avoid hitting rate limit
+    if (i < batches.length - 1) {
+      await new Promise((resolve) => setTimeout(resolve, 2500));
+    }
+  }
+}
+
+function createBatches<T>(array: T[], batchSize: number): T[][] {
+  const batches: T[][] = [];
+  for (let i = 0; i < array.length; i += batchSize) {
+    batches.push(array.slice(i, i + batchSize));
+  }
+  return batches;
 }
 
 async function deleteEmailTemplate(sesClient: SESClient, templateName: string): Promise<void> {

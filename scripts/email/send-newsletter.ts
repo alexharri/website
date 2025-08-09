@@ -75,7 +75,7 @@ async function main() {
     region: REGION,
   });
 
-  console.log("✓ Email sent successfully");
+  console.log("✅ All emails sent successfully");
 }
 
 main().catch(console.error);
