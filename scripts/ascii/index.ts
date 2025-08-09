@@ -1,10 +1,16 @@
 import * as fs from "fs";
 import * as path from "path";
 import { AsciiRenderer, SamplingConfig } from "./ascii-renderer";
-import { getAllConfigs, Config, ConfigName, getConfig, validateConfigs } from "./configs";
+import { getAllConfigs, ConfigName, getConfig, getAvailableConfigNames } from "./configs";
 import { combineAlphabets, Alphabet } from "./alphabets";
-import { CharacterVector } from "./types";
-import { ALPHABETS_OUTPUT_DIR, ensureOutputDirectory, getOutputFilename, getDebugDirectory } from "./constants";
+import { CharacterVector, Config } from "./types";
+import {
+  ALPHABETS_OUTPUT_DIR,
+  ensureOutputDirectory,
+  getOutputFilename,
+  getDebugDirectory,
+} from "./constants";
+import { CharacterSelector } from "./character-selection";
 
 class AsciiVectorBuilder {
   private renderer: AsciiRenderer;
@@ -21,11 +27,11 @@ class AsciiVectorBuilder {
     fontSize: number = 32,
     customFontPaths: { [key: string]: string[] } = {},
     blurRadius: number = 0,
-    maxCharacters: number | null = null,
+    pickMostDistinct: number | null = null,
   ) {
     this.samplingConfig = samplingConfig;
     this.characters = characters;
-    this.maxCharacters = maxCharacters;
+    this.maxCharacters = pickMostDistinct;
     this.renderer = new AsciiRenderer(
       canvasWidth,
       canvasHeight,
@@ -76,7 +82,7 @@ class AsciiVectorBuilder {
     let finalVectors = vectors;
     let finalChars = chars;
     if (this.maxCharacters && vectors.length > this.maxCharacters) {
-      const selected = AsciiVectorBuilder.selectMostDistinctCharacters(
+      const selected = CharacterSelector.selectMostDistinctCharacters(
         vectors,
         chars,
         this.maxCharacters,
@@ -103,81 +109,6 @@ class AsciiVectorBuilder {
     return characterVectors;
   }
 
-  static selectMostDistinctCharacters(
-    vectors: number[][],
-    chars: string[],
-    maxCount: number,
-  ): { vectors: number[][]; chars: string[] } {
-    if (vectors.length <= maxCount) {
-      return { vectors, chars };
-    }
-
-    console.log(
-      `Selecting ${maxCount} most distinct characters from ${vectors.length} candidates...`,
-    );
-
-    // Greedy farthest-first algorithm
-    const selected: number[] = [];
-    const selectedVectors: number[][] = [];
-    const selectedChars: string[] = [];
-
-    // Start with the vector closest to the origin (most "neutral" character)
-    let firstIndex = 0;
-    let minMagnitude = Infinity;
-    for (let i = 0; i < vectors.length; i++) {
-      const magnitude = Math.sqrt(vectors[i].reduce((sum, val) => sum + val * val, 0));
-      if (magnitude < minMagnitude) {
-        minMagnitude = magnitude;
-        firstIndex = i;
-      }
-    }
-
-    selected.push(firstIndex);
-    selectedVectors.push(vectors[firstIndex]);
-    selectedChars.push(chars[firstIndex]);
-
-    // Greedily select remaining characters
-    for (let count = 1; count < maxCount; count++) {
-      let bestIndex = -1;
-      let maxMinDistance = -1;
-
-      // Find the character that has the maximum minimum distance to all selected characters
-      for (let i = 0; i < vectors.length; i++) {
-        if (selected.includes(i)) continue;
-
-        // Calculate minimum distance to any selected character
-        let minDistance = Infinity;
-        for (const selectedVector of selectedVectors) {
-          const distance = this.euclideanDistance(vectors[i], selectedVector);
-          minDistance = Math.min(minDistance, distance);
-        }
-
-        // Keep track of the character with the largest minimum distance
-        if (minDistance > maxMinDistance) {
-          maxMinDistance = minDistance;
-          bestIndex = i;
-        }
-      }
-
-      if (bestIndex !== -1) {
-        selected.push(bestIndex);
-        selectedVectors.push(vectors[bestIndex]);
-        selectedChars.push(chars[bestIndex]);
-      }
-    }
-
-    console.log(
-      `Selected ${selectedChars.length} characters: ${selectedChars.slice(0, 10).join("")}${
-        selectedChars.length > 10 ? "..." : ""
-      }`,
-    );
-    return { vectors: selectedVectors, chars: selectedChars };
-  }
-
-  static euclideanDistance(v1: number[], v2: number[]): number {
-    return Math.sqrt(v1.reduce((sum, val, i) => sum + (val - v2[i]) ** 2, 0));
-  }
-
   // KD tree generation removed - vectors are built at runtime
 
   async saveCharacterVectors(
@@ -188,7 +119,9 @@ class AsciiVectorBuilder {
       metadata: {
         samplingConfig: {
           points: this.samplingConfig.points,
-          ...(this.samplingConfig.externalPoints && { externalPoints: this.samplingConfig.externalPoints }),
+          ...(this.samplingConfig.externalPoints && {
+            externalPoints: this.samplingConfig.externalPoints,
+          }),
           circleRadius: this.samplingConfig.circleRadius,
         },
         canvasWidth: this.renderer["width"],
@@ -224,7 +157,7 @@ async function buildConfigurationVectors(config: Config) {
   console.log(`- Canvas size: ${config.CANVAS_WIDTH}x${config.CANVAS_HEIGHT}`);
   console.log(`- Font: ${config.FONT_FAMILY} ${config.FONT_SIZE}px`);
   console.log(`- Output file: ${getOutputFilename(config.name)}`);
-  console.log(`- Max characters: ${config.MAX_CHARACTERS || "unlimited"}`);
+  console.log(`- Pick most distinct: ${config.PICK_MOST_DISTINCT || "disabled"}`);
   console.log(`- Generate debug images: ${config.GENERATE_DEBUG_IMAGES}`);
   if (config.GENERATE_DEBUG_IMAGES) {
     console.log(`- Debug directory: ${getDebugDirectory(config.name)}`);
@@ -240,22 +173,19 @@ async function buildConfigurationVectors(config: Config) {
     config.FONT_SIZE,
     config.CUSTOM_FONT_PATHS,
     config.BLUR_RADIUS,
-    config.MAX_CHARACTERS,
+    config.PICK_MOST_DISTINCT,
   );
 
   try {
     const debugDir = getDebugDirectory(config.name);
-    
+
     // Clear existing debug images if generating new ones
     if (config.GENERATE_DEBUG_IMAGES && fs.existsSync(debugDir)) {
       console.log(`Clearing existing debug images in ${debugDir}`);
       fs.rmSync(debugDir, { recursive: true, force: true });
     }
-    
-    const characterVectors = await builder.buildVectors(
-      config.GENERATE_DEBUG_IMAGES,
-      debugDir,
-    );
+
+    const characterVectors = await builder.buildVectors(config.GENERATE_DEBUG_IMAGES, debugDir);
 
     // Generate composite debug image if requested
     if (config.GENERATE_DEBUG_IMAGES && config.GENERATE_COMPOSITE_DEBUG_IMAGE) {
@@ -264,7 +194,7 @@ async function buildConfigurationVectors(config: Config) {
 
     // Ensure output directory exists
     ensureOutputDirectory();
-    
+
     // Construct full output path
     const outputPath = path.join(ALPHABETS_OUTPUT_DIR, getOutputFilename(config.name));
 
@@ -282,15 +212,49 @@ async function buildConfigurationVectors(config: Config) {
   }
 }
 
-async function main() {
-  // Validate that configs match alphabets
-  try {
-    validateConfigs();
-  } catch (error) {
-    console.error('Configuration validation failed:', error);
-    process.exit(1);
-  }
+async function generateAlphabetManager() {
+  const configNames = getAvailableConfigNames();
+  
+  // Generate imports
+  const imports = configNames.map(name => 
+    `import ${name.replace(/-/g, '')}Alphabet from "./${name}.json";`
+  ).join('\n');
+  
+  // Generate alphabets object
+  const alphabetEntries = configNames.map(name => 
+    `  "${name}": ${name.replace(/-/g, '')}Alphabet,`
+  ).join('\n');
+  
+  const managerContent = `// This file is auto-generated by scripts/ascii/index.ts
+// Do not edit manually - your changes will be overwritten
 
+${imports}
+
+const alphabets = {
+${alphabetEntries}
+} as const;
+
+export type AlphabetName = keyof typeof alphabets;
+
+export function getAvailableAlphabets(): AlphabetName[] {
+  return Object.keys(alphabets) as AlphabetName[];
+}
+
+export function getAlphabetCharacterVectors(name: AlphabetName) {
+  return alphabets[name].characters;
+}
+
+export function getAlphabetMetadata(name: AlphabetName) {
+  return alphabets[name].metadata;
+}
+`;
+
+  const managerPath = path.resolve(__dirname, "../../src/components/AsciiRenderer/alphabets/AlphabetManager.ts");
+  fs.writeFileSync(managerPath, managerContent);
+  console.log(`Generated AlphabetManager.ts with ${configNames.length} alphabets`);
+}
+
+async function main() {
   const args = process.argv.slice(2);
 
   if (args.length > 0) {
@@ -323,6 +287,9 @@ async function main() {
   }
 
   console.log("\n🎉 All configurations built successfully!");
+  
+  // Generate AlphabetManager.ts with all available alphabets
+  await generateAlphabetManager();
 }
 
 if (require.main === module) {

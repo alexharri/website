@@ -1,8 +1,8 @@
 import { Config } from "../types";
 import { Alphabet } from "../alphabets";
 
-export const programmingConfig: Config = {
-  name: "programming",
+export const ascii60Config: Config = {
+  name: "ascii-60",
   SAMPLING_CONFIG: {
     points: [
       { x: 0.3, y: 0.23 },
@@ -29,9 +29,9 @@ export const programmingConfig: Config = {
   CUSTOM_FONT_PATHS: {
     "Fira Code": ["/Users/alex/Library/Fonts/FiraCode-Regular.ttf"],
   },
-  GENERATE_DEBUG_IMAGES: false,
-  GENERATE_COMPOSITE_DEBUG_IMAGE: false,
-  ALPHABETS: [Alphabet.ASCII, Alphabet.PROGRAMMING, Alphabet.SYMBOLS],
-  PICK_MOST_DISTINCT: 80,
+  GENERATE_DEBUG_IMAGES: true,
+  GENERATE_COMPOSITE_DEBUG_IMAGE: true,
+  ALPHABETS: [Alphabet.ASCII],
+  PICK_MOST_DISTINCT: 60,
   BLUR_RADIUS: 0,
 };

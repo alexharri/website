@@ -1,18 +1,19 @@
 import { defaultConfig } from "./default";
+import { ascii60Config } from "./ascii-60";
 import { programmingConfig } from "./programming";
 import { pixelConfig } from "./pixel";
 import { pixelShortConfig } from "./pixel-short";
-import { getAvailableAlphabets, AlphabetName } from "../../../src/components/AsciiRenderer/alphabets/AlphabetManager";
 
 export const configs = {
   default: defaultConfig,
+  "ascii-60": ascii60Config,
   programming: programmingConfig,
   pixel: pixelConfig,
   "pixel-short": pixelShortConfig,
 } as const;
 
-// Derive config names from AlphabetManager - they should match
-export type ConfigName = AlphabetName;
+// Configs are the single source of truth
+export type ConfigName = keyof typeof configs;
 
 export function getConfig(name: ConfigName) {
   return configs[name];
@@ -23,22 +24,5 @@ export function getAllConfigs() {
 }
 
 export function getAvailableConfigNames(): ConfigName[] {
-  return getAvailableAlphabets();
-}
-
-// Validation function to ensure configs match alphabets
-export function validateConfigs() {
-  const availableAlphabets = new Set(getAvailableAlphabets());
-  const configNames = new Set(Object.keys(configs));
-  
-  const missingConfigs = [...availableAlphabets].filter(name => !configNames.has(name));
-  const extraConfigs = [...configNames].filter(name => !availableAlphabets.has(name as AlphabetName));
-  
-  if (missingConfigs.length > 0 || extraConfigs.length > 0) {
-    throw new Error(
-      `Config/Alphabet mismatch:\n` +
-      `Missing configs: ${missingConfigs.join(', ')}\n` +
-      `Extra configs: ${extraConfigs.join(', ')}`
-    );
-  }
+  return Object.keys(configs) as ConfigName[];
 }

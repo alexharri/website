@@ -32,6 +32,6 @@ export const defaultConfig: Config = {
   GENERATE_DEBUG_IMAGES: true,
   GENERATE_COMPOSITE_DEBUG_IMAGE: true,
   ALPHABETS: [Alphabet.ASCII],
-  MAX_CHARACTERS: null,
+  PICK_MOST_DISTINCT: null,
   BLUR_RADIUS: 0,
 };

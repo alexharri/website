@@ -358,12 +358,23 @@ export class AsciiRenderer {
 
     // Save the debug image
     const charCode = char.charCodeAt(0);
-    const filename =
-      char === " "
-        ? "space.png"
-        : char.match(/[a-zA-Z0-9]/)
-        ? `${char}.png`
-        : `char_${charCode}.png`;
+    let filename: string;
+    
+    if (char === " ") {
+      filename = "space.png";
+    } else if (char.match(/[a-z]/)) {
+      // Lowercase letters
+      filename = `${char}_lower.png`;
+    } else if (char.match(/[A-Z]/)) {
+      // Uppercase letters
+      filename = `${char}_upper.png`;
+    } else if (char.match(/[0-9]/)) {
+      // Numbers
+      filename = `${char}_digit.png`;
+    } else {
+      // Special characters: use char code
+      filename = `char_${charCode}.png`;
+    }
 
     const outputPath = path.join(outputDir, filename);
     const buffer = debugCanvas.toBuffer("image/png");
@@ -381,6 +392,23 @@ export class AsciiRenderer {
       console.warn("No debug images found to combine");
       return;
     }
+
+    // Sort files to display characters in logical order
+    files.sort((a, b) => {
+      // Extract character from filename for sorting
+      const getChar = (filename: string) => {
+        if (filename === "space.png") return " ";
+        if (filename.startsWith("char_")) return String.fromCharCode(parseInt(filename.slice(5, -4)));
+        if (filename.includes("_")) return filename.split("_")[0];
+        return filename.replace(".png", "");
+      };
+      
+      const charA = getChar(a);
+      const charB = getChar(b);
+      
+      // Sort by ASCII code for consistent ordering
+      return charA.charCodeAt(0) - charB.charCodeAt(0);
+    });
 
     // Calculate grid dimensions
     const cols = Math.ceil(Math.sqrt(files.length));
