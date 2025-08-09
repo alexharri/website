@@ -1,5 +1,5 @@
 import dynamic from "next/dynamic";
-import { createContext, useContext, useEffect, useRef } from "react";
+import React, { createContext, useContext, useEffect, useRef } from "react";
 import { useVisible } from "../utils/hooks/useVisible";
 import { LoadThreeContext } from "./Components/ThreeProvider";
 import { SceneSkeleton } from "./SceneSkeleton";
@@ -15,8 +15,13 @@ export interface SceneProps {
   xRotation?: number;
   usesVariables?: boolean;
   zoom?: number;
+  ascii?: boolean;
   yOffset?: number;
+  canvasRef?: React.RefObject<HTMLCanvasElement>;
   errorLoadingThreeJs: boolean;
+  onFrame?: (buffer: Uint8Array) => void;
+  orbitControlsRef?: React.RefObject<any>;
+  orbitControlsTargetRef?: React.RefObject<HTMLDivElement>;
 }
 
 export const ScenePropsContext = createContext<SceneProps>(null!);
@@ -82,9 +87,10 @@ export const threeJsScenes: Partial<Record<string, React.ComponentType<SceneProp
   
   "simplex": dynamic(() => import("./scenes/simplex"), { loading }),
   "simplex-point-array": dynamic(() => import("./scenes/simplex-point-array"), { loading }),
-  
 
   "vr-controller": dynamic(() => import("./scenes/vr-controller"), { loading }),
+
+  "cube": dynamic(() => import("./scenes/cube"), { loading })
 };
 
 interface Props {
@@ -96,10 +102,30 @@ interface Props {
   zoom?: number;
   yOffset?: number;
   xRotation?: number;
+  ascii?: boolean;
+  canvasRef?: React.RefObject<HTMLCanvasElement>;
+  onReady?: () => void;
+  onFrame?: (buffer: Uint8Array) => void;
+  orbitControlsRef?: React.RefObject<any>;
+  orbitControlsTargetRef?: React.RefObject<HTMLDivElement>;
 }
 
 export const Scene: React.FC<Props> = (props) => {
-  const { scene, height, usesVariables, angle, zoom, yOffset, autoRotate, xRotation } = props;
+  const {
+    scene,
+    height,
+    usesVariables,
+    angle,
+    zoom,
+    yOffset,
+    autoRotate,
+    xRotation,
+    ascii,
+    canvasRef,
+    onFrame,
+    orbitControlsRef,
+    orbitControlsTargetRef,
+  } = props;
   const containerRef = useRef<HTMLDivElement>(null);
   const visible = useVisible(containerRef, "350px");
   const render = useVisible(containerRef, "50px");
@@ -132,6 +158,11 @@ export const Scene: React.FC<Props> = (props) => {
     yOffset,
     zoom,
     xRotation,
+    ascii,
+    canvasRef,
+    onFrame,
+    orbitControlsRef,
+    orbitControlsTargetRef,
     errorLoadingThreeJs: error,
   };
 

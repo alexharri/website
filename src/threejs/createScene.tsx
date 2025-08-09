@@ -7,6 +7,7 @@ import { useDidUpdate } from "../utils/hooks/useDidUpdate";
 import { DreiContext, FiberContext, ThreeContext } from "./Components/ThreeProvider";
 import { useSceneHeight } from "./hooks";
 import { SceneProps } from "./scenes";
+import { FrameReader } from "./Components/FrameReader";
 
 const FADE_HEIGHT = 80;
 
@@ -77,6 +78,10 @@ export function createScene<V extends VariablesOptions>(
     yOffset = 0,
     xRotation = 0,
     zoom = 1,
+    canvasRef: externalCanvasRef,
+    onFrame,
+    orbitControlsRef: externalOrbitControlsRef,
+    orbitControlsTargetRef,
   }: SceneProps) => {
     const THREE = useContext(ThreeContext);
     const DREI = useContext(DreiContext);
@@ -146,7 +151,7 @@ export function createScene<V extends VariablesOptions>(
       setVariables((obj) => ({ ...obj, [key]: value }));
     };
 
-    const orbitRef = useRef<any>(null);
+    const orbitRef = externalOrbitControlsRef || useRef<any>(null);
 
     const rotationCallbacks = useRef(new Set<(vec: THREE.Camera) => void>());
 
@@ -171,14 +176,24 @@ export function createScene<V extends VariablesOptions>(
     const { height, scale } = useSceneHeight(targetHeight);
     const fadeHeight = Math.round(FADE_HEIGHT * scale);
 
+    const internalCanvasRef = useRef<HTMLCanvasElement>(null);
+    const canvasRef = externalCanvasRef || internalCanvasRef;
+
     return (
       <>
         <div style={{ position: "relative", height }}>
-          <div className={s("fade", { upper: true })} style={{ height: fadeHeight }} />
-          <div className={s("fade", { lower: true })} style={{ height: fadeHeight }} />
+          {/* <div className={s("fade", { upper: true })} style={{ height: fadeHeight }} />
+          <div className={s("fade", { lower: true })} style={{ height: fadeHeight }} /> */}
 
           {visible && (
             <FIBER.Canvas
+              shadows
+              onCreated={({ gl }) => {
+                gl.shadowMap.enabled = true;
+                gl.shadowMap.type = THREE.PCFSoftShadowMap;
+                canvasRef.current?.setAttribute("data-ready", "true");
+              }}
+              gl={{ preserveDrawingBuffer: true }}
               style={{
                 height,
                 userSelect: "none",
@@ -189,8 +204,10 @@ export function createScene<V extends VariablesOptions>(
               onMouseDown={() => setDown(true)}
               onMouseUp={() => setDown(false)}
               resize={{ scroll: false }}
+              ref={canvasRef}
             >
-              <ambientLight intensity={Math.PI / 2} />
+              {onFrame && <FrameReader onFrame={onFrame} />}
+              {/* <ambientLight intensity={Math.PI / 2} />
               <spotLight
                 position={[10, 10, 10]}
                 angle={0.15}
@@ -198,7 +215,7 @@ export function createScene<V extends VariablesOptions>(
                 decay={0}
                 intensity={Math.PI}
               />
-              <pointLight position={[-10, -10, -10]} decay={0} intensity={Math.PI} />
+              <pointLight position={[-10, -10, -10]} decay={0} intensity={Math.PI} /> */}
 
               <DREI.OrbitControls
                 rotateSpeed={0.3}
@@ -208,6 +225,7 @@ export function createScene<V extends VariablesOptions>(
                 enablePan={false}
                 enableZoom={false}
                 ref={orbitRef}
+                domElement={orbitControlsTargetRef?.current || undefined}
               />
 
               <mesh position={[0, yOffset, 0]}>
