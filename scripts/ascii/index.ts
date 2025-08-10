@@ -115,6 +115,15 @@ class AsciiVectorBuilder {
     characterVectors: CharacterVector[],
     filename: string = "character-vectors.json",
   ): Promise<void> {
+    const canvasWidth = this.renderer["width"];
+    const canvasHeight = this.renderer["height"];
+    const fontSize = this.renderer["fontSize"];
+    
+    // Calculate character dimensions relative to font size
+    const width = canvasWidth / fontSize;
+    const height = canvasHeight / fontSize;
+    const circleRadius = this.samplingConfig.circleRadius / fontSize;
+    
     const data = {
       metadata: {
         samplingConfig: {
@@ -122,14 +131,11 @@ class AsciiVectorBuilder {
           ...(this.samplingConfig.externalPoints && {
             externalPoints: this.samplingConfig.externalPoints,
           }),
-          circleRadius: this.samplingConfig.circleRadius,
+          circleRadius: circleRadius,
         },
-        canvasWidth: this.renderer["width"],
-        canvasHeight: this.renderer["height"],
-        fontFamily: this.renderer["fontFamily"],
-        fontSize: this.renderer["fontSize"],
-        blurRadius: this.renderer["blurRadius"],
-        charactersCount: characterVectors.length,
+        fontSize: 1,
+        width: width,
+        height: height,
       },
       characters: characterVectors,
     };

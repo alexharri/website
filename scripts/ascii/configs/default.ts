@@ -22,8 +22,8 @@ export const defaultConfig: Config = {
     ],
     circleRadius: 13.5,
   },
-  CANVAS_WIDTH: 48,
-  CANVAS_HEIGHT: 64,
+  CANVAS_WIDTH: 40,
+  CANVAS_HEIGHT: 40,
   FONT_FAMILY: "Fira Code",
   FONT_SIZE: 48,
   CUSTOM_FONT_PATHS: {

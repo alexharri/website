@@ -53,14 +53,11 @@
           "y": 1.23
         }
       ],
-      "circleRadius": 13.5
+      "circleRadius": 0.28125
     },
-    "canvasWidth": 48,
-    "canvasHeight": 64,
-    "fontFamily": "Fira Code",
-    "fontSize": 48,
-    "blurRadius": 0,
-    "charactersCount": 60
+    "fontSize": 1,
+    "width": 1,
+    "height": 1.3333333333333333
   },
   "characters": [
     {

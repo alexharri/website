@@ -4,6 +4,7 @@ import { StyleOptions } from "../../utils/styles";
 export const AsciiRendererStyles = ({ styled }: StyleOptions) => ({
   container: styled.css`
     pointer-events: none;
+    position: relative;
   `,
 
   pre: styled.css`
@@ -15,5 +16,23 @@ export const AsciiRendererStyles = ({ styled }: StyleOptions) => ({
     line-height: 1;
     color: rgb(103, 80, 179);
     font-variant-ligatures: none;
+  `,
+
+  visualizationLayer: styled.css`
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    pointer-events: none;
+    z-index: 1;
+  `,
+
+  samplingPoint: styled.css`
+    position: absolute;
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
   `,
 });

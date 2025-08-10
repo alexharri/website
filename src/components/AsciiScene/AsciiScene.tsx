@@ -20,6 +20,9 @@ interface AsciiSceneProps {
   xRotation?: number;
   showControls?: boolean;
   alphabet?: AlphabetName;
+  fontSize?: number;
+  showSamplingPoints?: boolean;
+  showExternalPoints?: boolean;
 }
 
 export const AsciiScene: React.FC<AsciiSceneProps> = ({
@@ -32,6 +35,9 @@ export const AsciiScene: React.FC<AsciiSceneProps> = ({
   yOffset,
   xRotation,
   showControls = true,
+  fontSize,
+  showSamplingPoints = false,
+  showExternalPoints = false,
 }) => {
   const s = useStyles(AsciiSceneStyles);
   const [viewMode, setViewMode] = useState<"ascii" | "split" | "canvas">("ascii");
@@ -184,6 +190,9 @@ export const AsciiScene: React.FC<AsciiSceneProps> = ({
                 onFrameRef={onFrameRef}
                 canvasRef={canvasRef}
                 alphabet={selectedAlphabet}
+                fontSize={fontSize}
+                showSamplingPoints={showSamplingPoints}
+                showExternalPoints={showExternalPoints}
               />
             </div>
           </div>
