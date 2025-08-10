@@ -11,7 +11,7 @@ interface Props {
   fontSize?: number;
   showSamplingPoints?: boolean;
   showExternalPoints?: boolean;
-  widthMultiplier?: number;
+  characterWidthPx?: number;
 }
 
 export function AsciiRenderer(props: Props) {
@@ -50,7 +50,8 @@ export function AsciiRenderer(props: Props) {
       const fontSize = props.fontSize || 14;
       const baseCharWidth = fontSize; // 1em in pixels
       const baseCharHeight = fontSize; // 1em in pixels
-      const widthMultiplier = props.widthMultiplier ?? 1;
+      const characterWidthPx = props.characterWidthPx ?? 10;
+      const widthMultiplier = characterWidthPx / baseCharWidth;
 
       charDimensions = {
         width: baseCharWidth * tempResult.metadata.width * widthMultiplier,
@@ -109,7 +110,7 @@ export function AsciiRenderer(props: Props) {
         setVisualizationData(null);
       }
     };
-  }, [props.alphabet, props.showSamplingPoints, props.showExternalPoints, props.fontSize, props.widthMultiplier]);
+  }, [props.alphabet, props.showSamplingPoints, props.showExternalPoints, props.fontSize, props.characterWidthPx]);
 
   return (
     <div
