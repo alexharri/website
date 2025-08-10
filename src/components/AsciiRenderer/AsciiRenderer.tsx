@@ -11,6 +11,7 @@ interface Props {
   fontSize?: number;
   showSamplingPoints?: boolean;
   showExternalPoints?: boolean;
+  widthMultiplier?: number;
 }
 
 export function AsciiRenderer(props: Props) {
@@ -18,13 +19,6 @@ export function AsciiRenderer(props: Props) {
   const s = useStyles(AsciiRendererStyles);
   const preRef = useRef<HTMLPreElement>(null);
   const [visualizationData, setVisualizationData] = useState<VisualizationData | null>(null);
-  const [spacingMetadata, setSpacingMetadata] = useState<{
-    letterSpacing: string;
-    lineHeight: number;
-  } | null>(null);
-  const [currentMetadata, setCurrentMetadata] = useState<{ width: number; height: number } | null>(
-    null,
-  );
 
   useEffect(() => {
     let charDimensions: { width: number; height: number } | null = null;
@@ -56,9 +50,10 @@ export function AsciiRenderer(props: Props) {
       const fontSize = props.fontSize || 14;
       const baseCharWidth = fontSize; // 1em in pixels
       const baseCharHeight = fontSize; // 1em in pixels
+      const widthMultiplier = props.widthMultiplier ?? 1;
 
       charDimensions = {
-        width: baseCharWidth * tempResult.metadata.width,
+        width: baseCharWidth * tempResult.metadata.width * widthMultiplier,
         height: baseCharHeight * tempResult.metadata.height,
       };
 
@@ -78,9 +73,9 @@ export function AsciiRenderer(props: Props) {
       }
 
       // Use the actual rendered character dimensions for grid calculation
-      // Width: account for letterSpacing (0.6em base + spacing)
+      // Width: account for letterSpacing and width multiplier
       // Height: use actual line height from metadata
-      const renderedCharWidth = baseCharWidth; // We'll handle spacing in CSS
+      const renderedCharWidth = baseCharWidth * widthMultiplier;
       const renderedCharHeight = baseCharHeight * tempResult.metadata.height;
 
       const W = Math.floor(effectiveWidth / renderedCharWidth);
@@ -98,23 +93,23 @@ export function AsciiRenderer(props: Props) {
 
       preEl.textContent = result.ascii;
 
-      // Calculate CSS spacing from character dimensions
-      // Assuming monospace characters are ~0.6em wide by default
-      // To make them occupy metadata.width * fontSize, we need additional spacing
+      // Set CSS properties directly
       const actualMonospaceWidth = 0.6; // actual width of monospace characters in em
-      const letterSpacing = `${result.metadata.width - actualMonospaceWidth}em`;
-      // lineHeight should be fontSize * height
+      const adjustedWidth = result.metadata.width * widthMultiplier;
+      const letterSpacing = `${adjustedWidth - actualMonospaceWidth}em`;
       const lineHeight = result.metadata.height;
 
-      setSpacingMetadata({ letterSpacing, lineHeight });
-
+      preEl.style.letterSpacing = letterSpacing;
+      preEl.style.lineHeight = lineHeight.toString();
+      preEl.style.fontSize = props.fontSize ? `${props.fontSize}px` : "14px";
+      
       if (enableVisualization && result.visualization) {
         setVisualizationData(result.visualization);
       } else {
         setVisualizationData(null);
       }
     };
-  }, [props.alphabet, props.showSamplingPoints, props.showExternalPoints, props.fontSize]);
+  }, [props.alphabet, props.showSamplingPoints, props.showExternalPoints, props.fontSize, props.widthMultiplier]);
 
   return (
     <div
@@ -126,11 +121,6 @@ export function AsciiRenderer(props: Props) {
       <pre
         ref={preRef}
         className={s("pre")}
-        style={{
-          fontSize: props.fontSize ? `${props.fontSize}px` : "14px",
-          letterSpacing: spacingMetadata ? spacingMetadata.letterSpacing : undefined,
-          lineHeight: spacingMetadata ? spacingMetadata.lineHeight : undefined,
-        }}
       />
       {visualizationData && (
         <div className={s("visualizationLayer")}>

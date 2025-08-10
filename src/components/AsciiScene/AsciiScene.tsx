@@ -45,6 +45,7 @@ export const AsciiScene: React.FC<AsciiSceneProps> = ({
   const [isDragging, setIsDragging] = useState(false);
   const [selectedAlphabet, setSelectedAlphabet] = useState<AlphabetName>("default");
   const [availableAlphabets] = useState<AlphabetName[]>(getAvailableAlphabets());
+  const [widthMultiplier, setWidthMultiplier] = useState(1);
 
   const viewportWidth = useViewportWidth();
   let width: number;
@@ -134,6 +135,36 @@ export const AsciiScene: React.FC<AsciiSceneProps> = ({
               </option>
             ))}
           </select>
+
+          <div className={s("sliderGroup")}>
+            <span className={s("label")}>Character Width:</span>
+            <div className={s("sliderContainer")}>
+              <button
+                className={s("sliderButton")}
+                onClick={() => setWidthMultiplier(Math.max(0.1, widthMultiplier - 0.1))}
+                disabled={widthMultiplier <= 0.1}
+              >
+                −
+              </button>
+              <input
+                type="range"
+                min="0.1"
+                max="3"
+                step="0.1"
+                value={widthMultiplier}
+                onChange={(e) => setWidthMultiplier(Number(e.target.value))}
+                className={s("slider")}
+              />
+              <button
+                className={s("sliderButton")}
+                onClick={() => setWidthMultiplier(Math.min(3, widthMultiplier + 0.1))}
+                disabled={widthMultiplier >= 3}
+              >
+                +
+              </button>
+              <span className={s("sliderValue")}>{widthMultiplier.toFixed(1)}×</span>
+            </div>
+          </div>
         </div>
       )}
 
@@ -193,6 +224,7 @@ export const AsciiScene: React.FC<AsciiSceneProps> = ({
                 fontSize={fontSize}
                 showSamplingPoints={showSamplingPoints}
                 showExternalPoints={showExternalPoints}
+                widthMultiplier={widthMultiplier}
               />
             </div>
           </div>

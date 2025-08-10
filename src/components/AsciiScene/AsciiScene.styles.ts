@@ -206,4 +206,42 @@ export default ({ styled, theme }: StyleOptions) => ({
     min-width: 30px;
     text-align: center;
   `,
+
+  sliderGroup: styled.css`
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    align-items: center;
+  `,
+
+  sliderContainer: styled.css`
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  `,
+
+  sliderButton: styled.css`
+    background: ${theme.background300};
+    border: 1px solid ${theme.text400};
+    color: ${theme.text};
+    width: 24px;
+    height: 24px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    
+    &:hover:not(:disabled) {
+      background: ${theme.background500};
+      border-color: ${theme.text700};
+    }
+    
+    &:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+  `,
 });
