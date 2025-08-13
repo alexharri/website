@@ -11,8 +11,8 @@ interface Props {
   fontSize?: number;
   showSamplingPoints?: boolean;
   showExternalPoints?: boolean;
-  characterWidthPx?: number;
-  characterHeightPx?: number;
+  characterWidthMultiplier?: number;
+  characterHeightMultiplier?: number;
 }
 
 export function AsciiRenderer(props: Props) {
@@ -22,8 +22,6 @@ export function AsciiRenderer(props: Props) {
   const [visualizationData, setVisualizationData] = useState<VisualizationData | null>(null);
 
   useEffect(() => {
-    let charDimensions: { width: number; height: number } | null = null;
-
     props.onFrameRef.current = function onFrame(pixelBuffer: Uint8Array): void {
       const container = ref.current;
       const preEl = preRef.current;
@@ -35,55 +33,45 @@ export function AsciiRenderer(props: Props) {
       const containerRect = container?.getBoundingClientRect();
       if (!containerRect) return;
 
-      // Get metadata first to calculate character dimensions
       const enableVisualization = props.showSamplingPoints || props.showExternalPoints;
       const tempResult = generateAsciiChars(
         pixelBuffer,
         canvas.width,
         canvas.height,
-        1, // temporary values to get metadata
+        1,
         1,
         props.alphabet,
-        false, // don't need visualization for metadata
+        false,
       );
 
-      // Calculate character dimensions from metadata and fontSize
       const fontSize = props.fontSize || 14;
-      const baseCharWidth = fontSize; // 1em in pixels
-      const baseCharHeight = fontSize; // 1em in pixels
-      const characterWidthPx = props.characterWidthPx ?? 10;
-      const characterHeightPx = props.characterHeightPx ?? 14;
-      const widthMultiplier = characterWidthPx / baseCharWidth;
-      const heightMultiplier = characterHeightPx / baseCharHeight;
+      const baseCharWidth = fontSize;
+      const baseCharHeight = fontSize;
+      const characterWidthMultiplier = props.characterWidthMultiplier ?? 0.7;
+      const characterHeightMultiplier = props.characterHeightMultiplier ?? 1.0;
+      const widthMultiplier = characterWidthMultiplier;
+      const heightMultiplier = characterHeightMultiplier;
 
-      charDimensions = {
-        width: baseCharWidth * tempResult.metadata.width * widthMultiplier,
-        height: baseCharHeight * tempResult.metadata.height * heightMultiplier,
-      };
-
-      // Calculate how many "standard" characters would fit, maintaining canvas aspect ratio
       const canvasAspectRatio = canvas.width / canvas.height;
       const containerAspectRatio = containerRect.width / containerRect.height;
 
       let effectiveWidth, effectiveHeight;
       if (containerAspectRatio > canvasAspectRatio) {
-        // Container is wider than canvas aspect ratio
         effectiveHeight = containerRect.height;
         effectiveWidth = effectiveHeight * canvasAspectRatio;
       } else {
-        // Container is taller than canvas aspect ratio
         effectiveWidth = containerRect.width;
         effectiveHeight = effectiveWidth / canvasAspectRatio;
       }
 
-      // Use the actual rendered character dimensions for grid calculation
-      // Width: account for letterSpacing and width multiplier
-      // Height: use actual line height from metadata and height multiplier
       const renderedCharWidth = baseCharWidth * widthMultiplier;
       const renderedCharHeight = baseCharHeight * tempResult.metadata.height * heightMultiplier;
 
-      const W = Math.floor(effectiveWidth / renderedCharWidth);
-      const H = Math.floor(effectiveHeight / renderedCharHeight);
+      let W = Math.floor(effectiveWidth / renderedCharWidth);
+      let H = Math.floor(effectiveHeight / renderedCharHeight);
+
+      if (W % 2 === 1) W += 1;
+      if (H % 2 === 1) H += 1;
 
       const result = generateAsciiChars(
         pixelBuffer,
@@ -97,8 +85,7 @@ export function AsciiRenderer(props: Props) {
 
       preEl.textContent = result.ascii;
 
-      // Set CSS properties directly
-      const actualMonospaceWidth = 0.6; // actual width of monospace characters in em
+      const actualMonospaceWidth = 0.6;
       const adjustedWidth = result.metadata.width * widthMultiplier;
       const adjustedHeight = result.metadata.height * heightMultiplier;
       const letterSpacing = `${adjustedWidth - actualMonospaceWidth}em`;
@@ -107,14 +94,35 @@ export function AsciiRenderer(props: Props) {
       preEl.style.letterSpacing = letterSpacing;
       preEl.style.lineHeight = lineHeight.toString();
       preEl.style.fontSize = props.fontSize ? `${props.fontSize}px` : "14px";
-      
+
+      const middleCharX = (W - 1) / 2;
+      const middleCharY = (H - 1) / 2;
+
+      const middleCharPixelX = middleCharX * adjustedWidth * fontSize;
+      const middleCharPixelY = middleCharY * adjustedHeight * fontSize;
+
+      const containerCenterX = containerRect.width / 2;
+      const containerCenterY = containerRect.height / 2;
+
+      const horizontalOffset = containerCenterX - middleCharPixelX;
+      const verticalOffset = containerCenterY - middleCharPixelY;
+
+      preEl.style.transform = `translate(${horizontalOffset}px, ${verticalOffset}px)`;
+
       if (enableVisualization && result.visualization) {
         setVisualizationData(result.visualization);
       } else {
         setVisualizationData(null);
       }
     };
-  }, [props.alphabet, props.showSamplingPoints, props.showExternalPoints, props.fontSize, props.characterWidthPx, props.characterHeightPx]);
+  }, [
+    props.alphabet,
+    props.showSamplingPoints,
+    props.showExternalPoints,
+    props.fontSize,
+    props.characterWidthMultiplier,
+    props.characterHeightMultiplier,
+  ]);
 
   return (
     <div
@@ -123,10 +131,7 @@ export function AsciiRenderer(props: Props) {
       style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0 }}
       className={s("container")}
     >
-      <pre
-        ref={preRef}
-        className={s("pre")}
-      />
+      <pre ref={preRef} className={s("pre")} />
       {visualizationData && (
         <div className={s("visualizationLayer")}>
           {visualizationData.samplingPoints.map((point, index) => {

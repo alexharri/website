@@ -8,4 +8,4 @@ title: "Canvas to ASCII renderer"
 
 Here's the same scene with a larger font size and visualization enabled to show how the vector sampling works:
 
-<AsciiScene scene="cube" height={650} autoRotate zoom={3} fontSize={100} showSamplingPoints showExternalPoints />
+{null && <AsciiScene scene="cube" height={650} autoRotate zoom={3} fontSize={100} showSamplingPoints showExternalPoints />}
