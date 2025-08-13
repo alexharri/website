@@ -3,7 +3,7 @@ import { StyleOptions } from "../../utils/styles";
 
 export const AsciiRendererStyles = ({ styled }: StyleOptions) => ({
   container: styled.css`
-    pointer-events: none;
+    pointer-events: auto;
     position: relative;
   `,
 

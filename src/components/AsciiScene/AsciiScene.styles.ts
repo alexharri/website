@@ -233,12 +233,12 @@ export default ({ styled, theme }: StyleOptions) => ({
     display: flex;
     align-items: center;
     justify-content: center;
-    
+
     &:hover:not(:disabled) {
       background: ${theme.background500};
       border-color: ${theme.text700};
     }
-    
+
     &:disabled {
       opacity: 0.5;
       cursor: not-allowed;

@@ -1,23 +1,16 @@
 import React, { useRef, useState } from "react";
-import { Scene } from "../../threejs/scenes";
 import { useStyles } from "../../utils/styles";
 import { AsciiRenderer } from "../AsciiRenderer";
 import { AlphabetName, getAvailableAlphabets } from "../AsciiRenderer/alphabets/AlphabetManager";
 import AsciiSceneStyles, { BREAKPOINT, CONTENT_WIDTH } from "./AsciiScene.styles";
-import { useSceneHeight } from "../../threejs/hooks";
 import { clamp } from "../../math/math";
 import { useViewportWidth } from "../../utils/hooks/useViewportWidth";
 import { SegmentedControl } from "../SegmentedControl";
+import { CanvasProvider, useCanvasContext } from "../../contexts/CanvasContext";
 
 interface AsciiSceneProps {
-  scene: string;
+  children: React.ReactNode;
   height: number;
-  angle?: number;
-  autoRotate?: boolean;
-  usesVariables?: boolean;
-  zoom?: number;
-  yOffset?: number;
-  xRotation?: number;
   showControls?: boolean;
   alphabet?: AlphabetName;
   fontSize?: number;
@@ -25,20 +18,31 @@ interface AsciiSceneProps {
   showExternalPoints?: boolean;
 }
 
-export const AsciiScene: React.FC<AsciiSceneProps> = ({
-  scene,
-  height: targetHeight,
-  angle,
-  autoRotate,
-  usesVariables,
-  zoom,
-  yOffset,
-  xRotation,
+export const AsciiScene: React.FC<AsciiSceneProps> = (props) => {
+  const onFrameRef = useRef<null | ((buffer: Uint8Array) => void)>(null);
+
+  return (
+    <CanvasProvider
+      onFrame={(buffer: Uint8Array) => onFrameRef.current?.(buffer)}
+      height={props.height}
+    >
+      <AsciiSceneInner {...props} onFrameRef={onFrameRef} />
+    </CanvasProvider>
+  );
+};
+
+const AsciiSceneInner: React.FC<
+  AsciiSceneProps & { onFrameRef: React.MutableRefObject<null | ((buffer: Uint8Array) => void)> }
+> = ({
+  children,
+  height,
   showControls = true,
   fontSize,
   showSamplingPoints = false,
   showExternalPoints = false,
+  onFrameRef,
 }) => {
+  const { orbitControlsTargetRef } = useCanvasContext();
   const s = useStyles(AsciiSceneStyles);
   const [viewMode, setViewMode] = useState<"ascii" | "split" | "canvas">("ascii");
   const [splitT, setSplitT] = useState(0.5);
@@ -81,31 +85,10 @@ export const AsciiScene: React.FC<AsciiSceneProps> = ({
     setIsDragging(false);
   };
 
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-
-  const onFrameRef = useRef<null | ((buffer: Uint8Array) => void)>(null);
-  const orbitControlsTargetRef = useRef<HTMLDivElement>(null);
-
-  const { height } = useSceneHeight(targetHeight);
-
-  const sceneProps = {
-    scene,
-    height: targetHeight,
-    angle,
-    autoRotate,
-    usesVariables,
-    zoom,
-    yOffset,
-    xRotation,
-    canvasRef,
-    onFrame: (buffer: Uint8Array) => onFrameRef.current?.(buffer),
-    orbitControlsTargetRef,
-  };
-
   const splitPercentage = splitT * 100;
 
   return (
-    <div className={s("container")}>
+    <div className={s("container")} style={{ height }}>
       {showControls && (
         <div className={s("controls")}>
           <span className={s("label")}>View:</span>
@@ -142,7 +125,9 @@ export const AsciiScene: React.FC<AsciiSceneProps> = ({
             <div className={s("sliderContainer")}>
               <button
                 className={s("sliderButton")}
-                onClick={() => setCharacterWidthMultiplier(Math.max(0.1, characterWidthMultiplier - 0.05))}
+                onClick={() =>
+                  setCharacterWidthMultiplier(Math.max(0.1, characterWidthMultiplier - 0.05))
+                }
                 disabled={characterWidthMultiplier <= 0.1}
               >
                 −
@@ -158,7 +143,9 @@ export const AsciiScene: React.FC<AsciiSceneProps> = ({
               />
               <button
                 className={s("sliderButton")}
-                onClick={() => setCharacterWidthMultiplier(Math.min(2.0, characterWidthMultiplier + 0.05))}
+                onClick={() =>
+                  setCharacterWidthMultiplier(Math.min(2.0, characterWidthMultiplier + 0.05))
+                }
                 disabled={characterWidthMultiplier >= 2.0}
               >
                 +
@@ -172,7 +159,9 @@ export const AsciiScene: React.FC<AsciiSceneProps> = ({
             <div className={s("sliderContainer")}>
               <button
                 className={s("sliderButton")}
-                onClick={() => setCharacterHeightMultiplier(Math.max(0.3, characterHeightMultiplier - 0.05))}
+                onClick={() =>
+                  setCharacterHeightMultiplier(Math.max(0.3, characterHeightMultiplier - 0.05))
+                }
                 disabled={characterHeightMultiplier <= 0.3}
               >
                 −
@@ -188,7 +177,9 @@ export const AsciiScene: React.FC<AsciiSceneProps> = ({
               />
               <button
                 className={s("sliderButton")}
-                onClick={() => setCharacterHeightMultiplier(Math.min(3.0, characterHeightMultiplier + 0.05))}
+                onClick={() =>
+                  setCharacterHeightMultiplier(Math.min(3.0, characterHeightMultiplier + 0.05))
+                }
                 disabled={characterHeightMultiplier >= 3.0}
               >
                 +
@@ -198,7 +189,6 @@ export const AsciiScene: React.FC<AsciiSceneProps> = ({
           </div>
         </div>
       )}
-
       <div
         className={s("wrapper")}
         onMouseMove={handleMouseMove}
@@ -250,7 +240,6 @@ export const AsciiScene: React.FC<AsciiSceneProps> = ({
             >
               <AsciiRenderer
                 onFrameRef={onFrameRef}
-                canvasRef={canvasRef}
                 alphabet={selectedAlphabet}
                 fontSize={fontSize}
                 showSamplingPoints={showSamplingPoints}
@@ -274,12 +263,12 @@ export const AsciiScene: React.FC<AsciiSceneProps> = ({
               style={{
                 transform:
                   viewMode === "split"
-                    ? `translateX(calc(-${50 + splitPercentage / 2}%))`
+                    ? `translateX(calc(-${50 + (splitT * 100) / 2}%))`
                     : "translateX(-50%)",
                 transition: isDragging ? "none" : "all 0.5s",
               }}
             >
-              <Scene {...sceneProps} />
+              {children}
             </div>
           </div>
         </div>

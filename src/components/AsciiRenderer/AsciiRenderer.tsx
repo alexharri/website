@@ -3,10 +3,10 @@ import { AsciiRendererStyles } from "./AsciiRenderer.styles";
 import { generateAsciiChars, VisualizationData } from "./ascii/generateAsciiChars";
 import { AlphabetName } from "./alphabets/AlphabetManager";
 import { useStyles } from "../../utils/styles";
+import { useCanvasContext } from "../../contexts/CanvasContext";
 
 interface Props {
   alphabet: AlphabetName;
-  canvasRef: React.RefObject<HTMLCanvasElement>;
   onFrameRef: React.MutableRefObject<null | ((buffer: Uint8Array) => void)>;
   fontSize?: number;
   showSamplingPoints?: boolean;
@@ -20,6 +20,7 @@ export function AsciiRenderer(props: Props) {
   const s = useStyles(AsciiRendererStyles);
   const preRef = useRef<HTMLPreElement>(null);
   const [visualizationData, setVisualizationData] = useState<VisualizationData | null>(null);
+  const { canvasRef } = useCanvasContext();
 
   useEffect(() => {
     props.onFrameRef.current = function onFrame(pixelBuffer: Uint8Array): void {
@@ -27,7 +28,7 @@ export function AsciiRenderer(props: Props) {
       const preEl = preRef.current;
       if (!container || !preEl) return;
 
-      const canvas = props.canvasRef.current;
+      const canvas = canvasRef.current;
       if (!canvas) return;
 
       const containerRect = container?.getBoundingClientRect();

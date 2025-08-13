@@ -3,6 +3,7 @@ import React, { createContext, useContext, useEffect, useRef } from "react";
 import { useVisible } from "../utils/hooks/useVisible";
 import { LoadThreeContext } from "./Components/ThreeProvider";
 import { SceneSkeleton } from "./SceneSkeleton";
+import { useCanvasContext } from "../contexts/CanvasContext";
 
 const loading = SceneSkeleton;
 
@@ -95,7 +96,6 @@ export const threeJsScenes: Partial<Record<string, React.ComponentType<SceneProp
 
 interface Props {
   scene: string;
-  height: number;
   angle?: number;
   autoRotate?: boolean;
   usesVariables?: boolean;
@@ -103,17 +103,13 @@ interface Props {
   yOffset?: number;
   xRotation?: number;
   ascii?: boolean;
-  canvasRef?: React.RefObject<HTMLCanvasElement>;
   onReady?: () => void;
-  onFrame?: (buffer: Uint8Array) => void;
   orbitControlsRef?: React.RefObject<any>;
-  orbitControlsTargetRef?: React.RefObject<HTMLDivElement>;
 }
 
 export const Scene: React.FC<Props> = (props) => {
   const {
     scene,
-    height,
     usesVariables,
     angle,
     zoom,
@@ -121,11 +117,10 @@ export const Scene: React.FC<Props> = (props) => {
     autoRotate,
     xRotation,
     ascii,
-    canvasRef,
-    onFrame,
     orbitControlsRef,
-    orbitControlsTargetRef,
   } = props;
+  
+  const { canvasRef, onFrame, height, orbitControlsTargetRef } = useCanvasContext();
   const containerRef = useRef<HTMLDivElement>(null);
   const visible = useVisible(containerRef, "350px");
   const render = useVisible(containerRef, "50px");
