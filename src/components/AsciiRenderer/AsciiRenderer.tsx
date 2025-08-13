@@ -12,6 +12,7 @@ interface Props {
   showSamplingPoints?: boolean;
   showExternalPoints?: boolean;
   characterWidthPx?: number;
+  characterHeightPx?: number;
 }
 
 export function AsciiRenderer(props: Props) {
@@ -51,11 +52,13 @@ export function AsciiRenderer(props: Props) {
       const baseCharWidth = fontSize; // 1em in pixels
       const baseCharHeight = fontSize; // 1em in pixels
       const characterWidthPx = props.characterWidthPx ?? 10;
+      const characterHeightPx = props.characterHeightPx ?? 14;
       const widthMultiplier = characterWidthPx / baseCharWidth;
+      const heightMultiplier = characterHeightPx / baseCharHeight;
 
       charDimensions = {
         width: baseCharWidth * tempResult.metadata.width * widthMultiplier,
-        height: baseCharHeight * tempResult.metadata.height,
+        height: baseCharHeight * tempResult.metadata.height * heightMultiplier,
       };
 
       // Calculate how many "standard" characters would fit, maintaining canvas aspect ratio
@@ -75,9 +78,9 @@ export function AsciiRenderer(props: Props) {
 
       // Use the actual rendered character dimensions for grid calculation
       // Width: account for letterSpacing and width multiplier
-      // Height: use actual line height from metadata
+      // Height: use actual line height from metadata and height multiplier
       const renderedCharWidth = baseCharWidth * widthMultiplier;
-      const renderedCharHeight = baseCharHeight * tempResult.metadata.height;
+      const renderedCharHeight = baseCharHeight * tempResult.metadata.height * heightMultiplier;
 
       const W = Math.floor(effectiveWidth / renderedCharWidth);
       const H = Math.floor(effectiveHeight / renderedCharHeight);
@@ -97,8 +100,9 @@ export function AsciiRenderer(props: Props) {
       // Set CSS properties directly
       const actualMonospaceWidth = 0.6; // actual width of monospace characters in em
       const adjustedWidth = result.metadata.width * widthMultiplier;
+      const adjustedHeight = result.metadata.height * heightMultiplier;
       const letterSpacing = `${adjustedWidth - actualMonospaceWidth}em`;
-      const lineHeight = result.metadata.height;
+      const lineHeight = adjustedHeight;
 
       preEl.style.letterSpacing = letterSpacing;
       preEl.style.lineHeight = lineHeight.toString();
@@ -110,7 +114,7 @@ export function AsciiRenderer(props: Props) {
         setVisualizationData(null);
       }
     };
-  }, [props.alphabet, props.showSamplingPoints, props.showExternalPoints, props.fontSize, props.characterWidthPx]);
+  }, [props.alphabet, props.showSamplingPoints, props.showExternalPoints, props.fontSize, props.characterWidthPx, props.characterHeightPx]);
 
   return (
     <div

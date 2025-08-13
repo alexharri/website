@@ -46,6 +46,7 @@ export const AsciiScene: React.FC<AsciiSceneProps> = ({
   const [selectedAlphabet, setSelectedAlphabet] = useState<AlphabetName>("default");
   const [availableAlphabets] = useState<AlphabetName[]>(getAvailableAlphabets());
   const [characterWidthPx, setCharacterWidthPx] = useState(10);
+  const [characterHeightPx, setCharacterHeightPx] = useState(14);
 
   const viewportWidth = useViewportWidth();
   let width: number;
@@ -141,7 +142,7 @@ export const AsciiScene: React.FC<AsciiSceneProps> = ({
             <div className={s("sliderContainer")}>
               <button
                 className={s("sliderButton")}
-                onClick={() => setCharacterWidthPx(Math.max(2, characterWidthPx - 1))}
+                onClick={() => setCharacterWidthPx(Math.max(2, characterWidthPx - 0.2))}
                 disabled={characterWidthPx <= 2}
               >
                 −
@@ -150,19 +151,49 @@ export const AsciiScene: React.FC<AsciiSceneProps> = ({
                 type="range"
                 min="2"
                 max="30"
-                step="1"
+                step="0.2"
                 value={characterWidthPx}
                 onChange={(e) => setCharacterWidthPx(Number(e.target.value))}
                 className={s("slider")}
               />
               <button
                 className={s("sliderButton")}
-                onClick={() => setCharacterWidthPx(Math.min(30, characterWidthPx + 1))}
+                onClick={() => setCharacterWidthPx(Math.min(30, characterWidthPx + 0.2))}
                 disabled={characterWidthPx >= 30}
               >
                 +
               </button>
-              <span className={s("sliderValue")}>{characterWidthPx}px</span>
+              <span className={s("sliderValue")}>{characterWidthPx.toFixed(1)}px</span>
+            </div>
+          </div>
+
+          <div className={s("sliderGroup")}>
+            <span className={s("label")}>Character Height:</span>
+            <div className={s("sliderContainer")}>
+              <button
+                className={s("sliderButton")}
+                onClick={() => setCharacterHeightPx(Math.max(6, characterHeightPx - 0.2))}
+                disabled={characterHeightPx <= 6}
+              >
+                −
+              </button>
+              <input
+                type="range"
+                min="6"
+                max="40"
+                step="0.2"
+                value={characterHeightPx}
+                onChange={(e) => setCharacterHeightPx(Number(e.target.value))}
+                className={s("slider")}
+              />
+              <button
+                className={s("sliderButton")}
+                onClick={() => setCharacterHeightPx(Math.min(40, characterHeightPx + 0.2))}
+                disabled={characterHeightPx >= 40}
+              >
+                +
+              </button>
+              <span className={s("sliderValue")}>{characterHeightPx.toFixed(1)}px</span>
             </div>
           </div>
         </div>
@@ -225,6 +256,7 @@ export const AsciiScene: React.FC<AsciiSceneProps> = ({
                 showSamplingPoints={showSamplingPoints}
                 showExternalPoints={showExternalPoints}
                 characterWidthPx={characterWidthPx}
+                characterHeightPx={characterHeightPx}
               />
             </div>
           </div>
