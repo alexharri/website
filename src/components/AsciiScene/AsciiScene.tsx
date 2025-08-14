@@ -1,12 +1,12 @@
 import React, { useRef, useState } from "react";
 import { useStyles } from "../../utils/styles";
 import { AsciiRenderer } from "../AsciiRenderer";
-import { AlphabetName, getAvailableAlphabets } from "../AsciiRenderer/alphabets/AlphabetManager";
+import { AlphabetName } from "../AsciiRenderer/alphabets/AlphabetManager";
 import AsciiSceneStyles, { BREAKPOINT, CONTENT_WIDTH } from "./AsciiScene.styles";
 import { clamp } from "../../math/math";
 import { useViewportWidth } from "../../utils/hooks/useViewportWidth";
-import { SegmentedControl } from "../SegmentedControl";
 import { CanvasProvider, useCanvasContext } from "../../contexts/CanvasContext";
+import { AsciiSceneControls } from "./AsciiSceneControls";
 
 interface AsciiSceneProps {
   children: React.ReactNode;
@@ -48,7 +48,6 @@ const AsciiSceneInner: React.FC<
   const [splitT, setSplitT] = useState(0.5);
   const [isDragging, setIsDragging] = useState(false);
   const [selectedAlphabet, setSelectedAlphabet] = useState<AlphabetName>("default");
-  const [availableAlphabets] = useState<AlphabetName[]>(getAvailableAlphabets());
   const [characterWidthMultiplier, setCharacterWidthMultiplier] = useState(0.7);
   const [characterHeightMultiplier, setCharacterHeightMultiplier] = useState(1.0);
 
@@ -62,9 +61,6 @@ const AsciiSceneInner: React.FC<
     width = CONTENT_WIDTH;
   }
 
-  const handleAlphabetChange = (newAlphabet: AlphabetName) => {
-    setSelectedAlphabet(newAlphabet);
-  };
 
   const handleMouseDown = (e: React.MouseEvent) => {
     if (viewMode === "split") {
@@ -90,104 +86,17 @@ const AsciiSceneInner: React.FC<
   return (
     <div className={s("container")} style={{ height }}>
       {showControls && (
-        <div className={s("controls")}>
-          <span className={s("label")}>View:</span>
-          <SegmentedControl
-            options={[
-              { value: "ascii", label: "ASCII" },
-              { value: "split", label: "Split" },
-              { value: "canvas", label: "Canvas" },
-            ]}
-            value={viewMode}
-            setValue={(value) => {
-              setViewMode(value);
-              if (value === "split") {
-                setSplitT(0.5);
-              }
-            }}
-          />
-
-          <span className={s("label")}>Alphabet:</span>
-          <select
-            className={s("select")}
-            value={selectedAlphabet}
-            onChange={(e) => handleAlphabetChange(e.target.value as AlphabetName)}
-          >
-            {availableAlphabets.map((alphabetOption) => (
-              <option key={alphabetOption} value={alphabetOption}>
-                {alphabetOption.charAt(0).toUpperCase() + alphabetOption.slice(1)}
-              </option>
-            ))}
-          </select>
-
-          <div className={s("sliderGroup")}>
-            <span className={s("label")}>Character Width:</span>
-            <div className={s("sliderContainer")}>
-              <button
-                className={s("sliderButton")}
-                onClick={() =>
-                  setCharacterWidthMultiplier(Math.max(0.1, characterWidthMultiplier - 0.05))
-                }
-                disabled={characterWidthMultiplier <= 0.1}
-              >
-                −
-              </button>
-              <input
-                type="range"
-                min="0.1"
-                max="2.0"
-                step="0.05"
-                value={characterWidthMultiplier}
-                onChange={(e) => setCharacterWidthMultiplier(Number(e.target.value))}
-                className={s("slider")}
-              />
-              <button
-                className={s("sliderButton")}
-                onClick={() =>
-                  setCharacterWidthMultiplier(Math.min(2.0, characterWidthMultiplier + 0.05))
-                }
-                disabled={characterWidthMultiplier >= 2.0}
-              >
-                +
-              </button>
-              <span className={s("sliderValue")}>{characterWidthMultiplier.toFixed(2)}×</span>
-            </div>
-          </div>
-
-          <div className={s("sliderGroup")}>
-            <span className={s("label")}>Character Height:</span>
-            <div className={s("sliderContainer")}>
-              <button
-                className={s("sliderButton")}
-                onClick={() =>
-                  setCharacterHeightMultiplier(Math.max(0.3, characterHeightMultiplier - 0.05))
-                }
-                disabled={characterHeightMultiplier <= 0.3}
-              >
-                −
-              </button>
-              <input
-                type="range"
-                min="0.3"
-                max="3.0"
-                step="0.05"
-                value={characterHeightMultiplier}
-                onChange={(e) => setCharacterHeightMultiplier(Number(e.target.value))}
-                className={s("slider")}
-              />
-              <button
-                className={s("sliderButton")}
-                onClick={() =>
-                  setCharacterHeightMultiplier(Math.min(3.0, characterHeightMultiplier + 0.05))
-                }
-                disabled={characterHeightMultiplier >= 3.0}
-              >
-                +
-              </button>
-              <span className={s("sliderValue")}>{characterHeightMultiplier.toFixed(2)}×</span>
-            </div>
-          </div>
-        </div>
+        <AsciiSceneControls
+          viewMode={viewMode}
+          setViewMode={setViewMode}
+          setSplitT={setSplitT}
+          selectedAlphabet={selectedAlphabet}
+          setSelectedAlphabet={setSelectedAlphabet}
+          characterWidthMultiplier={characterWidthMultiplier}
+          setCharacterWidthMultiplier={setCharacterWidthMultiplier}
+          characterHeightMultiplier={characterHeightMultiplier}
+          setCharacterHeightMultiplier={setCharacterHeightMultiplier}
+        />
       )}
       <div
         className={s("wrapper")}
