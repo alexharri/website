@@ -1,6 +1,8 @@
-import { Scene2DBase } from "./Scene2DBase";
-import { BouncingBallScene } from "./scenes/bouncing-ball";
+import { CircleScene } from "./scenes/circle";
 
-export const canvas2DScenes: Record<string, new (ctx: CanvasRenderingContext2D, width: number, height: number, props?: any) => Scene2DBase> = {
-  "bouncing-ball": BouncingBallScene,
+export const canvas2DScenes: Record<
+  string,
+  new (ctx: CanvasRenderingContext2D) => { render: () => void }
+> = {
+  circle: CircleScene,
 };

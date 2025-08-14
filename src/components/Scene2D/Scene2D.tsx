@@ -9,7 +9,6 @@ interface Scene2DProps {
 
 export const Scene2D: React.FC<Scene2DProps> = ({ scene, ...sceneProps }) => {
   const containerRef = useRef<HTMLDivElement>(null);
-  const animationFrameRef = useRef<number | null>(null);
   const { canvasRef, onFrame, height } = useCanvasContext();
 
   useEffect(() => {
@@ -25,7 +24,7 @@ export const Scene2D: React.FC<Scene2DProps> = ({ scene, ...sceneProps }) => {
 
     // Wait for container to have dimensions
     const containerWidth = container.clientWidth || 800; // fallback width
-    
+
     // Set canvas size
     canvas.width = containerWidth;
     canvas.height = height;
@@ -35,26 +34,24 @@ export const Scene2D: React.FC<Scene2DProps> = ({ scene, ...sceneProps }) => {
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
+    let mounted = true;
+
     // Create scene instance
-    const sceneInstance = new SceneComponent(ctx, canvas.width, canvas.height, sceneProps);
+    const sceneInstance = new SceneComponent(ctx);
 
-    // Animation loop
-    const animate = () => {
+    const tick = () => {
+      if (!mounted) return;
+      requestAnimationFrame(tick);
+
       sceneInstance.render();
-      
-      // Get pixel data and send to ASCII renderer
       const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-      onFrame(new Uint8Array(imageData.data.buffer));
-      
-      animationFrameRef.current = requestAnimationFrame(animate);
+      const buffer = new Uint8Array(imageData.data.buffer);
+      onFrame(buffer);
     };
-
-    animate();
+    tick();
 
     return () => {
-      if (animationFrameRef.current) {
-        cancelAnimationFrame(animationFrameRef.current);
-      }
+      mounted = false;
     };
   }, [scene, height, canvasRef, onFrame, sceneProps]);
 
