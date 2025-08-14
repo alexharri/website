@@ -12,19 +12,6 @@ The ASCII renderer supports both 3D and 2D scenes using a unified context-based 
 
 ## 2D Scene Example
 
-<AsciiScene height={650} fontSize={8}>
-  <Scene2D scene="circle" />
+<AsciiScene height={650} fontSize={280} showSamplingPoints>
+  <Scene2D scene="breathe" />
 </AsciiScene>
-
-## Architecture
-
-The `AsciiScene` component now uses a children-based composition pattern with `CanvasContext`:
-
-- **AsciiScene**: Provides canvas context and ASCII rendering
-- **Scene**: 3D scenes using Three.js
-- **Scene2D**: 2D scenes using Canvas 2D API
-
-Both scene types share the same canvas context and frame callback system, allowing seamless integration of different rendering approaches.
-
-## Visualization of Vector Sampling
-

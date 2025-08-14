@@ -20,6 +20,12 @@ export function AsciiRenderer(props: Props) {
   const s = useStyles(AsciiRendererStyles);
   const preRef = useRef<HTMLPreElement>(null);
   const [visualizationData, setVisualizationData] = useState<VisualizationData | null>(null);
+  const [renderParams, setRenderParams] = useState<{
+    renderedCharWidth: number;
+    renderedCharHeight: number;
+    horizontalOffset: number;
+    verticalOffset: number;
+  } | null>(null);
   const { canvasRef } = useCanvasContext();
 
   useEffect(() => {
@@ -112,8 +118,15 @@ export function AsciiRenderer(props: Props) {
 
       if (enableVisualization && result.visualization) {
         setVisualizationData(result.visualization);
+        setRenderParams({
+          renderedCharWidth,
+          renderedCharHeight,
+          horizontalOffset,
+          verticalOffset,
+        });
       } else {
         setVisualizationData(null);
+        setRenderParams(null);
       }
     };
   }, [
@@ -133,29 +146,34 @@ export function AsciiRenderer(props: Props) {
       className={s("container")}
     >
       <pre ref={preRef} className={s("pre")} />
-      {visualizationData && (
+      {visualizationData && renderParams && props.showSamplingPoints && (
         <div className={s("visualizationLayer")}>
-          {visualizationData.samplingPoints.map((point, index) => {
-            const shouldShow = point.isExternal
-              ? props.showExternalPoints
-              : props.showSamplingPoints;
-            if (!shouldShow) return null;
+          {visualizationData.characters.flatMap((char) =>
+            char.internalPoints.map((point, pointIndex) => {
+              // Calculate pixel position using same transform as ASCII text
+              const pixelX = char.charX * renderParams.renderedCharWidth + point.x * renderParams.renderedCharWidth;
+              const pixelY = char.charY * renderParams.renderedCharHeight + point.y * renderParams.renderedCharHeight;
+              
+              // Apply the same offset as the ASCII text
+              const finalX = pixelX + renderParams.horizontalOffset;
+              const finalY = pixelY + renderParams.verticalOffset;
 
-            return (
-              <div
-                key={index}
-                className={s("samplingPoint")}
-                style={{
-                  left: `${point.x}px`,
-                  top: `${point.y}px`,
-                  backgroundColor: point.isExternal
-                    ? `rgba(255, 100, 100, ${Math.max(0.3, point.lightness)})`
-                    : `rgba(100, 255, 100, ${Math.max(0.3, point.lightness)})`,
-                  border: `1px solid ${point.isExternal ? "#ff6464" : "#64ff64"}`,
-                }}
-              />
-            );
-          })}
+              return (
+                <div
+                  key={`${char.charX}-${char.charY}-${pointIndex}`}
+                  className={s("samplingPoint")}
+                  style={{
+                    left: `${finalX}px`,
+                    top: `${finalY}px`,
+                    width: `${visualizationData.circleRadius * 2}px`,
+                    height: `${visualizationData.circleRadius * 2}px`,
+                    backgroundColor: `rgba(255, 255, 255, ${0.2 + point.lightness * 0.6})`,
+                    border: `1px solid rgba(255, 255, 255, 0.3)`,
+                  }}
+                />
+              );
+            })
+          )}
         </div>
       )}
     </div>

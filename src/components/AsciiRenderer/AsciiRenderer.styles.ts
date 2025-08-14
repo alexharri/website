@@ -25,14 +25,13 @@ export const AsciiRendererStyles = ({ styled }: StyleOptions) => ({
     right: 0;
     bottom: 0;
     pointer-events: none;
-    z-index: 1;
+    z-index: -1;
   `,
 
   samplingPoint: styled.css`
     position: absolute;
-    width: 4px;
-    height: 4px;
     border-radius: 50%;
     transform: translate(-50%, -50%);
+    pointer-events: none;
   `,
 });

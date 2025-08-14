@@ -60,8 +60,6 @@ const AsciiSceneInner: React.FC<
     width = CONTENT_WIDTH;
   }
 
-
-
   return (
     <div className={s("container")} style={{ height }}>
       {showControls && (

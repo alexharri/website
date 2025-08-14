@@ -191,8 +191,19 @@ function getCharacterMatcher(): CharacterMatcher {
   return characterMatcher;
 }
 
+export interface CharacterSamplingData {
+  charX: number;
+  charY: number;
+  samplingVector: number[];
+  internalPoints: Array<{ x: number; y: number; lightness: number }>;
+  externalPoints: Array<{ x: number; y: number; lightness: number }>;
+}
+
 export interface VisualizationData {
-  samplingPoints: Array<{ x: number; y: number; lightness: number; isExternal: boolean }>;
+  characters: CharacterSamplingData[];
+  charWidth: number;
+  charHeight: number;
+  circleRadius: number;
 }
 
 export interface GenerationResult {
@@ -223,8 +234,13 @@ export function generateAsciiChars(
   const samplingConfig = matcher.getSamplingConfig();
   const metadata = matcher.getMetadata();
   const chars: string[] = [];
-  const visualizationData: VisualizationData = { samplingPoints: [] };
-  
+  const visualizationData: VisualizationData = {
+    characters: [],
+    charWidth: 0,
+    charHeight: 0,
+    circleRadius: 0,
+  };
+
   // Get normalized metadata
 
   // Check if dimensions changed and clear storage if needed
@@ -252,7 +268,7 @@ export function generateAsciiChars(
   // Calculate base character dimensions in pixels
   const baseCharWidth = canvasWidth / outputWidth;
   const baseCharHeight = canvasHeight / outputHeight;
-  
+
   // Adjust character width based on metadata for proper sampling, keep height unchanged
   const charWidth = baseCharWidth * metadata.width;
   const charHeight = baseCharHeight;
@@ -260,6 +276,13 @@ export function generateAsciiChars(
   // Scale the normalized circle radius to pixels based on character size
   // The circle radius in metadata is relative to font size, so we scale by character dimensions
   const circleRadiusInPixels = samplingConfig.circleRadius * Math.min(charWidth, charHeight);
+
+  // Store character dimensions and radius in visualization data
+  if (enableVisualization) {
+    visualizationData.charWidth = charWidth;
+    visualizationData.charHeight = charHeight;
+    visualizationData.circleRadius = circleRadiusInPixels;
+  }
 
   for (let y = 0; y < outputHeight; y++) {
     for (let x = 0; x < outputWidth; x++) {
@@ -276,7 +299,7 @@ export function generateAsciiChars(
         circleRadiusInPixels,
       );
 
-      let samplingVector = rawSamplingVector;
+      let samplingVector = [...rawSamplingVector];
       if (samplingConfig.externalPoints) {
         const contextValues = sampleDirectionalContext(
           pixelBuffer,
@@ -317,39 +340,19 @@ export function generateAsciiChars(
 
       // Collect visualization data if enabled
       if (enableVisualization) {
-        // Add regular sampling points - store grid coordinates and sampling point info
-        samplingConfig.points.forEach((point, index) => {
-          visualizationData.samplingPoints.push({
-            x: x + point.x, // Grid coordinate + normalized offset
-            y: y + point.y, // Grid coordinate + normalized offset
-            lightness: samplingVector[index] || 0,
-            isExternal: false,
-          });
+        const internalPoints = samplingConfig.points.map((point, index) => ({
+          x: point.x,
+          y: point.y,
+          lightness: rawSamplingVector[index] || 0, // Use raw values for better visualization
+        }));
+
+        visualizationData.characters.push({
+          charX: x,
+          charY: y,
+          samplingVector: [...rawSamplingVector], // Store raw vector for visualization
+          internalPoints,
+          externalPoints: [], // Focus on internal points for now
         });
-
-        // Add external sampling points if available
-        if (samplingConfig.externalPoints) {
-          const contextValues = sampleDirectionalContext(
-            pixelBuffer,
-            canvasWidth,
-            canvasHeight,
-            x,
-            y,
-            charWidth,
-            charHeight,
-            samplingConfig.externalPoints,
-            samplingConfig.circleRadius,
-          );
-
-          samplingConfig.externalPoints.forEach((point, index) => {
-            visualizationData.samplingPoints.push({
-              x: x + point.x, // Grid coordinate + normalized offset
-              y: y + point.y, // Grid coordinate + normalized offset
-              lightness: contextValues[index] || 0,
-              isExternal: true,
-            });
-          });
-        }
       }
 
       chars.push(selectedChar === "&nbsp;" ? " " : selectedChar);
