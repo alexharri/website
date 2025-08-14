@@ -2,11 +2,12 @@ import React from "react";
 import { useStyles } from "../../utils/styles";
 import { AlphabetName, getAvailableAlphabets } from "../AsciiRenderer/alphabets/AlphabetManager";
 import { SegmentedControl } from "../SegmentedControl";
+import { ViewMode } from "../SplitView";
 import AsciiSceneControlsStyles from "./AsciiSceneControls.styles";
 
 interface AsciiSceneControlsProps {
-  viewMode: "ascii" | "split" | "canvas";
-  setViewMode: (value: "ascii" | "split" | "canvas") => void;
+  viewMode: ViewMode;
+  setViewMode: (value: ViewMode) => void;
   setSplitT: (value: number) => void;
   selectedAlphabet: AlphabetName;
   setSelectedAlphabet: (alphabet: AlphabetName) => void;
@@ -40,9 +41,9 @@ export const AsciiSceneControls: React.FC<AsciiSceneControlsProps> = ({
         <span className={s("label")}>View:</span>
         <SegmentedControl
           options={[
-            { value: "ascii", label: "ASCII" },
+            { value: "left", label: "ASCII" },
             { value: "split", label: "Split" },
-            { value: "canvas", label: "Canvas" },
+            { value: "right", label: "Canvas" },
           ]}
           value={viewMode}
           setValue={(value) => {
