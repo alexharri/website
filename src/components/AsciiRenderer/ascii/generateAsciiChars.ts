@@ -3,7 +3,7 @@ import { AlphabetName, getAlphabetMetadata } from "../alphabets/AlphabetManager"
 
 const CONTRAST_EXPONENT_GLOBAL = 3;
 const CONTRAST_EXPONENT_LOCAL = 7;
-const SAMPLE_QUALITY = 12; // Number of samples per circle (higher = better quality, slower)
+const SAMPLE_QUALITY = 10; // Number of samples per circle (higher = better quality, slower)
 
 function readPixelFromBuffer(
   pixelBuffer: Uint8Array,

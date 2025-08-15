@@ -1,11 +1,12 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import { AsciiRendererStyles } from "./AsciiRenderer.styles";
-import { generateAsciiChars, CharacterSamplingData } from "./ascii/generateAsciiChars";
+import { generateAsciiChars } from "./ascii/generateAsciiChars";
 import { AlphabetName, getAlphabetMetadata } from "./alphabets/AlphabetManager";
 import { useStyles } from "../../utils/styles";
 import { useCanvasContext } from "../../contexts/CanvasContext";
-import { colors, cssVariables } from "../../utils/cssVariables";
+import { cssVariables } from "../../utils/cssVariables";
 import { useMonospaceCharacterWidthEm } from "../../utils/hooks/useMonospaceCharacterWidthEm";
+import { SamplingPointCanvas, renderSamplingPoints } from "./SamplingPointCanvas";
 
 interface Props {
   alphabet: AlphabetName;
@@ -23,7 +24,7 @@ export function AsciiRenderer(props: Props) {
   const contentRef = useRef<HTMLDivElement>(null);
   const s = useStyles(AsciiRendererStyles);
   const preRef = useRef<HTMLPreElement>(null);
-  const [samplingData, setSamplingData] = useState<CharacterSamplingData[][]>([]);
+  const samplingCanvasRef = useRef<HTMLCanvasElement>(null);
   const metadata = useMemo(() => getAlphabetMetadata(alphabet), [alphabet]);
   const characterWidth = useMonospaceCharacterWidthEm(cssVariables.fontMonospace);
 
@@ -85,7 +86,22 @@ export function AsciiRenderer(props: Props) {
 
       content.style.transform = `translate(${horizontalOffset}px, ${verticalOffset}px)`;
 
-      setSamplingData(result.samplingData);
+      // Render sampling points directly to canvas if visualization is enabled
+      if (enableVisualization && samplingCanvasRef.current && characterWidth != null) {
+        renderSamplingPoints(
+          samplingCanvasRef.current,
+          result.samplingData,
+          alphabet,
+          fontSize,
+          characterWidthMultiplier,
+          characterHeightMultiplier,
+          characterWidth,
+          containerRect.width,
+          containerRect.height,
+          horizontalOffset,
+          verticalOffset,
+        );
+      }
     };
   }, [
     alphabet,
@@ -107,79 +123,10 @@ export function AsciiRenderer(props: Props) {
     >
       <div className={s("content")} ref={contentRef}>
         <pre ref={preRef} className={s("pre")} />
-        {characterWidth != null && samplingData.length > 0 && (
-          <div className={s("visualizationLayer")}>
-            {samplingData
-              .map((row, y) =>
-                row.map(({ samplingVector }, x) => {
-                  const sampleRectWidth = fontSize * metadata.width;
-                  const sampleRectHeight = fontSize * metadata.height;
-                  const boxWidth = sampleRectWidth * characterWidthMultiplier;
-                  const boxHeight = sampleRectHeight * characterHeightMultiplier;
-                  const letterWidth = characterWidth;
-                  const difference = (metadata.width * characterWidthMultiplier - letterWidth) / 2;
-                  const left = x * boxWidth - difference * fontSize;
-                  const top = y * boxHeight;
-                  const sampleRectXOff = (boxWidth - sampleRectWidth) / 2;
-                  const sampleRectYOff = (boxHeight - sampleRectHeight) / 2;
-                  const samplingCircleWidth = fontSize * metadata.samplingConfig.circleRadius * 2;
-                  return (
-                    <div
-                      key={[x, y].join(",")}
-                      style={{
-                        position: "absolute",
-                        width: boxWidth,
-                        height: boxHeight,
-                        left,
-                        top,
-                        // border: "1px solid red",
-                      }}
-                    >
-                      <div
-                        style={{
-                          position: "absolute",
-                          width: sampleRectWidth,
-                          height: sampleRectHeight,
-                          left: sampleRectXOff,
-                          top: sampleRectYOff,
-                          // border: "1px solid lightgreen",
-                        }}
-                      >
-                        {metadata.samplingConfig.points.map(({ x, y }, i) => (
-                          <div
-                            key={i}
-                            className={s("samplingPoint")}
-                            style={{
-                              left: x * 100 + "%",
-                              top: y * 100 + "%",
-                              width: samplingCircleWidth,
-                              height: samplingCircleWidth,
-                              border: `1px solid rgba(255, 255, 255, 0.2)`,
-                              backgroundColor: colors.background200,
-                            }}
-                          >
-                            <div
-                              style={{
-                                position: "absolute",
-                                top: 0,
-                                left: 0,
-                                right: 0,
-                                bottom: 0,
-                                borderRadius: "50%",
-                                backgroundColor: `rgba(255, 255, 255, ${samplingVector[i] * 0.7})`,
-                              }}
-                            />
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  );
-                }),
-              )
-              .flat()}
-          </div>
-        )}
       </div>
+      {(props.showSamplingPoints || props.showExternalPoints) && (
+        <SamplingPointCanvas onCanvasRef={samplingCanvasRef} />
+      )}
     </div>
   );
 }
