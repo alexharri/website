@@ -85,6 +85,7 @@ const AsciiSceneInner: React.FC<
       >
         {[
           <AsciiRenderer
+            key="renderer"
             onFrameRef={onFrameRef}
             alphabet={selectedAlphabet}
             fontSize={fontSize}

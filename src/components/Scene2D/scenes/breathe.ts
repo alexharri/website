@@ -8,10 +8,10 @@ export class BreatheScene extends Scene2DBase {
   draw() {
     const { ctx, width, height, elapsed } = this;
 
-    const t = Math.sin(elapsed / 1000 / 5);
-    const radius = width / 2 + t * 300;
+    const t = Math.sin((elapsed / 1000) * 0.5);
+    const radius = width / 4 + t * 200;
 
-    const x = width;
+    const x = width * 0.7;
     const y = height / 2;
 
     ctx.beginPath();

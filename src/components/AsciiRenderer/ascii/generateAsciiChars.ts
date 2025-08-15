@@ -1,9 +1,9 @@
 import { CharacterMatcher, SamplingPoint } from "./CharacterMatcher";
-import { AlphabetName } from "../alphabets/AlphabetManager";
+import { AlphabetName, getAlphabetMetadata } from "../alphabets/AlphabetManager";
 
 const CONTRAST_EXPONENT_GLOBAL = 3;
 const CONTRAST_EXPONENT_LOCAL = 7;
-const STICKINESS_THRESHOLD = 0; // 0.02;
+const SAMPLE_QUALITY = 12; // Number of samples per circle (higher = better quality, slower)
 
 function readPixelFromBuffer(
   pixelBuffer: Uint8Array,
@@ -37,24 +37,35 @@ function sampleCircularRegion(
   centerY: number,
   radius: number,
 ): number {
-  // Much smaller radius and no anti-aliasing for speed
-  const actualRadius = Math.min(radius, 3);
   let totalLightness = 0;
   let sampleCount = 0;
 
-  // Sample fewer points, no anti-aliasing
-  for (let sy = -actualRadius; sy <= actualRadius; sy += 2) {
-    for (let sx = -actualRadius; sx <= actualRadius; sx += 2) {
-      // Check if point is within circle
-      if (sx * sx + sy * sy > actualRadius * actualRadius) continue;
+  // Always sample center point
+  const centerX_t = centerX / canvasWidth;
+  const centerY_t = centerY / canvasHeight;
+  const centerColor = readPixelFromBuffer(
+    pixelBuffer,
+    canvasWidth,
+    canvasHeight,
+    centerX_t,
+    centerY_t,
+  );
+  totalLightness += lightness(centerColor);
+  sampleCount++;
 
-      const sampleX = centerX + sx;
-      const sampleY = centerY + sy;
+  // Sample at edge of circle at evenly spaced angles
+  for (let i = 0; i < SAMPLE_QUALITY; i++) {
+    const angle = (i / SAMPLE_QUALITY) * 2 * Math.PI;
 
-      // Convert to normalized coordinates
-      const x_t = sampleX / canvasWidth;
-      const y_t = sampleY / canvasHeight;
+    const sampleX = centerX + Math.cos(angle) * radius;
+    const sampleY = centerY + Math.sin(angle) * radius;
 
+    // Convert to normalized coordinates
+    const x_t = sampleX / canvasWidth;
+    const y_t = sampleY / canvasHeight;
+
+    // Check bounds
+    if (x_t >= 0 && x_t <= 1 && y_t >= 0 && y_t <= 1) {
       const hexColor = readPixelFromBuffer(pixelBuffer, canvasWidth, canvasHeight, x_t, y_t);
       totalLightness += lightness(hexColor);
       sampleCount++;
@@ -170,19 +181,8 @@ function crunchSamplingVectorDirectional(
   });
 }
 
-function vectorDistance(a: number[], b: number[]): number {
-  if (a.length !== b.length) return Infinity;
-  return Math.sqrt(a.reduce((sum, val, i) => sum + Math.pow(val - b[i], 2), 0));
-}
-
 // Global character matcher instance (created once for performance)
 let characterMatcher: CharacterMatcher | null = null;
-
-// Persistent storage for character stickiness
-let previousCharacters: string[][] = [];
-let previousVectors: number[][][] = [];
-let previousOutputWidth = 0;
-let previousOutputHeight = 0;
 
 function getCharacterMatcher(): CharacterMatcher {
   if (!characterMatcher) {
@@ -192,82 +192,41 @@ function getCharacterMatcher(): CharacterMatcher {
 }
 
 export interface CharacterSamplingData {
-  charX: number;
-  charY: number;
   samplingVector: number[];
-  internalPoints: Array<{ x: number; y: number; lightness: number }>;
-  externalPoints: Array<{ x: number; y: number; lightness: number }>;
-}
-
-export interface VisualizationData {
-  characters: CharacterSamplingData[];
-  charWidth: number;
-  charHeight: number;
-  circleRadius: number;
 }
 
 export interface GenerationResult {
   ascii: string;
-  visualization?: VisualizationData;
   metadata: {
-    width: number; // character width relative to font size
+    width: number; // character width relative to font size<
     height: number; // character height relative to font size
   };
+  samplingData: CharacterSamplingData[][];
 }
 
 export function generateAsciiChars(
   pixelBuffer: Uint8Array,
   canvasWidth: number,
   canvasHeight: number,
-  outputWidth: number,
-  outputHeight: number,
-  alphabet?: AlphabetName,
+  columns: number,
+  rows: number,
+  alphabet: AlphabetName,
   enableVisualization?: boolean,
 ): GenerationResult {
   const matcher = getCharacterMatcher();
 
-  // Switch to the requested alphabet if provided
-  if (alphabet && alphabet !== matcher.getCurrentAlphabet()) {
+  if (alphabet !== matcher.getCurrentAlphabet()) {
     matcher.switchAlphabet(alphabet);
   }
 
-  const samplingConfig = matcher.getSamplingConfig();
-  const metadata = matcher.getMetadata();
+  const metadata = getAlphabetMetadata(alphabet);
+  const samplingConfig = metadata.samplingConfig;
+
   const chars: string[] = [];
-  const visualizationData: VisualizationData = {
-    characters: [],
-    charWidth: 0,
-    charHeight: 0,
-    circleRadius: 0,
-  };
-
-  // Get normalized metadata
-
-  // Check if dimensions changed and clear storage if needed
-  if (outputWidth !== previousOutputWidth || outputHeight !== previousOutputHeight) {
-    previousCharacters = [];
-    previousVectors = [];
-    previousOutputWidth = outputWidth;
-    previousOutputHeight = outputHeight;
-  }
-
-  // Initialize storage arrays if empty
-  if (previousCharacters.length === 0) {
-    previousCharacters = Array(outputHeight)
-      .fill(null)
-      .map(() => Array(outputWidth).fill(""));
-    previousVectors = Array(outputHeight)
-      .fill(null)
-      .map(() =>
-        Array(outputWidth)
-          .fill(null)
-          .map(() => []),
-      );
-  }
 
   // Calculate base character dimensions in pixels
-  const baseCharWidth = canvasWidth / outputWidth;
-  const baseCharHeight = canvasHeight / outputHeight;
+  const baseCharWidth = canvasWidth / columns;
+  const baseCharHeight = canvasHeight / rows;
 
   // Adjust character width based on metadata for proper sampling, keep height unchanged
   const charWidth = baseCharWidth * metadata.width;
@@ -277,15 +236,13 @@ export function generateAsciiChars(
   // The circle radius in metadata is relative to font size, so we scale by character dimensions
   const circleRadiusInPixels = samplingConfig.circleRadius * Math.min(charWidth, charHeight);
 
-  // Store character dimensions and radius in visualization data
-  if (enableVisualization) {
-    visualizationData.charWidth = charWidth;
-    visualizationData.charHeight = charHeight;
-    visualizationData.circleRadius = circleRadiusInPixels;
-  }
+  const samplingData: CharacterSamplingData[][] = [];
 
-  for (let y = 0; y < outputHeight; y++) {
-    for (let x = 0; x < outputWidth; x++) {
+  for (let y = 0; y < rows; y++) {
+    const samplingDataRow: CharacterSamplingData[] = [];
+    samplingData.push(samplingDataRow);
+
+    for (let x = 0; x < columns; x++) {
       // Create sampling vector for this character position
       const rawSamplingVector = createSamplingVector(
         pixelBuffer,
@@ -300,7 +257,7 @@ export function generateAsciiChars(
       );
 
       let samplingVector = [...rawSamplingVector];
-      if (samplingConfig.externalPoints) {
+      if ("externalPoints" in samplingConfig) {
         const contextValues = sampleDirectionalContext(
           pixelBuffer,
           canvasWidth,
@@ -323,36 +280,9 @@ export function generateAsciiChars(
       // Find best matching character using K-d tree
       let selectedChar = matcher.findBestCharacter(samplingVector);
 
-      // Apply stickiness to reduce jitter
-      const previousChar = previousCharacters[y][x];
-      const previousVector = previousVectors[y][x];
-
-      if (previousChar && previousVector.length > 0) {
-        const distance = vectorDistance(samplingVector, previousVector);
-        if (distance < STICKINESS_THRESHOLD) {
-          selectedChar = previousChar;
-        }
-      }
-
-      // Update storage with current frame data
-      previousCharacters[y][x] = selectedChar;
-      previousVectors[y][x] = [...samplingVector];
-
       // Collect visualization data if enabled
       if (enableVisualization) {
-        const internalPoints = samplingConfig.points.map((point, index) => ({
-          x: point.x,
-          y: point.y,
-          lightness: rawSamplingVector[index] || 0, // Use raw values for better visualization
-        }));
-
-        visualizationData.characters.push({
-          charX: x,
-          charY: y,
-          samplingVector: [...rawSamplingVector], // Store raw vector for visualization
-          internalPoints,
-          externalPoints: [], // Focus on internal points for now
-        });
+        samplingDataRow.push({ samplingVector: [...rawSamplingVector] });
       }
 
       chars.push(selectedChar === "&nbsp;" ? " " : selectedChar);
@@ -367,6 +297,6 @@ export function generateAsciiChars(
       width: metadata.width,
       height: metadata.height,
     },
-    ...(enableVisualization && { visualization: visualizationData }),
+    samplingData,
   };
 }

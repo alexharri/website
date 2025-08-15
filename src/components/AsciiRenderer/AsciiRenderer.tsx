@@ -1,38 +1,40 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { AsciiRendererStyles } from "./AsciiRenderer.styles";
-import { generateAsciiChars, VisualizationData } from "./ascii/generateAsciiChars";
-import { AlphabetName } from "./alphabets/AlphabetManager";
+import { generateAsciiChars, CharacterSamplingData } from "./ascii/generateAsciiChars";
+import { AlphabetName, getAlphabetMetadata } from "./alphabets/AlphabetManager";
 import { useStyles } from "../../utils/styles";
 import { useCanvasContext } from "../../contexts/CanvasContext";
+import { colors, cssVariables } from "../../utils/cssVariables";
+import { useMonospaceCharacterWidthEm } from "../../utils/hooks/useMonospaceCharacterWidthEm";
 
 interface Props {
   alphabet: AlphabetName;
   onFrameRef: React.MutableRefObject<null | ((buffer: Uint8Array) => void)>;
   fontSize?: number;
+  characterWidthMultiplier: number;
+  characterHeightMultiplier: number;
   showSamplingPoints?: boolean;
   showExternalPoints?: boolean;
-  characterWidthMultiplier?: number;
-  characterHeightMultiplier?: number;
 }
 
 export function AsciiRenderer(props: Props) {
-  const ref = useRef<HTMLDivElement>(null);
+  const { alphabet, fontSize = 14, characterHeightMultiplier, characterWidthMultiplier } = props;
+  const containerRef = useRef<HTMLDivElement>(null);
+  const contentRef = useRef<HTMLDivElement>(null);
   const s = useStyles(AsciiRendererStyles);
   const preRef = useRef<HTMLPreElement>(null);
-  const [visualizationData, setVisualizationData] = useState<VisualizationData | null>(null);
-  const [renderParams, setRenderParams] = useState<{
-    renderedCharWidth: number;
-    renderedCharHeight: number;
-    horizontalOffset: number;
-    verticalOffset: number;
-  } | null>(null);
+  const [samplingData, setSamplingData] = useState<CharacterSamplingData[][]>([]);
+  const metadata = useMemo(() => getAlphabetMetadata(alphabet), [alphabet]);
+  const characterWidth = useMonospaceCharacterWidthEm(cssVariables.fontMonospace);
+
   const { canvasRef } = useCanvasContext();
 
   useEffect(() => {
     props.onFrameRef.current = function onFrame(pixelBuffer: Uint8Array): void {
-      const container = ref.current;
+      const container = containerRef.current;
+      const content = contentRef.current;
       const preEl = preRef.current;
-      if (!container || !preEl) return;
+      if (!container || !content || !preEl || characterWidth == null) return;
 
       const canvas = canvasRef.current;
       if (!canvas) return;
@@ -41,141 +43,143 @@ export function AsciiRenderer(props: Props) {
       if (!containerRect) return;
 
       const enableVisualization = props.showSamplingPoints || props.showExternalPoints;
-      const tempResult = generateAsciiChars(
-        pixelBuffer,
-        canvas.width,
-        canvas.height,
-        1,
-        1,
-        props.alphabet,
-        false,
-      );
 
-      const fontSize = props.fontSize || 14;
-      const baseCharWidth = fontSize;
-      const baseCharHeight = fontSize;
-      const characterWidthMultiplier = props.characterWidthMultiplier ?? 0.7;
-      const characterHeightMultiplier = props.characterHeightMultiplier ?? 1.0;
-      const widthMultiplier = characterWidthMultiplier;
-      const heightMultiplier = characterHeightMultiplier;
+      const renderedCharWidth = fontSize * metadata.width * characterWidthMultiplier;
+      const renderedCharHeight = fontSize * metadata.height * characterHeightMultiplier;
 
-      const canvasAspectRatio = canvas.width / canvas.height;
-      const containerAspectRatio = containerRect.width / containerRect.height;
+      let cols = Math.ceil(containerRect.width / renderedCharWidth);
+      let rows = Math.ceil(containerRect.height / renderedCharHeight);
 
-      let effectiveWidth, effectiveHeight;
-      if (containerAspectRatio > canvasAspectRatio) {
-        effectiveHeight = containerRect.height;
-        effectiveWidth = effectiveHeight * canvasAspectRatio;
-      } else {
-        effectiveWidth = containerRect.width;
-        effectiveHeight = effectiveWidth / canvasAspectRatio;
-      }
-
-      const renderedCharWidth = baseCharWidth * widthMultiplier;
-      const renderedCharHeight = baseCharHeight * tempResult.metadata.height * heightMultiplier;
-
-      let W = Math.floor(effectiveWidth / renderedCharWidth);
-      let H = Math.floor(effectiveHeight / renderedCharHeight);
-
-      if (W % 2 === 1) W += 1;
-      if (H % 2 === 1) H += 1;
+      if (cols % 2 === 0) cols += 1;
+      if (rows % 2 === 0) rows += 1;
 
       const result = generateAsciiChars(
         pixelBuffer,
         canvas.width,
         canvas.height,
-        W,
-        H,
-        props.alphabet,
+        cols,
+        rows,
+        alphabet,
         enableVisualization,
       );
 
       preEl.textContent = result.ascii;
 
-      const actualMonospaceWidth = 0.6;
-      const adjustedWidth = result.metadata.width * widthMultiplier;
-      const adjustedHeight = result.metadata.height * heightMultiplier;
-      const letterSpacing = `${adjustedWidth - actualMonospaceWidth}em`;
+      const adjustedWidth = result.metadata.width * characterWidthMultiplier;
+      const adjustedHeight = result.metadata.height * characterHeightMultiplier;
+      const letterSpacing = `${adjustedWidth - characterWidth}em`;
       const lineHeight = adjustedHeight;
 
       preEl.style.letterSpacing = letterSpacing;
       preEl.style.lineHeight = lineHeight.toString();
       preEl.style.fontSize = props.fontSize ? `${props.fontSize}px` : "14px";
 
-      const middleCharX = (W - 1) / 2;
-      const middleCharY = (H - 1) / 2;
+      const colMid = cols / 2;
+      const rowMid = rows / 2;
 
-      const middleCharPixelX = middleCharX * adjustedWidth * fontSize;
-      const middleCharPixelY = middleCharY * adjustedHeight * fontSize;
+      const xMid = colMid * adjustedWidth * fontSize;
+      const yMid = rowMid * adjustedHeight * fontSize;
 
-      const containerCenterX = containerRect.width / 2;
-      const containerCenterY = containerRect.height / 2;
+      const horizontalOffset = containerRect.width / 2 - xMid;
+      const verticalOffset = containerRect.height / 2 - yMid;
 
-      const horizontalOffset = containerCenterX - middleCharPixelX;
-      const verticalOffset = containerCenterY - middleCharPixelY;
+      content.style.transform = `translate(${horizontalOffset}px, ${verticalOffset}px)`;
 
-      preEl.style.transform = `translate(${horizontalOffset}px, ${verticalOffset}px)`;
-
-      if (enableVisualization && result.visualization) {
-        setVisualizationData(result.visualization);
-        setRenderParams({
-          renderedCharWidth,
-          renderedCharHeight,
-          horizontalOffset,
-          verticalOffset,
-        });
-      } else {
-        setVisualizationData(null);
-        setRenderParams(null);
-      }
+      setSamplingData(result.samplingData);
     };
   }, [
-    props.alphabet,
+    alphabet,
+    metadata,
     props.showSamplingPoints,
     props.showExternalPoints,
-    props.fontSize,
-    props.characterWidthMultiplier,
-    props.characterHeightMultiplier,
+    fontSize,
+    characterWidthMultiplier,
+    characterHeightMultiplier,
+    characterWidth,
   ]);
 
   return (
     <div
       data-ascii
-      ref={ref}
+      ref={containerRef}
       style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0 }}
       className={s("container")}
     >
-      <pre ref={preRef} className={s("pre")} />
-      {visualizationData && renderParams && props.showSamplingPoints && (
-        <div className={s("visualizationLayer")}>
-          {visualizationData.characters.flatMap((char) =>
-            char.internalPoints.map((point, pointIndex) => {
-              // Calculate pixel position using same transform as ASCII text
-              const pixelX = char.charX * renderParams.renderedCharWidth + point.x * renderParams.renderedCharWidth;
-              const pixelY = char.charY * renderParams.renderedCharHeight + point.y * renderParams.renderedCharHeight;
-              
-              // Apply the same offset as the ASCII text
-              const finalX = pixelX + renderParams.horizontalOffset;
-              const finalY = pixelY + renderParams.verticalOffset;
-
-              return (
-                <div
-                  key={`${char.charX}-${char.charY}-${pointIndex}`}
-                  className={s("samplingPoint")}
-                  style={{
-                    left: `${finalX}px`,
-                    top: `${finalY}px`,
-                    width: `${visualizationData.circleRadius * 2}px`,
-                    height: `${visualizationData.circleRadius * 2}px`,
-                    backgroundColor: `rgba(255, 255, 255, ${0.2 + point.lightness * 0.6})`,
-                    border: `1px solid rgba(255, 255, 255, 0.3)`,
-                  }}
-                />
-              );
-            })
-          )}
-        </div>
-      )}
+      <div className={s("content")} ref={contentRef}>
+        <pre ref={preRef} className={s("pre")} />
+        {characterWidth != null && samplingData.length > 0 && (
+          <div className={s("visualizationLayer")}>
+            {samplingData
+              .map((row, y) =>
+                row.map(({ samplingVector }, x) => {
+                  const sampleRectWidth = fontSize * metadata.width;
+                  const sampleRectHeight = fontSize * metadata.height;
+                  const boxWidth = sampleRectWidth * characterWidthMultiplier;
+                  const boxHeight = sampleRectHeight * characterHeightMultiplier;
+                  const letterWidth = characterWidth;
+                  const difference = (metadata.width * characterWidthMultiplier - letterWidth) / 2;
+                  const left = x * boxWidth - difference * fontSize;
+                  const top = y * boxHeight;
+                  const sampleRectXOff = (boxWidth - sampleRectWidth) / 2;
+                  const sampleRectYOff = (boxHeight - sampleRectHeight) / 2;
+                  const samplingCircleWidth = fontSize * metadata.samplingConfig.circleRadius * 2;
+                  return (
+                    <div
+                      key={[x, y].join(",")}
+                      style={{
+                        position: "absolute",
+                        width: boxWidth,
+                        height: boxHeight,
+                        left,
+                        top,
+                        // border: "1px solid red",
+                      }}
+                    >
+                      <div
+                        style={{
+                          position: "absolute",
+                          width: sampleRectWidth,
+                          height: sampleRectHeight,
+                          left: sampleRectXOff,
+                          top: sampleRectYOff,
+                          // border: "1px solid lightgreen",
+                        }}
+                      >
+                        {metadata.samplingConfig.points.map(({ x, y }, i) => (
+                          <div
+                            key={i}
+                            className={s("samplingPoint")}
+                            style={{
+                              left: x * 100 + "%",
+                              top: y * 100 + "%",
+                              width: samplingCircleWidth,
+                              height: samplingCircleWidth,
+                              border: `1px solid rgba(255, 255, 255, 0.2)`,
+                              backgroundColor: colors.background200,
+                            }}
+                          >
+                            <div
+                              style={{
+                                position: "absolute",
+                                top: 0,
+                                left: 0,
+                                right: 0,
+                                bottom: 0,
+                                borderRadius: "50%",
+                                backgroundColor: `rgba(255, 255, 255, ${samplingVector[i] * 0.7})`,
+                              }}
+                            />
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  );
+                }),
+              )
+              .flat()}
+          </div>
+        )}
+      </div>
     </div>
   );
 }

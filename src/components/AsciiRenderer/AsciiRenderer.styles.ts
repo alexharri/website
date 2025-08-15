@@ -7,6 +7,14 @@ export const AsciiRendererStyles = ({ styled }: StyleOptions) => ({
     position: relative;
   `,
 
+  content: styled.css`
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+  `,
+
   pre: styled.css`
     font-family: ${cssVariables.fontMonospace};
     font-size: 14px;
