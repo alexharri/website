@@ -34,12 +34,13 @@ function readPixelFromBuffer(
   pixelBuffer: Uint8Array,
   canvasWidth: number,
   canvasHeight: number,
-  x: number,
-  y: number,
+  tx: number,
+  ty: number,
+  pixelBufferScale: number,
 ) {
-  const pixelX = Math.floor(x * canvasWidth);
-  const pixelY = Math.floor((1 - y) * canvasHeight);
-  const index = (pixelY * canvasWidth + pixelX) * 4;
+  const pixelX = Math.floor(tx * canvasWidth * pixelBufferScale);
+  const pixelY = Math.floor((1 - ty) * canvasHeight * pixelBufferScale);
+  const index = (pixelY * (canvasWidth * pixelBufferScale) + pixelX) * 4;
 
   if (index >= 0 && index < pixelBuffer.length - 3) {
     return (pixelBuffer[index] << 16) | (pixelBuffer[index + 1] << 8) | pixelBuffer[index + 2];
@@ -61,6 +62,7 @@ function sampleCircularRegion(
   x: number,
   y: number,
   radius: number,
+  scale: number,
 ): number {
   let totalLightness = 0;
   let sampleCount = 0;
@@ -68,7 +70,7 @@ function sampleCircularRegion(
   // Always sample center point
   const tx = x / canvasWidth;
   const ty = y / canvasHeight;
-  const centerColor = readPixelFromBuffer(pixelBuffer, canvasWidth, canvasHeight, tx, ty);
+  const centerColor = readPixelFromBuffer(pixelBuffer, canvasWidth, canvasHeight, tx, ty, scale);
   totalLightness += lightness(centerColor);
   sampleCount++;
 
@@ -85,7 +87,7 @@ function sampleCircularRegion(
 
     // Check bounds
     if (tx >= 0 && tx <= 1 && ty >= 0 && ty <= 1) {
-      const hexColor = readPixelFromBuffer(pixelBuffer, canvasWidth, canvasHeight, tx, ty);
+      const hexColor = readPixelFromBuffer(pixelBuffer, canvasWidth, canvasHeight, tx, ty, scale);
       totalLightness += lightness(hexColor);
       sampleCount++;
     }
@@ -155,6 +157,7 @@ export type VisualizationMode = "raw" | "crunched";
 export function generateAsciiChars(
   matcher: CharacterMatcher,
   pixelBuffer: Uint8Array,
+  pixelBufferScale: number,
   canvasWidth: number,
   canvasHeight: number,
   fontSize: number,
@@ -204,7 +207,6 @@ export function generateAsciiChars(
   const offsetX = canvasWidth / 2 - xMid;
   const offsetY = canvasHeight / 2 - yMid;
 
-  console.log(boxHeight, boxWidth);
   function createSamplingVector(
     col: number,
     row: number,
@@ -228,6 +230,7 @@ export function generateAsciiChars(
         centerX,
         centerY,
         samplingRadius,
+        pixelBufferScale,
       );
 
       vector.push(lightness);

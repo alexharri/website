@@ -62,9 +62,12 @@ export function AsciiRenderer(props: Props) {
 
       const enableVisualization = !!props.showSamplingPoints || props.showExternalPoints;
 
+      const pixelBufferScale = canvas.width / containerRect.width;
+
       const result = generateAsciiChars(
         characterMatcher,
         pixelBuffer,
+        pixelBufferScale,
         containerRect.width,
         containerRect.height,
         fontSize,
