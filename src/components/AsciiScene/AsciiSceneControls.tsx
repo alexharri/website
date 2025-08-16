@@ -43,6 +43,7 @@ export const AsciiSceneControls: React.FC<AsciiSceneControlsProps> = ({
           options={[
             { value: "left", label: "ASCII" },
             { value: "split", label: "Split" },
+            { value: "transparent", label: "Transparent" },
             { value: "right", label: "Canvas" },
           ]}
           value={viewMode}

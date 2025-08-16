@@ -4,7 +4,7 @@ import { generateAsciiChars, VisualizationMode } from "./ascii/generateAsciiChar
 import { AlphabetName, getAlphabetMetadata } from "./alphabets/AlphabetManager";
 import { useStyles } from "../../utils/styles";
 import { useCanvasContext } from "../../contexts/CanvasContext";
-import { cssVariables } from "../../utils/cssVariables";
+import { colors, cssVariables } from "../../utils/cssVariables";
 import { useMonospaceCharacterWidthEm } from "../../utils/hooks/useMonospaceCharacterWidthEm";
 import { SamplingPointCanvas, renderSamplingPoints } from "./visualizeSampling";
 import { CharacterMatcher } from "./ascii/CharacterMatcher";
@@ -19,10 +19,18 @@ interface Props {
   showSamplingPoints?: VisualizationMode;
   showExternalPoints?: boolean;
   lightnessEasingFunction?: string;
+  transparent: boolean;
 }
 
 export function AsciiRenderer(props: Props) {
-  const { alphabet, fontSize = 14, characterHeightMultiplier, characterWidthMultiplier } = props;
+  const {
+    alphabet,
+    fontSize = 14,
+    characterHeightMultiplier,
+    characterWidthMultiplier,
+    showSamplingPoints,
+    transparent,
+  } = props;
   const containerRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
   const s = useStyles(AsciiRendererStyles);
@@ -132,12 +140,12 @@ export function AsciiRenderer(props: Props) {
       data-ascii
       ref={containerRef}
       style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0 }}
-      className={s("container")}
+      className={s("container", { transparent })}
     >
       <div className={s("content")} ref={contentRef}>
         <pre ref={preRef} className={s("pre")} />
       </div>
-      {props.showSamplingPoints && <SamplingPointCanvas onCanvasRef={samplingCanvasRef} />}
+      {showSamplingPoints && <SamplingPointCanvas onCanvasRef={samplingCanvasRef} />}
     </div>
   );
 }

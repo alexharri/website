@@ -7,6 +7,7 @@ import { useViewportWidth } from "../../utils/hooks/useViewportWidth";
 import { CanvasProvider, useCanvasContext } from "../../contexts/CanvasContext";
 import { AsciiSceneControls } from "./AsciiSceneControls";
 import { SplitView, ViewMode } from "../SplitView";
+import { VisualizationMode } from "../AsciiRenderer/ascii/generateAsciiChars";
 
 interface AsciiSceneProps {
   children: React.ReactNode;
@@ -14,7 +15,7 @@ interface AsciiSceneProps {
   showControls?: boolean;
   alphabet?: AlphabetName;
   fontSize?: number;
-  showSamplingPoints?: boolean;
+  showSamplingPoints?: VisualizationMode;
   showExternalPoints?: boolean;
   lightnessEasingFunction?: string;
 }
@@ -39,8 +40,8 @@ const AsciiSceneInner: React.FC<
   height,
   showControls = true,
   fontSize,
-  showSamplingPoints = false,
-  showExternalPoints = false,
+  showSamplingPoints,
+  showExternalPoints,
   lightnessEasingFunction,
   onFrameRef,
 }) => {
@@ -91,11 +92,12 @@ const AsciiSceneInner: React.FC<
             onFrameRef={onFrameRef}
             alphabet={selectedAlphabet}
             fontSize={fontSize}
-            showSamplingPoints={showSamplingPoints}
-            showExternalPoints={showExternalPoints}
             characterWidthMultiplier={characterWidthMultiplier}
             characterHeightMultiplier={characterHeightMultiplier}
             lightnessEasingFunction={lightnessEasingFunction}
+            showSamplingPoints={showSamplingPoints}
+            showExternalPoints={showExternalPoints}
+            transparent={viewMode === "transparent"}
           />,
           children,
         ]}

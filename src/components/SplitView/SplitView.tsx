@@ -3,14 +3,13 @@ import { useStyles } from "../../utils/styles";
 import { clamp } from "../../math/math";
 import SplitViewStyles from "./SplitView.styles";
 
-export type ViewMode = "left" | "split" | "right";
+export type ViewMode = "left" | "split" | "right" | "transparent";
 
 interface SplitViewProps {
   children: [React.ReactNode, React.ReactNode];
   height: number;
   width: number;
   viewMode: ViewMode;
-  onViewModeChange?: (mode: ViewMode) => void;
   splitPosition?: number;
   onSplitPositionChange?: (position: number) => void;
   wrapperRef?: React.RefObject<HTMLDivElement>;
@@ -21,7 +20,6 @@ export const SplitView: React.FC<SplitViewProps> = ({
   height,
   width,
   viewMode,
-  onViewModeChange,
   splitPosition = 0.5,
   onSplitPositionChange,
   wrapperRef,
@@ -83,9 +81,9 @@ export const SplitView: React.FC<SplitViewProps> = ({
             transform:
               viewMode === "split"
                 ? `translateX(calc(-${width * (1 - splitPosition)}px))`
-                : viewMode === "right"
-                ? "translateX(-100%)"
-                : "translateX(0)",
+                : viewMode === "left" || viewMode === "transparent"
+                ? "translateX(0)"
+                : "translateX(-100%)",
             transition: isDragging ? "none" : "all 0.5s",
           }}
         >
@@ -95,21 +93,22 @@ export const SplitView: React.FC<SplitViewProps> = ({
               transform:
                 viewMode === "split"
                   ? `translateX(calc(${-splitPercentage / 2}% + 50%))`
-                  : viewMode === "right"
-                  ? "translateX(100%)"
-                  : "translateX(0)",
+                  : viewMode === "left" || viewMode === "transparent"
+                  ? "translateX(0)"
+                  : "translateX(100%)",
               transition: isDragging ? "none" : "all 0.5s",
             }}
           >
             {leftContent}
           </div>
         </div>
-        
+
         <div
           className={s("rightPanel", { split: viewMode === "split" })}
           style={{
             height,
-            transform: viewMode === "split" ? `translateX(${width * splitPosition}px)` : "translateX(0)",
+            transform:
+              viewMode === "split" ? `translateX(${width * splitPosition}px)` : "translateX(0)",
             transition: isDragging ? "none" : "all 0.5s",
           }}
         >

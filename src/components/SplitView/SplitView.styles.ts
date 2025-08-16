@@ -58,7 +58,6 @@ export default ({ styled, theme }: StyleOptions) => ({
 
   leftPanelInner: styled.css`
     position: absolute;
-    background: ${theme.background200};
     top: 0;
     bottom: 0;
     left: 0;
