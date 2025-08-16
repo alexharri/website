@@ -1,9 +1,33 @@
 import { CharacterMatcher, SamplingPoint } from "./CharacterMatcher";
+import Bezier from "bezier-easing";
 import { AlphabetName, getAlphabetMetadata } from "../alphabets/AlphabetManager";
 
 const CONTRAST_EXPONENT_GLOBAL = 3;
 const CONTRAST_EXPONENT_LOCAL = 7;
 const SAMPLE_QUALITY = 10; // Number of samples per circle (higher = better quality, slower)
+
+const lightnessEasingFunctions = {
+  default: Bezier(0.38, 0.01, 0.67, 1),
+  soft: Bezier(0.22, 0.02, 0.76, 0.82),
+};
+
+const easingLookupTables: Record<string, Float32Array> = {};
+const LOOKUP_TABLE_SIZE = 512;
+
+for (const [name, easingFn] of Object.entries(lightnessEasingFunctions)) {
+  const lut = new Float32Array(LOOKUP_TABLE_SIZE + 1);
+  for (let i = 0; i <= LOOKUP_TABLE_SIZE; i++) {
+    const t = i / LOOKUP_TABLE_SIZE;
+    lut[i] = easingFn(t);
+  }
+  easingLookupTables[name] = lut;
+}
+
+function applyEasingLookup(t: number, lookupTable: Float32Array): number {
+  const scaledValue = t * LOOKUP_TABLE_SIZE;
+  const index = Math.floor(scaledValue);
+  return lookupTable[index];
+}
 
 function readPixelFromBuffer(
   pixelBuffer: Uint8Array,
@@ -168,28 +192,18 @@ function crunchSamplingVectorDirectional(
     throw new Error("Vector and context values must have the same length");
   }
 
+  // const maxExternalValue = Math.max(...contextValues);
   return vector.map((value, index) => {
     const contextValue = contextValues[index];
     if (contextValue <= value) return value;
 
-    // Normalize using the contextual max
     const normalized = value / contextValue;
-    // Apply power-law enhancement
     const enhanced = Math.pow(normalized, exponent);
-    // Rescale back to original value's scale (not context scale)
     return enhanced * contextValue;
   });
 }
 
 // Global character matcher instance (created once for performance)
-let characterMatcher: CharacterMatcher | null = null;
-
-function getCharacterMatcher(): CharacterMatcher {
-  if (!characterMatcher) {
-    characterMatcher = new CharacterMatcher();
-  }
-  return characterMatcher;
-}
 
 export interface CharacterSamplingData {
   samplingVector: number[];
@@ -204,7 +218,10 @@ export interface GenerationResult {
   samplingData: CharacterSamplingData[][];
 }
 
+export type VisualizationMode = "raw" | "crunched";
+
 export function generateAsciiChars(
+  matcher: CharacterMatcher,
   pixelBuffer: Uint8Array,
   canvasWidth: number,
   canvasHeight: number,
@@ -212,13 +229,9 @@ export function generateAsciiChars(
   rows: number,
   alphabet: AlphabetName,
   enableVisualization?: boolean,
+  visualizationMode?: VisualizationMode,
+  lightnessEasingFunction?: string,
 ): GenerationResult {
-  const matcher = getCharacterMatcher();
-
-  if (alphabet !== matcher.getCurrentAlphabet()) {
-    matcher.switchAlphabet(alphabet);
-  }
-
   const metadata = getAlphabetMetadata(alphabet);
   const samplingConfig = metadata.samplingConfig;
 
@@ -237,6 +250,12 @@ export function generateAsciiChars(
   const circleRadiusInPixels = samplingConfig.circleRadius * Math.min(charWidth, charHeight);
 
   const samplingData: CharacterSamplingData[][] = [];
+
+  // Pre-compute easing lookup table once
+  const easingLookupTable =
+    lightnessEasingFunction && lightnessEasingFunction in easingLookupTables
+      ? easingLookupTables[lightnessEasingFunction]
+      : null;
 
   for (let y = 0; y < rows; y++) {
     const samplingDataRow: CharacterSamplingData[] = [];
@@ -257,6 +276,13 @@ export function generateAsciiChars(
       );
 
       let samplingVector = [...rawSamplingVector];
+
+      // Apply lightness easing function if specified
+      if (easingLookupTable) {
+        // samplingVector = samplingVector.map((value) => applyEasingLookup(value, easingLookupTable));
+        // samplingVector = samplingVector.map((value) => clamp(value - 0.01, 0, 1));
+      }
+
       if ("externalPoints" in samplingConfig) {
         const contextValues = sampleDirectionalContext(
           pixelBuffer,
@@ -270,7 +296,7 @@ export function generateAsciiChars(
           circleRadiusInPixels,
         );
         samplingVector = crunchSamplingVectorDirectional(
-          rawSamplingVector,
+          samplingVector,
           contextValues,
           CONTRAST_EXPONENT_LOCAL,
         );
@@ -282,7 +308,8 @@ export function generateAsciiChars(
 
       // Collect visualization data if enabled
       if (enableVisualization) {
-        samplingDataRow.push({ samplingVector: [...rawSamplingVector] });
+        const vectorToStore = visualizationMode === "crunched" ? samplingVector : rawSamplingVector;
+        samplingDataRow.push({ samplingVector: vectorToStore });
       }
 
       chars.push(selectedChar === "&nbsp;" ? " " : selectedChar);

@@ -28,21 +28,24 @@ export interface AlphabetMetadata {
   height: number; // character height relative to font size
 }
 
+type Effect = (vectors: number[][]) => void;
+
 export class CharacterMatcher {
   private kdTree!: KdTree<string>;
   private samplingConfig!: SamplingConfig;
   private metadata!: AlphabetMetadata;
   private currentAlphabet: AlphabetName = "default";
 
-  constructor() {
-    // Load default alphabet synchronously
-    this.loadAlphabet("default");
-  }
+  constructor() {}
 
-  loadAlphabet(alphabet: AlphabetName): void {
-    // Get alphabet data
+  loadAlphabet(alphabet: AlphabetName, effects: Effect[]): void {
     const characterVectors = getAlphabetCharacterVectors(alphabet);
     const metadata = getAlphabetMetadata(alphabet);
+
+    const vectors = characterVectors.map(({ vector }) => vector);
+    for (const effect of effects) {
+      effect(vectors);
+    }
 
     this.kdTree = new KdTree(characterVectors.map(({ vector, char }) => ({ vector, data: char })));
     this.currentAlphabet = alphabet;
@@ -67,11 +70,5 @@ export class CharacterMatcher {
 
   getCurrentAlphabet(): AlphabetName {
     return this.currentAlphabet;
-  }
-
-  switchAlphabet(name: AlphabetName): void {
-    if (name !== this.currentAlphabet) {
-      this.loadAlphabet(name);
-    }
   }
 }

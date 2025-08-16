@@ -1,12 +1,14 @@
 import { useEffect, useMemo, useRef } from "react";
 import { AsciiRendererStyles } from "./AsciiRenderer.styles";
-import { generateAsciiChars } from "./ascii/generateAsciiChars";
+import { generateAsciiChars, VisualizationMode } from "./ascii/generateAsciiChars";
 import { AlphabetName, getAlphabetMetadata } from "./alphabets/AlphabetManager";
 import { useStyles } from "../../utils/styles";
 import { useCanvasContext } from "../../contexts/CanvasContext";
 import { cssVariables } from "../../utils/cssVariables";
 import { useMonospaceCharacterWidthEm } from "../../utils/hooks/useMonospaceCharacterWidthEm";
 import { SamplingPointCanvas, renderSamplingPoints } from "./SamplingPointCanvas";
+import { CharacterMatcher } from "./ascii/CharacterMatcher";
+import { EFFECTS } from "./ascii/effects";
 
 interface Props {
   alphabet: AlphabetName;
@@ -14,8 +16,9 @@ interface Props {
   fontSize?: number;
   characterWidthMultiplier: number;
   characterHeightMultiplier: number;
-  showSamplingPoints?: boolean;
+  showSamplingPoints?: VisualizationMode;
   showExternalPoints?: boolean;
+  lightnessEasingFunction?: string;
 }
 
 export function AsciiRenderer(props: Props) {
@@ -30,6 +33,12 @@ export function AsciiRenderer(props: Props) {
 
   const { canvasRef } = useCanvasContext();
 
+  const characterMatcher = useMemo(() => {
+    const matcher = new CharacterMatcher();
+    matcher.loadAlphabet(alphabet, [EFFECTS.componentWiseGlobalNormalization]);
+    return matcher;
+  }, [alphabet]);
+
   useEffect(() => {
     props.onFrameRef.current = function onFrame(pixelBuffer: Uint8Array): void {
       const container = containerRef.current;
@@ -43,7 +52,7 @@ export function AsciiRenderer(props: Props) {
       const containerRect = container?.getBoundingClientRect();
       if (!containerRect) return;
 
-      const enableVisualization = props.showSamplingPoints || props.showExternalPoints;
+      const enableVisualization = !!props.showSamplingPoints || props.showExternalPoints;
 
       const renderedCharWidth = fontSize * metadata.width * characterWidthMultiplier;
       const renderedCharHeight = fontSize * metadata.height * characterHeightMultiplier;
@@ -55,6 +64,7 @@ export function AsciiRenderer(props: Props) {
       if (rows % 2 === 0) rows += 1;
 
       const result = generateAsciiChars(
+        characterMatcher,
         pixelBuffer,
         canvas.width,
         canvas.height,
@@ -62,6 +72,8 @@ export function AsciiRenderer(props: Props) {
         rows,
         alphabet,
         enableVisualization,
+        props.showSamplingPoints,
+        props.lightnessEasingFunction,
       );
 
       preEl.textContent = result.ascii;
@@ -87,7 +99,7 @@ export function AsciiRenderer(props: Props) {
       content.style.transform = `translate(${horizontalOffset}px, ${verticalOffset}px)`;
 
       // Render sampling points directly to canvas if visualization is enabled
-      if (enableVisualization && samplingCanvasRef.current && characterWidth != null) {
+      if (props.showSamplingPoints && samplingCanvasRef.current && characterWidth != null) {
         renderSamplingPoints(
           samplingCanvasRef.current,
           result.samplingData,
@@ -108,6 +120,7 @@ export function AsciiRenderer(props: Props) {
     metadata,
     props.showSamplingPoints,
     props.showExternalPoints,
+    props.lightnessEasingFunction,
     fontSize,
     characterWidthMultiplier,
     characterHeightMultiplier,
@@ -124,9 +137,7 @@ export function AsciiRenderer(props: Props) {
       <div className={s("content")} ref={contentRef}>
         <pre ref={preRef} className={s("pre")} />
       </div>
-      {(props.showSamplingPoints || props.showExternalPoints) && (
-        <SamplingPointCanvas onCanvasRef={samplingCanvasRef} />
-      )}
+      {props.showSamplingPoints && <SamplingPointCanvas onCanvasRef={samplingCanvasRef} />}
     </div>
   );
 }

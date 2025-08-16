@@ -16,6 +16,7 @@ interface AsciiSceneProps {
   fontSize?: number;
   showSamplingPoints?: boolean;
   showExternalPoints?: boolean;
+  lightnessEasingFunction?: string;
 }
 
 export const AsciiScene: React.FC<AsciiSceneProps> = (props) => {
@@ -40,6 +41,7 @@ const AsciiSceneInner: React.FC<
   fontSize,
   showSamplingPoints = false,
   showExternalPoints = false,
+  lightnessEasingFunction,
   onFrameRef,
 }) => {
   const { orbitControlsTargetRef } = useCanvasContext();
@@ -93,6 +95,7 @@ const AsciiSceneInner: React.FC<
             showExternalPoints={showExternalPoints}
             characterWidthMultiplier={characterWidthMultiplier}
             characterHeightMultiplier={characterHeightMultiplier}
+            lightnessEasingFunction={lightnessEasingFunction}
           />,
           children,
         ]}

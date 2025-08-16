@@ -278,8 +278,8 @@ export class AsciiRenderer {
 
     for (const vector of vectors) {
       for (let i = 0; i < K; i++) {
-        vector[i] = vector[i] * scalars[i];
-        // vector[i] = vector[i] / maxValue;
+        // vector[i] = vector[i] * scalars[i];
+        vector[i] = vector[i] / maxValue;
       }
     }
   }
@@ -359,7 +359,7 @@ export class AsciiRenderer {
     // Save the debug image
     const charCode = char.charCodeAt(0);
     let filename: string;
-    
+
     if (char === " ") {
       filename = "space.png";
     } else if (char.match(/[a-z]/)) {
@@ -398,14 +398,15 @@ export class AsciiRenderer {
       // Extract character from filename for sorting
       const getChar = (filename: string) => {
         if (filename === "space.png") return " ";
-        if (filename.startsWith("char_")) return String.fromCharCode(parseInt(filename.slice(5, -4)));
+        if (filename.startsWith("char_"))
+          return String.fromCharCode(parseInt(filename.slice(5, -4)));
         if (filename.includes("_")) return filename.split("_")[0];
         return filename.replace(".png", "");
       };
-      
+
       const charA = getChar(a);
       const charB = getChar(b);
-      
+
       // Sort by ASCII code for consistent ordering
       return charA.charCodeAt(0) - charB.charCodeAt(0);
     });
