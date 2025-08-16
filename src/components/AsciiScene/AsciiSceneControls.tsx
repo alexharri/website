@@ -84,8 +84,8 @@ export const AsciiSceneControls: React.FC<AsciiSceneControlsProps> = ({
           </button>
           <input
             type="range"
-            min="0.1"
-            max="2.0"
+            min="0.3"
+            max="4.0"
             step="0.05"
             value={characterWidthMultiplier}
             onChange={(e) => setCharacterWidthMultiplier(Number(e.target.value))}

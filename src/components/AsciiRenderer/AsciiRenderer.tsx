@@ -6,7 +6,7 @@ import { useStyles } from "../../utils/styles";
 import { useCanvasContext } from "../../contexts/CanvasContext";
 import { cssVariables } from "../../utils/cssVariables";
 import { useMonospaceCharacterWidthEm } from "../../utils/hooks/useMonospaceCharacterWidthEm";
-import { SamplingPointCanvas, renderSamplingPoints } from "./SamplingPointCanvas";
+import { SamplingPointCanvas, renderSamplingPoints } from "./visualizeSampling";
 import { CharacterMatcher } from "./ascii/CharacterMatcher";
 import { EFFECTS } from "./ascii/effects";
 

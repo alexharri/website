@@ -207,6 +207,7 @@ function crunchSamplingVectorDirectional(
 
 export interface CharacterSamplingData {
   samplingVector: number[];
+  externalSamplingVector: number[];
 }
 
 export interface GenerationResult {
@@ -283,8 +284,9 @@ export function generateAsciiChars(
         // samplingVector = samplingVector.map((value) => clamp(value - 0.01, 0, 1));
       }
 
+      let externalSamplingVector: number[] = [];
       if ("externalPoints" in samplingConfig) {
-        const contextValues = sampleDirectionalContext(
+        externalSamplingVector = sampleDirectionalContext(
           pixelBuffer,
           canvasWidth,
           canvasHeight,
@@ -297,7 +299,7 @@ export function generateAsciiChars(
         );
         samplingVector = crunchSamplingVectorDirectional(
           samplingVector,
-          contextValues,
+          externalSamplingVector,
           CONTRAST_EXPONENT_LOCAL,
         );
       }
@@ -309,7 +311,7 @@ export function generateAsciiChars(
       // Collect visualization data if enabled
       if (enableVisualization) {
         const vectorToStore = visualizationMode === "crunched" ? samplingVector : rawSamplingVector;
-        samplingDataRow.push({ samplingVector: vectorToStore });
+        samplingDataRow.push({ samplingVector: vectorToStore, externalSamplingVector });
       }
 
       chars.push(selectedChar === "&nbsp;" ? " " : selectedChar);
