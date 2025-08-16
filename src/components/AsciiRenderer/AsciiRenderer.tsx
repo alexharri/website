@@ -4,7 +4,7 @@ import { generateAsciiChars, VisualizationMode } from "./ascii/generateAsciiChar
 import { AlphabetName, getAlphabetMetadata } from "./alphabets/AlphabetManager";
 import { useStyles } from "../../utils/styles";
 import { useCanvasContext } from "../../contexts/CanvasContext";
-import { colors, cssVariables } from "../../utils/cssVariables";
+import { cssVariables } from "../../utils/cssVariables";
 import { useMonospaceCharacterWidthEm } from "../../utils/hooks/useMonospaceCharacterWidthEm";
 import { SamplingPointCanvas, renderSamplingPoints } from "./visualizeSampling";
 import { CharacterMatcher } from "./ascii/CharacterMatcher";
@@ -62,23 +62,16 @@ export function AsciiRenderer(props: Props) {
 
       const enableVisualization = !!props.showSamplingPoints || props.showExternalPoints;
 
-      const renderedCharWidth = fontSize * metadata.width * characterWidthMultiplier;
-      const renderedCharHeight = fontSize * metadata.height * characterHeightMultiplier;
-
-      let cols = Math.ceil(containerRect.width / renderedCharWidth);
-      let rows = Math.ceil(containerRect.height / renderedCharHeight);
-
-      if (cols % 2 === 0) cols += 1;
-      if (rows % 2 === 0) rows += 1;
-
       const result = generateAsciiChars(
         characterMatcher,
         pixelBuffer,
-        canvas.width,
-        canvas.height,
-        cols,
-        rows,
+        containerRect.width,
+        containerRect.height,
+        fontSize,
+        characterWidth,
         alphabet,
+        characterWidthMultiplier,
+        characterHeightMultiplier,
         enableVisualization,
         props.showSamplingPoints,
         props.lightnessEasingFunction,
@@ -95,16 +88,7 @@ export function AsciiRenderer(props: Props) {
       preEl.style.lineHeight = lineHeight.toString();
       preEl.style.fontSize = props.fontSize ? `${props.fontSize}px` : "14px";
 
-      const colMid = cols / 2;
-      const rowMid = rows / 2;
-
-      const xMid = colMid * adjustedWidth * fontSize;
-      const yMid = rowMid * adjustedHeight * fontSize;
-
-      const horizontalOffset = containerRect.width / 2 - xMid;
-      const verticalOffset = containerRect.height / 2 - yMid;
-
-      content.style.transform = `translate(${horizontalOffset}px, ${verticalOffset}px)`;
+      content.style.transform = `translate(${result.offsetX}px, ${result.offsetY}px)`;
 
       // Render sampling points directly to canvas if visualization is enabled
       if (props.showSamplingPoints && samplingCanvasRef.current && characterWidth != null) {
@@ -118,8 +102,8 @@ export function AsciiRenderer(props: Props) {
           characterWidth,
           containerRect.width,
           containerRect.height,
-          horizontalOffset,
-          verticalOffset,
+          result.offsetX,
+          result.offsetY,
         );
       }
     };

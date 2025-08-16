@@ -1,6 +1,7 @@
-import { CharacterMatcher, SamplingPoint } from "./CharacterMatcher";
+import { CharacterMatcher } from "./CharacterMatcher";
 import Bezier from "bezier-easing";
 import { AlphabetName, getAlphabetMetadata } from "../alphabets/AlphabetManager";
+import { clamp } from "../../../math/math";
 
 const CONTRAST_EXPONENT_GLOBAL = 3;
 const CONTRAST_EXPONENT_LOCAL = 7;
@@ -57,23 +58,17 @@ function sampleCircularRegion(
   pixelBuffer: Uint8Array,
   canvasWidth: number,
   canvasHeight: number,
-  centerX: number,
-  centerY: number,
+  x: number,
+  y: number,
   radius: number,
 ): number {
   let totalLightness = 0;
   let sampleCount = 0;
 
   // Always sample center point
-  const centerX_t = centerX / canvasWidth;
-  const centerY_t = centerY / canvasHeight;
-  const centerColor = readPixelFromBuffer(
-    pixelBuffer,
-    canvasWidth,
-    canvasHeight,
-    centerX_t,
-    centerY_t,
-  );
+  const tx = x / canvasWidth;
+  const ty = y / canvasHeight;
+  const centerColor = readPixelFromBuffer(pixelBuffer, canvasWidth, canvasHeight, tx, ty);
   totalLightness += lightness(centerColor);
   sampleCount++;
 
@@ -81,90 +76,22 @@ function sampleCircularRegion(
   for (let i = 0; i < SAMPLE_QUALITY; i++) {
     const angle = (i / SAMPLE_QUALITY) * 2 * Math.PI;
 
-    const sampleX = centerX + Math.cos(angle) * radius;
-    const sampleY = centerY + Math.sin(angle) * radius;
+    const sampleX = x + Math.cos(angle) * radius;
+    const sampleY = y + Math.sin(angle) * radius;
 
     // Convert to normalized coordinates
-    const x_t = sampleX / canvasWidth;
-    const y_t = sampleY / canvasHeight;
+    const tx = sampleX / canvasWidth;
+    const ty = sampleY / canvasHeight;
 
     // Check bounds
-    if (x_t >= 0 && x_t <= 1 && y_t >= 0 && y_t <= 1) {
-      const hexColor = readPixelFromBuffer(pixelBuffer, canvasWidth, canvasHeight, x_t, y_t);
+    if (tx >= 0 && tx <= 1 && ty >= 0 && ty <= 1) {
+      const hexColor = readPixelFromBuffer(pixelBuffer, canvasWidth, canvasHeight, tx, ty);
       totalLightness += lightness(hexColor);
       sampleCount++;
     }
   }
 
   return sampleCount > 0 ? totalLightness / sampleCount : 0;
-}
-
-function createSamplingVector(
-  pixelBuffer: Uint8Array,
-  canvasWidth: number,
-  canvasHeight: number,
-  charX: number,
-  charY: number,
-  charWidth: number,
-  charHeight: number,
-  samplingPoints: SamplingPoint[],
-  samplingRadius: number,
-): number[] {
-  const vector: number[] = [];
-
-  for (const point of samplingPoints) {
-    // Convert normalized character coordinates to pixel coordinates
-    const pixelX = charX * charWidth + point.x * charWidth;
-    const pixelY = charY * charHeight + point.y * charHeight;
-
-    // Sample the circular region at this point
-    const lightness = sampleCircularRegion(
-      pixelBuffer,
-      canvasWidth,
-      canvasHeight,
-      pixelX,
-      pixelY,
-      samplingRadius,
-    );
-
-    vector.push(lightness);
-  }
-
-  return vector;
-}
-
-function sampleDirectionalContext(
-  pixelBuffer: Uint8Array,
-  canvasWidth: number,
-  canvasHeight: number,
-  charX: number,
-  charY: number,
-  charWidth: number,
-  charHeight: number,
-  externalPoints: SamplingPoint[],
-  samplingRadius: number,
-): number[] {
-  const contextValues: number[] = [];
-
-  for (const externalPoint of externalPoints) {
-    // Calculate actual external sampling position in pixels
-    const externalX = charX * charWidth + externalPoint.x * charWidth;
-    const externalY = charY * charHeight + externalPoint.y * charHeight;
-
-    // Sample the external context point
-    const contextLightness = sampleCircularRegion(
-      pixelBuffer,
-      canvasWidth,
-      canvasHeight,
-      externalX,
-      externalY,
-      samplingRadius,
-    );
-
-    contextValues.push(contextLightness);
-  }
-
-  return contextValues;
 }
 
 function crunchSamplingVector(vector: number[], exponent: number): number[] {
@@ -217,6 +144,10 @@ export interface GenerationResult {
     height: number; // character height relative to font size
   };
   samplingData: CharacterSamplingData[][];
+  cols: number;
+  rows: number;
+  offsetX: number;
+  offsetY: number;
 }
 
 export type VisualizationMode = "raw" | "crunched";
@@ -226,9 +157,11 @@ export function generateAsciiChars(
   pixelBuffer: Uint8Array,
   canvasWidth: number,
   canvasHeight: number,
-  columns: number,
-  rows: number,
+  fontSize: number,
+  characterWidth: number,
   alphabet: AlphabetName,
+  characterWidthMultiplier: number,
+  characterHeightMultiplier: number,
   enableVisualization?: boolean,
   visualizationMode?: VisualizationMode,
   lightnessEasingFunction?: string,
@@ -238,65 +171,89 @@ export function generateAsciiChars(
 
   const chars: string[] = [];
 
-  // Calculate base character dimensions in pixels
-  const baseCharWidth = canvasWidth / columns;
-  const baseCharHeight = canvasHeight / rows;
+  const sampleRectWidth = fontSize * metadata.width;
+  const sampleRectHeight = fontSize * metadata.height;
+  const boxWidth = sampleRectWidth * characterWidthMultiplier;
+  const boxHeight = sampleRectHeight * characterHeightMultiplier;
+  const letterWidth = characterWidth;
+  const difference = (metadata.width * characterWidthMultiplier - letterWidth) / 2;
+  const sampleRectXOff = (boxWidth - sampleRectWidth) / 2;
+  const sampleRectYOff = (boxHeight - sampleRectHeight) / 2;
 
-  // Adjust character width based on metadata for proper sampling, keep height unchanged
-  const charWidth = baseCharWidth * metadata.width;
-  const charHeight = baseCharHeight;
+  const samplingRadius = fontSize * metadata.samplingConfig.circleRadius;
 
-  // Scale the normalized circle radius to pixels based on character size
-  // The circle radius in metadata is relative to font size, so we scale by character dimensions
-  const circleRadiusInPixels = samplingConfig.circleRadius * Math.min(charWidth, charHeight);
+  let cols = Math.ceil(canvasWidth / boxWidth);
+  let rows = Math.ceil(canvasHeight / boxHeight);
+
+  if (cols % 2 === 0) cols += 1;
+  if (rows % 2 === 0) rows += 1;
 
   const samplingData: CharacterSamplingData[][] = [];
 
-  // Pre-compute easing lookup table once
   const easingLookupTable =
     lightnessEasingFunction && lightnessEasingFunction in easingLookupTables
       ? easingLookupTables[lightnessEasingFunction]
       : null;
 
-  for (let y = 0; y < rows; y++) {
-    const samplingDataRow: CharacterSamplingData[] = [];
-    samplingData.push(samplingDataRow);
+  const colMid = cols / 2;
+  const rowMid = rows / 2;
 
-    for (let x = 0; x < columns; x++) {
-      // Create sampling vector for this character position
-      const rawSamplingVector = createSamplingVector(
+  const xMid = colMid * boxWidth;
+  const yMid = rowMid * boxHeight;
+
+  const offsetX = canvasWidth / 2 - xMid;
+  const offsetY = canvasHeight / 2 - yMid;
+
+  console.log(boxHeight, boxWidth);
+  function createSamplingVector(
+    col: number,
+    row: number,
+    points: { x: number; y: number }[],
+  ): number[] {
+    const vector: number[] = [];
+
+    const left = clamp(col * boxWidth - difference * fontSize + offsetX, 0, canvasWidth);
+    const top = clamp(row * boxHeight + offsetY, 0, canvasHeight);
+    const sampleRectLeft = left + sampleRectXOff;
+    const sampleRectTop = top + sampleRectYOff;
+
+    for (const point of points) {
+      const centerX = sampleRectLeft + point.x * sampleRectWidth;
+      const centerY = sampleRectTop + point.y * sampleRectHeight;
+
+      const lightness = sampleCircularRegion(
         pixelBuffer,
         canvasWidth,
         canvasHeight,
-        x,
-        y,
-        charWidth,
-        charHeight,
-        samplingConfig.points,
-        circleRadiusInPixels,
+        centerX,
+        centerY,
+        samplingRadius,
       );
+
+      vector.push(lightness);
+    }
+
+    return vector;
+  }
+
+  for (let row = 0; row < rows; row++) {
+    const samplingDataRow: CharacterSamplingData[] = [];
+    samplingData.push(samplingDataRow);
+
+    for (let col = 0; col < cols; col++) {
+      const rawSamplingVector = createSamplingVector(col, row, samplingConfig.points);
 
       let samplingVector = [...rawSamplingVector];
 
       // Apply lightness easing function if specified
       if (easingLookupTable) {
-        // samplingVector = samplingVector.map((value) => applyEasingLookup(value, easingLookupTable));
+        samplingVector = samplingVector.map((value) => applyEasingLookup(value, easingLookupTable));
         // samplingVector = samplingVector.map((value) => clamp(value - 0.01, 0, 1));
       }
 
       let externalSamplingVector: number[] = [];
       if ("externalPoints" in samplingConfig) {
-        externalSamplingVector = sampleDirectionalContext(
-          pixelBuffer,
-          canvasWidth,
-          canvasHeight,
-          x,
-          y,
-          charWidth,
-          charHeight,
-          samplingConfig.externalPoints,
-          circleRadiusInPixels,
-        );
+        externalSamplingVector = createSamplingVector(col, row, samplingConfig.externalPoints);
         samplingVector = crunchSamplingVectorDirectional(
           samplingVector,
           externalSamplingVector,
@@ -327,5 +284,9 @@ export function generateAsciiChars(
       height: metadata.height,
     },
     samplingData,
+    cols,
+    rows,
+    offsetX,
+    offsetY,
   };
 }

@@ -1,6 +1,5 @@
 import { CharacterSamplingData } from "./ascii/generateAsciiChars";
 import { AlphabetName, getAlphabetMetadata } from "./alphabets/AlphabetManager";
-import { colors } from "../../utils/cssVariables";
 
 interface Props {
   onCanvasRef: React.MutableRefObject<HTMLCanvasElement | null>;
@@ -78,17 +77,17 @@ export function renderSamplingPoints(
         const radius = samplingCircleWidth / 2;
 
         // Draw border circle
-        ctx.strokeStyle = "rgba(255, 255, 255, 0.2)";
+        ctx.strokeStyle = "rgba(255, 255, 255, 0.1)";
         ctx.lineWidth = 1;
         ctx.beginPath();
         ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI);
         ctx.stroke();
 
         // Draw background
-        ctx.fillStyle = colors.background200;
-        ctx.beginPath();
-        ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI);
-        ctx.fill();
+        // ctx.fillStyle = colors.background200;
+        // ctx.beginPath();
+        // ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI);
+        // ctx.fill();
 
         // Draw intensity overlay
         const intensity = samplingVector[i] * 0.7;
@@ -106,17 +105,17 @@ export function renderSamplingPoints(
         const radius = samplingCircleWidth / 2;
 
         // Draw border circle
-        ctx.strokeStyle = "rgba(255, 255, 255, 0.2)";
+        ctx.strokeStyle = "rgba(255, 255, 255, 0.1)";
         ctx.lineWidth = 1;
         ctx.beginPath();
         ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI);
         ctx.stroke();
 
         // Draw background
-        ctx.fillStyle = colors.background200;
-        ctx.beginPath();
-        ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI);
-        ctx.fill();
+        // ctx.fillStyle = colors.background200;
+        // ctx.beginPath();
+        // ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI);
+        // ctx.fill();
 
         // Draw intensity overlay
         const intensity = externalSamplingVector[i] * 0.7;
