@@ -2,6 +2,7 @@ import { CharacterMatcher } from "./CharacterMatcher";
 import Bezier from "bezier-easing";
 import { AlphabetName, getAlphabetMetadata } from "../alphabets/AlphabetManager";
 import { clamp } from "../../../math/math";
+import { AsciiRenderConfig } from "../renderConfig";
 
 const CONTRAST_EXPONENT_GLOBAL = 3;
 const CONTRAST_EXPONENT_LOCAL = 7;
@@ -158,13 +159,8 @@ export function generateAsciiChars(
   matcher: CharacterMatcher,
   pixelBuffer: Uint8Array,
   pixelBufferScale: number,
-  canvasWidth: number,
-  canvasHeight: number,
-  fontSize: number,
-  characterWidth: number,
+  config: AsciiRenderConfig,
   alphabet: AlphabetName,
-  characterWidthMultiplier: number,
-  characterHeightMultiplier: number,
   enableVisualization?: boolean,
   visualizationMode?: VisualizationMode,
   lightnessEasingFunction?: string,
@@ -173,39 +169,12 @@ export function generateAsciiChars(
   const samplingConfig = metadata.samplingConfig;
 
   const chars: string[] = [];
-
-  const sampleRectWidth = fontSize * metadata.width;
-  const sampleRectHeight = fontSize * metadata.height;
-  const boxWidth = sampleRectWidth * characterWidthMultiplier;
-  const boxHeight = sampleRectHeight * characterHeightMultiplier;
-  const letterWidth = characterWidth;
-  const difference = (metadata.width * characterWidthMultiplier - letterWidth) / 2;
-  const sampleRectXOff = (boxWidth - sampleRectWidth) / 2;
-  const sampleRectYOff = (boxHeight - sampleRectHeight) / 2;
-
-  const samplingRadius = fontSize * metadata.samplingConfig.circleRadius;
-
-  let cols = Math.ceil(canvasWidth / boxWidth);
-  let rows = Math.ceil(canvasHeight / boxHeight);
-
-  if (cols % 2 === 0) cols += 1;
-  if (rows % 2 === 0) rows += 1;
-
   const samplingData: CharacterSamplingData[][] = [];
 
   const easingLookupTable =
     lightnessEasingFunction && lightnessEasingFunction in easingLookupTables
       ? easingLookupTables[lightnessEasingFunction]
       : null;
-
-  const colMid = cols / 2;
-  const rowMid = rows / 2;
-
-  const xMid = colMid * boxWidth;
-  const yMid = rowMid * boxHeight;
-
-  const offsetX = canvasWidth / 2 - xMid;
-  const offsetY = canvasHeight / 2 - yMid;
 
   function createSamplingVector(
     col: number,
@@ -214,22 +183,26 @@ export function generateAsciiChars(
   ): number[] {
     const vector: number[] = [];
 
-    const left = clamp(col * boxWidth - difference * fontSize + offsetX, 0, canvasWidth);
-    const top = clamp(row * boxHeight + offsetY, 0, canvasHeight);
-    const sampleRectLeft = left + sampleRectXOff;
-    const sampleRectTop = top + sampleRectYOff;
+    const left = clamp(
+      col * config.boxWidth - config.difference * config.fontSize + config.offsetX,
+      0,
+      config.canvasWidth,
+    );
+    const top = clamp(row * config.boxHeight + config.offsetY, 0, config.canvasHeight);
+    const sampleRectLeft = left + config.sampleRectXOff;
+    const sampleRectTop = top + config.sampleRectYOff;
 
     for (const point of points) {
-      const centerX = sampleRectLeft + point.x * sampleRectWidth;
-      const centerY = sampleRectTop + point.y * sampleRectHeight;
+      const centerX = sampleRectLeft + point.x * config.sampleRectWidth;
+      const centerY = sampleRectTop + point.y * config.sampleRectHeight;
 
       const lightness = sampleCircularRegion(
         pixelBuffer,
-        canvasWidth,
-        canvasHeight,
+        config.canvasWidth,
+        config.canvasHeight,
         centerX,
         centerY,
-        samplingRadius,
+        config.samplingRadius,
         pixelBufferScale,
       );
 
@@ -239,11 +212,11 @@ export function generateAsciiChars(
     return vector;
   }
 
-  for (let row = 0; row < rows; row++) {
+  for (let row = 0; row < config.rows; row++) {
     const samplingDataRow: CharacterSamplingData[] = [];
     samplingData.push(samplingDataRow);
 
-    for (let col = 0; col < cols; col++) {
+    for (let col = 0; col < config.cols; col++) {
       const rawSamplingVector = createSamplingVector(col, row, samplingConfig.points);
 
       let samplingVector = [...rawSamplingVector];
@@ -287,9 +260,9 @@ export function generateAsciiChars(
       height: metadata.height,
     },
     samplingData,
-    cols,
-    rows,
-    offsetX,
-    offsetY,
+    cols: config.cols,
+    rows: config.rows,
+    offsetX: config.offsetX,
+    offsetY: config.offsetY,
   };
 }

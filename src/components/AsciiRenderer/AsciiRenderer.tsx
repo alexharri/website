@@ -9,6 +9,7 @@ import { useMonospaceCharacterWidthEm } from "../../utils/hooks/useMonospaceChar
 import { SamplingPointCanvas, renderSamplingPoints } from "./visualizeSampling";
 import { CharacterMatcher } from "./ascii/CharacterMatcher";
 import { EFFECTS } from "./ascii/effects";
+import { AsciiRenderConfig } from "./renderConfig";
 
 interface Props {
   alphabet: AlphabetName;
@@ -64,10 +65,7 @@ export function AsciiRenderer(props: Props) {
 
       const pixelBufferScale = canvas.width / containerRect.width;
 
-      const result = generateAsciiChars(
-        characterMatcher,
-        pixelBuffer,
-        pixelBufferScale,
+      const config = new AsciiRenderConfig(
         containerRect.width,
         containerRect.height,
         fontSize,
@@ -75,6 +73,14 @@ export function AsciiRenderer(props: Props) {
         alphabet,
         characterWidthMultiplier,
         characterHeightMultiplier,
+      );
+
+      const result = generateAsciiChars(
+        characterMatcher,
+        pixelBuffer,
+        pixelBufferScale,
+        config,
+        alphabet,
         enableVisualization,
         props.showSamplingPoints,
         props.lightnessEasingFunction,
@@ -93,21 +99,8 @@ export function AsciiRenderer(props: Props) {
 
       content.style.transform = `translate(${result.offsetX}px, ${result.offsetY}px)`;
 
-      // Render sampling points directly to canvas if visualization is enabled
-      if (props.showSamplingPoints && samplingCanvasRef.current && characterWidth != null) {
-        renderSamplingPoints(
-          samplingCanvasRef.current,
-          result.samplingData,
-          alphabet,
-          fontSize,
-          characterWidthMultiplier,
-          characterHeightMultiplier,
-          characterWidth,
-          containerRect.width,
-          containerRect.height,
-          result.offsetX,
-          result.offsetY,
-        );
+      if (props.showSamplingPoints && samplingCanvasRef.current) {
+        renderSamplingPoints(samplingCanvasRef.current, result.samplingData, config, alphabet);
       }
     };
   }, [

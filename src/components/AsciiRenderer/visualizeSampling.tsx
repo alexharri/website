@@ -1,5 +1,6 @@
 import { CharacterSamplingData } from "./ascii/generateAsciiChars";
 import { AlphabetName, getAlphabetMetadata } from "./alphabets/AlphabetManager";
+import { AsciiRenderConfig } from "./renderConfig";
 
 interface Props {
   onCanvasRef: React.MutableRefObject<HTMLCanvasElement | null>;
@@ -23,15 +24,8 @@ export function SamplingPointCanvas(props: Props) {
 export function renderSamplingPoints(
   canvas: HTMLCanvasElement,
   samplingData: CharacterSamplingData[][],
+  config: AsciiRenderConfig,
   alphabet: AlphabetName,
-  fontSize: number,
-  characterWidthMultiplier: number,
-  characterHeightMultiplier: number,
-  characterWidth: number,
-  containerWidth: number,
-  containerHeight: number,
-  offsetX: number,
-  offsetY: number,
 ) {
   const ctx = canvas.getContext("2d");
   if (!ctx || samplingData.length === 0) return;
@@ -39,41 +33,33 @@ export function renderSamplingPoints(
   const dpr = window.devicePixelRatio || 1;
 
   // Set canvas size to match container, accounting for device pixel ratio
-  canvas.width = containerWidth * dpr;
-  canvas.height = containerHeight * dpr;
+  canvas.width = config.canvasWidth * dpr;
+  canvas.height = config.canvasHeight * dpr;
 
   // Scale canvas back down using CSS
-  canvas.style.width = `${containerWidth}px`;
-  canvas.style.height = `${containerHeight}px`;
+  canvas.style.width = `${config.canvasWidth}px`;
+  canvas.style.height = `${config.canvasHeight}px`;
 
   // Scale the drawing context so everything draws at the correct size
   ctx.scale(dpr, dpr);
 
   // Clear canvas
-  ctx.clearRect(0, 0, containerWidth, containerHeight);
+  ctx.clearRect(0, 0, config.canvasWidth, config.canvasHeight);
 
   const metadata = getAlphabetMetadata(alphabet);
 
   samplingData.forEach((row, y) => {
     row.forEach(({ samplingVector, externalSamplingVector }, x) => {
-      const sampleRectWidth = fontSize * metadata.width;
-      const sampleRectHeight = fontSize * metadata.height;
-      const boxWidth = sampleRectWidth * characterWidthMultiplier;
-      const boxHeight = sampleRectHeight * characterHeightMultiplier;
-      const letterWidth = characterWidth;
-      const difference = (metadata.width * characterWidthMultiplier - letterWidth) / 2;
-      const left = x * boxWidth - difference * fontSize + offsetX;
-      const top = y * boxHeight + offsetY;
-      const sampleRectXOff = (boxWidth - sampleRectWidth) / 2;
-      const sampleRectYOff = (boxHeight - sampleRectHeight) / 2;
-      const samplingCircleWidth = fontSize * metadata.samplingConfig.circleRadius * 2;
+      const left = x * config.boxWidth - config.difference * config.fontSize + config.offsetX;
+      const top = y * config.boxHeight + config.offsetY;
+      const samplingCircleWidth = config.samplingRadius * 2;
 
-      const sampleRectLeft = left + sampleRectXOff;
-      const sampleRectTop = top + sampleRectYOff;
+      const sampleRectLeft = left + config.sampleRectXOff;
+      const sampleRectTop = top + config.sampleRectYOff;
 
       metadata.samplingConfig.points.forEach(({ x: pointX, y: pointY }, i) => {
-        const centerX = sampleRectLeft + pointX * sampleRectWidth;
-        const centerY = sampleRectTop + pointY * sampleRectHeight;
+        const centerX = sampleRectLeft + pointX * config.sampleRectWidth;
+        const centerY = sampleRectTop + pointY * config.sampleRectHeight;
         const radius = samplingCircleWidth / 2;
 
         // Draw border circle
@@ -100,8 +86,8 @@ export function renderSamplingPoints(
       const externalPoints =
         "externalPoints" in metadata.samplingConfig ? metadata.samplingConfig.externalPoints : [];
       for (const [i, { x, y }] of externalPoints.entries()) {
-        const centerX = sampleRectLeft + x * sampleRectWidth;
-        const centerY = sampleRectTop + y * sampleRectHeight;
+        const centerX = sampleRectLeft + x * config.sampleRectWidth;
+        const centerY = sampleRectTop + y * config.sampleRectHeight;
         const radius = samplingCircleWidth / 2;
 
         // Draw border circle
