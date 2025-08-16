@@ -13,13 +13,15 @@ export class AsciiRenderConfig {
   public offsetX: number;
   public offsetY: number;
   public samplingRadius: number;
+  public letterSpacingEm: number;
+  public lineHeight: number;
 
   constructor(
     public canvasWidth: number,
     public canvasHeight: number,
     public fontSize: number,
     public characterWidth: number,
-    alphabet: AlphabetName,
+    public alphabet: AlphabetName,
     characterWidthMultiplier: number,
     characterHeightMultiplier: number,
   ) {
@@ -45,5 +47,8 @@ export class AsciiRenderConfig {
 
     this.offsetX = this.canvasWidth / 2 - centerColX;
     this.offsetY = this.canvasHeight / 2 - centerRowY;
+
+    this.letterSpacingEm = metadata.width * characterWidthMultiplier - this.characterWidth;
+    this.lineHeight = metadata.height * characterHeightMultiplier;
   }
 }

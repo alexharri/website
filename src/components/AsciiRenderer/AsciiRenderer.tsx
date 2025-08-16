@@ -80,7 +80,6 @@ export function AsciiRenderer(props: Props) {
         pixelBuffer,
         pixelBufferScale,
         config,
-        alphabet,
         enableVisualization,
         props.showSamplingPoints,
         props.lightnessEasingFunction,
@@ -88,16 +87,11 @@ export function AsciiRenderer(props: Props) {
 
       preEl.textContent = result.ascii;
 
-      const adjustedWidth = result.metadata.width * characterWidthMultiplier;
-      const adjustedHeight = result.metadata.height * characterHeightMultiplier;
-      const letterSpacing = `${adjustedWidth - characterWidth}em`;
-      const lineHeight = adjustedHeight;
+      preEl.style.letterSpacing = config.letterSpacingEm + "em";
+      preEl.style.lineHeight = config.lineHeight.toString();
+      preEl.style.fontSize = config.fontSize + "px";
 
-      preEl.style.letterSpacing = letterSpacing;
-      preEl.style.lineHeight = lineHeight.toString();
-      preEl.style.fontSize = props.fontSize ? `${props.fontSize}px` : "14px";
-
-      content.style.transform = `translate(${result.offsetX}px, ${result.offsetY}px)`;
+      content.style.transform = `translate(${config.offsetX}px, ${config.offsetY}px)`;
 
       if (props.showSamplingPoints && samplingCanvasRef.current) {
         renderSamplingPoints(samplingCanvasRef.current, result.samplingData, config, alphabet);

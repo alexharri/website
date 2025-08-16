@@ -1,6 +1,6 @@
 import { CharacterMatcher } from "./CharacterMatcher";
 import Bezier from "bezier-easing";
-import { AlphabetName, getAlphabetMetadata } from "../alphabets/AlphabetManager";
+import { getAlphabetMetadata } from "../alphabets/AlphabetManager";
 import { clamp } from "../../../math/math";
 import { AsciiRenderConfig } from "../renderConfig";
 
@@ -147,10 +147,6 @@ export interface GenerationResult {
     height: number; // character height relative to font size
   };
   samplingData: CharacterSamplingData[][];
-  cols: number;
-  rows: number;
-  offsetX: number;
-  offsetY: number;
 }
 
 export type VisualizationMode = "raw" | "crunched";
@@ -160,12 +156,11 @@ export function generateAsciiChars(
   pixelBuffer: Uint8Array,
   pixelBufferScale: number,
   config: AsciiRenderConfig,
-  alphabet: AlphabetName,
   enableVisualization?: boolean,
   visualizationMode?: VisualizationMode,
   lightnessEasingFunction?: string,
 ): GenerationResult {
-  const metadata = getAlphabetMetadata(alphabet);
+  const metadata = getAlphabetMetadata(config.alphabet);
   const samplingConfig = metadata.samplingConfig;
 
   const chars: string[] = [];
@@ -260,9 +255,5 @@ export function generateAsciiChars(
       height: metadata.height,
     },
     samplingData,
-    cols: config.cols,
-    rows: config.rows,
-    offsetX: config.offsetX,
-    offsetY: config.offsetY,
   };
 }
