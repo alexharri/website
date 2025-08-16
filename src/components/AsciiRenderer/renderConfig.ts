@@ -12,7 +12,7 @@ export class AsciiRenderConfig {
   public rows: number;
   public offsetX: number;
   public offsetY: number;
-  public samplingRadius: number;
+  public samplePointRadius: number;
   public letterSpacingEm: number;
   public lineHeight: number;
 
@@ -35,7 +35,7 @@ export class AsciiRenderConfig {
     this.sampleRectXOff = (this.boxWidth - this.sampleRectWidth) / 2;
     this.sampleRectYOff = (this.boxHeight - this.sampleRectHeight) / 2;
 
-    this.samplingRadius = fontSize * metadata.samplingConfig.circleRadius;
+    this.samplePointRadius = fontSize * metadata.samplingConfig.circleRadius;
 
     this.cols = Math.ceil(canvasWidth / this.boxWidth);
     this.rows = Math.ceil(canvasHeight / this.boxHeight);
@@ -50,5 +50,18 @@ export class AsciiRenderConfig {
 
     this.letterSpacingEm = metadata.width * characterWidthMultiplier - this.characterWidth;
     this.lineHeight = metadata.height * characterHeightMultiplier;
+  }
+
+  public sampleRectPosition(col: number, row: number): [x: number, y: number] {
+    const x =
+      col * this.boxWidth - this.difference * this.fontSize + this.offsetX + this.sampleRectXOff;
+    const y = row * this.boxHeight + this.offsetY + this.sampleRectYOff;
+    return [x, y];
+  }
+
+  public samplePointOffset(point: { x: number; y: number }) {
+    const x = point.x * this.sampleRectWidth;
+    const y = point.y * this.sampleRectHeight;
+    return [x, y];
   }
 }

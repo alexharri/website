@@ -1,5 +1,5 @@
 import { CharacterSamplingData } from "./ascii/generateAsciiChars";
-import { AlphabetName, getAlphabetMetadata } from "./alphabets/AlphabetManager";
+import { getAlphabetMetadata } from "./alphabets/AlphabetManager";
 import { AsciiRenderConfig } from "./renderConfig";
 
 interface Props {
@@ -25,89 +25,72 @@ export function renderSamplingPoints(
   canvas: HTMLCanvasElement,
   samplingData: CharacterSamplingData[][],
   config: AsciiRenderConfig,
-  alphabet: AlphabetName,
 ) {
   const ctx = canvas.getContext("2d");
   if (!ctx || samplingData.length === 0) return;
 
   const dpr = window.devicePixelRatio || 1;
 
-  // Set canvas size to match container, accounting for device pixel ratio
   canvas.width = config.canvasWidth * dpr;
   canvas.height = config.canvasHeight * dpr;
+  canvas.style.width = config.canvasWidth + "px";
+  canvas.style.height = config.canvasHeight + "px";
 
-  // Scale canvas back down using CSS
-  canvas.style.width = `${config.canvasWidth}px`;
-  canvas.style.height = `${config.canvasHeight}px`;
-
-  // Scale the drawing context so everything draws at the correct size
   ctx.scale(dpr, dpr);
 
-  // Clear canvas
   ctx.clearRect(0, 0, config.canvasWidth, config.canvasHeight);
 
-  const metadata = getAlphabetMetadata(alphabet);
+  const metadata = getAlphabetMetadata(config.alphabet);
 
-  samplingData.forEach((row, y) => {
-    row.forEach(({ samplingVector, externalSamplingVector }, x) => {
-      const left = x * config.boxWidth - config.difference * config.fontSize + config.offsetX;
-      const top = y * config.boxHeight + config.offsetY;
-      const samplingCircleWidth = config.samplingRadius * 2;
+  samplingData.forEach((samplingDataRow, row) => {
+    samplingDataRow.forEach(({ samplingVector, externalSamplingVector }, col) => {
+      const [sampleRectLeft, sampleRectTop] = config.sampleRectPosition(col, row);
 
-      const sampleRectLeft = left + config.sampleRectXOff;
-      const sampleRectTop = top + config.sampleRectYOff;
+      metadata.samplingConfig.points.forEach((samplingPoint, i) => {
+        const [xOff, yOff] = config.samplePointOffset(samplingPoint);
+        const x = sampleRectLeft + xOff;
+        const y = sampleRectTop + yOff;
 
-      metadata.samplingConfig.points.forEach(({ x: pointX, y: pointY }, i) => {
-        const centerX = sampleRectLeft + pointX * config.sampleRectWidth;
-        const centerY = sampleRectTop + pointY * config.sampleRectHeight;
-        const radius = samplingCircleWidth / 2;
-
-        // Draw border circle
         ctx.strokeStyle = "rgba(255, 255, 255, 0.1)";
         ctx.lineWidth = 1;
         ctx.beginPath();
-        ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI);
+        ctx.arc(x, y, config.samplePointRadius, 0, 2 * Math.PI);
         ctx.stroke();
 
-        // Draw background
         // ctx.fillStyle = colors.background200;
         // ctx.beginPath();
         // ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI);
         // ctx.fill();
 
-        // Draw intensity overlay
         const intensity = samplingVector[i] * 0.7;
         ctx.fillStyle = `rgba(255, 255, 255, ${intensity})`;
         ctx.beginPath();
-        ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI);
+        ctx.arc(x, y, config.samplePointRadius, 0, 2 * Math.PI);
         ctx.fill();
       });
 
       const externalPoints =
         "externalPoints" in metadata.samplingConfig ? metadata.samplingConfig.externalPoints : [];
-      for (const [i, { x, y }] of externalPoints.entries()) {
-        const centerX = sampleRectLeft + x * config.sampleRectWidth;
-        const centerY = sampleRectTop + y * config.sampleRectHeight;
-        const radius = samplingCircleWidth / 2;
+      for (const [i, externalPoint] of externalPoints.entries()) {
+        const [xOff, yOff] = config.samplePointOffset(externalPoint);
+        const x = sampleRectLeft + xOff;
+        const y = sampleRectTop + yOff;
 
-        // Draw border circle
         ctx.strokeStyle = "rgba(255, 255, 255, 0.1)";
         ctx.lineWidth = 1;
         ctx.beginPath();
-        ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI);
+        ctx.arc(x, y, config.samplePointRadius, 0, 2 * Math.PI);
         ctx.stroke();
 
-        // Draw background
         // ctx.fillStyle = colors.background200;
         // ctx.beginPath();
         // ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI);
         // ctx.fill();
 
-        // Draw intensity overlay
         const intensity = externalSamplingVector[i] * 0.7;
         ctx.fillStyle = `rgba(255, 255, 255, ${intensity})`;
         ctx.beginPath();
-        ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI);
+        ctx.arc(x, y, config.samplePointRadius, 0, 2 * Math.PI);
         ctx.fill();
       }
     });

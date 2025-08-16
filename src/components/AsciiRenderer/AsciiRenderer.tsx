@@ -94,7 +94,7 @@ export function AsciiRenderer(props: Props) {
       content.style.transform = `translate(${config.offsetX}px, ${config.offsetY}px)`;
 
       if (props.showSamplingPoints && samplingCanvasRef.current) {
-        renderSamplingPoints(samplingCanvasRef.current, result.samplingData, config, alphabet);
+        renderSamplingPoints(samplingCanvasRef.current, result.samplingData, config);
       }
     };
   }, [

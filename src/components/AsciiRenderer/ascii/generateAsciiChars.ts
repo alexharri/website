@@ -197,7 +197,7 @@ export function generateAsciiChars(
         config.canvasHeight,
         centerX,
         centerY,
-        config.samplingRadius,
+        config.samplePointRadius,
         pixelBufferScale,
       );
 
