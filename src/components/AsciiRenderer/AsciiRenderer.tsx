@@ -30,6 +30,7 @@ export function AsciiRenderer(props: Props) {
     characterHeightMultiplier,
     characterWidthMultiplier,
     showSamplingPoints,
+    showExternalPoints,
     transparent,
   } = props;
   const containerRef = useRef<HTMLDivElement>(null);
@@ -39,6 +40,8 @@ export function AsciiRenderer(props: Props) {
   const samplingCanvasRef = useRef<HTMLCanvasElement>(null);
   const metadata = useMemo(() => getAlphabetMetadata(alphabet), [alphabet]);
   const characterWidth = useMonospaceCharacterWidthEm(cssVariables.fontMonospace);
+
+  const enableVisualization = !!(props.showSamplingPoints || props.showExternalPoints);
 
   const { canvasRef } = useCanvasContext();
 
@@ -60,8 +63,6 @@ export function AsciiRenderer(props: Props) {
 
       const containerRect = container?.getBoundingClientRect();
       if (!containerRect) return;
-
-      const enableVisualization = !!props.showSamplingPoints || props.showExternalPoints;
 
       const pixelBufferScale = canvas.width / containerRect.width;
 
@@ -97,7 +98,13 @@ export function AsciiRenderer(props: Props) {
       content.style.transform = `translate(${config.offsetX}px, ${config.offsetY}px)`;
 
       if (props.showSamplingPoints && samplingCanvasRef.current) {
-        renderSamplingPoints(samplingCanvasRef.current, result.samplingData, config);
+        renderSamplingPoints(
+          samplingCanvasRef.current,
+          result.samplingData,
+          config,
+          !!showSamplingPoints,
+          !!showExternalPoints,
+        );
       }
     };
   }, [
@@ -122,7 +129,7 @@ export function AsciiRenderer(props: Props) {
       <div className={s("content")} ref={contentRef}>
         <pre ref={preRef} className={s("pre")} />
       </div>
-      {showSamplingPoints && <SamplingPointCanvas onCanvasRef={samplingCanvasRef} />}
+      {enableVisualization && <SamplingPointCanvas onCanvasRef={samplingCanvasRef} />}
     </div>
   );
 }

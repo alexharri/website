@@ -25,6 +25,8 @@ export function renderSamplingPoints(
   canvas: HTMLCanvasElement,
   samplingData: CharacterSamplingData[][],
   config: AsciiRenderConfig,
+  showSamplingPoints: boolean,
+  showExternalPoints: boolean,
 ) {
   const ctx = canvas.getContext("2d");
   if (!ctx || samplingData.length === 0) return;
@@ -46,52 +48,56 @@ export function renderSamplingPoints(
     samplingDataRow.forEach(({ samplingVector, externalSamplingVector }, col) => {
       const [sampleRectLeft, sampleRectTop] = config.sampleRectPosition(col, row);
 
-      metadata.samplingConfig.points.forEach((samplingPoint, i) => {
-        const [xOff, yOff] = config.samplingCircleOffset(samplingPoint);
-        const x = sampleRectLeft + xOff;
-        const y = sampleRectTop + yOff;
+      if (showSamplingPoints) {
+        metadata.samplingConfig.points.forEach((samplingPoint, i) => {
+          const [xOff, yOff] = config.samplingCircleOffset(samplingPoint);
+          const x = sampleRectLeft + xOff;
+          const y = sampleRectTop + yOff;
 
-        ctx.strokeStyle = "rgba(255, 255, 255, 0.1)";
-        ctx.lineWidth = 1;
-        ctx.beginPath();
-        ctx.arc(x, y, config.samplePointRadius, 0, 2 * Math.PI);
-        ctx.stroke();
+          ctx.strokeStyle = "rgba(255, 255, 255, 0.1)";
+          ctx.lineWidth = 1;
+          ctx.beginPath();
+          ctx.arc(x, y, config.samplePointRadius, 0, 2 * Math.PI);
+          ctx.stroke();
 
-        // ctx.fillStyle = colors.background200;
-        // ctx.beginPath();
-        // ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI);
-        // ctx.fill();
+          // ctx.fillStyle = colors.background200;
+          // ctx.beginPath();
+          // ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI);
+          // ctx.fill();
 
-        const intensity = samplingVector[i] * 0.7;
-        ctx.fillStyle = `rgba(255, 255, 255, ${intensity})`;
-        ctx.beginPath();
-        ctx.arc(x, y, config.samplePointRadius, 0, 2 * Math.PI);
-        ctx.fill();
-      });
+          const intensity = samplingVector[i] * 0.7;
+          ctx.fillStyle = `rgba(255, 255, 255, ${intensity})`;
+          ctx.beginPath();
+          ctx.arc(x, y, config.samplePointRadius, 0, 2 * Math.PI);
+          ctx.fill();
+        });
+      }
 
-      const externalPoints =
-        "externalPoints" in metadata.samplingConfig ? metadata.samplingConfig.externalPoints : [];
-      for (const [i, externalPoint] of externalPoints.entries()) {
-        const [xOff, yOff] = config.samplingCircleOffset(externalPoint);
-        const x = sampleRectLeft + xOff;
-        const y = sampleRectTop + yOff;
+      if (showExternalPoints) {
+        const externalPoints =
+          "externalPoints" in metadata.samplingConfig ? metadata.samplingConfig.externalPoints : [];
+        for (const [i, externalPoint] of externalPoints.entries()) {
+          const [xOff, yOff] = config.samplingCircleOffset(externalPoint);
+          const x = sampleRectLeft + xOff;
+          const y = sampleRectTop + yOff;
 
-        ctx.strokeStyle = "rgba(255, 255, 255, 0.1)";
-        ctx.lineWidth = 1;
-        ctx.beginPath();
-        ctx.arc(x, y, config.samplePointRadius, 0, 2 * Math.PI);
-        ctx.stroke();
+          ctx.strokeStyle = "rgba(255, 255, 255, 0.1)";
+          ctx.lineWidth = 1;
+          ctx.beginPath();
+          ctx.arc(x, y, config.samplePointRadius, 0, 2 * Math.PI);
+          ctx.stroke();
 
-        // ctx.fillStyle = colors.background200;
-        // ctx.beginPath();
-        // ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI);
-        // ctx.fill();
+          // ctx.fillStyle = colors.background200;
+          // ctx.beginPath();
+          // ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI);
+          // ctx.fill();
 
-        const intensity = externalSamplingVector[i] * 0.7;
-        ctx.fillStyle = `rgba(255, 255, 255, ${intensity})`;
-        ctx.beginPath();
-        ctx.arc(x, y, config.samplePointRadius, 0, 2 * Math.PI);
-        ctx.fill();
+          const intensity = externalSamplingVector[i] * 0.7;
+          ctx.fillStyle = `rgba(255, 255, 255, ${intensity})`;
+          ctx.beginPath();
+          ctx.arc(x, y, config.samplePointRadius, 0, 2 * Math.PI);
+          ctx.fill();
+        }
       }
     });
   });
