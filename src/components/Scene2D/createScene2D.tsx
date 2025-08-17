@@ -179,12 +179,7 @@ export function createScene2D<V extends VariablesOptions>(
                     showValue={true}
                   />
                 );
-              if (spec.type === "normal") {
-                // For 2D scenes, we'll treat normal variables as [x, y, z] arrays
-                // This allows 2D scenes to use 3D vectors if needed
-                return <div key={key}>Normal variable support coming soon for 2D scenes</div>;
-              }
-              return null;
+              throw new Error(`2D scenes do not support variables of type '${spec.type}'.`);
             })}
           </div>
         )}
