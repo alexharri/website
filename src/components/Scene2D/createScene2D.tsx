@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import { NumberVariable, NumberVariableSpec } from "../../threejs/NumberVariable";
+import { NumberVariable, NumberVariableSpec } from "../variables";
 import { NormalVariableSpec } from "../../threejs/NormalVariable";
 import { StyleOptions, useStyles } from "../../utils/styles";
 import { useCanvasContext } from "../../contexts/CanvasContext";

@@ -1,10 +1,10 @@
 import { useMemo, useState } from "react";
-import { StyleOptions, useStyles } from "../utils/styles";
+import { StyleOptions, useStyles } from "../../utils/styles";
 import { MathSVG } from "./MathSVG";
-import { lerp } from "../math/lerp";
-import { clamp } from "../math/math";
-import { cssVariables } from "../utils/cssVariables";
-import { useIsMobile } from "../utils/hooks/useViewportWidth";
+import { lerp } from "../../math/lerp";
+import { clamp } from "../../math/math";
+import { cssVariables } from "../../utils/cssVariables";
+import { useIsMobile } from "../../utils/hooks/useViewportWidth";
 
 const firstUpper = (s: string) => s[0].toUpperCase() + s.slice(1);
 

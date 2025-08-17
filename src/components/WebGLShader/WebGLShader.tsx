@@ -6,7 +6,7 @@ import { vertexShaderRegistry } from "./shaders/vertexShaders";
 import { fragmentShaderRegistry } from "./shaders/fragmentShaders";
 import { cssVariables } from "../../utils/cssVariables";
 import { FragmentShader } from "./shaders/types";
-import { NumberVariable } from "../../threejs/NumberVariable";
+import { NumberVariable } from "../variables";
 import { clamp } from "../../math/lerp";
 import { useViewportWidth } from "../../utils/hooks/useViewportWidth";
 import { useRandomId } from "../../utils/hooks/useRandomId";

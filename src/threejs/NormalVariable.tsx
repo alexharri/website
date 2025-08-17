@@ -3,7 +3,7 @@ import type * as THREE from "three";
 import { useStyles } from "../utils/styles";
 import { Line } from "./Components/primitives/Line";
 import { DreiContext, FiberContext, ThreeContext } from "./Components/ThreeProvider";
-import { MathSVG } from "./MathSVG";
+import { MathSVG } from "../components/variables";
 import NormalVariableStyles from "./NormalVariable.styles";
 import { Three } from "./types";
 import { getBasicMaterial } from "./utils";
