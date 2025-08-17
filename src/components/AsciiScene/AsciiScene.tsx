@@ -95,8 +95,8 @@ const AsciiSceneInner: React.FC<
             characterWidthMultiplier={characterWidthMultiplier}
             characterHeightMultiplier={characterHeightMultiplier}
             lightnessEasingFunction={lightnessEasingFunction}
-            showSamplingPoints={showSamplingPoints}
-            showExternalPoints={showExternalPoints}
+            showSamplingCircles={showSamplingPoints}
+            showExternalSamplingCircles={showExternalPoints}
             transparent={viewMode === "transparent"}
           />,
           children,

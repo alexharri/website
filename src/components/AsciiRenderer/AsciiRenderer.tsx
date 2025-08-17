@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef } from "react";
 import { AsciiRendererStyles } from "./AsciiRenderer.styles";
-import { generateAsciiChars, VisualizationMode } from "./ascii/generateAsciiChars";
+import { generateAsciiChars } from "./ascii/generateAsciiChars";
 import { AlphabetName, getAlphabetMetadata } from "./alphabets/AlphabetManager";
 import { useStyles } from "../../utils/styles";
 import { useCanvasContext } from "../../contexts/CanvasContext";
@@ -10,6 +10,7 @@ import { SamplingPointCanvas, renderSamplingPoints } from "./visualizeSampling";
 import { CharacterMatcher } from "./ascii/CharacterMatcher";
 import { EFFECTS } from "./ascii/effects";
 import { AsciiRenderConfig } from "./renderConfig";
+import { DebugVizOptions, SamplingPointVisualizationMode } from "./types";
 
 interface Props {
   alphabet: AlphabetName;
@@ -17,8 +18,9 @@ interface Props {
   fontSize?: number;
   characterWidthMultiplier: number;
   characterHeightMultiplier: number;
-  showSamplingPoints?: VisualizationMode;
-  showExternalPoints?: boolean;
+  showSamplingCircles?: SamplingPointVisualizationMode | true;
+  showExternalSamplingCircles?: boolean;
+  showSamplingPoints?: boolean;
   lightnessEasingFunction?: string;
   transparent: boolean;
 }
@@ -29,10 +31,16 @@ export function AsciiRenderer(props: Props) {
     fontSize = 14,
     characterHeightMultiplier,
     characterWidthMultiplier,
-    showSamplingPoints,
-    showExternalPoints,
+    showSamplingCircles = "none",
+    showExternalSamplingCircles = false,
+    showSamplingPoints = false,
     transparent,
   } = props;
+  const debugVizOptions: DebugVizOptions = {
+    showSamplingCircles: showSamplingCircles === true ? "raw" : showSamplingCircles,
+    showExternalSamplingCircles,
+    showSamplingPoints,
+  };
   const containerRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
   const s = useStyles(AsciiRendererStyles);
@@ -41,7 +49,8 @@ export function AsciiRenderer(props: Props) {
   const metadata = useMemo(() => getAlphabetMetadata(alphabet), [alphabet]);
   const characterWidth = useMonospaceCharacterWidthEm(cssVariables.fontMonospace);
 
-  const enableVisualization = !!(props.showSamplingPoints || props.showExternalPoints);
+  const enableVisualization =
+    debugVizOptions.showSamplingCircles !== "none" || debugVizOptions.showExternalSamplingCircles;
 
   const { canvasRef } = useCanvasContext();
 
@@ -85,7 +94,7 @@ export function AsciiRenderer(props: Props) {
         pixelBufferScale,
         config,
         enableVisualization,
-        props.showSamplingPoints,
+        debugVizOptions.showSamplingCircles,
         props.lightnessEasingFunction,
       );
 
@@ -97,21 +106,20 @@ export function AsciiRenderer(props: Props) {
 
       content.style.transform = `translate(${config.offsetX}px, ${config.offsetY}px)`;
 
-      if (props.showSamplingPoints && samplingCanvasRef.current) {
+      if (props.showSamplingCircles && samplingCanvasRef.current) {
         renderSamplingPoints(
           samplingCanvasRef.current,
           result.samplingData,
           config,
-          !!showSamplingPoints,
-          !!showExternalPoints,
+          debugVizOptions,
         );
       }
     };
   }, [
     alphabet,
     metadata,
-    props.showSamplingPoints,
-    props.showExternalPoints,
+    props.showSamplingCircles,
+    props.showExternalSamplingCircles,
     props.lightnessEasingFunction,
     fontSize,
     characterWidthMultiplier,

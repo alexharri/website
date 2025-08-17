@@ -4,6 +4,7 @@ import { getAlphabetMetadata } from "../alphabets/AlphabetManager";
 
 import { AsciiRenderConfig } from "../renderConfig";
 import { clamp } from "../../../math/math";
+import { SamplingPointVisualizationMode } from "../types";
 
 const CONTRAST_EXPONENT_GLOBAL = 3;
 const CONTRAST_EXPONENT_LOCAL = 7;
@@ -142,15 +143,13 @@ export interface GenerationResult {
   samplingData: CharacterSamplingData[][];
 }
 
-export type VisualizationMode = "raw" | "crunched";
-
 export function generateAsciiChars(
   matcher: CharacterMatcher,
   pixelBuffer: Uint8Array,
   pixelBufferScale: number,
   config: AsciiRenderConfig,
   enableVisualization?: boolean,
-  visualizationMode?: VisualizationMode,
+  visualizationMode?: SamplingPointVisualizationMode,
   lightnessEasingFunction?: string,
 ): GenerationResult {
   const metadata = getAlphabetMetadata(config.alphabet);

@@ -1,6 +1,7 @@
 import { CharacterSamplingData } from "./ascii/generateAsciiChars";
 import { getAlphabetMetadata } from "./alphabets/AlphabetManager";
 import { AsciiRenderConfig } from "./renderConfig";
+import { DebugVizOptions } from "./types";
 
 interface Props {
   onCanvasRef: React.MutableRefObject<HTMLCanvasElement | null>;
@@ -25,8 +26,7 @@ export function renderSamplingPoints(
   canvas: HTMLCanvasElement,
   samplingData: CharacterSamplingData[][],
   config: AsciiRenderConfig,
-  showSamplingPoints: boolean,
-  showExternalPoints: boolean,
+  options: DebugVizOptions,
 ) {
   const ctx = canvas.getContext("2d");
   if (!ctx || samplingData.length === 0) return;
@@ -48,7 +48,7 @@ export function renderSamplingPoints(
     samplingDataRow.forEach(({ samplingVector, externalSamplingVector }, col) => {
       const [sampleRectLeft, sampleRectTop] = config.sampleRectPosition(col, row);
 
-      if (showSamplingPoints) {
+      if (options.showSamplingCircles) {
         metadata.samplingConfig.points.forEach((samplingPoint, i) => {
           const [xOff, yOff] = config.samplingCircleOffset(samplingPoint);
           const x = sampleRectLeft + xOff;
@@ -73,7 +73,7 @@ export function renderSamplingPoints(
         });
       }
 
-      if (showExternalPoints) {
+      if (options.showExternalSamplingCircles) {
         const externalPoints =
           "externalPoints" in metadata.samplingConfig ? metadata.samplingConfig.externalPoints : [];
         for (const [i, externalPoint] of externalPoints.entries()) {
