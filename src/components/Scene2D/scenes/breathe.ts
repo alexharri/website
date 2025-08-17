@@ -16,12 +16,12 @@ export const breatheScene = createScene2D(
   {
     variables: {
       xPosition: {
+        label: "math:x",
         type: "number",
-        range: [0.1, 0.9],
         value: 0.7,
+        range: [0.1, 0.9],
         step: 0.01,
         format: "percent",
-        label: "math:x",
       },
     },
   },
