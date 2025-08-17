@@ -46,7 +46,7 @@ export function renderAsciiDebugViz(
 
   const circleSamplingPoints = config.generateCircleSamplingPoints();
 
-  const samplingPointRadius = 4;
+  const samplingPointRadius = 2;
 
   samplingData.forEach((samplingDataRow, row) => {
     samplingDataRow.forEach(({ samplingVector, externalSamplingVector }, col) => {

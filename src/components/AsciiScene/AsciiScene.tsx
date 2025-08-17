@@ -21,26 +21,33 @@ interface AsciiSceneProps {
   showSamplingCircles?: SamplingPointVisualizationMode | true;
   showExternalSamplingCircles?: boolean;
   showSamplingPoints?: boolean;
+  characterWidthMultiplier?: number;
+  characterHeightMultiplier?: number;
 }
 
-export const AsciiScene: React.FC<AsciiSceneProps> = ({
-  children,
-  height,
-  showControls = true,
-  fontSize,
-  showSamplingCircles = "none",
-  showExternalSamplingCircles = false,
-  showSamplingPoints = false,
-  lightnessEasingFunction,
-}) => {
+export const AsciiScene: React.FC<AsciiSceneProps> = (props) => {
+  const {
+    children,
+    height,
+    showControls = true,
+    fontSize,
+    showSamplingCircles = "none",
+    showExternalSamplingCircles = false,
+    showSamplingPoints = false,
+    lightnessEasingFunction,
+  } = props;
   const orbitControlsTargetRef = useRef<HTMLDivElement>(null);
   const s = useStyles(AsciiSceneStyles);
   const onFrameRef = useRef<null | ((buffer: Uint8Array) => void)>(null);
   const [viewMode, setViewMode] = useState<ViewMode>("left");
   const [splitT, setSplitT] = useState(0.5);
   const [selectedAlphabet, setSelectedAlphabet] = useState<AlphabetName>("default");
-  const [characterWidthMultiplier, setCharacterWidthMultiplier] = useState(0.7);
-  const [characterHeightMultiplier, setCharacterHeightMultiplier] = useState(1.0);
+  const [characterWidthMultiplier, setCharacterWidthMultiplier] = useState(
+    props.characterWidthMultiplier ?? 1,
+  );
+  const [characterHeightMultiplier, setCharacterHeightMultiplier] = useState(
+    props.characterHeightMultiplier ?? 1,
+  );
 
   const [variables, setVariables] = useState<VariableDict>({});
   const [variableValues, setVariableValues] = useState<VariableValues>({});

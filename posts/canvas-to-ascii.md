@@ -14,7 +14,7 @@ The ASCII renderer supports both 3D and 2D scenes using a unified context-based 
 
 <Scene2D scene="breathe" height={650} />
 
-<AsciiScene height={650} fontSize={180} showSamplingCircles="raw" showSamplingPoints>
+<AsciiScene height={650} fontSize={100} showSamplingCircles="raw" showSamplingPoints characterWidthMultiplier={1.25} characterHeightMultiplier={1.25}>
   <Scene2D scene="breathe" />
 </AsciiScene>
 
