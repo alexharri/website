@@ -7,7 +7,7 @@ interface Props {
   onCanvasRef: React.MutableRefObject<HTMLCanvasElement | null>;
 }
 
-export function SamplingPointCanvas(props: Props) {
+export function AsciiDebugVizCanvas(props: Props) {
   return (
     <canvas
       ref={props.onCanvasRef}
@@ -22,7 +22,7 @@ export function SamplingPointCanvas(props: Props) {
   );
 }
 
-export function renderSamplingPoints(
+export function renderAsciiDebugViz(
   canvas: HTMLCanvasElement,
   samplingData: CharacterSamplingData[][],
   config: AsciiRenderConfig,
@@ -44,13 +44,17 @@ export function renderSamplingPoints(
 
   const metadata = getAlphabetMetadata(config.alphabet);
 
+  const circleSamplingPoints = config.generateCircleSamplingPoints();
+
+  const samplingPointRadius = 4;
+
   samplingData.forEach((samplingDataRow, row) => {
     samplingDataRow.forEach(({ samplingVector, externalSamplingVector }, col) => {
       const [sampleRectLeft, sampleRectTop] = config.sampleRectPosition(col, row);
 
       if (options.showSamplingCircles) {
-        metadata.samplingConfig.points.forEach((samplingPoint, i) => {
-          const [xOff, yOff] = config.samplingCircleOffset(samplingPoint);
+        metadata.samplingConfig.points.forEach((samplingCircle, i) => {
+          const [xOff, yOff] = config.samplingCircleOffset(samplingCircle);
           const x = sampleRectLeft + xOff;
           const y = sampleRectTop + yOff;
 
@@ -70,6 +74,15 @@ export function renderSamplingPoints(
           ctx.beginPath();
           ctx.arc(x, y, config.samplePointRadius, 0, 2 * Math.PI);
           ctx.fill();
+
+          if (options.showSamplingPoints) {
+            for (const point of circleSamplingPoints) {
+              ctx.fillStyle = "#ff0000";
+              ctx.beginPath();
+              ctx.arc(x + point.x, y + point.y, samplingPointRadius, 0, 2 * Math.PI);
+              ctx.fill();
+            }
+          }
         });
       }
 

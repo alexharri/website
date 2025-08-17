@@ -21,11 +21,16 @@ interface CanvasProviderProps {
   children: React.ReactNode;
   onFrame: (buffer: Uint8Array) => void;
   height: number;
+  orbitControlsTargetRef: React.RefObject<HTMLDivElement>;
 }
 
-export function CanvasProvider({ children, onFrame, height }: CanvasProviderProps) {
+export function CanvasProvider({
+  children,
+  onFrame,
+  height,
+  orbitControlsTargetRef,
+}: CanvasProviderProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const orbitControlsTargetRef = useRef<HTMLDivElement>(null);
 
   const contextValue: CanvasContextValue = {
     canvasRef,
@@ -34,9 +39,5 @@ export function CanvasProvider({ children, onFrame, height }: CanvasProviderProp
     orbitControlsTargetRef,
   };
 
-  return (
-    <CanvasContext.Provider value={contextValue}>
-      {children}
-    </CanvasContext.Provider>
-  );
+  return <CanvasContext.Provider value={contextValue}>{children}</CanvasContext.Provider>;
 }

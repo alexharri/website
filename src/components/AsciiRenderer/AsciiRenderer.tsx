@@ -6,11 +6,11 @@ import { useStyles } from "../../utils/styles";
 import { useCanvasContext } from "../../contexts/CanvasContext";
 import { cssVariables } from "../../utils/cssVariables";
 import { useMonospaceCharacterWidthEm } from "../../utils/hooks/useMonospaceCharacterWidthEm";
-import { SamplingPointCanvas, renderSamplingPoints } from "./visualizeSampling";
+import { AsciiDebugVizCanvas, renderAsciiDebugViz } from "./asciiDebugViz";
 import { CharacterMatcher } from "./ascii/CharacterMatcher";
 import { EFFECTS } from "./ascii/effects";
 import { AsciiRenderConfig } from "./renderConfig";
-import { DebugVizOptions, SamplingPointVisualizationMode } from "./types";
+import { DebugVizOptions } from "./types";
 
 interface Props {
   alphabet: AlphabetName;
@@ -18,11 +18,9 @@ interface Props {
   fontSize?: number;
   characterWidthMultiplier: number;
   characterHeightMultiplier: number;
-  showSamplingCircles?: SamplingPointVisualizationMode | true;
-  showExternalSamplingCircles?: boolean;
-  showSamplingPoints?: boolean;
   lightnessEasingFunction?: string;
   transparent: boolean;
+  debugVizOptions: DebugVizOptions;
 }
 
 export function AsciiRenderer(props: Props) {
@@ -31,16 +29,10 @@ export function AsciiRenderer(props: Props) {
     fontSize = 14,
     characterHeightMultiplier,
     characterWidthMultiplier,
-    showSamplingCircles = "none",
-    showExternalSamplingCircles = false,
-    showSamplingPoints = false,
+    debugVizOptions,
     transparent,
   } = props;
-  const debugVizOptions: DebugVizOptions = {
-    showSamplingCircles: showSamplingCircles === true ? "raw" : showSamplingCircles,
-    showExternalSamplingCircles,
-    showSamplingPoints,
-  };
+
   const containerRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
   const s = useStyles(AsciiRendererStyles);
@@ -106,8 +98,8 @@ export function AsciiRenderer(props: Props) {
 
       content.style.transform = `translate(${config.offsetX}px, ${config.offsetY}px)`;
 
-      if (props.showSamplingCircles && samplingCanvasRef.current) {
-        renderSamplingPoints(
+      if (debugVizOptions.showSamplingCircles !== "none" && samplingCanvasRef.current) {
+        renderAsciiDebugViz(
           samplingCanvasRef.current,
           result.samplingData,
           config,
@@ -118,9 +110,7 @@ export function AsciiRenderer(props: Props) {
   }, [
     alphabet,
     metadata,
-    props.showSamplingCircles,
-    props.showExternalSamplingCircles,
-    props.lightnessEasingFunction,
+    debugVizOptions,
     fontSize,
     characterWidthMultiplier,
     characterHeightMultiplier,
@@ -137,7 +127,7 @@ export function AsciiRenderer(props: Props) {
       <div className={s("content")} ref={contentRef}>
         <pre ref={preRef} className={s("pre")} />
       </div>
-      {enableVisualization && <SamplingPointCanvas onCanvasRef={samplingCanvasRef} />}
+      {enableVisualization && <AsciiDebugVizCanvas onCanvasRef={samplingCanvasRef} />}
     </div>
   );
 }
