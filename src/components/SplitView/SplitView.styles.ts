@@ -1,3 +1,4 @@
+import { hexToRgbaString } from "../../utils/color";
 import { StyleOptions } from "../../utils/styles";
 
 export default ({ styled, theme }: StyleOptions) => ({
@@ -54,6 +55,11 @@ export default ({ styled, theme }: StyleOptions) => ({
     user-select: none;
     pointer-events: none;
     transition: all 0.5s;
+    background: ${theme.background200};
+
+    &--transparent {
+      background: ${hexToRgbaString(theme.background200, 0.5)};
+    }
   `,
 
   leftPanelInner: styled.css`
