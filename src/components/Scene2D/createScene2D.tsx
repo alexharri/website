@@ -3,6 +3,7 @@ import { NumberVariable } from "../variables";
 import { StyleOptions, useStyles } from "../../utils/styles";
 import { useCanvasContext } from "../../contexts/CanvasContext";
 import { VariableDict, VariableSpec, VariableValues } from "../../types/variables";
+import { useSceneHeight } from "../../utils/hooks/useSceneHeight";
 
 const styles = ({ styled }: StyleOptions) => ({
   variablesWrapper: styled.css`
@@ -68,10 +69,13 @@ export function createScene2D<V extends VariableDict>(
     const fallbackCanvasRef = useRef<HTMLCanvasElement>(null);
     const canvasRef = context?.canvasRef || fallbackCanvasRef;
 
-    const height = props.height ?? context?.height;
-    if (typeof height !== "number") {
+    const targetHeight = props.height ?? context?.height;
+
+    if (typeof targetHeight !== "number") {
       throw new Error("No height specified for scene");
     }
+
+    const { height } = useSceneHeight(targetHeight);
 
     const onFrame = context?.onFrame;
 
@@ -102,16 +106,20 @@ export function createScene2D<V extends VariableDict>(
     const variableValuesRef = useRef<LocalVariables<V>>(null!);
     variableValuesRef.current = (context?.variables ?? variableValues) as LocalVariables<V>;
 
+    const heightRef = useRef(height);
+    heightRef.current = height;
+
     useEffect(() => {
       const canvas = canvasRef.current;
       const container = containerRef.current;
       if (!canvas || !container) return;
 
-      const containerWidth = container.clientWidth;
+      const width = container.clientWidth;
+      const height = heightRef.current;
 
-      canvas.width = containerWidth;
+      canvas.width = width;
       canvas.height = height;
-      canvas.style.width = `${containerWidth}px`;
+      canvas.style.width = `${width}px`;
       canvas.style.height = `${height}px`;
 
       const ctx = canvas.getContext("2d");
@@ -156,7 +164,7 @@ export function createScene2D<V extends VariableDict>(
       return () => {
         mounted = false;
       };
-    }, [height, canvasRef, onFrame]);
+    }, [canvasRef, onFrame]);
 
     return (
       <>

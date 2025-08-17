@@ -1,5 +1,5 @@
 import { useContext } from "react";
-import { SCENE_BASELINE_WIDTH } from "./constants";
+import { SCENE_BASELINE_WIDTH } from "../constants";
 import { ScenePropsContext } from "./scenes";
 import { SkeletonLoaderAnimation } from "../components/SkeletonLoaderAnimation/SkeletonLoaderAnimation";
 import { cssVariables } from "../utils/cssVariables";

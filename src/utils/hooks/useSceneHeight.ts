@@ -1,6 +1,6 @@
 import { useRef, useState } from "react";
-import { useIsomorphicLayoutEffect } from "../utils/hooks/useIsomorphicLayoutEffect";
-import { SCENE_BASELINE_WIDTH } from "./constants";
+import { useIsomorphicLayoutEffect } from "./useIsomorphicLayoutEffect";
+import { SCENE_BASELINE_WIDTH } from "../../constants";
 
 export function useSceneHeight(targetHeight: number) {
   const [width, setWidth] = useState(1000);

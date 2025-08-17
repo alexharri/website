@@ -10,6 +10,7 @@ import { SplitView, ViewMode } from "../SplitView";
 import { DebugVizOptions, SamplingPointVisualizationMode } from "../AsciiRenderer/types";
 import { NumberVariable } from "../variables";
 import { VariableValues, VariableSpec, VariableDict } from "../../types/variables";
+import { useSceneHeight } from "../../utils/hooks/useSceneHeight";
 
 interface AsciiSceneProps {
   children: React.ReactNode;
@@ -28,7 +29,7 @@ interface AsciiSceneProps {
 export const AsciiScene: React.FC<AsciiSceneProps> = (props) => {
   const {
     children,
-    height,
+    height: targetHeight,
     showControls = true,
     fontSize,
     showSamplingCircles = "none",
@@ -81,6 +82,8 @@ export const AsciiScene: React.FC<AsciiSceneProps> = (props) => {
     width = CONTENT_WIDTH;
   }
 
+  const { height } = useSceneHeight(targetHeight);
+
   const onFrame = useCallback((buffer: Uint8Array) => onFrameRef.current?.(buffer), []);
 
   return (
@@ -101,7 +104,7 @@ export const AsciiScene: React.FC<AsciiSceneProps> = (props) => {
         )}
         <CanvasProvider
           onFrame={onFrame}
-          height={height}
+          height={targetHeight}
           orbitControlsTargetRef={orbitControlsTargetRef}
           registerSceneVariables={registerSceneVariables}
           variables={variableValues}

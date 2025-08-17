@@ -5,7 +5,7 @@ import { NormalVariable } from "./NormalVariable";
 import { StyleOptions, useStyles } from "../utils/styles";
 import { useDidUpdate } from "../utils/hooks/useDidUpdate";
 import { DreiContext, FiberContext, ThreeContext } from "./Components/ThreeProvider";
-import { useSceneHeight } from "./hooks";
+import { useSceneHeight } from "../utils/hooks/useSceneHeight";
 import { SceneProps } from "./scenes";
 import { FrameReader } from "./Components/FrameReader";
 import { VariableDict } from "../types/variables";
@@ -188,8 +188,12 @@ export function createScene<V extends VariableDict>(
     return (
       <>
         <div style={{ position: "relative", height }}>
-          {/* <div className={s("fade", { upper: true })} style={{ height: fadeHeight }} />
-          <div className={s("fade", { lower: true })} style={{ height: fadeHeight }} /> */}
+          {!context && (
+            <>
+              <div className={s("fade", { upper: true })} style={{ height: fadeHeight }} />
+              <div className={s("fade", { lower: true })} style={{ height: fadeHeight }} />
+            </>
+          )}
 
           {visible && (
             <FIBER.Canvas

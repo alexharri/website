@@ -96,6 +96,7 @@ export const threeJsScenes: Partial<Record<string, React.ComponentType<SceneProp
 
 interface Props {
   scene: string;
+  height?: number;
   angle?: number;
   autoRotate?: boolean;
   usesVariables?: boolean;
@@ -119,11 +120,13 @@ export const Scene: React.FC<Props> = (props) => {
     ascii,
     orbitControlsRef,
   } = props;
-  
-  const { canvasRef, onFrame, height, orbitControlsTargetRef } = useCanvasContext();
+
+  const context = useCanvasContext();
   const containerRef = useRef<HTMLDivElement>(null);
   const visible = useVisible(containerRef, "350px");
   const render = useVisible(containerRef, "50px");
+
+  const height = context?.height ?? props.height;
 
   if (typeof height !== "number") throw new Error("'height' is a required prop for <Scene>");
   const S = threeJsScenes[scene];
@@ -154,11 +157,11 @@ export const Scene: React.FC<Props> = (props) => {
     zoom,
     xRotation,
     ascii,
-    canvasRef,
-    onFrame,
     orbitControlsRef,
-    orbitControlsTargetRef,
     errorLoadingThreeJs: error,
+    orbitControlsTargetRef: context?.orbitControlsTargetRef,
+    canvasRef: context?.canvasRef,
+    onFrame: context?.onFrame,
   };
 
   return (
