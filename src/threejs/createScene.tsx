@@ -1,13 +1,15 @@
 import React, { useContext, useEffect, useMemo, useRef, useState } from "react";
 import type * as THREE from "three";
-import { NumberVariable, NumberVariableSpec } from "../components/variables";
-import { NormalVariable, NormalVariableSpec } from "./NormalVariable";
+import { NumberVariable } from "../components/variables";
+import { NormalVariable } from "./NormalVariable";
 import { StyleOptions, useStyles } from "../utils/styles";
 import { useDidUpdate } from "../utils/hooks/useDidUpdate";
 import { DreiContext, FiberContext, ThreeContext } from "./Components/ThreeProvider";
 import { useSceneHeight } from "./hooks";
 import { SceneProps } from "./scenes";
 import { FrameReader } from "./Components/FrameReader";
+import { VariableDict } from "../types/variables";
+import { useCanvasContext } from "../contexts/CanvasContext";
 
 const FADE_HEIGHT = 80;
 
@@ -42,21 +44,17 @@ const styles = ({ styled, theme }: StyleOptions) => ({
   `,
 });
 
-type VariablesOptions = {
-  [key: string]: NumberVariableSpec | NormalVariableSpec;
-};
-
-type Variables<V extends VariablesOptions> = {
+type LocalVariables<V extends VariableDict> = {
   [K in keyof V]: V[K]["value"] extends [number, number, number] ? THREE.Vector3 : V[K]["value"];
 };
 
-interface SceneComponentProps<V extends VariablesOptions> {
+interface SceneComponentProps<V extends VariableDict> {
   scene: THREE.Scene;
   camera: THREE.PerspectiveCamera;
-  variables: Variables<V>;
+  variables: LocalVariables<V>;
 }
 
-interface Options<V extends VariablesOptions> {
+interface Options<V extends VariableDict> {
   variables?: V;
 }
 
@@ -64,7 +62,7 @@ const EMPTY_OBJ = {};
 
 const DEG_TO_RAD = Math.PI / 180;
 
-export function createScene<V extends VariablesOptions>(
+export function createScene<V extends VariableDict>(
   Component: React.FC<SceneComponentProps<V>>,
   options: Options<V> = {},
 ) {
@@ -86,6 +84,7 @@ export function createScene<V extends VariablesOptions>(
     const THREE = useContext(ThreeContext);
     const DREI = useContext(DreiContext);
     const FIBER = useContext(FiberContext);
+    const context = useCanvasContext();
 
     useEffect(() => {
       const variableKeys = Object.keys(options.variables || {});
@@ -121,7 +120,7 @@ export function createScene<V extends VariablesOptions>(
       return camera;
     }, [visible]);
 
-    const variablesSpec = options.variables ?? (EMPTY_OBJ as V);
+    const variablesSpec = useMemo(() => options.variables ?? (EMPTY_OBJ as V), [options.variables]);
     const variableKeys = useMemo(() => Object.keys(variablesSpec), [variablesSpec]);
 
     const [variables, setVariables] = useState(() =>
@@ -133,10 +132,17 @@ export function createScene<V extends VariablesOptions>(
                 ...(variablesSpec[key].value as [number, number, number]),
               ).normalize()
             : (variablesSpec[key].value as number)
-        ) as Variables<V>[typeof key];
+        ) as LocalVariables<V>[typeof key];
         return obj;
-      }, {} as Variables<V>),
+      }, {} as LocalVariables<V>),
     );
+
+    // Register variables with context if available
+    useEffect(() => {
+      if (context?.registerSceneVariables && variableKeys.length > 0) {
+        context.registerSceneVariables(variablesSpec);
+      }
+    }, [context?.registerSceneVariables, variableKeys.length]);
 
     const [rotate, setRotate] = useState(true);
 
@@ -235,7 +241,7 @@ export function createScene<V extends VariablesOptions>(
           )}
         </div>
 
-        {variableKeys.length > 0 && (
+        {variableKeys.length > 0 && !context?.registerSceneVariables && (
           <div className={s("variablesWrapper", { hasNormal })}>
             {variableKeys.map((key) => {
               const spec = variablesSpec[key];

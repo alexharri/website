@@ -1,8 +1,8 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
-import { NumberVariable, NumberVariableSpec } from "../variables";
-import { NormalVariableSpec } from "../../threejs/NormalVariable";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { NumberVariable } from "../variables";
 import { StyleOptions, useStyles } from "../../utils/styles";
 import { useCanvasContext } from "../../contexts/CanvasContext";
+import { VariableDict, VariableSpec, VariableValues } from "../../types/variables";
 
 const styles = ({ styled }: StyleOptions) => ({
   variablesWrapper: styled.css`
@@ -18,36 +18,30 @@ const styles = ({ styled }: StyleOptions) => ({
   `,
 });
 
-type VariablesOptions = {
-  [key: string]: NumberVariableSpec | NormalVariableSpec;
-};
-
-type Variables<V extends VariablesOptions> = {
+type LocalVariables<V extends VariableDict> = {
   [K in keyof V]: V[K]["value"] extends [number, number, number]
     ? [number, number, number]
     : V[K]["value"];
 };
 
-interface Scene2DDrawProps<V extends VariablesOptions> {
+interface Scene2DDrawProps<V extends VariableDict> {
   ctx: CanvasRenderingContext2D;
   width: number;
   height: number;
   elapsed: number;
   timeDelta: number;
-  variables: Variables<V>;
+  variables: LocalVariables<V>;
 }
 
-type DrawFunction<V extends VariablesOptions> = (props: Scene2DDrawProps<V>) => void;
+type DrawFunction<V extends VariableDict> = (props: Scene2DDrawProps<V>) => void;
 
-interface Options<V extends VariablesOptions> {
+interface Options<V extends VariableDict> {
   variables?: V;
 }
 
 export interface Scene2DProps {
   height?: number;
 }
-
-const EMPTY_OBJ = {};
 
 function flipBufferYAxis(buffer: Uint8Array, width: number, height: number): Uint8Array {
   const out = new Uint8Array(buffer.length);
@@ -64,7 +58,7 @@ function flipBufferYAxis(buffer: Uint8Array, width: number, height: number): Uin
   return out;
 }
 
-export function createScene2D<V extends VariablesOptions>(
+export function createScene2D<V extends VariableDict>(
   drawFunction: DrawFunction<V>,
   options: Options<V> = {},
 ) {
@@ -84,30 +78,37 @@ export function createScene2D<V extends VariablesOptions>(
     const containerRef = useRef<HTMLDivElement>(null);
     const s = useStyles(styles);
 
-    const variablesSpec = options.variables ?? (EMPTY_OBJ as V);
+    const variablesSpec = useMemo(() => options.variables ?? ({} as V), [options.variables]);
     const variableKeys = useMemo(() => Object.keys(variablesSpec), [variablesSpec]);
 
-    const [variables, setVariables] = useState(() =>
-      variableKeys.reduce((obj, _key) => {
-        const key = _key as keyof V;
-        obj[key] = variablesSpec[key].value as Variables<V>[typeof key];
-        return obj;
-      }, {} as Variables<V>),
-    );
+    const [variableValues, setVariableValues] = useState(() => {
+      const initialVariables: VariableValues = {};
+      for (const [key, spec] of Object.entries(variablesSpec)) {
+        initialVariables[key] = spec.value;
+      }
+      return initialVariables;
+    });
 
-    const setVariableValue = (key: string, value: unknown) => {
-      setVariables((obj) => ({ ...obj, [key]: value }));
-    };
+    const setVariableValue = useCallback((key: string, value: VariableSpec["value"]) => {
+      setVariableValues((prev) => ({ ...prev, [key]: value }));
+    }, []);
+
+    useEffect(() => {
+      if (context?.registerSceneVariables && variableKeys.length > 0) {
+        context.registerSceneVariables(variablesSpec);
+      }
+    }, [context?.registerSceneVariables, variableKeys.length]);
+
+    const variableValuesRef = useRef<LocalVariables<V>>(null!);
+    variableValuesRef.current = (context?.variables ?? variableValues) as LocalVariables<V>;
 
     useEffect(() => {
       const canvas = canvasRef.current;
       const container = containerRef.current;
       if (!canvas || !container) return;
 
-      // Wait for container to have dimensions
-      const containerWidth = container.clientWidth || 800; // fallback width
+      const containerWidth = container.clientWidth;
 
-      // Set canvas size
       canvas.width = containerWidth;
       canvas.height = height;
       canvas.style.width = `${containerWidth}px`;
@@ -138,7 +139,7 @@ export function createScene2D<V extends VariablesOptions>(
           height: canvas.height,
           elapsed,
           timeDelta,
-          variables,
+          variables: variableValuesRef.current,
         });
 
         if (onFrame) {
@@ -155,7 +156,7 @@ export function createScene2D<V extends VariablesOptions>(
       return () => {
         mounted = false;
       };
-    }, [height, canvasRef, onFrame, variables]);
+    }, [height, canvasRef, onFrame]);
 
     return (
       <>
@@ -163,11 +164,11 @@ export function createScene2D<V extends VariablesOptions>(
           <canvas ref={canvasRef} style={{ display: "block" }} />
         </div>
 
-        {variableKeys.length > 0 && (
+        {variableKeys.length > 0 && !context?.registerSceneVariables && (
           <div className={s("variablesWrapper")}>
             {variableKeys.map((key) => {
               const spec = variablesSpec[key];
-              const value = variables[key];
+              const value = variableValues[key];
               if (spec.type === "number")
                 return (
                   <NumberVariable

@@ -1,10 +1,15 @@
-import React, { createContext, useContext, useRef } from "react";
+import React, { createContext, useContext, useRef, useMemo } from "react";
+import { VariableDict } from "../types/variables";
+
+type Variables = Record<string, unknown>;
 
 interface CanvasContextValue {
   canvasRef: React.RefObject<HTMLCanvasElement>;
   onFrame: (buffer: Uint8Array) => void;
   height: number;
   orbitControlsTargetRef: React.RefObject<HTMLDivElement>;
+  registerSceneVariables?: (specs: VariableDict) => void;
+  variables?: Variables;
 }
 
 const CanvasContext = createContext<CanvasContextValue | null>(null);
@@ -19,6 +24,8 @@ interface CanvasProviderProps {
   onFrame: (buffer: Uint8Array) => void;
   height: number;
   orbitControlsTargetRef: React.RefObject<HTMLDivElement>;
+  registerSceneVariables?: (specs: VariableDict) => void;
+  variables?: Variables;
 }
 
 export function CanvasProvider({
@@ -26,15 +33,22 @@ export function CanvasProvider({
   onFrame,
   height,
   orbitControlsTargetRef,
+  registerSceneVariables,
+  variables,
 }: CanvasProviderProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
-  const contextValue: CanvasContextValue = {
-    canvasRef,
-    onFrame,
-    height,
-    orbitControlsTargetRef,
-  };
+  const contextValue: CanvasContextValue = useMemo(
+    () => ({
+      canvasRef,
+      onFrame,
+      height,
+      orbitControlsTargetRef,
+      registerSceneVariables,
+      variables,
+    }),
+    [onFrame, height, orbitControlsTargetRef, registerSceneVariables, variables],
+  );
 
   return <CanvasContext.Provider value={contextValue}>{children}</CanvasContext.Provider>;
 }

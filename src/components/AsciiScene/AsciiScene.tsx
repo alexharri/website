@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import React, { useRef, useState, useCallback } from "react";
 import { useStyles } from "../../utils/styles";
 import { AsciiRenderer } from "../AsciiRenderer";
 import { AlphabetName } from "../AsciiRenderer/alphabets/AlphabetManager";
@@ -8,6 +8,8 @@ import { CanvasProvider } from "../../contexts/CanvasContext";
 import { AsciiSceneControls } from "./AsciiSceneControls";
 import { SplitView, ViewMode } from "../SplitView";
 import { DebugVizOptions, SamplingPointVisualizationMode } from "../AsciiRenderer/types";
+import { NumberVariable } from "../variables";
+import { VariableValues, VariableSpec, VariableDict } from "../../types/variables";
 
 interface AsciiSceneProps {
   children: React.ReactNode;
@@ -40,6 +42,22 @@ export const AsciiScene: React.FC<AsciiSceneProps> = ({
   const [characterWidthMultiplier, setCharacterWidthMultiplier] = useState(0.7);
   const [characterHeightMultiplier, setCharacterHeightMultiplier] = useState(1.0);
 
+  const [variables, setVariables] = useState<VariableDict>({});
+  const [variableValues, setVariableValues] = useState<VariableValues>({});
+
+  const registerSceneVariables = useCallback((variables: VariableDict) => {
+    setVariables(variables);
+    const initialVariables: VariableValues = {};
+    for (const [key, spec] of Object.entries(variables)) {
+      initialVariables[key] = spec.value;
+    }
+    setVariableValues(initialVariables);
+  }, []);
+
+  const setVariableValue = useCallback((key: string, value: VariableSpec["value"]) => {
+    setVariableValues((prev) => ({ ...prev, [key]: value }));
+  }, []);
+
   const debugVizOptions: DebugVizOptions = {
     showSamplingCircles: showSamplingCircles === true ? "raw" : showSamplingCircles,
     showExternalSamplingCircles,
@@ -56,12 +74,10 @@ export const AsciiScene: React.FC<AsciiSceneProps> = ({
     width = CONTENT_WIDTH;
   }
 
+  const onFrame = useCallback((buffer: Uint8Array) => onFrameRef.current?.(buffer), []);
+
   return (
-    <CanvasProvider
-      onFrame={(buffer: Uint8Array) => onFrameRef.current?.(buffer)}
-      height={height}
-      orbitControlsTargetRef={orbitControlsTargetRef}
-    >
+    <>
       <div className={s("container")} style={{ height }}>
         {showControls && (
           <AsciiSceneControls
@@ -76,30 +92,59 @@ export const AsciiScene: React.FC<AsciiSceneProps> = ({
             setCharacterHeightMultiplier={setCharacterHeightMultiplier}
           />
         )}
-        <SplitView
-          viewMode={viewMode}
+        <CanvasProvider
+          onFrame={onFrame}
           height={height}
-          width={width}
-          splitPosition={splitT}
-          onSplitPositionChange={setSplitT}
-          wrapperRef={orbitControlsTargetRef}
+          orbitControlsTargetRef={orbitControlsTargetRef}
+          registerSceneVariables={registerSceneVariables}
+          variables={variableValues}
         >
-          {[
-            <AsciiRenderer
-              key="renderer"
-              onFrameRef={onFrameRef}
-              alphabet={selectedAlphabet}
-              fontSize={fontSize}
-              characterWidthMultiplier={characterWidthMultiplier}
-              characterHeightMultiplier={characterHeightMultiplier}
-              lightnessEasingFunction={lightnessEasingFunction}
-              debugVizOptions={debugVizOptions}
-              transparent={viewMode === "transparent"}
-            />,
-            children,
-          ]}
-        </SplitView>
+          <SplitView
+            viewMode={viewMode}
+            height={height}
+            width={width}
+            splitPosition={splitT}
+            onSplitPositionChange={setSplitT}
+            wrapperRef={orbitControlsTargetRef}
+          >
+            {[
+              <AsciiRenderer
+                key="renderer"
+                onFrameRef={onFrameRef}
+                alphabet={selectedAlphabet}
+                fontSize={fontSize}
+                characterWidthMultiplier={characterWidthMultiplier}
+                characterHeightMultiplier={characterHeightMultiplier}
+                lightnessEasingFunction={lightnessEasingFunction}
+                debugVizOptions={debugVizOptions}
+                transparent={viewMode === "transparent"}
+              />,
+              children,
+            ]}
+          </SplitView>
+        </CanvasProvider>
       </div>
-    </CanvasProvider>
+
+      {Object.keys(variables).length > 0 && (
+        <div className={s("variablesWrapper")}>
+          {Object.entries(variables).map(([key, spec]) => {
+            const value = variableValues[key];
+            if (spec.type === "number") {
+              return (
+                <NumberVariable
+                  key={key}
+                  dataKey={key}
+                  value={value as number}
+                  onValueChange={(value) => setVariableValue(key, value)}
+                  spec={spec}
+                  showValue={false}
+                />
+              );
+            }
+            throw new Error(`Variable rendering not implemented for type ${spec.type}`);
+          })}
+        </div>
+      )}
+    </>
   );
 };

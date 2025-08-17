@@ -244,4 +244,16 @@ export default ({ styled, theme }: StyleOptions) => ({
       cursor: not-allowed;
     }
   `,
+
+  variablesWrapper: styled.css`
+    position: relative;
+    z-index: 2;
+    display: flex;
+    justify-content: center;
+    gap: 32px;
+    height: 72px;
+    padding-bottom: 16px;
+    align-items: center;
+    margin-top: -16px;
+  `,
 });

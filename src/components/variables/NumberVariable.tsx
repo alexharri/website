@@ -5,6 +5,7 @@ import { lerp } from "../../math/lerp";
 import { clamp } from "../../math/math";
 import { cssVariables } from "../../utils/cssVariables";
 import { useIsMobile } from "../../utils/hooks/useViewportWidth";
+import { NumberVariableSpec } from "../../types/variables";
 
 const firstUpper = (s: string) => s[0].toUpperCase() + s.slice(1);
 
@@ -117,14 +118,7 @@ const styles = ({ styled, theme }: StyleOptions) => ({
   `,
 });
 
-export type NumberVariableSpec = {
-  type: "number";
-  label?: string;
-  range: [number, number];
-  value: number;
-  step?: number;
-  format?: "number" | "percent" | "multiplier";
-};
+export type { NumberVariableSpec } from "../../types/variables";
 
 interface NumberVariableProps {
   dataKey: string;

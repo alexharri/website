@@ -7,14 +7,11 @@ import { MathSVG } from "../components/variables";
 import NormalVariableStyles from "./NormalVariable.styles";
 import { Three } from "./types";
 import { getBasicMaterial } from "./utils";
+import { NormalVariableSpec } from "../types/variables";
 
 const firstUpper = (s: string) => s[0].toUpperCase() + s.slice(1);
 
-export type NormalVariableSpec = {
-  label?: string;
-  type: "normal";
-  value: [number, number, number];
-};
+export type { NormalVariableSpec } from "../types/variables";
 
 interface NormalVariableProps {
   dataKey: string;
