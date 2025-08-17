@@ -82,20 +82,31 @@ function getSamplePoints(quality: number): { x: number; y: number }[] {
   }
 
   const points: { x: number; y: number }[] = [];
-  const goldenAngleRad = Math.PI * (3 - Math.sqrt(5)); // "Golden angle" in radians
 
-  // 0.5 = uniform area, >0.5 = more center, <0.5 = more edge
-  const RADIAL_DISTRIBUTION_EXPONENT = 0.5;
+  if (quality < 5) {
+    for (let i = 0; i < quality; i++) {
+      const angle = (i / quality) * 2 * Math.PI;
+      const RADIUS = 0.8;
+      const x = Math.cos(angle) * RADIUS;
+      const y = Math.sin(angle) * RADIUS;
+      points.push({ x, y });
+    }
+  } else {
+    const goldenAngleRad = Math.PI * (3 - Math.sqrt(5)); // "Golden angle" in radians
 
-  for (let i = 0; i < quality; i++) {
-    const theta = i * goldenAngleRad;
+    // 0.5 = uniform area, >0.5 = more center, <0.5 = more edge
+    const RADIAL_DISTRIBUTION_EXPONENT = 0.5;
 
-    const r = Math.pow((i + 0.5) / quality, RADIAL_DISTRIBUTION_EXPONENT);
+    for (let i = 0; i < quality; i++) {
+      const theta = i * goldenAngleRad;
 
-    const x = r * Math.cos(theta);
-    const y = r * Math.sin(theta);
+      const r = Math.pow((i + 0.5) / quality, RADIAL_DISTRIBUTION_EXPONENT);
 
-    points.push({ x, y });
+      const x = r * Math.cos(theta);
+      const y = r * Math.sin(theta);
+
+      points.push({ x, y });
+    }
   }
 
   return points;
