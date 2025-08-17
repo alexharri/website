@@ -3,6 +3,7 @@ import Bezier from "bezier-easing";
 import { getAlphabetMetadata } from "../alphabets/AlphabetManager";
 
 import { AsciiRenderConfig } from "../renderConfig";
+import { clamp } from "../../../math/math";
 
 const CONTRAST_EXPONENT_GLOBAL = 3;
 const CONTRAST_EXPONENT_LOCAL = 7;
@@ -39,6 +40,8 @@ function readPixelFromBuffer(
   ty: number,
   pixelBufferScale: number,
 ) {
+  tx = clamp(tx, 0, 1);
+  ty = clamp(ty, 0, 1);
   const pixelX = Math.floor(tx * canvasWidth * pixelBufferScale);
   const pixelY = Math.floor((1 - ty) * canvasHeight * pixelBufferScale);
   const index = (pixelY * (canvasWidth * pixelBufferScale) + pixelX) * 4;
@@ -141,8 +144,6 @@ function crunchSamplingVectorDirectional(
     return enhanced * contextValue;
   });
 }
-
-// Global character matcher instance (created once for performance)
 
 export interface CharacterSamplingData {
   samplingVector: number[];

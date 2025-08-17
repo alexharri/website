@@ -23,9 +23,9 @@ export interface SamplingConfig {
 
 export interface AlphabetMetadata {
   samplingConfig: SamplingConfig;
-  fontSize: number; // always 1 (relative to font size)
-  width: number; // character width relative to font size
-  height: number; // character height relative to font size
+  fontSize: number;
+  width: number;
+  height: number;
 }
 
 type Effect = (vectors: number[][]) => void;

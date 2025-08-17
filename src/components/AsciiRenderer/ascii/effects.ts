@@ -54,6 +54,12 @@ export const EFFECTS = {
       setMagnitude(vector, remap(magnitude, 0, REMAP_OVER, MIN_MAGNITUDE, REMAP_OVER));
     }
   },
+
+  magnitude1(vectors: number[][]) {
+    for (const vector of vectors) {
+      setMagnitude(vector, 1);
+    }
+  },
 };
 
 function setMagnitude(vector: number[], targetMagnitude: number): void {

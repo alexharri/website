@@ -1,5 +1,6 @@
 import { BreatheScene } from "./scenes/breathe";
 import { CircleScene } from "./scenes/circle";
+import { ShadeSplitScene } from "./scenes/shadeSplit";
 
 export const canvas2DScenes: Record<
   string,
@@ -7,4 +8,5 @@ export const canvas2DScenes: Record<
 > = {
   circle: CircleScene,
   breathe: BreatheScene,
+  "shade-split": ShadeSplitScene,
 };
