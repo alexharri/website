@@ -13,10 +13,12 @@ export const shadeSplitScene = createScene2D(({ ctx, width, height, elapsed }) =
   // Moving split shape
   const xOff = width * 0.2 * t;
 
+  const xCenter = width * 0.5;
+
   ctx.beginPath();
   ctx.moveTo(0, 0);
-  ctx.lineTo(width * 0.7 + xOff, 0);
-  ctx.lineTo(width * 0.3 + xOff, height);
+  ctx.lineTo(xCenter + height * 0.2 + xOff, 0);
+  ctx.lineTo(xCenter - height * 0.2 + xOff, height);
   ctx.lineTo(0, height);
   ctx.closePath();
   ctx.fillStyle = "#333333";

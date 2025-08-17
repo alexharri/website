@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { NumberVariable } from "../variables";
 import { StyleOptions, useStyles } from "../../utils/styles";
-import { useCanvasContext } from "../../contexts/CanvasContext";
+import { useSceneContext } from "../../contexts/CanvasContext";
 import { VariableDict, VariableSpec, VariableValues } from "../../types/variables";
 import { useSceneHeight } from "../../utils/hooks/useSceneHeight";
 
@@ -64,7 +64,7 @@ export function createScene2D<V extends VariableDict>(
   options: Options<V> = {},
 ) {
   return (props: Scene2DProps) => {
-    const context = useCanvasContext();
+    const context = useSceneContext();
 
     const fallbackCanvasRef = useRef<HTMLCanvasElement>(null);
     const canvasRef = context?.canvasRef || fallbackCanvasRef;

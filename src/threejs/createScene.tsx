@@ -9,7 +9,7 @@ import { useSceneHeight } from "../utils/hooks/useSceneHeight";
 import { SceneProps } from "./scenes";
 import { FrameReader } from "./Components/FrameReader";
 import { VariableDict } from "../types/variables";
-import { useCanvasContext } from "../contexts/CanvasContext";
+import { useSceneContext } from "../contexts/CanvasContext";
 
 const FADE_HEIGHT = 80;
 
@@ -84,7 +84,7 @@ export function createScene<V extends VariableDict>(
     const THREE = useContext(ThreeContext);
     const DREI = useContext(DreiContext);
     const FIBER = useContext(FiberContext);
-    const context = useCanvasContext();
+    const context = useSceneContext();
 
     useEffect(() => {
       const variableKeys = Object.keys(options.variables || {});

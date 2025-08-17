@@ -31,7 +31,7 @@ export const AsciiScene: React.FC<AsciiSceneProps> = (props) => {
     children,
     height: targetHeight,
     showControls = true,
-    fontSize,
+    fontSize: targetFontSize = 14,
     showSamplingCircles = "none",
     showExternalSamplingCircles = false,
     showSamplingPoints = false,
@@ -82,7 +82,9 @@ export const AsciiScene: React.FC<AsciiSceneProps> = (props) => {
     width = CONTENT_WIDTH;
   }
 
-  const { height } = useSceneHeight(targetHeight);
+  const { height, scale } = useSceneHeight(targetHeight);
+
+  const fontSize = targetFontSize * scale;
 
   const onFrame = useCallback((buffer: Uint8Array) => onFrameRef.current?.(buffer), []);
 

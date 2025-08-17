@@ -3,7 +3,7 @@ import { VariableDict } from "../types/variables";
 
 type Variables = Record<string, unknown>;
 
-interface CanvasContextValue {
+interface ISceneContext {
   canvasRef: React.RefObject<HTMLCanvasElement>;
   onFrame: (buffer: Uint8Array) => void;
   height: number;
@@ -12,11 +12,10 @@ interface CanvasContextValue {
   variables?: Variables;
 }
 
-const CanvasContext = createContext<CanvasContextValue | null>(null);
+const SceneContext = createContext<ISceneContext | null>(null);
 
-export function useCanvasContext(): CanvasContextValue | null {
-  const context = useContext(CanvasContext);
-  return context;
+export function useSceneContext(): ISceneContext | null {
+  return useContext(SceneContext);
 }
 
 interface CanvasProviderProps {
@@ -38,7 +37,7 @@ export function CanvasProvider({
 }: CanvasProviderProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
-  const contextValue: CanvasContextValue = useMemo(
+  const contextValue: ISceneContext = useMemo(
     () => ({
       canvasRef,
       onFrame,
@@ -50,5 +49,5 @@ export function CanvasProvider({
     [onFrame, height, orbitControlsTargetRef, registerSceneVariables, variables],
   );
 
-  return <CanvasContext.Provider value={contextValue}>{children}</CanvasContext.Provider>;
+  return <SceneContext.Provider value={contextValue}>{children}</SceneContext.Provider>;
 }

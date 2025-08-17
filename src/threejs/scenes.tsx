@@ -3,7 +3,7 @@ import React, { createContext, useContext, useEffect, useRef } from "react";
 import { useVisible } from "../utils/hooks/useVisible";
 import { LoadThreeContext } from "./Components/ThreeProvider";
 import { SceneSkeleton } from "./SceneSkeleton";
-import { useCanvasContext } from "../contexts/CanvasContext";
+import { useSceneContext } from "../contexts/CanvasContext";
 
 const loading = SceneSkeleton;
 
@@ -121,7 +121,7 @@ export const Scene: React.FC<Props> = (props) => {
     orbitControlsRef,
   } = props;
 
-  const context = useCanvasContext();
+  const context = useSceneContext();
   const containerRef = useRef<HTMLDivElement>(null);
   const visible = useVisible(containerRef, "350px");
   const render = useVisible(containerRef, "50px");

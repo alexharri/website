@@ -3,7 +3,7 @@ import { AsciiRendererStyles } from "./AsciiRenderer.styles";
 import { generateAsciiChars } from "./ascii/generateAsciiChars";
 import { AlphabetName, getAlphabetMetadata } from "./alphabets/AlphabetManager";
 import { useStyles } from "../../utils/styles";
-import { useCanvasContext } from "../../contexts/CanvasContext";
+import { useSceneContext } from "../../contexts/CanvasContext";
 import { cssVariables } from "../../utils/cssVariables";
 import { useMonospaceCharacterWidthEm } from "../../utils/hooks/useMonospaceCharacterWidthEm";
 import { AsciiDebugVizCanvas, renderAsciiDebugViz } from "./asciiDebugViz";
@@ -15,7 +15,7 @@ import { DebugVizOptions } from "./types";
 interface Props {
   alphabet: AlphabetName;
   onFrameRef: React.MutableRefObject<null | ((buffer: Uint8Array) => void)>;
-  fontSize?: number;
+  fontSize: number;
   characterWidthMultiplier: number;
   characterHeightMultiplier: number;
   lightnessEasingFunction?: string;
@@ -26,7 +26,7 @@ interface Props {
 export function AsciiRenderer(props: Props) {
   const {
     alphabet,
-    fontSize = 14,
+    fontSize,
     characterHeightMultiplier,
     characterWidthMultiplier,
     debugVizOptions,
@@ -44,7 +44,10 @@ export function AsciiRenderer(props: Props) {
   const enableVisualization =
     debugVizOptions.showSamplingCircles !== "none" || debugVizOptions.showExternalSamplingCircles;
 
-  const { canvasRef } = useCanvasContext();
+  const context = useSceneContext();
+  if (!context) {
+    throw new Error(`AsciiRenderer requires a CanvasContext`);
+  }
 
   const characterMatcher = useMemo(() => {
     const matcher = new CharacterMatcher();
@@ -59,7 +62,7 @@ export function AsciiRenderer(props: Props) {
       const preEl = preRef.current;
       if (!container || !content || !preEl || characterWidth == null) return;
 
-      const canvas = canvasRef.current;
+      const canvas = context.canvasRef.current;
       if (!canvas) return;
 
       const containerRect = container?.getBoundingClientRect();
