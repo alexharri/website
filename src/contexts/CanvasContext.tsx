@@ -9,11 +9,8 @@ interface CanvasContextValue {
 
 const CanvasContext = createContext<CanvasContextValue | null>(null);
 
-export function useCanvasContext(): CanvasContextValue {
+export function useCanvasContext(): CanvasContextValue | null {
   const context = useContext(CanvasContext);
-  if (!context) {
-    throw new Error("useCanvasContext must be used within a CanvasProvider");
-  }
   return context;
 }
 

@@ -67,7 +67,7 @@ export function AsciiRenderer(props: Props) {
 
       const pixelBufferScale = canvas.width / containerRect.width;
 
-      const samplingQuality = 8;
+      const samplingQuality = 3;
 
       const config = new AsciiRenderConfig(
         containerRect.width,

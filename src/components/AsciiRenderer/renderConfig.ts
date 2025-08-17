@@ -86,7 +86,7 @@ function getSamplePoints(quality: number): { x: number; y: number }[] {
   if (quality < 5) {
     for (let i = 0; i < quality; i++) {
       const angle = (i / quality) * 2 * Math.PI;
-      const RADIUS = 0.8;
+      const RADIUS = 0.5;
       const x = Math.cos(angle) * RADIUS;
       const y = Math.sin(angle) * RADIUS;
       points.push({ x, y });

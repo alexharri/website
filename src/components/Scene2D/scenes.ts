@@ -1,12 +1,10 @@
-import { BreatheScene } from "./scenes/breathe";
-import { CircleScene } from "./scenes/circle";
-import { ShadeSplitScene } from "./scenes/shadeSplit";
+import { Scene2DProps } from "./createScene2D";
+import { breatheScene } from "./scenes/breathe";
+import { circleScene } from "./scenes/circle";
+import { shadeSplitScene } from "./scenes/shadeSplit";
 
-export const canvas2DScenes: Record<
-  string,
-  new (ctx: CanvasRenderingContext2D) => { render: () => void }
-> = {
-  circle: CircleScene,
-  breathe: BreatheScene,
-  "shade-split": ShadeSplitScene,
+export const canvas2DScenes: Partial<Record<string, React.ComponentType<Scene2DProps>>> = {
+  circle: circleScene,
+  breathe: breatheScene,
+  "shade-split": shadeSplitScene,
 };
