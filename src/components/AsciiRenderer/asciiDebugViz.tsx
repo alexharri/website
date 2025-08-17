@@ -110,6 +110,15 @@ export function renderAsciiDebugViz(
           ctx.beginPath();
           ctx.arc(x, y, config.samplePointRadius, 0, 2 * Math.PI);
           ctx.fill();
+
+          if (options.showSamplingPoints) {
+            for (const point of circleSamplingPoints) {
+              ctx.fillStyle = "#ff0000";
+              ctx.beginPath();
+              ctx.arc(x + point.x, y + point.y, samplingPointRadius, 0, 2 * Math.PI);
+              ctx.fill();
+            }
+          }
         }
       }
     });
