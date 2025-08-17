@@ -2,8 +2,8 @@ import { createScene2D } from "../createScene2D";
 
 export const breatheScene = createScene2D(
   ({ ctx, width, height, elapsed, variables }) => {
-    const t = Math.sin((elapsed / 1000) * 0.5);
-    const radius = Math.max(0, width / 4 + t * 200);
+    const t = (Math.sin((elapsed / 1000) * 0.5) + 1) / 2;
+    const radius = width * 0.05 + t * width * 0.4;
 
     const x = width * variables.xPosition;
     const y = height / 2;

@@ -15,7 +15,6 @@ export default ({ styled, theme }: StyleOptions) => ({
     width: 20px;
     z-index: 20;
     transform: translateX(50vw);
-    transition: all 0.5s;
     cursor: grab;
     display: flex;
     align-items: center;
@@ -33,7 +32,6 @@ export default ({ styled, theme }: StyleOptions) => ({
       background: ${theme.medium700};
       border-radius: 2px;
       pointer-events: none;
-      transition: all 0.3s;
     }
 
     &:hover {
@@ -54,7 +52,6 @@ export default ({ styled, theme }: StyleOptions) => ({
     overflow: hidden;
     user-select: none;
     pointer-events: none;
-    transition: all 0.5s;
     background: ${theme.background200};
 
     &--transparent {
@@ -70,7 +67,6 @@ export default ({ styled, theme }: StyleOptions) => ({
     right: 0;
     width: 100%;
     transform: translateX(0);
-    transition: all 0.5s;
   `,
 
   rightPanel: styled.css`
@@ -78,7 +74,6 @@ export default ({ styled, theme }: StyleOptions) => ({
     margin-left: auto;
     transform: translateX(100%);
     overflow: hidden;
-    transition: all 0.5s;
     position: relative;
   `,
 
@@ -88,6 +83,5 @@ export default ({ styled, theme }: StyleOptions) => ({
     left: 50%;
     width: 100%;
     transform: translateX(-75%);
-    transition: all 0.5s;
   `,
 });

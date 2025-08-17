@@ -114,14 +114,6 @@ export function createScene2D<V extends VariableDict>(
       const container = containerRef.current;
       if (!canvas || !container) return;
 
-      const width = container.clientWidth;
-      const height = heightRef.current;
-
-      canvas.width = width;
-      canvas.height = height;
-      canvas.style.width = `${width}px`;
-      canvas.style.height = `${height}px`;
-
       const ctx = canvas.getContext("2d");
       if (!ctx) return;
 
@@ -133,22 +125,23 @@ export function createScene2D<V extends VariableDict>(
         if (!mounted) return;
         requestAnimationFrame(tick);
 
+        const width = container.clientWidth;
+        const height = heightRef.current;
+        const variables = variableValuesRef.current;
+
+        if (width !== canvas.width || height !== canvas.height) {
+          canvas.width = width;
+          canvas.height = height;
+          canvas.style.width = `${width}px`;
+          canvas.style.height = `${height}px`;
+        }
+
         const now = Date.now();
         const timeDelta = now - lastTime;
         const elapsed = now - startTime;
 
-        // Clear canvas
         ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-        // Draw scene
-        drawFunction({
-          ctx,
-          width: canvas.width,
-          height: canvas.height,
-          elapsed,
-          timeDelta,
-          variables: variableValuesRef.current,
-        });
+        drawFunction({ ctx, width, height, elapsed, timeDelta, variables });
 
         if (onFrame) {
           const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);

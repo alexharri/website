@@ -69,7 +69,7 @@ export const SplitView: React.FC<SplitViewProps> = ({
               : viewMode === "right"
               ? `translateX(calc(-${width / 2}px - 100%))`
               : `translateX(${width / 2}px)`,
-          transition: isDragging ? "none" : "all 0.5s",
+          transition: isDragging ? "none" : "transform 0.5s",
         }}
         onMouseDown={handleMouseDown}
       >
@@ -86,7 +86,7 @@ export const SplitView: React.FC<SplitViewProps> = ({
                 : viewMode === "left" || viewMode === "transparent"
                 ? "translateX(0)"
                 : "translateX(-100%)",
-            transition: isDragging ? "none" : "all 0.5s",
+            transition: isDragging ? "none" : "transform 0.5s, background 0.5s",
             background:
               viewMode === "transparent"
                 ? hexToRgbaString(colors.background200, 0.5)
@@ -102,7 +102,7 @@ export const SplitView: React.FC<SplitViewProps> = ({
                   : viewMode === "left" || viewMode === "transparent"
                   ? "translateX(0)"
                   : "translateX(100%)",
-              transition: isDragging ? "none" : "all 0.5s",
+              transition: isDragging ? "none" : "transform 0.5s",
             }}
           >
             {leftContent}
@@ -115,7 +115,7 @@ export const SplitView: React.FC<SplitViewProps> = ({
             height,
             transform:
               viewMode === "split" ? `translateX(${width * splitPosition}px)` : "translateX(0)",
-            transition: isDragging ? "none" : "all 0.5s",
+            transition: isDragging ? "none" : "transform 0.5s",
           }}
         >
           <div
@@ -125,7 +125,7 @@ export const SplitView: React.FC<SplitViewProps> = ({
                 viewMode === "split"
                   ? `translateX(calc(-${50 + (splitPosition * 100) / 2}%))`
                   : "translateX(-50%)",
-              transition: isDragging ? "none" : "all 0.5s",
+              transition: isDragging ? "none" : "transform 0.5s",
             }}
           >
             {rightContent}
