@@ -65,12 +65,15 @@ export function AsciiRenderer(props: Props) {
 
       const pixelBufferScale = canvas.width / containerRect.width;
 
+      const samplingQuality = 8;
+
       const config = new AsciiRenderConfig(
         containerRect.width,
         containerRect.height,
         fontSize,
         characterWidth,
         alphabet,
+        samplingQuality,
         characterWidthMultiplier,
         characterHeightMultiplier,
       );

@@ -7,7 +7,6 @@ import { clamp } from "../../../math/math";
 
 const CONTRAST_EXPONENT_GLOBAL = 3;
 const CONTRAST_EXPONENT_LOCAL = 7;
-const SAMPLE_QUALITY = 10; // Number of samples per circle (higher = better quality, slower)
 
 const lightnessEasingFunctions = {
   default: Bezier(0.38, 0.01, 0.67, 1),
@@ -64,30 +63,17 @@ function sampleCircularRegion(
   config: AsciiRenderConfig,
   x: number,
   y: number,
+  samplingPoints: { x: number; y: number }[],
   scale: number,
 ): number {
   let totalLightness = 0;
   let sampleCount = 0;
 
   // Always sample center point
-  const tx = x / config.canvasWidth;
-  const ty = y / config.canvasHeight;
-  const centerColor = readPixelFromBuffer(
-    pixelBuffer,
-    config.canvasWidth,
-    config.canvasHeight,
-    tx,
-    ty,
-    scale,
-  );
-  totalLightness += lightness(centerColor);
-  sampleCount++;
 
-  for (let i = 0; i < SAMPLE_QUALITY; i++) {
-    const angle = (i / SAMPLE_QUALITY) * 2 * Math.PI;
-
-    const sampleX = x + Math.cos(angle) * config.samplePointRadius;
-    const sampleY = y + Math.sin(angle) * config.samplePointRadius;
+  for (const point of samplingPoints) {
+    const sampleX = x + point.x;
+    const sampleY = y + point.y;
 
     const tx = sampleX / config.canvasWidth;
     const ty = sampleY / config.canvasHeight;
@@ -175,17 +161,18 @@ export function generateAsciiChars(
       ? easingLookupTables[lightnessEasingFunction]
       : null;
 
+  const samplingPoints = config.generateCircleSamplingPoints();
   function createSamplingVector(
     col: number,
     row: number,
-    points: { x: number; y: number }[],
+    samplingCircleCenterPoints: { x: number; y: number }[],
   ): number[] {
     const [sampleRectLeft, sampleRectTop] = config.sampleRectPosition(col, row);
-    return points.map((point) => {
-      const [xOff, yOff] = config.samplePointOffset(point);
+    return samplingCircleCenterPoints.map((samplingCircleCenterPoint) => {
+      const [xOff, yOff] = config.samplingCircleOffset(samplingCircleCenterPoint);
       const x = sampleRectLeft + xOff;
       const y = sampleRectTop + yOff;
-      return sampleCircularRegion(pixelBuffer, config, x, y, pixelBufferScale);
+      return sampleCircularRegion(pixelBuffer, config, x, y, samplingPoints, pixelBufferScale);
     });
   }
 

@@ -22,6 +22,7 @@ export class AsciiRenderConfig {
     public fontSize: number,
     public characterWidth: number,
     public alphabet: AlphabetName,
+    public samplingQuality: number,
     characterWidthMultiplier: number,
     characterHeightMultiplier: number,
   ) {
@@ -59,9 +60,34 @@ export class AsciiRenderConfig {
     return [x, y];
   }
 
-  public samplePointOffset(point: { x: number; y: number }) {
+  public samplingCircleOffset(point: { x: number; y: number }) {
     const x = point.x * this.sampleRectWidth;
     const y = point.y * this.sampleRectHeight;
     return [x, y];
   }
+
+  public generateCircleSamplingPoints(): { x: number; y: number }[] {
+    const points = getSamplePoints(this.samplingQuality);
+    return points.map(({ x, y }) => {
+      x *= this.samplePointRadius;
+      y *= this.samplePointRadius;
+      return { x, y };
+    });
+  }
+}
+
+function getSamplePoints(quality: number): { x: number; y: number }[] {
+  if (quality === 1) {
+    return [{ x: 0, y: 0 }]; // Circle center
+  }
+  const points: { x: number; y: number }[] = [];
+  for (let i = 0; i < quality; i++) {
+    const angle = (i / quality) * 2 * Math.PI;
+
+    const x = Math.cos(angle);
+    const y = Math.sin(angle);
+
+    points.push({ x, y });
+  }
+  return points;
 }

@@ -47,7 +47,7 @@ export function renderSamplingPoints(
       const [sampleRectLeft, sampleRectTop] = config.sampleRectPosition(col, row);
 
       metadata.samplingConfig.points.forEach((samplingPoint, i) => {
-        const [xOff, yOff] = config.samplePointOffset(samplingPoint);
+        const [xOff, yOff] = config.samplingCircleOffset(samplingPoint);
         const x = sampleRectLeft + xOff;
         const y = sampleRectTop + yOff;
 
@@ -72,7 +72,7 @@ export function renderSamplingPoints(
       const externalPoints =
         "externalPoints" in metadata.samplingConfig ? metadata.samplingConfig.externalPoints : [];
       for (const [i, externalPoint] of externalPoints.entries()) {
-        const [xOff, yOff] = config.samplePointOffset(externalPoint);
+        const [xOff, yOff] = config.samplingCircleOffset(externalPoint);
         const x = sampleRectLeft + xOff;
         const y = sampleRectTop + yOff;
 
