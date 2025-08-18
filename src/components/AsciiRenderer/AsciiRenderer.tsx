@@ -11,6 +11,7 @@ import { CharacterMatcher } from "./ascii/CharacterMatcher";
 import { EFFECTS } from "./ascii/effects";
 import { AsciiRenderConfig } from "./renderConfig";
 import { DebugVizOptions } from "./types";
+import { hexToRgbaString } from "../../utils/color";
 
 interface Props {
   alphabet: AlphabetName;
@@ -20,6 +21,8 @@ interface Props {
   characterHeightMultiplier: number;
   lightnessEasingFunction?: string;
   transparent: boolean;
+  hideAscii: boolean;
+  offsetAlign: "left" | "center";
   debugVizOptions: DebugVizOptions;
 }
 
@@ -31,6 +34,8 @@ export function AsciiRenderer(props: Props) {
     characterWidthMultiplier,
     debugVizOptions,
     transparent,
+    hideAscii,
+    offsetAlign,
   } = props;
 
   const containerRef = useRef<HTMLDivElement>(null);
@@ -60,7 +65,7 @@ export function AsciiRenderer(props: Props) {
       const container = containerRef.current;
       const content = contentRef.current;
       const preEl = preRef.current;
-      if (!container || !content || !preEl || characterWidth == null) return;
+      if (!container || characterWidth == null) return;
 
       const canvas = context.canvasRef.current;
       if (!canvas) return;
@@ -81,6 +86,7 @@ export function AsciiRenderer(props: Props) {
         samplingQuality,
         characterWidthMultiplier,
         characterHeightMultiplier,
+        offsetAlign,
       );
 
       const result = generateAsciiChars(
@@ -93,15 +99,19 @@ export function AsciiRenderer(props: Props) {
         props.lightnessEasingFunction,
       );
 
-      preEl.textContent = result.ascii;
+      if (preEl) {
+        preEl.textContent = result.ascii;
+        preEl.style.letterSpacing = config.letterSpacingEm + "em";
+        preEl.style.lineHeight = config.lineHeight.toString();
+        preEl.style.fontSize = config.fontSize + "px";
+      }
+      if (content) {
+        content.style.transform = `translate(${config.offsetX + config.asciiXOffset}px, ${
+          config.offsetY
+        }px)`;
+      }
 
-      preEl.style.letterSpacing = config.letterSpacingEm + "em";
-      preEl.style.lineHeight = config.lineHeight.toString();
-      preEl.style.fontSize = config.fontSize + "px";
-
-      content.style.transform = `translate(${config.offsetX}px, ${config.offsetY}px)`;
-
-      if (debugVizOptions.showSamplingCircles !== "none" && samplingCanvasRef.current) {
+      if (samplingCanvasRef.current) {
         renderAsciiDebugViz(
           samplingCanvasRef.current,
           result.samplingData,
@@ -118,25 +128,36 @@ export function AsciiRenderer(props: Props) {
     characterWidthMultiplier,
     characterHeightMultiplier,
     characterWidth,
+    hideAscii,
   ]);
 
-  console.log(characterWidth);
+  let background: string;
+  if (transparent && hideAscii) {
+    background = "transparent";
+  } else if (transparent) {
+    background = hexToRgbaString(colors.background200, 0.5);
+  } else {
+    background = colors.background200;
+  }
+  console.log({ transparent, hideAscii, background });
 
   return (
     <div
       data-ascii
       ref={containerRef}
-      style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0 }}
-      className={s("container", { transparent })}
+      style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0, background }}
+      className={s("container")}
     >
-      <div className={s("content")} ref={contentRef}>
-        <pre
-          ref={preRef}
-          className={s("pre")}
-          style={{ color: transparent ? colors.background : colors.blue400 }}
-        />
-      </div>
-      {enableVisualization && <AsciiDebugVizCanvas onCanvasRef={samplingCanvasRef} />}
+      {!hideAscii && (
+        <div className={s("content")} ref={contentRef}>
+          <pre
+            ref={preRef}
+            className={s("pre")}
+            style={{ color: transparent ? colors.background : colors.blue400 }}
+          />
+        </div>
+      )}
+      <AsciiDebugVizCanvas onCanvasRef={samplingCanvasRef} />
     </div>
   );
 }

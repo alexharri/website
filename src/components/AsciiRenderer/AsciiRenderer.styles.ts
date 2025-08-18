@@ -5,6 +5,7 @@ export const AsciiRendererStyles = ({ styled }: StyleOptions) => ({
   container: styled.css`
     pointer-events: auto;
     position: relative;
+    transition: background 0.5s;
   `,
 
   content: styled.css`

@@ -2,8 +2,6 @@ import React, { useState } from "react";
 import { useStyles } from "../../utils/styles";
 import { clamp } from "../../math/math";
 import SplitViewStyles from "./SplitView.styles";
-import { colors } from "../../utils/cssVariables";
-import { hexToRgbaString } from "../../utils/color";
 
 export type ViewMode = "left" | "split" | "right" | "transparent";
 
@@ -86,11 +84,7 @@ export const SplitView: React.FC<SplitViewProps> = ({
                 : viewMode === "left" || viewMode === "transparent"
                 ? "translateX(0)"
                 : "translateX(-100%)",
-            transition: isDragging ? "none" : "transform 0.5s, background 0.5s",
-            background:
-              viewMode === "transparent"
-                ? hexToRgbaString(colors.background200, 0.5)
-                : colors.background200,
+            transition: isDragging ? "none" : "transform 0.5s",
           }}
         >
           <div

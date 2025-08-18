@@ -7,7 +7,6 @@ export class AsciiRenderConfig {
   public boxHeight: number;
   public sampleRectXOff: number;
   public sampleRectYOff: number;
-  public difference: number;
   public cols: number;
   public rows: number;
   public offsetX: number;
@@ -15,6 +14,7 @@ export class AsciiRenderConfig {
   public samplePointRadius: number;
   public letterSpacingEm: number;
   public lineHeight: number;
+  public asciiXOffset: number;
 
   constructor(
     public canvasWidth: number,
@@ -25,6 +25,7 @@ export class AsciiRenderConfig {
     public samplingQuality: number,
     characterWidthMultiplier: number,
     characterHeightMultiplier: number,
+    offsetAlign: "left" | "center",
   ) {
     const metadata = getAlphabetMetadata(alphabet);
 
@@ -32,7 +33,6 @@ export class AsciiRenderConfig {
     this.sampleRectHeight = fontSize * metadata.height;
     this.boxWidth = this.sampleRectWidth * characterWidthMultiplier;
     this.boxHeight = this.sampleRectHeight * characterHeightMultiplier;
-    this.difference = (metadata.width * characterWidthMultiplier - this.characterWidth) / 2;
     this.sampleRectXOff = (this.boxWidth - this.sampleRectWidth) / 2;
     this.sampleRectYOff = (this.boxHeight - this.sampleRectHeight) / 2;
 
@@ -43,19 +43,25 @@ export class AsciiRenderConfig {
     if (this.cols % 2 === 0) this.cols += 1;
     if (this.rows % 2 === 0) this.rows += 1;
 
-    const centerColX = (this.cols / 2) * this.boxWidth;
-    const centerRowY = (this.rows / 2) * this.boxHeight;
+    if (offsetAlign === "center") {
+      const centerColX = (this.cols / 2) * this.boxWidth;
+      const centerRowY = (this.rows / 2) * this.boxHeight;
 
-    this.offsetX = this.canvasWidth / 2 - centerColX;
-    this.offsetY = this.canvasHeight / 2 - centerRowY;
+      this.offsetX = this.canvasWidth / 2 - centerColX;
+      this.offsetY = this.canvasHeight / 2 - centerRowY;
+    } else {
+      this.offsetX = 0;
+      this.offsetY = 0;
+    }
 
     this.letterSpacingEm = metadata.width * characterWidthMultiplier - this.characterWidth;
     this.lineHeight = metadata.height * characterHeightMultiplier;
+
+    this.asciiXOffset = (this.letterSpacingEm * this.fontSize) / 2;
   }
 
   public sampleRectPosition(col: number, row: number): [x: number, y: number] {
-    const x =
-      col * this.boxWidth - this.difference * this.fontSize + this.offsetX + this.sampleRectXOff;
+    const x = col * this.boxWidth + this.offsetX + this.sampleRectXOff;
     const y = row * this.boxHeight + this.offsetY + this.sampleRectYOff;
     return [x, y];
   }

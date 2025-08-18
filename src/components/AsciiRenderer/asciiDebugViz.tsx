@@ -2,6 +2,8 @@ import { CharacterSamplingData } from "./ascii/generateAsciiChars";
 import { getAlphabetMetadata } from "./alphabets/AlphabetManager";
 import { AsciiRenderConfig } from "./renderConfig";
 import { DebugVizOptions } from "./types";
+import { colors } from "../../utils/cssVariables";
+import { hexToRgbaString } from "../../utils/color";
 
 interface Props {
   onCanvasRef: React.MutableRefObject<HTMLCanvasElement | null>;
@@ -29,7 +31,7 @@ export function renderAsciiDebugViz(
   options: DebugVizOptions,
 ) {
   const ctx = canvas.getContext("2d");
-  if (!ctx || samplingData.length === 0) return;
+  if (!ctx) return;
 
   const dpr = window.devicePixelRatio || 1;
 
@@ -47,6 +49,20 @@ export function renderAsciiDebugViz(
   const circleSamplingPoints = config.generateCircleSamplingPoints();
 
   const samplingPointRadius = 2;
+
+  if (options.showGrid) {
+    ctx.fillStyle = hexToRgbaString(colors.blue, 0.5);
+    ctx.beginPath();
+    for (let row = 1; row < config.rows; row++) {
+      const y = config.offsetY + config.boxHeight * row;
+      ctx.rect(0, y, config.canvasWidth, 1);
+    }
+    for (let col = 1; col < config.cols; col++) {
+      const x = config.offsetX + config.boxWidth * col;
+      ctx.rect(x, 0, 1, config.canvasHeight);
+    }
+    ctx.fill();
+  }
 
   samplingData.forEach((samplingDataRow, row) => {
     samplingDataRow.forEach(({ samplingVector, externalSamplingVector }, col) => {

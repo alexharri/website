@@ -81,7 +81,7 @@ Monospace characters are typically taller than they are wide. For example, the m
 
 The canvas above is $600 \times 360$. With a line height of $24$, we get $15$ rows. I'll also pick a letter width of 20, which gives us 30 columns. Together, those give us a $30 \times 15$ grid:
 
-<AsciiScene width={600} height={360} fontSize={20} rowHeight={24} columnWidth={20}>
+<AsciiScene width={600} height={360} fontSize={20} rowHeight={24} columnWidth={20} viewMode="transparent" hideAscii showGrid offsetAlign="left">
   <Scene2D scene="circle" />
 </AsciiScene>
 
@@ -113,7 +113,7 @@ The canvas above is $600 \times 360$. With a line height of $24$, we get $15$ ro
 
 
 
-<AsciiScene height={650} fontSize={100} showSamplingCircles="raw" showSamplingPoints characterWidthMultiplier={1.25} characterHeightMultiplier={1.25}>
+<AsciiScene height={650} fontSize={100} showSamplingCircles="raw" showSamplingPoints characterWidthMultiplier={1.25} characterHeightMultiplier={1.25} showGrid showControls offsetAlign="center">
   <Scene2D scene="breathe" />
 </AsciiScene>
 

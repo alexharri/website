@@ -25,6 +25,9 @@ interface AsciiSceneProps {
   showSamplingCircles?: SamplingPointVisualizationMode | true;
   showExternalSamplingCircles?: boolean;
   showSamplingPoints?: boolean;
+  showGrid?: boolean;
+  hideAscii?: boolean;
+  offsetAlign?: "left" | "center";
   width?: number;
   rowHeight?: number;
   columnWidth?: number;
@@ -50,6 +53,9 @@ export const AsciiScene: React.FC<AsciiSceneProps> = (props) => {
     showSamplingCircles = "none",
     showExternalSamplingCircles = false,
     showSamplingPoints = false,
+    showGrid = false,
+    hideAscii = false,
+    offsetAlign = "center",
     lightnessEasingFunction,
     viewModes = props.viewMode ? [props.viewMode] : [],
     rowHeight,
@@ -107,6 +113,7 @@ export const AsciiScene: React.FC<AsciiSceneProps> = (props) => {
     showSamplingCircles: showSamplingCircles === true ? "raw" : showSamplingCircles,
     showExternalSamplingCircles,
     showSamplingPoints,
+    showGrid,
   };
 
   const viewportWidth = useViewportWidth();
@@ -164,6 +171,8 @@ export const AsciiScene: React.FC<AsciiSceneProps> = (props) => {
                 lightnessEasingFunction={lightnessEasingFunction}
                 debugVizOptions={debugVizOptions}
                 transparent={viewMode === "transparent"}
+                hideAscii={hideAscii}
+                offsetAlign={offsetAlign}
               />,
               children,
             ]}
