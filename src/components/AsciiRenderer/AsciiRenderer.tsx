@@ -4,7 +4,7 @@ import { generateAsciiChars } from "./ascii/generateAsciiChars";
 import { AlphabetName, getAlphabetMetadata } from "./alphabets/AlphabetManager";
 import { useStyles } from "../../utils/styles";
 import { useSceneContext } from "../../contexts/CanvasContext";
-import { cssVariables } from "../../utils/cssVariables";
+import { colors, cssVariables } from "../../utils/cssVariables";
 import { useMonospaceCharacterWidthEm } from "../../utils/hooks/useMonospaceCharacterWidthEm";
 import { AsciiDebugVizCanvas, renderAsciiDebugViz } from "./asciiDebugViz";
 import { CharacterMatcher } from "./ascii/CharacterMatcher";
@@ -120,6 +120,8 @@ export function AsciiRenderer(props: Props) {
     characterWidth,
   ]);
 
+  console.log(characterWidth);
+
   return (
     <div
       data-ascii
@@ -128,7 +130,11 @@ export function AsciiRenderer(props: Props) {
       className={s("container", { transparent })}
     >
       <div className={s("content")} ref={contentRef}>
-        <pre ref={preRef} className={s("pre")} />
+        <pre
+          ref={preRef}
+          className={s("pre")}
+          style={{ color: transparent ? colors.background : colors.blue400 }}
+        />
       </div>
       {enableVisualization && <AsciiDebugVizCanvas onCanvasRef={samplingCanvasRef} />}
     </div>

@@ -4,8 +4,23 @@ import { StyleOptions, useStyles } from "../../utils/styles";
 import { useSceneContext } from "../../contexts/CanvasContext";
 import { VariableDict, VariableSpec, VariableValues } from "../../types/variables";
 import { useSceneHeight } from "../../utils/hooks/useSceneHeight";
+import { useViewportWidth } from "../../utils/hooks/useViewportWidth";
+import { cssVariables } from "../../utils/cssVariables";
 
-const styles = ({ styled }: StyleOptions) => ({
+const styles = ({ styled, theme }: StyleOptions) => ({
+  container: styled.css`
+    margin: 40px auto;
+    outline: 2px solid ${theme.medium400};
+    border-radius: 8px;
+    overflow: hidden;
+
+    &--fullWidth {
+      border: none;
+      margin: 40px -${cssVariables.contentPadding}px;
+      border-radius: 0;
+    }
+  `,
+
   variablesWrapper: styled.css`
     position: relative;
     z-index: 2;
@@ -42,6 +57,7 @@ interface Options<V extends VariableDict> {
 
 export interface Scene2DProps {
   height?: number;
+  width?: number;
 }
 
 function flipBufferYAxis(buffer: Uint8Array, width: number, height: number): Uint8Array {
@@ -70,12 +86,21 @@ export function createScene2D<V extends VariableDict>(
     const canvasRef = context?.canvasRef || fallbackCanvasRef;
 
     const targetHeight = props.height ?? context?.height;
+    const targetWidth = props.width;
 
     if (typeof targetHeight !== "number") {
       throw new Error("No height specified for scene");
     }
 
     const { height } = useSceneHeight(targetHeight);
+    const viewportWidth = useViewportWidth();
+
+    let width: number | "full" = targetWidth ?? "full";
+    if (viewportWidth != null && typeof width === "number") {
+      if (width > viewportWidth + 48) {
+        width = "full";
+      }
+    }
 
     const onFrame = context?.onFrame;
 
@@ -159,9 +184,20 @@ export function createScene2D<V extends VariableDict>(
       };
     }, [canvasRef, onFrame]);
 
+    let widthStyle: string | number | undefined;
+    if (context) {
+      widthStyle = "100%";
+    } else if (typeof width === "number") {
+      widthStyle = width;
+    }
+
     return (
       <>
-        <div ref={containerRef} style={{ width: "100%", height: `${height}px` }}>
+        <div
+          className={context ? undefined : s("container", { fullWidth: width === "full" })}
+          ref={containerRef}
+          style={{ width: widthStyle, height: `${height}px` }}
+        >
           <canvas ref={canvasRef} style={{ display: "block" }} />
         </div>
 

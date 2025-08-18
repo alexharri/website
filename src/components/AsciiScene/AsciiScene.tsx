@@ -1,8 +1,8 @@
-import React, { useRef, useState, useCallback } from "react";
+import React, { useRef, useState, useCallback, useMemo } from "react";
 import { useStyles } from "../../utils/styles";
 import { AsciiRenderer } from "../AsciiRenderer";
-import { AlphabetName } from "../AsciiRenderer/alphabets/AlphabetManager";
-import AsciiSceneStyles, { BREAKPOINT, CONTENT_WIDTH } from "./AsciiScene.styles";
+import { AlphabetName, getAlphabetMetadata } from "../AsciiRenderer/alphabets/AlphabetManager";
+import createAsciiSceneStyles from "./AsciiScene.styles";
 import { useViewportWidth } from "../../utils/hooks/useViewportWidth";
 import { CanvasProvider } from "../../contexts/CanvasContext";
 import { AsciiSceneControls } from "./AsciiSceneControls";
@@ -25,8 +25,12 @@ interface AsciiSceneProps {
   showSamplingCircles?: SamplingPointVisualizationMode | true;
   showExternalSamplingCircles?: boolean;
   showSamplingPoints?: boolean;
+  width?: number;
+  rowHeight?: number;
+  columnWidth?: number;
   characterWidthMultiplier?: number;
   characterHeightMultiplier?: number;
+  viewMode?: ViewModeKey;
   viewModes?: ViewModeKey[] | "all";
 }
 
@@ -47,18 +51,35 @@ export const AsciiScene: React.FC<AsciiSceneProps> = (props) => {
     showExternalSamplingCircles = false,
     showSamplingPoints = false,
     lightnessEasingFunction,
-    viewModes = [],
+    viewModes = props.viewMode ? [props.viewMode] : [],
+    rowHeight,
+    columnWidth,
+    width: targetWidth = 1080,
   } = props;
 
   const availableViewModes =
     viewModes === "all" ? Object.values(VIEW_MODE_MAP) : viewModes.map((key) => VIEW_MODE_MAP[key]);
 
+  const [alphabet, setAlphabet] = useState<AlphabetName>("default");
+
+  const metadata = useMemo(() => getAlphabetMetadata(alphabet), [alphabet]);
+  const heightMultiplierScale = useMemo(() => {
+    return rowHeight ? rowHeight / (targetFontSize * metadata.height) : 1;
+  }, [rowHeight, targetFontSize, metadata]);
+  const widthMultiplierScale = useMemo(() => {
+    return columnWidth ? columnWidth / (targetFontSize * metadata.width) : 1;
+  }, [columnWidth, targetFontSize, metadata]);
+
   const orbitControlsTargetRef = useRef<HTMLDivElement>(null);
+  const breakpoint = useMemo(() => targetWidth + 80, [targetWidth]);
+  const AsciiSceneStyles = useMemo(
+    () => createAsciiSceneStyles(targetWidth, breakpoint),
+    [targetWidth, breakpoint],
+  );
   const s = useStyles(AsciiSceneStyles);
   const onFrameRef = useRef<null | ((buffer: Uint8Array) => void)>(null);
   const [viewMode, setViewMode] = useState<ViewMode>(availableViewModes[0]?.value || "left");
   const [splitT, setSplitT] = useState(0.5);
-  const [selectedAlphabet, setSelectedAlphabet] = useState<AlphabetName>("default");
   const [characterWidthMultiplier, setCharacterWidthMultiplier] = useState(
     props.characterWidthMultiplier ?? 1,
   );
@@ -91,11 +112,11 @@ export const AsciiScene: React.FC<AsciiSceneProps> = (props) => {
   const viewportWidth = useViewportWidth();
   let width: number;
   if (viewportWidth == null) {
-    width = CONTENT_WIDTH;
-  } else if (viewportWidth < BREAKPOINT) {
+    width = targetWidth;
+  } else if (viewportWidth < breakpoint) {
     width = viewportWidth;
   } else {
-    width = CONTENT_WIDTH;
+    width = targetWidth;
   }
 
   const { height, scale } = useSceneHeight(targetHeight);
@@ -109,8 +130,8 @@ export const AsciiScene: React.FC<AsciiSceneProps> = (props) => {
       <div className={s("container")} style={{ height }}>
         {showControls && (
           <AsciiSceneControls
-            selectedAlphabet={selectedAlphabet}
-            setSelectedAlphabet={setSelectedAlphabet}
+            selectedAlphabet={alphabet}
+            setSelectedAlphabet={setAlphabet}
             characterWidthMultiplier={characterWidthMultiplier}
             setCharacterWidthMultiplier={setCharacterWidthMultiplier}
             characterHeightMultiplier={characterHeightMultiplier}
@@ -136,10 +157,10 @@ export const AsciiScene: React.FC<AsciiSceneProps> = (props) => {
               <AsciiRenderer
                 key="renderer"
                 onFrameRef={onFrameRef}
-                alphabet={selectedAlphabet}
+                alphabet={alphabet}
                 fontSize={fontSize}
-                characterWidthMultiplier={characterWidthMultiplier}
-                characterHeightMultiplier={characterHeightMultiplier}
+                characterWidthMultiplier={characterWidthMultiplier * widthMultiplierScale}
+                characterHeightMultiplier={characterHeightMultiplier * heightMultiplierScale}
                 lightnessEasingFunction={lightnessEasingFunction}
                 debugVizOptions={debugVizOptions}
                 transparent={viewMode === "transparent"}
@@ -148,7 +169,7 @@ export const AsciiScene: React.FC<AsciiSceneProps> = (props) => {
             ]}
           </SplitView>
         </CanvasProvider>
-        {viewModes.length > 0 && (
+        {viewModes.length > 1 && (
           <div className={s("viewModeControl")}>
             <ViewModeControl
               viewMode={viewMode}

@@ -35,6 +35,10 @@ export const StaticCodeBlockStyles = ({ styled, theme }: StyleOptions) => ({
     white-space: pre;
     line-height: 1.5;
     margin: 0px;
+
+    &--noLigatures {
+      font-variant-ligatures: none;
+    }
   `,
 
   copyButton: styled.css`

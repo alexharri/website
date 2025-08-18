@@ -1,17 +1,10 @@
-import { hexToRgbaString } from "../../utils/color";
 import { cssVariables } from "../../utils/cssVariables";
 import { StyleOptions } from "../../utils/styles";
 
-export const AsciiRendererStyles = ({ styled, theme }: StyleOptions) => ({
+export const AsciiRendererStyles = ({ styled }: StyleOptions) => ({
   container: styled.css`
     pointer-events: auto;
     position: relative;
-    /* background-color: ${theme.background200};
-    transition: background-color 0.3s;
-
-    &--transparent {
-      background-color: ${hexToRgbaString(theme.background200, 0.5)};
-    } */
   `,
 
   content: styled.css`
@@ -29,7 +22,6 @@ export const AsciiRendererStyles = ({ styled, theme }: StyleOptions) => ({
     margin: 0;
     padding: 0;
     line-height: 1;
-    color: rgb(103, 80, 179);
     font-variant-ligatures: none;
   `,
 

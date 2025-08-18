@@ -12,7 +12,11 @@ interface Props {
 }
 
 const videoExtensions = new Set(["mp4"]);
-const customPosts = new Set(["stabilizing-noisy-inputs", "icelandic-name-declension-trie"]);
+const customPosts = new Set([
+  "stabilizing-noisy-inputs",
+  "icelandic-name-declension-trie",
+  "canvas-to-ascii",
+]);
 
 export function imgSrcToHref(src: string, router: NextRouter) {
   const { slug } = router.query;
