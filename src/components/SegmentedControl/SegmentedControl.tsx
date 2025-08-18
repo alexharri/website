@@ -25,16 +25,18 @@ export const SegmentedControl = <T extends string>({
   useLayoutEffect(() => {
     if (!containerRef.current) return;
 
-    const selectedIndex = options.findIndex(option => option.value === value);
+    const selectedIndex = options.findIndex((option) => option.value === value);
     if (selectedIndex === -1) return;
 
-    const buttons = containerRef.current.querySelectorAll('[data-option]');
+    const buttons = containerRef.current.querySelectorAll("[data-option]");
     const selectedButton = buttons[selectedIndex] as HTMLElement;
-    
+
     if (selectedButton) {
       const containerRect = containerRef.current.getBoundingClientRect();
       const buttonRect = selectedButton.getBoundingClientRect();
-      
+
+      console.log(buttonRect);
+
       setIndicatorStyle({
         left: buttonRect.left - containerRect.left,
         width: buttonRect.width,
@@ -44,8 +46,8 @@ export const SegmentedControl = <T extends string>({
 
   return (
     <div ref={containerRef} className={s("container")}>
-      <div 
-        className={s("indicator")} 
+      <div
+        className={s("indicator")}
         style={{
           transform: `translateX(${indicatorStyle.left}px)`,
           width: indicatorStyle.width,

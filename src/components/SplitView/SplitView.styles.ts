@@ -32,6 +32,7 @@ export default ({ styled, theme }: StyleOptions) => ({
       background: ${theme.medium700};
       border-radius: 2px;
       pointer-events: none;
+      transition: background 0.3s, height 0.3s;
     }
 
     &:hover {

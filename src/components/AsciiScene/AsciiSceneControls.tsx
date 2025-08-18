@@ -1,14 +1,9 @@
 import React from "react";
 import { useStyles } from "../../utils/styles";
 import { AlphabetName, getAvailableAlphabets } from "../AsciiRenderer/alphabets/AlphabetManager";
-import { SegmentedControl } from "../SegmentedControl";
-import { ViewMode } from "../SplitView";
 import AsciiSceneControlsStyles from "./AsciiSceneControls.styles";
 
 interface AsciiSceneControlsProps {
-  viewMode: ViewMode;
-  setViewMode: (value: ViewMode) => void;
-  setSplitT: (value: number) => void;
   selectedAlphabet: AlphabetName;
   setSelectedAlphabet: (alphabet: AlphabetName) => void;
   characterWidthMultiplier: number;
@@ -18,9 +13,6 @@ interface AsciiSceneControlsProps {
 }
 
 export const AsciiSceneControls: React.FC<AsciiSceneControlsProps> = ({
-  viewMode,
-  setViewMode,
-  setSplitT,
   selectedAlphabet,
   setSelectedAlphabet,
   characterWidthMultiplier,
@@ -37,25 +29,6 @@ export const AsciiSceneControls: React.FC<AsciiSceneControlsProps> = ({
 
   return (
     <div className={s("controls")}>
-      <div className={s("controlGroup")}>
-        <span className={s("label")}>View:</span>
-        <SegmentedControl
-          options={[
-            { value: "left", label: "ASCII" },
-            { value: "split", label: "Split" },
-            { value: "transparent", label: "Transparent" },
-            { value: "right", label: "Canvas" },
-          ]}
-          value={viewMode}
-          setValue={(value) => {
-            setViewMode(value);
-            if (value === "split") {
-              setSplitT(0.5);
-            }
-          }}
-        />
-      </div>
-
       <div className={s("controlGroup")}>
         <span className={s("label")}>Alphabet:</span>
         <select

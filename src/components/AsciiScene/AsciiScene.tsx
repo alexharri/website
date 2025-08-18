@@ -6,11 +6,14 @@ import AsciiSceneStyles, { BREAKPOINT, CONTENT_WIDTH } from "./AsciiScene.styles
 import { useViewportWidth } from "../../utils/hooks/useViewportWidth";
 import { CanvasProvider } from "../../contexts/CanvasContext";
 import { AsciiSceneControls } from "./AsciiSceneControls";
+import { ViewModeControl } from "../ViewModeControl";
 import { SplitView, ViewMode } from "../SplitView";
 import { DebugVizOptions, SamplingPointVisualizationMode } from "../AsciiRenderer/types";
 import { NumberVariable } from "../variables";
 import { VariableValues, VariableSpec, VariableDict } from "../../types/variables";
 import { useSceneHeight } from "../../utils/hooks/useSceneHeight";
+
+type ViewModeKey = "ascii" | "split" | "transparent" | "canvas";
 
 interface AsciiSceneProps {
   children: React.ReactNode;
@@ -24,23 +27,33 @@ interface AsciiSceneProps {
   showSamplingPoints?: boolean;
   characterWidthMultiplier?: number;
   characterHeightMultiplier?: number;
+  viewModes?: ViewModeKey[];
 }
+
+const VIEW_MODE_MAP: Record<ViewModeKey, { value: ViewMode; label: string }> = {
+  ascii: { value: "left", label: "ASCII" },
+  split: { value: "split", label: "Split" },
+  transparent: { value: "transparent", label: "Transparent" },
+  canvas: { value: "right", label: "Canvas" },
+};
 
 export const AsciiScene: React.FC<AsciiSceneProps> = (props) => {
   const {
     children,
     height: targetHeight,
-    showControls = true,
+    showControls = false,
     fontSize: targetFontSize = 14,
     showSamplingCircles = "none",
     showExternalSamplingCircles = false,
     showSamplingPoints = false,
     lightnessEasingFunction,
+    viewModes = ["ascii", "split", "transparent", "canvas"],
   } = props;
   const orbitControlsTargetRef = useRef<HTMLDivElement>(null);
   const s = useStyles(AsciiSceneStyles);
   const onFrameRef = useRef<null | ((buffer: Uint8Array) => void)>(null);
-  const [viewMode, setViewMode] = useState<ViewMode>("left");
+  const availableViewModes = viewModes.map(key => VIEW_MODE_MAP[key]);
+  const [viewMode, setViewMode] = useState<ViewMode>(availableViewModes[0]?.value || "left");
   const [splitT, setSplitT] = useState(0.5);
   const [selectedAlphabet, setSelectedAlphabet] = useState<AlphabetName>("default");
   const [characterWidthMultiplier, setCharacterWidthMultiplier] = useState(
@@ -93,9 +106,6 @@ export const AsciiScene: React.FC<AsciiSceneProps> = (props) => {
       <div className={s("container")} style={{ height }}>
         {showControls && (
           <AsciiSceneControls
-            viewMode={viewMode}
-            setViewMode={setViewMode}
-            setSplitT={setSplitT}
             selectedAlphabet={selectedAlphabet}
             setSelectedAlphabet={setSelectedAlphabet}
             characterWidthMultiplier={characterWidthMultiplier}
@@ -135,6 +145,14 @@ export const AsciiScene: React.FC<AsciiSceneProps> = (props) => {
             ]}
           </SplitView>
         </CanvasProvider>
+        <div className={s("viewModeControl")}>
+          <ViewModeControl
+            viewMode={viewMode}
+            setViewMode={setViewMode}
+            setSplitT={setSplitT}
+            options={availableViewModes}
+          />
+        </div>
       </div>
 
       {Object.keys(variables).length > 0 && (
