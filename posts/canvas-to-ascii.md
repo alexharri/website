@@ -110,6 +110,6 @@ title: "Canvas to ASCII renderer"
 .
 
 
-<AsciiScene height={400} fontSize={70}>
+<AsciiScene height={400} fontSize={70} viewModes={["ascii", "transparent"]}>
   <Scene2D scene="shade_split_0" />
 </AsciiScene>

@@ -27,7 +27,7 @@ interface AsciiSceneProps {
   showSamplingPoints?: boolean;
   characterWidthMultiplier?: number;
   characterHeightMultiplier?: number;
-  viewModes?: ViewModeKey[];
+  viewModes?: ViewModeKey[] | "all";
 }
 
 const VIEW_MODE_MAP: Record<ViewModeKey, { value: ViewMode; label: string }> = {
@@ -47,12 +47,15 @@ export const AsciiScene: React.FC<AsciiSceneProps> = (props) => {
     showExternalSamplingCircles = false,
     showSamplingPoints = false,
     lightnessEasingFunction,
-    viewModes = ["ascii", "split", "transparent", "canvas"],
+    viewModes = [],
   } = props;
+
+  const availableViewModes =
+    viewModes === "all" ? Object.values(VIEW_MODE_MAP) : viewModes.map((key) => VIEW_MODE_MAP[key]);
+
   const orbitControlsTargetRef = useRef<HTMLDivElement>(null);
   const s = useStyles(AsciiSceneStyles);
   const onFrameRef = useRef<null | ((buffer: Uint8Array) => void)>(null);
-  const availableViewModes = viewModes.map(key => VIEW_MODE_MAP[key]);
   const [viewMode, setViewMode] = useState<ViewMode>(availableViewModes[0]?.value || "left");
   const [splitT, setSplitT] = useState(0.5);
   const [selectedAlphabet, setSelectedAlphabet] = useState<AlphabetName>("default");
@@ -145,14 +148,16 @@ export const AsciiScene: React.FC<AsciiSceneProps> = (props) => {
             ]}
           </SplitView>
         </CanvasProvider>
-        <div className={s("viewModeControl")}>
-          <ViewModeControl
-            viewMode={viewMode}
-            setViewMode={setViewMode}
-            setSplitT={setSplitT}
-            options={availableViewModes}
-          />
-        </div>
+        {viewModes.length > 0 && (
+          <div className={s("viewModeControl")}>
+            <ViewModeControl
+              viewMode={viewMode}
+              setViewMode={setViewMode}
+              setSplitT={setSplitT}
+              options={availableViewModes}
+            />
+          </div>
+        )}
       </div>
 
       {Object.keys(variables).length > 0 && (
