@@ -18,7 +18,7 @@ export function AsciiDebugVizCanvas(props: Props) {
         top: 0,
         left: 0,
         pointerEvents: "none",
-        zIndex: -1,
+        zIndex: 50,
       }}
     />
   );
@@ -48,7 +48,7 @@ export function renderAsciiDebugViz(
 
   const circleSamplingPoints = config.generateCircleSamplingPoints();
 
-  const samplingPointRadius = 2;
+  const samplingPointRadius = Math.min(Math.round(config.boxHeight * 0.08), 3);
 
   if (options.showGrid) {
     ctx.fillStyle = hexToRgbaString(colors.blue, 0.5);
@@ -94,7 +94,14 @@ export function renderAsciiDebugViz(
           }
 
           if (options.showSamplingPoints) {
-            ctx.fillStyle = colors.text;
+            ctx.fillStyle = colors.background;
+            ctx.beginPath();
+            for (const point of circleSamplingPoints) {
+              ctx.arc(x + point.x, y + point.y, samplingPointRadius * 1.25, 0, 2 * Math.PI);
+            }
+            ctx.fill();
+
+            ctx.fillStyle = colors.blue;
             ctx.beginPath();
             for (const point of circleSamplingPoints) {
               ctx.arc(x + point.x, y + point.y, samplingPointRadius, 0, 2 * Math.PI);
@@ -107,7 +114,7 @@ export function renderAsciiDebugViz(
   }
 
   samplingData.forEach((samplingDataRow, row) => {
-    samplingDataRow.forEach(({ samplingVector, externalSamplingVector }, col) => {
+    samplingDataRow.forEach(({ externalSamplingVector }, col) => {
       const [sampleRectLeft, sampleRectTop] = config.sampleRectPosition(col, row);
 
       if (options.showExternalSamplingCircles) {

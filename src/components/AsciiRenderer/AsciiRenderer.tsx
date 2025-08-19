@@ -153,7 +153,7 @@ export function AsciiRenderer(props: Props) {
           <pre
             ref={preRef}
             className={s("pre")}
-            style={{ color: transparent ? colors.background : colors.blue400 }}
+            style={{ color: transparent ? colors.text : colors.blue400 }}
           />
         </div>
       )}

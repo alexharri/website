@@ -1,3 +1,1 @@
-export const ASCII_SHORT_CHARS = [
-  " ", ".", ":", "-", "=", "+", "*", "#", "%", "@"
-];
+export const ASCII_SHORT_CHARS = [" ", ".", ":", "-", "=", "+", "*", "#", "%", "@"];

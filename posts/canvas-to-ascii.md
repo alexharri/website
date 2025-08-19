@@ -149,8 +149,8 @@ That's... pretty ugly. We seem to always get `@` for cells that fall within the 
 
 This happens because we're sampling a single point that will either fall inside the circle, returning 100% white, or fall outside of the circle, which returns the background color. There's no in-between.
 
-<AsciiScene width={600} height={360} fontSize={20} rowHeight={24} columnWidth={20} viewMode="ascii" offsetAlign="left" sampleQuality={1} alphabet="pixel-short">
-  <Scene2D scene="circle" />
+<AsciiScene width={600} height={360} fontSize={60} rowHeight={72} columnWidth={60} viewMode="transparent" showGrid offsetAlign="left" sampleQuality={1} showSamplingPoints alphabet="pixel-short">
+  <Scene2D scene="circle_zoomed" />
 </AsciiScene>
 
 .
