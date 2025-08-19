@@ -24,6 +24,7 @@ interface Props {
   hideAscii: boolean;
   offsetAlign: "left" | "center";
   debugVizOptions: DebugVizOptions;
+  sampleQuality: number;
 }
 
 export function AsciiRenderer(props: Props) {
@@ -36,6 +37,7 @@ export function AsciiRenderer(props: Props) {
     transparent,
     hideAscii,
     offsetAlign,
+    sampleQuality,
   } = props;
 
   const containerRef = useRef<HTMLDivElement>(null);
@@ -75,15 +77,13 @@ export function AsciiRenderer(props: Props) {
 
       const pixelBufferScale = canvas.width / containerRect.width;
 
-      const samplingQuality = 3;
-
       const config = new AsciiRenderConfig(
         containerRect.width,
         containerRect.height,
         fontSize,
         characterWidth,
         alphabet,
-        samplingQuality,
+        sampleQuality,
         characterWidthMultiplier,
         characterHeightMultiplier,
         offsetAlign,

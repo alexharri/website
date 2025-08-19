@@ -45,7 +45,7 @@ interface CodeProps {
 }
 
 export interface StaticCodeBlockProps {
-  language: string;
+  language?: string;
   children: string;
   small?: boolean;
   marginBottom?: number;
@@ -369,7 +369,7 @@ export const StaticCodeBlock = (props: StaticCodeBlockProps) => {
 
   const { children, marginBottom, small, noFlowOutside } = props;
 
-  const [language, directive] = props.language.split(":");
+  const [language, directive] = (props.language ?? "text").split(":");
   const noLigatures = directive === "no_ligatures";
 
   const padding = small ? 16 : 24;

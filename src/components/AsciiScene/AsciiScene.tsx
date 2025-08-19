@@ -28,6 +28,7 @@ interface AsciiSceneProps {
   showGrid?: boolean;
   hideAscii?: boolean;
   offsetAlign?: "left" | "center";
+  sampleQuality?: number;
   width?: number;
   rowHeight?: number;
   columnWidth?: number;
@@ -47,6 +48,7 @@ const VIEW_MODE_MAP: Record<ViewModeKey, { value: ViewMode; label: string }> = {
 export const AsciiScene: React.FC<AsciiSceneProps> = (props) => {
   const {
     children,
+    alphabet: initialAlphabet = "default",
     height: targetHeight,
     showControls = false,
     fontSize: targetFontSize = 14,
@@ -61,12 +63,13 @@ export const AsciiScene: React.FC<AsciiSceneProps> = (props) => {
     rowHeight,
     columnWidth,
     width: targetWidth = 1080,
+    sampleQuality = 3,
   } = props;
 
   const availableViewModes =
     viewModes === "all" ? Object.values(VIEW_MODE_MAP) : viewModes.map((key) => VIEW_MODE_MAP[key]);
 
-  const [alphabet, setAlphabet] = useState<AlphabetName>("default");
+  const [alphabet, setAlphabet] = useState<AlphabetName>(initialAlphabet);
 
   const metadata = useMemo(() => getAlphabetMetadata(alphabet), [alphabet]);
   const heightMultiplierScale = useMemo(() => {
@@ -173,6 +176,7 @@ export const AsciiScene: React.FC<AsciiSceneProps> = (props) => {
                 transparent={viewMode === "transparent"}
                 hideAscii={hideAscii}
                 offsetAlign={offsetAlign}
+                sampleQuality={sampleQuality}
               />,
               children,
             ]}
