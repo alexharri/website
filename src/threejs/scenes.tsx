@@ -1,8 +1,9 @@
 import dynamic from "next/dynamic";
-import { createContext, useContext, useEffect, useRef } from "react";
+import React, { createContext, useContext, useEffect, useRef } from "react";
 import { useVisible } from "../utils/hooks/useVisible";
 import { LoadThreeContext } from "./Components/ThreeProvider";
 import { SceneSkeleton } from "./SceneSkeleton";
+import { useSceneContext } from "../contexts/CanvasContext";
 
 const loading = SceneSkeleton;
 
@@ -15,8 +16,13 @@ export interface SceneProps {
   xRotation?: number;
   usesVariables?: boolean;
   zoom?: number;
+  ascii?: boolean;
   yOffset?: number;
+  canvasRef?: React.RefObject<HTMLCanvasElement>;
   errorLoadingThreeJs: boolean;
+  onFrame?: (buffer: Uint8Array) => void;
+  orbitControlsRef?: React.RefObject<any>;
+  orbitControlsTargetRef?: React.RefObject<HTMLDivElement>;
 }
 
 export const ScenePropsContext = createContext<SceneProps>(null!);
@@ -82,27 +88,45 @@ export const threeJsScenes: Partial<Record<string, React.ComponentType<SceneProp
   
   "simplex": dynamic(() => import("./scenes/simplex"), { loading }),
   "simplex-point-array": dynamic(() => import("./scenes/simplex-point-array"), { loading }),
-  
 
   "vr-controller": dynamic(() => import("./scenes/vr-controller"), { loading }),
+
+  "cube": dynamic(() => import("./scenes/cube"), { loading })
 };
 
 interface Props {
   scene: string;
-  height: number;
+  height?: number;
   angle?: number;
   autoRotate?: boolean;
   usesVariables?: boolean;
   zoom?: number;
   yOffset?: number;
   xRotation?: number;
+  ascii?: boolean;
+  onReady?: () => void;
+  orbitControlsRef?: React.RefObject<any>;
 }
 
 export const Scene: React.FC<Props> = (props) => {
-  const { scene, height, usesVariables, angle, zoom, yOffset, autoRotate, xRotation } = props;
+  const {
+    scene,
+    usesVariables,
+    angle,
+    zoom,
+    yOffset,
+    autoRotate,
+    xRotation,
+    ascii,
+    orbitControlsRef,
+  } = props;
+
+  const context = useSceneContext();
   const containerRef = useRef<HTMLDivElement>(null);
   const visible = useVisible(containerRef, "350px");
   const render = useVisible(containerRef, "50px");
+
+  const height = context?.height ?? props.height;
 
   if (typeof height !== "number") throw new Error("'height' is a required prop for <Scene>");
   const S = threeJsScenes[scene];
@@ -132,7 +156,12 @@ export const Scene: React.FC<Props> = (props) => {
     yOffset,
     zoom,
     xRotation,
+    ascii,
+    orbitControlsRef,
     errorLoadingThreeJs: error,
+    orbitControlsTargetRef: context?.orbitControlsTargetRef,
+    canvasRef: context?.canvasRef,
+    onFrame: context?.onFrame,
   };
 
   return (

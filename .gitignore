@@ -45,3 +45,6 @@ __pycache__
 
 # Email
 scripts/email/recipients
+
+# Debugging
+debug-images/

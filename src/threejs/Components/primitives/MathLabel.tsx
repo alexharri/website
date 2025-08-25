@@ -1,7 +1,7 @@
 import { useContext, useMemo, useRef } from "react";
 import type * as THREE from "three";
 import { SVGLoader } from "three/examples/jsm/loaders/SVGLoader";
-import { getMathSvg, getMathSvgOffset } from "../../math-svg";
+import { getMathSvg, getMathSvgOffset } from "../../../utils/math";
 import { getBasicMaterial, IVector3, parseVector } from "../../utils";
 import { FiberContext, ThreeContext } from "../ThreeProvider";
 

@@ -30,6 +30,7 @@ import { Code } from "../../components/Code/Code";
 import { MediaQuery } from "../../components/MediaQuery/MediaQuery";
 import { WebGLShaderLoader } from "../../components/WebGLShader/WebGLShaderLoader";
 import { Table } from "../../components/Table/Table";
+import { Scene2D } from "../../components/Scene2D/Scene2D";
 
 function firstUpper(s: string) {
   if (s.length === 0) return s;
@@ -75,6 +76,7 @@ const baseComponents = {
   Head,
   Note,
   Scene,
+  Scene2D,
   BarChart,
   EmDash: () => "—",
   WebGLShader: WebGLShaderLoader,
