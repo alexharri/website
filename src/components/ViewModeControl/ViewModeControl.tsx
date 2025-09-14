@@ -1,8 +1,6 @@
 import React from "react";
-import { useStyles } from "../../utils/styles";
 import { SegmentedControl } from "../SegmentedControl";
 import { ViewMode } from "../SplitView";
-import ViewModeControlStyles from "./ViewModeControl.styles";
 
 interface ViewModeControlProps {
   viewMode: ViewMode;
@@ -17,8 +15,6 @@ export const ViewModeControl: React.FC<ViewModeControlProps> = ({
   setSplitT,
   options,
 }) => {
-  const s = useStyles(ViewModeControlStyles);
-
   return (
     <SegmentedControl
       options={options}

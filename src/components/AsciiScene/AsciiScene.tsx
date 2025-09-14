@@ -39,13 +39,6 @@ interface AsciiSceneProps {
   pixelate?: boolean;
 }
 
-const VIEW_MODE_MAP: Record<ViewModeKey, { value: ViewMode; label: string }> = {
-  ascii: { value: "left", label: "ASCII" },
-  split: { value: "split", label: "Split" },
-  transparent: { value: "transparent", label: "Transparent" },
-  canvas: { value: "right", label: "Canvas" },
-};
-
 export const AsciiScene: React.FC<AsciiSceneProps> = (props) => {
   const {
     children,
@@ -57,7 +50,6 @@ export const AsciiScene: React.FC<AsciiSceneProps> = (props) => {
     showExternalSamplingCircles = false,
     showSamplingPoints = false,
     showGrid = false,
-    hideAscii = false,
     pixelate = false,
     offsetAlign = "center",
     lightnessEasingFunction,
@@ -66,6 +58,15 @@ export const AsciiScene: React.FC<AsciiSceneProps> = (props) => {
     columnWidth,
     width: targetWidth = 1080,
   } = props;
+
+  const VIEW_MODE_MAP: Record<ViewModeKey, { value: ViewMode; label: string }> = {
+    ascii: { value: "left", label: pixelate ? "Pixels" : "ASCII" },
+    split: { value: "split", label: "Split" },
+    transparent: { value: "transparent", label: "Transparent" },
+    canvas: { value: "right", label: "Canvas" },
+  };
+
+  const hideAscii = props.hideAscii ?? pixelate;
 
   const availableViewModes =
     viewModes === "all" ? Object.values(VIEW_MODE_MAP) : viewModes.map((key) => VIEW_MODE_MAP[key]);
