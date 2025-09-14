@@ -190,7 +190,7 @@ Notice the rough, jagged looking edges when the square is at an angle. Those are
 
 [jaggies]: https://en.wikipedia.org/wiki/Jaggies
 
-We can convert the downsampled image to an ASCII rendering by picking an ASCII character for each of the cells using the lightness of the sampled value. However, that doesn't change the final result still being jaggy.
+As we covered before, we can map the sampled lightness values to ASCII characters to create an ASCII rendering.
 
 <AsciiScene width={720} minWidth={400} height={360} fontSize={20} rowHeight={24} columnWidth={24} viewMode="ascii" offsetAlign="left" sampleQuality={1} alphabet="pixel-short">
   <Scene2D scene="rotating_square" />
@@ -202,23 +202,33 @@ This is what was happening in our circle example above:
   <Scene2D scene="circle" />
 </AsciiScene>
 
-When we only sample a single pixel value, as done in nearest-neighbor interpolation, that sample either lands inside of the circle or not, causing jaggies. Here's a zoomed in example where you can move the circle to illustrate:
+When we only sample a single pixel value, as is done in nearest-neighbor interpolation, the sampled pixel will either be inside of the circle or not, causing jaggies. Here's a zoomed in example where you can move the circle to illustrate:
 
 <AsciiScene width={600} height={360} fontSize={60} rowHeight={72} columnWidth={60} viewMode="transparent" showGrid offsetAlign="left" sampleQuality={1} showSamplingPoints alphabet="pixel-short">
   <Scene2D scene="circle_zoomed" />
 </AsciiScene>
 
+Let's look at anti-aliasing techniques we can use to resolve the jaggies.
+
 ### Anti-aliasing
 
-Consider this pixelated line
+Consider this line:
 
-<AsciiScene width={600} height={360} rowHeight={20} columnWidth={20} viewModes="all" hideAscii pixelate offsetAlign="left" sampleQuality={1} alphabet="pixel-short" showControls={false}>
+<AsciiScene width={600} height={360} rowHeight={40} columnWidth={40} viewMode="canvas" showControls={false}>
   <Scene2D scene="slanted_line" />
 </AsciiScene>
 
-Notice what happens when we increase the quality of sampling:
+The line's slope is $\dfrac{1}{3}x$, so when we pixelate it with nearest-neighbor interpolation we get the following:
 
-<AsciiScene width={600} height={360} rowHeight={20} columnWidth={20} cellScaleRange={[0.1, 1]} viewModes="all" hideAscii pixelate offsetAlign="left" sampleQuality={3} alphabet="pixel-short">
+<AsciiScene width={600} height={360} rowHeight={40} columnWidth={40} hideAscii pixelate offsetAlign="left" sampleQuality={1} alphabet="pixel-short" showControls={false}>
+  <Scene2D scene="slanted_line" />
+</AsciiScene>
+
+Each row contains 3 fully white pixels in a row, and the rest are fully dark. Same jagged edges as before.
+
+The simplest way to combat this is to take multiple samples for each pixel and averaging the sampled lightness values. 
+
+<AsciiScene width={600} height={360} rowHeight={40} columnWidth={40} viewModes="all" hideAscii pixelate offsetAlign="left" sampleQuality={3} alphabet="pixel-short" showSamplingPoints>
   <Scene2D scene="slanted_line" />
 </AsciiScene>
 

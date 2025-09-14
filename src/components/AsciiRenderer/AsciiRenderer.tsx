@@ -15,7 +15,9 @@ import { hexToRgbaString } from "../../utils/color";
 
 interface Props {
   alphabet: AlphabetName;
-  onFrameRef: React.MutableRefObject<null | ((buffer: Uint8Array) => void)>;
+  onFrameRef: React.MutableRefObject<
+    null | ((buffer: Uint8Array, options?: { flipY?: boolean }) => void)
+  >;
   fontSize: number;
   characterWidthMultiplier: number;
   characterHeightMultiplier: number;
@@ -50,9 +52,6 @@ export function AsciiRenderer(props: Props) {
   const metadata = useMemo(() => getAlphabetMetadata(alphabet), [alphabet]);
   const characterWidth = useMonospaceCharacterWidthEm(cssVariables.fontMonospace);
 
-  const enableVisualization =
-    debugVizOptions.showSamplingCircles !== "none" || debugVizOptions.showExternalSamplingCircles;
-
   const context = useSceneContext();
   if (!context) {
     throw new Error(`AsciiRenderer requires a CanvasContext`);
@@ -65,7 +64,11 @@ export function AsciiRenderer(props: Props) {
   }, [alphabet]);
 
   useEffect(() => {
-    props.onFrameRef.current = function onFrame(pixelBuffer: Uint8Array): void {
+    props.onFrameRef.current = function onFrame(
+      pixelBuffer: Uint8Array,
+      options: { flipY?: boolean } = {},
+    ): void {
+      const flipY = options.flipY ?? false;
       const container = containerRef.current;
       const content = contentRef.current;
       const preEl = preRef.current;
@@ -96,9 +99,10 @@ export function AsciiRenderer(props: Props) {
         pixelBuffer,
         pixelBufferScale,
         config,
+        debugVizOptions.showSamplingPoints,
+        flipY,
         debugVizOptions.showSamplingCircles,
         props.lightnessEasingFunction,
-        debugVizOptions.showSamplingPoints,
       );
 
       if (preEl) {

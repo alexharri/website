@@ -18,18 +18,17 @@ export default createScene2D(
     ctx.moveTo(-shiftX, height / 2 + deltaY);
     ctx.lineTo(width + shiftX, height / 2 - deltaY);
     ctx.strokeStyle = colors.text;
-    ctx.lineWidth = width * 0.03;
+    ctx.lineWidth = width * 0.052;
     ctx.stroke();
   },
   {
     variables: {
-      cellScale: {
-        label: "Scale",
-        range: [0.1, 1],
+      sampleQuality: {
+        label: "Number of samples",
+        range: [1, 5],
         type: "number",
         value: 1,
-        format: "multiplier",
-        step: 1 / 20,
+        step: 1,
         showValue: true,
       },
     },

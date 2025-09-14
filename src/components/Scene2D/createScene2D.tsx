@@ -60,20 +60,6 @@ export interface Scene2DProps {
   width?: number;
 }
 
-function flipBufferYAxis(buffer: Uint8Array, width: number, height: number): Uint8Array {
-  const out = new Uint8Array(buffer.length);
-  const bytesPerPixel = 4;
-
-  for (let y = 0; y < height; y++) {
-    const sourceRow = (height - 1 - y) * width * bytesPerPixel;
-    const targetRow = y * width * bytesPerPixel;
-    for (let x = 0; x < width * bytesPerPixel; x++) {
-      out[targetRow + x] = buffer[sourceRow + x];
-    }
-  }
-
-  return out;
-}
 
 export function createScene2D<V extends VariableDict>(
   drawFunction: DrawFunction<V>,
@@ -170,9 +156,8 @@ export function createScene2D<V extends VariableDict>(
 
         if (onFrame) {
           const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-          let buffer = new Uint8Array(imageData.data.buffer);
-          buffer = flipBufferYAxis(buffer, canvas.width, canvas.height);
-          onFrame(buffer);
+          const buffer = new Uint8Array(imageData.data.buffer);
+          onFrame(buffer, { flipY: true });
         }
 
         lastTime = now;

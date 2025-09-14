@@ -39,11 +39,12 @@ function readPixelFromBuffer(
   tx: number,
   ty: number,
   pixelBufferScale: number,
+  flipY: boolean,
 ) {
   tx = clamp(tx, 0, 1);
   ty = clamp(ty, 0, 1);
   const pixelX = Math.floor(tx * canvasWidth * pixelBufferScale);
-  const pixelY = Math.floor((1 - ty) * canvasHeight * pixelBufferScale);
+  const pixelY = Math.floor((flipY ? ty : (1 - ty)) * canvasHeight * pixelBufferScale);
   const index = (pixelY * (canvasWidth * pixelBufferScale) + pixelX) * 4;
 
   if (index >= 0 && index < pixelBuffer.length - 3) {
@@ -66,7 +67,8 @@ function sampleCircularRegion(
   y: number,
   samplingPoints: { x: number; y: number }[],
   scale: number,
-  collectSubsamples?: boolean,
+  collectSubsamples: boolean,
+  flipY: boolean,
 ): { averageLightness: number; individualValues: number[] } {
   let totalLightness = 0;
   let sampleCount = 0;
@@ -90,6 +92,7 @@ function sampleCircularRegion(
         tx,
         ty,
         scale,
+        flipY,
       );
       lightnessValue = lightness(hexColor);
       totalLightness += lightnessValue;
@@ -158,9 +161,10 @@ export function generateAsciiChars(
   pixelBuffer: Uint8Array,
   pixelBufferScale: number,
   config: AsciiRenderConfig,
+  collectSubsamples: boolean,
+  flipY: boolean,
   visualizationMode?: SamplingPointVisualizationMode,
   lightnessEasingFunction?: string,
-  collectSubsamples?: boolean,
 ): GenerationResult {
   const metadata = getAlphabetMetadata(config.alphabet);
   const samplingConfig = metadata.samplingConfig;
@@ -175,7 +179,8 @@ export function generateAsciiChars(
     col: number,
     row: number,
     samplingCircleCenterPoints: { x: number; y: number }[],
-    collectSubsamples?: boolean,
+    collectSubsamples: boolean,
+    flipY: boolean,
   ): { samplingVector: number[]; subsamples: number[][] } {
     const [sampleRectLeft, sampleRectTop] = config.sampleRectPosition(col, row);
     const samplingVector: number[] = [];
@@ -185,7 +190,7 @@ export function generateAsciiChars(
       const [xOff, yOff] = config.samplingCircleOffset(samplingCircleCenterPoint);
       const x = sampleRectLeft + xOff;
       const y = sampleRectTop + yOff;
-      const result = sampleCircularRegion(pixelBuffer, config, x, y, samplingPoints, pixelBufferScale, collectSubsamples);
+      const result = sampleCircularRegion(pixelBuffer, config, x, y, samplingPoints, pixelBufferScale, collectSubsamples, flipY);
       samplingVector.push(result.averageLightness);
       subsamples.push(result.individualValues);
     });
@@ -202,7 +207,7 @@ export function generateAsciiChars(
 
     for (let col = 0; col < config.cols; col++) {
       const shouldCollectSubsamples = collectSubsamples;
-      const rawSamplingResult = createSamplingVector(col, row, metadata.samplingConfig.points, shouldCollectSubsamples);
+      const rawSamplingResult = createSamplingVector(col, row, metadata.samplingConfig.points, shouldCollectSubsamples, flipY);
       const rawSamplingVector = rawSamplingResult.samplingVector;
       const samplingVectorSubsamples = rawSamplingResult.subsamples;
 
@@ -216,7 +221,7 @@ export function generateAsciiChars(
 
       let externalSamplingVector: number[] = [];
       if ("externalPoints" in samplingConfig) {
-        const externalResult = createSamplingVector(col, row, samplingConfig.externalPoints);
+        const externalResult = createSamplingVector(col, row, samplingConfig.externalPoints, false, flipY);
         externalSamplingVector = externalResult.samplingVector;
         samplingVector = crunchSamplingVectorDirectional(
           samplingVector,

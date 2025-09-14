@@ -4,7 +4,7 @@ import { AsciiRenderer } from "../AsciiRenderer";
 import { AlphabetName, getAlphabetMetadata } from "../AsciiRenderer/alphabets/AlphabetManager";
 import createAsciiSceneStyles from "./AsciiScene.styles";
 import { useViewportWidth } from "../../utils/hooks/useViewportWidth";
-import { CanvasProvider } from "../../contexts/CanvasContext";
+import { CanvasProvider, OnFrameOptions } from "../../contexts/CanvasContext";
 import { AsciiSceneControls } from "./AsciiSceneControls";
 import { ViewModeControl } from "../ViewModeControl";
 import { SplitView, ViewMode } from "../SplitView";
@@ -65,7 +65,6 @@ export const AsciiScene: React.FC<AsciiSceneProps> = (props) => {
     rowHeight,
     columnWidth,
     width: targetWidth = 1080,
-    sampleQuality = 3,
   } = props;
 
   const availableViewModes =
@@ -78,6 +77,10 @@ export const AsciiScene: React.FC<AsciiSceneProps> = (props) => {
 
   const metadata = useMemo(() => getAlphabetMetadata(alphabet), [alphabet]);
   const cellScale = "cellScale" in variableValues ? (variableValues.cellScale as number) : 1;
+  const sampleQuality =
+    "sampleQuality" in variableValues
+      ? (variableValues.sampleQuality as number)
+      : props.sampleQuality ?? 3;
   const heightMultiplierScale = useMemo(() => {
     return (rowHeight ? rowHeight / (targetFontSize * metadata.height) : 1) * cellScale;
   }, [rowHeight, targetFontSize, metadata, cellScale]);
@@ -92,7 +95,7 @@ export const AsciiScene: React.FC<AsciiSceneProps> = (props) => {
     [targetWidth, breakpoint],
   );
   const s = useStyles(AsciiSceneStyles);
-  const onFrameRef = useRef<null | ((buffer: Uint8Array) => void)>(null);
+  const onFrameRef = useRef<null | ((buffer: Uint8Array, options?: OnFrameOptions) => void)>(null);
   const [viewMode, setViewMode] = useState<ViewMode>(availableViewModes[0]?.value || "left");
   const [splitT, setSplitT] = useState(0.5);
   const [characterWidthMultiplier, setCharacterWidthMultiplier] = useState(
@@ -137,7 +140,10 @@ export const AsciiScene: React.FC<AsciiSceneProps> = (props) => {
 
   const fontSize = targetFontSize * scale * cellScale;
 
-  const onFrame = useCallback((buffer: Uint8Array) => onFrameRef.current?.(buffer), []);
+  const onFrame = useCallback(
+    (buffer: Uint8Array, options?: { flipY?: boolean }) => onFrameRef.current?.(buffer, options),
+    [],
+  );
 
   return (
     <>

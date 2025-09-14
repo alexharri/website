@@ -3,9 +3,11 @@ import { VariableDict } from "../types/variables";
 
 type Variables = Record<string, unknown>;
 
+export type OnFrameOptions = { flipY?: boolean };
+
 interface ISceneContext {
   canvasRef: React.RefObject<HTMLCanvasElement>;
-  onFrame: (buffer: Uint8Array) => void;
+  onFrame: (buffer: Uint8Array, options?: OnFrameOptions) => void;
   height: number;
   orbitControlsTargetRef: React.RefObject<HTMLDivElement>;
   registerSceneVariables?: (specs: VariableDict) => void;
@@ -20,7 +22,7 @@ export function useSceneContext(): ISceneContext | null {
 
 interface CanvasProviderProps {
   children: React.ReactNode;
-  onFrame: (buffer: Uint8Array) => void;
+  onFrame: (buffer: Uint8Array, options?: OnFrameOptions) => void;
   height: number;
   orbitControlsTargetRef: React.RefObject<HTMLDivElement>;
   registerSceneVariables?: (specs: VariableDict) => void;

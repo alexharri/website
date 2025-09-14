@@ -50,7 +50,7 @@ export function renderAsciiDebugViz(
 
   const circleSamplingPoints = config.generateCircleSamplingPoints();
 
-  const samplingPointRadius = Math.max(Math.round(config.boxHeight * 0.08), 2.5);
+  const samplingPointRadius = 2.5;
 
   if (options.pixelate) {
     for (let col = 0; col < config.cols; col++) {
@@ -110,19 +110,12 @@ export function renderAsciiDebugViz(
           }
 
           if (options.showSamplingPoints) {
-            // ctx.fillStyle = colors.blue;
-            // ctx.beginPath();
-            // for (const point of circleSamplingPoints) {
-            //   ctx.arc(x + point.x, y + point.y, samplingPointRadius * 1.25 + 1, 0, TAU);
-            // }
-            // ctx.fill();
-
             ctx.fillStyle = colors.blue200;
-            ctx.beginPath();
             for (const point of circleSamplingPoints) {
+              ctx.beginPath();
               ctx.arc(x + point.x, y + point.y, samplingPointRadius + 1.25, 0, TAU);
+              ctx.fill();
             }
-            ctx.fill();
 
             const subsamples = samplingVector.samplingVectorSubsamples[i];
             circleSamplingPoints.forEach((point, pointIndex) => {
@@ -132,6 +125,7 @@ export function renderAsciiDebugViz(
               ctx.beginPath();
               ctx.arc(x + point.x, y + point.y, samplingPointRadius, 0, TAU);
               ctx.fill();
+              ctx.closePath();
             });
           }
         });
