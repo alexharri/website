@@ -7,6 +7,7 @@ import { useSceneContext } from "../../contexts/CanvasContext";
 import { colors, cssVariables } from "../../utils/cssVariables";
 import { useMonospaceCharacterWidthEm } from "../../utils/hooks/useMonospaceCharacterWidthEm";
 import { AsciiDebugVizCanvas, renderAsciiDebugViz } from "./asciiDebugViz";
+import { PixelateCanvas, renderPixelate } from "./PixelateCanvas";
 import { CharacterMatcher } from "./ascii/CharacterMatcher";
 import { EFFECTS } from "./ascii/effects";
 import { AsciiRenderConfig } from "./renderConfig";
@@ -49,6 +50,7 @@ export function AsciiRenderer(props: Props) {
   const s = useStyles(AsciiRendererStyles);
   const preRef = useRef<HTMLPreElement>(null);
   const samplingCanvasRef = useRef<HTMLCanvasElement>(null);
+  const pixelateCanvasRef = useRef<HTMLCanvasElement>(null);
   const metadata = useMemo(() => getAlphabetMetadata(alphabet), [alphabet]);
   const characterWidth = useMonospaceCharacterWidthEm(cssVariables.fontMonospace);
 
@@ -125,6 +127,10 @@ export function AsciiRenderer(props: Props) {
           debugVizOptions,
         );
       }
+
+      if (pixelateCanvasRef.current && debugVizOptions.pixelate) {
+        renderPixelate(pixelateCanvasRef.current, result.samplingData, config);
+      }
     };
   }, [
     alphabet,
@@ -165,6 +171,9 @@ export function AsciiRenderer(props: Props) {
         </div>
       )}
       <AsciiDebugVizCanvas onCanvasRef={samplingCanvasRef} />
+      {debugVizOptions.pixelate && (
+        <PixelateCanvas onCanvasRef={pixelateCanvasRef} transparent={transparent} />
+      )}
     </div>
   );
 }

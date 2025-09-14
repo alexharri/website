@@ -228,7 +228,7 @@ Each row contains 3 fully white pixels in a row, and the rest are fully dark. Sa
 
 The simplest way to combat this is to take multiple samples for each pixel and averaging the sampled lightness values. 
 
-<AsciiScene width={600} height={360} rowHeight={40} columnWidth={40} viewModes="all" hideAscii pixelate offsetAlign="left" sampleQuality={3} alphabet="pixel-short" showSamplingPoints>
+<AsciiScene width={600} height={360} rowHeight={40} columnWidth={40} viewModes="all" hideAscii pixelate offsetAlign="left" sampleQuality={3} alphabet="pixel-short" showSamplingPoints showGrid>
   <Scene2D scene="slanted_line" />
 </AsciiScene>
 

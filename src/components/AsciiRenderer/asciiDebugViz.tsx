@@ -9,6 +9,7 @@ interface Props {
   onCanvasRef: React.MutableRefObject<HTMLCanvasElement | null>;
 }
 
+
 const TAU = 2 * Math.PI;
 
 export function AsciiDebugVizCanvas(props: Props) {
@@ -25,6 +26,7 @@ export function AsciiDebugVizCanvas(props: Props) {
     />
   );
 }
+
 
 export function renderAsciiDebugViz(
   canvas: HTMLCanvasElement,
@@ -52,20 +54,6 @@ export function renderAsciiDebugViz(
 
   const samplingPointRadius = 2.5;
 
-  if (options.pixelate) {
-    for (let col = 0; col < config.cols; col++) {
-      const x = config.offsetX + config.boxWidth * col;
-      for (let row = 0; row < config.rows; row++) {
-        const item = samplingData[row][col];
-        const l = item.samplingVector[0] * 255;
-        const y = config.offsetY + config.boxHeight * row;
-        ctx.beginPath();
-        ctx.rect(x, y, config.boxWidth, config.boxHeight);
-        ctx.fillStyle = `rgb(${l}, ${l}, ${l})`;
-        ctx.fill();
-      }
-    }
-  }
   if (options.showGrid) {
     ctx.fillStyle = hexToRgbaString(colors.blue, 0.5);
     ctx.beginPath();

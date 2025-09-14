@@ -86,33 +86,44 @@ function getSamplePoints(quality: number): { x: number; y: number }[] {
   if (quality === 1) {
     return [{ x: 0, y: 0 }]; // Circle center
   }
+  if (quality === 2) {
+    return [
+      { x: 0.5, y: 0.3 },
+      { x: -0.5, y: -0.3 },
+    ];
+  }
+  if (quality === 3) {
+    return [
+      { x: 0.5, y: 0.6 },
+      { x: -0.5, y: 0 },
+      { x: 0.5, y: -0.6 },
+    ];
+  }
+  if (quality === 4) {
+    return [
+      { x: 0.5, y: 0.5 },
+      { x: 0.5, y: -0.5 },
+      { x: -0.5, y: 0.5 },
+      { x: -0.5, y: -0.5 },
+    ];
+  }
 
   const points: { x: number; y: number }[] = [];
 
-  if (quality < 5) {
-    for (let i = 0; i < quality; i++) {
-      const angle = (i / quality) * 2 * Math.PI;
-      const RADIUS = 0.5;
-      const x = Math.cos(angle) * RADIUS;
-      const y = Math.sin(angle) * RADIUS;
-      points.push({ x, y });
-    }
-  } else {
-    const goldenAngleRad = Math.PI * (3 - Math.sqrt(5)); // "Golden angle" in radians
+  const goldenAngleRad = Math.PI * (3 - Math.sqrt(5)); // "Golden angle" in radians
 
-    // 0.5 = uniform area, >0.5 = more center, <0.5 = more edge
-    const RADIAL_DISTRIBUTION_EXPONENT = 0.5;
+  // 0.5 = uniform area, >0.5 = more center, <0.5 = more edge
+  const RADIAL_DISTRIBUTION_EXPONENT = 0.5;
 
-    for (let i = 0; i < quality; i++) {
-      const theta = i * goldenAngleRad;
+  for (let i = 0; i < quality; i++) {
+    const theta = i * goldenAngleRad;
 
-      const r = Math.pow((i + 0.5) / quality, RADIAL_DISTRIBUTION_EXPONENT);
+    const r = Math.pow((i + 0.5) / quality, RADIAL_DISTRIBUTION_EXPONENT);
 
-      const x = r * Math.cos(theta);
-      const y = r * Math.sin(theta);
+    const x = r * Math.cos(theta);
+    const y = r * Math.sin(theta);
 
-      points.push({ x, y });
-    }
+    points.push({ x, y });
   }
 
   return points;

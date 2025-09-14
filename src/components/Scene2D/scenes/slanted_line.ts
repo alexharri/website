@@ -25,7 +25,7 @@ export default createScene2D(
     variables: {
       sampleQuality: {
         label: "Number of samples",
-        range: [1, 5],
+        range: [1, 4],
         type: "number",
         value: 1,
         step: 1,

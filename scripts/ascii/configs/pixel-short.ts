@@ -5,7 +5,7 @@ export const pixelShortConfig: Config = {
   name: "pixel-short",
   SAMPLING_CONFIG: {
     points: [{ x: 0.5, y: 0.5 }],
-    circleRadius: 40,
+    circleRadius: 60,
   },
   CANVAS_WIDTH: 48,
   CANVAS_HEIGHT: 64,
