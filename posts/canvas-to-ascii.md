@@ -145,13 +145,9 @@ This results in the following:
   <Scene2D scene="circle" />
 </AsciiScene>
 
-That's... pretty ugly. We seem to always get `@` for cells that fall within the circle, and `.` for cells that fall outside.
+That works... but the result is pretty ugly. We seem to always get `@` for cells that fall within the circle, and `.` for cells that fall outside.
 
-This happens because, for each cell, we take single sample at some point. That point will either fall inside of the circle, returning 100% white, or fall outside of the circle, returning the background color.
-
-<AsciiScene width={600} height={360} fontSize={60} rowHeight={72} columnWidth={60} viewMode="transparent" showGrid offsetAlign="left" sampleQuality={1} showSamplingPoints alphabet="pixel-short">
-  <Scene2D scene="circle_zoomed" />
-</AsciiScene>
+Let's analyse what's happening to figure out what is going on.
 
 
 ## Downsampling
@@ -162,30 +158,55 @@ What we're doing is called [downsampling][image_scaling]. Downsampling, in the c
 
 [image_scaling]: https://en.wikipedia.org/wiki/Image_scaling
 
-The simplest and fastest method of sampling is [nearest-neighbor interpolation][nearest_neighbor]. It's the method we used above. In nearest-neighbor interpolation, we take a single sample from the image that we're sampling from at the relative position of the pixel that we're collecting the sample for.
-
-The problem with nearest-neighbor interpolation is that it produces "[jaggies][jaggies]". Consider this rotating square, for example:
+The simplest and fastest method of sampling is [nearest-neighbor interpolation][nearest_neighbor]. In nearest-neighbor interpolation, we take a single sample from the image that we're sampling from at the relative position of the pixel that we're collecting the sample for.
 
 [nearest_neighbor]: https://en.wikipedia.org/wiki/Nearest-neighbor_interpolation
+
+Let's step through nearest-neighbor sampling for this rotating square example:
+
+<AsciiScene width={720} minWidth={400} height={360} viewMode="canvas">
+  <Scene2D scene="rotating_square" />
+</AsciiScene>
+
+We'll start by splitting the canvas into a grid, with each cell being $24 \times 24$ pixels. The grid represents the smaller (downsampled) image:
+
+<AsciiScene width={720} minWidth={400} height={360} fontSize={20} rowHeight={24} columnWidth={24} viewMode="transparent" hideAscii showGrid offsetAlign="left" sampleQuality={1} alphabet="pixel-short">
+  <Scene2D scene="rotating_square" />
+</AsciiScene>
+
+We take a single sample at the center of each cell:
+
+<AsciiScene width={720} minWidth={400} height={360} fontSize={20} rowHeight={24} columnWidth={24} viewMode="transparent" hideAscii showGrid showSamplingPoints offsetAlign="left" sampleQuality={1} alphabet="pixel-short">
+  <Scene2D scene="rotating_square" />
+</AsciiScene>
+
+If we color each cell of our grid according to the sampled value, we get the following image:
+
+<AsciiScene width={720} minWidth={400} height={360} fontSize={20} rowHeight={24} columnWidth={24} viewMode="ascii" hideAscii pixelate offsetAlign="left" sampleQuality={1} alphabet="pixel-short">
+  <Scene2D scene="rotating_square" />
+</AsciiScene>
+
+Notice the rough, jagged looking edges when the square is at an angle. Those are called [jaggies][jaggies], and they're a common artefact of nearest-neighbor interpolation.
+
 [jaggies]: https://en.wikipedia.org/wiki/Jaggies
 
-<AsciiScene width={720} height={360} viewMode="canvas">
+We can convert the downsampled image to an ASCII rendering by picking an ASCII character for each of the cells using the lightness of the sampled value. However, that doesn't change the final result still being jaggy.
+
+<AsciiScene width={720} minWidth={400} height={360} fontSize={20} rowHeight={24} columnWidth={24} viewMode="ascii" offsetAlign="left" sampleQuality={1} alphabet="pixel-short">
   <Scene2D scene="rotating_square" />
 </AsciiScene>
 
-Let's split it into a grid, with each cell being $24 \times 24$ pixels:
+This is what was happening in our circle example above:
 
-<AsciiScene width={720} height={360} fontSize={20} rowHeight={24} columnWidth={24} viewMode="transparent" hideAscii showGrid offsetAlign="left" sampleQuality={1} alphabet="pixel-short">
-  <Scene2D scene="rotating_square" />
+<AsciiScene width={600} height={360} fontSize={20} rowHeight={24} columnWidth={20} viewMode="ascii" offsetAlign="left" sampleQuality={1} alphabet="pixel-short">
+  <Scene2D scene="circle" />
 </AsciiScene>
 
-We then take a single sample at the center of each pixel:
+When we only sample a single pixel value, as done in nearest-neighbor interpolation, that sample either lands inside of the circle or not, causing jaggies. Here's a zoomed in example where you can move the circle to illustrate:
 
-<AsciiScene width={720} height={360} fontSize={20} rowHeight={24} columnWidth={24} viewMode="transparent" hideAscii showGrid showSamplingPoints offsetAlign="left" sampleQuality={1} alphabet="pixel-short">
-  <Scene2D scene="rotating_square" />
+<AsciiScene width={600} height={360} fontSize={60} rowHeight={72} columnWidth={60} viewMode="transparent" showGrid offsetAlign="left" sampleQuality={1} showSamplingPoints alphabet="pixel-short">
+  <Scene2D scene="circle_zoomed" />
 </AsciiScene>
-
-The edges look really jagged.
 
 ### Anti-aliasing
 

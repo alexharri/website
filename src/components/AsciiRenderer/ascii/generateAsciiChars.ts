@@ -66,9 +66,11 @@ function sampleCircularRegion(
   y: number,
   samplingPoints: { x: number; y: number }[],
   scale: number,
-): number {
+  collectSubsamples?: boolean,
+): { averageLightness: number; individualValues: number[] } {
   let totalLightness = 0;
   let sampleCount = 0;
+  const individualValues: number[] = [];
 
   // Always sample center point
 
@@ -79,6 +81,7 @@ function sampleCircularRegion(
     const tx = sampleX / config.canvasWidth;
     const ty = sampleY / config.canvasHeight;
 
+    let lightnessValue = 0;
     if (tx >= 0 && tx <= 1 && ty >= 0 && ty <= 1) {
       const hexColor = readPixelFromBuffer(
         pixelBuffer,
@@ -88,12 +91,18 @@ function sampleCircularRegion(
         ty,
         scale,
       );
-      totalLightness += lightness(hexColor);
+      lightnessValue = lightness(hexColor);
+      totalLightness += lightnessValue;
       sampleCount++;
+    }
+
+    if (collectSubsamples) {
+      individualValues.push(lightnessValue);
     }
   }
 
-  return sampleCount > 0 ? totalLightness / sampleCount : 0;
+  const averageLightness = sampleCount > 0 ? totalLightness / sampleCount : 0;
+  return { averageLightness, individualValues };
 }
 
 function crunchSamplingVector(vector: number[], exponent: number): number[] {
@@ -135,6 +144,7 @@ function crunchSamplingVectorDirectional(
 export interface CharacterSamplingData {
   samplingVector: number[];
   externalSamplingVector: number[];
+  samplingVectorSubsamples: number[][];
 }
 
 export interface GenerationResult {
@@ -148,9 +158,9 @@ export function generateAsciiChars(
   pixelBuffer: Uint8Array,
   pixelBufferScale: number,
   config: AsciiRenderConfig,
-  enableVisualization?: boolean,
   visualizationMode?: SamplingPointVisualizationMode,
   lightnessEasingFunction?: string,
+  collectSubsamples?: boolean,
 ): GenerationResult {
   const metadata = getAlphabetMetadata(config.alphabet);
   const samplingConfig = metadata.samplingConfig;
@@ -165,14 +175,22 @@ export function generateAsciiChars(
     col: number,
     row: number,
     samplingCircleCenterPoints: { x: number; y: number }[],
-  ): number[] {
+    collectSubsamples?: boolean,
+  ): { samplingVector: number[]; subsamples: number[][] } {
     const [sampleRectLeft, sampleRectTop] = config.sampleRectPosition(col, row);
-    return samplingCircleCenterPoints.map((samplingCircleCenterPoint) => {
+    const samplingVector: number[] = [];
+    const subsamples: number[][] = [];
+
+    samplingCircleCenterPoints.forEach((samplingCircleCenterPoint) => {
       const [xOff, yOff] = config.samplingCircleOffset(samplingCircleCenterPoint);
       const x = sampleRectLeft + xOff;
       const y = sampleRectTop + yOff;
-      return sampleCircularRegion(pixelBuffer, config, x, y, samplingPoints, pixelBufferScale);
+      const result = sampleCircularRegion(pixelBuffer, config, x, y, samplingPoints, pixelBufferScale, collectSubsamples);
+      samplingVector.push(result.averageLightness);
+      subsamples.push(result.individualValues);
     });
+
+    return { samplingVector, subsamples };
   }
 
   const chars: string[] = [];
@@ -183,7 +201,10 @@ export function generateAsciiChars(
     samplingData.push(samplingDataRow);
 
     for (let col = 0; col < config.cols; col++) {
-      const rawSamplingVector = createSamplingVector(col, row, metadata.samplingConfig.points);
+      const shouldCollectSubsamples = collectSubsamples;
+      const rawSamplingResult = createSamplingVector(col, row, metadata.samplingConfig.points, shouldCollectSubsamples);
+      const rawSamplingVector = rawSamplingResult.samplingVector;
+      const samplingVectorSubsamples = rawSamplingResult.subsamples;
 
       let samplingVector = [...rawSamplingVector];
 
@@ -195,7 +216,8 @@ export function generateAsciiChars(
 
       let externalSamplingVector: number[] = [];
       if ("externalPoints" in samplingConfig) {
-        externalSamplingVector = createSamplingVector(col, row, samplingConfig.externalPoints);
+        const externalResult = createSamplingVector(col, row, samplingConfig.externalPoints);
+        externalSamplingVector = externalResult.samplingVector;
         samplingVector = crunchSamplingVectorDirectional(
           samplingVector,
           externalSamplingVector,
@@ -207,7 +229,11 @@ export function generateAsciiChars(
       let selectedChar = matcher.findBestCharacter(samplingVector);
 
       const vectorToStore = visualizationMode === "crunched" ? samplingVector : rawSamplingVector;
-      samplingDataRow.push({ samplingVector: vectorToStore, externalSamplingVector });
+      samplingDataRow.push({
+        samplingVector: vectorToStore,
+        externalSamplingVector,
+        samplingVectorSubsamples
+      });
 
       chars.push(selectedChar === "&nbsp;" ? " " : selectedChar);
     }

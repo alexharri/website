@@ -9,6 +9,8 @@ interface Props {
   onCanvasRef: React.MutableRefObject<HTMLCanvasElement | null>;
 }
 
+const TAU = 2 * Math.PI;
+
 export function AsciiDebugVizCanvas(props: Props) {
   return (
     <canvas
@@ -48,7 +50,7 @@ export function renderAsciiDebugViz(
 
   const circleSamplingPoints = config.generateCircleSamplingPoints();
 
-  const samplingPointRadius = Math.min(Math.round(config.boxHeight * 0.08), 3);
+  const samplingPointRadius = Math.max(Math.round(config.boxHeight * 0.08), 2.5);
 
   if (options.pixelate) {
     for (let col = 0; col < config.cols; col++) {
@@ -92,35 +94,45 @@ export function renderAsciiDebugViz(
             ctx.strokeStyle = "rgba(255, 255, 255, 0.1)";
             ctx.lineWidth = 1;
             ctx.beginPath();
-            ctx.arc(x, y, config.samplePointRadius, 0, 2 * Math.PI);
+            ctx.arc(x, y, config.samplePointRadius, 0, TAU);
             ctx.stroke();
 
             // ctx.fillStyle = colors.background200;
             // ctx.beginPath();
-            // ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI);
+            // ctx.arc(centerX, centerY, radius, 0, TAU);
             // ctx.fill();
 
             const intensity = samplingVector.samplingVector[i] * 0.7;
             ctx.fillStyle = `rgba(255, 255, 255, ${intensity})`;
             ctx.beginPath();
-            ctx.arc(x, y, config.samplePointRadius, 0, 2 * Math.PI);
+            ctx.arc(x, y, config.samplePointRadius, 0, TAU);
             ctx.fill();
           }
 
           if (options.showSamplingPoints) {
-            ctx.fillStyle = colors.background;
+            // ctx.fillStyle = colors.blue;
+            // ctx.beginPath();
+            // for (const point of circleSamplingPoints) {
+            //   ctx.arc(x + point.x, y + point.y, samplingPointRadius * 1.25 + 1, 0, TAU);
+            // }
+            // ctx.fill();
+
+            ctx.fillStyle = colors.blue200;
             ctx.beginPath();
             for (const point of circleSamplingPoints) {
-              ctx.arc(x + point.x, y + point.y, samplingPointRadius * 1.25, 0, 2 * Math.PI);
+              ctx.arc(x + point.x, y + point.y, samplingPointRadius + 1.25, 0, TAU);
             }
             ctx.fill();
 
-            ctx.fillStyle = colors.blue;
-            ctx.beginPath();
-            for (const point of circleSamplingPoints) {
-              ctx.arc(x + point.x, y + point.y, samplingPointRadius, 0, 2 * Math.PI);
-            }
-            ctx.fill();
+            const subsamples = samplingVector.samplingVectorSubsamples[i];
+            circleSamplingPoints.forEach((point, pointIndex) => {
+              const lightness = Math.floor(subsamples[pointIndex] * 255);
+              ctx.fillStyle = `rgb(${lightness}, ${lightness}, ${lightness})`;
+
+              ctx.beginPath();
+              ctx.arc(x + point.x, y + point.y, samplingPointRadius, 0, TAU);
+              ctx.fill();
+            });
           }
         });
       }

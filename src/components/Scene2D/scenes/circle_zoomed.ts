@@ -1,4 +1,3 @@
-import { colors } from "../../../utils/cssVariables";
 import { createScene2D } from "../createScene2D";
 
 export default createScene2D(
@@ -9,7 +8,7 @@ export default createScene2D(
 
     ctx.beginPath();
     ctx.rect(0, 0, width, height);
-    ctx.fillStyle = colors.background300;
+    ctx.fillStyle = "black";
     ctx.fill();
 
     ctx.beginPath();

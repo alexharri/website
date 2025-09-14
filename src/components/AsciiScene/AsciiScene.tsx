@@ -179,6 +179,7 @@ export const AsciiScene: React.FC<AsciiSceneProps> = (props) => {
                 debugVizOptions={debugVizOptions}
                 transparent={viewMode === "transparent"}
                 hideAscii={hideAscii}
+                showSamplingPoints={showSamplingPoints}
                 offsetAlign={offsetAlign}
                 sampleQuality={sampleQuality}
               />,

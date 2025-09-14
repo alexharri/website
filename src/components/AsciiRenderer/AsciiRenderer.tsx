@@ -22,6 +22,7 @@ interface Props {
   lightnessEasingFunction?: string;
   transparent: boolean;
   hideAscii: boolean;
+  showSamplingPoints: boolean;
   offsetAlign: "left" | "center";
   debugVizOptions: DebugVizOptions;
   sampleQuality: number;
@@ -36,6 +37,7 @@ export function AsciiRenderer(props: Props) {
     debugVizOptions,
     transparent,
     hideAscii,
+    showSamplingPoints,
     offsetAlign,
     sampleQuality,
   } = props;
@@ -94,9 +96,9 @@ export function AsciiRenderer(props: Props) {
         pixelBuffer,
         pixelBufferScale,
         config,
-        enableVisualization,
         debugVizOptions.showSamplingCircles,
         props.lightnessEasingFunction,
+        debugVizOptions.showSamplingPoints,
       );
 
       if (preEl) {
@@ -132,7 +134,9 @@ export function AsciiRenderer(props: Props) {
   ]);
 
   let background: string;
-  if (transparent && hideAscii) {
+  if (showSamplingPoints) {
+    background = hexToRgbaString(colors.background200, 0.5);
+  } else if (transparent && hideAscii) {
     background = "transparent";
   } else if (transparent) {
     background = hexToRgbaString(colors.background200, 0.5);
