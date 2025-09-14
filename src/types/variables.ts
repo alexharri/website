@@ -5,6 +5,7 @@ export type NumberVariableSpec = {
   value: number;
   step?: number;
   format?: "number" | "percent" | "multiplier";
+  showValue?: boolean;
 };
 
 export type NormalVariableSpec = {

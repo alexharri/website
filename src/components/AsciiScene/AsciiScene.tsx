@@ -36,6 +36,7 @@ interface AsciiSceneProps {
   characterHeightMultiplier?: number;
   viewMode?: ViewModeKey;
   viewModes?: ViewModeKey[] | "all";
+  pixelate?: boolean;
 }
 
 const VIEW_MODE_MAP: Record<ViewModeKey, { value: ViewMode; label: string }> = {
@@ -50,13 +51,14 @@ export const AsciiScene: React.FC<AsciiSceneProps> = (props) => {
     children,
     alphabet: initialAlphabet = "default",
     height: targetHeight,
-    showControls = false,
+    showControls = true,
     fontSize: targetFontSize = 14,
     showSamplingCircles = "none",
     showExternalSamplingCircles = false,
     showSamplingPoints = false,
     showGrid = false,
     hideAscii = false,
+    pixelate = false,
     offsetAlign = "center",
     lightnessEasingFunction,
     viewModes = props.viewMode ? [props.viewMode] : [],
@@ -71,13 +73,17 @@ export const AsciiScene: React.FC<AsciiSceneProps> = (props) => {
 
   const [alphabet, setAlphabet] = useState<AlphabetName>(initialAlphabet);
 
+  const [variables, setVariables] = useState<VariableDict>({});
+  const [variableValues, setVariableValues] = useState<VariableValues>({});
+
   const metadata = useMemo(() => getAlphabetMetadata(alphabet), [alphabet]);
+  const cellScale = "cellScale" in variableValues ? (variableValues.cellScale as number) : 1;
   const heightMultiplierScale = useMemo(() => {
-    return rowHeight ? rowHeight / (targetFontSize * metadata.height) : 1;
-  }, [rowHeight, targetFontSize, metadata]);
+    return (rowHeight ? rowHeight / (targetFontSize * metadata.height) : 1) * cellScale;
+  }, [rowHeight, targetFontSize, metadata, cellScale]);
   const widthMultiplierScale = useMemo(() => {
-    return columnWidth ? columnWidth / (targetFontSize * metadata.width) : 1;
-  }, [columnWidth, targetFontSize, metadata]);
+    return (columnWidth ? columnWidth / (targetFontSize * metadata.width) : 1) * cellScale;
+  }, [columnWidth, targetFontSize, metadata, cellScale]);
 
   const orbitControlsTargetRef = useRef<HTMLDivElement>(null);
   const breakpoint = useMemo(() => targetWidth + 80, [targetWidth]);
@@ -95,9 +101,6 @@ export const AsciiScene: React.FC<AsciiSceneProps> = (props) => {
   const [characterHeightMultiplier, setCharacterHeightMultiplier] = useState(
     props.characterHeightMultiplier ?? 1,
   );
-
-  const [variables, setVariables] = useState<VariableDict>({});
-  const [variableValues, setVariableValues] = useState<VariableValues>({});
 
   const registerSceneVariables = useCallback((variables: VariableDict) => {
     setVariables(variables);
@@ -117,6 +120,7 @@ export const AsciiScene: React.FC<AsciiSceneProps> = (props) => {
     showExternalSamplingCircles,
     showSamplingPoints,
     showGrid,
+    pixelate,
   };
 
   const viewportWidth = useViewportWidth();
@@ -131,14 +135,14 @@ export const AsciiScene: React.FC<AsciiSceneProps> = (props) => {
 
   const { height, scale } = useSceneHeight(targetHeight);
 
-  const fontSize = targetFontSize * scale;
+  const fontSize = targetFontSize * scale * cellScale;
 
   const onFrame = useCallback((buffer: Uint8Array) => onFrameRef.current?.(buffer), []);
 
   return (
     <>
       <div className={s("container")} style={{ height }}>
-        {showControls && (
+        {showControls && false && (
           <AsciiSceneControls
             selectedAlphabet={alphabet}
             setSelectedAlphabet={setAlphabet}
@@ -194,7 +198,7 @@ export const AsciiScene: React.FC<AsciiSceneProps> = (props) => {
         )}
       </div>
 
-      {Object.keys(variables).length > 0 && (
+      {showControls && Object.keys(variables).length > 0 && (
         <div className={s("variablesWrapper")}>
           {Object.entries(variables).map(([key, spec]) => {
             const value = variableValues[key];
@@ -206,7 +210,6 @@ export const AsciiScene: React.FC<AsciiSceneProps> = (props) => {
                   value={value as number}
                   onValueChange={(value) => setVariableValue(key, value)}
                   spec={spec}
-                  showValue={false}
                 />
               );
             }

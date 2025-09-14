@@ -25,6 +25,7 @@ export default createScene2D(
         range: [-1, 1],
         type: "number",
         step: 0.05,
+        showValue: false,
       },
     },
   },

@@ -50,6 +50,20 @@ export function renderAsciiDebugViz(
 
   const samplingPointRadius = Math.min(Math.round(config.boxHeight * 0.08), 3);
 
+  if (options.pixelate) {
+    for (let col = 0; col < config.cols; col++) {
+      const x = config.offsetX + config.boxWidth * col;
+      for (let row = 0; row < config.rows; row++) {
+        const item = samplingData[row][col];
+        const l = item.samplingVector[0] * 255;
+        const y = config.offsetY + config.boxHeight * row;
+        ctx.beginPath();
+        ctx.rect(x, y, config.boxWidth, config.boxHeight);
+        ctx.fillStyle = `rgb(${l}, ${l}, ${l})`;
+        ctx.fill();
+      }
+    }
+  }
   if (options.showGrid) {
     ctx.fillStyle = hexToRgbaString(colors.blue, 0.5);
     ctx.beginPath();
@@ -68,13 +82,13 @@ export function renderAsciiDebugViz(
     for (let row = 0; row < config.rows; row++) {
       const [sampleRectLeft, sampleRectTop] = config.sampleRectPosition(col, row);
       if (options.showSamplingCircles || options.showSamplingPoints) {
-        const samplingVector = samplingData[row]?.[col];
+        const samplingVector = samplingData[row][col];
         metadata.samplingConfig.points.forEach((samplingCircle, i) => {
           const [xOff, yOff] = config.samplingCircleOffset(samplingCircle);
           const x = sampleRectLeft + xOff;
           const y = sampleRectTop + yOff;
 
-          if (options.showSamplingCircles && samplingVector) {
+          if (options.showSamplingCircles !== "none") {
             ctx.strokeStyle = "rgba(255, 255, 255, 0.1)";
             ctx.lineWidth = 1;
             ctx.beginPath();
@@ -113,45 +127,45 @@ export function renderAsciiDebugViz(
     }
   }
 
-  samplingData.forEach((samplingDataRow, row) => {
-    samplingDataRow.forEach(({ externalSamplingVector }, col) => {
-      const [sampleRectLeft, sampleRectTop] = config.sampleRectPosition(col, row);
+  // samplingData.forEach((samplingDataRow, row) => {
+  //   samplingDataRow.forEach(({ externalSamplingVector }, col) => {
+  //     const [sampleRectLeft, sampleRectTop] = config.sampleRectPosition(col, row);
 
-      if (options.showExternalSamplingCircles) {
-        const externalPoints =
-          "externalPoints" in metadata.samplingConfig ? metadata.samplingConfig.externalPoints : [];
-        for (const [i, externalPoint] of externalPoints.entries()) {
-          const [xOff, yOff] = config.samplingCircleOffset(externalPoint);
-          const x = sampleRectLeft + xOff;
-          const y = sampleRectTop + yOff;
+  //     if (options.showExternalSamplingCircles) {
+  //       const externalPoints =
+  //         "externalPoints" in metadata.samplingConfig ? metadata.samplingConfig.externalPoints : [];
+  //       for (const [i, externalPoint] of externalPoints.entries()) {
+  //         const [xOff, yOff] = config.samplingCircleOffset(externalPoint);
+  //         const x = sampleRectLeft + xOff;
+  //         const y = sampleRectTop + yOff;
 
-          ctx.strokeStyle = "rgba(255, 255, 255, 0.1)";
-          ctx.lineWidth = 1;
-          ctx.beginPath();
-          ctx.arc(x, y, config.samplePointRadius, 0, 2 * Math.PI);
-          ctx.stroke();
+  //         ctx.strokeStyle = "rgba(255, 255, 255, 0.1)";
+  //         ctx.lineWidth = 1;
+  //         ctx.beginPath();
+  //         ctx.arc(x, y, config.samplePointRadius, 0, 2 * Math.PI);
+  //         ctx.stroke();
 
-          // ctx.fillStyle = colors.background200;
-          // ctx.beginPath();
-          // ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI);
-          // ctx.fill();
+  //         // ctx.fillStyle = colors.background200;
+  //         // ctx.beginPath();
+  //         // ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI);
+  //         // ctx.fill();
 
-          const intensity = externalSamplingVector[i] * 0.7;
-          ctx.fillStyle = `rgba(255, 255, 255, ${intensity})`;
-          ctx.beginPath();
-          ctx.arc(x, y, config.samplePointRadius, 0, 2 * Math.PI);
-          ctx.fill();
+  //         const intensity = externalSamplingVector[i] * 0.7;
+  //         ctx.fillStyle = `rgba(255, 255, 255, ${intensity})`;
+  //         ctx.beginPath();
+  //         ctx.arc(x, y, config.samplePointRadius, 0, 2 * Math.PI);
+  //         ctx.fill();
 
-          if (options.showSamplingPoints) {
-            for (const point of circleSamplingPoints) {
-              ctx.fillStyle = "#ff0000";
-              ctx.beginPath();
-              ctx.arc(x + point.x, y + point.y, samplingPointRadius, 0, 2 * Math.PI);
-              ctx.fill();
-            }
-          }
-        }
-      }
-    });
-  });
+  //         if (options.showSamplingPoints) {
+  //           for (const point of circleSamplingPoints) {
+  //             ctx.fillStyle = "#ff0000";
+  //             ctx.beginPath();
+  //             ctx.arc(x + point.x, y + point.y, samplingPointRadius, 0, 2 * Math.PI);
+  //             ctx.fill();
+  //           }
+  //         }
+  //       }
+  //     }
+  //   });
+  // });
 }

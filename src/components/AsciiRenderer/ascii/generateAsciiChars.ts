@@ -204,14 +204,10 @@ export function generateAsciiChars(
       }
       samplingVector = crunchSamplingVector(samplingVector, CONTRAST_EXPONENT_GLOBAL);
 
-      // Find best matching character using K-d tree
       let selectedChar = matcher.findBestCharacter(samplingVector);
 
-      // Collect visualization data if enabled
-      if (enableVisualization) {
-        const vectorToStore = visualizationMode === "crunched" ? samplingVector : rawSamplingVector;
-        samplingDataRow.push({ samplingVector: vectorToStore, externalSamplingVector });
-      }
+      const vectorToStore = visualizationMode === "crunched" ? samplingVector : rawSamplingVector;
+      samplingDataRow.push({ samplingVector: vectorToStore, externalSamplingVector });
 
       chars.push(selectedChar === "&nbsp;" ? " " : selectedChar);
     }

@@ -95,7 +95,7 @@ We can get lightness values for each cell by sampling the lightness of the pixel
 
 We want each pixel's lightness as a value $L$ from $0$ to $1$, but our image data consists of pixels with RGB values.
 
-We can use the following formula to convert an RGB color (with components values of $0$ to $255$) to a lightness value:
+We can use the following formula to convert an RGB color (with components values between $0$ and $255$) to a lightness value:
 
 <p className="mathblock">$$ L = \dfrac{R \times 0.2126 + G \times 0.7152 + B \times 0.0722}{255} $$</p>
 
@@ -115,7 +115,7 @@ Consider, for example, the following characters ASCII characters:
 : - # = + @ * % .
 ```
 
-We can sort them in (approximate) density order like so, with lower-density characters to the left, and high-density to the right:
+We can sort them in approximate density order like so, with lower-density characters to the left, and high-density to the right:
 
 ```text
 . : - = + * # % @
@@ -147,114 +147,72 @@ This results in the following:
 
 That's... pretty ugly. We seem to always get `@` for cells that fall within the circle, and `.` for cells that fall outside.
 
-This happens because we're sampling a single point that will either fall inside the circle, returning 100% white, or fall outside of the circle, which returns the background color. There's no in-between.
+This happens because, for each cell, we take single sample at some point. That point will either fall inside of the circle, returning 100% white, or fall outside of the circle, returning the background color.
 
 <AsciiScene width={600} height={360} fontSize={60} rowHeight={72} columnWidth={60} viewMode="transparent" showGrid offsetAlign="left" sampleQuality={1} showSamplingPoints alphabet="pixel-short">
   <Scene2D scene="circle_zoomed" />
 </AsciiScene>
 
-.
 
-.
+## Downsampling
 
-.
+What we're doing is called [downsampling][image_scaling]. Downsampling, in the context of image processing, is taking a larger image (in our case, the $600 \times 360$ canvas) and using that to construct a lower resolution image (our $30 \times 15$ grid). The pixel values for the lower resolution image are calculated by sampling the higher resolution image.
 
-.
+<SmallNote label="">Each cell in the ASCII grid above represents a single pixel in the smaller image.</SmallNote>
 
-.
+[image_scaling]: https://en.wikipedia.org/wiki/Image_scaling
 
-.
+The simplest and fastest method of sampling is [nearest-neighbor interpolation][nearest_neighbor]. It's the method we used above. In nearest-neighbor interpolation, we take a single sample from the image that we're sampling from at the relative position of the pixel that we're collecting the sample for.
 
-.
+The problem with nearest-neighbor interpolation is that it produces "[jaggies][jaggies]". Consider this rotating square, for example:
 
-.
+[nearest_neighbor]: https://en.wikipedia.org/wiki/Nearest-neighbor_interpolation
+[jaggies]: https://en.wikipedia.org/wiki/Jaggies
 
-.
-
-.
-
-.
-
-.
-
-
-
-
-<AsciiScene height={650} fontSize={100} showSamplingCircles="raw" showSamplingPoints characterWidthMultiplier={1.25} characterHeightMultiplier={1.25} showGrid showControls offsetAlign="center">
-  <Scene2D scene="breathe" />
+<AsciiScene width={720} height={360} viewMode="canvas">
+  <Scene2D scene="rotating_square" />
 </AsciiScene>
 
-.
+Let's split it into a grid, with each cell being $24 \times 24$ pixels:
 
-.
+<AsciiScene width={720} height={360} fontSize={20} rowHeight={24} columnWidth={24} viewMode="transparent" hideAscii showGrid offsetAlign="left" sampleQuality={1} alphabet="pixel-short">
+  <Scene2D scene="rotating_square" />
+</AsciiScene>
 
-.
+We then take a single sample at the center of each pixel:
 
-.
+<AsciiScene width={720} height={360} fontSize={20} rowHeight={24} columnWidth={24} viewMode="transparent" hideAscii showGrid showSamplingPoints offsetAlign="left" sampleQuality={1} alphabet="pixel-short">
+  <Scene2D scene="rotating_square" />
+</AsciiScene>
 
-.
+The edges look really jagged.
 
-.
+### Anti-aliasing
 
-.
+Consider this pixelated line
 
-.
+<AsciiScene width={600} height={360} rowHeight={20} columnWidth={20} viewModes="all" hideAscii pixelate offsetAlign="left" sampleQuality={1} alphabet="pixel-short" showControls={false}>
+  <Scene2D scene="slanted_line" />
+</AsciiScene>
 
-.
+Notice what happens when we increase the quality of sampling:
 
-.
+<AsciiScene width={600} height={360} rowHeight={20} columnWidth={20} cellScaleRange={[0.1, 1]} viewModes="all" hideAscii pixelate offsetAlign="left" sampleQuality={3} alphabet="pixel-short">
+  <Scene2D scene="slanted_line" />
+</AsciiScene>
 
-.
 
-.
 
+
+<AsciiScene height={650} fontSize={100} showSamplingCircles="raw" showSamplingPoints characterWidthMultiplier={1.25} characterHeightMultiplier={1.25} showGrid offsetAlign="center">
+  <Scene2D scene="breathe" />
+</AsciiScene>
 
 
 <AsciiScene height={650} fontSize={20}>
   <Scene2D scene="shade-split" />
 </AsciiScene>
 
-.
-
-.
-
-.
-
-.
-
-.
-
-.
-
-.
-
-.
-
-.
-
-.
-
-.
-
-.
-
-
 <AsciiScene height={550} fontSize={100} viewModes={["transparent"]} showSamplingCircles="raw" characterWidthMultiplier={1.25} characterHeightMultiplier={1.25}>
   <Scene2D scene="shade_split_0" />
 </AsciiScene>
-
-.
-
-.
-
-.
-
-.
-
-.
-
-.
-
-.
-
-.

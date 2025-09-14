@@ -51,8 +51,6 @@ export class CharacterMatcher {
     this.currentAlphabet = alphabet;
     this.metadata = metadata;
     this.samplingConfig = metadata.samplingConfig;
-
-    console.log(`✓ Loaded alphabet: ${alphabet}`);
   }
 
   findBestCharacter(samplingVector: number[]): string {

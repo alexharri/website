@@ -140,7 +140,8 @@ function defaultStep(min: number, max: number) {
 }
 
 export const NumberVariable: React.FC<NumberVariableProps> = (props) => {
-  const { dataKey, spec, value, onValueChange, showValue = true } = props;
+  const { dataKey, spec, value, onValueChange } = props;
+  const showValue = props.showValue ?? spec.showValue ?? true;
   const [min, max] = spec.range;
 
   const s = useStyles(styles);

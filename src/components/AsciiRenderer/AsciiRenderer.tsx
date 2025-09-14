@@ -139,7 +139,6 @@ export function AsciiRenderer(props: Props) {
   } else {
     background = colors.background200;
   }
-  console.log({ transparent, hideAscii, background });
 
   return (
     <div

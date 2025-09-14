@@ -5,4 +5,5 @@ export interface DebugVizOptions {
   showExternalSamplingCircles: boolean;
   showSamplingPoints: boolean;
   showGrid: boolean;
+  pixelate: boolean;
 }

@@ -35,8 +35,6 @@ export const SegmentedControl = <T extends string>({
       const containerRect = containerRef.current.getBoundingClientRect();
       const buttonRect = selectedButton.getBoundingClientRect();
 
-      console.log(buttonRect);
-
       setIndicatorStyle({
         left: buttonRect.left - containerRect.left,
         width: buttonRect.width,
