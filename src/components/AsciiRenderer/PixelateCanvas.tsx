@@ -42,6 +42,9 @@ export function renderPixelate(
   ctx.scale(dpr, dpr);
   ctx.clearRect(0, 0, config.canvasWidth, config.canvasHeight);
 
+  if (samplingData.length !== config.rows) return;
+  if (samplingData[0]?.length !== config.cols) return;
+
   for (let col = 0; col < config.cols; col++) {
     const x = config.offsetX + config.boxWidth * col;
     for (let row = 0; row < config.rows; row++) {
