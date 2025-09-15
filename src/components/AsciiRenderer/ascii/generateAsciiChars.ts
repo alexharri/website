@@ -40,16 +40,14 @@ function readPixelFromBuffer(
   pixelBufferScale: number,
   flipY: boolean,
 ) {
-  tx = clamp(tx, 0, 1);
-  ty = clamp(ty, 0, 1);
   const pixelX = Math.floor(tx * canvasWidth * pixelBufferScale);
   const pixelY = Math.floor((flipY ? ty : 1 - ty) * canvasHeight * pixelBufferScale);
-  const index = (pixelY * (canvasWidth * pixelBufferScale) + pixelX) * 4;
 
-  if (index >= 0 && index < pixelBuffer.length - 3) {
-    return (pixelBuffer[index] << 16) | (pixelBuffer[index + 1] << 8) | pixelBuffer[index + 2];
-  }
-  return 0x000000;
+  const clampedX = clamp(pixelX, 0, canvasWidth * pixelBufferScale - 1);
+  const clampedY = clamp(pixelY, 0, canvasHeight * pixelBufferScale - 1);
+
+  const index = (clampedY * (canvasWidth * pixelBufferScale) + clampedX) * 4;
+  return (pixelBuffer[index] << 16) | (pixelBuffer[index + 1] << 8) | pixelBuffer[index + 2];
 }
 
 function lightness(hexColor: number): number {
@@ -82,21 +80,18 @@ function sampleCircularRegion(
     const tx = sampleX / config.canvasWidth;
     const ty = sampleY / config.canvasHeight;
 
-    let lightnessValue = 0;
-    if (tx >= 0 && tx <= 1 && ty >= 0 && ty <= 1) {
-      const hexColor = readPixelFromBuffer(
-        pixelBuffer,
-        config.canvasWidth,
-        config.canvasHeight,
-        tx,
-        ty,
-        scale,
-        flipY,
-      );
-      lightnessValue = lightness(hexColor);
-      totalLightness += lightnessValue;
-      sampleCount++;
-    }
+    const hexColor = readPixelFromBuffer(
+      pixelBuffer,
+      config.canvasWidth,
+      config.canvasHeight,
+      tx,
+      ty,
+      scale,
+      flipY,
+    );
+    const lightnessValue = lightness(hexColor);
+    totalLightness += lightnessValue;
+    sampleCount++;
 
     if (collectSubsamples) {
       individualValues.push(lightnessValue);
