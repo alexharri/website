@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useRef, useMemo } from "react";
 import { VariableDict } from "../types/variables";
+import { SCENE_BASELINE_WIDTH } from "../constants";
 
 type Variables = Record<string, unknown>;
 
@@ -9,6 +10,7 @@ interface ISceneContext {
   canvasRef: React.RefObject<HTMLCanvasElement>;
   onFrame: (buffer: Uint8Array, options?: OnFrameOptions) => void;
   height: number;
+  minWidth: number;
   orbitControlsTargetRef: React.RefObject<HTMLDivElement>;
   registerSceneVariables?: (specs: VariableDict) => void;
   variables?: Variables;
@@ -24,6 +26,7 @@ interface CanvasProviderProps {
   children: React.ReactNode;
   onFrame: (buffer: Uint8Array, options?: OnFrameOptions) => void;
   height: number;
+  minWidth?: number;
   orbitControlsTargetRef: React.RefObject<HTMLDivElement>;
   registerSceneVariables?: (specs: VariableDict) => void;
   variables?: Variables;
@@ -33,6 +36,7 @@ export function CanvasProvider({
   children,
   onFrame,
   height,
+  minWidth,
   orbitControlsTargetRef,
   registerSceneVariables,
   variables,
@@ -44,11 +48,12 @@ export function CanvasProvider({
       canvasRef,
       onFrame,
       height,
+      minWidth: minWidth ?? SCENE_BASELINE_WIDTH,
       orbitControlsTargetRef,
       registerSceneVariables,
       variables,
     }),
-    [onFrame, height, orbitControlsTargetRef, registerSceneVariables, variables],
+    [onFrame, height, minWidth, orbitControlsTargetRef, registerSceneVariables, variables],
   );
 
   return <SceneContext.Provider value={contextValue}>{children}</SceneContext.Provider>;

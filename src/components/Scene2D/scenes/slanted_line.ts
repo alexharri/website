@@ -18,7 +18,7 @@ export default createScene2D(
     ctx.moveTo(-shiftX, height / 2 + deltaY);
     ctx.lineTo(width + shiftX, height / 2 - deltaY);
     ctx.strokeStyle = colors.text;
-    ctx.lineWidth = width * 0.052;
+    ctx.lineWidth = height * 0.09;
     ctx.stroke();
   },
   {

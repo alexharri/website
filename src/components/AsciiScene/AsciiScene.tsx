@@ -18,6 +18,7 @@ type ViewModeKey = "ascii" | "split" | "transparent" | "canvas";
 interface AsciiSceneProps {
   children: React.ReactNode;
   height: number;
+  minWidth?: number;
   showControls?: boolean;
   alphabet?: AlphabetName;
   fontSize?: number;
@@ -44,6 +45,7 @@ export const AsciiScene: React.FC<AsciiSceneProps> = (props) => {
     children,
     alphabet: initialAlphabet = "default",
     height: targetHeight,
+    minWidth,
     showControls = true,
     fontSize: targetFontSize = 14,
     showSamplingCircles = "none",
@@ -137,7 +139,7 @@ export const AsciiScene: React.FC<AsciiSceneProps> = (props) => {
     width = targetWidth;
   }
 
-  const { height, scale } = useSceneHeight(targetHeight);
+  const { height, scale } = useSceneHeight(targetHeight, { minWidth });
 
   const fontSize = targetFontSize * scale * cellScale;
 
@@ -162,6 +164,7 @@ export const AsciiScene: React.FC<AsciiSceneProps> = (props) => {
         <CanvasProvider
           onFrame={onFrame}
           height={targetHeight}
+          minWidth={minWidth}
           orbitControlsTargetRef={orbitControlsTargetRef}
           registerSceneVariables={registerSceneVariables}
           variables={variableValues}

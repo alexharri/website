@@ -204,7 +204,7 @@ This is what was happening in our circle example above:
 
 When we only sample a single pixel value, as is done in nearest-neighbor interpolation, the sampled pixel will either be inside of the circle or not, causing jaggies. Here's a zoomed in example where you can move the circle to illustrate:
 
-<AsciiScene width={600} height={360} fontSize={60} rowHeight={72} columnWidth={60} viewMode="transparent" showGrid offsetAlign="left" sampleQuality={1} showSamplingPoints alphabet="pixel-short">
+<AsciiScene width={600} minWidth={200} height={360} fontSize={60} rowHeight={72} columnWidth={60} viewMode="transparent" showGrid offsetAlign="left" sampleQuality={1} showSamplingPoints alphabet="pixel-short">
   <Scene2D scene="circle_zoomed" />
 </AsciiScene>
 
@@ -214,23 +214,27 @@ Let's look at anti-aliasing techniques we can use to resolve the jaggies.
 
 Consider this line:
 
-<AsciiScene width={600} height={360} rowHeight={40} columnWidth={40} viewMode="canvas" showControls={false}>
+<AsciiScene width={600} minWidth={200} height={360} rowHeight={40} columnWidth={40} viewMode="canvas" showControls={false}>
   <Scene2D scene="slanted_line" />
 </AsciiScene>
 
-The line's slope is $\dfrac{1}{3}x$, so when we pixelate it with nearest-neighbor interpolation we get the following:
+The line's slope on the $y$ axis is $\dfrac{1}{3}x$, so when we pixelate it with nearest-neighbor interpolation we get the following:
 
-<AsciiScene width={600} height={360} rowHeight={40} columnWidth={40} hideAscii pixelate offsetAlign="left" sampleQuality={1} alphabet="pixel-short" showControls={false}>
+<AsciiScene width={600} minWidth={200} height={360} rowHeight={40} columnWidth={40} hideAscii pixelate sampleQuality={1} alphabet="pixel-short" showControls={false}>
   <Scene2D scene="slanted_line" />
 </AsciiScene>
 
-Each row contains 3 fully white pixels in a row, and the rest are fully dark. Same jagged edges as before.
+Each row contains 3 fully white pixels in a row, and the rest are dark. Same jagged edges as before.
 
 The simplest way to combat this is to take multiple samples for each pixel and averaging the sampled lightness values. 
 
-<AsciiScene width={600} height={360} rowHeight={40} columnWidth={40} viewModes="all" hideAscii pixelate offsetAlign="left" sampleQuality={3} alphabet="pixel-short" showSamplingPoints showGrid>
+<AsciiScene width={600} minWidth={200} height={360} rowHeight={40} columnWidth={40} viewModes={["ascii", "transparent", "canvas"]} hideAscii pixelate sampleQuality={3} alphabet="pixel-short" showSamplingPoints showGrid>
   <Scene2D scene="slanted_line" />
 </AsciiScene>
+
+Increasing the number of samples for each.
+
+This method of collecting multiple samples from the larger image is called supersampling and it's a common method for anti-aliasing to avoid jaggies at sharp edges.
 
 
 
