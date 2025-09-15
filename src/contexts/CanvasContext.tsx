@@ -30,6 +30,7 @@ interface CanvasProviderProps {
   orbitControlsTargetRef: React.RefObject<HTMLDivElement>;
   registerSceneVariables?: (specs: VariableDict) => void;
   variables?: Variables;
+  canvasRef?: React.RefObject<HTMLCanvasElement>;
 }
 
 export function CanvasProvider({
@@ -40,8 +41,10 @@ export function CanvasProvider({
   orbitControlsTargetRef,
   registerSceneVariables,
   variables,
+  canvasRef: externalCanvasRef,
 }: CanvasProviderProps) {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const internalCanvasRef = useRef<HTMLCanvasElement>(null);
+  const canvasRef = externalCanvasRef || internalCanvasRef;
 
   const contextValue: ISceneContext = useMemo(
     () => ({

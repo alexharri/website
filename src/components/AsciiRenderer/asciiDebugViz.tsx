@@ -1,14 +1,13 @@
 import { CharacterSamplingData } from "./ascii/generateAsciiChars";
 import { getAlphabetMetadata } from "./alphabets/AlphabetManager";
 import { AsciiRenderConfig } from "./renderConfig";
-import { DebugVizOptions } from "./types";
+import { DebugVizOptions, SamplingPointVisualizationMode } from "./types";
 import { colors } from "../../utils/cssVariables";
 import { hexToRgbaString } from "../../utils/color";
 
 interface Props {
   onCanvasRef: React.MutableRefObject<HTMLCanvasElement | null>;
 }
-
 
 const TAU = 2 * Math.PI;
 
@@ -27,12 +26,12 @@ export function AsciiDebugVizCanvas(props: Props) {
   );
 }
 
-
 export function renderAsciiDebugViz(
   canvas: HTMLCanvasElement,
   samplingData: CharacterSamplingData[][],
   config: AsciiRenderConfig,
   options: DebugVizOptions,
+  visualizationMode?: SamplingPointVisualizationMode,
 ) {
   const ctx = canvas.getContext("2d");
   if (!ctx) return;
@@ -90,7 +89,11 @@ export function renderAsciiDebugViz(
             // ctx.arc(centerX, centerY, radius, 0, TAU);
             // ctx.fill();
 
-            const intensity = samplingVector.samplingVector[i] * 0.7;
+            const vectorToUse =
+              visualizationMode === "crunched"
+                ? samplingVector.samplingVector
+                : samplingVector.rawSamplingVector;
+            const intensity = vectorToUse[i] * 0.7;
             ctx.fillStyle = `rgba(255, 255, 255, ${intensity})`;
             ctx.beginPath();
             ctx.arc(x, y, config.samplePointRadius, 0, TAU);

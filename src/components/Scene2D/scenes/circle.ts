@@ -5,7 +5,7 @@ export const circleScene = createScene2D(
   ({ ctx, width, height }) => {
     const x = width / 2;
     const y = height / 2;
-    const radius = height / 3;
+    const radius = height / 3.1;
 
     ctx.beginPath();
     ctx.rect(0, 0, width, height);

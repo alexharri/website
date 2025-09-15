@@ -2,7 +2,7 @@ import { createScene2D } from "../createScene2D";
 
 export default createScene2D(
   ({ ctx, width, height, variables }) => {
-    const x = width / 2 + height * 0.8 + variables.x * height * 0.5 + 2;
+    const x = width / 2 + height * 1 + variables.x * height * 0.4;
     const y = height / 2;
     const radius = height * 1;
 

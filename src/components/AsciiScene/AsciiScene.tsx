@@ -12,6 +12,13 @@ import { DebugVizOptions, SamplingPointVisualizationMode } from "../AsciiRendere
 import { NumberVariable } from "../variables";
 import { VariableValues, VariableSpec, VariableDict } from "../../types/variables";
 import { useSceneHeight } from "../../utils/hooks/useSceneHeight";
+import { CharacterSamplingData } from "../AsciiRenderer/ascii/generateAsciiChars";
+import { AsciiRenderConfig } from "../AsciiRenderer/renderConfig";
+import { useMonospaceCharacterWidthEm } from "../../utils/hooks/useMonospaceCharacterWidthEm";
+import { cssVariables } from "../../utils/cssVariables";
+import { AsciiDebugVizCanvas } from "../AsciiRenderer/asciiDebugViz";
+import { SCENE_BASELINE_WIDTH } from "../../constants";
+import { useSamplingDataCollection } from "../../utils/hooks/useSamplingDataCollection";
 
 type ViewModeKey = "ascii" | "split" | "transparent" | "canvas";
 
@@ -45,7 +52,6 @@ export const AsciiScene: React.FC<AsciiSceneProps> = (props) => {
     children,
     alphabet: initialAlphabet = "default",
     height: targetHeight,
-    minWidth,
     showControls = true,
     fontSize: targetFontSize = 14,
     showSamplingCircles = "none",
@@ -60,6 +66,11 @@ export const AsciiScene: React.FC<AsciiSceneProps> = (props) => {
     columnWidth,
     width: targetWidth = 1080,
   } = props;
+  let { minWidth } = props;
+
+  if (minWidth == null && targetWidth < SCENE_BASELINE_WIDTH) {
+    minWidth = targetWidth;
+  }
 
   const VIEW_MODE_MAP: Record<ViewModeKey, { value: ViewMode; label: string }> = {
     ascii: { value: "left", label: pixelate ? "Pixels" : "ASCII" },
@@ -92,13 +103,18 @@ export const AsciiScene: React.FC<AsciiSceneProps> = (props) => {
   }, [columnWidth, targetFontSize, metadata, cellScale]);
 
   const orbitControlsTargetRef = useRef<HTMLDivElement>(null);
-  const breakpoint = useMemo(() => targetWidth + 80, [targetWidth]);
+  const breakpoint = useMemo(() => targetWidth + cssVariables.contentPadding * 2, [targetWidth]);
   const AsciiSceneStyles = useMemo(
     () => createAsciiSceneStyles(targetWidth, breakpoint),
     [targetWidth, breakpoint],
   );
   const s = useStyles(AsciiSceneStyles);
   const onFrameRef = useRef<null | ((buffer: Uint8Array, options?: OnFrameOptions) => void)>(null);
+  const samplingDataRef = useRef<CharacterSamplingData[][]>([]);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const debugCanvasRef = useRef<HTMLCanvasElement>(null);
+  const characterWidth = useMonospaceCharacterWidthEm(cssVariables.fontMonospace);
+
   const [viewMode, setViewMode] = useState<ViewMode>(availableViewModes[0]?.value || "left");
   const [splitT, setSplitT] = useState(0.5);
   const [characterWidthMultiplier, setCharacterWidthMultiplier] = useState(
@@ -133,7 +149,7 @@ export const AsciiScene: React.FC<AsciiSceneProps> = (props) => {
   let width: number;
   if (viewportWidth == null) {
     width = targetWidth;
-  } else if (viewportWidth < breakpoint) {
+  } else if (viewportWidth <= breakpoint) {
     width = viewportWidth;
   } else {
     width = targetWidth;
@@ -143,10 +159,39 @@ export const AsciiScene: React.FC<AsciiSceneProps> = (props) => {
 
   const fontSize = targetFontSize * scale * cellScale;
 
-  const onFrame = useCallback(
-    (buffer: Uint8Array, options?: { flipY?: boolean }) => onFrameRef.current?.(buffer, options),
-    [],
-  );
+  const config = useMemo(() => {
+    if (characterWidth == null) return null; // wait for fonts to load
+    return new AsciiRenderConfig(
+      width,
+      height,
+      fontSize,
+      characterWidth,
+      alphabet,
+      sampleQuality,
+      characterWidthMultiplier * widthMultiplierScale,
+      characterHeightMultiplier * heightMultiplierScale,
+      offsetAlign,
+    );
+  }, [
+    width,
+    height,
+    fontSize,
+    characterWidth,
+    alphabet,
+    sampleQuality,
+    characterWidthMultiplier,
+    widthMultiplierScale,
+    characterHeightMultiplier,
+    heightMultiplierScale,
+    offsetAlign,
+  ]);
+
+  const onFrame = useSamplingDataCollection({
+    refs: { canvasRef, samplingDataRef, debugCanvasRef, onFrameRef },
+    config,
+    debug: { showSamplingPoints, showSamplingCircles, debugVizOptions },
+    lightnessEasingFunction,
+  });
 
   return (
     <>
@@ -168,6 +213,7 @@ export const AsciiScene: React.FC<AsciiSceneProps> = (props) => {
           orbitControlsTargetRef={orbitControlsTargetRef}
           registerSceneVariables={registerSceneVariables}
           variables={variableValues}
+          canvasRef={canvasRef}
         >
           <SplitView
             viewMode={viewMode}
@@ -180,23 +226,18 @@ export const AsciiScene: React.FC<AsciiSceneProps> = (props) => {
             {[
               <AsciiRenderer
                 key="renderer"
-                onFrameRef={onFrameRef}
-                alphabet={alphabet}
-                fontSize={fontSize}
-                characterWidthMultiplier={characterWidthMultiplier * widthMultiplierScale}
-                characterHeightMultiplier={characterHeightMultiplier * heightMultiplierScale}
-                lightnessEasingFunction={lightnessEasingFunction}
+                samplingDataRef={samplingDataRef}
+                config={config}
                 debugVizOptions={debugVizOptions}
                 transparent={viewMode === "transparent"}
                 hideAscii={hideAscii}
                 showSamplingPoints={showSamplingPoints}
-                offsetAlign={offsetAlign}
-                sampleQuality={sampleQuality}
               />,
               children,
             ]}
           </SplitView>
         </CanvasProvider>
+        <AsciiDebugVizCanvas onCanvasRef={debugCanvasRef} />
         {viewModes.length > 1 && (
           <div className={s("viewModeControl")}>
             <ViewModeControl

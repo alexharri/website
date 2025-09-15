@@ -1,12 +1,8 @@
-import { useEffect, useMemo, useRef } from "react";
+import { useEffect, useMemo, useRef, useCallback } from "react";
 import { AsciiRendererStyles } from "./AsciiRenderer.styles";
-import { generateAsciiChars } from "./ascii/generateAsciiChars";
-import { AlphabetName, getAlphabetMetadata } from "./alphabets/AlphabetManager";
+import { samplingDataToAscii, CharacterSamplingData } from "./ascii/generateAsciiChars";
 import { useStyles } from "../../utils/styles";
-import { useSceneContext } from "../../contexts/CanvasContext";
-import { colors, cssVariables } from "../../utils/cssVariables";
-import { useMonospaceCharacterWidthEm } from "../../utils/hooks/useMonospaceCharacterWidthEm";
-import { AsciiDebugVizCanvas, renderAsciiDebugViz } from "./asciiDebugViz";
+import { colors } from "../../utils/cssVariables";
 import { PixelateCanvas, renderPixelate } from "./PixelateCanvas";
 import { CharacterMatcher } from "./ascii/CharacterMatcher";
 import { EFFECTS } from "./ascii/effects";
@@ -15,133 +11,70 @@ import { DebugVizOptions } from "./types";
 import { hexToRgbaString } from "../../utils/color";
 
 interface Props {
-  alphabet: AlphabetName;
-  onFrameRef: React.MutableRefObject<
-    null | ((buffer: Uint8Array, options?: { flipY?: boolean }) => void)
-  >;
-  fontSize: number;
-  characterWidthMultiplier: number;
-  characterHeightMultiplier: number;
-  lightnessEasingFunction?: string;
+  samplingDataRef: React.MutableRefObject<CharacterSamplingData[][]>;
+  config: AsciiRenderConfig | null;
   transparent: boolean;
   hideAscii: boolean;
   showSamplingPoints: boolean;
-  offsetAlign: "left" | "center";
   debugVizOptions: DebugVizOptions;
-  sampleQuality: number;
 }
 
 export function AsciiRenderer(props: Props) {
-  const {
-    alphabet,
-    fontSize,
-    characterHeightMultiplier,
-    characterWidthMultiplier,
-    debugVizOptions,
-    transparent,
-    hideAscii,
-    showSamplingPoints,
-    offsetAlign,
-    sampleQuality,
-  } = props;
+  const { debugVizOptions, transparent, hideAscii, showSamplingPoints, samplingDataRef, config } =
+    props;
 
   const containerRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
   const s = useStyles(AsciiRendererStyles);
   const preRef = useRef<HTMLPreElement>(null);
-  const samplingCanvasRef = useRef<HTMLCanvasElement>(null);
   const pixelateCanvasRef = useRef<HTMLCanvasElement>(null);
-  const metadata = useMemo(() => getAlphabetMetadata(alphabet), [alphabet]);
-  const characterWidth = useMonospaceCharacterWidthEm(cssVariables.fontMonospace);
-
-  const context = useSceneContext();
-  if (!context) {
-    throw new Error(`AsciiRenderer requires a CanvasContext`);
-  }
 
   const characterMatcher = useMemo(() => {
+    if (!config) return null;
     const matcher = new CharacterMatcher();
-    matcher.loadAlphabet(alphabet, [EFFECTS.componentWiseGlobalNormalization]);
+    matcher.loadAlphabet(config.alphabet, [EFFECTS.componentWiseGlobalNormalization]);
     return matcher;
-  }, [alphabet]);
+  }, [config?.alphabet]);
 
   useEffect(() => {
-    props.onFrameRef.current = function onFrame(
-      pixelBuffer: Uint8Array,
-      options: { flipY?: boolean } = {},
-    ): void {
-      const flipY = options.flipY ?? false;
-      const container = containerRef.current;
-      const content = contentRef.current;
-      const preEl = preRef.current;
-      if (!container || characterWidth == null) return;
+    const content = contentRef.current;
+    if (!config || !content) return;
+    content.style.transform = `translate(${config.offsetX + config.asciiXOffset}px, ${
+      config.offsetY
+    }px)`;
+  }, [config]);
 
-      const canvas = context.canvasRef.current;
-      if (!canvas) return;
+  const updateAsciiText = useCallback(() => {
+    const preEl = preRef.current;
+    const samplingData = samplingDataRef.current;
 
-      const containerRect = container?.getBoundingClientRect();
-      if (!containerRect) return;
+    if (!config || !characterMatcher || samplingData.length === 0) return;
 
-      const pixelBufferScale = canvas.width / containerRect.width;
+    if (!hideAscii && preEl) {
+      const ascii = samplingDataToAscii(characterMatcher, samplingData, config);
+      preEl.textContent = ascii;
+    }
 
-      const config = new AsciiRenderConfig(
-        containerRect.width,
-        containerRect.height,
-        fontSize,
-        characterWidth,
-        alphabet,
-        sampleQuality,
-        characterWidthMultiplier,
-        characterHeightMultiplier,
-        offsetAlign,
-      );
+    if (pixelateCanvasRef.current && debugVizOptions.pixelate) {
+      renderPixelate(pixelateCanvasRef.current, samplingData, config);
+    }
+  }, [characterMatcher, debugVizOptions.pixelate, config, hideAscii]);
 
-      const result = generateAsciiChars(
-        characterMatcher,
-        pixelBuffer,
-        pixelBufferScale,
-        config,
-        debugVizOptions.showSamplingPoints,
-        flipY,
-        debugVizOptions.showSamplingCircles,
-        props.lightnessEasingFunction,
-      );
+  useEffect(() => {
+    let mounted = true;
 
-      if (preEl) {
-        preEl.textContent = result.ascii;
-        preEl.style.letterSpacing = config.letterSpacingEm + "em";
-        preEl.style.lineHeight = config.lineHeight.toString();
-        preEl.style.fontSize = config.fontSize + "px";
-      }
-      if (content) {
-        content.style.transform = `translate(${config.offsetX + config.asciiXOffset}px, ${
-          config.offsetY
-        }px)`;
-      }
-
-      if (samplingCanvasRef.current) {
-        renderAsciiDebugViz(
-          samplingCanvasRef.current,
-          result.samplingData,
-          config,
-          debugVizOptions,
-        );
-      }
-
-      if (pixelateCanvasRef.current && debugVizOptions.pixelate) {
-        renderPixelate(pixelateCanvasRef.current, result.samplingData, config);
-      }
+    const tick = () => {
+      if (!mounted) return;
+      updateAsciiText();
+      requestAnimationFrame(tick);
     };
-  }, [
-    alphabet,
-    metadata,
-    debugVizOptions,
-    fontSize,
-    characterWidthMultiplier,
-    characterHeightMultiplier,
-    characterWidth,
-    hideAscii,
-  ]);
+
+    tick();
+
+    return () => {
+      mounted = false;
+    };
+  }, [updateAsciiText]);
 
   let background: string;
   if (showSamplingPoints) {
@@ -166,11 +99,15 @@ export function AsciiRenderer(props: Props) {
           <pre
             ref={preRef}
             className={s("pre")}
-            style={{ color: transparent ? colors.text : colors.blue400 }}
+            style={{
+              color: transparent ? colors.text : colors.blue400,
+              letterSpacing: config ? config.letterSpacingEm + "em" : undefined,
+              lineHeight: config ? config.lineHeight.toString() : undefined,
+              fontSize: config ? config.fontSize + "px" : undefined,
+            }}
           />
         </div>
       )}
-      <AsciiDebugVizCanvas onCanvasRef={samplingCanvasRef} />
       {debugVizOptions.pixelate && (
         <PixelateCanvas onCanvasRef={pixelateCanvasRef} transparent={transparent} />
       )}

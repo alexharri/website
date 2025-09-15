@@ -73,15 +73,15 @@ Since every character in a monospace font is equally wide and tall, we can split
 
 Let's start with a simple 2D canvas:
 
-<AsciiScene width={600} height={360} viewMode="canvas">
+<AsciiScene width={360} height={360} viewMode="canvas">
   <Scene2D scene="circle" />
 </AsciiScene>
 
 Monospace characters are typically taller than they are wide. For example, the monospace font in this blog is Fira Code, which has a width-to-height ratio of $0.6$.
 
-The canvas above is $600 \times 360$. With a row height of $24$, we get $15$ rows. I'll also pick a column width of 20, which gives us 30 columns. Together, those give us a $30 \times 15$ grid:
+The canvas above is $360 \times 360$. With a row height of $24$, we get $15$ rows. I'll also pick a column width of 20, which gives us 18 columns. Together, those give us a $18 \times 15$ grid:
 
-<AsciiScene width={600} height={360} fontSize={20} rowHeight={24} columnWidth={20} viewMode="transparent" hideAscii showGrid offsetAlign="left">
+<AsciiScene width={360} height={360} fontSize={20} rowHeight={24} columnWidth={20} viewMode="transparent" hideAscii showGrid>
   <Scene2D scene="circle" />
 </AsciiScene>
 
@@ -89,7 +89,7 @@ Our task is now to pick which character to place in each column. The simplest ap
 
 We can get lightness values for each cell by sampling the lightness of the pixel at the cell's center:
 
-<AsciiScene width={600} height={360} fontSize={20} rowHeight={24} columnWidth={20} viewMode="transparent" hideAscii showGrid offsetAlign="left" sampleQuality={1} showSamplingPoints alphabet="pixel-short">
+<AsciiScene width={360} height={360} fontSize={20} rowHeight={24} columnWidth={20} viewMode="canvas" hideAscii showGrid sampleQuality={1} showSamplingPoints alphabet="pixel-short">
   <Scene2D scene="circle" />
 </AsciiScene>
 
@@ -141,7 +141,7 @@ function getCharFromLightness(lightness: number) {
 
 This results in the following:
 
-<AsciiScene width={600} height={360} fontSize={20} rowHeight={24} columnWidth={20} viewMode="ascii" offsetAlign="left" sampleQuality={1} alphabet="pixel-short">
+<AsciiScene width={360} height={360} fontSize={20} rowHeight={24} columnWidth={20} viewMode="ascii" sampleQuality={1} alphabet="pixel-short">
   <Scene2D scene="circle" />
 </AsciiScene>
 
@@ -164,25 +164,25 @@ The simplest and fastest method of sampling is [nearest-neighbor interpolation][
 
 Let's step through nearest-neighbor sampling for this rotating square example:
 
-<AsciiScene width={720} minWidth={400} height={360} viewMode="canvas">
+<AsciiScene width={600} minWidth={400} height={360} viewMode="canvas">
   <Scene2D scene="rotating_square" />
 </AsciiScene>
 
 We'll start by splitting the canvas into a grid, with each cell being $24 \times 24$ pixels. The grid represents the smaller (downsampled) image:
 
-<AsciiScene width={720} minWidth={400} height={360} fontSize={20} rowHeight={24} columnWidth={24} viewMode="transparent" hideAscii showGrid offsetAlign="left" sampleQuality={1} alphabet="pixel-short">
+<AsciiScene width={600} minWidth={400} height={360} fontSize={20} rowHeight={24} columnWidth={24} viewMode="transparent" hideAscii showGrid offsetAlign="left" sampleQuality={1} alphabet="pixel-short">
   <Scene2D scene="rotating_square" />
 </AsciiScene>
 
 We take a single sample at the center of each cell:
 
-<AsciiScene width={720} minWidth={400} height={360} fontSize={20} rowHeight={24} columnWidth={24} viewMode="transparent" hideAscii showGrid showSamplingPoints offsetAlign="left" sampleQuality={1} alphabet="pixel-short">
+<AsciiScene width={600} minWidth={400} height={360} fontSize={20} rowHeight={24} columnWidth={24} viewMode="transparent" hideAscii showGrid showSamplingPoints offsetAlign="left" sampleQuality={1} alphabet="pixel-short">
   <Scene2D scene="rotating_square" />
 </AsciiScene>
 
 If we color each cell of our grid according to the sampled value, we get the following image:
 
-<AsciiScene width={720} minWidth={400} height={360} fontSize={20} rowHeight={24} columnWidth={24} viewMode="ascii" hideAscii pixelate offsetAlign="left" sampleQuality={1} alphabet="pixel-short">
+<AsciiScene width={600} minWidth={400} height={360} fontSize={20} rowHeight={24} columnWidth={24} viewMode="ascii" hideAscii pixelate offsetAlign="left" sampleQuality={1} alphabet="pixel-short">
   <Scene2D scene="rotating_square" />
 </AsciiScene>
 
@@ -192,19 +192,19 @@ Notice the rough, jagged looking edges when the square is at an angle. Those are
 
 As we covered before, we can map the sampled lightness values to ASCII characters to create an ASCII rendering.
 
-<AsciiScene width={720} minWidth={400} height={360} fontSize={20} rowHeight={24} columnWidth={24} viewMode="ascii" offsetAlign="left" sampleQuality={1} alphabet="pixel-short">
+<AsciiScene width={600} minWidth={400} height={360} fontSize={20} rowHeight={24} columnWidth={24} viewMode="ascii" offsetAlign="left" sampleQuality={1} alphabet="pixel-short">
   <Scene2D scene="rotating_square" />
 </AsciiScene>
 
 This is what was happening in our circle example above:
 
-<AsciiScene width={600} height={360} fontSize={20} rowHeight={24} columnWidth={20} viewMode="ascii" offsetAlign="left" sampleQuality={1} alphabet="pixel-short">
+<AsciiScene width={360} height={360} fontSize={20} rowHeight={24} columnWidth={20} viewMode="ascii" sampleQuality={1} alphabet="pixel-short">
   <Scene2D scene="circle" />
 </AsciiScene>
 
 When we only sample a single pixel value, as is done in nearest-neighbor interpolation, the sampled pixel will either be inside of the circle or not, causing jaggies. Here's a zoomed in example where you can move the circle to illustrate:
 
-<AsciiScene width={600} minWidth={200} height={360} fontSize={60} rowHeight={72} columnWidth={60} viewMode="transparent" showGrid offsetAlign="left" sampleQuality={1} showSamplingPoints alphabet="pixel-short">
+<AsciiScene width={600} minWidth={400} height={360} fontSize={60} rowHeight={72} columnWidth={60} viewMode="transparent" showGrid offsetAlign="left" sampleQuality={1} showSamplingPoints alphabet="pixel-short">
   <Scene2D scene="circle_zoomed" />
 </AsciiScene>
 

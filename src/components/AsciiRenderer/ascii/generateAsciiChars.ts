@@ -4,7 +4,6 @@ import { getAlphabetMetadata } from "../alphabets/AlphabetManager";
 
 import { AsciiRenderConfig } from "../renderConfig";
 import { clamp } from "../../../math/math";
-import { SamplingPointVisualizationMode } from "../types";
 
 const CONTRAST_EXPONENT_GLOBAL = 3;
 const CONTRAST_EXPONENT_LOCAL = 7;
@@ -44,7 +43,7 @@ function readPixelFromBuffer(
   tx = clamp(tx, 0, 1);
   ty = clamp(ty, 0, 1);
   const pixelX = Math.floor(tx * canvasWidth * pixelBufferScale);
-  const pixelY = Math.floor((flipY ? ty : (1 - ty)) * canvasHeight * pixelBufferScale);
+  const pixelY = Math.floor((flipY ? ty : 1 - ty) * canvasHeight * pixelBufferScale);
   const index = (pixelY * (canvasWidth * pixelBufferScale) + pixelX) * 4;
 
   if (index >= 0 && index < pixelBuffer.length - 3) {
@@ -146,6 +145,7 @@ function crunchSamplingVectorDirectional(
 
 export interface CharacterSamplingData {
   samplingVector: number[];
+  rawSamplingVector: number[];
   externalSamplingVector: number[];
   samplingVectorSubsamples: number[][];
 }
@@ -156,16 +156,14 @@ export interface GenerationResult {
   samplingData: CharacterSamplingData[][];
 }
 
-export function generateAsciiChars(
-  matcher: CharacterMatcher,
+export function generateSamplingData(
   pixelBuffer: Uint8Array,
   pixelBufferScale: number,
   config: AsciiRenderConfig,
   collectSubsamples: boolean,
   flipY: boolean,
-  visualizationMode?: SamplingPointVisualizationMode,
   lightnessEasingFunction?: string,
-): GenerationResult {
+): CharacterSamplingData[][] {
   const metadata = getAlphabetMetadata(config.alphabet);
   const samplingConfig = metadata.samplingConfig;
 
@@ -190,7 +188,16 @@ export function generateAsciiChars(
       const [xOff, yOff] = config.samplingCircleOffset(samplingCircleCenterPoint);
       const x = sampleRectLeft + xOff;
       const y = sampleRectTop + yOff;
-      const result = sampleCircularRegion(pixelBuffer, config, x, y, samplingPoints, pixelBufferScale, collectSubsamples, flipY);
+      const result = sampleCircularRegion(
+        pixelBuffer,
+        config,
+        x,
+        y,
+        samplingPoints,
+        pixelBufferScale,
+        collectSubsamples,
+        flipY,
+      );
       samplingVector.push(result.averageLightness);
       subsamples.push(result.individualValues);
     });
@@ -198,7 +205,6 @@ export function generateAsciiChars(
     return { samplingVector, subsamples };
   }
 
-  const chars: string[] = [];
   const samplingData: CharacterSamplingData[][] = [];
 
   for (let row = 0; row < config.rows; row++) {
@@ -207,21 +213,31 @@ export function generateAsciiChars(
 
     for (let col = 0; col < config.cols; col++) {
       const shouldCollectSubsamples = collectSubsamples;
-      const rawSamplingResult = createSamplingVector(col, row, metadata.samplingConfig.points, shouldCollectSubsamples, flipY);
+      const rawSamplingResult = createSamplingVector(
+        col,
+        row,
+        metadata.samplingConfig.points,
+        shouldCollectSubsamples,
+        flipY,
+      );
       const rawSamplingVector = rawSamplingResult.samplingVector;
       const samplingVectorSubsamples = rawSamplingResult.subsamples;
 
       let samplingVector = [...rawSamplingVector];
 
-      // Apply lightness easing function if specified
       if (easingLookupTable) {
         samplingVector = samplingVector.map((value) => applyEasingLookup(value, easingLookupTable));
-        // samplingVector = samplingVector.map((value) => clamp(value - 0.01, 0, 1));
       }
 
       let externalSamplingVector: number[] = [];
       if ("externalPoints" in samplingConfig) {
-        const externalResult = createSamplingVector(col, row, samplingConfig.externalPoints, false, flipY);
+        const externalResult = createSamplingVector(
+          col,
+          row,
+          samplingConfig.externalPoints,
+          false,
+          flipY,
+        );
         externalSamplingVector = externalResult.samplingVector;
         samplingVector = crunchSamplingVectorDirectional(
           samplingVector,
@@ -231,23 +247,38 @@ export function generateAsciiChars(
       }
       samplingVector = crunchSamplingVector(samplingVector, CONTRAST_EXPONENT_GLOBAL);
 
-      let selectedChar = matcher.findBestCharacter(samplingVector);
-
-      const vectorToStore = visualizationMode === "crunched" ? samplingVector : rawSamplingVector;
       samplingDataRow.push({
-        samplingVector: vectorToStore,
+        samplingVector,
+        rawSamplingVector,
         externalSamplingVector,
-        samplingVectorSubsamples
+        samplingVectorSubsamples,
       });
+    }
+  }
 
+  return samplingData;
+}
+
+export function samplingDataToAscii(
+  matcher: CharacterMatcher,
+  samplingData: CharacterSamplingData[][],
+  config: AsciiRenderConfig,
+): string {
+  const chars: string[] = [];
+
+  for (let row = 0; row < config.rows; row++) {
+    for (let col = 0; col < config.cols; col++) {
+      const cellSamplingData = samplingData[row]?.[col];
+      if (!cellSamplingData) {
+        chars.push(" ");
+        continue;
+      }
+
+      const selectedChar = matcher.findBestCharacter(cellSamplingData.samplingVector);
       chars.push(selectedChar === "&nbsp;" ? " " : selectedChar);
     }
     chars.push("\n");
   }
 
-  const ascii = chars.join("");
-  return {
-    ascii,
-    samplingData,
-  };
+  return chars.join("");
 }
