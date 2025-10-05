@@ -6,6 +6,7 @@ import { AsciiRenderConfig } from "../renderConfig";
 import { clamp } from "../../../math/math";
 
 const CONTRAST_EXPONENT_GLOBAL = 3;
+const CONTRAST_EXPONENT_LOCAL = 7;
 
 const lightnessEasingFunctions = {
   default: Bezier(0.38, 0.01, 0.67, 1),
@@ -113,6 +114,64 @@ function sampleGridCell(
   return { averageLightness, individualValues };
 }
 
+function sampleExternalPoints(
+  pixelBuffer: Uint8Array,
+  config: AsciiRenderConfig,
+  cellX: number,
+  cellY: number,
+  cellWidth: number,
+  cellHeight: number,
+  externalOffsets: Array<{ x: number; y: number }>,
+  samplingPoints: { x: number; y: number }[],
+  scale: number,
+  flipY: boolean,
+): { averageLightness: number; individualValues: number[] } {
+  let totalLightness = 0;
+  let sampleCount = 0;
+  const individualValues: number[] = [];
+
+  const cellCenterX = cellX + cellWidth / 2;
+  const cellCenterY = cellY + cellHeight / 2;
+
+  // Sample external points for this cell
+  for (const externalOffset of externalOffsets) {
+    // Calculate external position relative to cell
+    const externalX = cellCenterX + externalOffset.x * cellWidth;
+    const externalY = cellCenterY + externalOffset.y * cellHeight;
+
+    // Sample points around each external position
+    const maxRadius = Math.min(cellWidth, cellHeight) / 2;
+
+    for (const point of samplingPoints) {
+      const scaledX = (point.x / config.samplePointRadius) * maxRadius;
+      const scaledY = (point.y / config.samplePointRadius) * maxRadius;
+
+      const sampleX = externalX + scaledX;
+      const sampleY = externalY + scaledY;
+
+      const tx = sampleX / config.canvasWidth;
+      const ty = sampleY / config.canvasHeight;
+
+      const hexColor = readPixelFromBuffer(
+        pixelBuffer,
+        config.canvasWidth,
+        config.canvasHeight,
+        tx,
+        ty,
+        scale,
+        flipY,
+      );
+      const lightnessValue = lightness(hexColor);
+      totalLightness += lightnessValue;
+      sampleCount++;
+      individualValues.push(lightnessValue);
+    }
+  }
+
+  const averageLightness = sampleCount > 0 ? totalLightness / sampleCount : 0;
+  return { averageLightness, individualValues };
+}
+
 function crunchSamplingVector(vector: number[], exponent: number): number[] {
   const maxValue = Math.max(...vector);
 
@@ -129,6 +188,24 @@ function crunchSamplingVector(vector: number[], exponent: number): number[] {
   });
 }
 
+function crunchSamplingVectorDirectional(
+  vector: number[],
+  contextValues: number[],
+  exponent: number,
+): number[] {
+  if (vector.length !== contextValues.length) {
+    throw new Error("Vector and context values must have the same length");
+  }
+
+  return vector.map((value, index) => {
+    const contextValue = contextValues[index];
+    if (contextValue <= value) return value;
+
+    const normalized = value / contextValue;
+    const enhanced = Math.pow(normalized, exponent);
+    return enhanced * contextValue;
+  });
+}
 
 export interface CharacterSamplingData {
   samplingVector: number[];
@@ -162,21 +239,24 @@ export function generateSamplingData(
   function createSamplingVector(
     col: number,
     row: number,
-    gridCells: Array<{ row: number; col: number }>,
+    gridCells: Array<{ row: number; col: number; externalOffsets?: Array<{ x: number; y: number }> }>,
     gridRows: number,
     gridCols: number,
     collectSubsamples: boolean,
     flipY: boolean,
-  ): { samplingVector: number[]; subsamples: number[][] } {
+  ): { rawSamplingVector: number[]; externalSamplingVector: number[]; subsamples: number[][] } {
     const [sampleRectLeft, sampleRectTop] = config.sampleRectPosition(col, row);
-    const samplingVector: number[] = [];
+    const rawSamplingVector: number[] = [];
+    const externalSamplingVector: number[] = [];
     const subsamples: number[][] = [];
 
     for (const cell of gridCells) {
       const [xOff, yOff, cellWidth, cellHeight] = config.samplingGridCellOffset(cell.row, cell.col, gridRows, gridCols);
       const cellX = sampleRectLeft + xOff;
       const cellY = sampleRectTop + yOff;
-      const result = sampleGridCell(
+
+      // Sample internal points
+      const internalResult = sampleGridCell(
         pixelBuffer,
         config,
         cellX,
@@ -188,11 +268,30 @@ export function generateSamplingData(
         collectSubsamples,
         flipY,
       );
-      samplingVector.push(result.averageLightness);
-      subsamples.push(result.individualValues);
+      rawSamplingVector.push(internalResult.averageLightness);
+      subsamples.push(internalResult.individualValues);
+
+      // Sample external points if they exist
+      let externalLightness = 0;
+      if (cell.externalOffsets && cell.externalOffsets.length > 0) {
+        const externalResult = sampleExternalPoints(
+          pixelBuffer,
+          config,
+          cellX,
+          cellY,
+          cellWidth,
+          cellHeight,
+          cell.externalOffsets,
+          samplingPoints,
+          pixelBufferScale,
+          flipY,
+        );
+        externalLightness = externalResult.averageLightness;
+      }
+      externalSamplingVector.push(externalLightness);
     }
 
-    return { samplingVector, subsamples };
+    return { rawSamplingVector, externalSamplingVector, subsamples };
   }
 
   const samplingData: CharacterSamplingData[][] = [];
@@ -215,7 +314,7 @@ export function generateSamplingData(
         return cells;
       })();
 
-      const rawSamplingResult = createSamplingVector(
+      const samplingResult = createSamplingVector(
         col,
         row,
         gridCells,
@@ -224,8 +323,9 @@ export function generateSamplingData(
         shouldCollectSubsamples,
         flipY,
       );
-      const rawSamplingVector = rawSamplingResult.samplingVector;
-      const samplingVectorSubsamples = rawSamplingResult.subsamples;
+      const rawSamplingVector = samplingResult.rawSamplingVector;
+      const externalSamplingVector = samplingResult.externalSamplingVector;
+      const samplingVectorSubsamples = samplingResult.subsamples;
 
       let samplingVector = [...rawSamplingVector];
 
@@ -233,8 +333,16 @@ export function generateSamplingData(
         samplingVector = samplingVector.map((value) => applyEasingLookup(value, easingLookupTable));
       }
 
-      let externalSamplingVector: number[] = [];
-      // Grid-based sampling doesn't use external points, so we skip this step
+      // Apply directional contrast enhancement if external points exist
+      const hasExternalSampling = externalSamplingVector.some(val => val > 0);
+      if (hasExternalSampling) {
+        samplingVector = crunchSamplingVectorDirectional(
+          samplingVector,
+          externalSamplingVector,
+          CONTRAST_EXPONENT_LOCAL,
+        );
+      }
+
       samplingVector = crunchSamplingVector(samplingVector, CONTRAST_EXPONENT_GLOBAL);
 
       samplingDataRow.push({
