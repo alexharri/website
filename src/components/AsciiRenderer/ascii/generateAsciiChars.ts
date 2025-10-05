@@ -6,6 +6,7 @@ import { AsciiRenderConfig } from "../renderConfig";
 import { clamp } from "../../../math/math";
 
 const CONTRAST_EXPONENT_GLOBAL = 3;
+const CONTRAST_EXPONENT_LOCAL = 7;
 
 const lightnessEasingFunctions = {
   default: Bezier(0.38, 0.01, 0.67, 1),
@@ -57,13 +58,11 @@ function lightness(hexColor: number): number {
   return (0.2126 * r + 0.7152 * g + 0.0722 * b) / 255;
 }
 
-function sampleGridCell(
+function sampleCircularRegion(
   pixelBuffer: Uint8Array,
   config: AsciiRenderConfig,
-  cellX: number,
-  cellY: number,
-  cellWidth: number,
-  cellHeight: number,
+  x: number,
+  y: number,
   samplingPoints: { x: number; y: number }[],
   scale: number,
   collectSubsamples: boolean,
@@ -73,20 +72,11 @@ function sampleGridCell(
   let sampleCount = 0;
   const individualValues: number[] = [];
 
-  // Sample points throughout the grid cell
-  const cellCenterX = cellX + cellWidth / 2;
-  const cellCenterY = cellY + cellHeight / 2;
-
-  // Scale sampling points to fit within the cell dimensions
-  const maxRadius = Math.min(cellWidth, cellHeight) / 2;
+  // Always sample center point
 
   for (const point of samplingPoints) {
-    // Scale the point offset to fit within the cell
-    const scaledX = (point.x / config.samplePointRadius) * maxRadius;
-    const scaledY = (point.y / config.samplePointRadius) * maxRadius;
-
-    const sampleX = cellCenterX + scaledX;
-    const sampleY = cellCenterY + scaledY;
+    const sampleX = x + point.x;
+    const sampleY = y + point.y;
 
     const tx = sampleX / config.canvasWidth;
     const ty = sampleY / config.canvasHeight;
@@ -129,6 +119,25 @@ function crunchSamplingVector(vector: number[], exponent: number): number[] {
   });
 }
 
+function crunchSamplingVectorDirectional(
+  vector: number[],
+  contextValues: number[],
+  exponent: number,
+): number[] {
+  if (vector.length !== contextValues.length) {
+    throw new Error("Vector and context values must have the same length");
+  }
+
+  // const maxExternalValue = Math.max(...contextValues);
+  return vector.map((value, index) => {
+    const contextValue = contextValues[index];
+    if (contextValue <= value) return value;
+
+    const normalized = value / contextValue;
+    const enhanced = Math.pow(normalized, exponent);
+    return enhanced * contextValue;
+  });
+}
 
 export interface CharacterSamplingData {
   samplingVector: number[];
@@ -152,19 +161,18 @@ export function generateSamplingData(
   lightnessEasingFunction?: string,
 ): CharacterSamplingData[][] {
   const metadata = getAlphabetMetadata(config.alphabet);
+  const samplingConfig = metadata.samplingConfig;
 
   const easingLookupTable =
     lightnessEasingFunction && lightnessEasingFunction in easingLookupTables
       ? easingLookupTables[lightnessEasingFunction]
       : null;
 
-  const samplingPoints = config.generateGridSamplingPoints();
+  const samplingPoints = config.generateCircleSamplingPoints();
   function createSamplingVector(
     col: number,
     row: number,
-    gridCells: Array<{ row: number; col: number }>,
-    gridRows: number,
-    gridCols: number,
+    samplingCircleCenterPoints: { x: number; y: number }[],
     collectSubsamples: boolean,
     flipY: boolean,
   ): { samplingVector: number[]; subsamples: number[][] } {
@@ -172,17 +180,15 @@ export function generateSamplingData(
     const samplingVector: number[] = [];
     const subsamples: number[][] = [];
 
-    for (const cell of gridCells) {
-      const [xOff, yOff, cellWidth, cellHeight] = config.samplingGridCellOffset(cell.row, cell.col, gridRows, gridCols);
-      const cellX = sampleRectLeft + xOff;
-      const cellY = sampleRectTop + yOff;
-      const result = sampleGridCell(
+    samplingCircleCenterPoints.forEach((samplingCircleCenterPoint) => {
+      const [xOff, yOff] = config.samplingCircleOffset(samplingCircleCenterPoint);
+      const x = sampleRectLeft + xOff;
+      const y = sampleRectTop + yOff;
+      const result = sampleCircularRegion(
         pixelBuffer,
         config,
-        cellX,
-        cellY,
-        cellWidth,
-        cellHeight,
+        x,
+        y,
         samplingPoints,
         pixelBufferScale,
         collectSubsamples,
@@ -190,7 +196,7 @@ export function generateSamplingData(
       );
       samplingVector.push(result.averageLightness);
       subsamples.push(result.individualValues);
-    }
+    });
 
     return { samplingVector, subsamples };
   }
@@ -203,24 +209,10 @@ export function generateSamplingData(
 
     for (let col = 0; col < config.cols; col++) {
       const shouldCollectSubsamples = collectSubsamples;
-
-      // Generate grid cells if not provided
-      const gridCells = metadata.samplingConfig.gridCells || (() => {
-        const cells = [];
-        for (let row = 0; row < metadata.samplingConfig.gridRows; row++) {
-          for (let col = 0; col < metadata.samplingConfig.gridCols; col++) {
-            cells.push({ row, col });
-          }
-        }
-        return cells;
-      })();
-
       const rawSamplingResult = createSamplingVector(
         col,
         row,
-        gridCells,
-        metadata.samplingConfig.gridRows,
-        metadata.samplingConfig.gridCols,
+        metadata.samplingConfig.points,
         shouldCollectSubsamples,
         flipY,
       );
@@ -234,7 +226,21 @@ export function generateSamplingData(
       }
 
       let externalSamplingVector: number[] = [];
-      // Grid-based sampling doesn't use external points, so we skip this step
+      if ("externalPoints" in samplingConfig) {
+        const externalResult = createSamplingVector(
+          col,
+          row,
+          samplingConfig.externalPoints,
+          false,
+          flipY,
+        );
+        externalSamplingVector = externalResult.samplingVector;
+        samplingVector = crunchSamplingVectorDirectional(
+          samplingVector,
+          externalSamplingVector,
+          CONTRAST_EXPONENT_LOCAL,
+        );
+      }
       samplingVector = crunchSamplingVector(samplingVector, CONTRAST_EXPONENT_GLOBAL);
 
       samplingDataRow.push({

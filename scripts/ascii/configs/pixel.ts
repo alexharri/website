@@ -4,8 +4,8 @@ import { Alphabet } from "../alphabets";
 export const pixelConfig: Config = {
   name: "pixel",
   SAMPLING_CONFIG: {
-    gridRows: 1,
-    gridCols: 1,
+    points: [{ x: 0.5, y: 0.5 }],
+    circleRadius: 20,
   },
   CANVAS_WIDTH: 48,
   CANVAS_HEIGHT: 64,

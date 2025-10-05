@@ -49,7 +49,7 @@ export function renderAsciiDebugViz(
 
   const metadata = getAlphabetMetadata(config.alphabet);
 
-  const gridSamplingPoints = config.generateGridSamplingPoints();
+  const circleSamplingPoints = config.generateCircleSamplingPoints();
 
   const samplingPointRadius = 2.5;
 
@@ -72,69 +72,49 @@ export function renderAsciiDebugViz(
       const [sampleRectLeft, sampleRectTop] = config.sampleRectPosition(col, row);
       if (options.showSamplingCircles || options.showSamplingPoints) {
         const samplingVector = samplingData[row][col];
-
-        // Generate grid cells if not provided
-        const gridCells = metadata.samplingConfig.gridCells || (() => {
-          const cells = [];
-          for (let row = 0; row < metadata.samplingConfig.gridRows; row++) {
-            for (let col = 0; col < metadata.samplingConfig.gridCols; col++) {
-              cells.push({ row, col });
-            }
-          }
-          return cells;
-        })();
-
-        gridCells.forEach((cell, vectorIndex) => {
-          const [xOff, yOff, cellWidth, cellHeight] = config.samplingGridCellOffset(
-            cell.row,
-            cell.col,
-            metadata.samplingConfig.gridRows,
-            metadata.samplingConfig.gridCols
-          );
-          const cellX = sampleRectLeft + xOff;
-          const cellY = sampleRectTop + yOff;
+        metadata.samplingConfig.points.forEach((samplingCircle, i) => {
+          const [xOff, yOff] = config.samplingCircleOffset(samplingCircle);
+          const x = sampleRectLeft + xOff;
+          const y = sampleRectTop + yOff;
 
           if (options.showSamplingCircles !== "none") {
-            // Draw grid cell outline
             ctx.strokeStyle = "rgba(255, 255, 255, 0.1)";
             ctx.lineWidth = 1;
-            ctx.strokeRect(cellX, cellY, cellWidth, cellHeight);
+            ctx.beginPath();
+            ctx.arc(x, y, config.samplePointRadius, 0, TAU);
+            ctx.stroke();
 
-            // Fill grid cell with intensity
+            // ctx.fillStyle = colors.background200;
+            // ctx.beginPath();
+            // ctx.arc(centerX, centerY, radius, 0, TAU);
+            // ctx.fill();
+
             const vectorToUse =
               visualizationMode === "crunched"
                 ? samplingVector.samplingVector
                 : samplingVector.rawSamplingVector;
-            const intensity = vectorToUse[vectorIndex] * 0.7;
+            const intensity = vectorToUse[i] * 0.7;
             ctx.fillStyle = `rgba(255, 255, 255, ${intensity})`;
-            ctx.fillRect(cellX, cellY, cellWidth, cellHeight);
+            ctx.beginPath();
+            ctx.arc(x, y, config.samplePointRadius, 0, TAU);
+            ctx.fill();
           }
 
           if (options.showSamplingPoints) {
-            const cellCenterX = cellX + cellWidth / 2;
-            const cellCenterY = cellY + cellHeight / 2;
-
-            // Scale sampling points to fit within the cell dimensions
-            const maxRadius = Math.min(cellWidth, cellHeight) / 2;
-
             ctx.fillStyle = colors.blue200;
-            for (const point of gridSamplingPoints) {
-              const scaledX = (point.x / config.samplePointRadius) * maxRadius;
-              const scaledY = (point.y / config.samplePointRadius) * maxRadius;
+            for (const point of circleSamplingPoints) {
               ctx.beginPath();
-              ctx.arc(cellCenterX + scaledX, cellCenterY + scaledY, samplingPointRadius + 1.25, 0, TAU);
+              ctx.arc(x + point.x, y + point.y, samplingPointRadius + 1.25, 0, TAU);
               ctx.fill();
             }
 
-            const subsamples = samplingVector.samplingVectorSubsamples[vectorIndex];
-            gridSamplingPoints.forEach((point, pointIndex) => {
-              const scaledX = (point.x / config.samplePointRadius) * maxRadius;
-              const scaledY = (point.y / config.samplePointRadius) * maxRadius;
+            const subsamples = samplingVector.samplingVectorSubsamples[i];
+            circleSamplingPoints.forEach((point, pointIndex) => {
               const lightness = Math.floor(subsamples[pointIndex] * 255);
               ctx.fillStyle = `rgb(${lightness}, ${lightness}, ${lightness})`;
 
               ctx.beginPath();
-              ctx.arc(cellCenterX + scaledX, cellCenterY + scaledY, samplingPointRadius, 0, TAU);
+              ctx.arc(x + point.x, y + point.y, samplingPointRadius, 0, TAU);
               ctx.fill();
               ctx.closePath();
             });

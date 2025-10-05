@@ -4,8 +4,23 @@ import { Alphabet } from "../alphabets";
 export const ascii60Config: Config = {
   name: "ascii-60",
   SAMPLING_CONFIG: {
-    gridRows: 3,
-    gridCols: 2,
+    points: [
+      { x: 0.3, y: 0.23 },
+      { x: 0.7, y: 0.18 },
+      { x: 0.3, y: 0.5 },
+      { x: 0.7, y: 0.5 },
+      { x: 0.3, y: 0.82 },
+      { x: 0.7, y: 0.77 },
+    ],
+    externalPoints: [
+      { x: -0.3, y: -0.23 },
+      { x: 1.3, y: -0.23 },
+      { x: -0.3, y: 0.5 },
+      { x: 1.3, y: 0.5 },
+      { x: -0.3, y: 1.23 },
+      { x: 1.3, y: 1.23 },
+    ],
+    circleRadius: 13.5,
   },
   CANVAS_WIDTH: 48,
   CANVAS_HEIGHT: 64,
