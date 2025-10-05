@@ -120,8 +120,7 @@ class AsciiVectorBuilder {
     const gridCells = [];
     for (let row = 0; row < this.samplingConfig.gridRows; row++) {
       for (let col = 0; col < this.samplingConfig.gridCols; col++) {
-        const externalOffsets = this.getExternalOffsets(row, col);
-        gridCells.push({ row, col, externalOffsets });
+        gridCells.push({ row, col });
       }
     }
 
@@ -141,26 +140,6 @@ class AsciiVectorBuilder {
 
     fs.writeFileSync(filename, JSON.stringify(data, null, 2));
     console.log(`Character vectors saved to ${filename}`);
-  }
-
-  private getExternalOffsets(row: number, col: number): Array<{ x: number; y: number }> {
-    const offsets = [];
-    const totalRows = this.samplingConfig.gridRows;
-    const totalCols = this.samplingConfig.gridCols;
-
-    // Edges
-    if (row === 0) offsets.push({ x: 0, y: -0.5 });           // Top
-    if (row === totalRows - 1) offsets.push({ x: 0, y: 0.5 }); // Bottom
-    if (col === 0) offsets.push({ x: -0.5, y: 0 });           // Left
-    if (col === totalCols - 1) offsets.push({ x: 0.5, y: 0 }); // Right
-
-    // Diagonals for corners
-    if (row === 0 && col === 0) offsets.push({ x: -0.5, y: -0.5 });           // Top-left
-    if (row === 0 && col === totalCols - 1) offsets.push({ x: 0.5, y: -0.5 }); // Top-right
-    if (row === totalRows - 1 && col === 0) offsets.push({ x: -0.5, y: 0.5 }); // Bottom-left
-    if (row === totalRows - 1 && col === totalCols - 1) offsets.push({ x: 0.5, y: 0.5 }); // Bottom-right
-
-    return offsets;
   }
 
   // loadTree method removed - KD trees built at runtime
