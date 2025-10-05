@@ -11,6 +11,7 @@ const CONTRAST_EXPONENT_LOCAL = 7;
 const lightnessEasingFunctions = {
   default: Bezier(0.38, 0.01, 0.67, 1),
   soft: Bezier(0.22, 0.02, 0.76, 0.82),
+  increase_contrast: Bezier(0.55, 0.01, 0.58, 0.99),
 };
 
 const easingLookupTables: Record<string, Float32Array> = {};

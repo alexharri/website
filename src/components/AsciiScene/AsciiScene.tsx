@@ -29,6 +29,7 @@ interface AsciiSceneProps {
   showControls?: boolean;
   alphabet?: AlphabetName;
   fontSize?: number;
+  increaseContrast?: boolean;
   lightnessEasingFunction?: string;
   showSamplingCircles?: SamplingPointVisualizationMode | true;
   showExternalSamplingCircles?: boolean;
@@ -60,14 +61,17 @@ export const AsciiScene: React.FC<AsciiSceneProps> = (props) => {
     showGrid = false,
     pixelate = false,
     offsetAlign = "center",
-    lightnessEasingFunction,
     viewModes = props.viewMode ? [props.viewMode] : [],
     rowHeight,
     columnWidth,
+    increaseContrast,
     width: targetWidth = 1080,
   } = props;
-  let { minWidth } = props;
+  let { minWidth, lightnessEasingFunction } = props;
 
+  if (increaseContrast) {
+    lightnessEasingFunction = "increase_contrast";
+  }
   if (minWidth == null && targetWidth < SCENE_BASELINE_WIDTH) {
     minWidth = targetWidth;
   }

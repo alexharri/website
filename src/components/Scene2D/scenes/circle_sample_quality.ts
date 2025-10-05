@@ -2,10 +2,10 @@ import { colors } from "../../../utils/cssVariables";
 import { createScene2D } from "../createScene2D";
 
 export default createScene2D(
-  ({ ctx, width, height, variables }) => {
-    const x = width / 2 + height * 0.8 + variables.x * height * 0.4;
-    const y = height / 2;
-    const radius = height * 1;
+  ({ ctx, width, height }) => {
+    const x = width / 2;
+    const y = height / 2 - height * 0.065;
+    const radius = height / 3.1;
 
     ctx.beginPath();
     ctx.rect(0, 0, width, height);
@@ -19,13 +19,13 @@ export default createScene2D(
   },
   {
     variables: {
-      x: {
-        label: "math:x",
-        value: 0,
-        range: [-1, 1],
+      sampleQuality: {
+        label: "Number of samples",
+        range: [1, 4],
         type: "number",
-        step: 0.07,
-        showValue: false,
+        value: 1,
+        step: 1,
+        showValue: true,
       },
     },
   },

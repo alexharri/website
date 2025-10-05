@@ -44,6 +44,8 @@ interface Scene2DDrawProps<V extends VariableDict> {
   ctx: CanvasRenderingContext2D;
   width: number;
   height: number;
+  targetWidth: number;
+  targetHeight: number;
   elapsed: number;
   timeDelta: number;
   variables: LocalVariables<V>;
@@ -59,7 +61,6 @@ export interface Scene2DProps {
   height?: number;
   width?: number;
 }
-
 
 export function createScene2D<V extends VariableDict>(
   drawFunction: DrawFunction<V>,
@@ -152,7 +153,16 @@ export function createScene2D<V extends VariableDict>(
         const elapsed = now - startTime;
 
         ctx.clearRect(0, 0, canvas.width, canvas.height);
-        drawFunction({ ctx, width, height, elapsed, timeDelta, variables });
+        drawFunction({
+          ctx,
+          width,
+          height,
+          targetWidth: targetWidth || width,
+          targetHeight,
+          elapsed,
+          timeDelta,
+          variables,
+        });
 
         if (onFrame) {
           const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
