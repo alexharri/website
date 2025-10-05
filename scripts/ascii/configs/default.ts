@@ -4,23 +4,8 @@ import { Alphabet } from "../alphabets";
 export const defaultConfig: Config = {
   name: "default",
   SAMPLING_CONFIG: {
-    points: [
-      { x: 0.3, y: 0.23 },
-      { x: 0.7, y: 0.18 },
-      { x: 0.3, y: 0.5 },
-      { x: 0.7, y: 0.5 },
-      { x: 0.3, y: 0.82 },
-      { x: 0.7, y: 0.77 },
-    ],
-    externalPoints: [
-      { x: -0.3, y: -0.23 },
-      { x: 1.3, y: -0.23 },
-      { x: -0.3, y: 0.5 },
-      { x: 1.3, y: 0.5 },
-      { x: -0.3, y: 1.23 },
-      { x: 1.3, y: 1.23 },
-    ],
-    circleRadius: 13.5,
+    gridRows: 3,
+    gridCols: 2,
   },
   CANVAS_WIDTH: 48,
   CANVAS_HEIGHT: 64,

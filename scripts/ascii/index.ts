@@ -47,9 +47,9 @@ class AsciiVectorBuilder {
     generateDebugImages: boolean = false,
     debugDir: string = "debug",
   ): Promise<CharacterVector[]> {
-    const k = this.samplingConfig.points.length;
+    const k = this.samplingConfig.gridRows * this.samplingConfig.gridCols;
     console.log(
-      `Building character vectors with ${k} sampling points (r=${this.samplingConfig.circleRadius}px) for ${this.characters.length} characters...`,
+      `Building character vectors with ${k} sampling points (${this.samplingConfig.gridRows}x${this.samplingConfig.gridCols} grid) for ${this.characters.length} characters...`,
     );
     if (generateDebugImages) {
       console.log(`Debug images will be saved to ${debugDir}/`);
@@ -115,16 +115,21 @@ class AsciiVectorBuilder {
     // Calculate character dimensions relative to font size
     const width = canvasWidth / fontSize;
     const height = canvasHeight / fontSize;
-    const circleRadius = this.samplingConfig.circleRadius / fontSize;
+
+    // Generate grid cells for the output
+    const gridCells = [];
+    for (let row = 0; row < this.samplingConfig.gridRows; row++) {
+      for (let col = 0; col < this.samplingConfig.gridCols; col++) {
+        gridCells.push({ row, col });
+      }
+    }
 
     const data = {
       metadata: {
         samplingConfig: {
-          points: this.samplingConfig.points,
-          ...(this.samplingConfig.externalPoints && {
-            externalPoints: this.samplingConfig.externalPoints,
-          }),
-          circleRadius: circleRadius,
+          gridRows: this.samplingConfig.gridRows,
+          gridCols: this.samplingConfig.gridCols,
+          gridCells: gridCells,
         },
         fontSize: 1,
         width: width,
@@ -141,7 +146,7 @@ class AsciiVectorBuilder {
 }
 
 async function buildConfigurationVectors(config: Config) {
-  const k = config.SAMPLING_CONFIG.points.length;
+  const k = config.SAMPLING_CONFIG.gridRows * config.SAMPLING_CONFIG.gridCols;
 
   // Use alphabets from config
   const alphabets = config.ALPHABETS;
@@ -150,7 +155,7 @@ async function buildConfigurationVectors(config: Config) {
   console.log(`\n=== Building configuration: ${config.name} ===`);
   console.log(`- Character sets: ${alphabets.join(", ")} (${characters.length} chars)`);
   console.log(
-    `- Sampling points: ${k} circles with radius ${config.SAMPLING_CONFIG.circleRadius}px`,
+    `- Sampling points: ${k} grid cells (${config.SAMPLING_CONFIG.gridRows}x${config.SAMPLING_CONFIG.gridCols})`,
   );
   console.log(`- Canvas size: ${config.CANVAS_WIDTH}x${config.CANVAS_HEIGHT}`);
   console.log(`- Font: ${config.FONT_FAMILY} ${config.FONT_SIZE}px`);

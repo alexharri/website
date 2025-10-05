@@ -36,7 +36,7 @@ export class AsciiRenderConfig {
     this.sampleRectXOff = (this.boxWidth - this.sampleRectWidth) / 2;
     this.sampleRectYOff = (this.boxHeight - this.sampleRectHeight) / 2;
 
-    this.samplePointRadius = fontSize * metadata.samplingConfig.circleRadius;
+    this.samplePointRadius = fontSize * 0.1; // Fixed radius for grid cell visualization
 
     this.cols = Math.ceil(canvasWidth / this.boxWidth);
     this.rows = Math.ceil(canvasHeight / this.boxHeight);
@@ -66,13 +66,15 @@ export class AsciiRenderConfig {
     return [x, y];
   }
 
-  public samplingCircleOffset(point: { x: number; y: number }) {
-    const x = point.x * this.sampleRectWidth;
-    const y = point.y * this.sampleRectHeight;
-    return [x, y];
+  public samplingGridCellOffset(gridRow: number, gridCol: number, gridRows: number, gridCols: number) {
+    const cellWidth = this.sampleRectWidth / gridCols;
+    const cellHeight = this.sampleRectHeight / gridRows;
+    const x = gridCol * cellWidth;
+    const y = gridRow * cellHeight;
+    return [x, y, cellWidth, cellHeight];
   }
 
-  public generateCircleSamplingPoints(): { x: number; y: number }[] {
+  public generateGridSamplingPoints(): { x: number; y: number }[] {
     const points = getSamplePoints(this.samplingQuality);
     return points.map(({ x, y }) => {
       x *= this.samplePointRadius;

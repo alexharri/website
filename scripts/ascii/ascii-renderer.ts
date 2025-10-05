@@ -2,15 +2,10 @@ import { createCanvas, Canvas, registerFont } from "canvas";
 import * as fs from "fs";
 import * as path from "path";
 
-export interface SamplingPoint {
-  x: number; // 0-1 normalized coordinate
-  y: number; // 0-1 normalized coordinate
-}
-
 export interface SamplingConfig {
-  points: SamplingPoint[];
-  externalPoints?: SamplingPoint[];
-  circleRadius: number; // radius in pixels
+  gridRows: number;
+  gridCols: number;
+  gridCells?: Array<{ row: number; col: number }>;
 }
 
 export class AsciiRenderer {
@@ -199,17 +194,18 @@ export class AsciiRenderer {
     return kernel;
   }
 
-  private calculateCircleLightness(
+  private calculateGridCellLightness(
     canvas: Canvas,
-    centerX: number,
-    centerY: number,
-    radius: number,
+    cellX: number,
+    cellY: number,
+    cellWidth: number,
+    cellHeight: number,
   ): number {
     const ctx = canvas.getContext("2d");
-    const startX = Math.max(0, Math.floor(centerX - radius));
-    const startY = Math.max(0, Math.floor(centerY - radius));
-    const endX = Math.min(this.width, Math.ceil(centerX + radius));
-    const endY = Math.min(this.height, Math.ceil(centerY + radius));
+    const startX = Math.max(0, Math.floor(cellX));
+    const startY = Math.max(0, Math.floor(cellY));
+    const endX = Math.min(this.width, Math.ceil(cellX + cellWidth));
+    const endY = Math.min(this.height, Math.ceil(cellY + cellHeight));
 
     const imageData = ctx.getImageData(startX, startY, endX - startX, endY - startY);
     const data = imageData.data;
@@ -220,23 +216,13 @@ export class AsciiRenderer {
 
     for (let y = 0; y < endY - startY; y++) {
       for (let x = 0; x < width; x++) {
-        const pixelX = startX + x;
-        const pixelY = startY + y;
-
-        // Check if pixel is within circle
-        const dx = pixelX - centerX;
-        const dy = pixelY - centerY;
-        const distance = Math.sqrt(dx * dx + dy * dy);
-
-        if (distance <= radius) {
-          const i = (y * width + x) * 4;
-          const r = data[i];
-          const g = data[i + 1];
-          const b = data[i + 2];
-          const lightness = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
-          totalLightness += lightness;
-          pixelCount++;
-        }
+        const i = (y * width + x) * 4;
+        const r = data[i];
+        const g = data[i + 1];
+        const b = data[i + 2];
+        const lightness = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+        totalLightness += lightness;
+        pixelCount++;
       }
     }
 
@@ -247,20 +233,37 @@ export class AsciiRenderer {
     const canvas = this.renderCharacter(char);
     const vector: number[] = [];
 
-    for (const point of this.samplingConfig.points) {
-      const centerX = point.x * this.width;
-      const centerY = point.y * this.height;
+    const cellWidth = this.width / this.samplingConfig.gridCols;
+    const cellHeight = this.height / this.samplingConfig.gridRows;
 
-      const lightness = this.calculateCircleLightness(
+    // Generate grid cells if not provided
+    const gridCells = this.samplingConfig.gridCells || this.generateGridCells();
+
+    for (const cell of gridCells) {
+      const cellX = cell.col * cellWidth;
+      const cellY = cell.row * cellHeight;
+
+      const lightness = this.calculateGridCellLightness(
         canvas,
-        centerX,
-        centerY,
-        this.samplingConfig.circleRadius,
+        cellX,
+        cellY,
+        cellWidth,
+        cellHeight,
       );
       vector.push(lightness);
     }
 
     return vector;
+  }
+
+  private generateGridCells(): Array<{ row: number; col: number }> {
+    const cells = [];
+    for (let row = 0; row < this.samplingConfig.gridRows; row++) {
+      for (let col = 0; col < this.samplingConfig.gridCols; col++) {
+        cells.push({ row, col });
+      }
+    }
+    return cells;
   }
 
   static normalizeVectorsGlobally(vectors: number[][]) {
@@ -316,25 +319,46 @@ export class AsciiRenderer {
     samplingCtx.fillStyle = "black";
     samplingCtx.fillRect(0, 0, this.width, this.height);
 
-    // Draw sampling circles
-    for (let i = 0; i < this.samplingConfig.points.length; i++) {
-      const point = this.samplingConfig.points[i];
-      const centerX = point.x * this.width;
-      const centerY = point.y * this.height;
-      const lightness = vector[i];
+    // Draw sampling grid cells with sampling points visualization
+    const cellWidth = this.width / this.samplingConfig.gridCols;
+    const cellHeight = this.height / this.samplingConfig.gridRows;
+
+    // Generate grid cells if not provided
+    const gridCells = this.samplingConfig.gridCells || this.generateGridCells();
+
+    gridCells.forEach((cell, vectorIndex) => {
+      const cellX = cell.col * cellWidth;
+      const cellY = cell.row * cellHeight;
+      const lightness = vector[vectorIndex];
       const grayValue = Math.floor(lightness * 255);
 
-      // Fill circle with lightness value
-      samplingCtx.beginPath();
-      samplingCtx.arc(centerX, centerY, this.samplingConfig.circleRadius, 0, 2 * Math.PI);
+      // Fill grid cell with lightness value
       samplingCtx.fillStyle = `rgb(${grayValue}, ${grayValue}, ${grayValue})`;
-      samplingCtx.fill();
+      samplingCtx.fillRect(cellX, cellY, cellWidth, cellHeight);
 
-      // Draw circle outline
+      // Draw grid cell outline
       samplingCtx.strokeStyle = "#666666";
       samplingCtx.lineWidth = 1;
-      samplingCtx.stroke();
-    }
+      samplingCtx.strokeRect(cellX, cellY, cellWidth, cellHeight);
+
+      // Draw sampling points within the cell
+      const cellCenterX = cellX + cellWidth / 2;
+      const cellCenterY = cellY + cellHeight / 2;
+      const maxRadius = Math.min(cellWidth, cellHeight) / 2;
+      const samplePointRadius = 1;
+
+      samplingCtx.fillStyle = "#ff0000";
+      for (let i = 0; i < 4; i++) { // Show first few sampling points
+        const angle = (i / 4) * 2 * Math.PI;
+        const radius = maxRadius * 0.7;
+        const pointX = cellCenterX + Math.cos(angle) * radius;
+        const pointY = cellCenterY + Math.sin(angle) * radius;
+
+        samplingCtx.beginPath();
+        samplingCtx.arc(pointX, pointY, samplePointRadius, 0, 2 * Math.PI);
+        samplingCtx.fill();
+      }
+    });
 
     // Add sampling visualization to the right side
     debugCtx.drawImage(samplingCanvas, this.width + spacing + padding, 20 + padding);
@@ -344,7 +368,7 @@ export class AsciiRenderer {
     debugCtx.font = "16px monospace";
     debugCtx.fillText(`Original: '${char}'`, padding, 15 + padding);
     debugCtx.fillText(
-      `Sampling (${this.samplingConfig.points.length} points)`,
+      `Sampling (${this.samplingConfig.gridRows}x${this.samplingConfig.gridCols} grid)`,
       this.width + spacing + padding,
       15 + padding,
     );
