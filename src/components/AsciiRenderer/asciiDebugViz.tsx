@@ -32,6 +32,8 @@ export function renderAsciiDebugViz(
   config: AsciiRenderConfig,
   options: DebugVizOptions,
   visualizationMode?: SamplingPointVisualizationMode,
+  characterGrid?: string[][],
+  hideSpaces?: boolean,
 ) {
   const ctx = canvas.getContext("2d");
   if (!ctx) return;
@@ -69,6 +71,10 @@ export function renderAsciiDebugViz(
 
   for (let col = 0; col < config.cols; col++) {
     for (let row = 0; row < config.rows; row++) {
+      if (hideSpaces && characterGrid?.[row][col] === " ") {
+        continue;
+      }
+
       const [sampleRectLeft, sampleRectTop] = config.sampleRectPosition(col, row);
       if (options.showSamplingCircles || options.showSamplingPoints) {
         const samplingVector = samplingData[row][col];
@@ -78,7 +84,7 @@ export function renderAsciiDebugViz(
           const y = sampleRectTop + yOff;
 
           if (options.showSamplingCircles !== "none") {
-            ctx.strokeStyle = "rgba(255, 255, 255, 0.1)";
+            ctx.strokeStyle = "rgba(255, 255, 255, 0.2)";
             ctx.lineWidth = 1;
             ctx.beginPath();
             ctx.arc(x, y, config.samplePointRadius, 0, TAU);

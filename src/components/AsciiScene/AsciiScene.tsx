@@ -1,4 +1,4 @@
-import React, { useRef, useState, useCallback, useMemo } from "react";
+import React, { useRef, useState, useCallback, useMemo, useEffect } from "react";
 import { useStyles } from "../../utils/styles";
 import { AsciiRenderer } from "../AsciiRenderer";
 import { AlphabetName, getAlphabetMetadata } from "../AsciiRenderer/alphabets/AlphabetManager";
@@ -14,9 +14,10 @@ import { VariableValues, VariableSpec, VariableDict } from "../../types/variable
 import { useSceneHeight } from "../../utils/hooks/useSceneHeight";
 import { CharacterSamplingData } from "../AsciiRenderer/ascii/generateAsciiChars";
 import { AsciiRenderConfig } from "../AsciiRenderer/renderConfig";
+import { generateCharacterGridSamplingData } from "../AsciiRenderer/ascii/generateCharacterGrid";
 import { useMonospaceCharacterWidthEm } from "../../utils/hooks/useMonospaceCharacterWidthEm";
 import { cssVariables } from "../../utils/cssVariables";
-import { AsciiDebugVizCanvas } from "../AsciiRenderer/asciiDebugViz";
+import { AsciiDebugVizCanvas, renderAsciiDebugViz } from "../AsciiRenderer/asciiDebugViz";
 import { SCENE_BASELINE_WIDTH } from "../../constants";
 import { useSamplingDataCollection } from "../../utils/hooks/useSamplingDataCollection";
 
@@ -36,6 +37,7 @@ interface AsciiSceneProps {
   showSamplingPoints?: boolean;
   showGrid?: boolean;
   hideAscii?: boolean;
+  hideSpaces?: boolean;
   offsetAlign?: "left" | "center";
   sampleQuality?: number;
   width?: number;
@@ -59,6 +61,7 @@ export const AsciiScene: React.FC<AsciiSceneProps> = (props) => {
     showExternalSamplingCircles = false,
     showSamplingPoints = false,
     showGrid = false,
+    hideSpaces = false,
     pixelate = false,
     offsetAlign = "center",
     viewModes = props.viewMode ? [props.viewMode] : [],
@@ -197,6 +200,42 @@ export const AsciiScene: React.FC<AsciiSceneProps> = (props) => {
     lightnessEasingFunction,
   });
 
+  const isCharacterMode = typeof children === "string";
+
+  // Handle character grid mode
+  useEffect(() => {
+    if (isCharacterMode && config) {
+      const characterGridString = children as string;
+      const { samplingData, characterGrid } = generateCharacterGridSamplingData(
+        characterGridString,
+        config,
+        alphabet,
+      );
+
+      samplingDataRef.current = samplingData;
+
+      if (debugCanvasRef.current) {
+        renderAsciiDebugViz(
+          debugCanvasRef.current,
+          samplingData,
+          config,
+          debugVizOptions,
+          showSamplingCircles === true ? "raw" : showSamplingCircles,
+          characterGrid,
+          hideSpaces,
+        );
+      }
+    }
+  }, [
+    isCharacterMode,
+    children,
+    config,
+    alphabet,
+    debugVizOptions,
+    showSamplingCircles,
+    hideSpaces,
+  ]);
+
   return (
     <>
       <div className={s("container")} style={{ height }}>
@@ -237,7 +276,7 @@ export const AsciiScene: React.FC<AsciiSceneProps> = (props) => {
                 hideAscii={hideAscii}
                 showSamplingPoints={showSamplingPoints}
               />,
-              children,
+              isCharacterMode ? null : children,
             ]}
           </SplitView>
         </CanvasProvider>

@@ -6,13 +6,15 @@ import ascii60Alphabet from "./ascii-60.json";
 import programmingAlphabet from "./programming.json";
 import pixelAlphabet from "./pixel.json";
 import pixelshortAlphabet from "./pixel-short.json";
+import threesamplesAlphabet from "./three-samples.json";
 
 const alphabets = {
-  "default": defaultAlphabet,
+  default: defaultAlphabet,
   "ascii-60": ascii60Alphabet,
-  "programming": programmingAlphabet,
-  "pixel": pixelAlphabet,
+  programming: programmingAlphabet,
+  pixel: pixelAlphabet,
   "pixel-short": pixelshortAlphabet,
+  "three-samples": threesamplesAlphabet,
 } as const;
 
 export type AlphabetName = keyof typeof alphabets;
@@ -27,4 +29,13 @@ export function getAlphabetCharacterVectors(name: AlphabetName) {
 
 export function getAlphabetMetadata(name: AlphabetName) {
   return alphabets[name].metadata;
+}
+
+export function getCharacterVector(char: string, alphabet: AlphabetName): number[] {
+  const characters = alphabets[alphabet].characters;
+  const charData = characters.find((c) => c.char === char);
+  if (!charData) {
+    throw new Error(`Character '${char}' not in alphabet '${alphabet}'`);
+  }
+  return charData.vector;
 }

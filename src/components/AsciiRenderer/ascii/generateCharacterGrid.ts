@@ -1,0 +1,60 @@
+import { CharacterSamplingData } from "./generateAsciiChars";
+import { AsciiRenderConfig } from "../renderConfig";
+import { AlphabetName, getCharacterVector } from "../alphabets/AlphabetManager";
+
+export interface CharacterGridResult {
+  samplingData: CharacterSamplingData[][];
+  characterGrid: string[][];
+}
+
+export function generateCharacterGridSamplingData(
+  characterString: string,
+  config: AsciiRenderConfig,
+  alphabet: AlphabetName,
+): CharacterGridResult {
+  const lines = characterString.split("\n");
+  const contentRows = lines.length;
+  const contentCols = Math.max(...lines.map((line) => line.length));
+
+  // Calculate centering offsets
+  const rowOffset = Math.floor((config.rows - contentRows) / 2);
+  const colOffset = Math.floor((config.cols - contentCols) / 2);
+
+  // Build centered grid with padding
+  const samplingData: CharacterSamplingData[][] = [];
+  const characterGrid: string[][] = [];
+
+  for (let row = 0; row < config.rows; row++) {
+    const samplingDataRow: CharacterSamplingData[] = [];
+    const characterRow: string[] = [];
+
+    for (let col = 0; col < config.cols; col++) {
+      const sourceRow = row - rowOffset;
+      const sourceCol = col - colOffset;
+
+      let char = " ";
+      if (
+        sourceRow >= 0 &&
+        sourceRow < contentRows &&
+        sourceCol >= 0 &&
+        sourceCol < lines[sourceRow].length
+      ) {
+        char = lines[sourceRow][sourceCol];
+      }
+
+      const vector = getCharacterVector(char, alphabet);
+      samplingDataRow.push({
+        samplingVector: vector,
+        rawSamplingVector: vector,
+        externalSamplingVector: [],
+        samplingVectorSubsamples: [],
+      });
+      characterRow.push(char);
+    }
+
+    samplingData.push(samplingDataRow);
+    characterGrid.push(characterRow);
+  }
+
+  return { samplingData, characterGrid };
+}

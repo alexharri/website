@@ -245,6 +245,17 @@ export function getAlphabetCharacterVectors(name: AlphabetName) {
 export function getAlphabetMetadata(name: AlphabetName) {
   return alphabets[name].metadata;
 }
+
+export function getCharacterVector(char: string, alphabet: AlphabetName): number[] {
+  const characters = alphabets[alphabet].characters;
+  const charData = characters.find(c => c.char === char);
+  if (charData) {
+    return charData.vector;
+  }
+  // Fallback to space character
+  const spaceData = characters.find(c => c.char === ' ');
+  return spaceData ? spaceData.vector : [];
+}
 `;
 
   const managerPath = path.resolve(

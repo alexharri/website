@@ -290,17 +290,18 @@ Let's see how we can consider shape.
 
 So, what do I mean by shape?
 
-Well, if we have a canvas with a diagonal split, for example:
-
+{/* Well, if we have a canvas with a diagonal split, for example:
 
 <AsciiScene width={20 * 19} height={24 * 17} fontSize={20} rowHeight={24} columnWidth={20} viewModes={["ascii", "transparent"]} sampleQuality={3}>
   <Scene2D scene="diagonal_split" />
-</AsciiScene>
+</AsciiScene> */}
 
 
 When rendering an image as ASCII, we split the image into a grid. Each cell in that grid will be filled by a single ASCII character. So, for the region of the image that each cell represents, how do we pick the ASCII characters that best fits the image?
 
-
+<AsciiScene alphabet="three-samples" showGrid fontSize={100} height={300} showSamplingCircles="raw">
+  {""}
+</AsciiScene>
 
 
 
