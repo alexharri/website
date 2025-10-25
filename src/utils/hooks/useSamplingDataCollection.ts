@@ -66,6 +66,7 @@ export function useSamplingDataCollection(params: UseSamplingDataCollectionParam
             showSamplingCircles === true ? "raw" : showSamplingCircles,
             undefined,
             undefined,
+            undefined,
           );
         }
       }

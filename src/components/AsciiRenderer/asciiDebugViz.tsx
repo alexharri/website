@@ -34,6 +34,7 @@ export function renderAsciiDebugViz(
   visualizationMode?: SamplingPointVisualizationMode,
   characterGrid?: string[][],
   hideSpaces?: boolean,
+  forceSamplingValue?: number,
 ) {
   const ctx = canvas.getContext("2d");
   if (!ctx) return;
@@ -99,7 +100,8 @@ export function renderAsciiDebugViz(
               visualizationMode === "crunched"
                 ? samplingVector.samplingVector
                 : samplingVector.rawSamplingVector;
-            const intensity = vectorToUse[i] * 0.7;
+            const value = forceSamplingValue ?? vectorToUse[i];
+            const intensity = value * 0.7;
             ctx.fillStyle = `rgba(255, 255, 255, ${intensity})`;
             ctx.beginPath();
             ctx.arc(x, y, config.samplePointRadius, 0, TAU);
@@ -116,7 +118,8 @@ export function renderAsciiDebugViz(
 
             const subsamples = samplingVector.samplingVectorSubsamples[i];
             circleSamplingPoints.forEach((point, pointIndex) => {
-              const lightness = Math.floor(subsamples[pointIndex] * 255);
+              const value = subsamples?.[pointIndex] ?? 0;
+              const lightness = Math.floor(value * 255);
               ctx.fillStyle = `rgb(${lightness}, ${lightness}, ${lightness})`;
 
               ctx.beginPath();

@@ -288,37 +288,87 @@ Let's see how we can consider shape.
 
 ## Shape
 
-So, what do I mean by shape?
+What do I mean by shape? Well, consider the characters "T", "L" and "O" placed within a grid:
 
-{/* Well, if we have a canvas with a diagonal split, for example:
+<AsciiScene alphabet="two-samples" showGrid fontSize={100} height={260} width={520}>
+  {"T L O"}
+</AsciiScene>
 
-<AsciiScene width={20 * 19} height={24 * 17} fontSize={20} rowHeight={24} columnWidth={20} viewModes={["ascii", "transparent"]} sampleQuality={3}>
-  <Scene2D scene="diagonal_split" />
-</AsciiScene> */}
+The character "T" is top-heavy. Its visual density in the upper half of the grid cell is higher than in the lower half. The opposite can be said for "L" -- it's bottom-heavy. "O" somewhat equally occupies the upper and lower halves of the cell.
+
+We might also compare characters like "L" and "J". The character "L" is heavier within the left half of the cell, while "J" is heavier in the right half:
+
+<AsciiScene alphabet="two-samples" showGrid fontSize={100} height={260} width={360}>
+  {"L J"}
+</AsciiScene>
+
+We also have more "extreme" characters, such as `_` and `^` that only occupy the lower or upper portion of the cell, respectively:
+
+<AsciiScene alphabet="two-samples" showGrid fontSize={100} height={260} width={360}>
+  {"_ ^"}
+</AsciiScene>
+
+This is what I mean by "shape" in the context of ASCII rendering. It refers to which regions of a cell each character visually occupies.
 
 
-When rendering an image as ASCII, we split the image into a grid. Each cell in that grid will be filled by a single ASCII character. So, for the region of the image that each cell represents, how do we pick the ASCII characters that best fits the image?
+### Quantifying shape
 
-<AsciiScene alphabet="three-samples" showGrid fontSize={100} height={300} showSamplingCircles="raw">
+How might we quantify shape so that we can pick characters based on their shape?
+
+Let's start by only considering how much characters occupy the upper and lower region of our cell. We'll do that by defining two _sampling circles_ for each grid cell:
+
+<AsciiScene alphabet="two-samples" showGrid fontSize={100} rows={2.2} cols={6} showSamplingCircles>
   {""}
 </AsciiScene>
 
+Let's consider a single cell. Once a character is placed within the cell, the character will overlap the cell's sampling circles by _some_ amount (sometimes zero).
 
-
-
-
-
-{/*
-<AsciiScene height={650} fontSize={100} showSamplingCircles="raw" showSamplingPoints characterWidthMultiplier={1.25} characterHeightMultiplier={1.25} showGrid offsetAlign="center">
-  <Scene2D scene="breathe" />
+<AsciiScene alphabet="two-samples" showGrid fontSize={250} rows={1} cols={1} showSamplingCircles forceSamplingValue={0}>
+  {"T"}
 </AsciiScene>
 
+We'll then quantify the characters overlap with the sampling circle from $0$ to $1$ with $0$ meaning no overlap and $1$ meaning that the character completely fills the sampling circle.
 
-<AsciiScene height={650} fontSize={20}>
-  <Scene2D scene="shade-split" />
+One approach would be to take a bunch of random samples on the circle:
+
+<AsciiScene alphabet="two-samples" sampleQuality={50} showGrid fontSize={250} rows={1} cols={1} showSamplingCircles showSamplingPoints forceSamplingValue={0}>
+  {"T"}
 </AsciiScene>
 
-<AsciiScene height={550} fontSize={100} viewModes={["transparent"]} showSamplingCircles="raw" characterWidthMultiplier={1.25} characterHeightMultiplier={1.25}>
-  <Scene2D scene="shade_split_0" />
+<SmallNote center label=""></SmallNote>
+
+[fermat_spiral]: https://en.wikipedia.org/wiki/Fermat%27s_spiral
+
+Each sample will fall either outside or inside of the character. We can count the number of points that fall within the character and divide by the total number of points, giving us a value between $0$ and $1$.
+
+I generated the points above using a [Fermat spiral][fermat_spiral], but it'd be simpler and more effective to just take a sample at every single pixel. The random points just look nicer as a visualization.
+
+Anyway, for T, we get approximately $0.261$ for the upper circle and $0.097$ for the lower. We can interpret this as a $2$-dimensional vector:
+
+<p className="mathblock">$$\begin{bmatrix} 0.261 \\ 0.097 \end{bmatrix}$$</p>
+
+We can use this technique to generate a "character vector" that describes the shape of each ASCII character.
+
+Take the example below. In it, I color the sampling circles with their sampled lightness value:
+
+<AsciiScene alphabet="two-samples" showGrid fontSize={120} rows={2} cols={3} showSamplingCircles offsetAlign="left">
+  {"._=\n*%@"}
 </AsciiScene>
-*/}
+
+We can also represent this numerically. I'll define a $\text{shape}(C)$ function that outputs the character vector for a given character $C$. With it, we get:
+
+<p className="mathblock">$$\begin{align}
+\text{shape}(\texttt{.}) &= \begin{bmatrix} 0 \\ 0.099 \end{bmatrix} \\[4pt]
+\text{shape}(\texttt{\_}) &= \begin{bmatrix} 0 \\ 0.142 \end{bmatrix} \\[4pt]
+\text{shape}(\texttt{*}) &= \begin{bmatrix} 0.167 \\ 0.115 \end{bmatrix} \\[4pt]
+\text{shape}(\texttt{=}) &= \begin{bmatrix} 0.110 \\ 0.097 \end{bmatrix} \\[4pt]
+\text{shape}(\texttt{\%}) &= \begin{bmatrix} 0.305 \\ 0.225 \end{bmatrix} \\[4pt]
+\text{shape}(\texttt{@}) &= \begin{bmatrix} 0.277 \\ 0.281 \end{bmatrix} \\
+\end{align}$$</p>
+
+We can use these 2D character vectors as coordinates to plot the character on a 2D plane:
+
+(plot goes here)
+
+
+

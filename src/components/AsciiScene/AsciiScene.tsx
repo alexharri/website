@@ -30,6 +30,8 @@ interface AsciiSceneProps {
   showControls?: boolean;
   alphabet?: AlphabetName;
   fontSize?: number;
+  rows?: number;
+  cols?: number;
   increaseContrast?: boolean;
   lightnessEasingFunction?: string;
   showSamplingCircles?: SamplingPointVisualizationMode | true;
@@ -38,6 +40,7 @@ interface AsciiSceneProps {
   showGrid?: boolean;
   hideAscii?: boolean;
   hideSpaces?: boolean;
+  forceSamplingValue?: number;
   offsetAlign?: "left" | "center";
   sampleQuality?: number;
   width?: number;
@@ -54,27 +57,41 @@ export const AsciiScene: React.FC<AsciiSceneProps> = (props) => {
   const {
     children,
     alphabet: initialAlphabet = "default",
-    height: targetHeight,
+
     showControls = true,
+    rows,
+    cols,
     fontSize: targetFontSize = 14,
     showSamplingCircles = "none",
     showExternalSamplingCircles = false,
     showSamplingPoints = false,
     showGrid = false,
     hideSpaces = false,
+    forceSamplingValue,
     pixelate = false,
     offsetAlign = "center",
     viewModes = props.viewMode ? [props.viewMode] : [],
     rowHeight,
     columnWidth,
     increaseContrast,
-    width: targetWidth = 1080,
   } = props;
-  let { minWidth, lightnessEasingFunction } = props;
+  let { width: targetWidth, height: targetHeight, minWidth, lightnessEasingFunction } = props;
 
   if (increaseContrast) {
     lightnessEasingFunction = "increase_contrast";
   }
+
+  if (cols) {
+    const alphabet = getAlphabetMetadata(initialAlphabet);
+    targetWidth = targetFontSize * alphabet.width * cols;
+  }
+  if (rows) {
+    const alphabet = getAlphabetMetadata(initialAlphabet);
+    targetHeight = targetFontSize * alphabet.height * rows;
+  }
+
+  targetWidth ??= 1080;
+
   if (minWidth == null && targetWidth < SCENE_BASELINE_WIDTH) {
     minWidth = targetWidth;
   }
@@ -223,6 +240,7 @@ export const AsciiScene: React.FC<AsciiSceneProps> = (props) => {
           showSamplingCircles === true ? "raw" : showSamplingCircles,
           characterGrid,
           hideSpaces,
+          forceSamplingValue,
         );
       }
     }
@@ -234,6 +252,7 @@ export const AsciiScene: React.FC<AsciiSceneProps> = (props) => {
     debugVizOptions,
     showSamplingCircles,
     hideSpaces,
+    forceSamplingValue,
   ]);
 
   return (
