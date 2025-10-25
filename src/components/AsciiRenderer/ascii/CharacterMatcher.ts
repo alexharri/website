@@ -42,7 +42,7 @@ export class CharacterMatcher {
     const characterVectors = getAlphabetCharacterVectors(alphabet);
     const metadata = getAlphabetMetadata(alphabet);
 
-    const vectors = characterVectors.map(({ vector }) => vector);
+    const vectors = characterVectors.map(({ vector }) => [...vector]);
     for (const effect of effects) {
       effect(vectors);
     }
