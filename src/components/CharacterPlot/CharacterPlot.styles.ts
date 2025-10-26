@@ -5,7 +5,7 @@ export const CharacterPlotStyles = ({ styled }: StyleOptions) => ({
   container: styled.css`
     position: relative;
     max-width: 100%;
-    width: 600px;
+    width: 540px;
     margin: 40px auto;
     background: ${colors.background};
   `,
@@ -23,13 +23,13 @@ export const CharacterPlotStyles = ({ styled }: StyleOptions) => ({
 
   gridLine: styled.css`
     stroke: ${colors.medium400};
-    stroke-width: 0.001;
-    opacity: 0.5;
+    stroke-width: 0.0014;
+    opacity: 0.9;
   `,
 
   plotBorder: styled.css`
     fill: none;
-    stroke: ${colors.medium700};
+    stroke: ${colors.medium400};
     stroke-width: 0.002;
   `,
 
@@ -56,7 +56,6 @@ export const CharacterPlotStyles = ({ styled }: StyleOptions) => ({
 
   point: styled.css`
     fill: ${colors.text700};
-    cursor: pointer;
     transition: r 0.2s ease, fill 0.2s ease;
   `,
 
@@ -73,6 +72,12 @@ export const CharacterPlotStyles = ({ styled }: StyleOptions) => ({
     fill: ${colors.text};
     font-family: ${cssVariables.fontMonospace};
     font-weight: 600;
+    pointer-events: none;
+  `,
+
+  hoverLine: styled.css`
+    stroke: ${colors.blue};
+    stroke-width: 0.002;
     pointer-events: none;
   `,
 });

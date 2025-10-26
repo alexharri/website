@@ -368,8 +368,4 @@ We can also represent this numerically. I'll define a $\text{shape}(C)$ function
 
 We can use these 2D character vectors as coordinates to plot the character on a 2D plane:
 
-(plot goes here)
-
-
-
-<CharacterPlot max={0.42} highlight="^@qT" />
+<CharacterPlot max={0.42} highlight="^@qTMuX$g=C" />

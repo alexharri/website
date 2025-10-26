@@ -1,3 +1,5 @@
+// Vibe coded with Claude
+
 import React, { useState, useMemo, useCallback } from "react";
 import { useStyles } from "../../utils/styles";
 import { CharacterPlotStyles } from "./CharacterPlot.styles";
@@ -11,6 +13,7 @@ interface CharacterPlotProps {
   characters?: string;
   max?: number;
   highlight?: string;
+  showHoverLine?: boolean;
 }
 
 /**
@@ -61,9 +64,11 @@ export const CharacterPlot: React.FC<CharacterPlotProps> = ({
   characters,
   max = 1,
   highlight: highlight = "",
+  showHoverLine = false,
 }) => {
   const s = useStyles(CharacterPlotStyles);
   const [hoveredChar, setHoveredChar] = useState<string | null>(null);
+  const [mousePos, setMousePos] = useState<{ x: number; y: number } | null>(null);
   const svgRef = React.useRef<SVGSVGElement>(null);
   const [svgWidth, setSvgWidth] = useState<number>(600);
 
@@ -73,7 +78,6 @@ export const CharacterPlot: React.FC<CharacterPlotProps> = ({
   // Load and filter characters
   const characterData = useMemo(() => {
     const allChars = getAlphabetCharacterVectors(alphabet);
-    console.log(allChars);
 
     if (!characters) {
       return allChars;
@@ -86,7 +90,7 @@ export const CharacterPlot: React.FC<CharacterPlotProps> = ({
 
   // Find nearest character to mouse position
   const findNearestCharacter = useCallback(
-    (svgX: number, svgY: number): string | null => {
+    (svgX: number, svgY: number, pixelToData: number): string | null => {
       let minDist = Infinity;
       let nearest: string | null = null;
 
@@ -100,9 +104,19 @@ export const CharacterPlot: React.FC<CharacterPlotProps> = ({
         }
       });
 
+      // When showHoverLine is false, only return nearest if within max distance
+      // Max distance is 20 pixels, converted to data units
+      if (!showHoverLine) {
+        const maxDistanceInPixels = 20;
+        const maxDistance = maxDistanceInPixels * pixelToData;
+        if (minDist > maxDistance) {
+          return null;
+        }
+      }
+
       return nearest;
     },
-    [characterData],
+    [characterData, showHoverLine],
   );
 
   // Handle mouse move
@@ -126,14 +140,19 @@ export const CharacterPlot: React.FC<CharacterPlotProps> = ({
       const dataX = mouseX;
       const dataY = max - mouseY;
 
-      const nearest = findNearestCharacter(dataX, dataY);
+      // Calculate pixel-to-data scale for distance threshold
+      const pixelToData = vbWidth / rect.width;
+
+      const nearest = findNearestCharacter(dataX, dataY, pixelToData);
       setHoveredChar(nearest);
+      setMousePos({ x: dataX, y: dataY });
     },
     [max, findNearestCharacter],
   );
 
   const handleMouseLeave = useCallback(() => {
     setHoveredChar(null);
+    setMousePos(null);
   }, []);
 
   // Track SVG width for font size calculation
@@ -203,7 +222,7 @@ export const CharacterPlot: React.FC<CharacterPlotProps> = ({
         <text
           key={`x-${i}`}
           x={pos}
-          y={max}
+          y={max + labelFontSize * 0.4}
           className={s("axisLabel")}
           dy="1.2em"
           fontSize={labelFontSize}
@@ -216,7 +235,7 @@ export const CharacterPlot: React.FC<CharacterPlotProps> = ({
       labels.push(
         <text
           key={`y-${i}`}
-          x={-labelFontSize * 2}
+          x={-labelFontSize * 1.7}
           y={max - pos}
           className={s("axisLabel")}
           dy="0.3em"
@@ -234,9 +253,9 @@ export const CharacterPlot: React.FC<CharacterPlotProps> = ({
   // Calculate padding in fixed pixel units, converted to viewBox units
   const viewBoxWidthTemp = max * 1.2; // Initial estimate for calculation
   const labelFontSizeForPadding = (12 / svgWidth) * viewBoxWidthTemp;
-  const paddingLeft = labelFontSizeForPadding * 4.5; // ~48px worth of padding for Y-axis labels
-  const paddingBottom = labelFontSizeForPadding * 3.5; // ~30px worth of padding for X-axis labels
-  const paddingRight = labelFontSizeForPadding * 1; // ~12px worth of padding on the right
+  const paddingLeft = labelFontSizeForPadding * 4;
+  const paddingBottom = labelFontSizeForPadding * 4;
+  const paddingRight = labelFontSizeForPadding * 0;
 
   const viewBoxWidth = paddingLeft + max + paddingRight;
   const viewBoxHeight = max + paddingBottom;
@@ -255,6 +274,25 @@ export const CharacterPlot: React.FC<CharacterPlotProps> = ({
       >
         {/* Grid */}
         <g className={s("grid")}>{gridLines}</g>
+
+        {/* Hover line from mouse to closest point */}
+        {showHoverLine &&
+          hoveredChar &&
+          mousePos &&
+          (() => {
+            const charData = characterData.find((c) => c.char === hoveredChar);
+            if (!charData) return null;
+            const [x, y] = charData.vector;
+            return (
+              <line
+                x1={mousePos.x}
+                y1={max - mousePos.y}
+                x2={x}
+                y2={max - y}
+                className={s("hoverLine")}
+              />
+            );
+          })()}
 
         {/* Axis labels */}
         <g className={s("axisLabels")}>{axisLabels}</g>
