@@ -15,13 +15,21 @@ interface Props {
   config: AsciiRenderConfig | null;
   transparent: boolean;
   hideAscii: boolean;
+  showSamplingCircles: boolean;
   showSamplingPoints: boolean;
   debugVizOptions: DebugVizOptions;
 }
 
 export function AsciiRenderer(props: Props) {
-  const { debugVizOptions, transparent, hideAscii, showSamplingPoints, samplingDataRef, config } =
-    props;
+  const {
+    debugVizOptions,
+    transparent,
+    hideAscii,
+    showSamplingCircles,
+    showSamplingPoints,
+    samplingDataRef,
+    config,
+  } = props;
 
   const containerRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
@@ -77,7 +85,7 @@ export function AsciiRenderer(props: Props) {
   }, [updateAsciiText]);
 
   let background: string;
-  if (showSamplingPoints) {
+  if (showSamplingCircles || showSamplingPoints) {
     background = hexToRgbaString(colors.background200, 0.5);
   } else if (transparent && hideAscii) {
     background = "transparent";

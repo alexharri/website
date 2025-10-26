@@ -57,14 +57,17 @@ export function renderAsciiDebugViz(
   const samplingPointRadius = 2.5;
 
   if (options.showGrid) {
+    const TRESHOLD = 1;
     ctx.fillStyle = hexToRgbaString(colors.blue, 0.5);
     ctx.beginPath();
     for (let row = 1; row < config.rows; row++) {
       const y = config.offsetY + config.boxHeight * row;
+      if (Math.abs(y) < TRESHOLD || Math.abs(y - config.canvasHeight) < TRESHOLD) continue;
       ctx.rect(0, y, config.canvasWidth, 1);
     }
     for (let col = 1; col < config.cols; col++) {
       const x = config.offsetX + config.boxWidth * col;
+      if (Math.abs(x) < TRESHOLD || Math.abs(x - config.canvasWidth) < TRESHOLD) continue;
       ctx.rect(x, 0, 1, config.canvasHeight);
     }
     ctx.fill();

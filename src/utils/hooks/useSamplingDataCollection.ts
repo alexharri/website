@@ -31,10 +31,11 @@ interface UseSamplingDataCollectionParams {
   config: AsciiRenderConfig | null;
   debug: SamplingDebug;
   lightnessEasingFunction?: string;
+  forceSamplingValue?: number;
 }
 
 export function useSamplingDataCollection(params: UseSamplingDataCollectionParams) {
-  const { refs, config, debug, lightnessEasingFunction } = params;
+  const { refs, config, debug, lightnessEasingFunction, forceSamplingValue } = params;
   const { canvasRef, samplingDataRef, debugCanvasRef, onFrameRef } = refs;
   const { showSamplingPoints, showSamplingCircles, debugVizOptions } = debug;
 
@@ -66,7 +67,7 @@ export function useSamplingDataCollection(params: UseSamplingDataCollectionParam
             showSamplingCircles === true ? "raw" : showSamplingCircles,
             undefined,
             undefined,
-            undefined,
+            forceSamplingValue,
           );
         }
       }

@@ -4,6 +4,7 @@ import { circleScene } from "./scenes/circle";
 import { shadeSplitScene } from "./scenes/shadeSplit";
 import shade_split_0 from "./scenes/shade_split_0";
 import circle_zoomed from "./scenes/circle_zoomed";
+import circle_zoomed_bottom from "./scenes/circle_zoomed_bottom";
 import circle_sample_quality from "./scenes/circle_sample_quality";
 import circle_bottom from "./scenes/circle_bottom";
 import diagonal_split from "./scenes/diagonal_split";
@@ -21,6 +22,7 @@ export const canvas2DScenes: Partial<Record<string, React.ComponentType<Scene2DP
   "shade-split": shadeSplitScene,
   shade_split_0,
   circle_zoomed,
+  circle_zoomed_bottom,
   rotating_square,
   slanted_line,
 };

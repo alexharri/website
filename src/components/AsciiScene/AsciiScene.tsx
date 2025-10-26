@@ -215,6 +215,7 @@ export const AsciiScene: React.FC<AsciiSceneProps> = (props) => {
     config,
     debug: { showSamplingPoints, showSamplingCircles, debugVizOptions },
     lightnessEasingFunction,
+    forceSamplingValue,
   });
 
   const isCharacterMode = typeof children === "string";
@@ -294,6 +295,7 @@ export const AsciiScene: React.FC<AsciiSceneProps> = (props) => {
                 transparent={viewMode === "transparent"}
                 hideAscii={hideAscii}
                 showSamplingPoints={showSamplingPoints}
+                showSamplingCircles={showSamplingCircles !== "none"}
               />,
               isCharacterMode ? null : children,
             ]}

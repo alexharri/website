@@ -279,7 +279,7 @@ Our current approach doesn't really consider _which_ samples are light and which
 
 We can make our ASCII renderings fara more crisp by picking characters based on their shape. Here's the circle rendered that way:
 
-<AsciiScene width={360} height={408} fontSize={20} rowHeight={24} columnWidth={20} viewModes={["ascii", "transparent"]} sampleQuality={8}>
+<AsciiScene width={360} height={408} fontSize={20} rowHeight={24} columnWidth={20} viewModes={["ascii", "transparent"]} sampleQuality={8} increaseContrast>
   <Scene2D scene="circle_raised" />
 </AsciiScene>
 
@@ -366,6 +366,48 @@ We can also represent this numerically. I'll define a $\text{shape}(C)$ function
 \text{shape}(\texttt{@}) &= \begin{bmatrix} 0.277 \\ 0.281 \end{bmatrix} \\
 \end{align}$$</p>
 
-We can use these 2D character vectors as coordinates to plot the character on a 2D plane:
+We can use also these character vectors as 2D coordinates and plot the character on a 2D plane:
 
-<CharacterPlot max={0.42} highlight="^@qTMuX$g=C" />
+<CharacterPlot max={0.435} highlight="^@qTMuX$g=C" />
+
+
+### Shape-based lookup
+
+With our characters layed out on a 2D plane, we can, given input 2D coordinates, use those to resolve the "best" character for those coordinates. Try hovering the chart below to see what I mean:
+
+<CharacterPlot max={0.435} highlight="^@qTMuX$g=C" showHoverLine />
+
+Our problem, then, is calculating 2D coordinates for each cell in our grid to use for this lookup.
+
+Let's consider the following zoomed in circle. I made the canvas' size so that it splits cleanly into three grid cells:
+
+<AsciiScene alphabet="two-samples" fontSize={200} rows={1} cols={3} viewMode="canvas" showGrid>
+  <Scene2D scene="circle_zoomed_bottom" />
+</AsciiScene>
+
+Overlaying our sampling circles, we see varying degrees of overlap:
+
+<AsciiScene alphabet="two-samples" fontSize={200} rows={1} cols={3} hideAscii showGrid showSamplingCircles forceSamplingValue={0} log>
+  <Scene2D scene="circle_zoomed_bottom" />
+</AsciiScene>
+
+We haven't calculated the actual sampling values for these circles yet. We can't do that without determining the number of samples and the position of those samples within the circles.
+
+When calculating the values for our character vectors, we could use a really high number of samples because we only need to generate those once up front. After they're generated, we can use them again and again. But when converting an image to ASCII -- especially an animated canvas -- performance matters. We can't just sample indiscriminately without considering performance.
+
+Let's pick a sampling quality of $3$, with the samples placed like so:
+
+<AsciiScene alphabet="two-samples" fontSize={200} rows={1} cols={3} hideAscii showGrid showSamplingCircles showSamplingPoints increaseContrast>
+  <Scene2D scene="circle_zoomed_bottom" />
+</AsciiScene>
+
+For the top sampling circle of the leftmost cell, one of the samples is white with the two other being black. That gives us a lightness of $0.66$ repeating. Doing the same calculation for all three cells, we get the following vectors:
+
+<p className="mathblock">$$\begin{gathered}
+\left[\, \begin{matrix} 0.66 \\ 0 \end{matrix} \,\right]
+\:
+\left[\, \begin{matrix} 1 \\ 0.33 \end{matrix} \,\right]
+\:
+\left[\, \begin{matrix} 1 \\ 0.66 \end{matrix} \,\right]
+\end{gathered}$$</p>
+
