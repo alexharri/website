@@ -372,4 +372,4 @@ We can use these 2D character vectors as coordinates to plot the character on a 
 
 
 
-<CharacterPlot max={0.5} />
+<CharacterPlot max={0.42} highlight="^@qT" />

@@ -43,20 +43,36 @@ export const CharacterPlotStyles = ({ styled }: StyleOptions) => ({
     text-anchor: middle;
   `,
 
-  characters: styled.css`
-    /* Character group styles */
+  axisTitle: styled.css`
+    fill: ${colors.text700};
+    font-family: ${cssVariables.fontFamily};
+    font-weight: 500;
+    text-anchor: middle;
   `,
 
-  character: styled.css`
+  points: styled.css`
+    /* Points group styles */
+  `,
+
+  point: styled.css`
+    fill: ${colors.text700};
+    cursor: pointer;
+    transition: r 0.2s ease, fill 0.2s ease;
+  `,
+
+  pointHovered: styled.css`
+    fill: ${colors.text};
+  `,
+
+  characterLabelBackground: styled.css`
+    fill: ${colors.background};
+    pointer-events: none;
+  `,
+
+  characterLabel: styled.css`
     fill: ${colors.text};
     font-family: ${cssVariables.fontMonospace};
-    cursor: pointer;
-    transition: all 0.15s ease;
-    user-select: none;
-  `,
-
-  characterHovered: styled.css`
-    fill: ${colors.blue400};
     font-weight: 600;
+    pointer-events: none;
   `,
 });

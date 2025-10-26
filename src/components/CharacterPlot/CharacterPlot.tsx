@@ -10,6 +10,7 @@ interface CharacterPlotProps {
   alphabet?: AlphabetName;
   characters?: string;
   max?: number;
+  highlight?: string;
 }
 
 /**
@@ -59,11 +60,15 @@ export const CharacterPlot: React.FC<CharacterPlotProps> = ({
   alphabet = "two-samples",
   characters,
   max = 1,
+  highlight: highlight = "",
 }) => {
   const s = useStyles(CharacterPlotStyles);
   const [hoveredChar, setHoveredChar] = useState<string | null>(null);
   const svgRef = React.useRef<SVGSVGElement>(null);
   const [svgWidth, setSvgWidth] = useState<number>(600);
+
+  // Set of characters that should be highlighted by default
+  const highlightedSet = useMemo(() => new Set(highlight.split("")), [highlight]);
 
   // Load and filter characters
   const characterData = useMemo(() => {
@@ -162,7 +167,14 @@ export const CharacterPlot: React.FC<CharacterPlotProps> = ({
 
       // Horizontal lines
       lines.push(
-        <line key={`h-${i}`} x1={0} y1={pos} x2={max} y2={pos} className={s("gridLine")} />,
+        <line
+          key={`h-${i}`}
+          x1={0}
+          y1={max - pos}
+          x2={max}
+          y2={max - pos}
+          className={s("gridLine")}
+        />,
       );
     }
 
@@ -184,18 +196,33 @@ export const CharacterPlot: React.FC<CharacterPlotProps> = ({
       if (pos > max) break;
 
       // Format value nicely - remove unnecessary decimals
-      const value = pos.toFixed(3).replace(/\.?0+$/, '');
+      const value = pos.toFixed(3).replace(/\.?0+$/, "");
 
       // X-axis labels (bottom)
       labels.push(
-        <text key={`x-${i}`} x={pos} y={max} className={s("axisLabel")} dy="1.2em" fontSize={labelFontSize}>
+        <text
+          key={`x-${i}`}
+          x={pos}
+          y={max}
+          className={s("axisLabel")}
+          dy="1.2em"
+          fontSize={labelFontSize}
+        >
           {value}
         </text>,
       );
 
       // Y-axis labels (left)
       labels.push(
-        <text key={`y-${i}`} x={-labelFontSize * 2} y={max - pos} className={s("axisLabel")} dy="0.3em" textAnchor="end" fontSize={labelFontSize}>
+        <text
+          key={`y-${i}`}
+          x={-labelFontSize * 2}
+          y={max - pos}
+          className={s("axisLabel")}
+          dy="0.3em"
+          textAnchor="end"
+          fontSize={labelFontSize}
+        >
           {value}
         </text>,
       );
@@ -207,14 +234,14 @@ export const CharacterPlot: React.FC<CharacterPlotProps> = ({
   // Calculate padding in fixed pixel units, converted to viewBox units
   const viewBoxWidthTemp = max * 1.2; // Initial estimate for calculation
   const labelFontSizeForPadding = (12 / svgWidth) * viewBoxWidthTemp;
-  const paddingLeft = labelFontSizeForPadding * 4; // ~48px worth of padding for Y-axis labels
-  const paddingBottom = labelFontSizeForPadding * 2.5; // ~30px worth of padding for X-axis labels
+  const paddingLeft = labelFontSizeForPadding * 4.5; // ~48px worth of padding for Y-axis labels
+  const paddingBottom = labelFontSizeForPadding * 3.5; // ~30px worth of padding for X-axis labels
   const paddingRight = labelFontSizeForPadding * 1; // ~12px worth of padding on the right
 
   const viewBoxWidth = paddingLeft + max + paddingRight;
   const viewBoxHeight = max + paddingBottom;
-  const charFontSize = (16 / svgWidth) * (viewBoxWidth);
-  const charFontSizeHovered = (20 / svgWidth) * (viewBoxWidth);
+  const charFontSize = (16 / svgWidth) * viewBoxWidth;
+  const charFontSizeHovered = (20 / svgWidth) * viewBoxWidth;
 
   return (
     <div className={s("container")}>
@@ -232,30 +259,134 @@ export const CharacterPlot: React.FC<CharacterPlotProps> = ({
         {/* Axis labels */}
         <g className={s("axisLabels")}>{axisLabels}</g>
 
+        {/* Axis titles */}
+        <text
+          x={max / 2}
+          y={max + paddingBottom * 0.85}
+          className={s("axisTitle")}
+          textAnchor="middle"
+          fontSize={charFontSize * 0.9}
+        >
+          Upper
+        </text>
+        <text
+          x={-paddingLeft * 0.95}
+          y={max / 2}
+          className={s("axisTitle")}
+          textAnchor="middle"
+          dominantBaseline="middle"
+          fontSize={charFontSize * 0.9}
+          transform={`rotate(-90, ${-paddingLeft * 0.95}, ${max / 2})`}
+        >
+          Lower
+        </text>
+
         {/* Plot border */}
         <rect x={0} y={0} width={max} height={max} className={s("plotBorder")} />
 
-        {/* Characters */}
-        <g className={s("characters")}>
+        {/* Character points */}
+        <g className={s("points")}>
           {characterData.map((char) => {
             const [x, y] = char.vector; // vector = [upper, lower]
             const isHovered = hoveredChar === char.char;
+            const isHighlighted = !hoveredChar && highlightedSet.has(char.char);
+            const shouldHighlight = isHovered || isHighlighted;
+            const pointRadius = isHovered ? charFontSize * 0.21 : charFontSize * 0.12;
 
             return (
-              <text
+              <circle
                 key={char.char}
-                x={x} // X-axis = upper circle density
-                y={max - y} // Y-axis = lower circle density (SVG y increases downward, matching "lower")
-                className={s("character", { characterHovered: isHovered })}
-                textAnchor="middle"
-                dominantBaseline="central"
-                fontSize={isHovered ? charFontSizeHovered : charFontSize}
-              >
-                {char.char}
-              </text>
+                cx={x} // X-axis = upper circle density
+                cy={max - y} // Y-axis = lower circle density (SVG y increases downward, matching "lower")
+                r={pointRadius}
+                className={s("point", { pointHovered: shouldHighlight })}
+              />
             );
           })}
         </g>
+
+        {/* Character labels */}
+        {(() => {
+          // Show hovered character at full opacity
+          const hoveredLabel = hoveredChar
+            ? (() => {
+                const charData = characterData.find((c) => c.char === hoveredChar);
+                if (!charData) return null;
+                const [x, y] = charData.vector;
+                const labelY = max - y - charFontSize * 1.2;
+
+                return (
+                  <g key={`label-${hoveredChar}`}>
+                    {/* Background rectangle */}
+                    <rect
+                      x={x - charFontSizeHovered * 0.6}
+                      y={labelY - charFontSizeHovered * 0.6}
+                      width={charFontSizeHovered * 1.2}
+                      height={charFontSizeHovered * 1.2}
+                      className={s("characterLabelBackground")}
+                      rx={charFontSizeHovered * 0.15}
+                    />
+                    {/* Character text */}
+                    <text
+                      x={x}
+                      y={labelY}
+                      className={s("characterLabel")}
+                      textAnchor="middle"
+                      dominantBaseline="middle"
+                      fontSize={charFontSizeHovered}
+                    >
+                      {hoveredChar}
+                    </text>
+                  </g>
+                );
+              })()
+            : null;
+
+          // Show highlighted characters (faded if hovering something else)
+          const highlightedLabels = Array.from(highlightedSet).map((char) => {
+            const charData = characterData.find((c) => c.char === char);
+            if (!charData) return null;
+            const [x, y] = charData.vector;
+            const labelY = max - y - charFontSize * 1.2;
+            const opacity = hoveredChar ? 0.3 : 1;
+
+            return (
+              <g
+                key={`label-${char}`}
+                opacity={opacity}
+                style={{ transition: "opacity 0.2s ease" }}
+              >
+                {/* Background rectangle */}
+                <rect
+                  x={x - charFontSizeHovered * 0.6}
+                  y={labelY - charFontSizeHovered * 0.6}
+                  width={charFontSizeHovered * 1.2}
+                  height={charFontSizeHovered * 1.2}
+                  className={s("characterLabelBackground")}
+                  rx={charFontSizeHovered * 0.15}
+                />
+                {/* Character text */}
+                <text
+                  x={x}
+                  y={labelY}
+                  className={s("characterLabel")}
+                  textAnchor="middle"
+                  dominantBaseline="middle"
+                  fontSize={charFontSizeHovered}
+                >
+                  {char}
+                </text>
+              </g>
+            );
+          });
+
+          return (
+            <>
+              {highlightedLabels}
+              {hoveredLabel}
+            </>
+          );
+        })()}
       </svg>
     </div>
   );
