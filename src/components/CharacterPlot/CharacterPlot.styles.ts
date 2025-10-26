@@ -80,4 +80,22 @@ export const CharacterPlotStyles = ({ styled }: StyleOptions) => ({
     stroke-width: 0.002;
     pointer-events: none;
   `,
+
+  inputLine: styled.css`
+    stroke: ${colors.blue};
+    stroke-width: 0.002;
+    pointer-events: none;
+  `,
+
+  inputPoint: styled.css`
+    fill: ${colors.blue};
+    pointer-events: none;
+  `,
+
+  inputLabel: styled.css`
+    fill: ${colors.blue};
+    font-family: ${cssVariables.fontMonospace};
+    font-weight: 600;
+    pointer-events: none;
+  `,
 });

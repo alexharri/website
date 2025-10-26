@@ -8,12 +8,19 @@ import {
   getAlphabetCharacterVectors,
 } from "../AsciiRenderer/alphabets/AlphabetManager";
 
+interface InputPoint {
+  vector: [number, number];
+  label?: string;
+}
+
 interface CharacterPlotProps {
   alphabet?: AlphabetName;
   characters?: string;
   max?: number;
   highlight?: string;
   showHoverLine?: boolean;
+  inputPoints?: InputPoint[];
+  normalize?: boolean;
 }
 
 /**
@@ -65,6 +72,8 @@ export const CharacterPlot: React.FC<CharacterPlotProps> = ({
   max = 1,
   highlight: highlight = "",
   showHoverLine = false,
+  inputPoints = [],
+  normalize = false,
 }) => {
   const s = useStyles(CharacterPlotStyles);
   const [hoveredChar, setHoveredChar] = useState<string | null>(null);
@@ -79,18 +88,41 @@ export const CharacterPlot: React.FC<CharacterPlotProps> = ({
   const characterData = useMemo(() => {
     const allChars = getAlphabetCharacterVectors(alphabet);
 
-    if (!characters) {
-      return allChars;
+    let filteredChars = allChars;
+    if (characters) {
+      // Filter to only the hand-picked characters
+      const charSet = new Set(characters.split(""));
+      filteredChars = allChars.filter((c) => charSet.has(c.char));
     }
 
-    // Filter to only the hand-picked characters
-    const charSet = new Set(characters.split(""));
-    return allChars.filter((c) => charSet.has(c.char));
-  }, [alphabet, characters]);
+    // Normalize vectors to [0..max] if requested
+    if (normalize) {
+      // Find max values across all dimensions (assume min is 0)
+      let maxX = -Infinity;
+      let maxY = -Infinity;
 
-  // Find nearest character to mouse position
+      filteredChars.forEach((char) => {
+        const [x, y] = char.vector;
+        maxX = Math.max(maxX, x);
+        maxY = Math.max(maxY, y);
+      });
+
+      // Remap each vector from [0..maxX/maxY] to [0..max]
+      return filteredChars.map((char) => ({
+        ...char,
+        vector: [
+          maxX > 0 ? (char.vector[0] / maxX) * max : 0,
+          maxY > 0 ? (char.vector[1] / maxY) * max : 0,
+        ] as [number, number],
+      }));
+    }
+
+    return filteredChars;
+  }, [alphabet, characters, normalize, max]);
+
+  // Find nearest character to a point
   const findNearestCharacter = useCallback(
-    (svgX: number, svgY: number, pixelToData: number): string | null => {
+    (svgX: number, svgY: number, pixelToData?: number): string | null => {
       let minDist = Infinity;
       let nearest: string | null = null;
 
@@ -104,9 +136,9 @@ export const CharacterPlot: React.FC<CharacterPlotProps> = ({
         }
       });
 
-      // When showHoverLine is false, only return nearest if within max distance
+      // When showHoverLine is false and pixelToData is provided, only return nearest if within max distance
       // Max distance is 20 pixels, converted to data units
-      if (!showHoverLine) {
+      if (!showHoverLine && pixelToData !== undefined) {
         const maxDistanceInPixels = 20;
         const maxDistance = maxDistanceInPixels * pixelToData;
         if (minDist > maxDistance) {
@@ -275,25 +307,6 @@ export const CharacterPlot: React.FC<CharacterPlotProps> = ({
         {/* Grid */}
         <g className={s("grid")}>{gridLines}</g>
 
-        {/* Hover line from mouse to closest point */}
-        {showHoverLine &&
-          hoveredChar &&
-          mousePos &&
-          (() => {
-            const charData = characterData.find((c) => c.char === hoveredChar);
-            if (!charData) return null;
-            const [x, y] = charData.vector;
-            return (
-              <line
-                x1={mousePos.x}
-                y1={max - mousePos.y}
-                x2={x}
-                y2={max - y}
-                className={s("hoverLine")}
-              />
-            );
-          })()}
-
         {/* Axis labels */}
         <g className={s("axisLabels")}>{axisLabels}</g>
 
@@ -342,6 +355,88 @@ export const CharacterPlot: React.FC<CharacterPlotProps> = ({
             );
           })}
         </g>
+
+        {/* Hover line from mouse to closest point */}
+        {showHoverLine &&
+          hoveredChar &&
+          mousePos &&
+          (() => {
+            const charData = characterData.find((c) => c.char === hoveredChar);
+            if (!charData) return null;
+            const [x, y] = charData.vector;
+            return (
+              <line
+                x1={mousePos.x}
+                y1={max - mousePos.y}
+                x2={x}
+                y2={max - y}
+                className={s("hoverLine")}
+              />
+            );
+          })()}
+
+        {/* Input points and their connections to nearest characters */}
+        {inputPoints.map((inputPoint, i) => {
+          const [inputX, inputY] = inputPoint.vector;
+          const nearestChar = findNearestCharacter(inputX, inputY);
+          if (!nearestChar) return null;
+
+          const charData = characterData.find((c) => c.char === nearestChar);
+          if (!charData) return null;
+
+          const [charX, charY] = charData.vector;
+
+          // Calculate label positioning to keep it within bounds
+          let labelX = inputX;
+          let labelAnchor: "middle" | "start" | "end" = "middle";
+          const labelWidth = charFontSize * 0.8 * (inputPoint.label?.length || 0) * 0.6; // Rough estimate
+          const halfLabelWidth = labelWidth / 2;
+
+          if (inputPoint.label) {
+            // Check if label would overflow on the right
+            if (inputX + halfLabelWidth > max) {
+              labelX = max;
+              labelAnchor = "end";
+            }
+            // Check if label would overflow on the left
+            else if (inputX - halfLabelWidth < 0) {
+              labelX = 0;
+              labelAnchor = "start";
+            }
+          }
+
+          return (
+            <g key={`input-${i}`}>
+              {/* Line from input point to nearest character */}
+              <line
+                x1={inputX}
+                y1={max - inputY}
+                x2={charX}
+                y2={max - charY}
+                className={s("inputLine")}
+              />
+              {/* Input point circle */}
+              <circle
+                cx={inputX}
+                cy={max - inputY}
+                r={charFontSize * 0.15}
+                className={s("inputPoint")}
+              />
+              {/* Optional label */}
+              {inputPoint.label && (
+                <text
+                  x={labelX}
+                  y={max - inputY - charFontSize * 0.8}
+                  className={s("inputLabel")}
+                  textAnchor={labelAnchor}
+                  fontSize={charFontSize * 0.8}
+                >
+                  {inputPoint.label}
+                </text>
+              )}
+            </g>
+          );
+        })}
 
         {/* Character labels */}
         {(() => {

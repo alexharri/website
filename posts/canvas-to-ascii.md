@@ -393,21 +393,66 @@ Overlaying our sampling circles, we see varying degrees of overlap:
 
 We haven't calculated the actual sampling values for these circles yet. We can't do that without determining the number of samples and the position of those samples within the circles.
 
-When calculating the values for our character vectors, we could use a really high number of samples because we only need to generate those once up front. After they're generated, we can use them again and again. But when converting an image to ASCII -- especially an animated canvas -- performance matters. We can't just sample indiscriminately without considering performance.
+When calculating the values for our character vectors, we could afford to use a really high number of samples because we only need to generate the character vectors once up front. After they're generated, we can use them again and again.
+
+But when converting an image to ASCII -- especially an animated canvas -- performance matters a lot. We can't just sample indiscriminately without considering performance.
 
 Let's pick a sampling quality of $3$, with the samples placed like so:
 
-<AsciiScene alphabet="two-samples" fontSize={200} rows={1} cols={3} hideAscii showGrid showSamplingCircles showSamplingPoints increaseContrast>
+<AsciiScene alphabet="two-samples" sampleQuality={3} fontSize={200} rows={1} cols={3} hideAscii showGrid showSamplingCircles showSamplingPoints increaseContrast>
   <Scene2D scene="circle_zoomed_bottom" />
 </AsciiScene>
 
-For the top sampling circle of the leftmost cell, one of the samples is white with the two other being black. That gives us a lightness of $0.66$ repeating. Doing the same calculation for all three cells, we get the following vectors:
+For the top sampling circle of the leftmost cell, we get one white sample and two black. That gives us an average lightness of $0.33$ repeating for the sampling circle. Doing the same calculation for all three cells, we get the following vectors:
 
 <p className="mathblock">$$\begin{gathered}
-\left[\, \begin{matrix} 0.66 \\ 0 \end{matrix} \,\right]
+\left[\, \begin{matrix} 0.33 \\ 0 \end{matrix} \,\right]
 \:
 \left[\, \begin{matrix} 1 \\ 0.33 \end{matrix} \,\right]
 \:
 \left[\, \begin{matrix} 1 \\ 0.66 \end{matrix} \,\right]
 \end{gathered}$$</p>
 
+We can then perform a nearest-neighbor search on the 2D plot using these as input coordinates. Let's see what that looks like on our plot from before -- I'll color the points blue and label them "Left", "Middle", and "Right":
+
+<CharacterPlot highlight="P$" inputPoints={[
+  { vector: [0.33, 0], label: "Left" },
+  { vector: [1, 0.33], label: "Middle" },
+  { vector: [1, 0.66], label: "Right" }
+]} />
+
+Hmm... this is not quite what we want. Since none of the vector components exceed $0.4$, they're all clustered towards the bottom-left region of our plot. This makes our relatively high input vectors map to a few character on the edge of the cluster.
+
+We can fix this by _normalizing_ the character vectors. We'll do that by taking the maximum value of each component across all character vectors, and dividing the components of each character vectors by the maximum. Expressed in code, this looks like so:
+
+```ts
+const max = [0, 0]
+
+for (const vector of characterVectors) {
+  for (const [i, value] of Object.entries(vector)) {
+    if (value > max[i]) {
+      max[i] = value;
+    }
+  }
+}
+
+const normalizedCharacterVectors = characterVectors.map(
+  vector => vector.map((value, i) => value / max[i])
+)
+```
+
+Here's what the plot looks like with the characters normalized:
+
+<CharacterPlot highlight="^@qTMuX$g=C" normalize />
+
+If we now map the input vectors to their nearest neighbors, we get a much more sensible result:
+
+<CharacterPlot highlight="M$^" inputPoints={[
+  { vector: [0.66, 0], label: "Left" },
+  { vector: [1, 0.33], label: "Middle" },
+  { vector: [1, 0.66], label: "Right" }
+]} normalize />
+
+<AsciiScene alphabet="two-samples" sampleQuality={3} fontSize={200} rows={1} cols={3} showGrid showSamplingCircles showSamplingPoints increaseContrast>
+  <Scene2D scene="circle_zoomed_bottom" />
+</AsciiScene>

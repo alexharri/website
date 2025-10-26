@@ -67,6 +67,7 @@ function sampleCircularRegion(
   scale: number,
   collectSubsamples: boolean,
   flipY: boolean,
+  effect: (value: number) => number,
 ): { averageLightness: number; individualValues: number[] } {
   let totalLightness = 0;
   let sampleCount = 0;
@@ -90,7 +91,8 @@ function sampleCircularRegion(
       scale,
       flipY,
     );
-    const lightnessValue = lightness(hexColor);
+    const lightnessValue = effect(lightness(hexColor));
+
     totalLightness += lightnessValue;
     sampleCount++;
 
@@ -175,6 +177,7 @@ export function generateSamplingData(
     samplingCircleCenterPoints: { x: number; y: number }[],
     collectSubsamples: boolean,
     flipY: boolean,
+    effect: (value: number) => number,
   ): { samplingVector: number[]; subsamples: number[][] } {
     const [sampleRectLeft, sampleRectTop] = config.sampleRectPosition(col, row);
     const samplingVector: number[] = [];
@@ -193,6 +196,7 @@ export function generateSamplingData(
         pixelBufferScale,
         collectSubsamples,
         flipY,
+        effect,
       );
       samplingVector.push(result.averageLightness);
       subsamples.push(result.individualValues);
@@ -200,6 +204,10 @@ export function generateSamplingData(
 
     return { samplingVector, subsamples };
   }
+
+  const effect = easingLookupTable
+    ? (value: number) => applyEasingLookup(value, easingLookupTable)
+    : (v: number) => v;
 
   const samplingData: CharacterSamplingData[][] = [];
 
@@ -215,15 +223,12 @@ export function generateSamplingData(
         metadata.samplingConfig.points,
         shouldCollectSubsamples,
         flipY,
+        effect,
       );
-      const rawSamplingVector = rawSamplingResult.samplingVector;
-      const samplingVectorSubsamples = rawSamplingResult.subsamples;
+      let rawSamplingVector = rawSamplingResult.samplingVector;
+      let samplingVectorSubsamples = rawSamplingResult.subsamples;
 
       let samplingVector = [...rawSamplingVector];
-
-      if (easingLookupTable) {
-        samplingVector = samplingVector.map((value) => applyEasingLookup(value, easingLookupTable));
-      }
 
       let externalSamplingVector: number[] = [];
       if ("externalPoints" in samplingConfig) {
@@ -233,6 +238,7 @@ export function generateSamplingData(
           samplingConfig.externalPoints,
           false,
           flipY,
+          effect,
         );
         externalSamplingVector = externalResult.samplingVector;
         samplingVector = crunchSamplingVectorDirectional(
