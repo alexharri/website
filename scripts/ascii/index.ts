@@ -21,13 +21,13 @@ class AsciiVectorBuilder {
   constructor(
     samplingConfig: SamplingConfig,
     characters: string[] = combineAlphabets([Alphabet.ASCII]),
-    canvasWidth: number = 48,
-    canvasHeight: number = 64,
-    fontFamily: string = "monospace",
-    fontSize: number = 32,
-    customFontPaths: { [key: string]: string[] } = {},
-    blurRadius: number = 0,
-    pickMostDistinct: number | null = null,
+    canvasWidth: number,
+    canvasHeight: number,
+    fontFamily: string,
+    fontSize: number,
+    customFontPaths: { [key: string]: string[] },
+    blurRadius: number,
+    pickMostDistinct: number | null,
   ) {
     this.samplingConfig = samplingConfig;
     this.characters = characters;

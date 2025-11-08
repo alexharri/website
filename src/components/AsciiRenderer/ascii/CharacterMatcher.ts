@@ -35,6 +35,10 @@ export class CharacterMatcher {
   private samplingConfig!: SamplingConfig;
   private metadata!: AlphabetMetadata;
   private currentAlphabet: AlphabetName = "default";
+  private characters: {
+    data: string;
+    vector: number[];
+  }[] = [];
 
   constructor() {}
 
@@ -47,7 +51,8 @@ export class CharacterMatcher {
       effect(vectors);
     }
 
-    this.kdTree = new KdTree(characterVectors.map(({ vector, char }) => ({ vector, data: char })));
+    this.characters = characterVectors.map(({ char }, i) => ({ vector: vectors[i], data: char }));
+    this.kdTree = new KdTree(this.characters);
     this.currentAlphabet = alphabet;
     this.metadata = metadata;
     this.samplingConfig = metadata.samplingConfig;
@@ -56,6 +61,20 @@ export class CharacterMatcher {
   findBestCharacter(samplingVector: number[]): string {
     const result = this.kdTree.findNearest(samplingVector);
     return result ? result.data : " ";
+  }
+
+  // Here for performance comparison
+  findBestCharacterBruteForce(samplingVector: number[]): string {
+    let best = "";
+    let bestDistance = Infinity;
+    for (const item of this.characters) {
+      const dist = euclideanDistanceSquared(item.vector, samplingVector);
+      if (dist < bestDistance) {
+        bestDistance = dist;
+        best = item.data;
+      }
+    }
+    return best;
   }
 
   getSamplingConfig(): SamplingConfig {
@@ -69,4 +88,14 @@ export class CharacterMatcher {
   getCurrentAlphabet(): AlphabetName {
     return this.currentAlphabet;
   }
+}
+
+function euclideanDistanceSquared(a: number[], b: number[]): number {
+  let sumSquared = 0;
+  for (let i = 0; i < a.length; i++) {
+    const diff = a[i] - b[i];
+    sumSquared += diff * diff;
+  }
+
+  return sumSquared;
 }

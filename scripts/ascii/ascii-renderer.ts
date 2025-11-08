@@ -23,21 +23,30 @@ export class AsciiRenderer {
   private blurRadius: number;
 
   constructor(
-    width: number = 48,
-    height: number = 64,
+    width: number,
+    height: number,
     samplingConfig: SamplingConfig,
-    fontFamily: string = "monospace",
-    fontSize: number = 32,
-    customFontPaths: { [key: string]: string[] } = {},
-    blurRadius: number = 0,
+    fontFamily: string,
+    fontSize: number,
+    customFontPaths: { [key: string]: string[] },
+    blurRadius: number,
   ) {
-    this.width = width;
-    this.height = height;
-    this.samplingConfig = samplingConfig;
+    const SCALAR = 1;
+    function mapPoint(p: { x: number; y: number }) {
+      return { x: p.x * SCALAR, y: p.y * SCALAR };
+    }
+
+    this.width = width * SCALAR;
+    this.height = height * SCALAR;
+    this.samplingConfig = {
+      points: samplingConfig.points.map(mapPoint),
+      externalPoints: samplingConfig.externalPoints?.map(mapPoint),
+      circleRadius: samplingConfig.circleRadius * SCALAR,
+    };
     this.fontFamily = fontFamily;
-    this.fontSize = fontSize;
+    this.fontSize = fontSize * SCALAR;
     this.customFontPaths = customFontPaths;
-    this.blurRadius = blurRadius;
+    this.blurRadius = blurRadius * SCALAR;
 
     // Try to register custom fonts if needed
     this.tryRegisterCustomFonts();
@@ -82,13 +91,13 @@ export class AsciiRenderer {
 
     // Configure font
     ctx.fillStyle = "white";
-    ctx.font = `${this.fontSize}px ${this.fontFamily}`;
+    ctx.font = `${this.fontSize * 0.97}px ${this.fontFamily}`;
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
 
     // Center the character
-    const x = this.width / 2;
-    const y = this.height / 2;
+    const x = this.width * 0.5;
+    const y = this.height * 0.525;
 
     ctx.fillText(char, x, y);
 

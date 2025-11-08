@@ -18,6 +18,7 @@ interface Props {
   showSamplingCircles: boolean;
   showSamplingPoints: boolean;
   debugVizOptions: DebugVizOptions;
+  characterMode: boolean;
 }
 
 export function AsciiRenderer(props: Props) {
@@ -29,6 +30,7 @@ export function AsciiRenderer(props: Props) {
     showSamplingPoints,
     samplingDataRef,
     config,
+    characterMode,
   } = props;
 
   const containerRef = useRef<HTMLDivElement>(null);
@@ -40,7 +42,10 @@ export function AsciiRenderer(props: Props) {
   const characterMatcher = useMemo(() => {
     if (!config) return null;
     const matcher = new CharacterMatcher();
-    matcher.loadAlphabet(config.alphabet, [EFFECTS.componentWiseGlobalNormalization]);
+    matcher.loadAlphabet(
+      config.alphabet,
+      characterMode ? [] : [EFFECTS.componentWiseGlobalNormalization],
+    );
     return matcher;
   }, [config?.alphabet]);
 

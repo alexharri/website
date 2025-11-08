@@ -4,6 +4,7 @@ import { getAlphabetMetadata } from "../alphabets/AlphabetManager";
 
 import { AsciiRenderConfig } from "../renderConfig";
 import { clamp } from "../../../math/math";
+import { SamplingEffect } from "../types";
 
 const CONTRAST_EXPONENT_GLOBAL = 3;
 const CONTRAST_EXPONENT_LOCAL = 7;
@@ -161,9 +162,12 @@ export function generateSamplingData(
   collectSubsamples: boolean,
   flipY: boolean,
   lightnessEasingFunction?: string,
+  samplingEffects: SamplingEffect[] = [],
 ): CharacterSamplingData[][] {
   const metadata = getAlphabetMetadata(config.alphabet);
   const samplingConfig = metadata.samplingConfig;
+
+  const enabledEffects = new Set(samplingEffects);
 
   const easingLookupTable =
     lightnessEasingFunction && lightnessEasingFunction in easingLookupTables
@@ -241,13 +245,17 @@ export function generateSamplingData(
           effect,
         );
         externalSamplingVector = externalResult.samplingVector;
-        samplingVector = crunchSamplingVectorDirectional(
-          samplingVector,
-          externalSamplingVector,
-          CONTRAST_EXPONENT_LOCAL,
-        );
+        if (enabledEffects.has(SamplingEffect.Crunch)) {
+          samplingVector = crunchSamplingVectorDirectional(
+            samplingVector,
+            externalSamplingVector,
+            CONTRAST_EXPONENT_LOCAL,
+          );
+        }
       }
-      samplingVector = crunchSamplingVector(samplingVector, CONTRAST_EXPONENT_GLOBAL);
+      if (enabledEffects.has(SamplingEffect.Crunch)) {
+        samplingVector = crunchSamplingVector(samplingVector, CONTRAST_EXPONENT_GLOBAL);
+      }
 
       samplingDataRow.push({
         samplingVector,
@@ -277,6 +285,30 @@ export function samplingDataToAscii(
       }
 
       const selectedChar = matcher.findBestCharacter(cellSamplingData.samplingVector);
+      chars.push(selectedChar === "&nbsp;" ? " " : selectedChar);
+    }
+    chars.push("\n");
+  }
+
+  return chars.join("");
+}
+
+export function samplingDataToAsciiBrute(
+  matcher: CharacterMatcher,
+  samplingData: CharacterSamplingData[][],
+  config: AsciiRenderConfig,
+): string {
+  const chars: string[] = [];
+
+  for (let row = 0; row < config.rows; row++) {
+    for (let col = 0; col < config.cols; col++) {
+      const cellSamplingData = samplingData[row]?.[col];
+      if (!cellSamplingData) {
+        chars.push(" ");
+        continue;
+      }
+
+      const selectedChar = matcher.findBestCharacterBruteForce(cellSamplingData.samplingVector);
       chars.push(selectedChar === "&nbsp;" ? " " : selectedChar);
     }
     chars.push("\n");

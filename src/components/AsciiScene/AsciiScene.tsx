@@ -8,7 +8,11 @@ import { CanvasProvider, OnFrameOptions } from "../../contexts/CanvasContext";
 import { AsciiSceneControls } from "./AsciiSceneControls";
 import { ViewModeControl } from "../ViewModeControl";
 import { SplitView, ViewMode } from "../SplitView";
-import { DebugVizOptions, SamplingPointVisualizationMode } from "../AsciiRenderer/types";
+import {
+  DebugVizOptions,
+  SamplingPointVisualizationMode,
+  SamplingEffect,
+} from "../AsciiRenderer/types";
 import { NumberVariable } from "../variables";
 import { VariableValues, VariableSpec, VariableDict } from "../../types/variables";
 import { useSceneHeight } from "../../utils/hooks/useSceneHeight";
@@ -51,6 +55,7 @@ interface AsciiSceneProps {
   viewMode?: ViewModeKey;
   viewModes?: ViewModeKey[] | "all";
   pixelate?: boolean;
+  effects?: SamplingEffect[];
 }
 
 export const AsciiScene: React.FC<AsciiSceneProps> = (props) => {
@@ -74,6 +79,7 @@ export const AsciiScene: React.FC<AsciiSceneProps> = (props) => {
     rowHeight,
     columnWidth,
     increaseContrast,
+    effects,
   } = props;
   let { width: targetWidth, height: targetHeight, minWidth, lightnessEasingFunction } = props;
 
@@ -216,6 +222,7 @@ export const AsciiScene: React.FC<AsciiSceneProps> = (props) => {
     debug: { showSamplingPoints, showSamplingCircles, debugVizOptions },
     lightnessEasingFunction,
     forceSamplingValue,
+    samplingEffects: effects,
   });
 
   const isCharacterMode = typeof children === "string";
@@ -296,6 +303,7 @@ export const AsciiScene: React.FC<AsciiSceneProps> = (props) => {
                 hideAscii={hideAscii}
                 showSamplingPoints={showSamplingPoints}
                 showSamplingCircles={showSamplingCircles !== "none"}
+                characterMode={isCharacterMode}
               />,
               isCharacterMode ? null : children,
             ]}

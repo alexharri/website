@@ -8,6 +8,7 @@ import { renderAsciiDebugViz } from "../../components/AsciiRenderer/asciiDebugVi
 import {
   DebugVizOptions,
   SamplingPointVisualizationMode,
+  SamplingEffect,
 } from "../../components/AsciiRenderer/types";
 import { OnFrameOptions } from "../../contexts/CanvasContext";
 
@@ -32,10 +33,11 @@ interface UseSamplingDataCollectionParams {
   debug: SamplingDebug;
   lightnessEasingFunction?: string;
   forceSamplingValue?: number;
+  samplingEffects?: SamplingEffect[];
 }
 
 export function useSamplingDataCollection(params: UseSamplingDataCollectionParams) {
-  const { refs, config, debug, lightnessEasingFunction, forceSamplingValue } = params;
+  const { refs, config, debug, lightnessEasingFunction, forceSamplingValue, samplingEffects } = params;
   const { canvasRef, samplingDataRef, debugCanvasRef, onFrameRef } = refs;
   const { showSamplingPoints, showSamplingCircles, debugVizOptions } = debug;
 
@@ -54,6 +56,7 @@ export function useSamplingDataCollection(params: UseSamplingDataCollectionParam
           showSamplingPoints,
           options?.flipY ?? false,
           lightnessEasingFunction,
+          samplingEffects,
         );
 
         samplingDataRef.current = samplingData;
@@ -84,6 +87,7 @@ export function useSamplingDataCollection(params: UseSamplingDataCollectionParam
       showSamplingPoints,
       showSamplingCircles,
       debugVizOptions,
+      samplingEffects,
     ],
   );
 }

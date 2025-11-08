@@ -3,6 +3,7 @@
 import React, { useState, useMemo, useCallback } from "react";
 import { useStyles } from "../../utils/styles";
 import { CharacterPlotStyles } from "./CharacterPlot.styles";
+import { colors } from "../../utils/cssVariables";
 import {
   AlphabetName,
   getAlphabetCharacterVectors,
@@ -304,6 +305,21 @@ export const CharacterPlot: React.FC<CharacterPlotProps> = ({
         onMouseLeave={handleMouseLeave}
         preserveAspectRatio="xMidYMid meet"
       >
+        {/* Define arrowhead marker */}
+        <defs>
+          <marker
+            id="arrowhead"
+            markerWidth="8"
+            markerHeight="8"
+            refX="4"
+            refY="4"
+            orient="auto"
+            viewBox="0 0 8 8"
+          >
+            <path d="M0,0 L4,4 L0,8" stroke={colors.blue} strokeWidth="1.5" fill="none" />
+          </marker>
+        </defs>
+
         {/* Grid */}
         <g className={s("grid")}>{gridLines}</g>
 
@@ -386,6 +402,15 @@ export const CharacterPlot: React.FC<CharacterPlotProps> = ({
 
           const [charX, charY] = charData.vector;
 
+          // Shorten the line so arrow doesn't overlap the target point
+          const dx = charX - inputX;
+          const dy = charY - inputY;
+          const length = Math.sqrt(dx * dx + dy * dy);
+          const shortenBy = charFontSize * 0.5; // Stop before the point
+          const ratio = length > 0 ? (length - shortenBy) / length : 0;
+          const lineEndX = inputX + dx * ratio;
+          const lineEndY = inputY + dy * ratio;
+
           // Calculate label positioning to keep it within bounds
           let labelX = inputX;
           let labelAnchor: "middle" | "start" | "end" = "middle";
@@ -411,9 +436,10 @@ export const CharacterPlot: React.FC<CharacterPlotProps> = ({
               <line
                 x1={inputX}
                 y1={max - inputY}
-                x2={charX}
-                y2={max - charY}
+                x2={lineEndX}
+                y2={max - lineEndY}
                 className={s("inputLine")}
+                markerEnd="url(#arrowhead)"
               />
               {/* Input point circle */}
               <circle

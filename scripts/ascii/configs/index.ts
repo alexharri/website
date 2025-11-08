@@ -1,5 +1,6 @@
 import { defaultConfig } from "./default";
 import { threeSamplesConfig } from "./three-samples";
+import { sixSamplesConfig } from "./six-samples";
 import { twoSamplesConfig } from "./two-samples";
 import { ascii60Config } from "./ascii-60";
 import { programmingConfig } from "./programming";
@@ -14,6 +15,7 @@ export const configs = {
   "pixel-short": pixelShortConfig,
   "three-samples": threeSamplesConfig,
   "two-samples": twoSamplesConfig,
+  "six-samples": sixSamplesConfig,
 } as const;
 
 // Configs are the single source of truth

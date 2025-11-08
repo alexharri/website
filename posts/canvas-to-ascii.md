@@ -10,7 +10,7 @@ I've noticed a few common issues with how people generate the ASCII characters, 
 
 In this post, let's dive into how we can generate sharp ASCII arts from a dynamic input image. Here's an example of what we'll build:
 
-<AsciiScene height={540} fontSize={12} characterWidthMultiplier={0.85} characterHeightMultiplier={0.85} viewModes={["ascii", "split", "canvas"]}>
+<AsciiScene height={540} fontSize={12} characterWidthMultiplier={0.85} characterHeightMultiplier={0.85} viewModes={["ascii", "split", "canvas"]} effects={["crunch"]}>
   <Scene scene="cube" autoRotate zoom={2.7} yOffset={0.45} />
 </AsciiScene>
 
@@ -413,12 +413,12 @@ For the top sampling circle of the leftmost cell, we get one white sample and tw
 \left[\, \begin{matrix} 1 \\ 0.66 \end{matrix} \,\right]
 \end{gathered}$$</p>
 
-We can then perform a nearest-neighbor search on the 2D plot using these as input coordinates. Let's see what that looks like on our plot from before -- I'll color the points blue and label them "Left", "Middle", and "Right":
+We can then perform a nearest-neighbor search on the 2D plot using these as input coordinates. Let's see what that looks like on our plot from before -- I'll color the points blue and label them -- from left to right -- C0, C1 and C2:
 
 <CharacterPlot highlight="P$" inputPoints={[
-  { vector: [0.33, 0], label: "Left" },
-  { vector: [1, 0.33], label: "Middle" },
-  { vector: [1, 0.66], label: "Right" }
+  { vector: [0.33, 0], label: "C0" },
+  { vector: [1, 0.33], label: "C1" },
+  { vector: [1, 0.66], label: "C2" }
 ]} />
 
 Hmm... this is not quite what we want. Since none of the vector components exceed $0.4$, they're all clustered towards the bottom-left region of our plot. This makes our relatively high input vectors map to a few character on the edge of the cluster.
@@ -441,18 +441,184 @@ const normalizedCharacterVectors = characterVectors.map(
 )
 ```
 
-Here's what the plot looks like with the characters normalized:
+Here's what the plot looks like with the characters vectors normalized:
 
 <CharacterPlot highlight="^@qTMuX$g=C" normalize />
 
 If we now map the input vectors to their nearest neighbors, we get a much more sensible result:
 
-<CharacterPlot highlight="M$^" inputPoints={[
-  { vector: [0.66, 0], label: "Left" },
-  { vector: [1, 0.33], label: "Middle" },
-  { vector: [1, 0.66], label: "Right" }
+<CharacterPlot highlight="M$'" inputPoints={[
+  { vector: [0.33, 0], label: "C0" },
+  { vector: [1, 0.33], label: "C1" },
+  { vector: [1, 0.66], label: "C2" }
 ]} normalize />
 
-<AsciiScene alphabet="two-samples" sampleQuality={3} fontSize={200} rows={1} cols={3} showGrid showSamplingCircles showSamplingPoints increaseContrast>
+When rendered as ASCII, this looks like so:
+
+<AsciiScene alphabet="two-samples" sampleQuality={3} fontSize={200} rows={1} cols={3} viewMode="transparent" increaseContrast>
   <Scene2D scene="circle_zoomed_bottom" />
 </AsciiScene>
+
+Those characters fit the shape of the circle very well! We can also try rendering the full circle from before with the same method:
+
+<AsciiScene width={360} height={408} fontSize={20} rowHeight={24} columnWidth={18} alphabet="two-samples" sampleQuality={3} viewModes={["ascii", "transparent"]} increaseContrast>
+  <Scene2D scene="circle_raised" />
+</AsciiScene>
+
+Awesome stuff! It's easy to observe that the picked characters follow the shape of the circle fairly well.
+
+
+### Limits of a 2D character vector
+
+Two sampling circles -- one upper and one lower -- fall short when trying to capture other aspects of a character's shape. They don't capture the shape of characters that fall in the middle of the cell. Consider `-`:
+
+<AsciiScene alphabet="two-samples" showGrid fontSize={100} rows={1.5} cols={3.8}>
+  {"-"}
+</AsciiScene>
+
+For `-`, we get a character vector of $\begin{bmatrix} 0.029 \\ 0.002 \end{bmatrix}$. That doesn't represent the character very well.
+
+The two upper-lower sampling circles also don't capture left-right differences. Consider `p` and `q`:
+
+<AsciiScene alphabet="two-samples" showGrid fontSize={100} rows={1.5} cols={3.8}>
+  {"p q"}
+</AsciiScene>
+
+Their character vectors, $\begin{bmatrix} 0.16 \\ 0.27 \end{bmatrix}$ and $\begin{bmatrix} 0.16 \\ 0.28 \end{bmatrix}$, are pretty much identical.
+
+## Increasing to 6D
+
+Since cells are taller than they are wide, at least with most monospace fonts, $6$ sampling circles cover a cell quite well:
+
+<AsciiScene alphabet="six-samples" showGrid showSamplingCircles fontSize={200} rows={1.4} cols={1.8} hideSpaces forceSamplingValue={0}>
+  {"-"}
+</AsciiScene>
+
+$6$ sampling circles both capture left-right differences, while also considering characters that fall in the middle vertically, such as `-`. They also capture the shape of "diagonal" characters like `/`.
+
+<AsciiScene alphabet="six-samples" showGrid showSamplingCircles fontSize={200} rows={1.4} cols={1.8} hideSpaces>
+  {"/"}
+</AsciiScene>
+
+<SmallNote label="" center>The `/` character hits the top-right, center-left, center-right and bottom-left cells. It doesn't touch the top-left and bottom-right cell.</SmallNote>
+
+One problem with this grid-like configuration for the sampling circles is that there are gaps. Consider `.`, for example. It mostly falls between the sampling circles:
+
+<AsciiScene alphabet="six-samples" showGrid showSamplingCircles fontSize={200} rows={1.4} cols={1.8} hideSpaces>
+  {"."}
+</AsciiScene>
+
+To compensate for this, we can stagger the sampling circles vertically (e.g. lowering the left sampling circles, and raising the right ones) and make them a bit larger. This causes the cell to be almost fully covered while not causing excessive overlap across the sampling circles:
+
+<AsciiScene showGrid showSamplingCircles fontSize={140} rows={1.5} cols={2.3} hideSpaces>
+  {"."}
+</AsciiScene>
+
+<SmallNote label="" center>This is the configuration I settled on because it yielded good results for me. One could experiment and try other configurations.</SmallNote>
+
+We can use the same procedure as before to generate character vectors using these sampling circles, this time yielding a $6$-dimensional vector. Consider the character `L`:
+
+<AsciiScene showGrid showSamplingCircles fontSize={200} rows={1.4} cols={1.8} hideSpaces>
+  {"L"}
+</AsciiScene>
+
+For `L`, we get the vector:
+
+<p className="mathblock">$$\begin{bmatrix} 0.10 & 0.00 \\ 0.20 & 0.02 \\ 0.09 & 0.09 \end{bmatrix}$$</p>
+
+The lightness values certainly look L-shaped! I'd say that L's character vector describes its shape fairly well.
+
+If we normalize the 6D character vectors in the same manner as before, `L`'s character vector becomes:
+
+<p className="mathblock">$$\begin{bmatrix} 0.44 & 0.00 \\ 0.53 & 0.06 \\ 0.51 & 0.45 \end{bmatrix}$$</p>
+
+It just makes the L shape all the more obvious.
+
+---
+
+Now, with a 6D character vector describing every character, the next step is to be able to look up the "most similar" character vector given an input 6D sampling vector.
+
+In two dimensions, we could plot the characters on a 2D grid and perform a nearest neighbor search in a fairly straightforward manner:
+
+<CharacterPlot highlight="a" inputPoints={[
+  { vector: [0.44, 0.63], label: "Input" }
+]} normalize />
+
+The same idea applies in $6$ dimensions, though it's less intuitive to visualize. We'll lay our character vectors out as points in some $6$-dimensional space and perform nearest neighbor lookups with an input 6D sampling vector (point).
+
+
+### Nearest neighbor lookups in a 6D space
+
+Finding the closest point (nearest neighbor) in an N-dimensional space boils down to finding the point whose Euclidian distance to our input point is the smallest.
+
+Given two input points, $a$ and $b$, we can calculate the Euclidian distance $d$ like so:
+
+<p className="mathblock">$$ d = \sqrt{(a_1 - b_1)^2 + (a_2 - b_2)^2} $$</p>
+
+This generalizes to higher dimensions:
+
+<p className="mathblock">$$ d = \sqrt{(a_1 - b_1)^2 + (a_2 - b_2)^2 + \cdots + (a_n - b_n)^2} $$</p>
+
+Which put into code looks like so:
+
+```ts
+function euclideanDistance(a: number[], b: number[]): number {
+  let sum = 0;
+
+  for (let i = 0; i < a.length; i++) {
+    const difference = a[i] - b[i];
+    sum += difference * difference;
+  }
+
+  return Math.sqrt(sum);
+}
+```
+
+Though, if we're just using this for the purposes of finding the closest point, we can skip the expensive <Ts>Math.sqrt()</Ts> call and just return the squared distance:
+
+```ts
+function euclideanDistanceSquared(a: number[], b: number[]): number {
+  // ...
+  return sum;
+}
+```
+
+Now, let's say that we have our ASCII characters and their associated character vectors in a <Ts>CHARACTER_VECTORS</Ts> array:
+
+```ts
+const CHARACTER_VECTORS: Array<{
+  character: string,
+  vector: number[],
+}> = [...];
+```
+
+We can then perform a nearest neighbor search like so:
+
+```ts
+function findCharacter(samplingVector: number[]) {
+  let bestCharacter = "";
+  let bestDistance = Infinity;
+  
+  for (const { vector, character } of CHARACTER_VECTORS) {
+    const dist = euclideanDistanceSquared(vector, samplingVector);
+    if (dist < bestDistance) {
+      bestDistance = dist;
+      bestCharacter = character;
+    }
+  }
+  
+  return bestCharacter;
+}
+```
+
+I tried benchmarking this for $100{,}000$ input sampling vectors on my Macbook -- $100$K lookups consistently take about $190$ms. If we assume that we'll want to be able to use this for an animated canvas at $60$ frames per second (FPS), we only have $16{.}66$ms to render each frame. We can use this to get a rough budget for how many lookups we can perform each frame:
+
+<p className="mathblock">$$ 100{,}000 \times \dfrac{16{.}66\ldots}{190} \approx 8{,}772 $$</p>
+
+If we allow ourselves $50\%$ of the performance budget for just lookups, this gives us a budget of about $4$K characters. Not terrible, but definitely not great, especially considering that this is on a powerful laptop.
+
+
+### Improving lookup performance
+
+Brute-force 100K characters: 188ms
+K-d 100K characters: 66ms
