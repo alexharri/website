@@ -58,9 +58,23 @@ export class CharacterMatcher {
     this.samplingConfig = metadata.samplingConfig;
   }
 
+  public cache = new Map<number, string>();
+
   findBestCharacter(samplingVector: number[]): string {
     const result = this.kdTree.findNearest(samplingVector);
     return result ? result.data : " ";
+  }
+
+  findBestCharacterQuantized(samplingVector: number[]): string {
+    const key = quantizeToKey(samplingVector);
+
+    if (this.cache.has(key)) {
+      return this.cache.get(key)!;
+    }
+
+    const result = this.findBestCharacter(samplingVector);
+    this.cache.set(key, result);
+    return result;
   }
 
   // Here for performance comparison
@@ -98,4 +112,14 @@ function euclideanDistanceSquared(a: number[], b: number[]): number {
   }
 
   return sumSquared;
+}
+
+function quantizeToKey(vector: number[]): number {
+  let key = 0;
+  for (let i = 0; i < vector.length; i++) {
+    // Assuming vector values are in [0, 1] range
+    const quantized = Math.floor(vector[i] * 7.9999999); // 0-7 (avoid hitting 8)
+    key = (key << 3) | quantized; // 3 bits per dimension
+  }
+  return key;
 }

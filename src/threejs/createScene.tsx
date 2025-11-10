@@ -185,6 +185,8 @@ export function createScene<V extends VariableDict>(
     const internalCanvasRef = useRef<HTMLCanvasElement>(null);
     const canvasRef = externalCanvasRef || internalCanvasRef;
 
+    const S = 1;
+
     return (
       <>
         <div style={{ position: "relative", height }}>
@@ -205,7 +207,8 @@ export function createScene<V extends VariableDict>(
               }}
               gl={{ preserveDrawingBuffer: true }}
               style={{
-                height,
+                height: height * S,
+                width: 100 * S + "%",
                 userSelect: "none",
                 cursor: down ? "grabbing" : "grab",
               }}

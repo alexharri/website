@@ -1,4 +1,4 @@
-import { useCallback } from "react";
+import { useCallback, useState } from "react";
 import {
   generateSamplingData,
   CharacterSamplingData,
@@ -37,9 +37,14 @@ interface UseSamplingDataCollectionParams {
 }
 
 export function useSamplingDataCollection(params: UseSamplingDataCollectionParams) {
-  const { refs, config, debug, lightnessEasingFunction, forceSamplingValue, samplingEffects } = params;
+  const { refs, config, debug, lightnessEasingFunction, forceSamplingValue, samplingEffects } =
+    params;
   const { canvasRef, samplingDataRef, debugCanvasRef, onFrameRef } = refs;
   const { showSamplingPoints, showSamplingCircles, debugVizOptions } = debug;
+
+  const [samplingData] = useState<CharacterSamplingData[][]>(() => {
+    return [];
+  });
 
   return useCallback(
     (buffer: Uint8Array, options?: { flipY?: boolean }) => {
@@ -49,7 +54,8 @@ export function useSamplingDataCollection(params: UseSamplingDataCollectionParam
 
         const pixelBufferScale = canvas.width / config.canvasWidth;
 
-        const samplingData = generateSamplingData(
+        generateSamplingData(
+          samplingData,
           buffer,
           pixelBufferScale,
           config,

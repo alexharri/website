@@ -1,9 +1,10 @@
 import { useEffect, useMemo, useRef, useCallback } from "react";
 import { AsciiRendererStyles } from "./AsciiRenderer.styles";
-import { samplingDataToAscii, CharacterSamplingData } from "./ascii/generateAsciiChars";
+import { CharacterSamplingData } from "./ascii/generateAsciiChars";
 import { useStyles } from "../../utils/styles";
 import { colors } from "../../utils/cssVariables";
 import { PixelateCanvas, renderPixelate } from "./PixelateCanvas";
+import { AsciiCanvas, renderAsciiCanvas } from "./AsciiCanvas";
 import { CharacterMatcher } from "./ascii/CharacterMatcher";
 import { EFFECTS } from "./ascii/effects";
 import { AsciiRenderConfig } from "./renderConfig";
@@ -36,7 +37,7 @@ export function AsciiRenderer(props: Props) {
   const containerRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
   const s = useStyles(AsciiRendererStyles);
-  const preRef = useRef<HTMLPreElement>(null);
+  const asciiCanvasRef = useRef<HTMLCanvasElement>(null);
   const pixelateCanvasRef = useRef<HTMLCanvasElement>(null);
 
   const characterMatcher = useMemo(() => {
@@ -58,20 +59,20 @@ export function AsciiRenderer(props: Props) {
   }, [config]);
 
   const updateAsciiText = useCallback(() => {
-    const preEl = preRef.current;
+    const asciiCanvas = asciiCanvasRef.current;
     const samplingData = samplingDataRef.current;
 
     if (!config || !characterMatcher || samplingData.length === 0) return;
 
-    if (!hideAscii && preEl) {
-      const ascii = samplingDataToAscii(characterMatcher, samplingData, config);
-      preEl.textContent = ascii;
+    if (!hideAscii && asciiCanvas) {
+      const color = transparent ? colors.text : colors.blue400;
+      renderAsciiCanvas(asciiCanvas, samplingData, config, characterMatcher, color);
     }
 
     if (pixelateCanvasRef.current && debugVizOptions.pixelate) {
       renderPixelate(pixelateCanvasRef.current, samplingData, config);
     }
-  }, [characterMatcher, debugVizOptions.pixelate, config, hideAscii]);
+  }, [characterMatcher, debugVizOptions.pixelate, config, hideAscii, transparent]);
 
   useEffect(() => {
     let mounted = true;
@@ -109,16 +110,7 @@ export function AsciiRenderer(props: Props) {
     >
       {!hideAscii && (
         <div className={s("content")} ref={contentRef}>
-          <pre
-            ref={preRef}
-            className={s("pre")}
-            style={{
-              color: transparent ? colors.text : colors.blue400,
-              letterSpacing: config ? config.letterSpacingEm + "em" : undefined,
-              lineHeight: config ? config.lineHeight.toString() : undefined,
-              fontSize: config ? config.fontSize + "px" : undefined,
-            }}
-          />
+          <AsciiCanvas onCanvasRef={asciiCanvasRef} transparent={transparent} />
         </div>
       )}
       {debugVizOptions.pixelate && (

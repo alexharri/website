@@ -66,17 +66,14 @@ function sampleCircularRegion(
   y: number,
   samplingPoints: { x: number; y: number }[],
   scale: number,
-  collectSubsamples: boolean,
   flipY: boolean,
   effect: (value: number) => number,
-): { averageLightness: number; individualValues: number[] } {
+  subsamples: number[] | undefined,
+): number {
   let totalLightness = 0;
   let sampleCount = 0;
-  const individualValues: number[] = [];
 
-  // Always sample center point
-
-  for (const point of samplingPoints) {
+  samplingPoints.forEach((point, i) => {
     const sampleX = x + point.x;
     const sampleY = y + point.y;
 
@@ -97,49 +94,49 @@ function sampleCircularRegion(
     totalLightness += lightnessValue;
     sampleCount++;
 
-    if (collectSubsamples) {
-      individualValues.push(lightnessValue);
+    if (subsamples) {
+      subsamples[i] = lightnessValue;
     }
-  }
+  });
 
-  const averageLightness = sampleCount > 0 ? totalLightness / sampleCount : 0;
-  return { averageLightness, individualValues };
+  return totalLightness / sampleCount;
 }
 
-function crunchSamplingVector(vector: number[], exponent: number): number[] {
+function crunchSamplingVector(vector: number[], exponent: number): void {
   const maxValue = Math.max(...vector);
 
   // If all values are zero, return as-is
-  if (maxValue === 0) return vector;
+  if (maxValue === 0) return;
 
-  return vector.map((value) => {
+  for (let i = 0; i < vector.length; i++) {
     // Normalize to 0-1 range
-    const normalized = value / maxValue;
+    const normalized = vector[i] / maxValue;
     // Apply power-law enhancement
     const enhanced = Math.pow(normalized, exponent);
     // Rescale back to original range
-    return enhanced * maxValue;
-  });
+    vector[i] = enhanced * maxValue;
+  }
 }
 
 function crunchSamplingVectorDirectional(
   vector: number[],
   contextValues: number[],
   exponent: number,
-): number[] {
+): void {
   if (vector.length !== contextValues.length) {
     throw new Error("Vector and context values must have the same length");
   }
 
   // const maxExternalValue = Math.max(...contextValues);
-  return vector.map((value, index) => {
-    const contextValue = contextValues[index];
-    if (contextValue <= value) return value;
+  for (let i = 0; i < vector.length; i++) {
+    const value = vector[i];
+    const contextValue = contextValues[i];
+    if (contextValue <= value) continue;
 
     const normalized = value / contextValue;
     const enhanced = Math.pow(normalized, exponent);
-    return enhanced * contextValue;
-  });
+    vector[i] = enhanced * contextValue;
+  }
 }
 
 export interface CharacterSamplingData {
@@ -156,6 +153,7 @@ export interface GenerationResult {
 }
 
 export function generateSamplingData(
+  out: CharacterSamplingData[][],
   pixelBuffer: Uint8Array,
   pixelBufferScale: number,
   config: AsciiRenderConfig,
@@ -163,7 +161,7 @@ export function generateSamplingData(
   flipY: boolean,
   lightnessEasingFunction?: string,
   samplingEffects: SamplingEffect[] = [],
-): CharacterSamplingData[][] {
+): void {
   const metadata = getAlphabetMetadata(config.alphabet);
   const samplingConfig = metadata.samplingConfig;
 
@@ -175,78 +173,83 @@ export function generateSamplingData(
       : null;
 
   const samplingPoints = config.generateCircleSamplingPoints();
-  function createSamplingVector(
-    col: number,
-    row: number,
-    samplingCircleCenterPoints: { x: number; y: number }[],
-    collectSubsamples: boolean,
-    flipY: boolean,
-    effect: (value: number) => number,
-  ): { samplingVector: number[]; subsamples: number[][] } {
-    const [sampleRectLeft, sampleRectTop] = config.sampleRectPosition(col, row);
-    const samplingVector: number[] = [];
-    const subsamples: number[][] = [];
-
-    samplingCircleCenterPoints.forEach((samplingCircleCenterPoint) => {
-      const [xOff, yOff] = config.samplingCircleOffset(samplingCircleCenterPoint);
-      const x = sampleRectLeft + xOff;
-      const y = sampleRectTop + yOff;
-      const result = sampleCircularRegion(
-        pixelBuffer,
-        config,
-        x,
-        y,
-        samplingPoints,
-        pixelBufferScale,
-        collectSubsamples,
-        flipY,
-        effect,
-      );
-      samplingVector.push(result.averageLightness);
-      subsamples.push(result.individualValues);
-    });
-
-    return { samplingVector, subsamples };
-  }
 
   const effect = easingLookupTable
     ? (value: number) => applyEasingLookup(value, easingLookupTable)
     : (v: number) => v;
 
-  const samplingData: CharacterSamplingData[][] = [];
+  for (let row = out.length; row < config.rows; row++) {
+    out[row] ??= [];
+  }
+
+  const externalPoints = "externalPoints" in samplingConfig ? samplingConfig.externalPoints : null;
+
+  const samplingCircleOffsets = samplingConfig.points.map((point) =>
+    config.samplingCircleOffset(point),
+  );
+  const externalSamplingCircleOffsets = externalPoints?.map((point) =>
+    config.samplingCircleOffset(point),
+  );
+
+  const xBase = config.offsetX + config.sampleRectXOff;
+  const yBase = config.offsetY + config.sampleRectYOff;
+  let x = xBase;
+  let y = yBase;
 
   for (let row = 0; row < config.rows; row++) {
-    const samplingDataRow: CharacterSamplingData[] = [];
-    samplingData.push(samplingDataRow);
+    for (let col = out[row].length; col < config.cols; col++) {
+      const numSamples = metadata.samplingConfig.points.length;
+      const numSubsamples = numSamples * config.samplingQuality;
+      out[row][col] = {
+        samplingVector: Array.from({ length: numSamples }),
+        externalSamplingVector: Array.from({ length: numSamples }),
+        rawSamplingVector: Array.from({ length: numSamples }),
+        samplingVectorSubsamples: Array.from({ length: numSubsamples }),
+      };
+    }
 
     for (let col = 0; col < config.cols; col++) {
-      const shouldCollectSubsamples = collectSubsamples;
-      const rawSamplingResult = createSamplingVector(
-        col,
-        row,
-        metadata.samplingConfig.points,
-        shouldCollectSubsamples,
-        flipY,
-        effect,
-      );
-      let rawSamplingVector = rawSamplingResult.samplingVector;
-      let samplingVectorSubsamples = rawSamplingResult.subsamples;
-
-      let samplingVector = [...rawSamplingVector];
-
-      let externalSamplingVector: number[] = [];
-      if ("externalPoints" in samplingConfig) {
-        const externalResult = createSamplingVector(
-          col,
-          row,
-          samplingConfig.externalPoints,
-          false,
+      const {
+        rawSamplingVector,
+        samplingVector,
+        externalSamplingVector,
+        samplingVectorSubsamples,
+      } = out[row][col];
+      for (let i = 0; i < metadata.samplingConfig.points.length; i++) {
+        const [circleXOff, circleYOff] = samplingCircleOffsets[i];
+        rawSamplingVector[i] = sampleCircularRegion(
+          pixelBuffer,
+          config,
+          x + circleXOff,
+          y + circleYOff,
+          samplingPoints,
+          pixelBufferScale,
           flipY,
           effect,
+          collectSubsamples ? samplingVectorSubsamples[i] : undefined,
         );
-        externalSamplingVector = externalResult.samplingVector;
+      }
+      for (let i = 0; i < rawSamplingVector.length; i++) {
+        samplingVector[i] = rawSamplingVector[i];
+      }
+
+      if (externalPoints) {
+        for (let i = 0; i < metadata.samplingConfig.points.length; i++) {
+          const [circleXOff, circleYOff] = externalSamplingCircleOffsets![i];
+          externalSamplingVector[i] = sampleCircularRegion(
+            pixelBuffer,
+            config,
+            x + circleXOff,
+            y + circleYOff,
+            samplingPoints,
+            pixelBufferScale,
+            flipY,
+            effect,
+            undefined,
+          );
+        }
         if (enabledEffects.has(SamplingEffect.Crunch)) {
-          samplingVector = crunchSamplingVectorDirectional(
+          crunchSamplingVectorDirectional(
             samplingVector,
             externalSamplingVector,
             CONTRAST_EXPONENT_LOCAL,
@@ -254,19 +257,14 @@ export function generateSamplingData(
         }
       }
       if (enabledEffects.has(SamplingEffect.Crunch)) {
-        samplingVector = crunchSamplingVector(samplingVector, CONTRAST_EXPONENT_GLOBAL);
+        crunchSamplingVector(samplingVector, CONTRAST_EXPONENT_GLOBAL);
       }
-
-      samplingDataRow.push({
-        samplingVector,
-        rawSamplingVector,
-        externalSamplingVector,
-        samplingVectorSubsamples,
-      });
+      x += config.boxWidth;
     }
-  }
 
-  return samplingData;
+    y += config.boxHeight;
+    x = xBase;
+  }
 }
 
 export function samplingDataToAscii(
@@ -276,6 +274,9 @@ export function samplingDataToAscii(
 ): string {
   const chars: string[] = [];
 
+  // let totalCount = 0;
+  // let matchCount = 0;
+
   for (let row = 0; row < config.rows; row++) {
     for (let col = 0; col < config.cols; col++) {
       const cellSamplingData = samplingData[row]?.[col];
@@ -284,11 +285,18 @@ export function samplingDataToAscii(
         continue;
       }
 
-      const selectedChar = matcher.findBestCharacter(cellSamplingData.samplingVector);
+      const selectedChar = matcher.findBestCharacterQuantized(cellSamplingData.samplingVector);
       chars.push(selectedChar === "&nbsp;" ? " " : selectedChar);
+
+      // totalCount++;
+      // if (selectedChar === matcher.findBestCharacterQuantized(cellSamplingData.samplingVector)) {
+      //   matchCount++;
+      // }
     }
     chars.push("\n");
   }
+
+  // console.log(((matchCount / totalCount) * 100).toFixed(0) + "% match rate");
 
   return chars.join("");
 }

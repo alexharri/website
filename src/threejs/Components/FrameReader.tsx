@@ -1,4 +1,4 @@
-import { useContext } from "react";
+import { useContext, useMemo, useRef } from "react";
 import { FiberContext } from "./ThreeProvider";
 
 interface Props {
@@ -8,12 +8,17 @@ interface Props {
 export function FrameReader(props: Props) {
   const FIBER = useContext(FiberContext);
 
+  const bufferRef = useRef<Uint8Array | null>(null);
+
   FIBER.useFrame((state) => {
     const { gl } = state;
 
     const webglContext = gl.getContext();
     const canvas = webglContext.canvas!;
-    const pixelBuffer = new Uint8Array(canvas.width * canvas.height * 4);
+    const len = canvas.width * canvas.height * 4;
+    if (!bufferRef.current || bufferRef.current.length !== len) {
+      bufferRef.current = new Uint8Array(len);
+    }
 
     webglContext.readPixels(
       0,
@@ -22,10 +27,10 @@ export function FrameReader(props: Props) {
       canvas.height,
       webglContext.RGBA,
       webglContext.UNSIGNED_BYTE,
-      pixelBuffer,
+      bufferRef.current,
     );
 
-    props.onFrame(pixelBuffer);
+    props.onFrame(bufferRef.current);
   });
 
   return null;
