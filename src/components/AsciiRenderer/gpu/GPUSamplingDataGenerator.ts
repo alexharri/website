@@ -2,7 +2,11 @@ import { AsciiRenderConfig } from "../renderConfig";
 import { CharacterSamplingData } from "../ascii/generateAsciiChars";
 import { SamplingEffect } from "../types";
 import { getAlphabetMetadata } from "../alphabets/AlphabetManager";
-import { PASSTHROUGH_VERT, SAMPLING_FRAG, CRUNCH_FRAG } from "./shaders";
+import {
+  PASSTHROUGH_VERT,
+  createSamplingFragmentShader,
+  createCrunchFragmentShader,
+} from "./shaders";
 
 interface GPUSamplingDataGeneratorOptions {
   config: AsciiRenderConfig;
@@ -26,6 +30,7 @@ export class GPUSamplingDataGenerator {
   private pixelBufferScale: number;
   private samplingQuality: number;
   private samplingEffects: SamplingEffect[];
+  private numCircles: number;
 
   // WebGL resources
   private canvasTexture: WebGLTexture;
@@ -50,7 +55,6 @@ export class GPUSamplingDataGenerator {
 
   // Pixel Buffer Objects for async readback
   private pbos: WebGLBuffer[];
-  private currentPBOIndex: number = 0;
 
   // Output dimensions
   private outputWidth: number;
@@ -78,11 +82,14 @@ export class GPUSamplingDataGenerator {
     this.samplingQuality = options.samplingQuality;
     this.samplingEffects = options.samplingEffects;
 
+    // Get number of sampling circles from alphabet config
+    const metadata = getAlphabetMetadata(this.config.alphabet);
+    this.numCircles = metadata.samplingConfig.points.length;
+
     // Calculate output texture dimensions
-    // Each cell has 6 sampling circles
-    // We'll pack them as 2 circles per row, 3 rows per cell
-    this.outputWidth = this.config.cols * 2;
-    this.outputHeight = this.config.rows * 3;
+    // Each cell gets N pixels in a horizontal row (where N = number of circles)
+    this.outputWidth = this.config.cols * this.numCircles;
+    this.outputHeight = this.config.rows;
 
     // Initialize WebGL resources
     this.canvasTexture = this.createTexture()!;
@@ -98,14 +105,16 @@ export class GPUSamplingDataGenerator {
     this.crunchTexture = this.createFloatTexture(this.outputWidth, this.outputHeight)!;
     this.crunchFBO = this.createFramebuffer(this.crunchTexture)!;
 
-    // Compile shaders
-    const samplingProgram = this.createProgram(PASSTHROUGH_VERT, SAMPLING_FRAG);
+    // Compile shaders (generate fragment shaders based on numCircles)
+    const samplingFrag = createSamplingFragmentShader(this.numCircles);
+    const samplingProgram = this.createProgram(PASSTHROUGH_VERT, samplingFrag);
     if (!samplingProgram) {
       throw new Error("Failed to create sampling program");
     }
     this.samplingProgram = samplingProgram;
 
-    const crunchProgram = this.createProgram(PASSTHROUGH_VERT, CRUNCH_FRAG);
+    const crunchFrag = createCrunchFragmentShader(this.numCircles);
+    const crunchProgram = this.createProgram(PASSTHROUGH_VERT, crunchFrag);
     if (!crunchProgram) {
       throw new Error("Failed to create crunch program");
     }
@@ -251,6 +260,7 @@ export class GPUSamplingDataGenerator {
     gl.uniform1f(gl.getUniformLocation(program, "u_pixelBufferScale"), this.pixelBufferScale);
     gl.uniform1i(gl.getUniformLocation(program, "u_flipY"), flipY ? 1 : 0);
     gl.uniform1i(gl.getUniformLocation(program, "u_samplingQuality"), this.samplingQuality);
+    gl.uniform1i(gl.getUniformLocation(program, "u_numCircles"), this.numCircles);
 
     // Sampling points
     const pointsLoc = gl.getUniformLocation(program, "u_samplingPoints");
@@ -275,8 +285,9 @@ export class GPUSamplingDataGenerator {
     gl.bindTexture(gl.TEXTURE_2D, this.externalSamplingTexture);
     gl.uniform1i(gl.getUniformLocation(program, "u_externalSamplingTexture"), 1);
 
-    // Grid size for texture coordinate calculations
+    // Grid size and circle count for texture coordinate calculations
     gl.uniform2f(gl.getUniformLocation(program, "u_gridSize"), this.config.cols, this.config.rows);
+    gl.uniform1i(gl.getUniformLocation(program, "u_numCircles"), this.numCircles);
 
     // Crunch effects (both available but can be controlled independently)
     const useCrunch = this.samplingEffects.includes(SamplingEffect.Crunch);
@@ -345,13 +356,11 @@ export class GPUSamplingDataGenerator {
         const rawSamplingVector: number[] = [];
         const externalSamplingVector: number[] = [];
 
-        // Read 6 circles for this cell
-        for (let circleIdx = 0; circleIdx < 6; circleIdx++) {
-          const circleRow = Math.floor(circleIdx / 2);
-          const circleCol = circleIdx % 2;
-
-          const pixelX = col * 2 + circleCol;
-          const pixelY = row * 3 + circleRow;
+        // Read N circles for this cell (N = numCircles)
+        for (let circleIdx = 0; circleIdx < this.numCircles; circleIdx++) {
+          // Reverse circle order - texture stores them backwards
+          const pixelX = col * this.numCircles + (this.numCircles - 1 - circleIdx);
+          const pixelY = row;
 
           const pixelIndex = (pixelY * this.outputWidth + pixelX) * 4;
 

@@ -18,7 +18,7 @@ void main() {
 }
 `;
 
-export const SAMPLING_FRAG = /* glsl */ `#version 300 es
+export const createSamplingFragmentShader = (numCircles: number) => /* glsl */ `#version 300 es
 precision highp float;
 
 // Raw sampling shader - samples internal circles and outputs averaged lightness values
@@ -35,9 +35,10 @@ uniform vec2 u_gridOffset;              // Grid offset (offsetX, offsetY)
 uniform float u_pixelBufferScale;       // Scale factor for canvas resolution
 uniform bool u_flipY;                   // Vertical flip flag
 uniform int u_samplingQuality;          // Number of subsamples per circle (typically 3)
+uniform int u_numCircles;               // Number of sampling circles per cell (1-6)
 
 // Sampling circle positions (normalized 0-1 within cell)
-uniform vec2 u_samplingPoints[6];
+uniform vec2 u_samplingPoints[${numCircles}];
 uniform float u_circleRadius;           // Radius of sampling circles (normalized)
 
 // Constants for lightness conversion (Rec. 709)
@@ -113,19 +114,22 @@ float sampleCircularRegion(vec2 centerPixel, float radiusPixels) {
 }
 
 void main() {
-  // Determine which grid cell this fragment corresponds to
-  // Flip Y because texture coords are bottom-up but grid is top-down
-  vec2 texCoord = vec2(v_texCoord.x, 1.0 - v_texCoord.y);
-  vec2 gridCoord = texCoord * u_gridSize;  // (col, row) in [0, gridSize)
-  vec2 gridCell = floor(gridCoord);
+  // Determine which pixel we're rendering in the output texture
+  // Output texture is (cols * numCircles) × rows
+  float pixelX = v_texCoord.x * u_gridSize.x * float(u_numCircles);
+  float pixelY = v_texCoord.y * u_gridSize.y;
 
-  // Determine which sampling circle within the cell (0-5)
-  // We'll pack 2 circles per row: circles 0,1 in row 0; circles 2,3 in row 1; circles 4,5 in row 2
-  vec2 circleGridCoord = fract(gridCoord) * vec2(2.0, 3.0);
-  vec2 circleCell = floor(circleGridCoord);
-  int circleIndex = int(circleCell.y) * 2 + int(circleCell.x);
+  // Determine which grid cell this pixel belongs to
+  float col = floor(pixelX / float(u_numCircles));
+  float row = floor(pixelY);
 
-  if (circleIndex >= 6) {
+  // Flip Y to match grid coordinate system (top-down)
+  vec2 gridCell = vec2(col, u_gridSize.y - 1.0 - row);
+
+  // Determine which sampling circle within the cell
+  int circleIndex = int(mod(pixelX, float(u_numCircles)));
+
+  if (circleIndex >= u_numCircles) {
     // Out of bounds
     fragColor = vec4(0.0);
     return;
@@ -155,7 +159,7 @@ void main() {
 }
 `;
 
-export const CRUNCH_FRAG = /* glsl */ `#version 300 es
+export const createCrunchFragmentShader = (numCircles: number) => /* glsl */ `#version 300 es
 precision highp float;
 
 // Crunch shader - combines raw and external sampling vectors and applies crunching effects
@@ -168,6 +172,7 @@ uniform sampler2D u_externalSamplingTexture; // External sampling vector texture
 uniform bool u_useGlobalCrunch;              // Enable global crunch effect
 uniform bool u_useDirectionalCrunch;         // Enable directional crunch effect
 uniform vec2 u_gridSize;                     // Grid dimensions (cols, rows)
+uniform int u_numCircles;                    // Number of sampling circles per cell (1-6)
 
 // Crunch exponents (from generateAsciiChars.ts)
 const float GLOBAL_CRUNCH_EXPONENT = 3.0;
@@ -175,14 +180,12 @@ const float DIRECTIONAL_CRUNCH_EXPONENT = 7.0;
 
 // Calculate texture coordinate for a specific circle within a cell
 vec2 getCircleTexCoord(vec2 gridCell, int circleIndex) {
-  // Circles are packed as 2 per row, 3 rows per cell
-  int circleRow = circleIndex / 2;
-  int circleCol = circleIndex - (circleRow * 2);
+  // Circles are packed horizontally: N pixels per cell in a row
+  // gridCell is in flipped-Y space
 
-  // gridCell is in flipped-Y space. Convert to gridCoord (fractional)
-  // by adding the sub-cell position
-  vec2 subCellPos = (vec2(float(circleCol), float(circleRow)) + vec2(0.5)) / vec2(2.0, 3.0);
-  vec2 gridCoord = gridCell + subCellPos;
+  // Add fractional offset for the circle within the cell
+  float circleOffset = (float(circleIndex) + 0.5) / float(u_numCircles);
+  vec2 gridCoord = gridCell + vec2(circleOffset, 0.5);
 
   // Convert back to texture coordinates
   vec2 texCoord = gridCoord / u_gridSize;
@@ -195,17 +198,19 @@ vec2 getCircleTexCoord(vec2 gridCell, int circleIndex) {
 
 void main() {
   // Determine which grid cell and circle this fragment corresponds to
-  // Flip Y to match the sampling shader's coordinate system
-  vec2 texCoord = vec2(v_texCoord.x, 1.0 - v_texCoord.y);
-  vec2 gridCoord = texCoord * u_gridSize;
-  vec2 gridCell = floor(gridCoord);
+  float pixelX = v_texCoord.x * u_gridSize.x * float(u_numCircles);
+  float pixelY = v_texCoord.y * u_gridSize.y;
 
-  // Determine which sampling circle within the cell (0-5)
-  vec2 circleGridCoord = fract(gridCoord) * vec2(2.0, 3.0);
-  vec2 circleCell = floor(circleGridCoord);
-  int currentCircleIndex = int(circleCell.y) * 2 + int(circleCell.x);
+  float col = floor(pixelX / float(u_numCircles));
+  float row = floor(pixelY);
 
-  if (currentCircleIndex >= 6) {
+  // Flip Y to match grid coordinate system (top-down)
+  vec2 gridCell = vec2(col, u_gridSize.y - 1.0 - row);
+
+  // Determine which sampling circle within the cell
+  int currentCircleIndex = int(mod(pixelX, float(u_numCircles)));
+
+  if (currentCircleIndex >= u_numCircles) {
     fragColor = vec4(0.0);
     return;
   }
@@ -225,12 +230,12 @@ void main() {
   }
 
   // Apply global crunch SECOND (if enabled)
-  // Sample all 6 circles from the same cell to find max
+  // Sample all N circles from the same cell to find max
   if (u_useGlobalCrunch) {
     float maxValue = 0.0;
 
-    // Sample all 6 circles and find max
-    for (int i = 0; i < 6; i++) {
+    // Sample all circles and find max
+    for (int i = 0; i < ${numCircles}; i++) {
       vec2 circleTexCoord = getCircleTexCoord(gridCell, i);
       float circleValue = texture(u_rawSamplingTexture, circleTexCoord).r;
 
@@ -253,7 +258,7 @@ void main() {
       maxValue = max(maxValue, circleValue);
     }
 
-    // Apply global crunch using max across all 6 circles
+    // Apply global crunch using max across all circles
     if (maxValue > 0.0) {
       float normalized = value / maxValue;
       float enhanced = pow(normalized, GLOBAL_CRUNCH_EXPONENT);

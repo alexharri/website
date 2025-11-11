@@ -3,7 +3,6 @@ import Bezier from "bezier-easing";
 import { getAlphabetMetadata } from "../alphabets/AlphabetManager";
 
 import { AsciiRenderConfig } from "../renderConfig";
-import { clamp } from "../../../math/math";
 import { SamplingEffect } from "../types";
 
 const CONTRAST_EXPONENT_GLOBAL = 3;
