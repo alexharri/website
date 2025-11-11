@@ -1,4 +1,4 @@
-import { useCallback, useState } from "react";
+import { useCallback, useState, useRef, useEffect } from "react";
 import {
   generateSamplingData,
   CharacterSamplingData,
@@ -11,6 +11,7 @@ import {
   SamplingEffect,
 } from "../../components/AsciiRenderer/types";
 import { OnFrameOptions } from "../../contexts/CanvasContext";
+import { GPUSamplingDataGenerator } from "../../components/AsciiRenderer/gpu/GPUSamplingDataGenerator";
 
 interface SamplingRefs {
   canvasRef: React.RefObject<HTMLCanvasElement>;
@@ -34,17 +35,80 @@ interface UseSamplingDataCollectionParams {
   lightnessEasingFunction?: string;
   forceSamplingValue?: number;
   samplingEffects?: SamplingEffect[];
+  optimizePerformance?: boolean;
 }
 
 export function useSamplingDataCollection(params: UseSamplingDataCollectionParams) {
-  const { refs, config, debug, lightnessEasingFunction, forceSamplingValue, samplingEffects } =
-    params;
+  const {
+    refs,
+    config,
+    debug,
+    lightnessEasingFunction,
+    forceSamplingValue,
+    samplingEffects,
+    optimizePerformance
+  } = params;
   const { canvasRef, samplingDataRef, debugCanvasRef, onFrameRef } = refs;
   const { showSamplingPoints, showSamplingCircles, debugVizOptions } = debug;
 
   const [samplingData] = useState<CharacterSamplingData[][]>(() => {
     return [];
   });
+
+  // GPU sampling generator (only created if optimizePerformance is true)
+  const gpuGeneratorRef = useRef<GPUSamplingDataGenerator | null>(null);
+  const gpuCanvasRef = useRef<HTMLCanvasElement | null>(null);
+  const webgl2SupportedRef = useRef<boolean | null>(null);
+
+  // Check WebGL2 support once (client-side only)
+  if (typeof window !== 'undefined' && webgl2SupportedRef.current === null) {
+    const testCanvas = document.createElement('canvas');
+    const testGl = testCanvas.getContext('webgl2');
+    webgl2SupportedRef.current = testGl !== null;
+  }
+
+  const shouldUseGPU = optimizePerformance && webgl2SupportedRef.current;
+
+  // Initialize GPU generator when config changes
+  useEffect(() => {
+    if (shouldUseGPU && config) {
+      try {
+        // Create offscreen canvas for GPU operations
+        if (!gpuCanvasRef.current) {
+          gpuCanvasRef.current = document.createElement('canvas');
+          gpuCanvasRef.current.width = config.canvasWidth;
+          gpuCanvasRef.current.height = config.canvasHeight;
+        }
+
+        // Clean up existing generator
+        if (gpuGeneratorRef.current) {
+          gpuGeneratorRef.current.dispose();
+        }
+
+        // Create new generator
+        gpuGeneratorRef.current = new GPUSamplingDataGenerator(gpuCanvasRef.current, {
+          config,
+          canvasWidth: config.canvasWidth,
+          canvasHeight: config.canvasHeight,
+          pixelBufferScale: 1, // Will be updated per frame
+          samplingQuality: config.samplingQuality,
+          lightnessEasingFunction,
+          samplingEffects: samplingEffects || [],
+        });
+      } catch (error) {
+        console.error('Failed to initialize GPU sampling:', error);
+        gpuGeneratorRef.current = null;
+      }
+    }
+
+    // Cleanup on unmount or when switching to CPU
+    return () => {
+      if (gpuGeneratorRef.current) {
+        gpuGeneratorRef.current.dispose();
+        gpuGeneratorRef.current = null;
+      }
+    };
+  }, [shouldUseGPU, config, lightnessEasingFunction, samplingEffects]);
 
   return useCallback(
     (buffer: Uint8Array, options?: { flipY?: boolean }) => {
@@ -54,16 +118,42 @@ export function useSamplingDataCollection(params: UseSamplingDataCollectionParam
 
         const pixelBufferScale = canvas.width / config.canvasWidth;
 
-        generateSamplingData(
-          samplingData,
-          buffer,
-          pixelBufferScale,
-          config,
-          showSamplingPoints,
-          options?.flipY ?? false,
-          lightnessEasingFunction,
-          samplingEffects,
-        );
+        // Use GPU path if available and enabled
+        if (gpuGeneratorRef.current && shouldUseGPU) {
+          try {
+            gpuGeneratorRef.current.update(
+              buffer,
+              samplingData,
+              options?.flipY ?? false,
+              pixelBufferScale
+            );
+          } catch (error) {
+            console.error('GPU sampling failed, falling back to CPU:', error);
+            // Fallback to CPU
+            generateSamplingData(
+              samplingData,
+              buffer,
+              pixelBufferScale,
+              config,
+              showSamplingPoints,
+              options?.flipY ?? false,
+              lightnessEasingFunction,
+              samplingEffects,
+            );
+          }
+        } else {
+          // Use CPU path
+          generateSamplingData(
+            samplingData,
+            buffer,
+            pixelBufferScale,
+            config,
+            showSamplingPoints,
+            options?.flipY ?? false,
+            lightnessEasingFunction,
+            samplingEffects,
+          );
+        }
 
         samplingDataRef.current = samplingData;
 
@@ -94,6 +184,7 @@ export function useSamplingDataCollection(params: UseSamplingDataCollectionParam
       showSamplingCircles,
       debugVizOptions,
       samplingEffects,
+      shouldUseGPU,
     ],
   );
 }

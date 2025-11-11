@@ -56,6 +56,7 @@ interface AsciiSceneProps {
   viewModes?: ViewModeKey[] | "all";
   pixelate?: boolean;
   effects?: SamplingEffect[];
+  optimizePerformance?: boolean;
 }
 
 export const AsciiScene: React.FC<AsciiSceneProps> = (props) => {
@@ -223,6 +224,7 @@ export const AsciiScene: React.FC<AsciiSceneProps> = (props) => {
     lightnessEasingFunction,
     forceSamplingValue,
     samplingEffects: effects,
+    optimizePerformance: props.optimizePerformance,
   });
 
   const isCharacterMode = typeof children === "string";

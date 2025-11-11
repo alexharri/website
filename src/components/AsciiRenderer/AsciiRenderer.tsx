@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useCallback } from "react";
 import { AsciiRendererStyles } from "./AsciiRenderer.styles";
-import { CharacterSamplingData } from "./ascii/generateAsciiChars";
+import { CharacterSamplingData, samplingDataToAscii } from "./ascii/generateAsciiChars";
 import { useStyles } from "../../utils/styles";
 import { colors } from "../../utils/cssVariables";
 import { PixelateCanvas, renderPixelate } from "./PixelateCanvas";
@@ -10,6 +10,8 @@ import { EFFECTS } from "./ascii/effects";
 import { AsciiRenderConfig } from "./renderConfig";
 import { DebugVizOptions } from "./types";
 import { hexToRgbaString } from "../../utils/color";
+
+const USE_CANVAS = true;
 
 interface Props {
   samplingDataRef: React.MutableRefObject<CharacterSamplingData[][]>;
@@ -36,6 +38,7 @@ export function AsciiRenderer(props: Props) {
 
   const containerRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
+  const preRef = useRef<HTMLPreElement>(null);
   const s = useStyles(AsciiRendererStyles);
   const asciiCanvasRef = useRef<HTMLCanvasElement>(null);
   const pixelateCanvasRef = useRef<HTMLCanvasElement>(null);
@@ -61,12 +64,20 @@ export function AsciiRenderer(props: Props) {
   const updateAsciiText = useCallback(() => {
     const asciiCanvas = asciiCanvasRef.current;
     const samplingData = samplingDataRef.current;
+    const preEl = preRef.current;
 
     if (!config || !characterMatcher || samplingData.length === 0) return;
 
-    if (!hideAscii && asciiCanvas) {
-      const color = transparent ? colors.text : colors.blue400;
-      renderAsciiCanvas(asciiCanvas, samplingData, config, characterMatcher, color);
+    if (USE_CANVAS) {
+      if (!hideAscii && asciiCanvas) {
+        const color = transparent ? colors.text : colors.blue400;
+        renderAsciiCanvas(asciiCanvas, samplingData, config, characterMatcher, color);
+      }
+    } else {
+      if (!hideAscii && preEl) {
+        const ascii = samplingDataToAscii(characterMatcher, samplingData, config);
+        preEl.textContent = ascii;
+      }
     }
 
     if (pixelateCanvasRef.current && debugVizOptions.pixelate) {
@@ -110,7 +121,20 @@ export function AsciiRenderer(props: Props) {
     >
       {!hideAscii && (
         <div className={s("content")} ref={contentRef}>
-          <AsciiCanvas onCanvasRef={asciiCanvasRef} transparent={transparent} />
+          {USE_CANVAS ? (
+            <AsciiCanvas onCanvasRef={asciiCanvasRef} transparent={transparent} />
+          ) : (
+            <pre
+              ref={preRef}
+              className={s("pre")}
+              style={{
+                color: transparent ? colors.text : colors.blue400,
+                letterSpacing: config ? config.letterSpacingEm + "em" : undefined,
+                lineHeight: config ? config.lineHeight.toString() : undefined,
+                fontSize: config ? config.fontSize + "px" : undefined,
+              }}
+            />
+          )}
         </div>
       )}
       {debugVizOptions.pixelate && (
