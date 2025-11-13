@@ -114,12 +114,14 @@ function euclideanDistanceSquared(a: number[], b: number[]): number {
   return sumSquared;
 }
 
+const BITS = 5;
+const RANGE = 8;
+
 function quantizeToKey(vector: number[]): number {
   let key = 0;
   for (let i = 0; i < vector.length; i++) {
-    // Assuming vector values are in [0, 1] range
-    const quantized = Math.floor(vector[i] * 7.9999999); // 0-7 (avoid hitting 8)
-    key = (key << 3) | quantized; // 3 bits per dimension
+    const quantized = Math.min(RANGE - 1, Math.floor(vector[i] * RANGE));
+    key = (key << BITS) | quantized;
   }
   return key;
 }

@@ -613,14 +613,177 @@ function findCharacter(samplingVector: number[]) {
 }
 ```
 
+This gives us the ASCII character whose shape best matches our sampling vector, but this is not very performant. Once we start rendering thousands of ASCII characters at $60$ FPS (frames per second), we'll need to speed up performance significantly. We'll cover that later.
+
+---
+
+---
+
+---
+
+---
+
+---
+
+---
+
+---
+
+---
+
+---
+
+---
+
+---
+
+---
+
+---
+
+---
+
+---
+
+---
+
+---
+
+---
+
+---
+
+---
+
+---
+
+---
+
+---
+
+---
+
+---
+
+---
+
+---
+
+
 I tried benchmarking this for $100{,}000$ input sampling vectors on my Macbook -- $100$K lookups consistently take about $190$ms. If we assume that we'll want to be able to use this for an animated canvas at $60$ frames per second (FPS), we only have $16{.}66$ms to render each frame. We can use this to get a rough budget for how many lookups we can perform each frame:
 
 <p className="mathblock">$$ 100{,}000 \times \dfrac{16{.}66\ldots}{190} \approx 8{,}772 $$</p>
 
-If we allow ourselves $50\%$ of the performance budget for just lookups, this gives us a budget of about $4$K characters. Not terrible, but definitely not great, especially considering that this is on a powerful laptop.
+If we allow ourselves $50\%$ of the performance budget for just lookups, this gives us a budget of about $4$K characters. Not terrible, but far from great, especially considering that these numbers are from a powerful laptop. Let's see how we can improve this.
 
 
-### Improving lookup performance
+### k-d trees
 
-Brute-force 100K characters: 188ms
-K-d 100K characters: 66ms
+$k$-d trees are data structure that enables nearest-neighbor lookups in multi-dimensional ($k$-dimensional) space -- perfect for our purpose. Their performance [degrades in higher dimensions][kd_search_performance] (e.g. $\gt20$), but they perform well in $6$ dimensions.
+
+[kd_search_performance]: https://graphics.stanford.edu/~tpurcell/pubs/search.pdf
+
+Internally, $k$-d trees are a binary tree where each node is a $k$-dimensional point. Each node can be thought to split the $k$-dimensional space in half with a hyperplane, with the left subtree on one side of the hyperplane and the right subtree on the other.
+
+<SmallNote>I won't go into much detail on $k$-d trees here.</SmallNote>
+
+Let's see how it performs! We'll construct a $k$-d tree with our characters and their associated vectors:
+
+```ts
+const kdTree = new KdTree(
+  CHARACTER_VECTORS.map(({ character, vector }) => ({
+    point: vector,
+    data: character,
+  }))
+);
+```
+
+After that, we can perform nearest-neighbor searches with sampling vectors:
+
+```ts
+const result = kdTree.findNearest(samplingVector);
+```
+
+Running $100$K such lookups takes $66$ms on my Macbook. That's a bit under $3$x faster than the $188$ms than the brute-force approach. We can then calculate the rough number of lookups per frame:
+
+<p className="mathblock">$$ 100{,}000 \times \dfrac{16{.}66\ldots}{66} \approx 25{,}253 $$</p>
+
+That's a lot of lookups per frame, but this is calculated based on a benchmark on a powerful machine. We can easily expect a $5$-$10$x smaller performance budget on mobile devices.
+
+Let's see how we can eek out even more performance.
+
+
+### Caching
+
+An obvious avenue for speeding up lookups is trying to cache the result:
+
+```ts
+function searchCached(vector: number[]) {
+  const key = generateCacheKey(vector)
+  
+  if (cache.has(key)) {
+    return cache.get(key)!;
+  }
+  
+  const result = search(samplingVector);
+  cache.set(key, result);
+  return result;
+}
+```
+
+But how does one generate a cache key for a $6$-dimensional vector?
+
+Well, one way is to quantize each vector component so that it fits into a set number of bits and packing those bits into a single number. JavaScript numbers give us $32$ bits to work with, so each vector component has at most $5$ bits to play around with.
+
+We can quantize a numeric value between $0$ and $1$ to the range $0$ to $31$ (the most that $5$ bits can store) like so:
+
+```ts
+const RANGE = 2 ** 5; // Equivalent to Math.pow(2, 5)
+
+function quantizeTo5Bits(value: number) {
+  return Math.min(RANGE - 1, Math.floor(value * RANGE));
+}
+```
+
+<SmallNote label="">Applying a max of <Ts>RANGE - 1</Ts> is done so that a <Ts>value</Ts> of exactly $1$ is mapped to $31$ instead of $32$.</SmallNote>
+
+We can quantize each vector component in this manner and use bit shifting to pack all of the quantized values into a single number like so:
+
+```ts
+const BITS = 5;
+const RANGE = 2 ** BITS;
+
+function generateCacheKey(vector: number[]): number {
+  let key = 0;
+  for (let i = 0; i < vector.length; i++) {
+    const quantized = Math.min(RANGE - 1, Math.floor(vector[i] * RANGE));
+    key = (key << BITS) | quantized;
+  }
+  return key;
+}
+```
+
+The <Ts>RANGE</Ts> is current set to <Ts>2 ** 5</Ts>, but consider how large that makes our key space. Each vector component is one of $32$ possible values. With $6$ vector components, makes the total number of possible keys $32^6$, which equals $1{,}073{,}741{,}824$. If the cache were to be fully saturated, just storing those keys alone would take $8$GB of memory! I'd also expect the cache hit rate to be incredibly low if we were to lazily fill the cache.
+
+We can pick any number between $1$ and $32$ for our range.
+
+Here's the number of keys -- and the memory needed to store them -- for range sizes between $6$ and $12$.
+
+<Table
+  align="right"
+  columns={["Range", "Number of keys", { title: "Memory needed for keys", width: 160 }]}
+  data={[
+    [ 6, "46,656", "364.50 KB" ],
+    [ 7, "117,649", "919.13 KB" ],
+    [ 8, "262,144", "2.00 MB" ],
+    [ 9, "531,441", "4.05 MB" ],
+    [ 10, "1,000,000", "7.63 MB" ],
+    [ 11, "1,771,561", "13.52 MB" ],
+    [ 12, "2,985,984", "22.78 MB" ],
+  ]}
+/>
+
+There is a memory-vs-quality trade-off to consider. As the range gets smaller, the quality of the results drops. If we pick a range of $6$, for example, there only possible lightness values are $0$, $0.2$, $0.4$, $0.6$, $0.8$ and $1$. That _does_ affect the quality of the ASCII rendering.
+
+Cached lookups are incredibly fast. So fast that lookup performance is not really a concern anymore. If we prepopulate the cache, we can expect consistently fast performance, though I encountered no problems lazily populating the cache.
+

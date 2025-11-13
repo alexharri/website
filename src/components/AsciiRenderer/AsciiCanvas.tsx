@@ -113,7 +113,9 @@ export function renderAsciiCanvas(
       const cellSamplingData = samplingData[row]?.[col];
       if (!cellSamplingData) continue;
 
-      const selectedChar = characterMatcher.findBestCharacter(cellSamplingData.samplingVector);
+      const selectedChar = characterMatcher.findBestCharacterQuantized(
+        cellSamplingData.samplingVector,
+      );
 
       const x = config.offsetX + config.asciiXOffset + col * config.boxWidth;
       const y = config.offsetY + row * config.boxHeight;
