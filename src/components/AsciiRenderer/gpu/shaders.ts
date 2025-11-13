@@ -159,24 +159,17 @@ void main() {
 }
 `;
 
-export const createCrunchFragmentShader = (numCircles: number) => /* glsl */ `#version 300 es
+export const createMaxValueFragmentShader = (numCircles: number) => /* glsl */ `#version 300 es
 precision highp float;
 
-// Crunch shader - combines raw and external sampling vectors and applies crunching effects
+// Max value shader - computes the maximum value across all circles in each cell
 
 in vec2 v_texCoord;
 out vec4 fragColor;
 
-uniform sampler2D u_rawSamplingTexture;      // Raw sampling vector texture
-uniform sampler2D u_externalSamplingTexture; // External sampling vector texture
-uniform bool u_useGlobalCrunch;              // Enable global crunch effect
-uniform bool u_useDirectionalCrunch;         // Enable directional crunch effect
-uniform vec2 u_gridSize;                     // Grid dimensions (cols, rows)
-uniform int u_numCircles;                    // Number of sampling circles per cell (1-6)
-
-// Crunch exponents (from generateAsciiChars.ts)
-const float GLOBAL_CRUNCH_EXPONENT = 3.0;
-const float DIRECTIONAL_CRUNCH_EXPONENT = 7.0;
+uniform sampler2D u_rawSamplingTexture;  // Raw sampling vector texture
+uniform vec2 u_gridSize;                 // Grid dimensions (cols, rows)
+uniform int u_numCircles;                // Number of sampling circles per cell (1-6)
 
 // Calculate texture coordinate for a specific circle within a cell
 vec2 getCircleTexCoord(vec2 gridCell, int circleIndex) {
@@ -197,76 +190,117 @@ vec2 getCircleTexCoord(vec2 gridCell, int circleIndex) {
 }
 
 void main() {
-  // Determine which grid cell and circle this fragment corresponds to
-  float pixelX = v_texCoord.x * u_gridSize.x * float(u_numCircles);
-  float pixelY = v_texCoord.y * u_gridSize.y;
-
-  float col = floor(pixelX / float(u_numCircles));
-  float row = floor(pixelY);
+  // Output texture is cols × rows (one pixel per cell)
+  // Determine which grid cell this fragment corresponds to
+  float col = floor(v_texCoord.x * u_gridSize.x);
+  float row = floor(v_texCoord.y * u_gridSize.y);
 
   // Flip Y to match grid coordinate system (top-down)
   vec2 gridCell = vec2(col, u_gridSize.y - 1.0 - row);
 
-  // Determine which sampling circle within the cell
-  int currentCircleIndex = int(mod(pixelX, float(u_numCircles)));
+  // Find max value across all circles in this cell
+  float maxValue = 0.0;
 
-  if (currentCircleIndex >= u_numCircles) {
-    fragColor = vec4(0.0);
-    return;
+  for (int i = 0; i < ${numCircles}; i++) {
+    vec2 circleTexCoord = getCircleTexCoord(gridCell, i);
+    float circleValue = texture(u_rawSamplingTexture, circleTexCoord).r;
+    maxValue = max(maxValue, circleValue);
   }
 
-  // Sample current raw and external values
-  vec4 rawSample = texture(u_rawSamplingTexture, v_texCoord);
-  vec4 externalSample = texture(u_externalSamplingTexture, v_texCoord);
+  // Output max value
+  fragColor = vec4(maxValue, 0.0, 0.0, 1.0);
+}
+`;
 
-  float value = rawSample.r;
-  float contextValue = externalSample.r;
+export const createDirectionalCrunchFragmentShader = (
+  numCircles: number,
+) => /* glsl */ `#version 300 es
+precision highp float;
 
-  // Apply directional crunch FIRST (if enabled)
-  if (u_useDirectionalCrunch && contextValue > value) {
+// Directional crunch shader - applies directional crunch effect based on external context
+
+in vec2 v_texCoord;
+out vec4 fragColor;
+
+uniform sampler2D u_inputTexture;            // Input texture from previous pass
+uniform sampler2D u_externalSamplingTexture; // External sampling vector texture
+uniform vec2 u_gridSize;                     // Grid dimensions (cols, rows)
+uniform int u_numCircles;                    // Number of sampling circles per cell (1-6)
+
+// Crunch exponent (from generateAsciiChars.ts)
+const float DIRECTIONAL_CRUNCH_EXPONENT = 7.0;
+
+void main() {
+  // Sample input and external values at current fragment
+  float value = texture(u_inputTexture, v_texCoord).r;
+  float contextValue = texture(u_externalSamplingTexture, v_texCoord).r;
+
+  // Apply directional crunch: enhance contrast when context > value
+  if (contextValue > value) {
     float normalized = value / contextValue;
     float enhanced = pow(normalized, DIRECTIONAL_CRUNCH_EXPONENT);
     value = enhanced * contextValue;
   }
 
-  // Apply global crunch SECOND (if enabled)
-  // Sample all N circles from the same cell to find max
-  if (u_useGlobalCrunch) {
-    float maxValue = 0.0;
+  // Output crunched value
+  fragColor = vec4(value, 0.0, 0.0, 1.0);
+}
+`;
 
-    // Sample all circles and find max
-    for (int i = 0; i < ${numCircles}; i++) {
-      vec2 circleTexCoord = getCircleTexCoord(gridCell, i);
-      float circleValue = texture(u_rawSamplingTexture, circleTexCoord).r;
+export const createGlobalCrunchFragmentShader = (numCircles: number) => /* glsl */ `#version 300 es
+precision highp float;
 
-      // Apply directional crunch to this sample if enabled
-      if (u_useDirectionalCrunch) {
-        float circleContextValue = texture(u_externalSamplingTexture, circleTexCoord).r;
+// Global crunch shader - applies global crunch effect based on cell max values
 
-        if (circleContextValue > circleValue) {
-          float normalized = circleValue / circleContextValue;
-          float enhanced = pow(normalized, DIRECTIONAL_CRUNCH_EXPONENT);
-          circleValue = enhanced * circleContextValue;
-        }
-      }
+in vec2 v_texCoord;
+out vec4 fragColor;
 
-      // Update value for current circle
-      if (i == currentCircleIndex) {
-        value = circleValue;
-      }
+uniform sampler2D u_inputTexture;    // Input texture from previous pass
+uniform sampler2D u_maxValueTexture; // Max value texture (cols × rows)
+uniform vec2 u_gridSize;             // Grid dimensions (cols, rows)
+uniform int u_numCircles;            // Number of sampling circles per cell (1-6)
 
-      maxValue = max(maxValue, circleValue);
-    }
+// Crunch exponent (from generateAsciiChars.ts)
+const float GLOBAL_CRUNCH_EXPONENT = 3.0;
 
-    // Apply global crunch using max across all circles
-    if (maxValue > 0.0) {
-      float normalized = value / maxValue;
-      float enhanced = pow(normalized, GLOBAL_CRUNCH_EXPONENT);
-      value = enhanced * maxValue;
-    }
+void main() {
+  // Determine which grid cell this fragment corresponds to
+  float pixelX = v_texCoord.x * u_gridSize.x * float(u_numCircles);
+  float pixelY = v_texCoord.y * u_gridSize.y;
+
+  float col = floor(v_texCoord.x * u_gridSize.x);
+  float row = floor(v_texCoord.y * u_gridSize.y);
+
+  // Calculate texture coordinate for the cell's max value
+  vec2 cellTexCoord = (vec2(col, row) + vec2(0.5)) / u_gridSize;
+
+  // Sample input value and max value
+  float value = texture(u_inputTexture, v_texCoord).r;
+  float maxValue = texture(u_maxValueTexture, cellTexCoord).r;
+
+  // Apply global crunch: normalize by max and enhance contrast
+  if (maxValue > 0.0) {
+    float normalized = value / maxValue;
+    float enhanced = pow(normalized, GLOBAL_CRUNCH_EXPONENT);
+    value = enhanced * maxValue;
   }
 
-  // Output final value
+  // Output crunched value
   fragColor = vec4(value, 0.0, 0.0, 1.0);
+}
+`;
+
+export const COPY_FRAGMENT_SHADER = /* glsl */ `#version 300 es
+precision highp float;
+
+// Simple copy shader - copies input texture to output
+
+in vec2 v_texCoord;
+out vec4 fragColor;
+
+uniform sampler2D u_inputTexture;
+
+void main() {
+  fragColor = texture(u_inputTexture, v_texCoord);
 }
 `;

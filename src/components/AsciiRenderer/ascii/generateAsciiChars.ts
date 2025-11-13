@@ -32,28 +32,7 @@ function applyEasingLookup(t: number, lookupTable: Float32Array): number {
   return lookupTable[index];
 }
 
-// function readPixelFromBuffer(
-//   pixelBuffer: Uint8Array,
-//   canvasWidth: number,
-//   canvasHeight: number,
-//   tx: number,
-//   ty: number,
-//   pixelBufferScale: number,
-//   flipY: boolean,
-// ) {
-//   const pixelX = Math.floor(tx * canvasWidth * pixelBufferScale);
-//   const pixelY = Math.floor((flipY ? ty : 1 - ty) * canvasHeight * pixelBufferScale);
-
-//   const clampedX = clamp(pixelX, 0, canvasWidth * pixelBufferScale - 1);
-//   const clampedY = clamp(pixelY, 0, canvasHeight * pixelBufferScale - 1);
-
-//   const index = (clampedY * (canvasWidth * pixelBufferScale) + clampedX) * 4;
-//   return (pixelBuffer[index] << 16) | (pixelBuffer[index + 1] << 8) | pixelBuffer[index + 2];
-// }
 function readPixelFromBuffer(pixelBuffer: Uint8Array, index: number) {
-  // const clampedX = clamp(pixelX, 0, canvasWidth * pixelBufferScale - 1);
-  // const clampedY = clamp(pixelY, 0, canvasHeight * pixelBufferScale - 1);
-
   return (pixelBuffer[index] << 16) | (pixelBuffer[index + 1] << 8) | pixelBuffer[index + 2];
 }
 
@@ -86,7 +65,7 @@ function sampleCircularRegion(
     const sampleY = y + point.y;
 
     const pixelX = Math.floor(sampleX * scale);
-    const pixelY = canvasHeight - Math.floor(sampleY * scale);
+    const pixelY = Math.floor(flipY ? sampleY * scale : canvasHeight - sampleY * scale);
     const index = (pixelY * canvasWidth + pixelX) * 4;
 
     const hexColor = readPixelFromBuffer(pixelBuffer, index);

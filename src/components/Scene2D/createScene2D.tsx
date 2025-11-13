@@ -126,7 +126,7 @@ export function createScene2D<V extends VariableDict>(
       const container = containerRef.current;
       if (!canvas || !container) return;
 
-      const ctx = canvas.getContext("2d");
+      const ctx = canvas.getContext("2d", { willReadFrequently: true });
       if (!ctx) return;
 
       let mounted = true;
@@ -164,7 +164,7 @@ export function createScene2D<V extends VariableDict>(
           variables,
         });
 
-        if (onFrame) {
+        if (onFrame && canvas.width && canvas.height) {
           const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
           const buffer = new Uint8Array(imageData.data.buffer);
           onFrame(buffer, { flipY: true });

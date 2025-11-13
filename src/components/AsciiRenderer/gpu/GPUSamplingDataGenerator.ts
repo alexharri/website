@@ -5,7 +5,10 @@ import { getAlphabetMetadata } from "../alphabets/AlphabetManager";
 import {
   PASSTHROUGH_VERT,
   createSamplingFragmentShader,
-  createCrunchFragmentShader,
+  createMaxValueFragmentShader,
+  createDirectionalCrunchFragmentShader,
+  createGlobalCrunchFragmentShader,
+  COPY_FRAGMENT_SHADER,
 } from "./shaders";
 
 interface GPUSamplingDataGeneratorOptions {
@@ -43,12 +46,21 @@ export class GPUSamplingDataGenerator {
   private externalSamplingFBO: WebGLFramebuffer;
   private externalSamplingTexture: WebGLTexture;
 
-  private crunchFBO: WebGLFramebuffer;
-  private crunchTexture: WebGLTexture;
+  private maxValueFBO: WebGLFramebuffer;
+  private maxValueTexture: WebGLTexture;
+
+  private currentSamplingFBO: WebGLFramebuffer;
+  private currentSamplingTexture: WebGLTexture;
+
+  private nextSamplingFBO: WebGLFramebuffer;
+  private nextSamplingTexture: WebGLTexture;
 
   // Shader programs
   private samplingProgram: WebGLProgram;
-  private crunchProgram: WebGLProgram;
+  private copyProgram: WebGLProgram;
+  private maxValueProgram: WebGLProgram;
+  private directionalCrunchProgram: WebGLProgram;
+  private globalCrunchProgram: WebGLProgram;
 
   // Vertex array object for fullscreen quad
   private quadVAO: WebGLVertexArrayObject;
@@ -102,8 +114,16 @@ export class GPUSamplingDataGenerator {
     this.externalSamplingTexture = this.createFloatTexture(this.outputWidth, this.outputHeight)!;
     this.externalSamplingFBO = this.createFramebuffer(this.externalSamplingTexture)!;
 
-    this.crunchTexture = this.createFloatTexture(this.outputWidth, this.outputHeight)!;
-    this.crunchFBO = this.createFramebuffer(this.crunchTexture)!;
+    // Max value texture is cols × rows (one pixel per cell)
+    this.maxValueTexture = this.createFloatTexture(this.config.cols, this.config.rows)!;
+    this.maxValueFBO = this.createFramebuffer(this.maxValueTexture)!;
+
+    // Current and next sampling textures for ping-pong buffering
+    this.currentSamplingTexture = this.createFloatTexture(this.outputWidth, this.outputHeight)!;
+    this.currentSamplingFBO = this.createFramebuffer(this.currentSamplingTexture)!;
+
+    this.nextSamplingTexture = this.createFloatTexture(this.outputWidth, this.outputHeight)!;
+    this.nextSamplingFBO = this.createFramebuffer(this.nextSamplingTexture)!;
 
     // Compile shaders (generate fragment shaders based on numCircles)
     const samplingFrag = createSamplingFragmentShader(this.numCircles);
@@ -113,12 +133,32 @@ export class GPUSamplingDataGenerator {
     }
     this.samplingProgram = samplingProgram;
 
-    const crunchFrag = createCrunchFragmentShader(this.numCircles);
-    const crunchProgram = this.createProgram(PASSTHROUGH_VERT, crunchFrag);
-    if (!crunchProgram) {
-      throw new Error("Failed to create crunch program");
+    const copyProgram = this.createProgram(PASSTHROUGH_VERT, COPY_FRAGMENT_SHADER);
+    if (!copyProgram) {
+      throw new Error("Failed to create copy program");
     }
-    this.crunchProgram = crunchProgram;
+    this.copyProgram = copyProgram;
+
+    const maxValueFrag = createMaxValueFragmentShader(this.numCircles);
+    const maxValueProgram = this.createProgram(PASSTHROUGH_VERT, maxValueFrag);
+    if (!maxValueProgram) {
+      throw new Error("Failed to create max value program");
+    }
+    this.maxValueProgram = maxValueProgram;
+
+    const directionalCrunchFrag = createDirectionalCrunchFragmentShader(this.numCircles);
+    const directionalCrunchProgram = this.createProgram(PASSTHROUGH_VERT, directionalCrunchFrag);
+    if (!directionalCrunchProgram) {
+      throw new Error("Failed to create directional crunch program");
+    }
+    this.directionalCrunchProgram = directionalCrunchProgram;
+
+    const globalCrunchFrag = createGlobalCrunchFragmentShader(this.numCircles);
+    const globalCrunchProgram = this.createProgram(PASSTHROUGH_VERT, globalCrunchFrag);
+    if (!globalCrunchProgram) {
+      throw new Error("Failed to create global crunch program");
+    }
+    this.globalCrunchProgram = globalCrunchProgram;
 
     // Create fullscreen quad
     this.quadVAO = this.createQuadVAO()!;
@@ -136,41 +176,100 @@ export class GPUSamplingDataGenerator {
   public update(
     pixelBuffer: Uint8Array,
     out: CharacterSamplingData[][],
-    flipY: boolean = false,
-    pixelBufferScale?: number,
+    flipY: boolean,
+    pixelBufferScale: number,
   ): void {
-    // Update pixel buffer scale if provided
-    if (pixelBufferScale !== undefined) {
-      this.pixelBufferScale = pixelBufferScale;
-    }
-
-    // Upload canvas texture
+    this.pixelBufferScale = pixelBufferScale;
     this.uploadCanvasTexture(pixelBuffer);
 
-    // Get sampling configuration
+    this.collectRawSamples(flipY);
+    this.collectExternalSamples(flipY);
+
+    const applyCrunchEffect = this.samplingEffects.includes(SamplingEffect.Crunch);
+    if (applyCrunchEffect) {
+      this.applyCrunchEffects();
+    }
+
+    this.readbackAndParse(out);
+
+    this.checkGLError("Update");
+  }
+
+  /**
+   * Render raw sampling pass (internal points)
+   */
+  private collectRawSamples(flipY: boolean): void {
     const metadata = getAlphabetMetadata(this.config.alphabet);
     const samplingConfig = metadata.samplingConfig;
 
-    // Pass 1: Raw sampling (internal points)
     this.renderPass(this.rawSamplingFBO, this.samplingProgram, (program) =>
       this.setSamplingUniforms(program, samplingConfig.points, flipY),
     );
 
-    // Pass 2: External sampling (external points)
+    // Copy raw sampling to current buffer (avoids feedback loops in effect passes)
+    this.renderPass(this.currentSamplingFBO, this.copyProgram, (program) => {
+      const gl = this.gl;
+      gl.activeTexture(gl.TEXTURE0);
+      gl.bindTexture(gl.TEXTURE_2D, this.rawSamplingTexture);
+      gl.uniform1i(gl.getUniformLocation(program, "u_inputTexture"), 0);
+    });
+  }
+
+  /**
+   * Render external sampling pass (external points)
+   */
+  private collectExternalSamples(flipY: boolean): void {
+    const metadata = getAlphabetMetadata(this.config.alphabet);
+    const samplingConfig = metadata.samplingConfig;
     const externalPoints = "externalPoints" in samplingConfig ? samplingConfig.externalPoints : [];
+
+    // Skip if no external points defined
+    if (!externalPoints || externalPoints.length === 0) {
+      return;
+    }
+
     this.renderPass(this.externalSamplingFBO, this.samplingProgram, (program) =>
-      this.setSamplingUniforms(program, externalPoints || [], flipY),
+      this.setSamplingUniforms(program, externalPoints, flipY),
+    );
+  }
+
+  /**
+   * Apply crunch effects (directional crunch, then global crunch)
+   */
+  private applyCrunchEffects(): void {
+    this.applyDirectionalCrunch();
+    this.applyGlobalCrunch();
+  }
+
+  /**
+   * Apply directional crunch: enhance contrast based on external context
+   */
+  private applyDirectionalCrunch(): void {
+    this.renderPass(this.nextSamplingFBO, this.directionalCrunchProgram, (program) =>
+      this.setDirectionalCrunchUniforms(program),
+    );
+    this.swapSamplingBuffers();
+  }
+
+  /**
+   * Apply global crunch: normalize by cell max value
+   * Computes max from current sampling texture (after directional crunch if applied)
+   */
+  private applyGlobalCrunch(): void {
+    // Compute max value per cell from current sampling texture
+    this.renderPass(
+      this.maxValueFBO,
+      this.maxValueProgram,
+      (program) => this.setMaxValueUniforms(program),
+      this.config.cols,
+      this.config.rows,
     );
 
-    // Pass 3: Crunch
-    this.renderPass(this.crunchFBO, this.crunchProgram, (program) =>
-      this.setCrunchUniforms(program),
+    // Apply global crunch using max values
+    this.renderPass(this.nextSamplingFBO, this.globalCrunchProgram, (program) =>
+      this.setGlobalCrunchUniforms(program),
     );
-
-    // Async readback using PBO
-    this.readbackAndParse(out);
-
-    this.checkGLError("Update");
+    this.swapSamplingBuffers();
   }
 
   /**
@@ -202,12 +301,14 @@ export class GPUSamplingDataGenerator {
     fbo: WebGLFramebuffer,
     program: WebGLProgram,
     setUniforms: (program: WebGLProgram) => void,
+    width?: number,
+    height?: number,
   ): void {
     const gl = this.gl;
 
     // Bind framebuffer
     gl.bindFramebuffer(gl.FRAMEBUFFER, fbo);
-    gl.viewport(0, 0, this.outputWidth, this.outputHeight);
+    gl.viewport(0, 0, width ?? this.outputWidth, height ?? this.outputHeight);
 
     // Use program
     gl.useProgram(program);
@@ -271,28 +372,75 @@ export class GPUSamplingDataGenerator {
   }
 
   /**
-   * Set uniforms for crunch pass
+   * Set uniforms for max value pass
    */
-  private setCrunchUniforms(program: WebGLProgram): void {
+  private setMaxValueUniforms(program: WebGLProgram): void {
     const gl = this.gl;
 
-    // Input textures
+    // Input texture (current sampling vector)
     gl.activeTexture(gl.TEXTURE0);
-    gl.bindTexture(gl.TEXTURE_2D, this.rawSamplingTexture);
+    gl.bindTexture(gl.TEXTURE_2D, this.currentSamplingTexture);
     gl.uniform1i(gl.getUniformLocation(program, "u_rawSamplingTexture"), 0);
 
+    // Grid size and circle count
+    gl.uniform2f(gl.getUniformLocation(program, "u_gridSize"), this.config.cols, this.config.rows);
+    gl.uniform1i(gl.getUniformLocation(program, "u_numCircles"), this.numCircles);
+  }
+
+  /**
+   * Set uniforms for directional crunch pass
+   */
+  private setDirectionalCrunchUniforms(program: WebGLProgram): void {
+    const gl = this.gl;
+
+    // Input texture (current sampling vector)
+    gl.activeTexture(gl.TEXTURE0);
+    gl.bindTexture(gl.TEXTURE_2D, this.currentSamplingTexture);
+    gl.uniform1i(gl.getUniformLocation(program, "u_inputTexture"), 0);
+
+    // External sampling texture
     gl.activeTexture(gl.TEXTURE1);
     gl.bindTexture(gl.TEXTURE_2D, this.externalSamplingTexture);
     gl.uniform1i(gl.getUniformLocation(program, "u_externalSamplingTexture"), 1);
 
-    // Grid size and circle count for texture coordinate calculations
+    // Grid size and circle count
     gl.uniform2f(gl.getUniformLocation(program, "u_gridSize"), this.config.cols, this.config.rows);
     gl.uniform1i(gl.getUniformLocation(program, "u_numCircles"), this.numCircles);
+  }
 
-    // Crunch effects (both available but can be controlled independently)
-    const useCrunch = this.samplingEffects.includes(SamplingEffect.Crunch);
-    gl.uniform1i(gl.getUniformLocation(program, "u_useGlobalCrunch"), useCrunch ? 1 : 0);
-    gl.uniform1i(gl.getUniformLocation(program, "u_useDirectionalCrunch"), useCrunch ? 1 : 0);
+  /**
+   * Set uniforms for global crunch pass
+   */
+  private setGlobalCrunchUniforms(program: WebGLProgram): void {
+    const gl = this.gl;
+
+    // Input texture (current sampling vector)
+    gl.activeTexture(gl.TEXTURE0);
+    gl.bindTexture(gl.TEXTURE_2D, this.currentSamplingTexture);
+    gl.uniform1i(gl.getUniformLocation(program, "u_inputTexture"), 0);
+
+    // Max value texture
+    gl.activeTexture(gl.TEXTURE1);
+    gl.bindTexture(gl.TEXTURE_2D, this.maxValueTexture);
+    gl.uniform1i(gl.getUniformLocation(program, "u_maxValueTexture"), 1);
+
+    // Grid size and circle count
+    gl.uniform2f(gl.getUniformLocation(program, "u_gridSize"), this.config.cols, this.config.rows);
+    gl.uniform1i(gl.getUniformLocation(program, "u_numCircles"), this.numCircles);
+  }
+
+  /**
+   * Swap current and next sampling buffers for ping-pong rendering
+   */
+  private swapSamplingBuffers(): void {
+    const tempTexture = this.currentSamplingTexture;
+    const tempFBO = this.currentSamplingFBO;
+
+    this.currentSamplingTexture = this.nextSamplingTexture;
+    this.currentSamplingFBO = this.nextSamplingFBO;
+
+    this.nextSamplingTexture = tempTexture;
+    this.nextSamplingFBO = tempFBO;
   }
 
   /**
@@ -314,8 +462,8 @@ export class GPUSamplingDataGenerator {
     const externalData = new Float32Array(this.outputWidth * this.outputHeight * 4);
     gl.readPixels(0, 0, this.outputWidth, this.outputHeight, gl.RGBA, gl.FLOAT, externalData);
 
-    // Read crunched sampling texture
-    gl.bindFramebuffer(gl.FRAMEBUFFER, this.crunchFBO);
+    // Read current sampling vector (final output after all effects)
+    gl.bindFramebuffer(gl.FRAMEBUFFER, this.currentSamplingFBO);
     const crunchedData = new Float32Array(this.outputWidth * this.outputHeight * 4);
     gl.readPixels(0, 0, this.outputWidth, this.outputHeight, gl.RGBA, gl.FLOAT, crunchedData);
 
@@ -607,16 +755,23 @@ export class GPUSamplingDataGenerator {
     gl.deleteTexture(this.easingLUTTexture);
     gl.deleteTexture(this.rawSamplingTexture);
     gl.deleteTexture(this.externalSamplingTexture);
-    gl.deleteTexture(this.crunchTexture);
+    gl.deleteTexture(this.maxValueTexture);
+    gl.deleteTexture(this.currentSamplingTexture);
+    gl.deleteTexture(this.nextSamplingTexture);
 
     // Delete framebuffers
     gl.deleteFramebuffer(this.rawSamplingFBO);
     gl.deleteFramebuffer(this.externalSamplingFBO);
-    gl.deleteFramebuffer(this.crunchFBO);
+    gl.deleteFramebuffer(this.maxValueFBO);
+    gl.deleteFramebuffer(this.currentSamplingFBO);
+    gl.deleteFramebuffer(this.nextSamplingFBO);
 
     // Delete programs
     gl.deleteProgram(this.samplingProgram);
-    gl.deleteProgram(this.crunchProgram);
+    gl.deleteProgram(this.copyProgram);
+    gl.deleteProgram(this.maxValueProgram);
+    gl.deleteProgram(this.directionalCrunchProgram);
+    gl.deleteProgram(this.globalCrunchProgram);
 
     // Delete VAO
     gl.deleteVertexArray(this.quadVAO);

@@ -46,7 +46,7 @@ export function useSamplingDataCollection(params: UseSamplingDataCollectionParam
     lightnessEasingFunction,
     forceSamplingValue,
     samplingEffects,
-    optimizePerformance
+    optimizePerformance,
   } = params;
   const { canvasRef, samplingDataRef, debugCanvasRef, onFrameRef } = refs;
   const { showSamplingPoints, showSamplingCircles, debugVizOptions } = debug;
@@ -61,9 +61,9 @@ export function useSamplingDataCollection(params: UseSamplingDataCollectionParam
   const webgl2SupportedRef = useRef<boolean | null>(null);
 
   // Check WebGL2 support once (client-side only)
-  if (typeof window !== 'undefined' && webgl2SupportedRef.current === null) {
-    const testCanvas = document.createElement('canvas');
-    const testGl = testCanvas.getContext('webgl2');
+  if (typeof window !== "undefined" && webgl2SupportedRef.current === null) {
+    const testCanvas = document.createElement("canvas");
+    const testGl = testCanvas.getContext("webgl2");
     webgl2SupportedRef.current = testGl !== null;
   }
 
@@ -75,7 +75,7 @@ export function useSamplingDataCollection(params: UseSamplingDataCollectionParam
       try {
         // Create offscreen canvas for GPU operations
         if (!gpuCanvasRef.current) {
-          gpuCanvasRef.current = document.createElement('canvas');
+          gpuCanvasRef.current = document.createElement("canvas");
           gpuCanvasRef.current.width = config.canvasWidth;
           gpuCanvasRef.current.height = config.canvasHeight;
         }
@@ -96,7 +96,7 @@ export function useSamplingDataCollection(params: UseSamplingDataCollectionParam
           samplingEffects: samplingEffects || [],
         });
       } catch (error) {
-        console.error('Failed to initialize GPU sampling:', error);
+        console.error("Failed to initialize GPU sampling:", error);
         gpuGeneratorRef.current = null;
       }
     }
@@ -125,10 +125,10 @@ export function useSamplingDataCollection(params: UseSamplingDataCollectionParam
               buffer,
               samplingData,
               options?.flipY ?? false,
-              pixelBufferScale
+              pixelBufferScale,
             );
           } catch (error) {
-            console.error('GPU sampling failed, falling back to CPU:', error);
+            console.error("GPU sampling failed, falling back to CPU:", error);
             // Fallback to CPU
             generateSamplingData(
               samplingData,

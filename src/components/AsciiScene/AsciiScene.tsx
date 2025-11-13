@@ -24,6 +24,9 @@ import { cssVariables } from "../../utils/cssVariables";
 import { AsciiDebugVizCanvas, renderAsciiDebugViz } from "../AsciiRenderer/asciiDebugViz";
 import { SCENE_BASELINE_WIDTH } from "../../constants";
 import { useSamplingDataCollection } from "../../utils/hooks/useSamplingDataCollection";
+import { useVisible } from "../../utils/hooks/useVisible";
+
+const DEFAULT_FONT_SIZE = 14;
 
 type ViewModeKey = "ascii" | "split" | "transparent" | "canvas";
 
@@ -57,16 +60,14 @@ interface AsciiSceneProps {
   pixelate?: boolean;
   effects?: SamplingEffect[];
   optimizePerformance?: boolean;
+  usesVariables?: boolean;
 }
 
-export const AsciiScene: React.FC<AsciiSceneProps> = (props) => {
+const _AsciiScene: React.FC<AsciiSceneProps> = (props) => {
   const {
     children,
-    alphabet: initialAlphabet = "default",
-
+    alphabet = "default",
     showControls = true,
-    rows,
-    cols,
     fontSize: targetFontSize = 14,
     showSamplingCircles = "none",
     showExternalSamplingCircles = false,
@@ -81,26 +82,12 @@ export const AsciiScene: React.FC<AsciiSceneProps> = (props) => {
     columnWidth,
     increaseContrast,
     effects,
+    optimizePerformance = false,
   } = props;
-  let { width: targetWidth, height: targetHeight, minWidth, lightnessEasingFunction } = props;
+  let { minWidth, lightnessEasingFunction } = props;
 
   if (increaseContrast) {
     lightnessEasingFunction = "increase_contrast";
-  }
-
-  if (cols) {
-    const alphabet = getAlphabetMetadata(initialAlphabet);
-    targetWidth = targetFontSize * alphabet.width * cols;
-  }
-  if (rows) {
-    const alphabet = getAlphabetMetadata(initialAlphabet);
-    targetHeight = targetFontSize * alphabet.height * rows;
-  }
-
-  targetWidth ??= 1080;
-
-  if (minWidth == null && targetWidth < SCENE_BASELINE_WIDTH) {
-    minWidth = targetWidth;
   }
 
   const VIEW_MODE_MAP: Record<ViewModeKey, { value: ViewMode; label: string }> = {
@@ -115,11 +102,10 @@ export const AsciiScene: React.FC<AsciiSceneProps> = (props) => {
   const availableViewModes =
     viewModes === "all" ? Object.values(VIEW_MODE_MAP) : viewModes.map((key) => VIEW_MODE_MAP[key]);
 
-  const [alphabet, setAlphabet] = useState<AlphabetName>(initialAlphabet);
-
   const [variables, setVariables] = useState<VariableDict>({});
   const [variableValues, setVariableValues] = useState<VariableValues>({});
 
+  const { targetWidth, targetHeight, width, height, scale, breakpoint } = useDimensions(props);
   const metadata = useMemo(() => getAlphabetMetadata(alphabet), [alphabet]);
   const cellScale = "cellScale" in variableValues ? (variableValues.cellScale as number) : 1;
   const sampleQuality =
@@ -134,7 +120,6 @@ export const AsciiScene: React.FC<AsciiSceneProps> = (props) => {
   }, [columnWidth, targetFontSize, metadata, cellScale]);
 
   const orbitControlsTargetRef = useRef<HTMLDivElement>(null);
-  const breakpoint = useMemo(() => targetWidth + cssVariables.contentPadding * 2, [targetWidth]);
   const AsciiSceneStyles = useMemo(
     () => createAsciiSceneStyles(targetWidth, breakpoint),
     [targetWidth, breakpoint],
@@ -176,18 +161,6 @@ export const AsciiScene: React.FC<AsciiSceneProps> = (props) => {
     pixelate,
   };
 
-  const viewportWidth = useViewportWidth();
-  let width: number;
-  if (viewportWidth == null) {
-    width = targetWidth;
-  } else if (viewportWidth <= breakpoint) {
-    width = viewportWidth;
-  } else {
-    width = targetWidth;
-  }
-
-  const { height, scale } = useSceneHeight(targetHeight, { minWidth });
-
   const fontSize = targetFontSize * scale * cellScale;
 
   const config = useMemo(() => {
@@ -224,7 +197,7 @@ export const AsciiScene: React.FC<AsciiSceneProps> = (props) => {
     lightnessEasingFunction,
     forceSamplingValue,
     samplingEffects: effects,
-    optimizePerformance: props.optimizePerformance,
+    optimizePerformance,
   });
 
   const isCharacterMode = typeof children === "string";
@@ -271,7 +244,9 @@ export const AsciiScene: React.FC<AsciiSceneProps> = (props) => {
         {showControls && false && (
           <AsciiSceneControls
             selectedAlphabet={alphabet}
-            setSelectedAlphabet={setAlphabet}
+            setSelectedAlphabet={() => {
+              throw new Error("Not implemented");
+            }}
             characterWidthMultiplier={characterWidthMultiplier}
             setCharacterWidthMultiplier={setCharacterWidthMultiplier}
             characterHeightMultiplier={characterHeightMultiplier}
@@ -346,3 +321,50 @@ export const AsciiScene: React.FC<AsciiSceneProps> = (props) => {
     </>
   );
 };
+
+export const AsciiScene: React.FC<AsciiSceneProps> = (props) => {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const visible = useVisible(containerRef, "350px");
+
+  const { height } = useDimensions(props);
+
+  const variablesHeight = props.usesVariables ? 72 : 0;
+
+  return (
+    <div ref={containerRef} style={{ height: height + variablesHeight }} className="scene">
+      {visible && <_AsciiScene {...props} />}
+    </div>
+  );
+};
+
+function useDimensions(props: AsciiSceneProps) {
+  const { cols, rows, alphabet = "default", fontSize: targetFontSize = DEFAULT_FONT_SIZE } = props;
+  let { width: targetWidth, height: targetHeight, minWidth } = props;
+
+  const metadata = useMemo(() => getAlphabetMetadata(alphabet), [alphabet]);
+
+  if (cols) targetWidth = targetFontSize * metadata.width * cols;
+  if (rows) targetHeight = targetFontSize * metadata.height * rows;
+
+  targetWidth ??= 1080;
+
+  if (minWidth == null && targetWidth < SCENE_BASELINE_WIDTH) {
+    minWidth = targetWidth;
+  }
+
+  const breakpoint = useMemo(() => targetWidth + cssVariables.contentPadding * 2, [targetWidth]);
+
+  const viewportWidth = useViewportWidth();
+  let width: number;
+  if (viewportWidth == null) {
+    width = targetWidth;
+  } else if (viewportWidth <= breakpoint) {
+    width = viewportWidth;
+  } else {
+    width = targetWidth;
+  }
+
+  const { height, scale } = useSceneHeight(targetHeight, { minWidth });
+
+  return { targetWidth, targetHeight, width, height, minWidth, breakpoint, scale };
+}

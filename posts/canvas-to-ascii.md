@@ -10,7 +10,7 @@ I've noticed a few common issues with how people generate the ASCII characters, 
 
 In this post, let's dive into how we can generate sharp ASCII arts from a dynamic input image. Here's an example of what we'll build:
 
-<AsciiScene height={540} fontSize={12} characterWidthMultiplier={0.85} characterHeightMultiplier={0.85} viewModes={["ascii", "split", "canvas"]} effects={["crunch"]}>
+<AsciiScene height={540} fontSize={12} characterWidthMultiplier={0.85} characterHeightMultiplier={0.85} viewModes={["ascii", "split", "canvas"]} effects={["crunch"]} optimizePerformance>
   <Scene scene="cube" autoRotate zoom={2.7} yOffset={0.45} />
 </AsciiScene>
 
@@ -206,7 +206,7 @@ This is what was happening in our circle example above:
 
 When we only sample a single pixel value, as is done in nearest-neighbor interpolation, the sampled pixel will either be inside of the circle or not, causing jaggies. Here's a zoomed in example where you can move the circle to illustrate:
 
-<AsciiScene width={600} minWidth={400} height={360} fontSize={60} rowHeight={72} columnWidth={60} viewMode="transparent" showGrid offsetAlign="left" sampleQuality={1} showSamplingPoints alphabet="pixel-short" increaseContrast>
+<AsciiScene width={600} minWidth={400} height={360} fontSize={60} rowHeight={72} columnWidth={60} viewMode="transparent" showGrid offsetAlign="left" sampleQuality={1} showSamplingPoints alphabet="pixel-short" increaseContrast usesVariables>
   <Scene2D scene="circle_zoomed" />
 </AsciiScene>
 
@@ -228,7 +228,7 @@ The line's slope on the $y$ axis is $\dfrac{1}{3}x$. When we pixelate it with ne
 
 We can get rid of the jagginess by taking multiple samples within each cell and using the average sampled lightness value to color the cell. Try varying the number of samples using the slider in the example below:
 
-<AsciiScene width={600} minWidth={200} height={360} fontSize={40} rowHeight={40} columnWidth={40} viewModes={["ascii", "transparent", "canvas"]} hideAscii pixelate sampleQuality={3} alphabet="pixel-short" showSamplingPoints showGrid>
+<AsciiScene width={600} minWidth={200} height={360} fontSize={40} rowHeight={40} columnWidth={40} viewModes={["ascii", "transparent", "canvas"]} hideAscii pixelate sampleQuality={3} alphabet="pixel-short" showSamplingPoints showGrid usesVariables>
   <Scene2D scene="slanted_line" />
 </AsciiScene>
 
@@ -241,7 +241,7 @@ This method of collecting multiple samples from the larger image is called [supe
 
 Let's look at what supersampling does for the circle example from earlier. Try dragging the sample quality slider:
 
-<AsciiScene width={360} height={408} fontSize={20} rowHeight={24} columnWidth={20} viewModes={["ascii", "transparent"]} alphabet="pixel-short" increaseContrast>
+<AsciiScene width={360} height={408} fontSize={20} rowHeight={24} columnWidth={20} viewModes={["ascii", "transparent"]} alphabet="pixel-short" increaseContrast usesVariables>
   <Scene2D scene="circle_sample_quality" />
 </AsciiScene>
 

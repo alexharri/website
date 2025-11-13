@@ -7,7 +7,7 @@ export default (width: number, breakpoint: number) =>
       position: relative;
       max-width: 100%;
       width: ${width}px;
-      margin: 40px auto;
+      margin: 0 auto;
       border: 1px solid ${theme.medium400};
       border-radius: 16px;
       overflow: hidden;
@@ -37,6 +37,5 @@ export default (width: number, breakpoint: number) =>
       height: 72px;
       padding-bottom: 16px;
       align-items: center;
-      margin-top: -16px;
     `,
   });
