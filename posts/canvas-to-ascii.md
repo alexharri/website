@@ -551,7 +551,7 @@ The same idea applies in $6$ dimensions, though it's less intuitive to visualize
 
 Finding the closest point (nearest neighbor) in an N-dimensional space boils down to finding the point whose Euclidian distance to our input point is the smallest.
 
-Given two input points, $a$ and $b$, we can calculate the Euclidian distance $d$ like so:
+Given two points in 2D space, $a$ and $b$, we can calculate the Euclidian distance between them $d$ like so:
 
 <p className="mathblock">$$ d = \sqrt{(a_1 - b_1)^2 + (a_2 - b_2)^2} $$</p>
 
@@ -582,6 +582,8 @@ function euclideanDistanceSquared(a: number[], b: number[]): number {
   return sum;
 }
 ```
+
+<SmallNote label="">Since we're searching for the smallest value (shortest distance), it only matter that the values' relative order stays the same. The absolute value doesn't matter.</SmallNote>
 
 Now, let's say that we have our ASCII characters and their associated character vectors in a <Ts>CHARACTER_VECTORS</Ts> array:
 

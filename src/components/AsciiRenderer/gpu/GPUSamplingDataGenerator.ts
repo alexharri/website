@@ -449,37 +449,45 @@ export class GPUSamplingDataGenerator {
   private readbackAndParse(out: CharacterSamplingData[][]): void {
     const gl = this.gl;
 
+    const READBACK_RAW = false;
+    const READBACK_EXTERNAL = false;
+
     // Read back all three textures synchronously (for now)
     // TODO: Optimize with async readback for all textures
 
-    // Read raw sampling texture
-    gl.bindFramebuffer(gl.FRAMEBUFFER, this.rawSamplingFBO);
-    const rawData = new Float32Array(this.outputWidth * this.outputHeight * 4);
-    gl.readPixels(0, 0, this.outputWidth, this.outputHeight, gl.RGBA, gl.FLOAT, rawData);
+    let rawData: Float32Array | null = null;
+    let externalData: Float32Array | null = null;
 
-    // Read external sampling texture
-    gl.bindFramebuffer(gl.FRAMEBUFFER, this.externalSamplingFBO);
-    const externalData = new Float32Array(this.outputWidth * this.outputHeight * 4);
-    gl.readPixels(0, 0, this.outputWidth, this.outputHeight, gl.RGBA, gl.FLOAT, externalData);
+    if (READBACK_RAW) {
+      gl.bindFramebuffer(gl.FRAMEBUFFER, this.rawSamplingFBO);
+      rawData = new Float32Array(this.outputWidth * this.outputHeight * 4);
+      gl.readPixels(0, 0, this.outputWidth, this.outputHeight, gl.RGBA, gl.FLOAT, rawData);
+    }
+
+    if (READBACK_EXTERNAL) {
+      gl.bindFramebuffer(gl.FRAMEBUFFER, this.externalSamplingFBO);
+      externalData = new Float32Array(this.outputWidth * this.outputHeight * 4);
+      gl.readPixels(0, 0, this.outputWidth, this.outputHeight, gl.RGBA, gl.FLOAT, externalData);
+    }
 
     // Read current sampling vector (final output after all effects)
     gl.bindFramebuffer(gl.FRAMEBUFFER, this.currentSamplingFBO);
-    const crunchedData = new Float32Array(this.outputWidth * this.outputHeight * 4);
-    gl.readPixels(0, 0, this.outputWidth, this.outputHeight, gl.RGBA, gl.FLOAT, crunchedData);
+    const finalData = new Float32Array(this.outputWidth * this.outputHeight * 4);
+    gl.readPixels(0, 0, this.outputWidth, this.outputHeight, gl.RGBA, gl.FLOAT, finalData);
 
     gl.bindFramebuffer(gl.FRAMEBUFFER, null);
 
     // Parse data into output array
-    this.parseReadbackData(rawData, externalData, crunchedData, out);
+    this.parseReadbackData(finalData, rawData, externalData, out);
   }
 
   /**
    * Parse readback data into CharacterSamplingData array
    */
   private parseReadbackData(
-    rawData: Float32Array,
-    externalData: Float32Array,
-    crunchedData: Float32Array,
+    finalData: Float32Array,
+    rawData: Float32Array | null,
+    externalData: Float32Array | null,
     out: CharacterSamplingData[][],
   ): void {
     // Data is packed as: 3 circles per row, 2 rows per cell
@@ -514,9 +522,9 @@ export class GPUSamplingDataGenerator {
 
           // Read from all three textures
           // Crunch is now applied in GPU shader, so read final values from crunchedData
-          samplingVector.push(crunchedData[pixelIndex]); // Final crunched value
-          rawSamplingVector.push(rawData[pixelIndex]); // Raw value
-          externalSamplingVector.push(externalData[pixelIndex]); // External value
+          samplingVector.push(finalData[pixelIndex]); // Final crunched value
+          if (rawData) rawSamplingVector.push(rawData[pixelIndex]); // Raw value
+          if (externalData) externalSamplingVector.push(externalData[pixelIndex]); // External value
         }
 
         // Update output array (note: subsamples not collected in GPU path)

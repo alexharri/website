@@ -281,6 +281,7 @@ const _AsciiScene: React.FC<AsciiSceneProps> = (props) => {
                 showSamplingPoints={showSamplingPoints}
                 showSamplingCircles={showSamplingCircles !== "none"}
                 characterMode={isCharacterMode}
+                optimizePerformance={optimizePerformance}
               />,
               isCharacterMode ? null : children,
             ]}

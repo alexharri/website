@@ -11,8 +11,6 @@ import { AsciiRenderConfig } from "./renderConfig";
 import { DebugVizOptions } from "./types";
 import { hexToRgbaString } from "../../utils/color";
 
-const USE_CANVAS = true;
-
 interface Props {
   samplingDataRef: React.MutableRefObject<CharacterSamplingData[][]>;
   config: AsciiRenderConfig | null;
@@ -22,6 +20,7 @@ interface Props {
   showSamplingPoints: boolean;
   debugVizOptions: DebugVizOptions;
   characterMode: boolean;
+  optimizePerformance: boolean;
 }
 
 export function AsciiRenderer(props: Props) {
@@ -34,6 +33,7 @@ export function AsciiRenderer(props: Props) {
     samplingDataRef,
     config,
     characterMode,
+    optimizePerformance,
   } = props;
 
   const containerRef = useRef<HTMLDivElement>(null);
@@ -68,7 +68,7 @@ export function AsciiRenderer(props: Props) {
 
     if (!config || !characterMatcher || samplingData.length === 0) return;
 
-    if (USE_CANVAS) {
+    if (optimizePerformance) {
       if (!hideAscii && asciiCanvas) {
         const color = transparent ? colors.text : colors.blue400;
         renderAsciiCanvas(asciiCanvas, samplingData, config, characterMatcher, color);
@@ -121,7 +121,7 @@ export function AsciiRenderer(props: Props) {
     >
       {!hideAscii && (
         <div className={s("content")} ref={contentRef}>
-          {USE_CANVAS ? (
+          {optimizePerformance ? (
             <AsciiCanvas onCanvasRef={asciiCanvasRef} transparent={transparent} />
           ) : (
             <pre
