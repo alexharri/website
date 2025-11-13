@@ -179,12 +179,13 @@ export function generateSamplingData(
   for (let row = 0; row < config.rows; row++) {
     for (let col = out[row].length; col < config.cols; col++) {
       const numSamples = metadata.samplingConfig.points.length;
-      const numSubsamples = numSamples * config.samplingQuality;
       out[row][col] = {
         samplingVector: Array.from({ length: numSamples }),
         externalSamplingVector: Array.from({ length: numSamples }),
         rawSamplingVector: Array.from({ length: numSamples }),
-        samplingVectorSubsamples: Array.from({ length: numSubsamples }),
+        samplingVectorSubsamples: Array.from({ length: numSamples }, () =>
+          Array.from({ length: config.samplingQuality }),
+        ),
       };
     }
 
