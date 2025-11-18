@@ -4,6 +4,7 @@ import { getAlphabetMetadata } from "../alphabets/AlphabetManager";
 
 import { AsciiRenderConfig } from "../renderConfig";
 import { SamplingEffect } from "../types";
+import { clamp } from "../../../math/math";
 
 const CONTRAST_EXPONENT_GLOBAL = 3;
 const CONTRAST_EXPONENT_LOCAL = 7;
@@ -64,8 +65,12 @@ function sampleCircularRegion(
     const sampleX = x + point.x;
     const sampleY = y + point.y;
 
-    const pixelX = Math.floor(sampleX * scale);
-    const pixelY = Math.floor(flipY ? sampleY * scale : canvasHeight - sampleY * scale);
+    let pixelX = Math.floor(sampleX * scale);
+    let pixelY = Math.floor(flipY ? sampleY * scale : canvasHeight - sampleY * scale);
+
+    pixelX = clamp(pixelX, 0, canvasWidth - 1);
+    pixelY = clamp(pixelY, 0, canvasHeight - 1);
+
     const index = (pixelY * canvasWidth + pixelX) * 4;
 
     const hexColor = readPixelFromBuffer(pixelBuffer, index);
@@ -146,6 +151,10 @@ export function generateSamplingData(
   const samplingConfig = metadata.samplingConfig;
 
   const enabledEffects = new Set(samplingEffects);
+  if (enabledEffects.has(SamplingEffect.Crunch)) {
+    enabledEffects.add(SamplingEffect.GlobalCrunch);
+    enabledEffects.add(SamplingEffect.DirectionalCrunch);
+  }
 
   const easingLookupTable =
     lightnessEasingFunction && lightnessEasingFunction in easingLookupTables
@@ -229,7 +238,7 @@ export function generateSamplingData(
             undefined,
           );
         }
-        if (enabledEffects.has(SamplingEffect.Crunch)) {
+        if (enabledEffects.has(SamplingEffect.DirectionalCrunch)) {
           crunchSamplingVectorDirectional(
             samplingVector,
             externalSamplingVector,
@@ -237,7 +246,7 @@ export function generateSamplingData(
           );
         }
       }
-      if (enabledEffects.has(SamplingEffect.Crunch)) {
+      if (enabledEffects.has(SamplingEffect.GlobalCrunch)) {
         crunchSamplingVector(samplingVector, CONTRAST_EXPONENT_GLOBAL);
       }
       x += config.boxWidth;

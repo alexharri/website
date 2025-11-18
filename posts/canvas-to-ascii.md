@@ -613,7 +613,100 @@ function findCharacter(samplingVector: number[]) {
 }
 ```
 
-This gives us the ASCII character whose shape best matches our sampling vector, but this is not very performant. Once we start rendering thousands of ASCII characters at $60$ FPS (frames per second), we'll need to speed up performance significantly. We'll cover that later.
+This gives us the ASCII character whose shape best matches our sampling vector, but this is not very performant. Once we start rendering thousands of ASCII characters at $60$ FPS (frames per second), we'll need to speed up performance significantly. We'll take a look at how we can do that later -- let's get to rendering some scenes!
+
+### Trying out the 6D sampling approach
+
+If we render the circle example from before with 6D sampling vectors, we get the following:
+
+<AsciiScene width={360} height={360} fontSize={20} rowHeight={24} columnWidth={20} viewMode="ascii" offsetAlign="left" sampleQuality={4} alphabet="default" increaseContrast>
+  <Scene2D scene="circle" />
+</AsciiScene>
+
+That's pretty good! Notice the quality of the character picks for e.g. the upper-right and lower-right parts of the circle -- `L` is a really good pick for the upper-right part and `P` is a great pick for the lower-right part.
+
+Let's look at our rotating square:
+
+<AsciiScene width={600} minWidth={400} height={360} fontSize={20} rowHeight={24} columnWidth={19} viewMode="ascii" offsetAlign="left" sampleQuality={10}>
+  <Scene2D scene="rotating_square" />
+</AsciiScene>
+
+Oh yeah, that's excellent. You can easily tell that it's a rotating square -- the picked characters match the shape very well.
+
+<SmallNote label="" center>(insert more examples?)</SmallNote>
+
+Now, let's try rendering a 3D scene!
+
+
+## Rendering a 3D scene
+
+Consider the following 3D scene:
+
+<AsciiScene height={540} viewMode="canvas" optimizePerformance>
+  <Scene scene="cube" autoRotate zoom={2.7} yOffset={0.45} />
+</AsciiScene>
+
+If we render it as ASCII, we get the following:
+
+<AsciiScene height={540} fontSize={12} characterWidthMultiplier={0.85} characterHeightMultiplier={0.85} viewModes={["ascii", "split", "canvas"]} optimizePerformance>
+  <Scene scene="cube" autoRotate zoom={2.7} yOffset={0.45} />
+</AsciiScene>
+
+That's pretty cool, but honestly, the ASCII rendering looks pretty blurry. It all kind of blends together, especially at some angles like this one:
+
+<AsciiScene height={500} fontSize={12} characterWidthMultiplier={0.85} characterHeightMultiplier={0.85} viewMode="split" optimizePerformance>
+  <Scene scene="cube" zoom={2.7} xRotation={230} yOffset={0.45} />
+</AsciiScene>
+
+I'd like the ASCII character picks to consider edges better. When there is a sharp change in color -- like when two faces of a cube meet -- I'd like to see more "sharpness" in ASCII rendering.
+
+For example, consider the following split:
+
+<AsciiScene width={600} minWidth={400} height={360} viewMode="canvas">
+  <Scene2D scene="shade_split" />
+</AsciiScene>
+
+It's currently rendered like so:
+
+<AsciiScene width={600} minWidth={400} height={360} fontSize={13} rowHeight={15}>
+  <Scene2D scene="shade_split" />
+</AsciiScene>
+
+You can see the shade split -- `i`s on the left and `B`s on the right -- but the boundary is not very sharp.
+
+By applying some image processing techniques to our sampling vector, we can make the boundary look much sharper:
+
+<AsciiScene width={600} minWidth={400} height={360} fontSize={13} rowHeight={15} effects={["crunch"]}>
+  <Scene2D scene="shade_split" />
+</AsciiScene>
+
+Notice the difference?
+
+Take a look at the 3D scene from before again, with the same effect applied:
+
+<AsciiScene height={540} fontSize={12} characterWidthMultiplier={0.85} characterHeightMultiplier={0.85} viewModes={["ascii", "split", "canvas"]} effects={["crunch"]}>
+  <Scene scene="cube" autoRotate zoom={2.7} yOffset={0.45} />
+</AsciiScene>
+
+Quite a drastic difference! Let's look at how we can implement this sharpening effect.
+
+## Vector crunching
+
+Consider the ASCII characters that are rendered on top of this color boundary:
+
+<AsciiScene showGrid fontSize={140} rows={1.4} cols={3.4} viewMode="transparent" sampleQuality={5}>
+  <Scene2D scene="shade_split_static" />
+</AsciiScene>
+
+`T` is a decent choice -- it's visually heavier in the upper region than in the lower, which matches the shape of the image well.
+
+The 6D sampling vectors for each of these looks like so:
+
+<p className="mathblock">$$\begin{bmatrix} 0.44 & 0.00 \\ 0.53 & 0.06 \\ 0.51 & 0.45 \end{bmatrix}$$</p>
+
+<AsciiScene showGrid fontSize={140} rows={1.4} cols={3.4} viewMode="transparent" sampleQuality={5} showSamplingCircles>
+  <Scene2D scene="shade_split_static" />
+</AsciiScene>
 
 ---
 

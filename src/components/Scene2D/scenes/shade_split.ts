@@ -1,6 +1,6 @@
 import { createScene2D } from "../createScene2D";
 
-export const shadeSplitScene = createScene2D(({ ctx, width, height, elapsed }) => {
+export default createScene2D(({ ctx, width, height, elapsed }) => {
   const t = Math.sin((elapsed / 1000) * 0.5);
 
   // Background
@@ -17,10 +17,10 @@ export const shadeSplitScene = createScene2D(({ ctx, width, height, elapsed }) =
 
   ctx.beginPath();
   ctx.moveTo(0, 0);
-  ctx.lineTo(xCenter + height * 0.2 + xOff, 0);
-  ctx.lineTo(xCenter - height * 0.2 + xOff, height);
+  ctx.lineTo(xCenter - height * 0.2 + xOff, 0);
+  ctx.lineTo(xCenter + height * 0.2 + xOff, height);
   ctx.lineTo(0, height);
   ctx.closePath();
-  ctx.fillStyle = "#333333";
+  ctx.fillStyle = "#686868ff";
   ctx.fill();
 });
