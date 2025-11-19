@@ -262,6 +262,10 @@ export function samplingDataToAscii(
   samplingData: CharacterSamplingData[][],
   config: AsciiRenderConfig,
 ): string {
+  if (!window.foo) {
+    window.foo = true;
+    console.log(JSON.stringify(samplingData, null, 2));
+  }
   const chars: string[] = [];
 
   // let totalCount = 0;

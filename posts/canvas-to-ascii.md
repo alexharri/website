@@ -694,19 +694,45 @@ Quite a drastic difference! Let's look at how we can implement this sharpening e
 
 Consider the ASCII characters that are rendered on top of this color boundary:
 
-<AsciiScene showGrid fontSize={140} rows={1.4} cols={3.4} viewMode="transparent" sampleQuality={5}>
+<AsciiScene showGrid fontSize={140} rows={1.4} cols={3.4} viewMode="transparent" sampleQuality={5} hideAscii>
   <Scene2D scene="shade_split_static" />
 </AsciiScene>
 
-`T` is a decent choice -- it's visually heavier in the upper region than in the lower, which matches the shape of the image well.
+We get this 6D sampling vector:
 
-The 6D sampling vectors for each of these looks like so:
+<p className="mathblock">$$\begin{bmatrix} 0.73 & 0.73 \\ 0.41 & 0.41 \\ 0.33 & 0.33 \end{bmatrix}$$</p>
 
-<p className="mathblock">$$\begin{bmatrix} 0.44 & 0.00 \\ 0.53 & 0.06 \\ 0.51 & 0.45 \end{bmatrix}$$</p>
+Which I'll visualize like so:
 
-<AsciiScene showGrid fontSize={140} rows={1.4} cols={3.4} viewMode="transparent" sampleQuality={5} showSamplingCircles>
-  <Scene2D scene="shade_split_static" />
-</AsciiScene>
+<Vector6D
+  samplingVector={[0.73, 0.73, 0.41, 0.41, 0.33, 0.33]}
+/>
+
+Currently, this sampling vector resolves to the character "T", which is a sensible choice. The character T is visually dense in the top half, and less so in the bottom half.
+
+Still, I want the picked character to emphasize the boundary better. We can achieve that by enhancing the contrast of the sampling vector.
+
+### Contrast enhancement
+
+To increase the contrast of our sampling vector, we might raise each component of the vector to the power of some exponent.
+
+Consider how an exponent affects values between $0$ and $1$. Numbers close to $0$ experiece a strong pull towards $0$ while larger numbers experience less pull. For example, $0.1^2 = 0.01$, a 90% reduction, while $0.9^2 = 0.81$, only a reduction of 10%.
+
+The level of pull depends on the exponent. Here's a chart of $x^2$ for values of $x$ between $0$ and $1$:
+
+<Image src="~/x-pow-2-chart.png" plain width={500} />
+
+This effect becomes more pronounced with higher exponents:
+
+<Image src="~/x-pow-n-chart.png" plain width={500} />
+
+<SmallNote label="" center>A higher exponent translates to a stronger pull towards zero</SmallNote>
+
+Raising each component of the sampling vector to the power of $2$, we get the following:
+
+<Vector6D
+  samplingVector={[0.73, 0.73, 0.41, 0.41, 0.33, 0.33].map(n => Math.pow(n, 2))}
+/>
 
 ---
 
