@@ -16,7 +16,6 @@ export const configs = {
   "six-samples": sixSamplesConfig,
 } as const;
 
-// Configs are the single source of truth
 export type ConfigName = keyof typeof configs;
 
 export function getConfig(name: ConfigName) {
