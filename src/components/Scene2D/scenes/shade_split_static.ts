@@ -5,7 +5,7 @@ export default createScene2D(({ ctx, width, height }) => {
   ctx.beginPath();
   ctx.rect(0, 0, width, height);
   ctx.closePath();
-  ctx.fillStyle = "#bbbbbb";
+  ctx.fillStyle = "#a8a8a8ff";
   ctx.fill();
 
   ctx.beginPath();
@@ -14,6 +14,6 @@ export default createScene2D(({ ctx, width, height }) => {
   ctx.lineTo(width, height * 0.45);
   ctx.lineTo(width, height);
   ctx.closePath();
-  ctx.fillStyle = "#555555";
+  ctx.fillStyle = "#393939ff";
   ctx.fill();
 });

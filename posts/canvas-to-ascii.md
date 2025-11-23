@@ -700,15 +700,20 @@ Consider the ASCII characters that are rendered on top of this color boundary:
 
 We get this 6D sampling vector:
 
-<p className="mathblock">$$\begin{bmatrix} 0.73 & 0.73 \\ 0.41 & 0.41 \\ 0.33 & 0.33 \end{bmatrix}$$</p>
+<p className="mathblock">$$\begin{bmatrix} 0.65 & 0.65 \\ 0.31 & 0.31 \\ 0.22 & 0.22 \end{bmatrix}$$</p>
 
 Which I'll visualize like so:
 
 <Vector6D
-  samplingVector={[0.73, 0.73, 0.41, 0.41, 0.33, 0.33]}
+  samplingVector={[0.65, 0.65, 0.31, 0.31, 0.22, 0.22]}
 />
 
 Currently, this sampling vector resolves to the character "T", which is a sensible choice. The character T is visually dense in the top half, and less so in the bottom half.
+
+<InteractiveVector6D
+  samplingVector={[0.65, 0.65, 0.31, 0.31, 0.22, 0.22]}
+  showCharacterPick
+/>
 
 Still, I want the picked character to emphasize the boundary better. We can achieve that by enhancing the contrast of the sampling vector.
 
@@ -728,11 +733,75 @@ This effect becomes more pronounced with higher exponents:
 
 <SmallNote label="" center>A higher exponent translates to a stronger pull towards zero</SmallNote>
 
-Raising each component of the sampling vector to the power of $2$, we get the following:
+In the example below you can vary the exponent between $1$ and $2$:
 
-<Vector6D
-  samplingVector={[0.73, 0.73, 0.41, 0.41, 0.33, 0.33].map(n => Math.pow(n, 2))}
+<InteractiveVector6D
+  vary="exponent"
+  samplingVector={[0.65, 0.65, 0.31, 0.31, 0.22, 0.22]}
 />
+
+As the exponent is increased to $2$, the darker components of the sampling vector certainly get darker. However, the lightest (top) components also get moved significantly towards zero.
+
+I don't want that. I want to increase the contrast _between_ the lighter and darker components of the sampling vector.
+
+To achieve that, we can normalize the sampling vector to the range $[0, 1]$ prior to applying the exponent, and then "denormalizing" the vector back to the original range afterwards.
+
+The normalization to $[0, 1]$ can be done by dividing each component by the maximum component value. After applying the exponent, mapping back to the original range is done by multiplying each component by the same max value:
+
+```ts
+const maxValue = Math.max(...samplingVector)
+
+samplingVector = samplingVector.map((value) => {
+  value = x / maxValue; // Normalize
+  value = Math.pow(x, exponent);
+  value = x * maxValue; // Map back to original range
+  return value;
+})
+```
+
+Here's the same example, but with this normalization applied:
+
+<InteractiveVector6D
+  vary="exponent"
+  normalize
+  samplingVector={[0.65, 0.65, 0.31, 0.31, 0.22, 0.22]}
+/>
+
+Very nice! The lightest component values are retained, and the contrast between the lighter and darker components is increased by "crunching" the lower values.
+
+This affects which character is picked. The following example shows how the selected character changes as the contrast is increased:
+
+<InteractiveVector6D
+  vary="exponent"
+  normalize
+  showCharacterPick
+  samplingVector={[0.65, 0.65, 0.31, 0.31, 0.22, 0.22]}
+/>
+
+Awesome! Enhancing the vector's contrast gives us a character pick that emphasizes the shape in the extreme.
+
+Because we normalize prior to applying the exponent, the highest values are not affected all. At the same time, values that are _close_ to the maximum value of the vector are only slightly affected. This causes vectors that are fairly uniform in value not to be affected much by contrast enhancement:
+
+<InteractiveVector6D
+  vary="exponent"
+  normalize
+  showCharacterPick
+  samplingVector={[0.64, 0.52, 0.62, 0.51, 0.60, 0.50]}
+/>
+
+<SmallNote label="" center>Because the vector is uniform the contrast enhancement only has a slight effect and doesn't change the picked character.</SmallNote>
+
+This is a good thing! If we have a smooth gradient in our image we want to retain it -- we don't want to introduce unnecessary choppiness.
+
+Vectors at the boundaries of two different-colored surfaces will have larger differences in the sampling vector, which the contrast enhancement enhances:
+
+<InteractiveVector6D
+  vary="exponent"
+  normalize
+  showCharacterPick
+  samplingVector={[0.68, 0.31, 0.76, 0.31, 0.77, 0.78]}
+/>
+
 
 ---
 
