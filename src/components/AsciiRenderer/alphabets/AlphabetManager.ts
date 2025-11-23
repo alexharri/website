@@ -3,7 +3,6 @@
 
 import defaultAlphabet from "./default.json";
 import ascii60Alphabet from "./ascii-60.json";
-import programmingAlphabet from "./programming.json";
 import pixelAlphabet from "./pixel.json";
 import pixelshortAlphabet from "./pixel-short.json";
 import threesamplesAlphabet from "./three-samples.json";
@@ -13,7 +12,6 @@ import sixsamplesAlphabet from "./six-samples.json";
 const alphabets = {
   "default": defaultAlphabet,
   "ascii-60": ascii60Alphabet,
-  "programming": programmingAlphabet,
   "pixel": pixelAlphabet,
   "pixel-short": pixelshortAlphabet,
   "three-samples": threesamplesAlphabet,
