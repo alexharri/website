@@ -12,7 +12,7 @@
     "generate-sitemap": "ts-node -T ./scripts/generate-sitemap.ts",
     "generate-rss": "ts-node -T ./scripts/generate-rss.ts",
     "send-email": "ts-node -T ./scripts/email/send-newsletter.ts",
-    "generate-alphabets": "ts-node -T ./scripts/ascii/index.ts"
+    "generate-alphabets": "cd scripts/ascii && npm run generate"
   },
   "dependencies": {
     "@emotion/css": "^11.11.2",
@@ -51,7 +51,6 @@
     "@types/rss": "^0.0.32",
     "@types/three": "^0.162.0",
     "arg": "^5.0.2",
-    "canvas": "^3.1.2",
     "dotenv": "^16.4.5",
     "marked": "^16.1.2",
     "prettier": "^2.8.0",

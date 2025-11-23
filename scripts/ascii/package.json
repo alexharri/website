@@ -1,0 +1,16 @@
+{
+  "name": "ascii-alphabet-generator",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "generate": "ts-node -T ./index.ts"
+  },
+  "dependencies": {
+    "canvas": "^3.1.2"
+  },
+  "devDependencies": {
+    "@types/node": "^18.11.9",
+    "ts-node": "^10.9.1",
+    "typescript": "^5.6.3"
+  }
+}
