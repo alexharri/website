@@ -871,72 +871,46 @@ This makes lighter values in the external vector push lower values in the sampli
   showCharacterPick
 />
 
+I call this "directional contrast enhancement", since each of the external samples reaches outside of the cell in the _direction_ of the sampling vector component that it is enhancing the contrast of. I describe the other effect as "global contrast enhancement", since it acts on all of the sampling vector components together.
+
+Try dragging the slider below to gradually apply directional contrast enhancement to the 3D scene from before. The directional contrast enhancement is applied _on top of_ a layer of global contrast enhancement:
+
 <AsciiScene height={540} fontSize={12} characterWidthMultiplier={0.85} characterHeightMultiplier={0.85} viewModes={["ascii", "split", "canvas"]} effects={["crunch"]} optimizePerformance vary={["directional_crunch_exponent"]} usesVariables>
-  <Scene scene="cube" zoom={2.7} yOffset={0.45} />
+  <Scene scene="cube" autoRotate zoom={2.7} yOffset={0.45} />
 </AsciiScene>
 
+<SmallNote label="" center>I find that an exponent of $7$ for the directional crunch works well.</SmallNote>
 
+## Final words
 
----
+These two types of contrast enhancement make the image feel sharper and far more readable than otherwise.
 
----
+## Appendix I: Character lookup performance
 
----
+Earlier in this post I showed how can find the best character by finding the character with the shortest Euclidian distance to our sampling vector.
 
----
+```ts
+function findCharacter(samplingVector: number[]) {
+  let bestCharacter = "";
+  let bestDistance = Infinity;
+  
+  for (const { vector, character } of CHARACTER_VECTORS) {
+    const dist = euclideanDistanceSquared(vector, samplingVector);
+    if (dist < bestDistance) {
+      bestDistance = dist;
+      bestCharacter = character;
+    }
+  }
+  
+  return bestCharacter;
+}
+```
 
----
-
----
-
----
-
----
-
----
-
----
-
----
-
----
-
----
-
----
-
----
-
----
-
----
-
----
-
----
-
----
-
----
-
----
-
----
-
----
-
----
-
----
-
----
-
-
-I tried benchmarking this for $100{,}000$ input sampling vectors on my Macbook -- $100$K lookups consistently take about $190$ms. If we assume that we'll want to be able to use this for an animated canvas at $60$ frames per second (FPS), we only have $16{.}66$ms to render each frame. We can use this to get a rough budget for how many lookups we can perform each frame:
+I tried benchmarking this for $100{,}000$ input sampling vectors on my Macbook -- $100$K invocations of this function consistently take about $190$ms. If we assume that we'll want to be able to use this for an animated canvas at $60$ frames per second (FPS), we only have $16{.}66$ms to render each frame. We can use this to get a rough budget for how many lookups we can perform each frame:
 
 <p className="mathblock">$$ 100{,}000 \times \dfrac{16{.}66\ldots}{190} \approx 8{,}772 $$</p>
 
-If we allow ourselves $50\%$ of the performance budget for just lookups, this gives us a budget of about $4$K characters. Not terrible, but far from great, especially considering that these numbers are from a powerful laptop. Let's see how we can improve this.
+If we allow ourselves $50\%$ of the performance budget for just lookups, this gives us a budget of about $4$K characters. Not terrible, but far from great, especially considering that the benchmark was run on a powerful laptop. Let's see how we can improve this.
 
 
 ### k-d trees
@@ -966,11 +940,11 @@ After that, we can perform nearest-neighbor searches with sampling vectors:
 const result = kdTree.findNearest(samplingVector);
 ```
 
-Running $100$K such lookups takes $66$ms on my Macbook. That's a bit under $3$x faster than the $188$ms than the brute-force approach. We can then calculate the rough number of lookups per frame:
+Running $100$K such lookups takes $66$ms on my Macbook. That's about $3$x faster than the brute-force approach. We can use this to calculate, roughly, the number of lookups we can perform per frame:
 
 <p className="mathblock">$$ 100{,}000 \times \dfrac{16{.}66\ldots}{66} \approx 25{,}253 $$</p>
 
-That's a lot of lookups per frame, but this is calculated based on a benchmark on a powerful machine. We can easily expect a $5$-$10$x smaller performance budget on mobile devices.
+That's a lot of lookups per frame, but again, we're benchmarking on a powerful machine. We can easily expect a $5$-$10$x smaller performance budget on mobile devices.
 
 Let's see how we can eek out even more performance.
 
@@ -1048,4 +1022,6 @@ Here's the number of keys -- and the memory needed to store them -- for range si
 There is a memory-vs-quality trade-off to consider. As the range gets smaller, the quality of the results drops. If we pick a range of $6$, for example, there only possible lightness values are $0$, $0.2$, $0.4$, $0.6$, $0.8$ and $1$. That _does_ affect the quality of the ASCII rendering.
 
 Cached lookups are incredibly fast. So fast that lookup performance is not really a concern anymore. If we prepopulate the cache, we can expect consistently fast performance, though I encountered no problems lazily populating the cache.
+
+## Appendix II: GPU accelerated sampling
 

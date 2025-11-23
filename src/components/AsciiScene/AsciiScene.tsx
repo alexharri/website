@@ -130,7 +130,7 @@ const _AsciiScene: React.FC<AsciiSceneProps> = (props) => {
         label: "Directional Exponent",
         value: 1,
         range: [1, 10],
-        step: 0.1,
+        step: 1,
       };
     }
 
