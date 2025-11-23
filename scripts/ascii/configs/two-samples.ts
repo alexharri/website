@@ -1,3 +1,4 @@
+import path from "path";
 import { Config } from "../types";
 import { Alphabet } from "../alphabets";
 
@@ -15,7 +16,7 @@ export const twoSamplesConfig: Config = {
   CANVAS_HEIGHT: 64,
   FONT_FAMILY: "Fira Code",
   CUSTOM_FONT_PATHS: {
-    "Fira Code": ["/Users/alex/Library/Fonts/FiraCode-Regular.ttf"],
+    "Fira Code": [path.resolve("../../public/fonts/FiraCode-Regular.ttf")],
   },
   GENERATE_DEBUG_IMAGES: true,
   GENERATE_COMPOSITE_DEBUG_IMAGE: true,
