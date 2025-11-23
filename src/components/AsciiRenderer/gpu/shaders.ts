@@ -212,9 +212,7 @@ void main() {
 }
 `;
 
-export const createDirectionalCrunchFragmentShader = (
-  numCircles: number,
-) => /* glsl */ `#version 300 es
+export const createDirectionalCrunchFragmentShader = () => /* glsl */ `#version 300 es
 precision highp float;
 
 // Directional crunch shader - applies directional crunch effect based on external context
@@ -245,7 +243,7 @@ void main() {
 }
 `;
 
-export const createGlobalCrunchFragmentShader = (numCircles: number) => /* glsl */ `#version 300 es
+export const createGlobalCrunchFragmentShader = () => /* glsl */ `#version 300 es
 precision highp float;
 
 // Global crunch shader - applies global crunch effect based on cell max values

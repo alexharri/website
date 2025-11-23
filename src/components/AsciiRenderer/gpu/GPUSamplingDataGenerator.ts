@@ -155,14 +155,14 @@ export class GPUSamplingDataGenerator {
     }
     this.maxValueProgram = maxValueProgram;
 
-    const directionalCrunchFrag = createDirectionalCrunchFragmentShader(this.numCircles);
+    const directionalCrunchFrag = createDirectionalCrunchFragmentShader();
     const directionalCrunchProgram = this.createProgram(PASSTHROUGH_VERT, directionalCrunchFrag);
     if (!directionalCrunchProgram) {
       throw new Error("Failed to create directional crunch program");
     }
     this.directionalCrunchProgram = directionalCrunchProgram;
 
-    const globalCrunchFrag = createGlobalCrunchFragmentShader(this.numCircles);
+    const globalCrunchFrag = createGlobalCrunchFragmentShader();
     const globalCrunchProgram = this.createProgram(PASSTHROUGH_VERT, globalCrunchFrag);
     if (!globalCrunchProgram) {
       throw new Error("Failed to create global crunch program");

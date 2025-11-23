@@ -283,11 +283,9 @@ export class AsciiRenderer {
     }
 
     const maxValue = Math.max(...maxValues);
-    const scalars = maxValues.map((v) => 1 / v);
 
     for (const vector of vectors) {
       for (let i = 0; i < K; i++) {
-        // vector[i] = vector[i] * scalars[i];
         vector[i] = vector[i] / maxValue;
       }
     }
@@ -387,7 +385,7 @@ export class AsciiRenderer {
 
     const outputPath = path.join(outputDir, filename);
     const buffer = debugCanvas.toBuffer("image/png");
-    fs.writeFileSync(outputPath, buffer);
+    fs.writeFileSync(outputPath, new Uint8Array(buffer));
   }
 
   static createCompositeDebugImage(debugDir: string) {
@@ -463,7 +461,7 @@ export class AsciiRenderer {
     // Save composite image
     const compositeBuffer = compositeCanvas.toBuffer("image/png");
     const compositeOutputPath = path.join(debugDir, "!composite.png");
-    fs.writeFileSync(compositeOutputPath, compositeBuffer);
+    fs.writeFileSync(compositeOutputPath, new Uint8Array(compositeBuffer));
 
     console.log(`Created composite debug image: ${compositeOutputPath}`);
     console.log(`Combined ${files.length} images in a ${cols}x${rows} grid`);

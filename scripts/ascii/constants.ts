@@ -19,6 +19,6 @@ export function getOutputFilename(configName: string): string {
   return `${configName}.json`;
 }
 
-export function getDebugDirectory(configName: string, alphabets?: string[]): string {
+export function getDebugDirectory(configName: string): string {
   return `debug-images/${configName}`;
 }

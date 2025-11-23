@@ -61,7 +61,7 @@ export class KdTree<T> {
   findNearest(target: number[]): { vector: number[]; data: T; distance: number } | null {
     if (!this.root) return null;
 
-    let best: { node: KdTreeNode<T>; distance: number } | null = null;
+    let best: { node: KdTreeNode<T>; distance: number } = null!;
 
     const search = (node: KdTreeNode<T> | undefined, depth: number): void => {
       if (!node) return;
@@ -90,6 +90,8 @@ export class KdTree<T> {
     };
 
     search(this.root, 0);
+
+    if (!best) return null;
 
     return best
       ? {
