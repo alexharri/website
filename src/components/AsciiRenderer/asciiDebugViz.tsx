@@ -133,6 +133,29 @@ export function renderAsciiDebugViz(
           }
         });
       }
+
+      if (options.showExternalSamplingCircles && "externalPoints" in metadata.samplingConfig) {
+        const samplingVector = samplingData[row][col];
+        metadata.samplingConfig.externalPoints.forEach((samplingCircle, i) => {
+          const [xOff, yOff] = config.samplingCircleOffset(samplingCircle);
+          const x = sampleRectLeft + xOff;
+          const y = sampleRectTop + yOff;
+
+          ctx.strokeStyle = "rgba(255, 255, 255, 0.2)";
+          ctx.lineWidth = 1;
+          ctx.beginPath();
+          ctx.arc(x, y, config.samplePointRadius, 0, TAU);
+          ctx.stroke();
+
+          const vectorToUse = samplingVector.externalSamplingVector;
+          const value = forceSamplingValue ?? vectorToUse[i];
+          const intensity = value * 0.7;
+          ctx.fillStyle = `rgba(255, 255, 255, ${intensity})`;
+          ctx.beginPath();
+          ctx.arc(x, y, config.samplePointRadius, 0, TAU);
+          ctx.fill();
+        });
+      }
     }
   }
 

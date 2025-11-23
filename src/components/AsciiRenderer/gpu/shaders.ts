@@ -226,9 +226,7 @@ uniform sampler2D u_inputTexture;            // Input texture from previous pass
 uniform sampler2D u_externalSamplingTexture; // External sampling vector texture
 uniform vec2 u_gridSize;                     // Grid dimensions (cols, rows)
 uniform int u_numCircles;                    // Number of sampling circles per cell (1-6)
-
-// Crunch exponent (from generateAsciiChars.ts)
-const float DIRECTIONAL_CRUNCH_EXPONENT = 7.0;
+uniform float u_directionalCrunchExponent;   // Crunch exponent (variable)
 
 void main() {
   // Sample input and external values at current fragment
@@ -238,7 +236,7 @@ void main() {
   // Apply directional crunch: enhance contrast when context > value
   if (contextValue > value) {
     float normalized = value / contextValue;
-    float enhanced = pow(normalized, DIRECTIONAL_CRUNCH_EXPONENT);
+    float enhanced = pow(normalized, u_directionalCrunchExponent);
     value = enhanced * contextValue;
   }
 
@@ -259,9 +257,7 @@ uniform sampler2D u_inputTexture;    // Input texture from previous pass
 uniform sampler2D u_maxValueTexture; // Max value texture (cols × rows)
 uniform vec2 u_gridSize;             // Grid dimensions (cols, rows)
 uniform int u_numCircles;            // Number of sampling circles per cell (1-6)
-
-// Crunch exponent (from generateAsciiChars.ts)
-const float GLOBAL_CRUNCH_EXPONENT = 3.0;
+uniform float u_globalCrunchExponent; // Crunch exponent (variable)
 
 void main() {
   // Determine which grid cell this fragment corresponds to
@@ -281,7 +277,7 @@ void main() {
   // Apply global crunch: normalize by max and enhance contrast
   if (maxValue > 0.0) {
     float normalized = value / maxValue;
-    float enhanced = pow(normalized, GLOBAL_CRUNCH_EXPONENT);
+    float enhanced = pow(normalized, u_globalCrunchExponent);
     value = enhanced * maxValue;
   }
 

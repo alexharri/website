@@ -23,6 +23,10 @@ export default ({ styled, theme }: StyleOptions) => ({
 
   vector: styled.css`
     width: 200px;
+
+    &--external {
+      width: 320px;
+    }
   `,
 
   characterPick: styled.css`

@@ -26,6 +26,9 @@ import { SCENE_BASELINE_WIDTH } from "../../constants";
 import { useSamplingDataCollection } from "../../utils/hooks/useSamplingDataCollection";
 import { useVisible } from "../../utils/hooks/useVisible";
 
+const DEFAULT_DIRECTIONAL_CRUNCH_EXPONENT = 7;
+const DEFAULT_GLOBAL_CRUNCH_EXPONENT = 3;
+
 const DEFAULT_FONT_SIZE = 14;
 
 type ViewModeKey = "ascii" | "split" | "transparent" | "canvas";
@@ -61,6 +64,7 @@ interface AsciiSceneProps {
   effects?: SamplingEffect[];
   optimizePerformance?: boolean;
   usesVariables?: boolean;
+  vary?: string[];
 }
 
 const _AsciiScene: React.FC<AsciiSceneProps> = (props) => {
@@ -83,6 +87,7 @@ const _AsciiScene: React.FC<AsciiSceneProps> = (props) => {
     increaseContrast,
     effects,
     optimizePerformance = false,
+    vary = [],
   } = props;
   let { minWidth, lightnessEasingFunction } = props;
 
@@ -104,6 +109,44 @@ const _AsciiScene: React.FC<AsciiSceneProps> = (props) => {
 
   const [variables, setVariables] = useState<VariableDict>({});
   const [variableValues, setVariableValues] = useState<VariableValues>({});
+
+  // Register variables based on the vary prop
+  useEffect(() => {
+    const varyVariables: VariableDict = {};
+
+    if (vary.includes("global_crunch_exponent")) {
+      varyVariables.global_crunch_exponent = {
+        type: "number",
+        label: "Exponent",
+        value: 1,
+        range: [1, 5],
+        step: 0.1,
+      };
+    }
+
+    if (vary.includes("directional_crunch_exponent")) {
+      varyVariables.directional_crunch_exponent = {
+        type: "number",
+        label: "Directional Exponent",
+        value: 1,
+        range: [1, 10],
+        step: 0.1,
+      };
+    }
+
+    if (Object.keys(varyVariables).length > 0) {
+      setVariables((prev) => ({ ...prev, ...varyVariables }));
+      setVariableValues((prev) => {
+        const newValues = { ...prev };
+        for (const [key, spec] of Object.entries(varyVariables)) {
+          if (!(key in newValues)) {
+            newValues[key] = spec.value;
+          }
+        }
+        return newValues;
+      });
+    }
+  }, [vary]);
 
   const { targetWidth, targetHeight, width, height, scale, breakpoint } = useDimensions(props);
   const metadata = useMemo(() => getAlphabetMetadata(alphabet), [alphabet]);
@@ -198,6 +241,12 @@ const _AsciiScene: React.FC<AsciiSceneProps> = (props) => {
     forceSamplingValue,
     samplingEffects: effects,
     optimizePerformance,
+    globalCrunchExponent:
+      (variableValues.global_crunch_exponent as number | undefined) ??
+      DEFAULT_GLOBAL_CRUNCH_EXPONENT,
+    directionalCrunchExponent:
+      (variableValues.directional_crunch_exponent as number | undefined) ??
+      DEFAULT_DIRECTIONAL_CRUNCH_EXPONENT,
   });
 
   const isCharacterMode = typeof children === "string";

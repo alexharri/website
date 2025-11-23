@@ -736,7 +736,8 @@ This effect becomes more pronounced with higher exponents:
 In the example below you can vary the exponent between $1$ and $2$:
 
 <InteractiveVector6D
-  vary="exponent"
+  vary="global_exponent"
+  normalize={false}
   samplingVector={[0.65, 0.65, 0.31, 0.31, 0.22, 0.22]}
 />
 
@@ -762,8 +763,7 @@ samplingVector = samplingVector.map((value) => {
 Here's the same example, but with this normalization applied:
 
 <InteractiveVector6D
-  vary="exponent"
-  normalize
+  vary="global_exponent"
   samplingVector={[0.65, 0.65, 0.31, 0.31, 0.22, 0.22]}
 />
 
@@ -772,8 +772,7 @@ Very nice! The lightest component values are retained, and the contrast between 
 This affects which character is picked. The following example shows how the selected character changes as the contrast is increased:
 
 <InteractiveVector6D
-  vary="exponent"
-  normalize
+  vary="global_exponent"
   showCharacterPick
   samplingVector={[0.65, 0.65, 0.31, 0.31, 0.22, 0.22]}
 />
@@ -783,8 +782,7 @@ Awesome! Enhancing the vector's contrast gives us a character pick that emphasiz
 Because we normalize prior to applying the exponent, the highest values are not affected all. At the same time, values that are _close_ to the maximum value of the vector are only slightly affected. This causes vectors that are fairly uniform in value not to be affected much by contrast enhancement:
 
 <InteractiveVector6D
-  vary="exponent"
-  normalize
+  vary="global_exponent"
   showCharacterPick
   samplingVector={[0.64, 0.52, 0.62, 0.51, 0.60, 0.50]}
 />
@@ -796,11 +794,87 @@ This is a good thing! If we have a smooth gradient in our image we want to retai
 Vectors at the boundaries of two different-colored surfaces will have larger differences in the sampling vector, which the contrast enhancement enhances:
 
 <InteractiveVector6D
-  vary="exponent"
-  normalize
+  vary="global_exponent"
   showCharacterPick
   samplingVector={[0.68, 0.31, 0.76, 0.31, 0.77, 0.78]}
 />
+
+<SmallNote label="" center>I _love_ the transition from `& -> b -> L` as the L-shape of the vector becomes more enhanced!</SmallNote>
+
+Compare the 3D scene ASCII rendering with and without this contrast enhancement!
+
+<AsciiScene height={540} fontSize={12} characterWidthMultiplier={0.85} characterHeightMultiplier={0.85} viewModes={["ascii", "split", "canvas"]} effects={["global_crunch"]} optimizePerformance vary={["global_crunch_exponent"]} usesVariables>
+  <Scene scene="cube" autoRotate zoom={2.7} yOffset={0.45} />
+</AsciiScene>
+
+
+### Directional contrast enhancement
+
+To further increase the contrast between boundaries. let's look _outside_ of the cell's boundary and sample regions outside of the cell.
+
+We currently have sampling circles arranged like so:
+
+<AsciiScene alphabet="default" showGrid fontSize={140} rows={2.2} cols={2.6} hideSpaces showSamplingCircles forceSamplingValue={0}>
+  {"-"}
+</AsciiScene>
+
+For each of those sampling circles, we'll specify an "external sampling circle", placed outside of the cell's boundary like so:
+
+<AsciiScene alphabet="default" showGrid fontSize={140} rows={2.2} cols={2.6} hideSpaces showSamplingCircles showExternalSamplingCircles forceSamplingValue={0}>
+  {"-"}
+</AsciiScene>
+
+Each of those external sampling circles is "reaching" into the region of a neighboring cell. Together, the samples that are collected by the external sampling circles constitute an "external sampling vector". I'll call this the "external vector" for conciseness.
+
+Let's simplify the visualization and consider a single example. Imagine that we collected a sampling vector and an external sampling vector that look like so:
+
+<InteractiveVector6D
+  samplingVector={[0.51, 0.51, 0.52, 0.52, 0.53, 0.53]}
+  externalVector={[0.80, 0.51, 0.57, 0.52, 0.53, 0.53]}
+  showCharacterPick
+/>
+
+The sampling vector itself is a fairly uniform, with values ranging from $0.51$ to $0.53$. The external vector's values are similar, except in the upper left region where the values are significantly lighter. This indicates that in the underlying image the region of the image to the upper left of the cell is lighter.
+
+To enhance the apparent boundary at the upper left corner of the cell we'd want the darken top-left and middle-left components of the sampling vector. We can do that by applying a component-wise contrast enhancement using the components of the external vector
+
+In our previous contrast enhancement, we determined the max value across the component's of the sampling vector:
+
+```ts
+const maxValue = Math.max(...samplingVector)
+```
+
+But here, for each index $i$ of our sampling vectors, we'll calculate the max value like so:
+
+```ts
+const maxValue = Math.max(samplingVector[i], externalSamplingVector[i])
+```
+
+Aside from that, the contrast enhancement is performed in the same way:
+
+```ts
+samplingVector = samplingVector.map((value, i) => {
+  const maxValue = Math.max(value, externalSamplingVector[i])
+  value = x / maxValue;
+  value = Math.pow(x, exponent);
+  value = x * maxValue;
+  return value;
+})
+```
+
+This makes lighter values in the external vector push lower values in the sampling vector down:
+
+<InteractiveVector6D
+  samplingVector={[0.51, 0.51, 0.52, 0.52, 0.53, 0.53]}
+  externalVector={[0.80, 0.51, 0.57, 0.52, 0.53, 0.53]}
+  vary="directional_exponent"
+  showCharacterPick
+/>
+
+<AsciiScene height={540} fontSize={12} characterWidthMultiplier={0.85} characterHeightMultiplier={0.85} viewModes={["ascii", "split", "canvas"]} effects={["crunch"]} optimizePerformance vary={["directional_crunch_exponent"]} usesVariables>
+  <Scene scene="cube" zoom={2.7} yOffset={0.45} />
+</AsciiScene>
+
 
 
 ---

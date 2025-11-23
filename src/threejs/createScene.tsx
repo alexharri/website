@@ -234,7 +234,7 @@ export function createScene<V extends VariableDict>(
                 rotateSpeed={0.3}
                 enableRotate
                 autoRotate={rotate && autoRotate}
-                autoRotateSpeed={3.7}
+                autoRotateSpeed={0.7}
                 enablePan={false}
                 enableZoom={false}
                 ref={orbitRef}

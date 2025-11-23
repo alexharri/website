@@ -19,6 +19,8 @@ interface GPUSamplingDataGeneratorOptions {
   samplingQuality: number;
   lightnessEasingFunction?: string;
   samplingEffects: SamplingEffect[];
+  globalCrunchExponent?: number;
+  directionalCrunchExponent?: number;
 }
 
 /**
@@ -34,6 +36,8 @@ export class GPUSamplingDataGenerator {
   private samplingQuality: number;
   private samplingEffects: SamplingEffect[];
   private numCircles: number;
+  private globalCrunchExponent: number;
+  private directionalCrunchExponent: number;
 
   // WebGL resources
   private canvasTexture: WebGLTexture;
@@ -92,7 +96,12 @@ export class GPUSamplingDataGenerator {
     this.canvasHeight = options.canvasHeight;
     this.pixelBufferScale = options.pixelBufferScale;
     this.samplingQuality = options.samplingQuality;
-    this.samplingEffects = options.samplingEffects;
+    this.samplingEffects = [...options.samplingEffects];
+    if (this.samplingEffects.includes(SamplingEffect.Crunch)) {
+      this.samplingEffects.push(SamplingEffect.DirectionalCrunch, SamplingEffect.GlobalCrunch);
+    }
+    this.globalCrunchExponent = options.globalCrunchExponent ?? 3;
+    this.directionalCrunchExponent = options.directionalCrunchExponent ?? 7;
 
     // Get number of sampling circles from alphabet config
     const metadata = getAlphabetMetadata(this.config.alphabet);
@@ -171,6 +180,18 @@ export class GPUSamplingDataGenerator {
   }
 
   /**
+   * Update exponent values without recreating the generator
+   */
+  public updateExponents(globalCrunchExponent?: number, directionalCrunchExponent?: number): void {
+    if (globalCrunchExponent !== undefined) {
+      this.globalCrunchExponent = globalCrunchExponent;
+    }
+    if (directionalCrunchExponent !== undefined) {
+      this.directionalCrunchExponent = directionalCrunchExponent;
+    }
+  }
+
+  /**
    * Update sampling data from a new canvas buffer
    */
   public update(
@@ -185,9 +206,14 @@ export class GPUSamplingDataGenerator {
     this.collectRawSamples(flipY);
     this.collectExternalSamples(flipY);
 
-    const applyCrunchEffect = this.samplingEffects.includes(SamplingEffect.Crunch);
-    if (applyCrunchEffect) {
-      this.applyCrunchEffects();
+    const applyDirectionalCrunch = this.samplingEffects.includes(SamplingEffect.DirectionalCrunch);
+    if (applyDirectionalCrunch) {
+      this.applyDirectionalCrunch();
+    }
+
+    const applyGlobalCrunch = this.samplingEffects.includes(SamplingEffect.GlobalCrunch);
+    if (applyGlobalCrunch) {
+      this.applyGlobalCrunch();
     }
 
     this.readbackAndParse(out);
@@ -231,14 +257,6 @@ export class GPUSamplingDataGenerator {
     this.renderPass(this.externalSamplingFBO, this.samplingProgram, (program) =>
       this.setSamplingUniforms(program, externalPoints, flipY),
     );
-  }
-
-  /**
-   * Apply crunch effects (directional crunch, then global crunch)
-   */
-  private applyCrunchEffects(): void {
-    this.applyDirectionalCrunch();
-    this.applyGlobalCrunch();
   }
 
   /**
@@ -406,6 +424,12 @@ export class GPUSamplingDataGenerator {
     // Grid size and circle count
     gl.uniform2f(gl.getUniformLocation(program, "u_gridSize"), this.config.cols, this.config.rows);
     gl.uniform1i(gl.getUniformLocation(program, "u_numCircles"), this.numCircles);
+
+    // Directional crunch exponent
+    gl.uniform1f(
+      gl.getUniformLocation(program, "u_directionalCrunchExponent"),
+      this.directionalCrunchExponent,
+    );
   }
 
   /**
@@ -427,6 +451,12 @@ export class GPUSamplingDataGenerator {
     // Grid size and circle count
     gl.uniform2f(gl.getUniformLocation(program, "u_gridSize"), this.config.cols, this.config.rows);
     gl.uniform1i(gl.getUniformLocation(program, "u_numCircles"), this.numCircles);
+
+    // Global crunch exponent
+    gl.uniform1f(
+      gl.getUniformLocation(program, "u_globalCrunchExponent"),
+      this.globalCrunchExponent,
+    );
   }
 
   /**

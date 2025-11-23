@@ -36,6 +36,8 @@ interface UseSamplingDataCollectionParams {
   forceSamplingValue?: number;
   samplingEffects?: SamplingEffect[];
   optimizePerformance?: boolean;
+  globalCrunchExponent?: number;
+  directionalCrunchExponent?: number;
 }
 
 export function useSamplingDataCollection(params: UseSamplingDataCollectionParams) {
@@ -47,6 +49,8 @@ export function useSamplingDataCollection(params: UseSamplingDataCollectionParam
     forceSamplingValue,
     samplingEffects,
     optimizePerformance,
+    globalCrunchExponent,
+    directionalCrunchExponent,
   } = params;
   const { canvasRef, samplingDataRef, debugCanvasRef, onFrameRef } = refs;
   const { showSamplingPoints, showSamplingCircles, debugVizOptions } = debug;
@@ -94,6 +98,8 @@ export function useSamplingDataCollection(params: UseSamplingDataCollectionParam
           samplingQuality: config.samplingQuality,
           lightnessEasingFunction,
           samplingEffects: samplingEffects || [],
+          globalCrunchExponent,
+          directionalCrunchExponent,
         });
       } catch (error) {
         console.error("Failed to initialize GPU sampling:", error);
@@ -109,6 +115,13 @@ export function useSamplingDataCollection(params: UseSamplingDataCollectionParam
       }
     };
   }, [shouldUseGPU, config, lightnessEasingFunction, samplingEffects]);
+
+  // Update exponents dynamically without recreating the generator
+  useEffect(() => {
+    if (gpuGeneratorRef.current) {
+      gpuGeneratorRef.current.updateExponents(globalCrunchExponent, directionalCrunchExponent);
+    }
+  }, [globalCrunchExponent, directionalCrunchExponent]);
 
   return useCallback(
     (buffer: Uint8Array, options?: { flipY?: boolean }) => {
