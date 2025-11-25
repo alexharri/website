@@ -170,7 +170,6 @@ const _AsciiScene: React.FC<AsciiSceneProps> = (props) => {
   const s = useStyles(AsciiSceneStyles);
   const onFrameRef = useRef<null | ((buffer: Uint8Array, options?: OnFrameOptions) => void)>(null);
   const samplingDataRef = useRef<CharacterSamplingData[][]>([]);
-  const canvasRef = useRef<HTMLCanvasElement>(null);
   const debugCanvasRef = useRef<HTMLCanvasElement>(null);
   const characterWidth = useMonospaceCharacterWidthEm(cssVariables.fontMonospace);
 
@@ -184,12 +183,12 @@ const _AsciiScene: React.FC<AsciiSceneProps> = (props) => {
   );
 
   const registerSceneVariables = useCallback((variables: VariableDict) => {
-    setVariables(variables);
+    setVariables((prev) => ({ ...prev, ...variables }));
     const initialVariables: VariableValues = {};
     for (const [key, spec] of Object.entries(variables)) {
       initialVariables[key] = spec.value;
     }
-    setVariableValues(initialVariables);
+    setVariableValues((prev) => ({ ...prev, ...initialVariables }));
   }, []);
 
   const setVariableValue = useCallback((key: string, value: VariableSpec["value"]) => {
@@ -234,7 +233,7 @@ const _AsciiScene: React.FC<AsciiSceneProps> = (props) => {
   ]);
 
   const onFrame = useSamplingDataCollection({
-    refs: { canvasRef, samplingDataRef, debugCanvasRef, onFrameRef },
+    refs: { samplingDataRef, debugCanvasRef, onFrameRef },
     config,
     debug: { showSamplingPoints, showSamplingCircles, debugVizOptions },
     lightnessEasingFunction,
@@ -304,12 +303,12 @@ const _AsciiScene: React.FC<AsciiSceneProps> = (props) => {
         )}
         <CanvasProvider
           onFrame={onFrame}
+          width={targetWidth}
           height={targetHeight}
           minWidth={minWidth}
           orbitControlsTargetRef={orbitControlsTargetRef}
           registerSceneVariables={registerSceneVariables}
           variables={variableValues}
-          canvasRef={canvasRef}
         >
           <SplitView
             viewMode={viewMode}

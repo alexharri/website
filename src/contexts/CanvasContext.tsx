@@ -1,14 +1,14 @@
-import React, { createContext, useContext, useRef, useMemo } from "react";
+import React, { createContext, useContext, useMemo } from "react";
 import { VariableDict } from "../types/variables";
 import { SCENE_BASELINE_WIDTH } from "../constants";
 
 type Variables = Record<string, unknown>;
 
-export type OnFrameOptions = { flipY?: boolean };
+export type OnFrameOptions = { flipY?: boolean; canvasWidth: number };
 
 interface ISceneContext {
-  canvasRef: React.RefObject<HTMLCanvasElement>;
-  onFrame: (buffer: Uint8Array, options?: OnFrameOptions) => void;
+  onFrame: (buffer: Uint8Array, options: OnFrameOptions) => void;
+  width: number;
   height: number;
   minWidth: number;
   orbitControlsTargetRef: React.RefObject<HTMLDivElement>;
@@ -24,39 +24,36 @@ export function useSceneContext(): ISceneContext | null {
 
 interface CanvasProviderProps {
   children: React.ReactNode;
-  onFrame: (buffer: Uint8Array, options?: OnFrameOptions) => void;
+  onFrame: (buffer: Uint8Array, options: OnFrameOptions) => void;
+  width: number;
   height: number;
   minWidth?: number;
   orbitControlsTargetRef: React.RefObject<HTMLDivElement>;
   registerSceneVariables?: (specs: VariableDict) => void;
   variables?: Variables;
-  canvasRef?: React.RefObject<HTMLCanvasElement>;
 }
 
 export function CanvasProvider({
   children,
   onFrame,
+  width,
   height,
   minWidth,
   orbitControlsTargetRef,
   registerSceneVariables,
   variables,
-  canvasRef: externalCanvasRef,
 }: CanvasProviderProps) {
-  const internalCanvasRef = useRef<HTMLCanvasElement>(null);
-  const canvasRef = externalCanvasRef || internalCanvasRef;
-
   const contextValue: ISceneContext = useMemo(
     () => ({
-      canvasRef,
       onFrame,
+      width,
       height,
       minWidth: minWidth ?? SCENE_BASELINE_WIDTH,
       orbitControlsTargetRef,
       registerSceneVariables,
       variables,
     }),
-    [onFrame, height, minWidth, orbitControlsTargetRef, registerSceneVariables, variables],
+    [onFrame, width, height, minWidth, orbitControlsTargetRef, registerSceneVariables, variables],
   );
 
   return <SceneContext.Provider value={contextValue}>{children}</SceneContext.Provider>;

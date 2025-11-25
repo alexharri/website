@@ -11,6 +11,7 @@ import { clamp } from "../../math/lerp";
 import { useViewportWidth } from "../../utils/hooks/useViewportWidth";
 import { useRandomId } from "../../utils/hooks/useRandomId";
 import { CONTROLS_HEIGHT, DEFAULT_HEIGHT, SKEW_DEG } from "./constants";
+import { useSceneContext } from "../../contexts/CanvasContext";
 
 const SHOW_SEED_AND_TIME = false;
 
@@ -101,6 +102,7 @@ function useFragmentShader(props: FragmentShaderProps): FragmentShader {
 
 export const WebGLShader: React.FC<WebGLShaderProps> = (props) => {
   const s = useStyles(styles);
+  const context = useSceneContext();
 
   const shaderTimeId = useRandomId();
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -108,12 +110,31 @@ export const WebGLShader: React.FC<WebGLShaderProps> = (props) => {
   const { showControls = true, animate = true, colorConfiguration, skew } = props;
 
   const viewportWidth = useViewportWidth()!;
-  const [width, height] = calculateWebGLCanvasDimensions(props, viewportWidth);
+  const [width, height] = calculateWebGLCanvasDimensions({ ...context, ...props }, viewportWidth);
 
   const idealScale = Math.min(1, viewportWidth / width);
   const canvasScale = Math.ceil(height * idealScale) / height;
 
   const fragmentShader = useFragmentShader(props);
+
+  // Register variables with context if available
+  useEffect(() => {
+    if (context?.registerSceneVariables && Object.keys(fragmentShader.uniforms).length > 0) {
+      // Convert FragmentShaderUniforms to VariableDict format
+      const variableDict: Record<string, any> = {};
+      for (const [key, uniform] of Object.entries(fragmentShader.uniforms)) {
+        variableDict[key] = {
+          type: "number" as const,
+          label: uniform.label,
+          value: uniform.value,
+          range: uniform.range,
+          step: uniform.step,
+          format: uniform.format,
+        };
+      }
+      context.registerSceneVariables(variableDict);
+    }
+  }, [context?.registerSceneVariables, fragmentShader.uniforms]);
 
   const [uniformValues, setUniformValues] = useState(() => {
     const values: Record<string, number> = {};
@@ -123,9 +144,18 @@ export const WebGLShader: React.FC<WebGLShaderProps> = (props) => {
     return values;
   });
 
+  // Use context variables if available, otherwise use local state
+  const effectiveUniformValues: Record<string, number> = {
+    ...uniformValues,
+    ...((context?.variables || {}) as Record<string, number>),
+  };
+
   const pendingUniformWrites = useRef<[string, number][]>([]);
   const colorConfigurationRef = useRef(colorConfiguration);
   colorConfigurationRef.current = colorConfiguration;
+  const bufferRef = useRef<Uint8Array | null>(null);
+  const contextRef = useRef(context);
+  contextRef.current = context;
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -141,7 +171,7 @@ export const WebGLShader: React.FC<WebGLShaderProps> = (props) => {
       colorConfigurations[colorConfiguration],
       props.seed,
     );
-    for (const [key, value] of Object.entries(uniformValues)) {
+    for (const [key, value] of Object.entries(effectiveUniformValues)) {
       pendingUniformWrites.current.push([key, value]);
     }
     if (!animate) renderer.setTimeSpeed(0, 0);
@@ -155,7 +185,10 @@ export const WebGLShader: React.FC<WebGLShaderProps> = (props) => {
       requestAnimationFrame(tick);
 
       if (resized) {
-        const [width, height] = calculateWebGLCanvasDimensions(props, window.innerWidth);
+        const [width, height] = calculateWebGLCanvasDimensions(
+          { ...context, ...props },
+          window.innerWidth,
+        );
         renderer.setDimensions(width, height);
         resized = false;
       }
@@ -171,6 +204,25 @@ export const WebGLShader: React.FC<WebGLShaderProps> = (props) => {
       pendingUniformWrites.current.length = 0;
 
       renderer.render();
+
+      // Call onFrame callback if in context
+      if (contextRef.current?.onFrame && canvas) {
+        const gl = renderer.getGLContext();
+        const len = canvas.width * canvas.height * 4;
+        if (!bufferRef.current || bufferRef.current.length !== len) {
+          bufferRef.current = new Uint8Array(len);
+        }
+        gl.readPixels(
+          0,
+          0,
+          canvas.width,
+          canvas.height,
+          gl.RGBA,
+          gl.UNSIGNED_BYTE,
+          bufferRef.current,
+        );
+        contextRef.current.onFrame(bufferRef.current, { canvasWidth: canvas.width });
+      }
 
       if (SHOW_SEED_AND_TIME) {
         const timeEl = document.querySelector(`[data-shader-time="${shaderTimeId}"]`);
@@ -208,7 +260,7 @@ export const WebGLShader: React.FC<WebGLShaderProps> = (props) => {
 
   return (
     <>
-      <div className={s("canvasWrapper", { skew })} style={{ width }}>
+      <div className={s("canvasWrapper", { skew })} style={{ width, height }}>
         <div style={{ paddingTop: `${(height / width) * 100}%` }} />
         <canvas
           ref={canvasRef}
@@ -226,14 +278,14 @@ export const WebGLShader: React.FC<WebGLShaderProps> = (props) => {
           />
         )}
       </div>
-      {showControls && uniformEntries.length > 0 && (
+      {showControls && uniformEntries.length > 0 && !context?.registerSceneVariables && (
         <div className={s("variables")}>
           {uniformEntries.map(([key, uniform]) => {
             return (
               <NumberVariable
                 key={key}
                 dataKey={key}
-                value={uniformValues[key] ?? uniform.value}
+                value={effectiveUniformValues[key] ?? uniform.value}
                 onValueChange={(value) => setUniformValue(key, value)}
                 spec={uniform}
                 width={uniformEntries.length > 1 ? "small" : "normal"}

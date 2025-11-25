@@ -14,7 +14,6 @@ import { OnFrameOptions } from "../../contexts/CanvasContext";
 import { GPUSamplingDataGenerator } from "../../components/AsciiRenderer/gpu/GPUSamplingDataGenerator";
 
 interface SamplingRefs {
-  canvasRef: React.RefObject<HTMLCanvasElement>;
   samplingDataRef: React.MutableRefObject<CharacterSamplingData[][]>;
   debugCanvasRef: React.RefObject<HTMLCanvasElement>;
   onFrameRef: React.MutableRefObject<
@@ -36,8 +35,8 @@ interface UseSamplingDataCollectionParams {
   forceSamplingValue?: number;
   samplingEffects?: SamplingEffect[];
   optimizePerformance?: boolean;
-  globalCrunchExponent?: number;
-  directionalCrunchExponent?: number;
+  globalCrunchExponent: number;
+  directionalCrunchExponent: number;
 }
 
 export function useSamplingDataCollection(params: UseSamplingDataCollectionParams) {
@@ -52,7 +51,7 @@ export function useSamplingDataCollection(params: UseSamplingDataCollectionParam
     globalCrunchExponent,
     directionalCrunchExponent,
   } = params;
-  const { canvasRef, samplingDataRef, debugCanvasRef, onFrameRef } = refs;
+  const { samplingDataRef, debugCanvasRef, onFrameRef } = refs;
   const { showSamplingPoints, showSamplingCircles, debugVizOptions } = debug;
 
   const [samplingData] = useState<CharacterSamplingData[][]>(() => {
@@ -124,12 +123,9 @@ export function useSamplingDataCollection(params: UseSamplingDataCollectionParam
   }, [globalCrunchExponent, directionalCrunchExponent]);
 
   return useCallback(
-    (buffer: Uint8Array, options?: { flipY?: boolean }) => {
+    (buffer: Uint8Array, options: { flipY?: boolean; canvasWidth: number }) => {
       if (config != null) {
-        const canvas = canvasRef.current;
-        if (!canvas) return;
-
-        const pixelBufferScale = canvas.width / config.canvasWidth;
+        const pixelBufferScale = options.canvasWidth / config.canvasWidth;
 
         // Use GPU path if available and enabled
         if (gpuGeneratorRef.current && shouldUseGPU) {
@@ -150,6 +146,8 @@ export function useSamplingDataCollection(params: UseSamplingDataCollectionParam
               config,
               showSamplingPoints,
               options?.flipY ?? false,
+              globalCrunchExponent,
+              directionalCrunchExponent,
               lightnessEasingFunction,
               samplingEffects,
             );
@@ -163,6 +161,8 @@ export function useSamplingDataCollection(params: UseSamplingDataCollectionParam
             config,
             showSamplingPoints,
             options?.flipY ?? false,
+            globalCrunchExponent,
+            directionalCrunchExponent,
             lightnessEasingFunction,
             samplingEffects,
           );
@@ -187,7 +187,6 @@ export function useSamplingDataCollection(params: UseSamplingDataCollectionParam
       onFrameRef.current?.(buffer, options);
     },
     [
-      canvasRef,
       samplingDataRef,
       debugCanvasRef,
       onFrameRef,
@@ -198,6 +197,8 @@ export function useSamplingDataCollection(params: UseSamplingDataCollectionParam
       debugVizOptions,
       samplingEffects,
       shouldUseGPU,
+      globalCrunchExponent,
+      directionalCrunchExponent,
     ],
   );
 }

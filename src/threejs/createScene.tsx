@@ -76,7 +76,6 @@ export function createScene<V extends VariableDict>(
     yOffset = 0,
     xRotation = 0,
     zoom = 1,
-    canvasRef: externalCanvasRef,
     onFrame,
     orbitControlsRef: externalOrbitControlsRef,
     orbitControlsTargetRef,
@@ -182,8 +181,7 @@ export function createScene<V extends VariableDict>(
     const { height, scale } = useSceneHeight(targetHeight);
     const fadeHeight = Math.round(FADE_HEIGHT * scale);
 
-    const internalCanvasRef = useRef<HTMLCanvasElement>(null);
-    const canvasRef = externalCanvasRef || internalCanvasRef;
+    const canvasRef = useRef<HTMLCanvasElement>(null);
 
     const S = 1;
 

@@ -69,8 +69,7 @@ export function createScene2D<V extends VariableDict>(
   return (props: Scene2DProps) => {
     const context = useSceneContext();
 
-    const fallbackCanvasRef = useRef<HTMLCanvasElement>(null);
-    const canvasRef = context?.canvasRef || fallbackCanvasRef;
+    const canvasRef = useRef<HTMLCanvasElement>(null);
 
     const targetHeight = props.height ?? context?.height;
     const targetWidth = props.width;
@@ -167,7 +166,7 @@ export function createScene2D<V extends VariableDict>(
         if (onFrame && canvas.width && canvas.height) {
           const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
           const buffer = new Uint8Array(imageData.data.buffer);
-          onFrame(buffer, { flipY: true });
+          onFrame(buffer, { flipY: true, canvasWidth: canvas.width });
         }
 
         lastTime = now;

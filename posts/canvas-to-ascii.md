@@ -14,6 +14,14 @@ In this post, let's dive into how we can generate sharp ASCII arts from a dynami
   <Scene scene="cube" autoRotate zoom={2.7} yOffset={0.45} />
 </AsciiScene>
 
+Here's a shader:
+
+<WebGLShader height={400} minWidth={600} fragmentShader="final" maintainHeight={0.3} seed={16192} />
+
+<AsciiScene height={500} minWidth={600} fontSize={12} characterWidthMultiplier={0.9} characterHeightMultiplier={0.9} viewModes={["ascii", "split", "canvas"]} effects={["crunch"]} vary={["global_crunch_exponent", "directional_crunch_exponent"]} usesVariables>
+  <WebGLShader fragmentShader="multiple_waves" maintainHeight={0.7} seed={20367} />
+</AsciiScene>
+
 Let's get started!
 
 

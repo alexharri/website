@@ -75,6 +75,10 @@ export class WebGLRenderer {
     return state.elapsed / 1000;
   }
 
+  public getGLContext() {
+    return this.gl;
+  }
+
   public render() {
     const { gl } = this;
     const now = Date.now();

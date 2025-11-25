@@ -144,6 +144,8 @@ export function generateSamplingData(
   config: AsciiRenderConfig,
   collectSubsamples: boolean,
   flipY: boolean,
+  globalCrunchExponent: number,
+  directionalCrunchExponent: number,
   lightnessEasingFunction?: string,
   samplingEffects: SamplingEffect[] = [],
 ): void {
@@ -242,12 +244,12 @@ export function generateSamplingData(
           crunchSamplingVectorDirectional(
             samplingVector,
             externalSamplingVector,
-            CONTRAST_EXPONENT_LOCAL,
+            directionalCrunchExponent ?? CONTRAST_EXPONENT_LOCAL,
           );
         }
       }
       if (enabledEffects.has(SamplingEffect.GlobalCrunch)) {
-        crunchSamplingVector(samplingVector, CONTRAST_EXPONENT_GLOBAL);
+        crunchSamplingVector(samplingVector, globalCrunchExponent ?? CONTRAST_EXPONENT_GLOBAL);
       }
       x += config.boxWidth;
     }

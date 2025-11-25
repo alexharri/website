@@ -1,4 +1,3 @@
-import { cssVariables } from "../../utils/cssVariables";
 import { StyleOptions } from "../../utils/styles";
 
 export default (width: number, breakpoint: number) =>
@@ -13,7 +12,6 @@ export default (width: number, breakpoint: number) =>
       overflow: hidden;
 
       @media (max-width: ${breakpoint}px) {
-        margin: 0 -${cssVariables.contentPadding}px;
         border-radius: 0;
         border: none;
         min-width: 100vw;

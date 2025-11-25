@@ -1,8 +1,9 @@
 import { useContext, useRef } from "react";
 import { FiberContext } from "./ThreeProvider";
+import { OnFrameOptions } from "../../contexts/CanvasContext";
 
 interface Props {
-  onFrame: (buffer: Uint8Array) => void;
+  onFrame: (buffer: Uint8Array, options: OnFrameOptions) => void;
 }
 
 export function FrameReader(props: Props) {
@@ -30,7 +31,7 @@ export function FrameReader(props: Props) {
       bufferRef.current,
     );
 
-    props.onFrame(bufferRef.current);
+    props.onFrame(bufferRef.current, { canvasWidth: canvas.width });
   });
 
   return null;
