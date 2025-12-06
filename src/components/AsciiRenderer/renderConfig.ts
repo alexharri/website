@@ -23,6 +23,7 @@ export class AsciiRenderConfig {
     public characterWidth: number,
     public alphabet: AlphabetName,
     public samplingQuality: number,
+    public exclude: string,
     characterWidthMultiplier: number,
     characterHeightMultiplier: number,
     offsetAlign: "left" | "center",

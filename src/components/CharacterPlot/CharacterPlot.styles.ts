@@ -15,6 +15,7 @@ export const CharacterPlotStyles = ({ styled }: StyleOptions) => ({
     height: auto;
     display: block;
     overflow: visible;
+    touch-action: none;
   `,
 
   grid: styled.css`

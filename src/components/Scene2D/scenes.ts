@@ -10,6 +10,7 @@ import circle_bottom from "./scenes/circle_bottom";
 import circle_raised from "./scenes/circle_raised";
 import rotating_square from "./scenes/rotating_square";
 import slanted_line from "./scenes/slanted_line";
+import staircase_effect from "./scenes/staircase_effect";
 import shade_split_static from "./scenes/shade_split_static";
 
 export const canvas2DScenes: Partial<Record<string, React.ComponentType<Scene2DProps>>> = {
@@ -24,5 +25,6 @@ export const canvas2DScenes: Partial<Record<string, React.ComponentType<Scene2DP
   circle_zoomed,
   circle_zoomed_bottom,
   rotating_square,
+  staircase_effect,
   slanted_line,
 };

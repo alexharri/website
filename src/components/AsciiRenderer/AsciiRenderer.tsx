@@ -49,6 +49,7 @@ export function AsciiRenderer(props: Props) {
     matcher.loadAlphabet(
       config.alphabet,
       characterMode ? [] : [EFFECTS.componentWiseGlobalNormalization],
+      config.exclude,
     );
     return matcher;
   }, [config?.alphabet]);

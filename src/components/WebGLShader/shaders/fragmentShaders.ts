@@ -45,6 +45,7 @@ import multiple_waves_blur_3 from "./fragment/multiple_waves_blur_3";
 import multiple_waves_blur_4 from "./fragment/multiple_waves_blur_4";
 import final_effect_0 from "./fragment/final_effect_0";
 import final_effect_1 from "./fragment/final_effect_1";
+import test from "./fragment/test";
 
 export const fragmentShaderRegistry: Partial<Record<string, CreateFragmentShader>> = {
   final,
@@ -94,4 +95,6 @@ export const fragmentShaderRegistry: Partial<Record<string, CreateFragmentShader
   multiple_waves_blur_4,
   final_effect_0,
   final_effect_1,
+
+  test,
 };

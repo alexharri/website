@@ -13,6 +13,7 @@ const lightnessEasingFunctions = {
   default: Bezier(0.38, 0.01, 0.67, 1),
   soft: Bezier(0.22, 0.02, 0.76, 0.82),
   increase_contrast: Bezier(1, 0, 0, 1),
+  darken: Bezier(0.38, 0.01, 0.78, 0.82),
 };
 
 const easingLookupTables: Record<string, Float32Array> = {};
@@ -266,9 +267,6 @@ export function samplingDataToAscii(
 ): string {
   const chars: string[] = [];
 
-  // let totalCount = 0;
-  // let matchCount = 0;
-
   for (let row = 0; row < config.rows; row++) {
     for (let col = 0; col < config.cols; col++) {
       const cellSamplingData = samplingData[row]?.[col];
@@ -277,18 +275,11 @@ export function samplingDataToAscii(
         continue;
       }
 
-      const selectedChar = matcher.findBestCharacterQuantized(cellSamplingData.samplingVector);
-      chars.push(selectedChar === "&nbsp;" ? " " : selectedChar);
-
-      // totalCount++;
-      // if (selectedChar === matcher.findBestCharacterQuantized(cellSamplingData.samplingVector)) {
-      //   matchCount++;
-      // }
+      const selectedChar = matcher.findBestCharacter(cellSamplingData.samplingVector);
+      chars.push(selectedChar);
     }
     chars.push("\n");
   }
-
-  // console.log(((matchCount / totalCount) * 100).toFixed(0) + "% match rate");
 
   return chars.join("");
 }

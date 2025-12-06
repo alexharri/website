@@ -42,8 +42,10 @@ export class CharacterMatcher {
 
   constructor() {}
 
-  loadAlphabet(alphabet: AlphabetName, effects: Effect[]): void {
-    const characterVectors = getAlphabetCharacterVectors(alphabet);
+  loadAlphabet(alphabet: AlphabetName, effects: Effect[], exclude: string): void {
+    const characterVectors = getAlphabetCharacterVectors(alphabet).filter(
+      (vector) => !exclude.includes(vector.char),
+    );
     const metadata = getAlphabetMetadata(alphabet);
 
     const vectors = characterVectors.map(({ vector }) => [...vector]);

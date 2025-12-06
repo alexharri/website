@@ -10,6 +10,7 @@ import { SceneProps } from "./scenes";
 import { FrameReader } from "./Components/FrameReader";
 import { VariableDict } from "../types/variables";
 import { useSceneContext } from "../contexts/CanvasContext";
+import { Three } from "./types";
 
 const FADE_HEIGHT = 80;
 
@@ -50,12 +51,14 @@ type LocalVariables<V extends VariableDict> = {
 
 interface SceneComponentProps<V extends VariableDict> {
   scene: THREE.Scene;
-  camera: THREE.PerspectiveCamera;
+  camera: THREE.PerspectiveCamera | THREE.OrthographicCamera;
   variables: LocalVariables<V>;
 }
 
 interface Options<V extends VariableDict> {
   variables?: V;
+  createCamera?: (three: Three) => THREE.PerspectiveCamera | THREE.OrthographicCamera;
+  customLights?: boolean;
 }
 
 const EMPTY_OBJ = {};
@@ -103,6 +106,9 @@ export function createScene<V extends VariableDict>(
     }, [visible]);
 
     const camera = useMemo(() => {
+      if (options.createCamera) {
+        return options.createCamera(THREE);
+      }
       const scale = 1 - (targetHeight / 500) * 0.13;
       const fov = targetHeight / 10;
       const camera = new THREE.PerspectiveCamera(fov);

@@ -50,7 +50,7 @@ export const InteractiveVector6D: React.FC<Vector6DProps> = ({
 
   const characterMatcher = useMemo(() => {
     const matcher = new CharacterMatcher();
-    matcher.loadAlphabet("default", [EFFECTS.componentWiseGlobalNormalization]);
+    matcher.loadAlphabet("default", [EFFECTS.componentWiseGlobalNormalization], "");
     return matcher;
   }, []);
 

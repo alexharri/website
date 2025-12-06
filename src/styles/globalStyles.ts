@@ -186,6 +186,13 @@ hr {
   height: 1px;
 }
 
+abbr {
+  text-decoration-line: underline;
+  text-decoration-style: dotted;
+  text-decoration-thickness: 2px;
+  text-decoration-color: ${colors.text400};
+}
+
 blockquote {
   position: relative;
   margin: 24px 0;

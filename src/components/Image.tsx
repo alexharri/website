@@ -11,7 +11,7 @@ interface Props {
   scrollable?: boolean;
 }
 
-const videoExtensions = new Set(["mp4"]);
+const videoExtensions = new Set(["mp4", "mov"]);
 const customPosts = new Set([
   "stabilizing-noisy-inputs",
   "icelandic-name-declension-trie",

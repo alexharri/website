@@ -90,7 +90,8 @@ export const threeJsScenes: Partial<Record<string, React.ComponentType<SceneProp
 
   "vr-controller": dynamic(() => import("./scenes/vr-controller"), { loading }),
 
-  "cube": dynamic(() => import("./scenes/cube"), { loading })
+  "cube": dynamic(() => import("./scenes/cube"), { loading }),
+  "cube-logo": dynamic(() => import("./scenes/cube-logo"), { loading })
 };
 
 interface Props {

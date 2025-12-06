@@ -65,6 +65,7 @@ interface AsciiSceneProps {
   optimizePerformance?: boolean;
   usesVariables?: boolean;
   vary?: string[];
+  exclude?: string;
 }
 
 const _AsciiScene: React.FC<AsciiSceneProps> = (props) => {
@@ -88,6 +89,7 @@ const _AsciiScene: React.FC<AsciiSceneProps> = (props) => {
     effects,
     optimizePerformance = false,
     vary = [],
+    exclude = "",
   } = props;
   let { minWidth, lightnessEasingFunction } = props;
 
@@ -214,6 +216,7 @@ const _AsciiScene: React.FC<AsciiSceneProps> = (props) => {
       characterWidth,
       alphabet,
       sampleQuality,
+      exclude,
       characterWidthMultiplier * widthMultiplierScale,
       characterHeightMultiplier * heightMultiplierScale,
       offsetAlign,
@@ -230,6 +233,7 @@ const _AsciiScene: React.FC<AsciiSceneProps> = (props) => {
     characterHeightMultiplier,
     heightMultiplierScale,
     offsetAlign,
+    exclude,
   ]);
 
   const onFrame = useSamplingDataCollection({
