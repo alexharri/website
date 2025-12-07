@@ -1113,15 +1113,24 @@ I've noticed a few common issues with how people generate the ASCII characters, 
 
 In this post, let's dive into how we can generate sharp ASCII arts from a dynamic input image. Here's an example of what we'll build:
 
-<AsciiScene height={540} fontSize={12} characterWidthMultiplier={0.85} characterHeightMultiplier={0.85} viewModes={["ascii", "split", "canvas"]} effects={["crunch"]} vary={["global_crunch_exponent", "directional_crunch_exponent"]} usesVariables>
+<AsciiScene height={540} fontSize={12} characterWidthMultiplier={0.85} characterHeightMultiplier={0.85} viewModes={["ascii", "split", "canvas"]} usesVariables effects={{
+  global_crunch: [2.2, { range: [1, 5], step: 0.25 }],
+  directional_crunch: [2.8, { range: [1, 5], step: 0.25 }],
+}}>
   <Scene scene="cube" autoRotate zoom={2.7} yOffset={0.45} />
 </AsciiScene>
 
-<AsciiScene width={400} height={300} fontSize={19} rowHeight={18} columnWidth={15} viewMode="transparent" vary={["global_crunch_exponent", "directional_crunch_exponent"]} effects={["crunch"]} usesVariables exclude="|v">
+<AsciiScene width={400} height={300} fontSize={19} rowHeight={18} columnWidth={15} viewMode="transparent" usesVariables exclude="|v" effects={{
+  global_crunch: [1, { range: [1, 5], step: 0.25 }],
+  directional_crunch: [1, { range: [1, 5], step: 0.25 }],
+}}>
   <Scene2D scene="staircase_effect" />
 </AsciiScene>
 
-<AsciiScene width={400} height={300} fontSize={19} rowHeight={18} columnWidth={15} viewMode="transparent" vary={["global_crunch_exponent", "directional_crunch_exponent"]} effects={["crunch"]} usesVariables exclude="|v" optimizePerformance>
+<AsciiScene width={400} height={300} fontSize={19} rowHeight={18} columnWidth={15} viewMode="transparent" usesVariables exclude="|v" optimizePerformance effects={{
+  global_crunch: [1, { range: [1, 5], step: 0.25 }],
+  directional_crunch: [1, { range: [1, 5], step: 0.25 }],
+}}>
   <Scene2D scene="staircase_effect" />
 </AsciiScene>
 

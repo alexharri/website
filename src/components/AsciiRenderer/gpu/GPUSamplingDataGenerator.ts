@@ -62,6 +62,7 @@ export class GPUSamplingDataGenerator {
 
   // Shader programs
   private samplingProgram: WebGLProgram;
+  private externalSamplingProgram: WebGLProgram;
   private copyProgram: WebGLProgram;
   private maxValueProgram: WebGLProgram;
   private externalMaxProgram: WebGLProgram;
@@ -170,6 +171,13 @@ export class GPUSamplingDataGenerator {
       throw new Error("Failed to create sampling program");
     }
     this.samplingProgram = samplingProgram;
+
+    const externalSamplingFrag = createSamplingFragmentShader(this.numExternalPoints);
+    const externalSamplingProgram = this.createProgram(PASSTHROUGH_VERT, externalSamplingFrag);
+    if (!externalSamplingProgram) {
+      throw new Error("Failed to create external sampling program");
+    }
+    this.externalSamplingProgram = externalSamplingProgram;
 
     const copyProgram = this.createProgram(PASSTHROUGH_VERT, COPY_FRAGMENT_SHADER);
     if (!copyProgram) {
@@ -339,7 +347,7 @@ export class GPUSamplingDataGenerator {
 
     this.renderPass(
       this.externalSamplingFBO,
-      this.samplingProgram,
+      this.externalSamplingProgram,
       (program) => this.setSamplingUniforms(program, externalPoints, flipY),
       externalOutputWidth,
       this.config.rows,
@@ -534,7 +542,7 @@ export class GPUSamplingDataGenerator {
     // External max texture (computed from external sampling + affects mapping)
     gl.activeTexture(gl.TEXTURE1);
     gl.bindTexture(gl.TEXTURE_2D, this.externalMaxTexture);
-    gl.uniform1i(gl.getUniformLocation(program, "u_externalSamplingTexture"), 1);
+    gl.uniform1i(gl.getUniformLocation(program, "u_externalMaxTexture"), 1);
 
     // Grid size and circle count
     gl.uniform2f(gl.getUniformLocation(program, "u_gridSize"), this.config.cols, this.config.rows);
@@ -611,8 +619,9 @@ export class GPUSamplingDataGenerator {
 
     if (READBACK_EXTERNAL) {
       gl.bindFramebuffer(gl.FRAMEBUFFER, this.externalSamplingFBO);
-      externalData = new Float32Array(this.outputWidth * this.outputHeight * 4);
-      gl.readPixels(0, 0, this.outputWidth, this.outputHeight, gl.RGBA, gl.FLOAT, externalData);
+      const externalWidth = this.config.cols * this.numExternalPoints;
+      externalData = new Float32Array(externalWidth * this.outputHeight * 4);
+      gl.readPixels(0, 0, externalWidth, this.outputHeight, gl.RGBA, gl.FLOAT, externalData);
     }
 
     // Read current sampling vector (final output after all effects)
@@ -923,6 +932,7 @@ export class GPUSamplingDataGenerator {
 
     // Delete programs
     gl.deleteProgram(this.samplingProgram);
+    gl.deleteProgram(this.externalSamplingProgram);
     gl.deleteProgram(this.copyProgram);
     gl.deleteProgram(this.maxValueProgram);
     gl.deleteProgram(this.externalMaxProgram);

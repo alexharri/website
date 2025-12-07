@@ -295,7 +295,7 @@ in vec2 v_texCoord;
 out vec4 fragColor;
 
 uniform sampler2D u_inputTexture;            // Input texture from previous pass
-uniform sampler2D u_externalSamplingTexture; // External sampling vector texture
+uniform sampler2D u_externalMaxTexture;      // External max values per internal point
 uniform vec2 u_gridSize;                     // Grid dimensions (cols, rows)
 uniform int u_numCircles;                    // Number of sampling circles per cell (1-6)
 uniform float u_directionalCrunchExponent;   // Crunch exponent (variable)
@@ -303,7 +303,7 @@ uniform float u_directionalCrunchExponent;   // Crunch exponent (variable)
 void main() {
   // Sample input and external values at current fragment
   float value = texture(u_inputTexture, v_texCoord).r;
-  float contextValue = texture(u_externalSamplingTexture, v_texCoord).r;
+  float contextValue = texture(u_externalMaxTexture, v_texCoord).r;
 
   float originalValue = value;
   

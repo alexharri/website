@@ -26,9 +26,6 @@ import { SCENE_BASELINE_WIDTH } from "../../constants";
 import { useSamplingDataCollection } from "../../utils/hooks/useSamplingDataCollection";
 import { useVisible } from "../../utils/hooks/useVisible";
 
-const DEFAULT_DIRECTIONAL_CRUNCH_EXPONENT = 7;
-const DEFAULT_GLOBAL_CRUNCH_EXPONENT = 3;
-
 const DEFAULT_FONT_SIZE = 14;
 
 type ViewModeKey = "ascii" | "split" | "transparent" | "canvas";
@@ -61,11 +58,10 @@ interface AsciiSceneProps {
   viewMode?: ViewModeKey;
   viewModes?: ViewModeKey[] | "all";
   pixelate?: boolean;
-  effects?: SamplingEffect[];
   optimizePerformance?: boolean;
   usesVariables?: boolean;
-  vary?: string[];
   exclude?: string;
+  effects?: { [key: string]: number | [number, { range: [number, number]; step: number }] };
 }
 
 const _AsciiScene: React.FC<AsciiSceneProps> = (props) => {
@@ -88,7 +84,6 @@ const _AsciiScene: React.FC<AsciiSceneProps> = (props) => {
     increaseContrast,
     effects,
     optimizePerformance = false,
-    vary = [],
     exclude = "",
   } = props;
   let { minWidth, lightnessEasingFunction } = props;
@@ -110,45 +105,58 @@ const _AsciiScene: React.FC<AsciiSceneProps> = (props) => {
     viewModes === "all" ? Object.values(VIEW_MODE_MAP) : viewModes.map((key) => VIEW_MODE_MAP[key]);
 
   const [variables, setVariables] = useState<VariableDict>({});
-  const [variableValues, setVariableValues] = useState<VariableValues>({});
+  const [variableValues, setVariableValues] = useState<VariableValues>(() => ({}));
 
-  // Register variables based on the vary prop
   useEffect(() => {
-    const varyVariables: VariableDict = {};
+    const variableValues: VariableValues = {};
+    const variables: VariableDict = {};
 
-    if (vary.includes("global_crunch_exponent")) {
-      varyVariables.global_crunch_exponent = {
-        type: "number",
-        label: "Exponent",
-        value: 1,
-        range: [1, 5],
-        step: 0.1,
-      };
+    function getEffect(key: string) {
+      const effect = effects?.[key];
+      if (typeof effect === "number") {
+        return [effect, null] as const;
+      }
+      return effect;
     }
 
-    if (vary.includes("directional_crunch_exponent")) {
-      varyVariables.directional_crunch_exponent = {
-        type: "number",
-        label: "Directional Exponent",
-        value: 1,
-        range: [1, 5],
-        step: 0.1,
-      };
+    const globalCrunch = getEffect(SamplingEffect.GlobalCrunch);
+    if (globalCrunch) {
+      const [value, config] = globalCrunch;
+      const key = "global_crunch_exponent";
+      variableValues[key] = value;
+      if (config) {
+        variables[key] = {
+          type: "number",
+          label: "Exponent",
+          value,
+          range: config.range,
+          step: config.step,
+        };
+      }
+    }
+    const directionalCrunch = getEffect(SamplingEffect.DirectionalCrunch);
+    if (directionalCrunch) {
+      const [value, config] = directionalCrunch;
+      const key = "directional_crunch_exponent";
+      variableValues[key] = value;
+      if (config) {
+        variables[key] = {
+          type: "number",
+          label: "Directional exponent",
+          value,
+          range: config.range,
+          step: config.step,
+        };
+      }
     }
 
-    if (Object.keys(varyVariables).length > 0) {
-      setVariables((prev) => ({ ...prev, ...varyVariables }));
-      setVariableValues((prev) => {
-        const newValues = { ...prev };
-        for (const [key, spec] of Object.entries(varyVariables)) {
-          if (!(key in newValues)) {
-            newValues[key] = spec.value;
-          }
-        }
-        return newValues;
-      });
+    if (Object.keys(variables).length > 0) {
+      setVariables((prev) => ({ ...prev, ...variables }));
     }
-  }, [vary]);
+    if (Object.keys(variableValues).length > 0) {
+      setVariableValues((prev) => ({ ...prev, ...variableValues }));
+    }
+  }, [effects]);
 
   const { targetWidth, targetHeight, width, height, scale, breakpoint } = useDimensions(props);
   const metadata = useMemo(() => getAlphabetMetadata(alphabet), [alphabet]);
@@ -236,20 +244,19 @@ const _AsciiScene: React.FC<AsciiSceneProps> = (props) => {
     exclude,
   ]);
 
+  const samplingEffects = useMemo(() => Object.keys(effects || {}) as SamplingEffect[], []);
+
   const onFrame = useSamplingDataCollection({
     refs: { samplingDataRef, debugCanvasRef, onFrameRef },
     config,
     debug: { showSamplingPoints, showSamplingCircles, debugVizOptions },
     lightnessEasingFunction,
     forceSamplingValue,
-    samplingEffects: effects,
+    samplingEffects,
     optimizePerformance,
-    globalCrunchExponent:
-      (variableValues.global_crunch_exponent as number | undefined) ??
-      DEFAULT_GLOBAL_CRUNCH_EXPONENT,
+    globalCrunchExponent: (variableValues.global_crunch_exponent as number | undefined) ?? 1,
     directionalCrunchExponent:
-      (variableValues.directional_crunch_exponent as number | undefined) ??
-      DEFAULT_DIRECTIONAL_CRUNCH_EXPONENT,
+      (variableValues.directional_crunch_exponent as number | undefined) ?? 1,
   });
 
   const isCharacterMode = typeof children === "string";
