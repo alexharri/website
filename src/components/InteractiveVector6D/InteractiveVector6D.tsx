@@ -5,6 +5,7 @@ import { Vector6D } from "../Vector6D/Vector6D";
 import { NumberVariable } from "../variables";
 import { CharacterMatcher } from "../AsciiRenderer/ascii/CharacterMatcher";
 import { EFFECTS } from "../AsciiRenderer/ascii/effects";
+import { getAlphabetMetadata } from "../AsciiRenderer/alphabets/AlphabetManager";
 
 interface Vector6DProps {
   samplingVector: number[];
@@ -12,6 +13,7 @@ interface Vector6DProps {
   vary?: "global_exponent" | "directional_exponent";
   normalize?: boolean;
   showCharacterPick?: boolean;
+  exclude?: string;
 }
 
 export const InteractiveVector6D: React.FC<Vector6DProps> = ({
@@ -20,10 +22,18 @@ export const InteractiveVector6D: React.FC<Vector6DProps> = ({
   vary,
   normalize = true,
   showCharacterPick,
+  exclude = "",
 }) => {
   const s = useStyles(InteractiveVector6DStyles);
   const [globalExponent, setGlobalExponent] = useState(1);
   const [directionalExponent, setDirectionalExponent] = useState(1);
+
+  const metadata = useMemo(() => {
+    if (externalVector && externalVector.length === 6) {
+      return getAlphabetMetadata("simple-directional-crunch");
+    }
+    return getAlphabetMetadata("default");
+  }, [externalVector]);
 
   const maxValue = Math.max(...samplingVector);
 
@@ -37,7 +47,15 @@ export const InteractiveVector6D: React.FC<Vector6DProps> = ({
   }
   if (vary === "directional_exponent" && externalVector) {
     samplingVector = samplingVector.map((value, i) => {
-      const externalValue = externalVector[i];
+      const affectsMapping =
+        "affectsMapping" in metadata.samplingConfig && metadata.samplingConfig.affectsMapping;
+      if (!affectsMapping) {
+        throw new Error(`Expected affectsMapping in metadata`);
+      }
+      let externalValue = 0;
+      for (const externalIndex of affectsMapping[i]) {
+        externalValue = Math.max(externalValue, externalVector[externalIndex]);
+      }
       if (externalValue <= value) {
         return value;
       }
@@ -50,9 +68,9 @@ export const InteractiveVector6D: React.FC<Vector6DProps> = ({
 
   const characterMatcher = useMemo(() => {
     const matcher = new CharacterMatcher();
-    matcher.loadAlphabet("default", [EFFECTS.componentWiseGlobalNormalization], "");
+    matcher.loadAlphabet("default", [EFFECTS.componentWiseGlobalNormalization], exclude);
     return matcher;
-  }, []);
+  }, [exclude]);
 
   const pickedCharacter = useMemo(() => {
     return characterMatcher.findBestCharacter(samplingVector);

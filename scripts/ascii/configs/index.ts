@@ -1,4 +1,5 @@
 import { defaultConfig } from "./default";
+import { simpleDirectionalCrunch } from "./simple-directional-crunch";
 import { threeSamplesConfig } from "./three-samples";
 import { sixSamplesConfig } from "./six-samples";
 import { twoSamplesConfig } from "./two-samples";
@@ -8,6 +9,7 @@ import { pixelShortConfig } from "./pixel-short";
 
 export const configs = {
   default: defaultConfig,
+  "simple-directional-crunch": simpleDirectionalCrunch,
   "ascii-60": ascii60Config,
   pixel: pixelConfig,
   "pixel-short": pixelShortConfig,

@@ -796,26 +796,64 @@ The example below demonstrates the staircase effect -- observe how the darker pa
   <Scene2D scene="staircase_effect" />
 </AsciiScene>
 
-To get the edges even sharper good, we'll apply a different type of contrast enhancement.
+Why might this be? Well, a cell at the edge might have one or a few light sample in the top-left corner, while the rest of the samples will be dark. When the sampling vector has at least one sample, _all_ of the dark samples will be crunched as a result. This looks kind of like so:
 
+<InteractiveVector6D
+  vary="global_exponent"
+  showCharacterPick
+  samplingVector={[0.6, 0.2, 0.2, 0.2, 0.2, 0.2]}
+/>
+
+Consider the row in the middle of the canvas, progressing from left to right. As we start off, every sample is light and we get `U`s, so the first characters will be U
+
+```text
+UUUUUUUU ->
+```
+
+Then, as we progress a bit further, we start getting dark bottom samples. Those are crunched by the lighter components so we get some `Y`s:
+
+```text
+UUUUUUUUYY ->
+```
+
+As we move right we get more and more dark bottom samples, which all get crunched the same. This results in characters that more and more only visually occupy the upper region:
+
+```text
+UUUUUUUUYYf""''` ->
+```
+
+After we move a bit more to the right, we get no light samples. That causes no crunching to occur, resulting in us getting `!`s:
+
+```text
+UUUUUUUUYYf""''`!!!!!!!!!! ->
+```
+
+This sudden stop in crunching as we get no more light samples is what causes the staircasing effect:
+
+```text:no_ligatures
+                   !!!!!!!!
+             !!!!!!!!!!!!!!
+      !!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!
+```
+
+To get rid of this we'll apply a another layer of contrast enhancement, this time looking outside of the boundary of each cell.
 
 ### Directional contrast enhancement
 
-To further increase the contrast between boundaries. let's look _outside_ of the cell's boundary and sample regions outside of the cell.
-
 We currently have sampling circles arranged like so:
 
-<AsciiScene alphabet="default" showGrid fontSize={140} rows={2.2} cols={2.6} hideSpaces showSamplingCircles forceSamplingValue={0}>
-  {"-"}
+<AsciiScene alphabet="simple-directional-crunch" showGrid fontSize={140} rows={2.2} cols={2.6} hideSpaces showSamplingCircles forceSamplingValue={0}>
+  {"F"}
 </AsciiScene>
 
 For each of those sampling circles, we'll specify an "external sampling circle", placed outside of the cell's boundary like so:
 
-<AsciiScene alphabet="default" showGrid fontSize={140} rows={2.2} cols={2.6} hideSpaces showSamplingCircles showExternalSamplingCircles forceSamplingValue={0}>
-  {"-"}
+<AsciiScene alphabet="simple-directional-crunch" showGrid fontSize={140} rows={2.2} cols={2.6} hideSpaces showSamplingCircles showExternalSamplingCircles forceSamplingValue={0}>
+  {"F"}
 </AsciiScene>
 
-Each of those external sampling circles is "reaching" into the region of a neighboring cell. Together, the samples that are collected by the external sampling circles constitute an "external sampling vector". I'll call this the "external vector" for conciseness.
+Each of those external sampling circles is "reaching" into the region of a neighboring cell. Together, the samples that are collected by the external sampling circles constitute an "external sampling vector".
 
 Let's simplify the visualization and consider a single example. Imagine that we collected a sampling vector and an external sampling vector that look like so:
 
@@ -835,7 +873,7 @@ In our previous contrast enhancement, we determined the max value across the com
 const maxValue = Math.max(...samplingVector)
 ```
 
-But here, for each index $i$ of our sampling vectors, we'll calculate the max value like so:
+But here, for each index $i$ of our sampling vector, we'll calculate the max value like so:
 
 ```ts
 const maxValue = Math.max(samplingVector[i], externalSamplingVector[i])
@@ -846,14 +884,14 @@ Aside from that, the contrast enhancement is performed in the same way:
 ```ts
 samplingVector = samplingVector.map((value, i) => {
   const maxValue = Math.max(value, externalSamplingVector[i])
-  value = x / maxValue;
-  value = Math.pow(x, exponent);
-  value = x * maxValue;
+  value = value / maxValue;
+  value = Math.pow(value, exponent);
+  value = value * maxValue;
   return value;
 })
 ```
 
-This makes lighter values in the external vector push lower values in the sampling vector down:
+As we can see in the example below, light values in the external sampling vector push values in the sampling vector down:
 
 <InteractiveVector6D
   samplingVector={[0.51, 0.51, 0.52, 0.52, 0.53, 0.53]}
@@ -862,7 +900,48 @@ This makes lighter values in the external vector push lower values in the sampli
   showCharacterPick
 />
 
-I call this "directional contrast enhancement", since each of the external samples reaches outside of the cell in the _direction_ of the sampling vector component that it is enhancing the contrast of. I describe the other effect as "global contrast enhancement", since it acts on all of the sampling vector components together.
+I call this "directional contrast enhancement", since each of the external samples reaches outside of the cell in the _direction_ of the sampling vector component that it is enhancing the contrast of. I describe the other effect as "global contrast enhancement", since it acts on all of the sampling vector's components.
+
+However, this doesn't quite get rid of the staircasing effect. Try dragging the slider in the example below to see for yourself:
+
+<AsciiScene width={400} height={300} alphabet="simple-directional-crunch" fontSize={19} rowHeight={18} columnWidth={15} viewMode="transparent" vary={["directional_crunch_exponent"]} effects={["crunch"]} usesVariables exclude="|v">
+  <Scene2D scene="staircase_effect" />
+</AsciiScene>
+
+Our problem is that the directional crunch is too local -- it isn't reaching the middle components of the sampling vector. Even if both of the top external samples are light, it only affects the uppermost components:
+
+<InteractiveVector6D
+  samplingVector={[0.3, 0.3, 0.3, 0.3, 0.3, 0.3]}
+  externalVector={[0.8, 0.8, 0.3, 0.3, 0.3, 0.3]}
+  vary="directional_exponent"
+  showCharacterPick
+  exclude="|v"
+/>
+
+The change to `!` to `:` is good, but not enough. To properly get rid of the staircasing, I'd want a sequence like so:
+
+```text:no_ligatures
+            ..::!!
+      ..::!!!!!!!!
+..::!!!!!!!!!!!!!!
+```
+
+But because the lightness of the four bottom components is retained, we never really get to `.` -- just `:`.
+
+The system I came up with is to introduce a few more external sampling circles, arranged like so:
+
+<AsciiScene showGrid fontSize={140} rows={2.2} cols={2.6} hideSpaces showSamplingCircles showExternalSamplingCircles forceSamplingValue={0}>
+  {"F"}
+</AsciiScene>
+
+{false && <InteractiveVector6D
+  samplingVector={[0.3, 0.3, 0.3, 0.3, 0.3, 0.3]}
+  externalVector={[0.8, 0.8, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3]}
+  vary="directional_exponent"
+  showCharacterPick
+  exclude="|v"
+/>}
+
 
 Try dragging the slider below to gradually apply directional contrast enhancement to the 3D scene from before. The directional contrast enhancement is applied _on top of_ a layer of global contrast enhancement:
 
@@ -1034,7 +1113,7 @@ I've noticed a few common issues with how people generate the ASCII characters, 
 
 In this post, let's dive into how we can generate sharp ASCII arts from a dynamic input image. Here's an example of what we'll build:
 
-<AsciiScene height={540} fontSize={12} characterWidthMultiplier={0.85} characterHeightMultiplier={0.85} viewModes={["ascii", "split", "canvas"]} effects={["crunch"]} vary={["global_crunch_exponent", "directional_crunch_exponent"]} optimizePerformance usesVariables>
+<AsciiScene height={540} fontSize={12} characterWidthMultiplier={0.85} characterHeightMultiplier={0.85} viewModes={["ascii", "split", "canvas"]} effects={["crunch"]} vary={["global_crunch_exponent", "directional_crunch_exponent"]} usesVariables>
   <Scene scene="cube" autoRotate zoom={2.7} yOffset={0.45} />
 </AsciiScene>
 

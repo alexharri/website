@@ -1,7 +1,9 @@
 import { createScene2D } from "../createScene2D";
 
+const slope = 0.14;
+
 export default createScene2D(
-  ({ ctx, width, height, variables: { slope } }) => {
+  ({ ctx, width, height }) => {
     ctx.beginPath();
     ctx.rect(0, 0, width, height);
     ctx.closePath();
@@ -18,13 +20,13 @@ export default createScene2D(
     ctx.fill();
   },
   {
-    variables: {
-      slope: {
-        range: [0, 0.5],
-        type: "number",
-        value: 0.14,
-        label: "Slope",
-      },
-    },
+    // variables: {
+    //   slope: {
+    //     range: [0, 0.5],
+    //     type: "number",
+    //     value: 0.14,
+    //     label: "Slope",
+    //   },
+    // },
   },
 );

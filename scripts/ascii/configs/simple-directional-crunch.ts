@@ -2,8 +2,8 @@ import path from "path";
 import { Config } from "../types";
 import { Alphabet } from "../alphabets";
 
-export const defaultConfig: Config = {
-  name: "default",
+export const simpleDirectionalCrunch: Config = {
+  name: "simple-directional-crunch",
   SAMPLING_CONFIG: {
     points: [
       { x: 0.3, y: 0.23 },
@@ -14,16 +14,12 @@ export const defaultConfig: Config = {
       { x: 0.7, y: 0.77 },
     ],
     externalPoints: [
-      { x: 0.07, y: -0.21, affects: [0, 1] },
-      { x: 0.93, y: -0.21, affects: [0, 1] },
-      { x: -0.25, y: 0.07, affects: [0, 2] },
-      { x: 1.25, y: 0.07, affects: [1, 3] },
-      { x: -0.25, y: 0.5, affects: [0, 2, 4] },
-      { x: 1.25, y: 0.5, affects: [1, 3, 5] },
-      { x: -0.25, y: 0.93, affects: [2, 4] },
-      { x: 1.25, y: 0.93, affects: [3, 5] },
-      { x: 0.07, y: 1.21, affects: [4, 5] },
-      { x: 0.93, y: 1.21, affects: [4, 5] },
+      { x: -0.3, y: -0.23, affects: [0] },
+      { x: 1.3, y: -0.23, affects: [1] },
+      { x: -0.3, y: 0.5, affects: [2] },
+      { x: 1.3, y: 0.5, affects: [3] },
+      { x: -0.3, y: 1.23, affects: [4] },
+      { x: 1.3, y: 1.23, affects: [5] },
     ],
     circleRadius: 13.5,
   },
