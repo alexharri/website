@@ -212,6 +212,80 @@ void main() {
 }
 `;
 
+export const createExternalMaxFragmentShader = (
+  numCircles: number,
+  numExternalPoints: number,
+) => /* glsl */ `#version 300 es
+precision highp float;
+
+// External max shader - computes max external value for each internal point based on affects mapping
+
+in vec2 v_texCoord;
+out vec4 fragColor;
+
+uniform sampler2D u_externalSamplingTexture;  // External sampling texture (cols*numExt × rows)
+uniform vec2 u_gridSize;                      // Grid dimensions (cols, rows)
+uniform int u_numCircles;                     // Number of internal sampling circles (6)
+uniform int u_numExternalPoints;              // Number of external sampling points (10)
+
+// Affects mapping: flattened array with counts
+uniform int u_affectsMapping[${numCircles * numExternalPoints}];
+uniform int u_affectsCounts[${numCircles}];
+
+// Get texture coordinate for external point in a cell
+vec2 getExternalTexCoord(vec2 gridCell, int externalIndex) {
+  // External sampling texture has width: cols * numExternalPoints
+  // For grid cell (col, row) and external point e:
+  //   Pixel X = col * numExternalPoints + e
+  //   Pixel Y = row
+
+  float pixelX = gridCell.x * float(u_numExternalPoints) + float(externalIndex) + 0.5;
+  float pixelY = (u_gridSize.y - gridCell.y - 1.0) + 0.5;
+
+  vec2 texCoord = vec2(
+    pixelX / (u_gridSize.x * float(u_numExternalPoints)),
+    pixelY / u_gridSize.y
+  );
+
+  return texCoord;
+}
+
+void main() {
+  // Output texture is cols*numCircles × rows (one pixel per internal point)
+  float pixelX = v_texCoord.x * u_gridSize.x * float(u_numCircles);
+  float pixelY = v_texCoord.y * u_gridSize.y;
+
+  float col = floor(pixelX / float(u_numCircles));
+  float row = floor(pixelY);
+
+  vec2 gridCell = vec2(col, u_gridSize.y - 1.0 - row);
+
+  int circleIndex = int(mod(pixelX, float(u_numCircles)));
+
+  // Find start index in affects mapping for this internal point
+  int startIndex = 0;
+  for (int i = 0; i < ${numCircles}; i++) {
+    if (i >= circleIndex) break;
+    startIndex += u_affectsCounts[i];
+  }
+  
+  int numAffecting = u_affectsCounts[circleIndex];
+
+  // Find max value among external points that affect this internal point
+  float maxValue = 0.0;
+
+  // Iterate through affecting external points
+  for (int i = 0; i < numAffecting; i++) {
+    int externalIdx = u_affectsMapping[startIndex + i];
+    vec2 externalTexCoord = getExternalTexCoord(gridCell, externalIdx);
+    float externalValue = texture(u_externalSamplingTexture, externalTexCoord).r;
+    maxValue = max(maxValue, externalValue);
+  }
+
+  fragColor = vec4(maxValue, 0.0, 0.0, 1.0);
+}
+`;
+
 export const createDirectionalCrunchFragmentShader = () => /* glsl */ `#version 300 es
 precision highp float;
 
@@ -231,6 +305,8 @@ void main() {
   float value = texture(u_inputTexture, v_texCoord).r;
   float contextValue = texture(u_externalSamplingTexture, v_texCoord).r;
 
+  float originalValue = value;
+  
   // Apply directional crunch: enhance contrast when context > value
   if (contextValue > value) {
     float normalized = value / contextValue;
@@ -238,7 +314,10 @@ void main() {
     value = enhanced * contextValue;
   }
 
-  // Output crunched value
+  // Debug: visualize direction of change
+  // Red = darkening (expected), Green = lightening (unexpected)
+  float darkening = max(0.0, originalValue - value);
+  // float lightening = max(0.0, value - originalValue);
   fragColor = vec4(value, 0.0, 0.0, 1.0);
 }
 `;

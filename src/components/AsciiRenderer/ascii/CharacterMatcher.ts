@@ -15,9 +15,14 @@ export interface SamplingPoint {
   y: number;
 }
 
+export interface ExternalSamplingPoint extends SamplingPoint {
+  affects: number[];
+}
+
 export interface SamplingConfig {
   points: SamplingPoint[];
-  externalPoints?: SamplingPoint[];
+  externalPoints?: ExternalSamplingPoint[];
+  affectsMapping?: number[][];
   circleRadius: number;
 }
 

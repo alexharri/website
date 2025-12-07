@@ -6,6 +6,7 @@ import {
   PASSTHROUGH_VERT,
   createSamplingFragmentShader,
   createMaxValueFragmentShader,
+  createExternalMaxFragmentShader,
   createDirectionalCrunchFragmentShader,
   createGlobalCrunchFragmentShader,
   COPY_FRAGMENT_SHADER,
@@ -63,8 +64,16 @@ export class GPUSamplingDataGenerator {
   private samplingProgram: WebGLProgram;
   private copyProgram: WebGLProgram;
   private maxValueProgram: WebGLProgram;
+  private externalMaxProgram: WebGLProgram;
   private directionalCrunchProgram: WebGLProgram;
   private globalCrunchProgram: WebGLProgram;
+
+  // External max computation
+  private externalMaxFBO: WebGLFramebuffer;
+  private externalMaxTexture: WebGLTexture;
+  private numExternalPoints: number;
+  private affectsMapping: number[];
+  private affectsCounts: number[];
 
   // Vertex array object for fullscreen quad
   private quadVAO: WebGLVertexArrayObject;
@@ -107,6 +116,20 @@ export class GPUSamplingDataGenerator {
     const metadata = getAlphabetMetadata(this.config.alphabet);
     this.numCircles = metadata.samplingConfig.points.length;
 
+    // Get external points configuration
+    const externalPoints =
+      "externalPoints" in metadata.samplingConfig ? metadata.samplingConfig.externalPoints : [];
+    this.numExternalPoints = externalPoints?.length ?? 0;
+
+    // Build affects mapping for GPU
+    const affectsMapping =
+      "affectsMapping" in metadata.samplingConfig
+        ? metadata.samplingConfig.affectsMapping
+        : undefined;
+    const { flatMapping, counts } = this.buildAffectsMappingForGPU(affectsMapping, externalPoints);
+    this.affectsMapping = flatMapping;
+    this.affectsCounts = counts;
+
     // Calculate output texture dimensions
     // Each cell gets N pixels in a horizontal row (where N = number of circles)
     this.outputWidth = this.config.cols * this.numCircles;
@@ -120,8 +143,14 @@ export class GPUSamplingDataGenerator {
     this.rawSamplingTexture = this.createFloatTexture(this.outputWidth, this.outputHeight)!;
     this.rawSamplingFBO = this.createFramebuffer(this.rawSamplingTexture)!;
 
-    this.externalSamplingTexture = this.createFloatTexture(this.outputWidth, this.outputHeight)!;
+    // External sampling texture uses numExternalPoints instead of numCircles
+    const externalOutputWidth = this.config.cols * this.numExternalPoints;
+    this.externalSamplingTexture = this.createFloatTexture(externalOutputWidth, this.outputHeight)!;
     this.externalSamplingFBO = this.createFramebuffer(this.externalSamplingTexture)!;
+
+    // External max texture (same dimensions as internal sampling: cols*numCircles × rows)
+    this.externalMaxTexture = this.createFloatTexture(this.outputWidth, this.outputHeight)!;
+    this.externalMaxFBO = this.createFramebuffer(this.externalMaxTexture)!;
 
     // Max value texture is cols × rows (one pixel per cell)
     this.maxValueTexture = this.createFloatTexture(this.config.cols, this.config.rows)!;
@@ -154,6 +183,16 @@ export class GPUSamplingDataGenerator {
       throw new Error("Failed to create max value program");
     }
     this.maxValueProgram = maxValueProgram;
+
+    const externalMaxFrag = createExternalMaxFragmentShader(
+      this.numCircles,
+      this.numExternalPoints,
+    );
+    const externalMaxProgram = this.createProgram(PASSTHROUGH_VERT, externalMaxFrag);
+    if (!externalMaxProgram) {
+      throw new Error("Failed to create external max program");
+    }
+    this.externalMaxProgram = externalMaxProgram;
 
     const directionalCrunchFrag = createDirectionalCrunchFragmentShader();
     const directionalCrunchProgram = this.createProgram(PASSTHROUGH_VERT, directionalCrunchFrag);
@@ -189,6 +228,47 @@ export class GPUSamplingDataGenerator {
     if (directionalCrunchExponent !== undefined) {
       this.directionalCrunchExponent = directionalCrunchExponent;
     }
+  }
+
+  /**
+   * Build affects mapping in flat array format for GPU uniforms
+   * Prefers affectsMapping from JSON if available, otherwise computes from external points
+   */
+  private buildAffectsMappingForGPU(
+    affectsMapping: number[][] | undefined,
+    externalPoints: Array<{ x: number; y: number; affects?: number[] }>,
+  ): { flatMapping: number[]; counts: number[] } {
+    const numInternalPoints = this.numCircles;
+    const counts: number[] = [];
+    const flatMapping: number[] = [];
+
+    // Use precomputed mapping from JSON if available
+    if (affectsMapping) {
+      for (let i = 0; i < numInternalPoints; i++) {
+        const affecting = affectsMapping[i] || [];
+        counts.push(affecting.length);
+        flatMapping.push(...affecting);
+      }
+    } else {
+      // Fallback: compute from external points
+      for (let i = 0; i < numInternalPoints; i++) {
+        const affectingExternals: number[] = [];
+
+        externalPoints.forEach((extPoint, extIdx) => {
+          if (extPoint.affects?.includes(i)) {
+            affectingExternals.push(extIdx);
+          } else if (!extPoint.affects && extIdx === i) {
+            // Backwards compatibility
+            affectingExternals.push(extIdx);
+          }
+        });
+
+        counts.push(affectingExternals.length);
+        flatMapping.push(...affectingExternals);
+      }
+    }
+
+    return { flatMapping, counts };
   }
 
   /**
@@ -254,8 +334,15 @@ export class GPUSamplingDataGenerator {
       return;
     }
 
-    this.renderPass(this.externalSamplingFBO, this.samplingProgram, (program) =>
-      this.setSamplingUniforms(program, externalPoints, flipY),
+    // External sampling uses different output width
+    const externalOutputWidth = this.config.cols * this.numExternalPoints;
+
+    this.renderPass(
+      this.externalSamplingFBO,
+      this.samplingProgram,
+      (program) => this.setSamplingUniforms(program, externalPoints, flipY),
+      externalOutputWidth,
+      this.config.rows,
     );
   }
 
@@ -263,9 +350,16 @@ export class GPUSamplingDataGenerator {
    * Apply directional crunch: enhance contrast based on external context
    */
   private applyDirectionalCrunch(): void {
+    // Step 1: Compute external max values per internal point
+    this.renderPass(this.externalMaxFBO, this.externalMaxProgram, (program) =>
+      this.setExternalMaxUniforms(program),
+    );
+
+    // Step 2: Apply directional crunch using external max values
     this.renderPass(this.nextSamplingFBO, this.directionalCrunchProgram, (program) =>
       this.setDirectionalCrunchUniforms(program),
     );
+
     this.swapSamplingBuffers();
   }
 
@@ -379,7 +473,7 @@ export class GPUSamplingDataGenerator {
     gl.uniform1f(gl.getUniformLocation(program, "u_pixelBufferScale"), this.pixelBufferScale);
     gl.uniform1i(gl.getUniformLocation(program, "u_flipY"), flipY ? 1 : 0);
     gl.uniform1i(gl.getUniformLocation(program, "u_samplingQuality"), this.samplingQuality);
-    gl.uniform1i(gl.getUniformLocation(program, "u_numCircles"), this.numCircles);
+    gl.uniform1i(gl.getUniformLocation(program, "u_numCircles"), samplingPoints.length);
 
     // Sampling points
     const pointsLoc = gl.getUniformLocation(program, "u_samplingPoints");
@@ -406,6 +500,27 @@ export class GPUSamplingDataGenerator {
   }
 
   /**
+   * Set uniforms for external max computation pass
+   */
+  private setExternalMaxUniforms(program: WebGLProgram): void {
+    const gl = this.gl;
+
+    // External sampling texture
+    gl.activeTexture(gl.TEXTURE0);
+    gl.bindTexture(gl.TEXTURE_2D, this.externalSamplingTexture);
+    gl.uniform1i(gl.getUniformLocation(program, "u_externalSamplingTexture"), 0);
+
+    // Grid parameters
+    gl.uniform2f(gl.getUniformLocation(program, "u_gridSize"), this.config.cols, this.config.rows);
+    gl.uniform1i(gl.getUniformLocation(program, "u_numCircles"), this.numCircles);
+    gl.uniform1i(gl.getUniformLocation(program, "u_numExternalPoints"), this.numExternalPoints);
+
+    // Affects mapping
+    gl.uniform1iv(gl.getUniformLocation(program, "u_affectsMapping"), this.affectsMapping);
+    gl.uniform1iv(gl.getUniformLocation(program, "u_affectsCounts"), this.affectsCounts);
+  }
+
+  /**
    * Set uniforms for directional crunch pass
    */
   private setDirectionalCrunchUniforms(program: WebGLProgram): void {
@@ -416,9 +531,9 @@ export class GPUSamplingDataGenerator {
     gl.bindTexture(gl.TEXTURE_2D, this.currentSamplingTexture);
     gl.uniform1i(gl.getUniformLocation(program, "u_inputTexture"), 0);
 
-    // External sampling texture
+    // External max texture (computed from external sampling + affects mapping)
     gl.activeTexture(gl.TEXTURE1);
-    gl.bindTexture(gl.TEXTURE_2D, this.externalSamplingTexture);
+    gl.bindTexture(gl.TEXTURE_2D, this.externalMaxTexture);
     gl.uniform1i(gl.getUniformLocation(program, "u_externalSamplingTexture"), 1);
 
     // Grid size and circle count
@@ -793,6 +908,7 @@ export class GPUSamplingDataGenerator {
     gl.deleteTexture(this.easingLUTTexture);
     gl.deleteTexture(this.rawSamplingTexture);
     gl.deleteTexture(this.externalSamplingTexture);
+    gl.deleteTexture(this.externalMaxTexture);
     gl.deleteTexture(this.maxValueTexture);
     gl.deleteTexture(this.currentSamplingTexture);
     gl.deleteTexture(this.nextSamplingTexture);
@@ -800,6 +916,7 @@ export class GPUSamplingDataGenerator {
     // Delete framebuffers
     gl.deleteFramebuffer(this.rawSamplingFBO);
     gl.deleteFramebuffer(this.externalSamplingFBO);
+    gl.deleteFramebuffer(this.externalMaxFBO);
     gl.deleteFramebuffer(this.maxValueFBO);
     gl.deleteFramebuffer(this.currentSamplingFBO);
     gl.deleteFramebuffer(this.nextSamplingFBO);
@@ -808,6 +925,7 @@ export class GPUSamplingDataGenerator {
     gl.deleteProgram(this.samplingProgram);
     gl.deleteProgram(this.copyProgram);
     gl.deleteProgram(this.maxValueProgram);
+    gl.deleteProgram(this.externalMaxProgram);
     gl.deleteProgram(this.directionalCrunchProgram);
     gl.deleteProgram(this.globalCrunchProgram);
 

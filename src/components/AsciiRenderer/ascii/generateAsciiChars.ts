@@ -6,9 +6,6 @@ import { AsciiRenderConfig } from "../renderConfig";
 import { SamplingEffect } from "../types";
 import { clamp } from "../../../math/math";
 
-const CONTRAST_EXPONENT_GLOBAL = 3;
-const CONTRAST_EXPONENT_LOCAL = 7;
-
 const lightnessEasingFunctions = {
   default: Bezier(0.38, 0.01, 0.67, 1),
   soft: Bezier(0.22, 0.02, 0.76, 0.82),
@@ -106,17 +103,19 @@ function crunchSamplingVector(vector: number[], exponent: number): void {
 
 function crunchSamplingVectorDirectional(
   vector: number[],
-  contextValues: number[],
+  externalSamplingVector: number[],
+  affectsMapping: number[][],
   exponent: number,
 ): void {
-  if (vector.length !== contextValues.length) {
-    throw new Error("Vector and context values must have the same length");
-  }
-
-  // const maxExternalValue = Math.max(...contextValues);
   for (let i = 0; i < vector.length; i++) {
     const value = vector[i];
-    const contextValue = contextValues[i];
+
+    const affectingExternalIndices = affectsMapping[i];
+    let contextValue = 0;
+    for (const externalIndex of affectingExternalIndices) {
+      contextValue = Math.max(contextValue, externalSamplingVector[externalIndex]);
+    }
+
     if (contextValue <= value) continue;
 
     const normalized = value / contextValue;
@@ -175,13 +174,16 @@ export function generateSamplingData(
   }
 
   const externalPoints = "externalPoints" in samplingConfig ? samplingConfig.externalPoints : null;
+  const affectsMapping = "affectsMapping" in samplingConfig ? samplingConfig.affectsMapping : [];
+
+  const numPoints = metadata.samplingConfig.points.length;
+  const numExternalPoints = externalPoints?.length ?? 0;
 
   const samplingCircleOffsets = samplingConfig.points.map((point) =>
     config.samplingCircleOffset(point),
   );
-  const externalSamplingCircleOffsets = externalPoints?.map((point) =>
-    config.samplingCircleOffset(point),
-  );
+  const externalSamplingCircleOffsets =
+    externalPoints?.map((point) => config.samplingCircleOffset(point)) ?? [];
 
   const xBase = config.offsetX + config.sampleRectXOff;
   const yBase = config.offsetY + config.sampleRectYOff;
@@ -190,12 +192,11 @@ export function generateSamplingData(
 
   for (let row = 0; row < config.rows; row++) {
     for (let col = out[row].length; col < config.cols; col++) {
-      const numSamples = metadata.samplingConfig.points.length;
       out[row][col] = {
-        samplingVector: Array.from({ length: numSamples }),
-        externalSamplingVector: Array.from({ length: numSamples }),
-        rawSamplingVector: Array.from({ length: numSamples }),
-        samplingVectorSubsamples: Array.from({ length: numSamples }, () =>
+        samplingVector: Array.from({ length: numPoints }),
+        externalSamplingVector: Array.from({ length: numExternalPoints }),
+        rawSamplingVector: Array.from({ length: numPoints }),
+        samplingVectorSubsamples: Array.from({ length: numPoints }, () =>
           Array.from({ length: config.samplingQuality }),
         ),
       };
@@ -227,8 +228,8 @@ export function generateSamplingData(
       }
 
       if (externalPoints) {
-        for (let i = 0; i < metadata.samplingConfig.points.length; i++) {
-          const [circleXOff, circleYOff] = externalSamplingCircleOffsets![i];
+        for (let i = 0; i < externalPoints.length; i++) {
+          const [circleXOff, circleYOff] = externalSamplingCircleOffsets[i];
           externalSamplingVector[i] = sampleCircularRegion(
             pixelBuffer,
             config,
@@ -245,12 +246,13 @@ export function generateSamplingData(
           crunchSamplingVectorDirectional(
             samplingVector,
             externalSamplingVector,
-            directionalCrunchExponent ?? CONTRAST_EXPONENT_LOCAL,
+            affectsMapping,
+            directionalCrunchExponent,
           );
         }
       }
       if (enabledEffects.has(SamplingEffect.GlobalCrunch)) {
-        crunchSamplingVector(samplingVector, globalCrunchExponent ?? CONTRAST_EXPONENT_GLOBAL);
+        crunchSamplingVector(samplingVector, globalCrunchExponent);
       }
       x += config.boxWidth;
     }

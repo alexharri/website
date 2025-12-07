@@ -9,9 +9,13 @@ export interface SamplingPoint {
   y: number; // 0-1 normalized coordinate
 }
 
+export interface ExternalSamplingPoint extends SamplingPoint {
+  affects: number[];
+}
+
 export interface SamplingConfig {
   points: SamplingPoint[];
-  externalPoints?: SamplingPoint[];
+  externalPoints?: ExternalSamplingPoint[];
   circleRadius: number; // radius in pixels
 }
 
@@ -34,8 +38,8 @@ export class AsciiRenderer {
     blurRadius: number,
   ) {
     const SCALAR = 1;
-    function mapPoint(p: { x: number; y: number }) {
-      return { x: p.x * SCALAR, y: p.y * SCALAR };
+    function mapPoint<T extends SamplingPoint>(p: T): T {
+      return { ...p, x: p.x * SCALAR, y: p.y * SCALAR };
     }
 
     this.width = width * SCALAR;

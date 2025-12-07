@@ -788,9 +788,9 @@ Compare the 3D scene ASCII rendering with and without this contrast enhancement:
   <Scene scene="cube" autoRotate zoom={2.7} yOffset={0.45} />
 </AsciiScene>
 
-The edges do become sharper, but not quite enough in some parts of the image (such as the lightest faces of the cube).
+We see edges becoming sharper, but this is not at the level of quality I want just yet. Not all edges become quite sharp enough, and those that do encounter a "staircasing" effect.
 
-Also, some parts of the image encounter a staircase-like effect, which I really do not like:
+The example below demonstrates the staircase effect -- observe how the darker part of the edge becomes "staircase-y" as you increase the exponent:
 
 <AsciiScene width={400} height={300} fontSize={19} rowHeight={18} columnWidth={15} viewMode="transparent" vary={["global_crunch_exponent", "directional_crunch_exponent"]} effects={["crunch"]} usesVariables exclude="|v">
   <Scene2D scene="staircase_effect" />
@@ -1034,8 +1034,16 @@ I've noticed a few common issues with how people generate the ASCII characters, 
 
 In this post, let's dive into how we can generate sharp ASCII arts from a dynamic input image. Here's an example of what we'll build:
 
-<AsciiScene height={540} fontSize={12} characterWidthMultiplier={0.85} characterHeightMultiplier={0.85} viewModes={["ascii", "split", "canvas"]} effects={["crunch"]} optimizePerformance>
+<AsciiScene height={540} fontSize={12} characterWidthMultiplier={0.85} characterHeightMultiplier={0.85} viewModes={["ascii", "split", "canvas"]} effects={["crunch"]} vary={["global_crunch_exponent", "directional_crunch_exponent"]} optimizePerformance usesVariables>
   <Scene scene="cube" autoRotate zoom={2.7} yOffset={0.45} />
+</AsciiScene>
+
+<AsciiScene width={400} height={300} fontSize={19} rowHeight={18} columnWidth={15} viewMode="transparent" vary={["global_crunch_exponent", "directional_crunch_exponent"]} effects={["crunch"]} usesVariables exclude="|v">
+  <Scene2D scene="staircase_effect" />
+</AsciiScene>
+
+<AsciiScene width={400} height={300} fontSize={19} rowHeight={18} columnWidth={15} viewMode="transparent" vary={["global_crunch_exponent", "directional_crunch_exponent"]} effects={["crunch"]} usesVariables exclude="|v" optimizePerformance>
+  <Scene2D scene="staircase_effect" />
 </AsciiScene>
 
 Let's get started!

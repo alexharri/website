@@ -106,6 +106,34 @@ class AsciiVectorBuilder {
 
   // KD tree generation removed - vectors are built at runtime
 
+  /**
+   * Build reverse mapping: internal point index → affecting external point indices
+   */
+  private buildAffectsMapping(
+    externalPoints: Array<{ x: number; y: number; affects?: number[] }>,
+    numInternalPoints: number,
+  ): number[][] {
+    const mapping: number[][] = Array.from({ length: numInternalPoints }, () => []);
+
+    externalPoints.forEach((extPoint, extIdx) => {
+      if (extPoint.affects) {
+        // External point has explicit affects array
+        extPoint.affects.forEach((internalIdx) => {
+          if (internalIdx >= 0 && internalIdx < numInternalPoints) {
+            mapping[internalIdx].push(extIdx);
+          }
+        });
+      } else {
+        // Backwards compatibility: assume 1-to-1 if no affects property
+        if (extIdx < numInternalPoints) {
+          mapping[extIdx].push(extIdx);
+        }
+      }
+    });
+
+    return mapping;
+  }
+
   async saveCharacterVectors(
     characterVectors: CharacterVector[],
     filename: string = "character-vectors.json",
@@ -119,12 +147,24 @@ class AsciiVectorBuilder {
     const height = canvasHeight / fontSize;
     const circleRadius = this.samplingConfig.circleRadius / fontSize;
 
+    // Compute affects mapping if external points exist
+    const affectsMapping =
+      this.samplingConfig.externalPoints
+        ? this.buildAffectsMapping(
+            this.samplingConfig.externalPoints,
+            this.samplingConfig.points.length,
+          )
+        : undefined;
+
     const data = {
       metadata: {
         samplingConfig: {
           points: this.samplingConfig.points,
           ...(this.samplingConfig.externalPoints && {
             externalPoints: this.samplingConfig.externalPoints,
+          }),
+          ...(affectsMapping && {
+            affectsMapping: affectsMapping,
           }),
           circleRadius: circleRadius,
         },
