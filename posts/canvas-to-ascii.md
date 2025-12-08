@@ -902,11 +902,24 @@ As we can see in the example below, light values in the external sampling vector
 
 I call this "directional contrast enhancement", since each of the external samples reaches outside of the cell in the _direction_ of the sampling vector component that it is enhancing the contrast of. I describe the other effect as "global contrast enhancement", since it acts on all of the sampling vector's components.
 
-However, this doesn't quite get rid of the staircasing effect. Try dragging the slider in the example below to see for yourself:
+However, this doesn't quite get rid of the staircasing effect. Take a look -- in the example below, the global crunch is set use an exponent of $4$, but you can vary the directional crunch exponent:
 
-<AsciiScene width={400} height={300} alphabet="simple-directional-crunch" fontSize={19} rowHeight={18} columnWidth={15} viewMode="transparent" vary={["directional_crunch_exponent"]} effects={["crunch"]} usesVariables exclude="|v">
+<AsciiScene width={400} height={300} alphabet="simple-directional-crunch" fontSize={19} rowHeight={18} columnWidth={15} viewMode="transparent" usesVariables exclude="|v" effects={{
+  global_crunch: 4,
+  directional_crunch: [1, { range: [1, 5], step: 0.25 }],
+}}>
   <Scene2D scene="staircase_effect" />
 </AsciiScene>
+
+We can see the lower edge "shift down" a bit as the characters closest to the edge change from `!` to `:`. 
+
+The change to `!` to `:` is good, but not enough. To properly get rid of the staircasing, I'd want a sequence like so:
+
+```text:no_ligatures
+            ..::!!
+      ..::!!!!!!!!
+..::!!!!!!!!!!!!!!
+```
 
 Our problem is that the directional crunch is too local -- it isn't reaching the middle components of the sampling vector. Even if both of the top external samples are light, it only affects the uppermost components:
 
@@ -918,30 +931,36 @@ Our problem is that the directional crunch is too local -- it isn't reaching the
   exclude="|v"
 />
 
-The change to `!` to `:` is good, but not enough. To properly get rid of the staircasing, I'd want a sequence like so:
+But because the lightness of the four bottom components is retained, we don't get to `.`, just `:`.
 
-```text:no_ligatures
-            ..::!!
-      ..::!!!!!!!!
-..::!!!!!!!!!!!!!!
-```
+### Wider directional crunch
 
-But because the lightness of the four bottom components is retained, we never really get to `.` -- just `:`.
+I'd like to "widen" the directional crunch so that, for example, light external values close to the top spread to the middle components of the sampling vector.
 
-The system I came up with is to introduce a few more external sampling circles, arranged like so:
+To do that, I'll introduce a few more external sampling circles, arranged like so:
 
 <AsciiScene showGrid fontSize={140} rows={2.2} cols={2.6} hideSpaces showSamplingCircles showExternalSamplingCircles forceSamplingValue={0}>
   {"F"}
 </AsciiScene>
 
-{false && <InteractiveVector6D
+These are a total of $10$ external sampling circles. Each of the external sampling circles will specify $n$ "internal" sampling circles that it affects. The example below lets you hover the sampling circles to see the relationships:
+
+
+<InteractiveVector6D
   samplingVector={[0.3, 0.3, 0.3, 0.3, 0.3, 0.3]}
-  externalVector={[0.8, 0.8, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3]}
+  externalVector={[0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3]}
+  drawAffects
+/>
+
+Now check out what happens if the top four external sampling circles are light: it causes the crunching to be applied to all but the bottom two sampling circles.
+
+<InteractiveVector6D
+  samplingVector={[0.3, 0.3, 0.3, 0.3, 0.3, 0.3]}
+  externalVector={[0.8, 0.8, 0.8, 0.8, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3]}
   vary="directional_exponent"
   showCharacterPick
   exclude="|v"
-/>}
-
+/>
 
 Try dragging the slider below to gradually apply directional contrast enhancement to the 3D scene from before. The directional contrast enhancement is applied _on top of_ a layer of global contrast enhancement:
 

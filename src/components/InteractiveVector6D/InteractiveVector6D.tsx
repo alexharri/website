@@ -14,6 +14,7 @@ interface Vector6DProps {
   normalize?: boolean;
   showCharacterPick?: boolean;
   exclude?: string;
+  drawAffects?: boolean;
 }
 
 export const InteractiveVector6D: React.FC<Vector6DProps> = ({
@@ -23,6 +24,7 @@ export const InteractiveVector6D: React.FC<Vector6DProps> = ({
   normalize = true,
   showCharacterPick,
   exclude = "",
+  drawAffects = false,
 }) => {
   const s = useStyles(InteractiveVector6DStyles);
   const [globalExponent, setGlobalExponent] = useState(1);
@@ -76,11 +78,20 @@ export const InteractiveVector6D: React.FC<Vector6DProps> = ({
     return characterMatcher.findBestCharacter(samplingVector);
   }, [...samplingVector, characterMatcher]);
 
+  const affectsMapping =
+    "affectsMapping" in metadata.samplingConfig
+      ? metadata.samplingConfig.affectsMapping
+      : undefined;
+
   return (
     <div className={s("outerWrapper")}>
       <div className={s("wrapper")}>
         <div className={s("vector", { external: !!externalVector })}>
-          <Vector6D samplingVector={samplingVector} externalVector={externalVector} />
+          <Vector6D
+            samplingVector={samplingVector}
+            externalVector={externalVector}
+            affectsMapping={drawAffects ? affectsMapping : undefined}
+          />
         </div>
         {showCharacterPick && (
           <>
