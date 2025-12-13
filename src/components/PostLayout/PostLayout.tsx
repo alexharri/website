@@ -44,12 +44,17 @@ const Styles = ({ styled }: StyleOptions) => ({
     & > .image,
     & > .chart,
     & > .canvas,
+    & > .ascii-scene,
     & > table {
       & + .note,
       & + [data-script-id] + .note {
         margin-top: -24px;
         margin-bottom: 40px;
       }
+    }
+
+    & > .ascii-scene {
+      margin: 40px -${cssVariables.contentPadding}px;
     }
 
     & > .scene {

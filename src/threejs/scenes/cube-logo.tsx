@@ -17,7 +17,6 @@ export default createScene(
     const topRowRef = useRef<THREE.Group>(null);
     const bottomRowRef = useRef<THREE.Group>(null);
     const meshRefs = useRef<(THREE.Mesh | null)[]>(Array(12).fill(null));
-    const lightRef = useRef<THREE.DirectionalLight>(null);
     const startTimeRef = useRef(Date.now());
 
     // Geometry and materials

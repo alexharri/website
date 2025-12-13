@@ -32,8 +32,7 @@ export default (width: number, breakpoint: number) =>
       display: flex;
       justify-content: center;
       gap: 32px;
-      height: 72px;
-      padding-bottom: 16px;
+      height: 56px;
       align-items: center;
     `,
   });

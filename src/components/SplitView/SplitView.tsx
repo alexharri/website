@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 import { useStyles } from "../../utils/styles";
 import { clamp } from "../../math/math";
 import SplitViewStyles from "./SplitView.styles";
@@ -13,6 +13,7 @@ interface SplitViewProps {
   splitPosition?: number;
   onSplitPositionChange?: (position: number) => void;
   wrapperRef?: React.RefObject<HTMLDivElement>;
+  splitMode?: "static" | "dynamic";
 }
 
 export const SplitView: React.FC<SplitViewProps> = ({
@@ -23,41 +24,39 @@ export const SplitView: React.FC<SplitViewProps> = ({
   splitPosition = 0.5,
   onSplitPositionChange,
   wrapperRef,
+  splitMode = "static",
 }) => {
   const s = useStyles(SplitViewStyles);
+  const rectRef = useRef<HTMLDivElement>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [leftContent, rightContent] = children;
 
   const handleMouseDown = (e: React.MouseEvent) => {
-    if (viewMode === "split") {
-      setIsDragging(true);
-      e.preventDefault();
+    e.preventDefault();
+    if (viewMode !== "split") {
+      return;
     }
-  };
-
-  const handleMouseMove = (e: React.MouseEvent) => {
-    if (isDragging && viewMode === "split") {
-      const rect = e.currentTarget.getBoundingClientRect();
+    setIsDragging(true);
+    function onMouseMove(e: MouseEvent) {
+      if (!rectRef?.current) return;
+      const rect = rectRef.current.getBoundingClientRect();
       const x = e.clientX - rect.left;
-      const newPosition = clamp(x / rect.width, 0.2, 0.8);
+      const newPosition = clamp(x / rect.width, 0.1, 0.9);
       onSplitPositionChange?.(newPosition);
     }
-  };
-
-  const handleMouseUp = () => {
-    setIsDragging(false);
+    function onMouseUp() {
+      window.removeEventListener("mousemove", onMouseMove);
+      window.removeEventListener("mouseup", onMouseUp);
+      setIsDragging(false);
+    }
+    window.addEventListener("mousemove", onMouseMove);
+    window.addEventListener("mouseup", onMouseUp);
   };
 
   const splitPercentage = splitPosition * 100;
 
   return (
-    <div
-      className={s("wrapper")}
-      onMouseMove={handleMouseMove}
-      onMouseUp={handleMouseUp}
-      onMouseLeave={handleMouseUp}
-      style={{ cursor: "grab" }}
-    >
+    <div className={s("wrapper")} style={{ cursor: "grab" }} ref={rectRef}>
       <div
         className={s("divider", { dragging: isDragging, split: viewMode === "split" })}
         style={{
@@ -80,7 +79,9 @@ export const SplitView: React.FC<SplitViewProps> = ({
           style={{
             transform:
               viewMode === "split"
-                ? `translateX(calc(-${width * (1 - splitPosition)}px))`
+                ? splitMode === "dynamic"
+                  ? `translateX(calc(-${width * (1 - splitPosition)}px))`
+                  : `translateX(calc(-${width * (1 - splitPosition)}px))`
                 : viewMode === "left" || viewMode === "transparent"
                 ? "translateX(0)"
                 : "translateX(-100%)",
@@ -92,7 +93,9 @@ export const SplitView: React.FC<SplitViewProps> = ({
             style={{
               transform:
                 viewMode === "split"
-                  ? `translateX(calc(${-splitPercentage / 2}% + 50%))`
+                  ? splitMode === "dynamic"
+                    ? `translateX(calc(${-splitPercentage / 2}% + 50%))`
+                    : `translateX(calc(-${splitPercentage}% + 100%))`
                   : viewMode === "left" || viewMode === "transparent"
                   ? "translateX(0)"
                   : "translateX(100%)",
@@ -108,7 +111,11 @@ export const SplitView: React.FC<SplitViewProps> = ({
           style={{
             height,
             transform:
-              viewMode === "split" ? `translateX(${width * splitPosition}px)` : "translateX(0)",
+              viewMode === "split"
+                ? splitMode === "dynamic"
+                  ? `translateX(${width * splitPosition}px)`
+                  : "translateX(0)"
+                : "translateX(0)",
             transition: isDragging ? "none" : "transform 0.5s",
           }}
         >
@@ -117,7 +124,9 @@ export const SplitView: React.FC<SplitViewProps> = ({
             style={{
               transform:
                 viewMode === "split"
-                  ? `translateX(calc(-${50 + (splitPosition * 100) / 2}%))`
+                  ? splitMode === "dynamic"
+                    ? `translateX(calc(-${50 + (splitPosition * 100) / 2}%))`
+                    : "translateX(-50%)"
                   : "translateX(-50%)",
               transition: isDragging ? "none" : "transform 0.5s",
             }}

@@ -119,7 +119,9 @@ export class GPUSamplingDataGenerator {
 
     // Get external points configuration
     const externalPoints =
-      "externalPoints" in metadata.samplingConfig ? metadata.samplingConfig.externalPoints : [];
+      "externalPoints" in metadata.samplingConfig
+        ? metadata.samplingConfig.externalPoints
+        : metadata.samplingConfig.points;
     this.numExternalPoints = externalPoints?.length ?? 0;
 
     // Build affects mapping for GPU

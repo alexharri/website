@@ -27,8 +27,6 @@ export const ImageStyles = ({ styled }: StyleOptions) => ({
       }
     }
 
-    &--fullWidth,
-    &--noMargin,
     &--scrollable {
       margin-left: -${cssVariables.contentPadding}px;
       margin-right: -${cssVariables.contentPadding}px;
@@ -41,6 +39,11 @@ export const ImageStyles = ({ styled }: StyleOptions) => ({
   `,
 
   wrapper: styled.css`
+    &--noMargin {
+      margin-left: -${cssVariables.contentPadding}px;
+      margin-right: -${cssVariables.contentPadding}px;
+    }
+
     &--scrollable {
       padding-top: 8px;
       padding-bottom: 8px;

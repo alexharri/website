@@ -8,12 +8,21 @@ interface Vector6DProps {
   samplingVector: number[];
   externalVector?: number[];
   affectsMapping?: number[][];
+  showOrder?: boolean;
+}
+
+interface Circle {
+  value: number;
+  index: number;
+  external: boolean;
+  position: [number, number];
 }
 
 export const Vector6D: React.FC<Vector6DProps> = ({
   samplingVector,
   externalVector,
   affectsMapping,
+  showOrder,
 }) => {
   const s = useStyles(Vector6DStyles);
 
@@ -41,16 +50,16 @@ export const Vector6D: React.FC<Vector6DProps> = ({
           [1, 1],
         ]
       : [
-          [-0.7, -1.7],
-          [0.7, -1.7],
-          [-1.7, -0.7],
-          [1.7, -0.7],
+          [-0.3, -1.7],
+          [0.3, -1.7],
+          [-1.7, -0.5],
+          [1.7, -0.5],
           [-1.7, 0],
           [1.7, 0],
-          [-1.7, 0.7],
-          [1.7, 0.7],
-          [-0.7, 1.7],
-          [0.7, 1.7],
+          [-1.7, 0.5],
+          [1.7, 0.5],
+          [-0.3, 1.7],
+          [0.3, 1.7],
         ];
 
   const externalRelativeTo =
@@ -67,7 +76,7 @@ export const Vector6D: React.FC<Vector6DProps> = ({
   let bottomExtent = circleRadius;
 
   if (externalVector) {
-    const allDirections = [0, 1, 2, 3, 4, 5].map(getDiagonalDirection);
+    const allDirections = externalVector.map((_, i) => getDiagonalDirection(i));
     leftExtent =
       Math.max(...allDirections.map(([dx]) => (dx < 0 ? Math.abs(dx) : 0))) * diagonalOffset +
       circleRadius;
@@ -97,7 +106,7 @@ export const Vector6D: React.FC<Vector6DProps> = ({
   const paddingBottom = (containerHeight / containerWidth) * 100;
 
   // Combine both vectors into a single array with metadata
-  const circles = samplingVector.map((value, index) => ({
+  const circles = samplingVector.map<Circle>((value, index) => ({
     value,
     index,
     external: false,
@@ -105,7 +114,7 @@ export const Vector6D: React.FC<Vector6DProps> = ({
   }));
 
   const externalCircles =
-    externalVector?.map((value, index) => {
+    externalVector?.map<Circle>((value, index) => {
       const [baseX, baseY] = getCirclePosition(externalRelativeTo[index]);
       const [xOff, yOff] = getDiagonalDirection(index);
 
@@ -117,32 +126,35 @@ export const Vector6D: React.FC<Vector6DProps> = ({
       };
     }) || [];
 
+  function drawCircle({ value, index, external, position: [x, y] }: Circle) {
+    return (
+      <div
+        key={`${external ? "external" : "sampling"}-${index}`}
+        style={{
+          position: "absolute",
+          left: `${((x - circleRadius) / containerWidth) * 100}%`,
+          top: `${((y - circleRadius) / containerHeight) * 100}%`,
+          width: `${((circleRadius * 2) / containerWidth) * 100}%`,
+        }}
+      >
+        <div
+          className={s("circle", { external })}
+          style={{
+            backgroundColor: external
+              ? `rgba(220, 150, 170, ${lerp(0, 0.6, value)})`
+              : `rgba(185, 219, 250, ${lerp(0, 0.6, value)})`,
+          }}
+        />
+        <div className={s("circleText")}>{showOrder ? index : value.toFixed(2)}</div>
+      </div>
+    );
+  }
+
   return (
     <div className={s("containerOuter", { hasExternal: !!externalVector })}>
       <div className={s("container")} style={{ paddingBottom: `${paddingBottom}%` }}>
-        {[...circles, ...externalCircles].map(({ value, index, external, position: [x, y] }) => {
-          return (
-            <div
-              key={`${external ? "external" : "sampling"}-${index}`}
-              style={{
-                position: "absolute",
-                left: `${((x - circleRadius) / containerWidth) * 100}%`,
-                top: `${((y - circleRadius) / containerHeight) * 100}%`,
-                width: `${((circleRadius * 2) / containerWidth) * 100}%`,
-              }}
-            >
-              <div
-                className={s("circle", { external })}
-                style={{
-                  backgroundColor: external
-                    ? `rgba(220, 150, 170, ${lerp(0, 0.6, value)})`
-                    : `rgba(185, 219, 250, ${lerp(0, 0.6, value)})`,
-                }}
-              />
-              <div className={s("circleText")}>{value.toFixed(2)}</div>
-            </div>
-          );
-        })}
+        {circles.map(drawCircle)}
+        {externalCircles.map(drawCircle)}
         {affectsMapping?.map((externalIndices, circleIndex) => {
           const [xTo, yTo] = circles[circleIndex].position;
 
@@ -161,7 +173,7 @@ export const Vector6D: React.FC<Vector6DProps> = ({
 
             const adjustedXFrom = xFrom + normalizedDx * circleRadius;
             const adjustedYFrom = yFrom + normalizedDy * circleRadius;
-            const adjustedLength = distance - 2 * circleRadius;
+            const adjustedLength = distance - 2 * circleRadius - 5;
 
             const arrowHeadSize = 8;
 
@@ -181,10 +193,9 @@ export const Vector6D: React.FC<Vector6DProps> = ({
                     height: "2px",
                     backgroundColor: colors.blue,
                     transformOrigin: "0 0",
-                    transform: `rotate(${angle}deg)`,
+                    transform: `rotate(${angle}deg) translateY(-1px)`,
                   }}
                 />
-                {/* Arrow head - left side */}
                 <div
                   style={{
                     position: "absolute",
@@ -194,10 +205,9 @@ export const Vector6D: React.FC<Vector6DProps> = ({
                     height: "2px",
                     backgroundColor: colors.blue,
                     transformOrigin: "0 0",
-                    transform: `rotate(${angle + 180 - 45}deg) translate(0px, -2px)`,
+                    transform: `rotate(${angle + 180 - 45}deg) translate(-1px, -1px)`,
                   }}
                 />
-                {/* Arrow head - right side */}
                 <div
                   style={{
                     position: "absolute",
@@ -207,7 +217,7 @@ export const Vector6D: React.FC<Vector6DProps> = ({
                     height: "2px",
                     backgroundColor: colors.blue,
                     transformOrigin: "0 0",
-                    transform: `rotate(${angle + 180 + 45}deg) translate(-2px, -2px)`,
+                    transform: `rotate(${angle + 180 + 45}deg) translate(-1px, -1px)`,
                   }}
                 />
               </React.Fragment>

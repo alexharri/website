@@ -2,12 +2,12 @@
 title: "Canvas to ASCII renderer"
 ---
 
-ASCII art uses [ASCII characters][ascii_characters] to create images, typically in a [monospace][monospace] font. Here's an example of an ASCII art piece I like a lot:
+ASCII art uses [ASCII characters][ascii_characters] to create images, typically in a [monospace][monospace] font. Here's an example of an ASCII art piece:
 
 [ascii_characters]: https://en.wikipedia.org/wiki/ASCII#Printable_character_table
 
-```text:no_ligatures
-                                              _.oo.
+<AsciiScene fontSize={15} characterWidthMultiplier={0.61} rows={20} cols={40}>
+{`                                            _.oo.
                       _.u[[/;:,.         .odMMMMMM'
                    .o888UU[[[/;:-.  .o@P^    MMM^
                   oN88888UU[[[/;::-.        dP^
@@ -19,62 +19,66 @@ ASCII art uses [ASCII characters][ascii_characters] to create images, typically 
             .@^  YUU[[[/o@^;::---..
           oMP     ^/o@P^;:::---..
        .dMMM    .o@^ ^;::---...
-      dMMMMMMM@^`       `^^^^
+      dMMMMMMM@^\       \^^^^
      YMMMUP^
-      ^^
-```
+      ^^`}
+</AsciiScene>
 
 <SmallNote label="" center>Source: [https://paulbourke.net/dataformats/asciiart/](https://paulbourke.net/dataformats/asciiart/)</SmallNote>
 
-The gradient going over the planet, produced by picking characters with different visual densities, looks really good. Also, look at how sharp the artist manages to make the edge of the ring to the upper right:
+I really like the ring around the planet. The artist manages to produce sharp edges by picking characters that match the ring's contour really well. The gradient of the 
 
-```text:no_ligatures
-     _.oo.
-.odMMMMMM'
-    MMM^
-   dP^
-```
+Sharp edges like these are an aspect of ASCII rendering that is often overlooked when programmatically rendering images as ASCII. Consider this animated 3D scene that is rendered via ASCII characters:
 
-This piece of ASCII art demonstrates really well how much shape matters in producing sharp and elegant ASCII art. That's an aspect that is often missing when rendering images as ASCII programmatically.
-
-Consider this 3D cube scene which is rendered as ASCII:
-
-<Image src="~/cube-logo-short.mp4" plain width={700} />
+<Image src="~/cube-logo-short.mp4" plain width={700} noMargin />
 
 <SmallNote label="" center>Source: [cognition.ai](https://cognition.ai/)</SmallNote>
 
-It's a cool effect, especially while in motion, but take a look at those blurry edges! The characters follow the shape of the cube's edges very poorly, and as a result the edges look blurry and inconsistent:
+It's a cool effect, especially while in motion, but take a look at those blurry edges! The characters follow the cube's contour very poorly and as a result the edges look blurry and inconsistent:
 
-<Image src="~/cube-logo-zoomed-in.png" plain width={450} />
+<Image src="~/cube-logo-zoomed-in.png" plain width={450} noMargin />
 
-I've been seeing more programmatic ASCII art like this as of late. It's a motif commonly accompanying terminal-based coding agents (for example, the Cursor CLI product release page had an animated cursor logo rendered as ASCII). In every single instance, I see the same mistake being made -- only considering visual density and ignoring shape.
+This blurriness arises from a common mistake made when implementing an ASCII renderer: ignoring the shape of ASCII characters and only considering visual density.
 
-This has become a small pet peeve of mine, so I spent some time on producing a high-quality image-to-ASCII renderer with a focus on sharp rendering quality.
+Blurry edges in ASCII rendering have become a small pet peeve of mine, so I recently took the time to implement an ASCII renderer that focuses on contour matching and rendering quality. Here's what it produces for an image of Saturn:
 
-Firstly, I took the liberty of recreating the cube logo animation from earlier:
-
-<AsciiScene height={700} fontSize={12} characterWidthMultiplier={0.9} characterHeightMultiplier={0.9} viewModes={["ascii", "split", "canvas"]} lightnessEasingFunction="darken">
-  <Scene scene="cube-logo" seed={20367} />
+<AsciiScene height={500} width={500} minWidth={500} fontSize={14} characterWidthMultiplier={0.75} characterHeightMultiplier={0.9} viewModes={["ascii", "split", "canvas"]} splitMode="static" effects={{
+  global_crunch: 1.5,
+  directional_crunch: 1.25,
+}}>
+  <Scene2D scene="saturn" />
 </AsciiScene>
 
-<SmallNote label="" center>Look how sharp the edges are as a result of picking characters that match them!</SmallNote>
+<SmallNote label="" center>Try the 'Split' mode to compare the image to the resulting ASCII.</SmallNote>
 
-I also looked at how one can increase the sharpness between edges. Here is an example with animated waves -- try dragging the "sharpness" slider to see the effect:
+Here's an interactive 3D scene rendered in real time with the same renderer -- try dragging it around:
 
-<AsciiScene height={450} width={700} fontSize={13} characterWidthMultiplier={0.8} characterHeightMultiplier={0.8} viewModes={["ascii", "split", "canvas"]} effects={["crunch"]} vary={["global_crunch_exponent", "directional_crunch_exponent"]} usesVariables>
+<AsciiScene height={540} fontSize={12} characterWidthMultiplier={0.85} characterHeightMultiplier={0.85} viewModes={["ascii", "split", "canvas"]} optimizePerformance splitMode="dynamic" effects={{
+  global_crunch: 2.2,
+  directional_crunch: 2.8,
+}}>
+  <Scene scene="cube" autoRotate zoom={2.7} yOffset={0.45} />
+</AsciiScene>
+
+In this post I'll cover how I built this ASCII renderer in detail.
+
+We'll start with the basics of image-to-ASCII conversion and see where the common issue of blurry edges comes from. After that I'll show you how to fix that to achieve sharp, high-quality ASCII rendering. We'll cover wide range of ideas, ranging from the basics of image processing to nearest neighbor lookups in a high-dimensional space.
+
+We'll also take a look at we can apply effects such as contrast enhancement, here's an example:
+
+<AsciiScene height={450} width={700} fontSize={13} characterWidthMultiplier={0.8} characterHeightMultiplier={0.8} viewModes={["ascii", "split", "canvas"]} usesVariables splitMode="static" exclude="|v" effectSlider={{
+  global_crunch: [1, 1.5],
+  directional_crunch: [1, 2.75],
+}}>
   <WebGLShader fragmentShader="multiple_waves" seed={9581} />
 </AsciiScene>
-
-The renderer I built uses techniques and ideas from image processing (and some learnings from my teenage years that I spent making pixel art). In this post we'll cover those techniques in detail.
-
-We'll start with the basics of image-to-ASCII conversion and see where the common mistake occurs, after which we'll learn some techniques to fix that mistake and achieve sharp, high-quality ASCII rendering. We'll make use of ideas from image processing and perform high-dimensional vector search along the way -- we'll cover a lot.
 
 Let's get to it!
 
 
-### Image to ASCII conversion
+## Image to ASCII conversion
 
-ASCII has 95 printable characters, which are supported by pretty much every single monospace font in existence:
+ASCII has the following 95 printable characters:
 
 [monospace]: https://en.wikipedia.org/wiki/Monospaced_font
 [ascii]: https://en.wikipedia.org/wiki/ASCII
@@ -88,23 +92,23 @@ abcdefghijklmnopqrstuvwxyz
 {|}~
 ```
 
-Since every character in a monospace font is equally wide and tall, we can split images into a grid, with each text character occupying a single cell of the grid.
-
-Let's start with a simple 2D canvas with a white circle:
+We'll start by rendering the following image, containing a white circle, as ASCII:
 
 <AsciiScene width={360} height={360} viewMode="canvas">
   <Scene2D scene="circle" />
 </AsciiScene>
 
-Monospace characters are typically taller than they are wide. For example, the monospace font in this blog is Fira Code, which has a width-to-height ratio of $0.6$.
+ASCII rendering almost always uses a [monospace][monospace] font. Since every character in a monospace font is equally wide and tall, we can split the image into a grid. Each grid cell will contain a single ASCII character.
 
-The canvas above is $360 \times 360$. I'll pick a row height of $24$ pixels and a column width of $20$ pixels. That splits the canvas into $15$ rows and $18$ columns -- an $18 \times 15$ grid:
+The image with the circle is $360 \times 360$ pixels. For the ASCII grid I'll pick a row height of $24$ pixels and a column width of $20$ pixels. That splits the canvas into $15$ rows and $18$ columns -- an $18 \times 15$ grid:
 
 <AsciiScene width={360} height={360} fontSize={20} rowHeight={24} columnWidth={20} viewMode="transparent" hideAscii showGrid offsetAlign="left">
   <Scene2D scene="circle" />
 </AsciiScene>
 
-Our task is now to pick which character to place in each column. The simplest approach would be to calculate a lightness value for the cell and pick a character based on that.
+<SmallNote label="" center>Monospace characters are typically taller than they are wide. The monospace font in this blog is Fira Code, which has a width-to-height ratio of $0.6$.</SmallNote>
+
+Our task is now to pick which character to place in each column. The simplest approach is to calculate a lightness value for each cell and pick a character based on that.
 
 We can get a lightness value for each cell by sampling the lightness of the pixel at the cell's center:
 
@@ -112,21 +116,23 @@ We can get a lightness value for each cell by sampling the lightness of the pixe
   <Scene2D scene="circle" />
 </AsciiScene>
 
-We want each pixel's lightness as a numeric value between $0$ and $1$, but our image data consists of pixels with RGB values.
+We want each pixel's lightness as a numeric value between $0$ and $1$, but our image data consists of pixels with [RGB][rgb] color values.
+
+[rgb]: https://en.wikipedia.org/wiki/RGB_color_model
 
 We can use the following formula to convert an RGB color (with components values between $0$ and $255$) to a lightness value:
 
 <p className="mathblock">$$ \dfrac{R \times 0.2126 + G \times 0.7152 + B \times 0.0722}{255} $$</p>
 
-<SmallNote label="" center>Read more about [relative luminance][relative_luminance].</SmallNote>
+<SmallNote label="" center>See [relative luminance][relative_luminance].</SmallNote>
 
 [relative_luminance]: https://en.wikipedia.org/wiki/Relative_luminance#Relative_luminance_and_%22gamma_encoded%22_colorspaces
 
-With a lightness value for each cell, we can use that to determine the ASCII character to render.
-
 ### Mapping lightness values to ASCII characters
 
-To pick a character from a lightness value, we can use the relative "visual densities" of ASCII characters. Consider the following ASCII characters:
+Now that we have a lightness value for each cell, we want to use them to pick ASCII characters.
+
+Consider the following ASCII characters:
 
 ```text
 : - # = + @ * % .
@@ -140,15 +146,15 @@ We can sort them in approximate density order like so, with lower-density charac
 
 <SmallNote label="">That `:` comes before `-` is a matter of taste. They feel somewhat equally dense to me.</SmallNote>
 
-Let's put these characters in an array:
+We'll put these characters in a <Ts>CHARS</Ts> array:
 
 ```ts
 const CHARS = [" ", ".", ":", "-", "=", "+", "*", "#", "%", "@"]
 ```
 
-<SmallNote label="">I added space as the first character -- it was awkward to include in the code blocks above.</SmallNote>
+<SmallNote label="">I added space as the first (least dense) character.</SmallNote>
 
-We can then map lightness values to characters in the array like so:
+We can then map lightness values between $0$ and $1$ to one of those characters like so:
 
 ```ts
 function getCharacterFromLightness(lightness: number) {
@@ -159,7 +165,7 @@ function getCharacterFromLightness(lightness: number) {
 
 This maps low lightness values to low-density characters and high lightness values to high-density characters.
 
-Rendering the circle from above with this method gives us this result:
+Rendering the circle from above with this method gives us:
 
 <AsciiScene width={360} height={360} fontSize={20} rowHeight={24} columnWidth={20} viewMode="ascii" offsetAlign="left" sampleQuality={1} alphabet="pixel-short" increaseContrast>
   <Scene2D scene="circle" />
@@ -171,11 +177,11 @@ This happens because we've pretty much just implemented nearest-neighbor downsam
 
 ## Downsampling
 
-[Downsampling][image_scaling], in the context of image processing, is taking a larger image (in our case, the $360 \times 360$ canvas) and using that image's data to construct a lower resolution image (in our case, the $18 \times 15$ ASCII grid). The pixel values for the lower resolution image are calculated by sampling values from the higher resolution image.
+[Downsampling][image_scaling], in the context of image processing, is taking a larger image (in our case, the $360 \times 360$ canvas) and using that image's data to construct a lower resolution image (in our case, the $18 \times 15$ ASCII grid). The pixel values of the lower resolution image are calculated by sampling values from the higher resolution image.
 
 [image_scaling]: https://en.wikipedia.org/wiki/Image_scaling
 
-The simplest and fastest method of sampling is [nearest-neighbor interpolation][nearest_neighbor]. In nearest-neighbor interpolation, we only take a single sample from the higher resolution image.
+The simplest and fastest method of sampling is [nearest-neighbor interpolation][nearest_neighbor] where we only take a single sample from the higher resolution image. That's what we did above.
 
 [nearest_neighbor]: https://en.wikipedia.org/wiki/Nearest-neighbor_interpolation
 
@@ -187,13 +193,13 @@ Consider this rotating square split into a $24 \times 24$ pixel grid:
 
 For a shape like this, using nearest-neighbor interpolation, the single sample taken for each cell either falls inside or outside of the shape, resulting in either $0\%$ or $100\%$ lightness:
 
-<AsciiScene width={600} minWidth={400} height={360} fontSize={20} rowHeight={24} columnWidth={24} viewMode="transparent" hideAscii showGrid showSamplingPoints offsetAlign="left" sampleQuality={1} alphabet="pixel-short">
+<AsciiScene width={600} minWidth={400} height={360} fontSize={20} rowHeight={24} columnWidth={24} viewMode="transparent" hideAscii showGrid showSamplingPoints offsetAlign="left" sampleQuality={1} alphabet="pixel-short" optimizePerformance>
   <Scene2D scene="rotating_square" />
 </AsciiScene>
 
 If, instead of picking an ASCII character for each grid cell, we color each grid cell according the the sampled value, we get the following pixelated rendering:
 
-<AsciiScene width={600} minWidth={400} height={360} fontSize={20} rowHeight={24} columnWidth={24} viewMode="ascii" hideAscii pixelate offsetAlign="left" sampleQuality={1} alphabet="pixel-short">
+<AsciiScene width={600} minWidth={400} height={360} fontSize={20} rowHeight={24} columnWidth={24} viewMode="ascii" hideAscii pixelate offsetAlign="left" sampleQuality={1} alphabet="pixel-short" optimizePerformance>
   <Scene2D scene="rotating_square" />
 </AsciiScene>
 
@@ -883,12 +889,12 @@ Aside from that, the contrast enhancement is performed in the same way:
 
 ```ts
 samplingVector = samplingVector.map((value, i) => {
-  const maxValue = Math.max(value, externalSamplingVector[i])
+  const maxValue = Math.max(value, externalSamplingVector[i]);
   value = value / maxValue;
   value = Math.pow(value, exponent);
   value = value * maxValue;
   return value;
-})
+});
 ```
 
 As we can see in the example below, light values in the external sampling vector push values in the sampling vector down:
@@ -952,7 +958,59 @@ These are a total of $10$ external sampling circles. Each of the external sampli
   drawAffects
 />
 
-Now check out what happens if the top four external sampling circles are light: it causes the crunching to be applied to all but the bottom two sampling circles.
+For each component of the sampling vector, we take the _maximum_ external sampling value across the external sampling circles that affect that component, and crunch it with that.
+
+Let's implement this. Given that the internal and external sampling circles are ordered like so:
+
+<InteractiveVector6D
+  samplingVector={[0.3, 0.3, 0.3, 0.3, 0.3, 0.3]}
+  externalVector={[0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3]}
+  showOrder
+  drawAffects
+/>
+
+We can define a mapping from the the internal to the external sampling circles that affect it:
+
+```ts
+const AFFECTING_EXTERNAL_INDICES = [
+  [0, 1, 2, 4],
+  [0, 1, 3, 5],
+  [2, 4, 6],
+  [3, 5, 7],
+  [4, 6, 8, 9],
+  [5, 7, 8, 9],
+];
+```
+
+With this, we can change the calculation from <Ts>maxValue</Ts> to take the maximum affecting external value:
+
+```ts
+// Before
+const maxValue = Math.max(value, externalSamplingVector[i]);
+
+// After
+let maxValue = value;
+for (const externalIndex of AFFECTING_EXTERNAL_INDICES[i]) {
+  maxValue = Math.max(value, externalSamplingVector[externalIndex]);
+}
+```
+
+Which makes the direction crunch implementation look like so:
+
+```ts
+samplingVector = samplingVector.map((value, i) => {
+  let maxValue = value;
+  for (const externalIndex of AFFECTING_EXTERNAL_INDICES[i]) {
+    maxValue = Math.max(value, externalSamplingVector[externalIndex]);
+  }
+  value = value / maxValue;
+  value = Math.pow(value, exponent);
+  value = value * maxValue;
+  return value;
+});
+```
+
+With this change, check out what happens if the top four external sampling circles are light: it causes the crunching to be applied to all but the bottom two sampling circles, giving us the desired effect
 
 <InteractiveVector6D
   samplingVector={[0.3, 0.3, 0.3, 0.3, 0.3, 0.3]}
@@ -960,15 +1018,41 @@ Now check out what happens if the top four external sampling circles are light: 
   vary="directional_exponent"
   showCharacterPick
   exclude="|v"
+  drawAffects
 />
 
-Try dragging the slider below to gradually apply directional contrast enhancement to the 3D scene from before. The directional contrast enhancement is applied _on top of_ a layer of global contrast enhancement:
+It only takes an exponent of a bit less than $2$ for the vector to get crunched to `.`! Even if only the two top-left external sampling circles are light, the vector gets crunched sufficiently for us to get `.` with an exponent just under $4$:
 
-<AsciiScene height={540} fontSize={12} characterWidthMultiplier={0.85} characterHeightMultiplier={0.85} viewModes={["ascii", "split", "canvas"]} effects={["crunch"]} optimizePerformance vary={["directional_crunch_exponent"]} usesVariables>
+<InteractiveVector6D
+  samplingVector={[0.3, 0.3, 0.3, 0.3, 0.3, 0.3]}
+  externalVector={[0.8, 0.3, 0.8, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3]}
+  vary="directional_exponent"
+  showCharacterPick
+  exclude="|v"
+  drawAffects
+/>
+
+Let's try this new and improved directional crunch and see if it resolves the staircasing effect:
+
+<AsciiScene width={400} height={300} fontSize={19} rowHeight={18} columnWidth={15} viewMode="transparent" usesVariables exclude="|v" effects={{
+  global_crunch: 2.7,
+  directional_crunch: [1, { range: [1, 4], step: 0.25 }],
+}}>
+  <Scene2D scene="staircase_effect" />
+</AsciiScene>
+
+Oh yeah -- that looks awesome! You can clearly see the edge form.
+
+Here's the 3D scene again, this time with both the global and improved directional crunch. I'll let you toggle the crunching effect on and off so that you can see the difference.
+
+<AsciiScene height={540} fontSize={12} characterWidthMultiplier={0.85} characterHeightMultiplier={0.85} viewModes={["ascii", "split", "canvas"]} optimizePerformance effects={{
+  global_crunch: 2.7,
+  directional_crunch: 3.7,
+}}>
   <Scene scene="cube" autoRotate zoom={2.7} yOffset={0.45} />
 </AsciiScene>
 
-<SmallNote label="" center>I find that an exponent of $7$ for the directional crunch works well.</SmallNote>
+The crunching makes the edges crisp as heck!
 
 ## Final words
 
@@ -1153,4 +1237,18 @@ In this post, let's dive into how we can generate sharp ASCII arts from a dynami
   <Scene2D scene="staircase_effect" />
 </AsciiScene>
 
+<AsciiScene height={700} fontSize={12} characterWidthMultiplier={0.9} characterHeightMultiplier={0.9} viewModes={["ascii", "split", "canvas"]} lightnessEasingFunction="darken">
+  <Scene scene="cube-logo" seed={20367} />
+</AsciiScene>
+
+<SmallNote label="" center>Look how sharp the edges are as a result of picking characters that match them!</SmallNote>
+
+<AsciiScene height={450} width={700} fontSize={13} characterWidthMultiplier={0.8} characterHeightMultiplier={0.8} viewModes={["ascii", "split", "canvas"]} usesVariables exclude="|v" effects={{
+  global_crunch: [1, { range: [1, 5], step: 0.25 }],
+  directional_crunch: [1, { range: [1, 5], step: 0.25 }],
+}}>
+  <WebGLShader fragmentShader="multiple_waves" seed={9581} />
+</AsciiScene>
+
 Let's get started!
+

@@ -78,7 +78,7 @@ export const Image = (props: Props) => {
   return (
     <div className={containerClassName} style={{ width: scrollable ? undefined : width }}>
       <div
-        className={s("wrapper", { scrollable })}
+        className={s("wrapper", { scrollable, noMargin })}
         style={{
           minWidth: scrollable ? (width as number) + cssVariables.contentPadding * 2 : undefined,
         }}

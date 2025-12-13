@@ -25,6 +25,13 @@ import { AsciiDebugVizCanvas, renderAsciiDebugViz } from "../AsciiRenderer/ascii
 import { SCENE_BASELINE_WIDTH } from "../../constants";
 import { useSamplingDataCollection } from "../../utils/hooks/useSamplingDataCollection";
 import { useVisible } from "../../utils/hooks/useVisible";
+import { lerp } from "three/src/math/MathUtils";
+import { useIsomorphicLayoutEffect } from "../../utils/hooks/useIsomorphicLayoutEffect";
+
+const EFFECT_TO_KEY: Record<string, string> = {
+  [SamplingEffect.DirectionalCrunch]: "directional_crunch_exponent",
+  [SamplingEffect.GlobalCrunch]: "global_crunch_exponent",
+};
 
 const DEFAULT_FONT_SIZE = 14;
 
@@ -62,6 +69,8 @@ interface AsciiSceneProps {
   usesVariables?: boolean;
   exclude?: string;
   effects?: { [key: string]: number | [number, { range: [number, number]; step: number }] };
+  splitMode?: "static" | "dynamic";
+  effectSlider?: { [key: string]: [number, number] };
 }
 
 const _AsciiScene: React.FC<AsciiSceneProps> = (props) => {
@@ -85,6 +94,8 @@ const _AsciiScene: React.FC<AsciiSceneProps> = (props) => {
     effects,
     optimizePerformance = false,
     exclude = "",
+    splitMode = "dynamic",
+    effectSlider,
   } = props;
   let { minWidth, lightnessEasingFunction } = props;
 
@@ -96,7 +107,7 @@ const _AsciiScene: React.FC<AsciiSceneProps> = (props) => {
     ascii: { value: "left", label: pixelate ? "Pixels" : "ASCII" },
     split: { value: "split", label: "Split" },
     transparent: { value: "transparent", label: "Transparent" },
-    canvas: { value: "right", label: "Canvas" },
+    canvas: { value: "right", label: "Image" },
   };
 
   const hideAscii = props.hideAscii ?? pixelate;
@@ -122,7 +133,7 @@ const _AsciiScene: React.FC<AsciiSceneProps> = (props) => {
     const globalCrunch = getEffect(SamplingEffect.GlobalCrunch);
     if (globalCrunch) {
       const [value, config] = globalCrunch;
-      const key = "global_crunch_exponent";
+      const key = EFFECT_TO_KEY[SamplingEffect.GlobalCrunch];
       variableValues[key] = value;
       if (config) {
         variables[key] = {
@@ -137,7 +148,7 @@ const _AsciiScene: React.FC<AsciiSceneProps> = (props) => {
     const directionalCrunch = getEffect(SamplingEffect.DirectionalCrunch);
     if (directionalCrunch) {
       const [value, config] = directionalCrunch;
-      const key = "directional_crunch_exponent";
+      const key = EFFECT_TO_KEY[SamplingEffect.DirectionalCrunch];
       variableValues[key] = value;
       if (config) {
         variables[key] = {
@@ -149,6 +160,17 @@ const _AsciiScene: React.FC<AsciiSceneProps> = (props) => {
         };
       }
     }
+    if (effectSlider) {
+      variableValues.effect_t = 0;
+      variables.effect_t = {
+        type: "number",
+        label: "Contrast",
+        value: 0,
+        range: [0, 1],
+        step: 0.05,
+        showValue: false,
+      };
+    }
 
     if (Object.keys(variables).length > 0) {
       setVariables((prev) => ({ ...prev, ...variables }));
@@ -156,7 +178,19 @@ const _AsciiScene: React.FC<AsciiSceneProps> = (props) => {
     if (Object.keys(variableValues).length > 0) {
       setVariableValues((prev) => ({ ...prev, ...variableValues }));
     }
-  }, [effects]);
+  }, [effects, effectSlider]);
+
+  useIsomorphicLayoutEffect(() => {
+    if (effectSlider) {
+      setVariableValues((prev) => {
+        const out = { ...prev };
+        for (const [effect, range] of Object.entries(effectSlider)) {
+          out[EFFECT_TO_KEY[effect]] = lerp(range[0], range[1], variableValues.effect_t as number);
+        }
+        return out;
+      });
+    }
+  }, [effectSlider, variableValues.effect_t]);
 
   const { targetWidth, targetHeight, width, height, scale, breakpoint } = useDimensions(props);
   const metadata = useMemo(() => getAlphabetMetadata(alphabet), [alphabet]);
@@ -244,7 +278,10 @@ const _AsciiScene: React.FC<AsciiSceneProps> = (props) => {
     exclude,
   ]);
 
-  const samplingEffects = useMemo(() => Object.keys(effects || {}) as SamplingEffect[], []);
+  const samplingEffects = useMemo(
+    () => [...Object.keys(effects || {}), ...Object.keys(effectSlider || {})] as SamplingEffect[],
+    [effects, effectSlider],
+  );
 
   const onFrame = useSamplingDataCollection({
     refs: { samplingDataRef, debugCanvasRef, onFrameRef },
@@ -323,6 +360,7 @@ const _AsciiScene: React.FC<AsciiSceneProps> = (props) => {
         >
           <SplitView
             viewMode={viewMode}
+            splitMode={splitMode}
             height={height}
             width={width}
             splitPosition={splitT}
@@ -388,10 +426,10 @@ export const AsciiScene: React.FC<AsciiSceneProps> = (props) => {
 
   const { height } = useDimensions(props);
 
-  const variablesHeight = props.usesVariables ? 72 : 0;
+  const variablesHeight = props.usesVariables ? 40 : 0;
 
   return (
-    <div ref={containerRef} style={{ height: height + variablesHeight }} className="scene">
+    <div ref={containerRef} style={{ height: height + variablesHeight }} className="ascii-scene">
       {visible && <_AsciiScene {...props} />}
     </div>
   );

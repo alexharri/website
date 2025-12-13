@@ -15,6 +15,7 @@ interface Vector6DProps {
   showCharacterPick?: boolean;
   exclude?: string;
   drawAffects?: boolean;
+  showOrder?: boolean;
 }
 
 export const InteractiveVector6D: React.FC<Vector6DProps> = ({
@@ -25,6 +26,7 @@ export const InteractiveVector6D: React.FC<Vector6DProps> = ({
   showCharacterPick,
   exclude = "",
   drawAffects = false,
+  showOrder,
 }) => {
   const s = useStyles(InteractiveVector6DStyles);
   const [globalExponent, setGlobalExponent] = useState(1);
@@ -91,6 +93,7 @@ export const InteractiveVector6D: React.FC<Vector6DProps> = ({
             samplingVector={samplingVector}
             externalVector={externalVector}
             affectsMapping={drawAffects ? affectsMapping : undefined}
+            showOrder={showOrder}
           />
         </div>
         {showCharacterPick && (

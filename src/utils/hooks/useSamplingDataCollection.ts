@@ -88,6 +88,8 @@ export function useSamplingDataCollection(params: UseSamplingDataCollectionParam
           gpuGeneratorRef.current.dispose();
         }
 
+        console.log(config.canvasWidth, config.canvasHeight);
+
         // Create new generator
         gpuGeneratorRef.current = new GPUSamplingDataGenerator(gpuCanvasRef.current, {
           config,
