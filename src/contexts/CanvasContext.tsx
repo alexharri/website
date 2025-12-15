@@ -4,7 +4,7 @@ import { SCENE_BASELINE_WIDTH } from "../constants";
 
 type Variables = Record<string, unknown>;
 
-export type OnFrameOptions = { flipY?: boolean; canvasWidth: number };
+export type OnFrameOptions = { flipY?: boolean; canvasWidth: number; canvasHeight: number };
 
 interface ISceneContext {
   onFrame: (buffer: Uint8Array, options: OnFrameOptions) => void;

@@ -289,8 +289,12 @@ export class GPUSamplingDataGenerator {
     out: CharacterSamplingData[][],
     flipY: boolean,
     pixelBufferScale: number,
+    canvasWidth: number,
+    canvasHeight: number,
   ): void {
     this.pixelBufferScale = pixelBufferScale;
+    this.canvasWidth = canvasWidth;
+    this.canvasHeight = canvasHeight;
     this.uploadCanvasTexture(pixelBuffer);
 
     this.collectRawSamples(flipY);
@@ -399,16 +403,13 @@ export class GPUSamplingDataGenerator {
    */
   private uploadCanvasTexture(pixelBuffer: Uint8Array): void {
     const gl = this.gl;
-    const scaledWidth = Math.floor(this.canvasWidth * this.pixelBufferScale);
-    const scaledHeight = Math.floor(this.canvasHeight * this.pixelBufferScale);
-
     gl.bindTexture(gl.TEXTURE_2D, this.canvasTexture);
     gl.texImage2D(
       gl.TEXTURE_2D,
       0,
       gl.RGBA,
-      scaledWidth,
-      scaledHeight,
+      this.canvasWidth,
+      this.canvasHeight,
       0,
       gl.RGBA,
       gl.UNSIGNED_BYTE,
@@ -466,9 +467,11 @@ export class GPUSamplingDataGenerator {
     gl.uniform1i(gl.getUniformLocation(program, "u_easingLUT"), 1);
 
     // Canvas and grid parameters
-    const scaledWidth = this.canvasWidth * this.pixelBufferScale;
-    const scaledHeight = this.canvasHeight * this.pixelBufferScale;
-    gl.uniform2f(gl.getUniformLocation(program, "u_canvasSize"), scaledWidth, scaledHeight);
+    gl.uniform2f(
+      gl.getUniformLocation(program, "u_canvasSize"),
+      this.canvasWidth,
+      this.canvasHeight,
+    );
     gl.uniform2f(gl.getUniformLocation(program, "u_gridSize"), this.config.cols, this.config.rows);
     gl.uniform2f(
       gl.getUniformLocation(program, "u_boxSize"),

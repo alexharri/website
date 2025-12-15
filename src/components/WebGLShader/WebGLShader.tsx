@@ -221,7 +221,7 @@ export const WebGLShader: React.FC<WebGLShaderProps> = (props) => {
           gl.UNSIGNED_BYTE,
           bufferRef.current,
         );
-        contextRef.current.onFrame(bufferRef.current, { canvasWidth: canvas.width });
+        contextRef.current.onFrame(bufferRef.current, { canvasWidth: canvas.width, canvasHeight: canvas.height });
       }
 
       if (SHOW_SEED_AND_TIME) {

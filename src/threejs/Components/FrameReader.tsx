@@ -31,7 +31,7 @@ export function FrameReader(props: Props) {
       bufferRef.current,
     );
 
-    props.onFrame(bufferRef.current, { canvasWidth: canvas.width });
+    props.onFrame(bufferRef.current, { canvasWidth: canvas.width, canvasHeight: canvas.height });
   });
 
   return null;

@@ -88,8 +88,6 @@ export function useSamplingDataCollection(params: UseSamplingDataCollectionParam
           gpuGeneratorRef.current.dispose();
         }
 
-        console.log(config.canvasWidth, config.canvasHeight);
-
         // Create new generator
         gpuGeneratorRef.current = new GPUSamplingDataGenerator(gpuCanvasRef.current, {
           config,
@@ -125,9 +123,14 @@ export function useSamplingDataCollection(params: UseSamplingDataCollectionParam
   }, [globalCrunchExponent, directionalCrunchExponent]);
 
   return useCallback(
-    (buffer: Uint8Array, options: { flipY?: boolean; canvasWidth: number }) => {
+    (
+      buffer: Uint8Array,
+      options: { flipY?: boolean; canvasWidth: number; canvasHeight: number },
+    ) => {
       if (config != null) {
         const pixelBufferScale = options.canvasWidth / config.canvasWidth;
+        const canvasWidth = options.canvasWidth;
+        const canvasHeight = options.canvasHeight;
 
         // Use GPU path if available and enabled
         if (gpuGeneratorRef.current && shouldUseGPU) {
@@ -137,6 +140,8 @@ export function useSamplingDataCollection(params: UseSamplingDataCollectionParam
               samplingData,
               options?.flipY ?? false,
               pixelBufferScale,
+              canvasWidth,
+              canvasHeight,
             );
           } catch (error) {
             console.error("GPU sampling failed, falling back to CPU:", error);
