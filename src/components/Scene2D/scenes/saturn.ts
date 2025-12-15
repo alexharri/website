@@ -32,6 +32,7 @@ export default createScene2D(
     ctx.drawImage(img, 0, 0, width, height);
   },
   {
+    static: true,
     variables: {},
   },
 );

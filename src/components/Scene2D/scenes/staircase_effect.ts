@@ -19,14 +19,5 @@ export default createScene2D(
     ctx.fillStyle = "#4a4a4aff";
     ctx.fill();
   },
-  {
-    // variables: {
-    //   slope: {
-    //     range: [0, 0.5],
-    //     type: "number",
-    //     value: 0.14,
-    //     label: "Slope",
-    //   },
-    // },
-  },
+  { static: true },
 );

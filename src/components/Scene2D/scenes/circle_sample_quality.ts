@@ -20,6 +20,7 @@ export default createScene2D(
     ctx.fill();
   },
   {
+    static: true,
     variables: {
       sampleQuality: {
         label: "Number of samples",

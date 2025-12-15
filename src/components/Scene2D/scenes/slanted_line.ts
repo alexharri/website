@@ -22,6 +22,7 @@ export default createScene2D(
     ctx.stroke();
   },
   {
+    static: true,
     variables: {
       sampleQuality: {
         label: "Number of samples",

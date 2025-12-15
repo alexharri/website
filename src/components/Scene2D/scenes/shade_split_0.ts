@@ -22,6 +22,7 @@ export default createScene2D(
     ctx.fill();
   },
   {
+    static: true,
     variables: {
       x: {
         label: "math:x",

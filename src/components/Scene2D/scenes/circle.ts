@@ -18,6 +18,7 @@ export const circleScene = createScene2D(
     ctx.fill();
   },
   {
+    static: true,
     variables: {},
   },
 );

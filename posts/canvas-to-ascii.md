@@ -26,13 +26,13 @@ ASCII art uses [ASCII characters][ascii_characters] to create images, typically 
 
 <SmallNote label="" center>Source: [https://paulbourke.net/dataformats/asciiart/](https://paulbourke.net/dataformats/asciiart/)</SmallNote>
 
-I really like the ring around the planet. The artist manages to produce sharp edges by picking characters that match the ring's contour really well. The gradient of the 
+I really like the ring around the planet. The artist manages to make its edges sharp by picking characters that match the ring's contour really well.
 
 Sharp edges like these are an aspect of ASCII rendering that is often overlooked when programmatically rendering images as ASCII. Consider this animated 3D scene that is rendered via ASCII characters:
 
 <Image src="~/cube-logo-short.mp4" plain width={700} noMargin />
 
-<SmallNote label="" center>Source: [cognition.ai](https://cognition.ai/)</SmallNote>
+<SmallNote label="" center>From [cognition.ai](https://cognition.ai/) landing page.</SmallNote>
 
 It's a cool effect, especially while in motion, but take a look at those blurry edges! The characters follow the cube's contour very poorly and as a result the edges look blurry and inconsistent:
 
@@ -40,7 +40,18 @@ It's a cool effect, especially while in motion, but take a look at those blurry 
 
 This blurriness arises from a common mistake made when implementing an ASCII renderer: ignoring the shape of ASCII characters and only considering visual density.
 
-Blurry edges in ASCII rendering have become a small pet peeve of mine, so I recently took the time to implement an ASCII renderer that focuses on contour matching and rendering quality. Here's what it produces for an image of Saturn:
+Blurry edges in ASCII rendering have become a small pet peeve of mine, so I recently took the time to implement an ASCII renderer that focuses on contour matching and rendering quality. Here's an interactive 3D scene rendered via the ASCII renderer -- try panning around the scene:
+
+<AsciiScene height={540} fontSize={12} characterWidthMultiplier={0.85} characterHeightMultiplier={0.85} viewModes={["ascii", "split", "canvas"]} optimizePerformance splitMode="dynamic" effects={{
+  global_crunch: 2.2,
+  directional_crunch: 2.8,
+}}>
+  <Scene scene="cube" autoRotate zoom={2.7} yOffset={0.45} />
+</AsciiScene>
+
+<SmallNote label="" center>Try the 'Split' mode to compare the image to the resulting ASCII.</SmallNote>
+
+Here's what the same renderer produces for an image of Saturn:
 
 <AsciiScene height={500} width={500} minWidth={500} fontSize={14} characterWidthMultiplier={0.75} characterHeightMultiplier={0.9} viewModes={["ascii", "split", "canvas"]} splitMode="static" effects={{
   global_crunch: 1.5,
@@ -49,16 +60,6 @@ Blurry edges in ASCII rendering have become a small pet peeve of mine, so I rece
   <Scene2D scene="saturn" />
 </AsciiScene>
 
-<SmallNote label="" center>Try the 'Split' mode to compare the image to the resulting ASCII.</SmallNote>
-
-Here's an interactive 3D scene rendered in real time with the same renderer -- try dragging it around:
-
-<AsciiScene height={540} fontSize={12} characterWidthMultiplier={0.85} characterHeightMultiplier={0.85} viewModes={["ascii", "split", "canvas"]} optimizePerformance splitMode="dynamic" effects={{
-  global_crunch: 2.2,
-  directional_crunch: 2.8,
-}}>
-  <Scene scene="cube" autoRotate zoom={2.7} yOffset={0.45} />
-</AsciiScene>
 
 In this post I'll cover how I built this ASCII renderer in detail.
 

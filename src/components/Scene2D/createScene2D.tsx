@@ -55,6 +55,7 @@ type DrawFunction<V extends VariableDict> = (props: Scene2DDrawProps<V>) => void
 
 interface Options<V extends VariableDict> {
   variables?: V;
+  static?: boolean;
 }
 
 export interface Scene2DProps {
@@ -77,6 +78,8 @@ export function createScene2D<V extends VariableDict>(
     if (typeof targetHeight !== "number") {
       throw new Error("No height specified for scene");
     }
+
+    const lastVariablesRef = useRef({} as Record<string, unknown>);
 
     const { height } = useSceneHeight(targetHeight);
     const viewportWidth = useViewportWidth();
@@ -140,11 +143,35 @@ export function createScene2D<V extends VariableDict>(
         const height = heightRef.current;
         const variables = variableValuesRef.current;
 
+        let changed = false;
+
+        if (!options.static) {
+          changed = true;
+        }
+
         if (width !== canvas.width || height !== canvas.height) {
           canvas.width = width;
           canvas.height = height;
           canvas.style.width = `${width}px`;
           canvas.style.height = `${height}px`;
+          console.log("resized!");
+          changed = true;
+        }
+
+        if (!changed) {
+          for (const [key, value] of Object.entries(variables)) {
+            if (lastVariablesRef.current[key] !== value) {
+              changed = true;
+              break;
+            }
+          }
+          if (changed) {
+            lastVariablesRef.current = { ...variables };
+          }
+        }
+
+        if (!changed) {
+          return;
         }
 
         const now = Date.now();
