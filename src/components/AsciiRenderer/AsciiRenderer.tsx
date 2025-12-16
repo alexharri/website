@@ -10,9 +10,10 @@ import { EFFECTS } from "./ascii/effects";
 import { AsciiRenderConfig } from "./renderConfig";
 import { DebugVizOptions } from "./types";
 import { hexToRgbaString } from "../../utils/color";
+import { Observer } from "../../utils/observer";
 
 interface Props {
-  samplingDataRef: React.MutableRefObject<CharacterSamplingData[][]>;
+  samplingDataObserver: Observer<CharacterSamplingData[][]>;
   config: AsciiRenderConfig | null;
   transparent: boolean;
   hideAscii: boolean;
@@ -25,12 +26,12 @@ interface Props {
 
 export function AsciiRenderer(props: Props) {
   const {
+    samplingDataObserver,
     debugVizOptions,
     transparent,
     hideAscii,
     showSamplingCircles,
     showSamplingPoints,
-    samplingDataRef,
     config,
     characterMode,
     optimizePerformance,
@@ -62,44 +63,36 @@ export function AsciiRenderer(props: Props) {
     }px)`;
   }, [config]);
 
-  const updateAsciiText = useCallback(() => {
-    const asciiCanvas = asciiCanvasRef.current;
-    const samplingData = samplingDataRef.current;
-    const preEl = preRef.current;
+  const updateAsciiText = useCallback(
+    (samplingData: CharacterSamplingData[][]) => {
+      const asciiCanvas = asciiCanvasRef.current;
+      const preEl = preRef.current;
 
-    if (!config || !characterMatcher || samplingData.length === 0) return;
+      if (!config || !characterMatcher || samplingData.length === 0) return;
 
-    if (optimizePerformance) {
-      if (!hideAscii && asciiCanvas) {
-        const color = transparent ? colors.text : colors.blue400;
-        renderAsciiCanvas(asciiCanvas, samplingData, config, characterMatcher, color);
+      if (optimizePerformance) {
+        if (!hideAscii && asciiCanvas) {
+          const color = transparent ? colors.text : colors.blue400;
+          renderAsciiCanvas(asciiCanvas, samplingData, config, characterMatcher, color);
+        }
+      } else {
+        if (!hideAscii && preEl) {
+          const ascii = samplingDataToAscii(characterMatcher, samplingData, config);
+          preEl.textContent = ascii;
+        }
       }
-    } else {
-      if (!hideAscii && preEl) {
-        const ascii = samplingDataToAscii(characterMatcher, samplingData, config);
-        preEl.textContent = ascii;
-      }
-    }
 
-    if (pixelateCanvasRef.current && debugVizOptions.pixelate) {
-      renderPixelate(pixelateCanvasRef.current, samplingData, config);
-    }
-  }, [characterMatcher, debugVizOptions.pixelate, config, hideAscii, transparent]);
+      if (pixelateCanvasRef.current && debugVizOptions.pixelate) {
+        renderPixelate(pixelateCanvasRef.current, samplingData, config);
+      }
+    },
+    [characterMatcher, debugVizOptions.pixelate, config, hideAscii, transparent],
+  );
 
   useEffect(() => {
-    let mounted = true;
-
-    const tick = () => {
-      if (!mounted) return;
-      updateAsciiText();
-      requestAnimationFrame(tick);
-    };
-
-    tick();
-
-    return () => {
-      mounted = false;
-    };
+    updateAsciiText(samplingDataObserver.getValue());
+    const unsubscribe = samplingDataObserver.subscribe(updateAsciiText);
+    return unsubscribe;
   }, [updateAsciiText]);
 
   let background: string;

@@ -4,7 +4,7 @@ import { AsciiRenderer } from "../AsciiRenderer";
 import { AlphabetName, getAlphabetMetadata } from "../AsciiRenderer/alphabets/AlphabetManager";
 import createAsciiSceneStyles from "./AsciiScene.styles";
 import { useViewportWidth } from "../../utils/hooks/useViewportWidth";
-import { CanvasProvider, OnFrameOptions } from "../../contexts/CanvasContext";
+import { CanvasProvider } from "../../contexts/CanvasContext";
 import { AsciiSceneControls } from "./AsciiSceneControls";
 import { ViewModeControl } from "../ViewModeControl";
 import { SplitView, ViewMode } from "../SplitView";
@@ -27,6 +27,7 @@ import { useSamplingDataCollection } from "../../utils/hooks/useSamplingDataColl
 import { useVisible } from "../../utils/hooks/useVisible";
 import { lerp } from "three/src/math/MathUtils";
 import { useIsomorphicLayoutEffect } from "../../utils/hooks/useIsomorphicLayoutEffect";
+import { Observer } from "../../utils/observer";
 
 const EFFECT_TO_KEY: Record<string, string> = {
   [SamplingEffect.DirectionalCrunch]: "directional_crunch_exponent",
@@ -212,8 +213,6 @@ const _AsciiScene: React.FC<AsciiSceneProps> = (props) => {
     [targetWidth, breakpoint],
   );
   const s = useStyles(AsciiSceneStyles);
-  const onFrameRef = useRef<null | ((buffer: Uint8Array, options?: OnFrameOptions) => void)>(null);
-  const samplingDataRef = useRef<CharacterSamplingData[][]>([]);
   const debugCanvasRef = useRef<HTMLCanvasElement>(null);
   const characterWidth = useMonospaceCharacterWidthEm(cssVariables.fontMonospace);
 
@@ -283,8 +282,11 @@ const _AsciiScene: React.FC<AsciiSceneProps> = (props) => {
     [effects, effectSlider],
   );
 
+  const [samplingDataObserver] = useState(() => new Observer<CharacterSamplingData[][]>([]));
+
   const onFrame = useSamplingDataCollection({
-    refs: { samplingDataRef, debugCanvasRef, onFrameRef },
+    samplingDataObserver,
+    refs: { debugCanvasRef },
     config,
     debug: { showSamplingPoints, showSamplingCircles, debugVizOptions },
     lightnessEasingFunction,
@@ -308,7 +310,7 @@ const _AsciiScene: React.FC<AsciiSceneProps> = (props) => {
         alphabet,
       );
 
-      samplingDataRef.current = samplingData;
+      samplingDataObserver.emit(samplingData);
 
       if (debugCanvasRef.current) {
         renderAsciiDebugViz(
@@ -370,7 +372,7 @@ const _AsciiScene: React.FC<AsciiSceneProps> = (props) => {
             {[
               <AsciiRenderer
                 key="renderer"
-                samplingDataRef={samplingDataRef}
+                samplingDataObserver={samplingDataObserver}
                 config={config}
                 debugVizOptions={debugVizOptions}
                 transparent={viewMode === "transparent"}

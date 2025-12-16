@@ -196,7 +196,7 @@ export class GPUSamplingDataGenerator {
 
     const externalMaxFrag = createExternalMaxFragmentShader(
       this.numCircles,
-      this.numExternalPoints,
+      this.affectsMapping.length,
     );
     const externalMaxProgram = this.createProgram(PASSTHROUGH_VERT, externalMaxFrag);
     if (!externalMaxProgram) {

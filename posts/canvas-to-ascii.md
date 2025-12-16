@@ -2,6 +2,17 @@
 title: "Canvas to ASCII renderer"
 ---
 
+Lately I've been working on an ASCII renderer. Here is the result:
+
+<AsciiScene height={540} fontSize={12} characterWidthMultiplier={0.85} characterHeightMultiplier={0.85} viewModes={["ascii", "split", "canvas"]} optimizePerformance splitMode="dynamic" effects={{
+  global_crunch: 2.2,
+  directional_crunch: 2.8,
+}}>
+  <Scene scene="cube" autoRotate zoom={2.7} yOffset={0.45} />
+</AsciiScene>
+
+Pretty cool, right?
+
 ASCII art uses [ASCII characters][ascii_characters] to create images, typically in a [monospace][monospace] font. Here's an example of an ASCII art piece:
 
 [ascii_characters]: https://en.wikipedia.org/wiki/ASCII#Printable_character_table
@@ -65,13 +76,13 @@ In this post I'll cover how I built this ASCII renderer in detail.
 
 We'll start with the basics of image-to-ASCII conversion and see where the common issue of blurry edges comes from. After that I'll show you how to fix that to achieve sharp, high-quality ASCII rendering. We'll cover wide range of ideas, ranging from the basics of image processing to nearest neighbor lookups in a high-dimensional space.
 
-We'll also take a look at we can apply effects such as contrast enhancement, here's an example:
+We'll also take a look at we can apply effects such as contrast enhancement. Here's the 3D scene again without contrast enhancement by default -- try dragging the slider to gradually increase the contrast between edges:
 
-<AsciiScene height={450} width={700} fontSize={13} characterWidthMultiplier={0.8} characterHeightMultiplier={0.8} viewModes={["ascii", "split", "canvas"]} usesVariables splitMode="static" exclude="|v" effectSlider={{
-  global_crunch: [1, 1.5],
-  directional_crunch: [1, 2.75],
+<AsciiScene height={540} fontSize={12} characterWidthMultiplier={0.85} characterHeightMultiplier={0.85} viewModes={["ascii", "split", "canvas"]} optimizePerformance splitMode="dynamic" effectSlider={{
+  global_crunch: [1, 2.2],
+  directional_crunch: [1, 2.8],
 }}>
-  <WebGLShader fragmentShader="multiple_waves" seed={9581} />
+  <Scene scene="cube" autoRotate zoom={2.7} yOffset={0.45} />
 </AsciiScene>
 
 Let's get to it!
@@ -95,7 +106,7 @@ abcdefghijklmnopqrstuvwxyz
 
 We'll start by rendering the following image, containing a white circle, as ASCII:
 
-<AsciiScene width={360} height={360} viewMode="canvas">
+<AsciiScene width={360} minWidth={360} height={360} viewMode="canvas">
   <Scene2D scene="circle" />
 </AsciiScene>
 
@@ -103,7 +114,7 @@ ASCII rendering almost always uses a [monospace][monospace] font. Since every ch
 
 The image with the circle is $360 \times 360$ pixels. For the ASCII grid I'll pick a row height of $24$ pixels and a column width of $20$ pixels. That splits the canvas into $15$ rows and $18$ columns -- an $18 \times 15$ grid:
 
-<AsciiScene width={360} height={360} fontSize={20} rowHeight={24} columnWidth={20} viewMode="transparent" hideAscii showGrid offsetAlign="left">
+<AsciiScene width={360} minWidth={360} height={360} fontSize={20} rowHeight={24} columnWidth={20} viewMode="transparent" hideAscii showGrid offsetAlign="left">
   <Scene2D scene="circle" />
 </AsciiScene>
 
@@ -113,7 +124,7 @@ Our task is now to pick which character to place in each column. The simplest ap
 
 We can get a lightness value for each cell by sampling the lightness of the pixel at the cell's center:
 
-<AsciiScene width={360} height={360} fontSize={20} rowHeight={24} columnWidth={20} viewMode="canvas" hideAscii showGrid offsetAlign="left" sampleQuality={1} showSamplingPoints alphabet="pixel-short">
+<AsciiScene width={360} minWidth={360} height={360} fontSize={20} rowHeight={24} columnWidth={20} viewMode="canvas" hideAscii showGrid offsetAlign="left" sampleQuality={1} showSamplingPoints alphabet="pixel-short">
   <Scene2D scene="circle" />
 </AsciiScene>
 
@@ -168,7 +179,7 @@ This maps low lightness values to low-density characters and high lightness valu
 
 Rendering the circle from above with this method gives us:
 
-<AsciiScene width={360} height={360} fontSize={20} rowHeight={24} columnWidth={20} viewMode="ascii" offsetAlign="left" sampleQuality={1} alphabet="pixel-short" increaseContrast>
+<AsciiScene width={360} minWidth={360} height={360} fontSize={20} rowHeight={24} columnWidth={20} viewMode="ascii" offsetAlign="left" sampleQuality={1} alphabet="pixel-short" increaseContrast>
   <Scene2D scene="circle" />
 </AsciiScene>
 

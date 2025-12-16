@@ -21,6 +21,14 @@ const styles = ({ styled, theme }: StyleOptions) => ({
     }
   `,
 
+  loadingMessage: styled.css`
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: ${theme.text400};
+  `,
+
   variablesWrapper: styled.css`
     position: relative;
     z-index: 2;
@@ -56,6 +64,7 @@ type DrawFunction<V extends VariableDict> = (props: Scene2DDrawProps<V>) => void
 interface Options<V extends VariableDict> {
   variables?: V;
   static?: boolean;
+  isLoading?: () => boolean;
 }
 
 export interface Scene2DProps {
@@ -123,6 +132,10 @@ export function createScene2D<V extends VariableDict>(
     const heightRef = useRef(height);
     heightRef.current = height;
 
+    const [isLoading, setIsLoading] = useState(options.isLoading?.() ?? false);
+    const isLoadingRef = useRef(isLoading);
+    isLoadingRef.current = isLoading;
+
     useEffect(() => {
       const canvas = canvasRef.current;
       const container = containerRef.current;
@@ -149,12 +162,17 @@ export function createScene2D<V extends VariableDict>(
           changed = true;
         }
 
+        const isLoading = options.isLoading?.() ?? false;
+        if (isLoadingRef.current && !isLoading) {
+          setIsLoading(isLoading);
+          changed = true;
+        }
+
         if (width !== canvas.width || height !== canvas.height) {
           canvas.width = width;
           canvas.height = height;
           canvas.style.width = `${width}px`;
           canvas.style.height = `${height}px`;
-          console.log("resized!");
           changed = true;
         }
 
@@ -219,7 +237,8 @@ export function createScene2D<V extends VariableDict>(
           ref={containerRef}
           style={{ width: widthStyle, height: `${height}px` }}
         >
-          <canvas ref={canvasRef} style={{ display: "block" }} />
+          <canvas ref={canvasRef} style={{ display: isLoading ? "none" : "block" }} />
+          {isLoading && <p className={s("loadingMessage")}>Loading...</p>}
         </div>
 
         {variableKeys.length > 0 && !context?.registerSceneVariables && (

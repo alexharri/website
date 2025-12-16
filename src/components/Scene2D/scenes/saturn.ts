@@ -24,8 +24,6 @@ export default createScene2D(
 
     const img = getImage();
     if (!img) {
-      ctx.fillStyle = "white";
-      ctx.fillText("Loading...", width / 2, height / 2);
       return;
     }
 
@@ -34,5 +32,6 @@ export default createScene2D(
   {
     static: true,
     variables: {},
+    isLoading: () => !loaded,
   },
 );

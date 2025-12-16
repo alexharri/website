@@ -10,15 +10,11 @@ import {
   SamplingPointVisualizationMode,
   SamplingEffect,
 } from "../../components/AsciiRenderer/types";
-import { OnFrameOptions } from "../../contexts/CanvasContext";
 import { GPUSamplingDataGenerator } from "../../components/AsciiRenderer/gpu/GPUSamplingDataGenerator";
+import { Observer } from "../observer";
 
 interface SamplingRefs {
-  samplingDataRef: React.MutableRefObject<CharacterSamplingData[][]>;
   debugCanvasRef: React.RefObject<HTMLCanvasElement>;
-  onFrameRef: React.MutableRefObject<
-    null | ((buffer: Uint8Array, options?: OnFrameOptions) => void)
-  >;
 }
 
 interface SamplingDebug {
@@ -28,6 +24,7 @@ interface SamplingDebug {
 }
 
 interface UseSamplingDataCollectionParams {
+  samplingDataObserver: Observer<CharacterSamplingData[][]>;
   refs: SamplingRefs;
   config: AsciiRenderConfig | null;
   debug: SamplingDebug;
@@ -41,6 +38,7 @@ interface UseSamplingDataCollectionParams {
 
 export function useSamplingDataCollection(params: UseSamplingDataCollectionParams) {
   const {
+    samplingDataObserver,
     refs,
     config,
     debug,
@@ -51,7 +49,7 @@ export function useSamplingDataCollection(params: UseSamplingDataCollectionParam
     globalCrunchExponent,
     directionalCrunchExponent,
   } = params;
-  const { samplingDataRef, debugCanvasRef, onFrameRef } = refs;
+  const { debugCanvasRef } = refs;
   const { showSamplingPoints, showSamplingCircles, debugVizOptions } = debug;
 
   const [samplingData] = useState<CharacterSamplingData[][]>(() => {
@@ -74,6 +72,9 @@ export function useSamplingDataCollection(params: UseSamplingDataCollectionParam
 
   // Initialize GPU generator when config changes
   useEffect(() => {
+    if (!config) {
+      return;
+    }
     if (shouldUseGPU && config) {
       try {
         // Create offscreen canvas for GPU operations
@@ -122,45 +123,37 @@ export function useSamplingDataCollection(params: UseSamplingDataCollectionParam
     }
   }, [globalCrunchExponent, directionalCrunchExponent]);
 
-  return useCallback(
+  const lastFrameRef = useRef<{
+    buffer: Uint8Array;
+    options: { flipY?: boolean; canvasWidth: number; canvasHeight: number };
+  } | null>(null);
+
+  const onFrame = useCallback(
     (
       buffer: Uint8Array,
       options: { flipY?: boolean; canvasWidth: number; canvasHeight: number },
     ) => {
-      if (config != null) {
-        const pixelBufferScale = options.canvasWidth / config.canvasWidth;
-        const canvasWidth = options.canvasWidth;
-        const canvasHeight = options.canvasHeight;
+      lastFrameRef.current = { buffer, options };
+      if (!config) return;
 
-        // Use GPU path if available and enabled
-        if (gpuGeneratorRef.current && shouldUseGPU) {
-          try {
-            gpuGeneratorRef.current.update(
-              buffer,
-              samplingData,
-              options?.flipY ?? false,
-              pixelBufferScale,
-              canvasWidth,
-              canvasHeight,
-            );
-          } catch (error) {
-            console.error("GPU sampling failed, falling back to CPU:", error);
-            // Fallback to CPU
-            generateSamplingData(
-              samplingData,
-              buffer,
-              pixelBufferScale,
-              config,
-              showSamplingPoints,
-              options?.flipY ?? false,
-              globalCrunchExponent,
-              directionalCrunchExponent,
-              lightnessEasingFunction,
-              samplingEffects,
-            );
-          }
-        } else {
-          // Use CPU path
+      const pixelBufferScale = options.canvasWidth / config.canvasWidth;
+      const canvasWidth = options.canvasWidth;
+      const canvasHeight = options.canvasHeight;
+
+      // Use GPU path if available and enabled
+      if (gpuGeneratorRef.current && shouldUseGPU) {
+        try {
+          gpuGeneratorRef.current.update(
+            buffer,
+            samplingData,
+            options?.flipY ?? false,
+            pixelBufferScale,
+            canvasWidth,
+            canvasHeight,
+          );
+        } catch (error) {
+          console.error("GPU sampling failed, falling back to CPU:", error);
+          // Fallback to CPU
           generateSamplingData(
             samplingData,
             buffer,
@@ -174,29 +167,40 @@ export function useSamplingDataCollection(params: UseSamplingDataCollectionParam
             samplingEffects,
           );
         }
-
-        samplingDataRef.current = samplingData;
-
-        if (debugCanvasRef.current) {
-          renderAsciiDebugViz(
-            debugCanvasRef.current,
-            samplingData,
-            config,
-            debugVizOptions,
-            showSamplingCircles === true ? "raw" : showSamplingCircles,
-            undefined,
-            undefined,
-            forceSamplingValue,
-          );
-        }
+      } else {
+        // Use CPU path
+        generateSamplingData(
+          samplingData,
+          buffer,
+          pixelBufferScale,
+          config,
+          showSamplingPoints,
+          options?.flipY ?? false,
+          globalCrunchExponent,
+          directionalCrunchExponent,
+          lightnessEasingFunction,
+          samplingEffects,
+        );
       }
 
-      onFrameRef.current?.(buffer, options);
+      samplingDataObserver.emit(samplingData);
+
+      if (debugCanvasRef.current) {
+        renderAsciiDebugViz(
+          debugCanvasRef.current,
+          samplingData,
+          config,
+          debugVizOptions,
+          showSamplingCircles === true ? "raw" : showSamplingCircles,
+          undefined,
+          undefined,
+          forceSamplingValue,
+        );
+      }
     },
     [
-      samplingDataRef,
+      samplingDataObserver,
       debugCanvasRef,
-      onFrameRef,
       config,
       lightnessEasingFunction,
       showSamplingPoints,
@@ -208,4 +212,13 @@ export function useSamplingDataCollection(params: UseSamplingDataCollectionParam
       directionalCrunchExponent,
     ],
   );
+
+  useEffect(() => {
+    if (lastFrameRef.current) {
+      const { buffer, options } = lastFrameRef.current;
+      onFrame(buffer, options);
+    }
+  }, [onFrame]);
+
+  return onFrame;
 }

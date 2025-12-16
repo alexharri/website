@@ -214,7 +214,7 @@ void main() {
 
 export const createExternalMaxFragmentShader = (
   numCircles: number,
-  numExternalPoints: number,
+  affectsMappingLength: number,
 ) => /* glsl */ `#version 300 es
 precision highp float;
 
@@ -229,7 +229,7 @@ uniform int u_numCircles;                     // Number of internal sampling cir
 uniform int u_numExternalPoints;              // Number of external sampling points (10)
 
 // Affects mapping: flattened array with counts
-uniform int u_affectsMapping[${numCircles * numExternalPoints}];
+uniform int u_affectsMapping[${affectsMappingLength}];
 uniform int u_affectsCounts[${numCircles}];
 
 // Get texture coordinate for external point in a cell
