@@ -50,9 +50,10 @@ interface AsciiSceneProps {
   increaseContrast?: boolean;
   lightnessEasingFunction?: string;
   showSamplingCircles?: SamplingPointVisualizationMode | true;
+  samplingCirclesColor?: "blue" | "gray" | "white";
   showExternalSamplingCircles?: boolean;
   showSamplingPoints?: boolean;
-  showGrid?: boolean;
+  showGrid?: boolean | "dark";
   hideAscii?: boolean;
   hideSpaces?: boolean;
   forceSamplingValue?: number;
@@ -81,6 +82,7 @@ const _AsciiScene: React.FC<AsciiSceneProps> = (props) => {
     showControls = true,
     fontSize: targetFontSize = 14,
     showSamplingCircles = "none",
+    samplingCirclesColor = "gray",
     showExternalSamplingCircles = false,
     showSamplingPoints = false,
     showGrid = false,
@@ -98,7 +100,7 @@ const _AsciiScene: React.FC<AsciiSceneProps> = (props) => {
     splitMode = "dynamic",
     effectSlider,
   } = props;
-  let { minWidth, lightnessEasingFunction } = props;
+  let { lightnessEasingFunction } = props;
 
   if (increaseContrast) {
     lightnessEasingFunction = "increase_contrast";
@@ -193,7 +195,8 @@ const _AsciiScene: React.FC<AsciiSceneProps> = (props) => {
     }
   }, [effectSlider, variableValues.effect_t]);
 
-  const { targetWidth, targetHeight, width, height, scale, breakpoint } = useDimensions(props);
+  const { targetWidth, targetHeight, width, height, minWidth, scale, breakpoint } =
+    useDimensions(props);
   const metadata = useMemo(() => getAlphabetMetadata(alphabet), [alphabet]);
   const cellScale = "cellScale" in variableValues ? (variableValues.cellScale as number) : 1;
   const sampleQuality =
@@ -240,6 +243,7 @@ const _AsciiScene: React.FC<AsciiSceneProps> = (props) => {
 
   const debugVizOptions: DebugVizOptions = {
     showSamplingCircles: showSamplingCircles === true ? "raw" : showSamplingCircles,
+    samplingCirclesColor,
     showExternalSamplingCircles,
     showSamplingPoints,
     showGrid,
@@ -448,7 +452,7 @@ function useDimensions(props: AsciiSceneProps) {
 
   targetWidth ??= 1080;
 
-  if (minWidth == null && targetWidth < SCENE_BASELINE_WIDTH) {
+  if (cols || (minWidth == null && targetWidth < SCENE_BASELINE_WIDTH)) {
     minWidth = targetWidth;
   }
 

@@ -11,7 +11,7 @@ export default createScene2D(({ ctx, width, height, elapsed }) => {
   ctx.fill();
 
   // Moving split shape
-  const xOff = width * 0.2 * t;
+  const xOff = (height / 2) * t;
 
   const xCenter = width * 0.5;
 

@@ -97,11 +97,11 @@ export function AsciiRenderer(props: Props) {
 
   let background: string;
   if (showSamplingCircles || showSamplingPoints) {
-    background = hexToRgbaString(colors.background200, 0.5);
+    background = hexToRgbaString(colors.background200, 0.7);
   } else if (transparent && hideAscii) {
     background = "transparent";
   } else if (transparent) {
-    background = hexToRgbaString(colors.background200, 0.5);
+    background = hexToRgbaString(colors.background200, 0.7);
   } else {
     background = colors.background200;
   }

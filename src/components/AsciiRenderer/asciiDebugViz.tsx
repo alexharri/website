@@ -57,18 +57,20 @@ export function renderAsciiDebugViz(
   const samplingPointRadius = 2.5;
 
   if (options.showGrid) {
-    const TRESHOLD = 1;
-    ctx.fillStyle = hexToRgbaString(colors.blue, 0.5);
+    const thickness = options.showGrid === "dark" ? 2 : 1;
+    const offset = -(1 - thickness) / 2;
+    ctx.fillStyle =
+      options.showGrid === "dark" ? colors.background : hexToRgbaString(colors.blue, 0.5);
     ctx.beginPath();
     for (let row = 1; row < config.rows; row++) {
       const y = config.offsetY + config.boxHeight * row;
-      if (Math.abs(y) < TRESHOLD || Math.abs(y - config.canvasHeight) < TRESHOLD) continue;
-      ctx.rect(0, y, config.canvasWidth, 1);
+      if (Math.abs(y) < thickness || Math.abs(y - config.canvasHeight) < thickness) continue;
+      ctx.rect(0, y + offset, config.canvasWidth, thickness);
     }
     for (let col = 1; col < config.cols; col++) {
       const x = config.offsetX + config.boxWidth * col;
-      if (Math.abs(x) < TRESHOLD || Math.abs(x - config.canvasWidth) < TRESHOLD) continue;
-      ctx.rect(x, 0, 1, config.canvasHeight);
+      if (Math.abs(x) < thickness || Math.abs(x - config.canvasWidth) < thickness) continue;
+      ctx.rect(x + offset, 0, thickness, config.canvasHeight);
     }
     ctx.fill();
   }
@@ -88,7 +90,16 @@ export function renderAsciiDebugViz(
           const y = sampleRectTop + yOff;
 
           if (options.showSamplingCircles !== "none") {
-            ctx.strokeStyle = "rgba(255, 255, 255, 0.2)";
+            let color = "rgba(255, 255, 255, 0.2)";
+            switch (options.samplingCirclesColor) {
+              case "blue":
+                color = colors.blue;
+                break;
+              case "white":
+                color = colors.text;
+                break;
+            }
+            ctx.strokeStyle = color;
             ctx.lineWidth = 1;
             ctx.beginPath();
             ctx.arc(x, y, config.samplePointRadius, 0, TAU);

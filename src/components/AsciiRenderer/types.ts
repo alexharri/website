@@ -8,8 +8,9 @@ export enum SamplingEffect {
 
 export interface DebugVizOptions {
   showSamplingCircles: SamplingPointVisualizationMode;
+  samplingCirclesColor: "gray" | "blue" | "white";
   showExternalSamplingCircles: boolean;
   showSamplingPoints: boolean;
-  showGrid: boolean;
+  showGrid: boolean | "dark";
   pixelate: boolean;
 }

@@ -90,27 +90,17 @@ Let's get to it!
 
 ## Image to ASCII conversion
 
-ASCII has the following 95 printable characters:
-
-[monospace]: https://en.wikipedia.org/wiki/Monospaced_font
 [ascii]: https://en.wikipedia.org/wiki/ASCII
 
-```text:no_ligatures
- !"#$%&\'()*+,-./
-0123456789:;<=>?@
-ABCDEFGHIJKLMNOPQRSTUVWXYZ
-[\\]^_\`
-abcdefghijklmnopqrstuvwxyz
-{|}~
-```
-
-We'll start by rendering the following image, containing a white circle, as ASCII:
+Let's start off by rendering the following image, containing a white circle, using ASCII characters:
 
 <AsciiScene width={360} minWidth={360} height={360} viewMode="canvas">
   <Scene2D scene="circle" />
 </AsciiScene>
 
-ASCII rendering almost always uses a [monospace][monospace] font. Since every character in a monospace font is equally wide and tall, we can split the image into a grid. Each grid cell will contain a single ASCII character.
+ASCII art pretty much always uses a [monospace][monospace] font. Since every character in a monospace font is equally wide and tall, we can split the image into a grid. Each grid cell will contain a single ASCII character.
+
+[monospace]: https://en.wikipedia.org/wiki/Monospaced_font
 
 The image with the circle is $360 \times 360$ pixels. For the ASCII grid I'll pick a row height of $24$ pixels and a column width of $20$ pixels. That splits the canvas into $15$ rows and $18$ columns -- an $18 \times 15$ grid:
 
@@ -118,7 +108,7 @@ The image with the circle is $360 \times 360$ pixels. For the ASCII grid I'll pi
   <Scene2D scene="circle" />
 </AsciiScene>
 
-<SmallNote label="" center>Monospace characters are typically taller than they are wide. The monospace font in this blog is Fira Code, which has a width-to-height ratio of $0.6$.</SmallNote>
+<SmallNote label="" center>Monospace characters are typically taller than they are wide, so I made each grid cell a bit taller than it is wide.</SmallNote>
 
 Our task is now to pick which character to place in each column. The simplest approach is to calculate a lightness value for each cell and pick a character based on that.
 
@@ -142,9 +132,18 @@ We can use the following formula to convert an RGB color (with components values
 
 ### Mapping lightness values to ASCII characters
 
-Now that we have a lightness value for each cell, we want to use them to pick ASCII characters.
+Now that we have a lightness value for each cell, we want to use them to pick ASCII characters. ASCII has 95 printable characters:
 
-Consider the following ASCII characters:
+```text:no_ligatures
+ !"#$%&\'()*+,-./
+0123456789:;<=>?@
+ABCDEFGHIJKLMNOPQRSTUVWXYZ
+[\\]^_\`
+abcdefghijklmnopqrstuvwxyz
+{|}~
+```
+
+To simplify, let's start by just considering these ASCII characters:
 
 ```text
 : - # = + @ * % .
@@ -185,13 +184,11 @@ Rendering the circle from above with this method gives us:
 
 That works... but the result is pretty ugly. We seem to always get `@` for cells that fall within the circle and a space for cells that fall outside.
 
-This happens because we've pretty much just implemented nearest-neighbor downsampling. Let's see what that means.
+That is happening because we've pretty much just implemented nearest-neighbor downsampling. Let's see what that means.
 
 ## Downsampling
 
-[Downsampling][image_scaling], in the context of image processing, is taking a larger image (in our case, the $360 \times 360$ canvas) and using that image's data to construct a lower resolution image (in our case, the $18 \times 15$ ASCII grid). The pixel values of the lower resolution image are calculated by sampling values from the higher resolution image.
-
-[image_scaling]: https://en.wikipedia.org/wiki/Image_scaling
+Downsampling, in the context of image processing, is taking a larger image (in our case, the $360 \times 360$ canvas) and using that image's data to construct a lower resolution image (in our case, the $18 \times 15$ ASCII grid). The pixel values of the lower resolution image are calculated by sampling values from the higher resolution image.
 
 The simplest and fastest method of sampling is [nearest-neighbor interpolation][nearest_neighbor] where we only take a single sample from the higher resolution image. That's what we did above.
 
@@ -205,7 +202,7 @@ Consider this rotating square split into a $24 \times 24$ pixel grid:
 
 For a shape like this, using nearest-neighbor interpolation, the single sample taken for each cell either falls inside or outside of the shape, resulting in either $0\%$ or $100\%$ lightness:
 
-<AsciiScene width={600} minWidth={400} height={360} fontSize={20} rowHeight={24} columnWidth={24} viewMode="transparent" hideAscii showGrid showSamplingPoints offsetAlign="left" sampleQuality={1} alphabet="pixel-short" optimizePerformance>
+<AsciiScene width={600} minWidth={400} height={360} fontSize={20} rowHeight={24} columnWidth={24} viewMode="transparent" hideAscii showGrid showSamplingPoints offsetAlign="left" sampleQuality={1} alphabet="pixel-short">
   <Scene2D scene="rotating_square" />
 </AsciiScene>
 
@@ -215,15 +212,13 @@ If, instead of picking an ASCII character for each grid cell, we color each grid
   <Scene2D scene="rotating_square" />
 </AsciiScene>
 
-Notice the rough, jagged looking edges when the square is at an angle. Those are an aliasing artifacts (often called [jaggies][jaggies]), and they're a common result of using nearest-neighbor interpolation.
+Notice the rough, jagged looking edges when the square is at an angle. Those aliasing artifacts (often called [jaggies][jaggies]), and they're a common result of using nearest-neighbor interpolation.
 
 [jaggies]: https://en.wikipedia.org/wiki/Jaggies
 
-### Anti-aliasing
+### Supersampling
 
-The obvious idea to get rid of these jaggies is to take more than one sample.
-
-Consider this line:
+To get rid of jaggies, we might collect more samples for each cell. Consider this line, for example:
 
 <AsciiScene width={600} minWidth={200} height={360} rowHeight={40} columnWidth={40} viewMode="canvas" showControls={false}>
   <Scene2D scene="slanted_line" />
@@ -235,15 +230,19 @@ The line's slope on the $y$ axis is $\dfrac{1}{3}x$. When we pixelate it with ne
   <Scene2D scene="slanted_line" />
 </AsciiScene>
 
-Let's try to get rid of the jagginess by taking multiple samples within each cell and using the average sampled lightness value to color the cell. The example below lets you vary the number of samples using the slider:
+Let's try to get rid of the jagginess by taking multiple samples within each cell and using the average sampled lightness value as the cell's lightness. The example below lets you vary the number of samples using the slider:
 
-<AsciiScene width={600} minWidth={200} height={360} fontSize={40} rowHeight={40} columnWidth={40} viewModes={["ascii", "transparent", "canvas"]} hideAscii pixelate sampleQuality={3} alphabet="pixel-short" showSamplingPoints showGrid usesVariables>
+<AsciiScene width={600} minWidth={200} height={360} fontSize={40} rowHeight={40} columnWidth={40} viewMode="ascii" hideAscii pixelate sampleQuality={3} alphabet="pixel-short" usesVariables>
   <Scene2D scene="slanted_line" />
 </AsciiScene>
 
-Works as expected! With multiple samples, cells that lie on the edge of a shape will have some of its samples fall within the shape, and some outside of it. Averaging those, we get gray in-between colors that smooth the downsampled image.
+With multiple samples, cells that lie on the edge of a shape will have some of its samples fall within the shape, and some outside of it. Averaging those, we get gray in-between colors that smooth the downsampled image. Below is the same example, but with an overlay showing where the samples land:
 
-This method of collecting multiple samples from the larger image is called [supersampling][supersampling]. It's a common method of [spatial anti-aliasing][anti_aliasing] (in other words, avoiding jaggies at edges). Here's what the rotating square looks like with supersampling (using $16$ samples for each cell):
+<AsciiScene width={600} minWidth={200} height={360} fontSize={40} rowHeight={40} columnWidth={40} viewModes={["ascii", "canvas"]} hideAscii pixelate sampleQuality={3} alphabet="pixel-short" showSamplingPoints showGrid usesVariables>
+  <Scene2D scene="slanted_line" />
+</AsciiScene>
+
+This method of collecting multiple samples from the larger image is called [supersampling][supersampling]. It's a common method of [spatial anti-aliasing][anti_aliasing] (avoiding jaggies at edges). Here's what the rotating square looks like with supersampling (using $16$ samples for each cell):
 
 <AsciiScene width={600} minWidth={400} height={360} fontSize={20} rowHeight={24} columnWidth={24} viewMode="ascii" hideAscii pixelate offsetAlign="left" sampleQuality={16} alphabet="pixel-short">
   <Scene2D scene="rotating_square" />
@@ -260,13 +259,15 @@ Let's look at what supersampling does for the circle example from earlier. Try d
 
 The circle becomes less jagged, but the edges feel blurry. Why's that?
 
-Well, they feel blurry because we're pretty much just rendering a low-resolution pixelated image of a circle. Below is the same example, but instead of rendering ASCII character, we color the grid cells (pixels) according to the average sampled lightness:
+Well, they feel blurry because we're pretty much just rendering a low-resolution pixelated image of a circle. Take a look at the pixelated view:
 
 <AsciiScene width={360} height={408} fontSize={20} rowHeight={24} columnWidth={20} viewModes={["ascii", "transparent"]} offsetAlign="left" alphabet="pixel-short" pixelate usesVariables>
   <Scene2D scene="circle_sample_quality" />
 </AsciiScene>
 
-Our ASCII rendering of the circle is pretty much just a low-resolution rendering of the original high-resolution circle, scaled up to the original size -- of course it feels blurry. Upscaled low-resolution images are always going to look blurry and bad.
+The ASCII and pixelated views are mirror images of each other. Both are just low-resolution versions of the original high-resolution image, scaled up to the original's size -- of course they both look blurry.
+
+---
 
 Increasing the number of samples is insufficient. No matter how many samples we take per cell, the samples will be averaged into a single lightness value, used to render a single pixel.
 
@@ -284,20 +285,22 @@ Same for the rotating cube -- look at the results we can achieve when we conside
   <Scene2D scene="rotating_square" />
 </AsciiScene>
 
+This looks _far_ better than the equivalent pixelated image. By picking characters based on shape, we get a far higher _effective_ resolution. The result is also significantly more visually interesting.
+
 Let's see how we can implement this.
 
 
 ## Shape
 
-So, what do I mean by shape? Well, consider the characters `T`, `L` and `O` placed within grid cells:
+So what do I mean by shape? Well, consider the characters `T`, `L` and `O` placed within grid cells:
 
 <AsciiScene alphabet="two-samples" showGrid fontSize={100} height={260} width={520}>
   {"T L O"}
 </AsciiScene>
 
-The character `T` is top-heavy. Its visual density in the upper half of the grid cell is higher than in the lower half. The opposite can be said for `L` -- it's bottom-heavy. `O` is pretty much equally heavy in the upper and lower halves of the cell.
+The character `T` is top-heavy. Its visual density in the upper half of the grid cell is higher than in the lower half. The opposite can be said for `L` -- it's bottom-heavy. `O` is pretty much equally dense in the upper and lower halves of the cell.
 
-We might also compare characters like `L` and `J`. The character `L` is heavier within the left half of the cell, while `J` is heavier in the right half:
+We might also compare characters like `L` and `J`. The character `L` is heavier within the left half of the cell while `J` is heavier in the right half:
 
 <AsciiScene alphabet="two-samples" showGrid fontSize={100} height={260} width={360}>
   {"L J"}
@@ -309,46 +312,41 @@ We also have more "extreme" characters, such as `_` and `^` that only occupy the
   {"_ ^"}
 </AsciiScene>
 
-This is what I mean by "shape", at least in the context of ASCII rendering. Shape refers to which regions of a cell a given character visually occupies.
+This is, roughly, what I mean by "shape" in the context of ASCII rendering. Shape refers to which regions of a cell a given character visually occupies.
 
 
 ### Quantifying shape
 
-How might we quantify shape so that we can somehow pick characters based on their shape?
+To pick characters based on their shape, we'll somehow need to quantify (put numbers to) the shape of each character.
 
-Let's start by only considering how much characters occupy the upper and lower region of our cell. We'll do that by defining two _sampling circles_ for each grid cell:
+Let's start by only considering how much characters occupy the upper and lower region of our cell. To do that we'll define two "sampling circles" for each grid cell -- one placed in the upper half and one in the lower half:
 
 <AsciiScene alphabet="two-samples" showGrid fontSize={100} rows={2.2} cols={6} showSamplingCircles>
   {""}
 </AsciiScene>
 
-<SmallNote label="" center>It may seem odd to use circles instead of just splitting the cell into two rectangles, but using sampling circles will give us more flexibility later on.</SmallNote>
+<SmallNote label="" center>It may seem odd or arbitrary to use circles instead of just splitting the cell into two rectangles, but using circles will give us more flexibility later on.</SmallNote>
 
-A character placed within a cell will overlap each of the cell's sampling circles to _some_ extent (sometimes zero).
+A character placed within a cell will overlap each of the cell's sampling circles to _some_ extent.
 
 <AsciiScene alphabet="two-samples" showGrid fontSize={250} rows={1} cols={1} showSamplingCircles forceSamplingValue={0}>
   {"T"}
 </AsciiScene>
 
-Now we'll quantify how much the character overlaps each sampling circle from $0$ to $1$. An overlap of $0$ means that there's no overlap and $1$ means that the character completely overlaps the sampling circle.
+One can compute that overlap by taking a bunch of samples within the circle. The fraction of samples that land inside the character gives us the overlap as a numeric value between $0$ and $1$:
 
-One way to compute the overlap is to take a bunch of samples within the circle and checking if they fall inside or outside of the character, dividing the number samples that fall inside by the total number of samples:
 
-<AsciiScene alphabet="two-samples" sampleQuality={50} showGrid fontSize={250} rows={1} cols={1} showSamplingCircles showSamplingPoints forceSamplingValue={0}>
+<AsciiScene alphabet="two-samples" sampleQuality={180} showGrid fontSize={250} rows={1} cols={1} showSamplingCircles showSamplingPoints forceSamplingValue={0}>
   {"T"}
 </AsciiScene>
 
-<SmallNote center label=""></SmallNote>
+<p className="mathblock">$$\text{Overlap} = \dfrac{\text{Samples inside character}}{\text{Total samples}}$$</p>
 
-[fermat_spiral]: https://en.wikipedia.org/wiki/Fermat%27s_spiral
-
-These points are generated using a [Fermat spiral][fermat_spiral], but that's just to make the visualization look nicer. It's simpler and more effective to just take a sample at every pixel.
-
-Anyway, for T, we get approximately $0.261$ for the upper circle and $0.097$ for the lower. Those values form a $2$-dimensional vector:
+For T, we get an overlap of approximately $0.261$ for the upper circle and $0.097$ for the lower. Those values form a $2$-dimensional vector:
 
 <p className="mathblock">$$\begin{bmatrix} 0.261 \\ 0.097 \end{bmatrix}$$</p>
 
-This way we can generate a "shape vector" for each ASCII character that quantifies that character's shape.
+We can generate such a $2$-dimensional vector for each character within the ASCII alphabet. These vectors quantify the shape of each ASCII character, so I'll call them _shape vectors_.
 
 Below are some ASCII characters and their shape vectors. I'm coloring the sampling circles using the component values of the shape vectors:
 
@@ -356,20 +354,21 @@ Below are some ASCII characters and their shape vectors. I'm coloring the sampli
   {"._=\n*%@"}
 </AsciiScene>
 
-We can plot all of the printable ASCII characters on a 2D plane using their shape vectors as 2D coordinates:
+Below is a 2D plot of all ASCII characters using their shape vectors as 2D coordinates:
 
 <CharacterPlot max={0.435} highlight="^@qTMuX$g=C" />
 
+Let's see how to use this in image-to-ASCII rendering!
 
 ### Shape-based lookup
 
-With our characters laid out on a 2D plane, we can find the best (nearest) character for any given 2D input coordinates. Try hovering the chart below to see what I mean:
+With our characters laid out on a 2D plane, we can find the closest character given 2D input coordinates. Try hovering the chart below to see what I mean:
 
 <CharacterPlot max={0.435} highlight="^@qTMuX$g=C" showHoverLine />
 
-So then, now we need to calculate a 2D vector for each cell in the grid to use as lookup coordinates.
+We now have a method of finding the best matching ASCII character for an input 2D lookup vector.
 
-Let's use the following zoomed in circle as an example. It is split into three grid cells:
+To make use of this in our ASCII renderer, we'll need to calculate a 2D lookup vector for each cell in the grid. Let's use the following zoomed in circle as an example -- it is split into three grid cells:
 
 <AsciiScene alphabet="two-samples" fontSize={200} rows={1} cols={3} viewMode="canvas" showGrid>
   <Scene2D scene="circle_zoomed_bottom" />
@@ -377,23 +376,21 @@ Let's use the following zoomed in circle as an example. It is split into three g
 
 Overlaying our sampling circles, we see varying degrees of overlap:
 
-<AsciiScene alphabet="two-samples" fontSize={200} rows={1} cols={3} hideAscii showGrid showSamplingCircles forceSamplingValue={0} log>
+<AsciiScene alphabet="two-samples" fontSize={200} rows={1} cols={3} hideAscii showGrid showSamplingCircles forceSamplingValue={0} log samplingCirclesColor="white" gridMode="dark">
   <Scene2D scene="circle_zoomed_bottom" />
 </AsciiScene>
 
-We haven't actually calculated the average lightness value for these yet. Before we do that, we need to decide how many samples to take, and where to take them from.
+When calculating the shape vectors of ASCII characters, we took a huge number of samples. We could afford to do that because we only need to calculate those shape vectors once up front. After they're calculated, we can use them again and again.
 
-It would be simple to take a sample at each pixel like we did when calculating the shape vectors for each character. We could afford to do that when calculating the shape vectors because we only need to generate them once up front. After they're generated, we can use them again and again.
+However, if we're converting an animated image (e.g. canvas or video) to ASCII, we need to be mindful of performance. An ASCII rendering might have hundreds or thousands of cells. Multiplying that by tens or hundreds of samples would be incredibly costly in terms of performance.
 
-However, if we're converting an animated canvas or video to ASCII, we need to be mindful of performance. An ASCII rendering might have hundreds or thousands of cells. In that context, collecting dozens or hundreds of samples per sampling circle would _crush_ performance.
+With that being said, let's pick a sampling quality of $3$, with the samples placed like so:
 
-For now let's pick a sampling quality of $3$, with the samples placed like so:
-
-<AsciiScene alphabet="two-samples" sampleQuality={3} fontSize={200} rows={1} cols={3} hideAscii showGrid showSamplingCircles showSamplingPoints increaseContrast>
+<AsciiScene alphabet="two-samples" sampleQuality={3} fontSize={200} rows={1} cols={3} hideAscii showGrid showSamplingCircles showSamplingPoints increaseContrast samplingCirclesColor="white">
   <Scene2D scene="circle_zoomed_bottom" />
 </AsciiScene>
 
-For the top sampling circle of the leftmost cell, we get one white sample and two black, giving us an average lightness of $0.33$. Doing the same calculation for all of the sampling circles, we get the following sampling vectors:
+For the top sampling circle of the leftmost cell, we get one white sample and two black, giving us an average lightness of $0.33$. Doing the same calculation for all of the sampling circles, we get the following 2D vectors:
 
 <p className="mathblock">$$\begin{gathered}
 \left[\, \begin{matrix} 0.33 \\ 0.00 \end{matrix} \,\right]
@@ -403,9 +400,9 @@ For the top sampling circle of the leftmost cell, we get one white sample and tw
 \left[\, \begin{matrix} 1.00 \\ 0.66 \end{matrix} \,\right]
 \end{gathered}$$</p>
 
-We can now find the closest characters using these sampling vectors as 2D input coordinates.
+I'll call these vectors, sampled from the image that we're rendering as ASCII, "sampling vectors". A sampling vector is calculated for each cell in the grid.
 
-Let's see what that mapping looks like on our plot from before. I'll color the input coordinates blue and label them C0, C1 and C2:
+Anyway, we can use these sampling vectors to find the best matching ASCII character. Let's see what that looks like on our 2D plot -- I'll label the sampling vectors (from left to right) C0, C1 and C2:
 
 <CharacterPlot highlight="P$" inputPoints={[
   { vector: [0.33, 0], label: "C0" },
@@ -413,7 +410,7 @@ Let's see what that mapping looks like on our plot from before. I'll color the i
   { vector: [1, 0.66], label: "C2" }
 ]} />
 
-Hmm... this is not quite what we want. Since none of the shape vector components exceed $0.4$, they're all clustered towards the bottom-left region of our plot. This makes our high input coordinates map to a few character on the edge of the cluster.
+Hmm... this is not quite what we want. Since none of the shape vector components exceed $0.4$, they're all clustered towards the bottom-left region of our plot. This makes our sampling vectors map to a few character on the edge of the cluster.
 
 We can fix this by _normalizing_ the shape vectors. We'll do that by taking the maximum value of each component across all shape vectors, and dividing the components of each shape vectors by the maximum. Expressed in code, that looks like so:
 
@@ -451,38 +448,41 @@ We get `'`, `M` and `$`.  Let's see how well those characters match the circle:
   <Scene2D scene="circle_zoomed_bottom" />
 </AsciiScene>
 
-Those characters fit the shape of the circle very well! We can also try rendering the full circle from before with the same method:
+Nice! They match very well.
+
+Let's try rendering the full circle from before with the same method:
 
 <AsciiScene width={360} height={408} fontSize={20} rowHeight={24} columnWidth={18} alphabet="two-samples" sampleQuality={3} viewModes={["ascii", "transparent"]} increaseContrast>
   <Scene2D scene="circle_raised" />
 </AsciiScene>
 
-Awesome stuff! It's easy to observe that the picked characters follow the shape of the circle fairly well.
+Far sharper than before! The picked characters match the contour of the circle very well, producing a sharp edge.
 
+## Limits of a 2D shape vector
 
-### Limits of a 2D character vector
+Using two sampling circles -- one upper and one lower -- produces better result than the prior $1$-dimensional pixelated approach. However, it still fall short when trying to capture other aspects of a character's shape.
 
-Using two sampling circles -- one upper and one lower -- already produces much better result compared to the prior $1$-dimensional pixel approach. However, it still fall short when trying to capture other aspects of a character's shape.
-
-For example, the two circles don't capture the shape of characters that fall in the middle of the cell. Consider `-`:
+For example, two circles don't capture the shape of characters that fall in the middle of the cell. Consider `-`:
 
 <AsciiScene alphabet="two-samples" showGrid fontSize={150} rows={1.5} cols={2.5} hideSpaces showSamplingCircles>
   {"-"}
 </AsciiScene>
 
-For `-`, we get a character vector of $\begin{bmatrix} 0.029 \\ 0.002 \end{bmatrix}$. That doesn't represent the character very well at all.
+For `-`, we get a shape vector of $\begin{bmatrix} 0.029 \\ 0.002 \end{bmatrix}$. That doesn't represent the character very well at all.
 
-The two upper-lower sampling circles also don't capture left-right differences. Consider `p` and `q`:
+The two upper-lower sampling circles also don't capture left-right differences, such as the difference between `p` and `q`:
 
 <AsciiScene alphabet="two-samples" showGrid fontSize={150} rows={1.5} cols={3.8} hideSpaces showSamplingCircles>
   {"p q"}
 </AsciiScene>
 
-Their character vectors, $\begin{bmatrix} 0.16 \\ 0.27 \end{bmatrix}$ and $\begin{bmatrix} 0.16 \\ 0.28 \end{bmatrix}$, are pretty much identical.
+These differences are information that we could use to get better character picks, but we're currently throwing this information away.
+
+Let's increase the dimensionality of our shape and sampling vectors to capture this information.
 
 ## Increasing to 6D
 
-Since cells are taller than they are wide (at least with our monospace font), we can use $6$ sampling circles to cover the area of the cell quite well:
+Since cells are taller than they are wide (at least with the monospace font I'm using), we can use $6$ sampling circles to cover the area of each cell quite well:
 
 <AsciiScene alphabet="six-samples" showGrid showSamplingCircles fontSize={200} rows={1.4} cols={1.8} hideSpaces forceSamplingValue={0}>
   {"-"}
@@ -541,9 +541,9 @@ The same idea applies in $6$ dimensions, though it's less intuitive to visualize
 
 ### Nearest neighbor lookups in a 6D space
 
-Finding the nearest neighbor (closest point) in an N-dimensional space boils down to finding the point whose Euclidian distance to our input point is the smallest.
+Finding the nearest neighbor (closest point) in an $n$-dimensional space boils down to finding the point whose Euclidian distance to our input point is the smallest.
 
-Given two points in 2D space, $a$ and $b$, we can calculate the Euclidian distance between them $d$ like so:
+Given two points in 2D space, $a$ and $b$, we can calculate the Euclidian distance $d$ between them like so:
 
 <p className="mathblock">$$ d = \sqrt{(a_1 - b_1)^2 + (a_2 - b_2)^2} $$</p>
 
@@ -558,8 +558,7 @@ function euclideanDistance(a: number[], b: number[]): number {
   let sum = 0;
 
   for (let i = 0; i < a.length; i++) {
-    const difference = a[i] - b[i];
-    sum += difference * difference;
+    sum += (a[i] - b[i]) ** 2;
   }
 
   return Math.sqrt(sum);
@@ -574,8 +573,6 @@ function euclideanDistanceSquared(a: number[], b: number[]): number {
   return sum;
 }
 ```
-
-<SmallNote label="">Since we're searching for the smallest value (shortest distance), it only matter that the values' relative order stays the same. The absolute value doesn't matter.</SmallNote>
 
 Now, let's say that we have our ASCII characters and their associated shape vectors in a <Ts>CHARACTERS</Ts> array:
 
@@ -616,19 +613,17 @@ We'll take a look at how we can do that later -- let's first get to rendering so
 
 If we render the circle example from before with 6D sampling vectors, we get the following:
 
-<AsciiScene width={360} height={360} fontSize={20} rowHeight={24} columnWidth={20} viewMode="ascii" offsetAlign="left" sampleQuality={4} alphabet="default" increaseContrast>
+<AsciiScene width={360} minWidth={360} height={360} fontSize={20} rowHeight={24} columnWidth={20} viewMode="ascii" offsetAlign="left" sampleQuality={4} alphabet="default" increaseContrast>
   <Scene2D scene="circle" />
 </AsciiScene>
 
-Those are some really good character picks! `L` is an excellent pick for the upper-right part and `P` is a great pick for the lower-right part.
-
-Let's look at our rotating square:
+Those are some really good character picks! Let's look at our rotating square:
 
 <AsciiScene width={600} minWidth={400} height={360} fontSize={20} rowHeight={24} columnWidth={19} viewMode="ascii" offsetAlign="left" sampleQuality={10}>
   <Scene2D scene="rotating_square" />
 </AsciiScene>
 
-Oh yeah, that's excellent. You can easily tell that it's a rotating square -- the picked characters match the shape very well.
+You can easily tell that it's a rotating square -- the picked characters match the contour very well.
 
 Now, let's try rendering a 3D scene!
 
@@ -637,7 +632,7 @@ Now, let's try rendering a 3D scene!
 
 Consider the following 3D scene:
 
-<AsciiScene height={540} viewMode="canvas" optimizePerformance>
+<AsciiScene height={540} viewMode="canvas" hideAscii optimizePerformance>
   <Scene scene="cube" autoRotate zoom={2.7} yOffset={0.45} />
 </AsciiScene>
 
@@ -647,55 +642,48 @@ If we render it as ASCII, we get the following:
   <Scene scene="cube" autoRotate zoom={2.7} yOffset={0.45} />
 </AsciiScene>
 
-That's pretty cool, but honestly, the ASCII rendering looks pretty blurry. It all kind of blends together, especially at some angles like this one:
+The outer edges look good -- our shape matching takes care of that -- but the objects all kind of blend together. The edges _between_ the objects aren't distinct enough. For example, the lighter faces of the the cubes all kind of blend into one solid color.
 
-<AsciiScene height={500} fontSize={12} characterWidthMultiplier={0.85} characterHeightMultiplier={0.85} viewMode="split" optimizePerformance>
-  <Scene scene="cube" zoom={2.7} xRotation={230} yOffset={0.45} />
-</AsciiScene>
-
-I'd like the ASCII character picks to consider edges better. When there is a sharp change in color -- like when two faces of a cube meet -- I'd like to see more "sharpness" in ASCII rendering.
+When there is a change in color -- like when two faces of a cube meet -- I'd like to see more "sharpness" in ASCII rendering.
 
 For example, consider the following split:
 
-<AsciiScene width={600} minWidth={400} height={360} viewMode="canvas">
+<AsciiScene width={450} minWidth={400} rows={14} viewMode="canvas" optimizePerformance>
   <Scene2D scene="shade_split" />
 </AsciiScene>
 
 It's currently rendered like so:
 
-<AsciiScene width={600} minWidth={400} height={360} fontSize={13} rowHeight={15}>
+<AsciiScene width={450} minWidth={400} rows={14} fontSize={13} rowHeight={15} optimizePerformance>
   <Scene2D scene="shade_split" />
 </AsciiScene>
 
-The shade split is quite obvious -- `i`s on the left and `B`s on the right -- but the boundary is not very sharp.
+The different shades result in `i`s on the left and `B`s on the right, but the boundary is not very sharp.
 
 By applying some image processing effects to the sampling vector, we can enhance the boundary so that it appears sharper:
 
-<AsciiScene width={600} minWidth={400} height={360} fontSize={13} rowHeight={15} effects={["crunch"]}>
+<AsciiScene width={450} minWidth={400} rows={14} fontSize={13} rowHeight={15} optimizePerformance exclude="\\|:" effects={{
+  global_crunch: 2.5,
+  directional_crunch: 3,
+}}>
   <Scene2D scene="shade_split" />
 </AsciiScene>
 
-Here's the 3D scene from earlier with this same effect applied:
-
-<AsciiScene height={540} fontSize={12} characterWidthMultiplier={0.85} characterHeightMultiplier={0.85} viewModes={["ascii", "split", "canvas"]} effects={["crunch"]}>
-  <Scene scene="cube" autoRotate zoom={2.7} yOffset={0.45} />
-</AsciiScene>
-
-Quite a drastic difference! Let's look at how we can implement this sharpening effect.
+Let's look at how we can implement this sharpening effect.
 
 ## Increasing sharpness
 
-Consider this color boundary:
+Consider cells overlapping a color boundary like so:
 
-<AsciiScene showGrid fontSize={140} rows={1.4} cols={3.4} viewMode="transparent" sampleQuality={5} hideAscii>
+<AsciiScene showGrid="dark" fontSize={120} rows={1.4} cols={3.4} viewMode="transparent" sampleQuality={5} hideAscii>
   <Scene2D scene="shade_split_static" />
 </AsciiScene>
 
-For the middle three cells, we get the same 6D sampling vector that looks like so:
+For the cells on the boundary, we get a 6D sampling vector that looks like so:
 
 <p className="mathblock">$$\begin{bmatrix} 0.65 & 0.65 \\ 0.31 & 0.31 \\ 0.22 & 0.22 \end{bmatrix}$$</p>
 
-I'll start visualizing vectors using circles with different lightness levels like so -- it makes things easier to parse:
+To make future examples easier to visualize, I'll start drawing the sampling vector using $6$ circles like so:
 
 <Vector6D
   samplingVector={[0.65, 0.65, 0.31, 0.31, 0.22, 0.22]}
@@ -708,7 +696,13 @@ Currently, this sampling vector resolves to the character `T`:
   showCharacterPick
 />
 
-That's a sensible choice -- the character `T` is visually dense in the top half and less so in the bottom half. Still, I want the picked character to emphasize the shape of the boundary better. We can achieve that by enhancing the contrast of the sampling vector.
+That's a sensible choice -- the character `T` is visually dense in the top half and less so in the bottom half, so it matches the image fairly well.
+
+<AsciiScene showGrid="dark" fontSize={120} rows={1.4} cols={3.4} viewMode="transparent" sampleQuality={5}>
+  <Scene2D scene="shade_split_static" />
+</AsciiScene>
+
+Still, I want the picked character to emphasize the shape of the boundary better. We can achieve that by enhancing the contrast of the sampling vector.
 
 ### Contrast enhancement
 
@@ -726,7 +720,7 @@ This effect becomes more pronounced with higher exponents:
 
 <SmallNote label="" center>A higher exponent translates to a stronger pull towards zero</SmallNote>
 
-In the example below you can vary the exponent between $1$ and $2$:
+Applying an exponent should make dark values darker more quickly than light ones. The example below allows you to vary the exponent applied to the sampling vector:
 
 <InteractiveVector6D
   vary="global_exponent"
@@ -734,11 +728,11 @@ In the example below you can vary the exponent between $1$ and $2$:
   samplingVector={[0.65, 0.65, 0.31, 0.31, 0.22, 0.22]}
 />
 
-As the exponent is increased to $2$ the darker components of the sampling vector quickly become _much_ darker. However, the lighter components also get pulled towards zero by a significant amount.
+As the exponent is increased to $2$ the darker components of the sampling vector quickly become _much_ darker, just like we wanted. However, the lighter components also get pulled towards zero by a significant amount.
 
 I don't want that. I want to increase the contrast _between_ the lighter and darker components of the sampling vector, not the vector in its entirety.
 
-To achieve that, we can normalize the sampling vector to the range $[0, 1]$ prior to applying the exponent, and then "denormalizing" the vector back to the original range afterwards.
+To achieve that, we can normalize the sampling vector to the range $[0, 1]$ prior to applying the exponent, and then "denormalize" the vector back to the original range afterwards.
 
 The normalization to $[0, 1]$ can be done by dividing each component by the maximum component value. After applying the exponent, mapping back to the original range is done by multiplying each component by the same max value:
 
@@ -772,13 +766,15 @@ This affects which character is picked. The following example shows how the sele
 
 Awesome! The pick of `"` over `T` emphasizes the separation between the lighter region above and the darker region below!
 
-<AsciiScene showGrid fontSize={140} rows={1.4} cols={3.4} viewMode="transparent" sampleQuality={5} effects={["crunch"]}>
+<AsciiScene showGrid="dark" fontSize={120} rows={1.4} cols={3.4} viewMode="transparent" sampleQuality={5} effects={{
+  global_crunch: 2,
+}}>
   <Scene2D scene="shade_split_static" />
 </AsciiScene>
 
-There's a trade-off to consider, though. By enhancing the contrast, we get a character that less faithfully represents the lightness of the region that the cell encompasses. We do, however, get a character that better matches the "shape" of the region.
+By enhancing the contrast, we exaggerate the shape of the sampling vector. This gives us a character that less faithfully represents the underlying image, but improves readability by enhancing the separation between different colored regions.
 
-Another aspect to consider is that because we normalize prior to applying the exponent, the highest values -- and values close to the highest value -- are not affected much when an exponent is applied. This causes vectors that are uniform-ish in value to not be affected much by contrast enhancement:
+What's nice about applying exponents to normalized sampling vectors is that it barely affects vectors that are uniform in value. If all component values are similiar, applying an exponent has a minimal effect:
 
 <InteractiveVector6D
   vary="global_exponent"
@@ -790,7 +786,7 @@ Another aspect to consider is that because we normalize prior to applying the ex
 
 This is a good thing! If we have a smooth gradient in our image, we'd want to retain it. We very much do _not_ want to introduce unnecessary choppiness.
 
-Vectors at the boundaries of two different-colored surfaces will have larger differences in the sampling vector, which the contrast enhancement enhances:
+In contrast to that, sampling vectors that fall on the boundary of different-colored surfaces will have differences in the component values, which contrast enhancement amplifies. Consider this L-shaped sampling vector:
 
 <InteractiveVector6D
   vary="global_exponent"
@@ -798,55 +794,89 @@ Vectors at the boundaries of two different-colored surfaces will have larger dif
   samplingVector={[0.68, 0.31, 0.76, 0.31, 0.77, 0.78]}
 />
 
-<SmallNote label="" center>I _love_ the transition from `& -> b -> L` as the L-shape of the vector becomes more pronounced!</SmallNote>
+I _love_ the transition from `& -> b -> L` as the L-shape of the vector becomes more pronounced!
 
 Compare the 3D scene ASCII rendering with and without this contrast enhancement:
 
-<AsciiScene height={540} fontSize={12} characterWidthMultiplier={0.85} characterHeightMultiplier={0.85} viewModes={["ascii", "split", "canvas"]} effects={["global_crunch"]} optimizePerformance vary={["global_crunch_exponent"]} usesVariables>
+<AsciiScene height={540} fontSize={12} characterWidthMultiplier={0.85} characterHeightMultiplier={0.85} viewModes={["ascii", "split", "canvas"]} optimizePerformance usesVariables effectSlider={{
+  global_crunch: [1, 5],
+}}>
   <Scene scene="cube" autoRotate zoom={2.7} yOffset={0.45} />
 </AsciiScene>
 
-We see edges becoming sharper, but this is not at the level of quality I want just yet. Not all edges become quite sharp enough, and those that do encounter a "staircasing" effect.
+We do see more contrast at boundaries, but this is not quite there yet. Some edges are still not sharp enough, and we also observe a "staircasing" effect happening at some boundaries.
 
-The example below demonstrates the staircase effect -- observe how the darker part of the edge becomes "staircase-y" as you increase the exponent:
+Let's look at the staircasing effect first. We can reproduce it with a boundary like so:
 
-<AsciiScene width={400} height={300} fontSize={19} rowHeight={18} columnWidth={15} viewMode="transparent" vary={["global_crunch_exponent", "directional_crunch_exponent"]} effects={["crunch"]} usesVariables exclude="|v">
+<AsciiScene width={400} minWidth={400} height={200} fontSize={19} rowHeight={18} columnWidth={15} viewMode="split" splitMode="static" exclude="|v">
   <Scene2D scene="staircase_effect" />
 </AsciiScene>
 
-Why might this be? Well, a cell at the edge might have one or a few light sample in the top-left corner, while the rest of the samples will be dark. When the sampling vector has at least one sample, _all_ of the dark samples will be crunched as a result. This looks kind of like so:
+The example below demonstrates the staircase effect -- observe how the darker part of the edge becomes "staircase-y" as you increase the exponent:
 
-<InteractiveVector6D
-  vary="global_exponent"
-  showCharacterPick
-  samplingVector={[0.6, 0.2, 0.2, 0.2, 0.2, 0.2]}
-/>
+<AsciiScene width={400} minWidth={400} height={200} fontSize={19} rowHeight={18} columnWidth={15} viewMode="ascii" usesVariables exclude="|v" effectSlider={{
+  global_crunch: [1, 4],
+}}>
+  <Scene2D scene="staircase_effect" />
+</AsciiScene>
 
-Consider the row in the middle of the canvas, progressing from left to right. As we start off, every sample is light and we get `U`s, so the first characters will be U
+To understand what's happening here, let's consider the row in the middle of the canvas, progressing from left to right. As we start off, every sample is equally light, which gives us the `U`s:
 
 ```text
 UUUUUUUU ->
 ```
 
-Then, as we progress a bit further, we start getting dark bottom samples. Those are crunched by the lighter components so we get some `Y`s:
+As we reach the boundary, the lower right samples become a bit darker. Those darker component are crunched by contrast enhancement, giving us some `Y`s:
+
+<InteractiveVector6D
+  vary="global_exponent"
+  showCharacterPick
+  samplingVector={[0.6, 0.6, 0.6, 0.6, 0.4, 0.3]}
+/>
+
+So we get:
 
 ```text
 UUUUUUUUYY ->
 ```
 
-As we move right we get more and more dark bottom samples, which all get crunched the same. This results in characters that more and more only visually occupy the upper region:
+As we progress further right, the middle and lower samples get darker, so we get some `f`s:
+
+<InteractiveVector6D
+  vary="global_exponent"
+  showCharacterPick
+  samplingVector={[0.6, 0.6, 0.55, 0.46, 0.32, 0.26]}
+/>
+
+This trend continues towards `"`, `'`, and finally, <code>{"`"}</code>:
+
+<InteractiveVector6D
+  vary="global_exponent"
+  showCharacterPick
+  samplingVector={[0.54, 0.45, 0.34, 0.25, 0.2, 0.2]}
+/>
+
+Giving us a sequence like so:
 
 ```text
 UUUUUUUUYYf""''` ->
 ```
 
-After we move a bit more to the right, we get no light samples. That causes no crunching to occur, resulting in us getting `!`s:
+That looks good, but at some point we get _no_ light samples. Once we get no light samples, our contrast enhancement has no effect because we're applying it to a normalized vector. This causes us to always get `!`s:
+
+<InteractiveVector6D
+  vary="global_exponent"
+  showCharacterPick
+  samplingVector={[0.2, 0.2, 0.2, 0.2, 0.2, 0.2]}
+/>
+
+Making our sequence look like so:
 
 ```text
 UUUUUUUUYYf""''`!!!!!!!!!! ->
 ```
 
-This sudden stop in crunching as we get no more light samples is what causes the staircasing effect:
+This sudden stop in contrast enhancement having an effect is what causes the staircasing effect:
 
 ```text:no_ligatures
                    !!!!!!!!
@@ -855,7 +885,7 @@ This sudden stop in crunching as we get no more light samples is what causes the
 !!!!!!!!!!!!!!!!!!!!!!!!!!!
 ```
 
-To get rid of this we'll apply a another layer of contrast enhancement, this time looking outside of the boundary of each cell.
+We'll counteract this staircasing effect with _another_ layer of contrast enhancement, this time looking outside of the boundary of each cell.
 
 ### Directional contrast enhancement
 
@@ -881,20 +911,32 @@ Let's simplify the visualization and consider a single example. Imagine that we 
   showCharacterPick
 />
 
-The sampling vector itself is a fairly uniform, with values ranging from $0.51$ to $0.53$. The external vector's values are similar, except in the upper left region where the values are significantly lighter. This indicates that in the underlying image the region of the image to the upper left of the cell is lighter.
+<SmallNote label="" center>The circles colored red are the external sampling vector components. Currently they have no effect.</SmallNote>
 
-To enhance the apparent boundary at the upper left corner of the cell we'd want the darken top-left and middle-left components of the sampling vector. We can do that by applying a component-wise contrast enhancement using the components of the external vector
+The sampling vector itself is a fairly uniform, with values ranging from $0.51$ to $0.53$. The external vector's values are similar, except in the upper left region where the values are significantly lighter ($0.8$ and $0.57$). This indicates a color boundary above and to the left of the cell.
 
-In our previous contrast enhancement, we determined the max value across the component's of the sampling vector:
+To enhance this apparent boundary, we'd want the darken top-left and middle-left components of the sampling vector. We can do that by applying component-wise contrast enhancement using the values from the external vector
+
+In the previous contrast enhancement, we calculated the max component value for the sampling vector and normalized the vector using that value:
 
 ```ts
 const maxValue = Math.max(...samplingVector)
+
+samplingVector = samplingVector.map((value) => {
+  value = x / maxValue; // Normalize
+  value = Math.pow(x, exponent);
+  value = x * maxValue; // Denormalize
+  return value;
+})
 ```
 
-But here, for each index $i$ of our sampling vector, we'll calculate the max value like so:
+But the new component-wise contrast enhancement will take the maximum value between each component of the sampling vector and the corresponding component in the external sampling vector:
 
 ```ts
-const maxValue = Math.max(samplingVector[i], externalSamplingVector[i])
+samplingVector = samplingVector.map((value, i) => {
+  const maxValue = Math.max(value, externalSamplingVector[i])
+  // ...
+});
 ```
 
 Aside from that, the contrast enhancement is performed in the same way:
@@ -909,7 +951,7 @@ samplingVector = samplingVector.map((value, i) => {
 });
 ```
 
-As we can see in the example below, light values in the external sampling vector push values in the sampling vector down:
+The example below shows how light values in the external sampling vector push values in the sampling vector down:
 
 <InteractiveVector6D
   samplingVector={[0.51, 0.51, 0.52, 0.52, 0.53, 0.53]}
@@ -920,18 +962,16 @@ As we can see in the example below, light values in the external sampling vector
 
 I call this "directional contrast enhancement", since each of the external samples reaches outside of the cell in the _direction_ of the sampling vector component that it is enhancing the contrast of. I describe the other effect as "global contrast enhancement", since it acts on all of the sampling vector's components.
 
-However, this doesn't quite get rid of the staircasing effect. Take a look -- in the example below, the global crunch is set use an exponent of $4$, but you can vary the directional crunch exponent:
+Let's see what this directional contrast enhancement does to get rid of the staircasing effect:
 
-<AsciiScene width={400} height={300} alphabet="simple-directional-crunch" fontSize={19} rowHeight={18} columnWidth={15} viewMode="transparent" usesVariables exclude="|v" effects={{
-  global_crunch: 4,
-  directional_crunch: [1, { range: [1, 5], step: 0.25 }],
+<AsciiScene width={400} height={300} alphabet="simple-directional-crunch" fontSize={19} rowHeight={18} columnWidth={15} viewMode="transparent" usesVariables exclude="|v" effectSlider={{
+  global_crunch: [4, 4],
+  directional_crunch: [1, 5],
 }}>
   <Scene2D scene="staircase_effect" />
 </AsciiScene>
 
-We can see the lower edge "shift down" a bit as the characters closest to the edge change from `!` to `:`. 
-
-The change to `!` to `:` is good, but not enough. To properly get rid of the staircasing, I'd want a sequence like so:
+Hmm, that's not doing what I wanted. I wanted to see a sequence like so:
 
 ```text:no_ligatures
             ..::!!
@@ -939,17 +979,16 @@ The change to `!` to `:` is good, but not enough. To properly get rid of the sta
 ..::!!!!!!!!!!!!!!
 ```
 
-Our problem is that the directional crunch is too local -- it isn't reaching the middle components of the sampling vector. Even if both of the top external samples are light, it only affects the uppermost components:
+But we just see `!` changing to `:`
 
 <InteractiveVector6D
-  samplingVector={[0.3, 0.3, 0.3, 0.3, 0.3, 0.3]}
-  externalVector={[0.8, 0.8, 0.3, 0.3, 0.3, 0.3]}
+  samplingVector={[0.2, 0.2, 0.2, 0.2, 0.2, 0.2]}
+  externalVector={[0.4, 0.35, 0.2, 0.2, 0.2, 0.2]}
   vary="directional_exponent"
   showCharacterPick
-  exclude="|v"
 />
 
-But because the lightness of the four bottom components is retained, we don't get to `.`, just `:`.
+This happens because the directional crunch doesn't reach far enough into our sampling vector. The light upper values in the external vector _do_ push the upper values of the sampling vector down, but because the lightness of the four bottom components is retained, we don't get to `.` -- just `:`.
 
 ### Wider directional crunch
 
@@ -961,8 +1000,7 @@ To do that, I'll introduce a few more external sampling circles, arranged like s
   {"F"}
 </AsciiScene>
 
-These are a total of $10$ external sampling circles. Each of the external sampling circles will specify $n$ "internal" sampling circles that it affects. The example below lets you hover the sampling circles to see the relationships:
-
+These are a total of $10$ external sampling circles. Each of the external sampling circles will affect one or more of the "internal" sampling circles. Here an illustration showing which internal samples each external sample affects:
 
 <InteractiveVector6D
   samplingVector={[0.3, 0.3, 0.3, 0.3, 0.3, 0.3]}
@@ -970,9 +1008,9 @@ These are a total of $10$ external sampling circles. Each of the external sampli
   drawAffects
 />
 
-For each component of the sampling vector, we take the _maximum_ external sampling value across the external sampling circles that affect that component, and crunch it with that.
+For each component of the internal sampling vector, we'll calculate the maximum external sampling value across all of the external sampling vector component that affect it, and use that maximum in the contrast enhancement.
 
-Let's implement this. Given that the internal and external sampling circles are ordered like so:
+Let's implement this. I'l order the internal and external sampling circles like so:
 
 <InteractiveVector6D
   samplingVector={[0.3, 0.3, 0.3, 0.3, 0.3, 0.3]}
@@ -981,7 +1019,7 @@ Let's implement this. Given that the internal and external sampling circles are 
   drawAffects
 />
 
-We can define a mapping from the the internal to the external sampling circles that affect it:
+We can then define a mapping from the the internal to the external sampling circles that affect it:
 
 ```ts
 const AFFECTING_EXTERNAL_INDICES = [
@@ -994,7 +1032,7 @@ const AFFECTING_EXTERNAL_INDICES = [
 ];
 ```
 
-With this, we can change the calculation from <Ts>maxValue</Ts> to take the maximum affecting external value:
+With this, we can change the calculation of <Ts>maxValue</Ts> to take the maximum affecting external value:
 
 ```ts
 // Before
@@ -1007,64 +1045,40 @@ for (const externalIndex of AFFECTING_EXTERNAL_INDICES[i]) {
 }
 ```
 
-Which makes the direction crunch implementation look like so:
-
-```ts
-samplingVector = samplingVector.map((value, i) => {
-  let maxValue = value;
-  for (const externalIndex of AFFECTING_EXTERNAL_INDICES[i]) {
-    maxValue = Math.max(value, externalSamplingVector[externalIndex]);
-  }
-  value = value / maxValue;
-  value = Math.pow(value, exponent);
-  value = value * maxValue;
-  return value;
-});
-```
-
-With this change, check out what happens if the top four external sampling circles are light: it causes the crunching to be applied to all but the bottom two sampling circles, giving us the desired effect
+Now look what happens if the top four external sampling circles are light: it causes the crunching to reach into the middle of the sampling vector, giving us the desired effect
 
 <InteractiveVector6D
-  samplingVector={[0.3, 0.3, 0.3, 0.3, 0.3, 0.3]}
-  externalVector={[0.8, 0.8, 0.8, 0.8, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3]}
+  samplingVector={[0.2, 0.2, 0.2, 0.2, 0.2, 0.2]}
+  externalVector={[0.58, 0.52, 0.31, 0.26, 0.2, 0.2, 0.2, 0.2, 0.2, 0.2]}
   vary="directional_exponent"
   showCharacterPick
   exclude="|v"
   drawAffects
 />
 
-It only takes an exponent of a bit less than $2$ for the vector to get crunched to `.`! Even if only the two top-left external sampling circles are light, the vector gets crunched sufficiently for us to get `.` with an exponent just under $4$:
+We now smoothly transition from `!` to `:` and `.`. Beautifull stuff!
 
-<InteractiveVector6D
-  samplingVector={[0.3, 0.3, 0.3, 0.3, 0.3, 0.3]}
-  externalVector={[0.8, 0.3, 0.8, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0.3]}
-  vary="directional_exponent"
-  showCharacterPick
-  exclude="|v"
-  drawAffects
-/>
+Let's try out this wider directional crunch and see if it resolves the staircasing effect:
 
-Let's try this new and improved directional crunch and see if it resolves the staircasing effect:
-
-<AsciiScene width={400} height={300} fontSize={19} rowHeight={18} columnWidth={15} viewMode="transparent" usesVariables exclude="|v" effects={{
-  global_crunch: 2.7,
-  directional_crunch: [1, { range: [1, 4], step: 0.25 }],
+<AsciiScene width={400} height={300} fontSize={19} rowHeight={18} columnWidth={15} viewMode="transparent" usesVariables exclude="|v" effectSlider={{
+  global_crunch: [2.7, 2.7],
+  directional_crunch: [1, 3.5],
 }}>
   <Scene2D scene="staircase_effect" />
 </AsciiScene>
 
-Oh yeah -- that looks awesome! You can clearly see the edge form.
+Oh yeah, looks awesome! We get the desired effect. Look at how clear the boundary has become!
 
-Here's the 3D scene again, this time with both the global and improved directional crunch. I'll let you toggle the crunching effect on and off so that you can see the difference.
+Here's the 3D scene again. The contrast slider now applies both effects at once -- take a look:
 
-<AsciiScene height={540} fontSize={12} characterWidthMultiplier={0.85} characterHeightMultiplier={0.85} viewModes={["ascii", "split", "canvas"]} optimizePerformance effects={{
-  global_crunch: 2.7,
-  directional_crunch: 3.7,
+<AsciiScene height={540} fontSize={12} characterWidthMultiplier={0.85} characterHeightMultiplier={0.85} viewModes={["ascii", "split", "canvas"]} optimizePerformance usesVariables effectSlider={{
+  global_crunch: [1, 2.7],
+  directional_crunch: [1, 3.7],
 }}>
   <Scene scene="cube" autoRotate zoom={2.7} yOffset={0.45} />
 </AsciiScene>
 
-The crunching makes the edges crisp as heck!
+This really enhances the contrast at the edges! We've produced a really nice ASCII rendering.
 
 ## Final words
 
