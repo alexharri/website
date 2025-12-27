@@ -1105,11 +1105,11 @@ function findCharacter(samplingVector: number[]) {
 }
 ```
 
-I tried benchmarking this for $100{,}000$ input sampling vectors on my Macbook -- $100$K invocations of this function consistently take about $190$ms. If we assume that we'll want to be able to use this for an animated canvas at $60$ frames per second (FPS), we only have $16{.}66$ms to render each frame. We can use this to get a rough budget for how many lookups we can perform each frame:
+I tried benchmarking this for $100{,}000$ input sampling vectors on my Macbook -- $100$K invocations of this function consistently take about $190$ms. If we want to be able to use this for an animated canvas at $60$ frames per second (FPS), we only have $16{.}66$ms to render each frame. We can use this to get a rough budget for how many lookups we can perform each frame:
 
 <p className="mathblock">$$ 100{,}000 \times \dfrac{16{.}66\ldots}{190} \approx 8{,}772 $$</p>
 
-If we allow ourselves $50\%$ of the performance budget for just lookups, this gives us a budget of about $4$K characters. Not terrible, but far from great, especially considering that the benchmark was run on a powerful laptop. Let's see how we can improve this.
+If we allow ourselves $50\%$ of the performance budget for just lookups, this gives us a budget of about $4$K characters. Not terrible, but far from great, especially considering that we're using numbers for a powerful laptop. A mobile device might have a $10$ times lower budget. Let's see how we can improve this.
 
 
 ### k-d trees
@@ -1120,7 +1120,7 @@ $k$-d trees are data structure that enables nearest-neighbor lookups in multi-di
 
 Internally, $k$-d trees are a binary tree where each node is a $k$-dimensional point. Each node can be thought to split the $k$-dimensional space in half with a hyperplane, with the left subtree on one side of the hyperplane and the right subtree on the other.
 
-<SmallNote>I won't go into much detail on $k$-d trees here.</SmallNote>
+<Note><p>I won't go into much detail on $k$-d trees here. You'll have to look at other resources if you're interested in learning more.</p></Note>
 
 Let's see how it performs! We'll construct a $k$-d tree with our characters and their associated vectors:
 
@@ -1133,28 +1133,28 @@ const kdTree = new KdTree(
 );
 ```
 
-After that, we can perform nearest-neighbor searches with sampling vectors:
+Which we can use to perform nearest-neighbor lookups with a sampling vector:
 
 ```ts
 const result = kdTree.findNearest(samplingVector);
 ```
 
-Running $100$K such lookups takes $66$ms on my Macbook. That's about $3$x faster than the brute-force approach. We can use this to calculate, roughly, the number of lookups we can perform per frame:
+Running $100$K such lookups takes about $66$ms on my Macbook. That's about $3$x faster than the brute-force approach. We can use this to calculate, roughly, the number of lookups we can perform per frame:
 
 <p className="mathblock">$$ 100{,}000 \times \dfrac{16{.}66\ldots}{66} \approx 25{,}253 $$</p>
 
-That's a lot of lookups per frame, but again, we're benchmarking on a powerful machine. We can easily expect a $5$-$10$x smaller performance budget on mobile devices.
+That's a lot of lookups per frame, but again, we're benchmarking on a powerful machine. This is still not good enough.
 
 Let's see how we can eek out even more performance.
 
 
 ### Caching
 
-An obvious avenue for speeding up lookups is trying to cache the result:
+An obvious avenue for speeding up lookups is to cache the result:
 
 ```ts
-function searchCached(vector: number[]) {
-  const key = generateCacheKey(vector)
+function searchCached(samplingVector: number[]) {
+  const key = generateCacheKey(samplingVector)
   
   if (cache.has(key)) {
     return cache.get(key)!;
@@ -1173,7 +1173,7 @@ Well, one way is to quantize each vector component so that it fits into a set nu
 We can quantize a numeric value between $0$ and $1$ to the range $0$ to $31$ (the most that $5$ bits can store) like so:
 
 ```ts
-const RANGE = 2 ** 5; // Equivalent to Math.pow(2, 5)
+const RANGE = 2 ** 5;
 
 function quantizeTo5Bits(value: number) {
   return Math.min(RANGE - 1, Math.floor(value * RANGE));
@@ -1198,18 +1198,16 @@ function generateCacheKey(vector: number[]): number {
 }
 ```
 
-The <Ts>RANGE</Ts> is current set to <Ts>2 ** 5</Ts>, but consider how large that makes our key space. Each vector component is one of $32$ possible values. With $6$ vector components, makes the total number of possible keys $32^6$, which equals $1{,}073{,}741{,}824$. If the cache were to be fully saturated, just storing those keys alone would take $8$GB of memory! I'd also expect the cache hit rate to be incredibly low if we were to lazily fill the cache.
+The <Ts>RANGE</Ts> is current set to <Ts>2 ** 5</Ts>, but consider how large that makes our key space. Each vector component is one of $32$ possible values. With $6$ vector components that makes the total number of possible keys $32^6$, which equals $1{,}073{,}741{,}824$. If the cache were to be fully saturated, just storing those keys alone would take $8$GB of memory! I'd also expect the cache hit rate to be incredibly low if we were to lazily fill the cache.
 
-We can pick any number between $1$ and $32$ for our range.
-
-Here's the number of keys -- and the memory needed to store them -- for range sizes between $6$ and $12$.
+Alright, $32$ is too high, but what value should we pick? We can pick any number under $32$ for our range. To help, here's a table showing the number of possible keys (and the memory needed to store them) for range values between $6$ and $12$:
 
 <Table
   align="right"
   columns={["Range", "Number of keys", { title: "Memory needed for keys", width: 160 }]}
   data={[
-    [ 6, "46,656", "364.50 KB" ],
-    [ 7, "117,649", "919.13 KB" ],
+    [ 6, "46,656", "364 KB" ],
+    [ 7, "117,649", "919 KB" ],
     [ 8, "262,144", "2.00 MB" ],
     [ 9, "531,441", "4.05 MB" ],
     [ 10, "1,000,000", "7.63 MB" ],
@@ -1218,9 +1216,13 @@ Here's the number of keys -- and the memory needed to store them -- for range si
   ]}
 />
 
-There is a memory-vs-quality trade-off to consider. As the range gets smaller, the quality of the results drops. If we pick a range of $6$, for example, there only possible lightness values are $0$, $0.2$, $0.4$, $0.6$, $0.8$ and $1$. That _does_ affect the quality of the ASCII rendering.
+There are trade offs to consider here. As the range gets smaller, the quality of the results drops. If we pick a range of $6$, for example, the only possible lightness values are $0$, $0.2$, $0.4$, $0.6$, $0.8$ and $1$. That _does_ affect the quality of the ASCII rendering.
 
-Cached lookups are incredibly fast. So fast that lookup performance is not really a concern anymore. If we prepopulate the cache, we can expect consistently fast performance, though I encountered no problems lazily populating the cache.
+At the same time, if we increase the possible number of keys, we need more memory to store them. Additionally, the cache hit rate might be very low, especially when the cache is relatively empty.
+
+Cached lookups are incredibly fast -- fast enough that lookup performance just isn't a concern anymore ($100$K lookups take a few ms on my Macbook). And if we prepopulate the cache, we can expect consistently fast performance, though I encountered no problems just lazily populating the cache.
+
+On my Macbook, both the brute force and the $k$-d tree approaches were performant enough. However, since I needed the examples in this post to perform well on mobile, I ended up using this cached lookups with the $k$-d tree. That runs fast enough on my iPhone. Hopefully it runs fast enough on whatever device you're reading this on!
 
 ## Appendix II: GPU accelerated sampling
 
