@@ -81,6 +81,7 @@ export class GPUSamplingDataGenerator {
 
   // Pixel Buffer Objects for async readback
   private pbos: WebGLBuffer[];
+  private pboSyncs: (WebGLSync | null)[];
   private pboIndex: number;
   private pboInitialized: boolean;
 
@@ -229,8 +230,9 @@ export class GPUSamplingDataGenerator {
     // Create fullscreen quad
     this.quadVAO = this.createQuadVAO()!;
 
-    // Create PBOs for async readback (double buffering)
-    this.pbos = [this.createPBO()!, this.createPBO()!];
+    // Create PBOs for async readback (triple buffering)
+    this.pbos = [this.createPBO()!, this.createPBO()!, this.createPBO()!];
+    this.pboSyncs = [null, null, null];
     this.pboIndex = 0;
     this.pboInitialized = false;
 
@@ -612,7 +614,7 @@ export class GPUSamplingDataGenerator {
   }
 
   /**
-   * Read back results and parse into CharacterSamplingData using async PBO readback
+   * Read back results and parse into CharacterSamplingData using async PBO readback with fences
    */
   private readbackAndParse(out: CharacterSamplingData[][]): void {
     const gl = this.gl;
@@ -629,8 +631,13 @@ export class GPUSamplingDataGenerator {
       // Also write to PBO for next frame
       gl.bindBuffer(gl.PIXEL_PACK_BUFFER, this.pbos[1]);
       gl.readPixels(0, 0, this.outputWidth, this.outputHeight, gl.RGBA, gl.FLOAT, 0);
-
       gl.bindBuffer(gl.PIXEL_PACK_BUFFER, null);
+
+      // Create fence to signal when GPU completes the transfer
+      const sync = gl.fenceSync(gl.SYNC_GPU_COMMANDS_COMPLETE, 0);
+      gl.flush();
+      this.pboSyncs[1] = sync;
+
       gl.bindFramebuffer(gl.FRAMEBUFFER, null);
 
       // Move to async mode for next frame
@@ -639,24 +646,53 @@ export class GPUSamplingDataGenerator {
       return;
     }
 
-    // Subsequent frames: use async PBO readback
+    // Subsequent frames: use async PBO readback with fence checking
     const readIndex = this.pboIndex;
-    const writeIndex = (this.pboIndex + 1) % 2;
+    const writeIndex = (this.pboIndex + 1) % 3;
 
-    // Read from the previous frame's PBO
-    gl.bindBuffer(gl.PIXEL_PACK_BUFFER, this.pbos[readIndex]);
-    const finalData = new Float32Array(this.outputWidth * this.outputHeight * 4);
-    gl.getBufferSubData(gl.PIXEL_PACK_BUFFER, 0, finalData);
+    // Check if the previous frame's PBO is ready to read
+    const readSync = this.pboSyncs[readIndex];
+    if (readSync) {
+      const status = gl.getSyncParameter(readSync, gl.SYNC_STATUS);
 
-    // Parse data into output array
-    this.parseReadbackData(finalData, out);
+      if (status === gl.SIGNALED) {
+        // GPU has finished - safe to read
+        gl.bindBuffer(gl.PIXEL_PACK_BUFFER, this.pbos[readIndex]);
+        const finalData = new Float32Array(this.outputWidth * this.outputHeight * 4);
+        gl.getBufferSubData(gl.PIXEL_PACK_BUFFER, 0, finalData);
+        gl.bindBuffer(gl.PIXEL_PACK_BUFFER, null);
+
+        // Parse data into output array
+        this.parseReadbackData(finalData, out);
+
+        // Clean up the sync object
+        gl.deleteSync(readSync);
+        this.pboSyncs[readIndex] = null;
+      }
+      // If not signaled, skip reading this frame (keep previous samplingData)
+    }
+
+    // Before writing, ensure the write buffer is available
+    const existingWriteSync = this.pboSyncs[writeIndex];
+    if (existingWriteSync) {
+      // Wait for the previous write to this buffer to complete
+      // Use timeout 0 to avoid INVALID_OPERATION error
+      gl.clientWaitSync(existingWriteSync, gl.SYNC_FLUSH_COMMANDS_BIT, 0);
+      gl.deleteSync(existingWriteSync);
+      this.pboSyncs[writeIndex] = null;
+    }
 
     // Request pixels for the current frame into the next PBO (non-blocking)
     gl.bindFramebuffer(gl.FRAMEBUFFER, this.currentSamplingFBO);
     gl.bindBuffer(gl.PIXEL_PACK_BUFFER, this.pbos[writeIndex]);
     gl.readPixels(0, 0, this.outputWidth, this.outputHeight, gl.RGBA, gl.FLOAT, 0);
-
     gl.bindBuffer(gl.PIXEL_PACK_BUFFER, null);
+
+    // Create fence for this write
+    const writeSync = gl.fenceSync(gl.SYNC_GPU_COMMANDS_COMPLETE, 0);
+    gl.flush();
+    this.pboSyncs[writeIndex] = writeSync;
+
     gl.bindFramebuffer(gl.FRAMEBUFFER, null);
 
     // Rotate buffers
@@ -965,5 +1001,10 @@ export class GPUSamplingDataGenerator {
 
     // Delete PBOs
     this.pbos.forEach((pbo) => gl.deleteBuffer(pbo));
+
+    // Delete sync objects
+    this.pboSyncs.forEach((sync) => {
+      if (sync) gl.deleteSync(sync);
+    });
   }
 }
