@@ -90,12 +90,11 @@ export default ({ styled, theme }: StyleOptions) => ({
       border-top-left-radius: 16px;
       border-top-right-radius: 16px;
       border-bottom: 1px solid ${theme.medium500};
-      padding: 16px 24px;
     }
     &--bottom {
-      border-top: 1px solid ${theme.medium500};
       border-bottom-left-radius: 16px;
       border-bottom-right-radius: 16px;
+      border-top: 1px solid ${theme.medium500};
     }
 
     strong {
@@ -116,12 +115,12 @@ export default ({ styled, theme }: StyleOptions) => ({
   `,
 
   variables: styled.css`
-    margin: 40px auto 0;
-    display: flex;
-    justify-content: center;
+    height: 72px;
+    padding-top: 20px;
+    margin: 0 auto;
 
-    @media (max-width: 600px) {
-      display: none;
+    @media (max-width: ${cssVariables.mobileWidth}px) {
+      padding-top: 40px;
     }
   `,
 });

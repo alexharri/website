@@ -2,7 +2,7 @@
 title: "Canvas to ASCII renderer"
 ---
 
-Lately I've been working on an ASCII renderer. Here is the result:
+Recently I've been spending my time building an image-to-ASCII renderer. Below is the result -- try dragging it around, this demo is interactive!
 
 <AsciiScene height={540} fontSize={12} characterWidthMultiplier={0.85} characterHeightMultiplier={0.85} viewModes={["ascii", "split", "canvas"]} optimizePerformance splitMode="dynamic" effects={{
   global_crunch: 2.2,

@@ -124,13 +124,13 @@ export const InteractiveVector6D: React.FC<Vector6DProps> = ({
   return (
     <div className={s("outerWrapper", { external: !!externalVector })}>
       <div className={s("wrapper", { showCharacterPick })}>
-        {vary && <div className={s("banner", { top: true })}>{renderVariables("above")}</div>}
         <div className={s("vector")}>
           <Vector6D
             samplingVector={samplingVector}
             externalVector={externalVector}
             affectsMapping={drawAffects ? affectsMapping : undefined}
             showOrder={showOrder}
+            noMargin
           />
         </div>
         {showCharacterPick && (

@@ -14,6 +14,10 @@ export default ({ styled }: StyleOptions) => ({
         width: 270px;
       }
     }
+
+    &--noMargin {
+      margin: 0 auto;
+    }
   `,
 
   container: styled.css`

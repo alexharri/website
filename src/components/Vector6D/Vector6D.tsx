@@ -9,6 +9,7 @@ interface Vector6DProps {
   externalVector?: number[];
   affectsMapping?: number[][];
   showOrder?: boolean;
+  noMargin?: boolean;
 }
 
 interface Circle {
@@ -23,6 +24,7 @@ export const Vector6D: React.FC<Vector6DProps> = ({
   externalVector,
   affectsMapping,
   showOrder,
+  noMargin,
 }) => {
   const s = useStyles(Vector6DStyles);
 
@@ -151,7 +153,7 @@ export const Vector6D: React.FC<Vector6DProps> = ({
   }
 
   return (
-    <div className={s("containerOuter", { hasExternal: !!externalVector })}>
+    <div className={s("containerOuter", { hasExternal: !!externalVector, noMargin })}>
       <div className={s("container")} style={{ paddingBottom: `${paddingBottom}%` }}>
         {circles.map(drawCircle)}
         {externalCircles.map(drawCircle)}
