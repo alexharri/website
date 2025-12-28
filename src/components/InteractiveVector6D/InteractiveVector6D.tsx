@@ -85,25 +85,10 @@ export const InteractiveVector6D: React.FC<Vector6DProps> = ({
       ? metadata.samplingConfig.affectsMapping
       : undefined;
 
-  return (
-    <div className={s("outerWrapper")}>
-      <div className={s("wrapper")}>
-        <div className={s("vector", { external: !!externalVector })}>
-          <Vector6D
-            samplingVector={samplingVector}
-            externalVector={externalVector}
-            affectsMapping={drawAffects ? affectsMapping : undefined}
-            showOrder={showOrder}
-          />
-        </div>
-        {showCharacterPick && (
-          <>
-            <div className={s("arrow")}>{"→"}</div>
-            <div className={s("characterPick")}>{pickedCharacter}</div>
-          </>
-        )}
-      </div>
-      <div className={s("variables")}>
+  function renderVariables(type: "below" | "above") {
+    const showValue = type === "below" ? true : "only-value-on-hover";
+    return (
+      <>
         {vary === "global_exponent" && (
           <NumberVariable
             value={globalExponent}
@@ -114,6 +99,7 @@ export const InteractiveVector6D: React.FC<Vector6DProps> = ({
               label: "Exponent",
               step: 0.05,
             }}
+            showValue={showValue}
             dataKey="exponent"
           />
         )}
@@ -127,21 +113,37 @@ export const InteractiveVector6D: React.FC<Vector6DProps> = ({
               label: "Exponent",
               step: 0.05,
             }}
+            showValue={showValue}
             dataKey="exponent"
           />
         )}
-        {/* <NumberVariable
-          value={t}
-          onValueChange={setT}
-          spec={{
-            range: [0, 1],
-            value: t,
-            label: "math:t",
-            step: 0.05,
-          }}
-          dataKey="t"
-        /> */}
+      </>
+    );
+  }
+
+  return (
+    <div className={s("outerWrapper", { external: !!externalVector })}>
+      <div className={s("wrapper", { showCharacterPick })}>
+        {vary && <div className={s("banner", { top: true })}>{renderVariables("above")}</div>}
+        <div className={s("vector")}>
+          <Vector6D
+            samplingVector={samplingVector}
+            externalVector={externalVector}
+            affectsMapping={drawAffects ? affectsMapping : undefined}
+            showOrder={showOrder}
+          />
+        </div>
+        {showCharacterPick && (
+          <>
+            <div className={s("arrow")}>{"→"}</div>
+            <div className={s("character")}>{pickedCharacter}</div>
+            <div className={s("banner", { bottom: true })}>
+              Picked character: <strong>{pickedCharacter}</strong>
+            </div>
+          </>
+        )}
       </div>
+      <div className={s("variables")}>{renderVariables("below")}</div>
     </div>
   );
 };

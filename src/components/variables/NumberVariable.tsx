@@ -95,6 +95,41 @@ const styles = ({ styled, theme }: StyleOptions) => ({
         opacity: 0.7;
       }
     }
+    &--solidBackground {
+      opacity: 0;
+      background: ${theme.background300};
+      border: 1px solid ${theme.medium500};
+      padding: 4px 8px;
+      border-radius: 4px;
+
+      &:after,
+      &:before {
+        content: "";
+        width: 7px;
+        height: 7px;
+        position: absolute;
+        top: 100%;
+        left: 50%;
+      }
+
+      &:before {
+        z-index: 2;
+        background: ${theme.background300};
+        transform: translate(-50%, -50%) translateY(-1px) rotate(45deg);
+      }
+      &:after {
+        z-index: 1;
+        background: ${theme.medium500};
+        transform: translate(-50%, -50%) translateY(0.5px) rotate(45deg);
+      }
+    }
+    &--solidBackground&--hover {
+      background: ${theme.background300};
+      opacity: 1;
+    }
+    &--hideLeftRightValues {
+      background: transparent;
+    }
     &--left {
       left: 11px;
     }
@@ -125,7 +160,7 @@ interface NumberVariableProps {
   value: number;
   onValueChange: (value: number) => void;
   spec: Omit<NumberVariableSpec, "type">;
-  showValue?: boolean;
+  showValue?: boolean | "only-value" | "only-value-on-hover";
   width?: "small" | "normal";
 }
 
@@ -143,6 +178,8 @@ export const NumberVariable: React.FC<NumberVariableProps> = (props) => {
   const { dataKey, spec, value, onValueChange } = props;
   const showValue = props.showValue ?? spec.showValue ?? true;
   const [min, max] = spec.range;
+
+  const hideLeftRightValues = typeof showValue === "string" && showValue.startsWith("only-value");
 
   const s = useStyles(styles);
 
@@ -197,14 +234,24 @@ export const NumberVariable: React.FC<NumberVariableProps> = (props) => {
         />
         {showValue && (
           <>
-            <span className={s("label", { left: true, down })} style={{ opacity: lOpacity }}>
-              {format(min, step, spec.format)}
-            </span>
-            <span className={s("label", { right: true, down })} style={{ opacity: rOpacity }}>
-              {format(max, step, spec.format)}
-            </span>
+            {!hideLeftRightValues && (
+              <>
+                <span className={s("label", { left: true, down })} style={{ opacity: lOpacity }}>
+                  {format(min, step, spec.format)}
+                </span>
+                <span className={s("label", { right: true, down })} style={{ opacity: rOpacity }}>
+                  {format(max, step, spec.format)}
+                </span>
+              </>
+            )}
             <span
-              className={s("label", { value: true, down, hover })}
+              className={s("label", {
+                value: true,
+                hideLeftRightValues,
+                solidBackground: showValue === "only-value-on-hover",
+                down,
+                hover,
+              })}
               style={{ left: `calc(${lerp(11, -11, t)}px + ${t * 100}%)` }}
             >
               {format(value, step, spec.format)}

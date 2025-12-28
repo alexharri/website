@@ -4,11 +4,15 @@ import { StyleOptions } from "../../utils/styles";
 export default ({ styled }: StyleOptions) => ({
   containerOuter: styled.css`
     margin: 30px auto;
-    width: 100%;
-    max-width: 196px;
+    max-width: 100%;
+    width: 180px;
 
     &--hasExternal {
-      max-width: 400px;
+      width: 310px;
+
+      @media (max-width: 700px) {
+        width: 270px;
+      }
     }
   `,
 
