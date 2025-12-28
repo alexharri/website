@@ -3,7 +3,7 @@ import { CharacterSamplingData } from "../ascii/generateAsciiChars";
 import { SamplingEffect } from "../types";
 import { getAlphabetMetadata } from "../alphabets/AlphabetManager";
 import {
-  PASSTHROUGH_VERT,
+  PASSTHROUGH_VERTEX_SHADER,
   createSamplingFragmentShader,
   createMaxValueFragmentShader,
   createExternalMaxFragmentShader,
@@ -168,27 +168,30 @@ export class GPUSamplingDataGenerator {
 
     // Compile shaders (generate fragment shaders based on numCircles)
     const samplingFrag = createSamplingFragmentShader(this.numCircles);
-    const samplingProgram = this.createProgram(PASSTHROUGH_VERT, samplingFrag);
+    const samplingProgram = this.createProgram(PASSTHROUGH_VERTEX_SHADER, samplingFrag);
     if (!samplingProgram) {
       throw new Error("Failed to create sampling program");
     }
     this.samplingProgram = samplingProgram;
 
     const externalSamplingFrag = createSamplingFragmentShader(this.numExternalPoints);
-    const externalSamplingProgram = this.createProgram(PASSTHROUGH_VERT, externalSamplingFrag);
+    const externalSamplingProgram = this.createProgram(
+      PASSTHROUGH_VERTEX_SHADER,
+      externalSamplingFrag,
+    );
     if (!externalSamplingProgram) {
       throw new Error("Failed to create external sampling program");
     }
     this.externalSamplingProgram = externalSamplingProgram;
 
-    const copyProgram = this.createProgram(PASSTHROUGH_VERT, COPY_FRAGMENT_SHADER);
+    const copyProgram = this.createProgram(PASSTHROUGH_VERTEX_SHADER, COPY_FRAGMENT_SHADER);
     if (!copyProgram) {
       throw new Error("Failed to create copy program");
     }
     this.copyProgram = copyProgram;
 
     const maxValueFrag = createMaxValueFragmentShader(this.numCircles);
-    const maxValueProgram = this.createProgram(PASSTHROUGH_VERT, maxValueFrag);
+    const maxValueProgram = this.createProgram(PASSTHROUGH_VERTEX_SHADER, maxValueFrag);
     if (!maxValueProgram) {
       throw new Error("Failed to create max value program");
     }
@@ -198,21 +201,24 @@ export class GPUSamplingDataGenerator {
       this.numCircles,
       this.affectsMapping.length,
     );
-    const externalMaxProgram = this.createProgram(PASSTHROUGH_VERT, externalMaxFrag);
+    const externalMaxProgram = this.createProgram(PASSTHROUGH_VERTEX_SHADER, externalMaxFrag);
     if (!externalMaxProgram) {
       throw new Error("Failed to create external max program");
     }
     this.externalMaxProgram = externalMaxProgram;
 
     const directionalCrunchFrag = createDirectionalCrunchFragmentShader();
-    const directionalCrunchProgram = this.createProgram(PASSTHROUGH_VERT, directionalCrunchFrag);
+    const directionalCrunchProgram = this.createProgram(
+      PASSTHROUGH_VERTEX_SHADER,
+      directionalCrunchFrag,
+    );
     if (!directionalCrunchProgram) {
       throw new Error("Failed to create directional crunch program");
     }
     this.directionalCrunchProgram = directionalCrunchProgram;
 
     const globalCrunchFrag = createGlobalCrunchFragmentShader();
-    const globalCrunchProgram = this.createProgram(PASSTHROUGH_VERT, globalCrunchFrag);
+    const globalCrunchProgram = this.createProgram(PASSTHROUGH_VERTEX_SHADER, globalCrunchFrag);
     if (!globalCrunchProgram) {
       throw new Error("Failed to create global crunch program");
     }

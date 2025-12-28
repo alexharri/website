@@ -1226,6 +1226,28 @@ On my Macbook, both the brute force and the $k$-d tree approaches were performan
 
 ## Appendix II: GPU accelerated sampling
 
+Lookups were not the only performance concern. Just collecting the sampling vectors (internal and external) turned out to be terribly expensive.
+
+Just consider the sheer amount of samples that need to be collected. The 3D scene I've been using as an example uses a $41 \times 107$ grid, which equals $4{,}387$ cells. For each of those cell, we calculate a $6$-dimensional sampling vector and a $10$-dimensional external sampling vector. This is more than $70$K samples collected on every frame!
+
+<p className="mathblock">$$ 4{,}387 \times (6 + 10) = 70{,}192 $$</p>
+
+And that's if we use a sampling quality of $1$. If we increase the sampling quality, this number just gets bigger.
+
+These lookups absolutely _crushed_ performance on my iPhone, so I either needed to either perform fewer lookups or speed them up somehow. Fewer lookups would have meant rendering fewer ASCII characters or remove the directional contrast enhancement, neither of which is an appealing solution.
+
+As for performance, the main problem was that the lookups were running on the CPU. It would be far faster to perform the sampling in parallel on the GPU instead. Well, that's exactly what I implemented (with help from Claude):
+
+The pipeline roughly looks like so:
+
+1. Collect the raw internal and external sampling vectors into two $\text{cols} \times \text{rows} \times \text{num circles}$ textures ($\text{num circles} = 6$ for the internal and $10$ for the external).
+2. Calculate the maximum external value affecting each internal vector component into a $\text{cols} \times \text{rows}$ texture.
+3. Apply directional contrast enhancement to each sampling vector component, using the maximum external values calculated in the prior step.
+4. Calculate maximum value per internal sampling vector into a $\text{cols} \times \text{rows}$ texture.
+5. Apply global contrast enhancement to each sampling vector component, using the maximum internal values calculated in the prior step.
+
+This is _significantly_ more performant
+
 
 ## Various cool examples
 

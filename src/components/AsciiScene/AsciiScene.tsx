@@ -202,7 +202,7 @@ const _AsciiScene: React.FC<AsciiSceneProps> = (props) => {
   const sampleQuality =
     "sampleQuality" in variableValues
       ? (variableValues.sampleQuality as number)
-      : props.sampleQuality ?? 3;
+      : props.sampleQuality ?? 1;
   const heightMultiplierScale = useMemo(() => {
     return (rowHeight ? rowHeight / (targetFontSize * metadata.height) : 1) * cellScale;
   }, [rowHeight, targetFontSize, metadata, cellScale]);
