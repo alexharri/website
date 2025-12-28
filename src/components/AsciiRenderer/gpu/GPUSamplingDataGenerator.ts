@@ -81,6 +81,8 @@ export class GPUSamplingDataGenerator {
 
   // Pixel Buffer Objects for async readback
   private pbos: WebGLBuffer[];
+  private pboIndex: number;
+  private pboInitialized: boolean;
 
   // Output dimensions
   private outputWidth: number;
@@ -229,6 +231,8 @@ export class GPUSamplingDataGenerator {
 
     // Create PBOs for async readback (double buffering)
     this.pbos = [this.createPBO()!, this.createPBO()!];
+    this.pboIndex = 0;
+    this.pboInitialized = false;
 
     // Check for errors
     this.checkGLError("Constructor");
@@ -608,53 +612,61 @@ export class GPUSamplingDataGenerator {
   }
 
   /**
-   * Read back results and parse into CharacterSamplingData
+   * Read back results and parse into CharacterSamplingData using async PBO readback
    */
   private readbackAndParse(out: CharacterSamplingData[][]): void {
     const gl = this.gl;
 
-    const READBACK_RAW = false;
-    const READBACK_EXTERNAL = false;
+    // First frame: do synchronous readback to ensure samplingData is populated
+    if (!this.pboInitialized) {
+      gl.bindFramebuffer(gl.FRAMEBUFFER, this.currentSamplingFBO);
+      const finalData = new Float32Array(this.outputWidth * this.outputHeight * 4);
+      gl.readPixels(0, 0, this.outputWidth, this.outputHeight, gl.RGBA, gl.FLOAT, finalData);
 
-    // Read back all three textures synchronously (for now)
-    // TODO: Optimize with async readback for all textures
+      // Parse data into output array
+      this.parseReadbackData(finalData, out);
 
-    let rawData: Float32Array | null = null;
-    let externalData: Float32Array | null = null;
+      // Also write to PBO for next frame
+      gl.bindBuffer(gl.PIXEL_PACK_BUFFER, this.pbos[1]);
+      gl.readPixels(0, 0, this.outputWidth, this.outputHeight, gl.RGBA, gl.FLOAT, 0);
 
-    if (READBACK_RAW) {
-      gl.bindFramebuffer(gl.FRAMEBUFFER, this.rawSamplingFBO);
-      rawData = new Float32Array(this.outputWidth * this.outputHeight * 4);
-      gl.readPixels(0, 0, this.outputWidth, this.outputHeight, gl.RGBA, gl.FLOAT, rawData);
+      gl.bindBuffer(gl.PIXEL_PACK_BUFFER, null);
+      gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+
+      // Move to async mode for next frame
+      this.pboIndex = 1;
+      this.pboInitialized = true;
+      return;
     }
 
-    if (READBACK_EXTERNAL) {
-      gl.bindFramebuffer(gl.FRAMEBUFFER, this.externalSamplingFBO);
-      const externalWidth = this.config.cols * this.numExternalPoints;
-      externalData = new Float32Array(externalWidth * this.outputHeight * 4);
-      gl.readPixels(0, 0, externalWidth, this.outputHeight, gl.RGBA, gl.FLOAT, externalData);
-    }
+    // Subsequent frames: use async PBO readback
+    const readIndex = this.pboIndex;
+    const writeIndex = (this.pboIndex + 1) % 2;
 
-    // Read current sampling vector (final output after all effects)
-    gl.bindFramebuffer(gl.FRAMEBUFFER, this.currentSamplingFBO);
+    // Read from the previous frame's PBO
+    gl.bindBuffer(gl.PIXEL_PACK_BUFFER, this.pbos[readIndex]);
     const finalData = new Float32Array(this.outputWidth * this.outputHeight * 4);
-    gl.readPixels(0, 0, this.outputWidth, this.outputHeight, gl.RGBA, gl.FLOAT, finalData);
-
-    gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+    gl.getBufferSubData(gl.PIXEL_PACK_BUFFER, 0, finalData);
 
     // Parse data into output array
-    this.parseReadbackData(finalData, rawData, externalData, out);
+    this.parseReadbackData(finalData, out);
+
+    // Request pixels for the current frame into the next PBO (non-blocking)
+    gl.bindFramebuffer(gl.FRAMEBUFFER, this.currentSamplingFBO);
+    gl.bindBuffer(gl.PIXEL_PACK_BUFFER, this.pbos[writeIndex]);
+    gl.readPixels(0, 0, this.outputWidth, this.outputHeight, gl.RGBA, gl.FLOAT, 0);
+
+    gl.bindBuffer(gl.PIXEL_PACK_BUFFER, null);
+    gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+
+    // Rotate buffers
+    this.pboIndex = writeIndex;
   }
 
   /**
    * Parse readback data into CharacterSamplingData array
    */
-  private parseReadbackData(
-    finalData: Float32Array,
-    rawData: Float32Array | null,
-    externalData: Float32Array | null,
-    out: CharacterSamplingData[][],
-  ): void {
+  private parseReadbackData(finalData: Float32Array, out: CharacterSamplingData[][]): void {
     // Data is packed as: 3 circles per row, 2 rows per cell
     // Each pixel contains one sampling value in the red channel
 
@@ -688,8 +700,6 @@ export class GPUSamplingDataGenerator {
           // Read from all three textures
           // Crunch is now applied in GPU shader, so read final values from crunchedData
           samplingVector.push(finalData[pixelIndex]); // Final crunched value
-          if (rawData) rawSamplingVector.push(rawData[pixelIndex]); // Raw value
-          if (externalData) externalSamplingVector.push(externalData[pixelIndex]); // External value
         }
 
         // Update output array (note: subsamples not collected in GPU path)
