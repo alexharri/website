@@ -1140,7 +1140,7 @@ function searchCached(samplingVector: number[]) {
 
 But how does one generate a cache key for a $6$-dimensional vector?
 
-Well, one way is to quantize each vector component so that it fits into a set number of bits and packing those bits into a single number. JavaScript numbers give us $32$ bits to work with, so each vector component has at most $5$ bits to play around with.
+Well, one way is to quantize each vector component so that it fits into a set number of bits and packing those bits into a single number. JavaScript numbers give us $32$ bits to work with, so each vector component gets $5$ bits.
 
 We can quantize a numeric value between $0$ and $1$ to the range $0$ to $31$ (the most that $5$ bits can store) like so:
 
@@ -1188,13 +1188,13 @@ Alright, $32$ is too high, but what value should we pick? We can pick any number
   ]}
 />
 
-There are trade offs to consider here. As the range gets smaller, the quality of the results drops. If we pick a range of $6$, for example, the only possible lightness values are $0$, $0.2$, $0.4$, $0.6$, $0.8$ and $1$. That _does_ affect the quality of the ASCII rendering.
+There are trade offs to consider here. As the range gets smaller, the quality of the results drops. If we pick a range of $6$, for example, the only possible lightness values are $0$, $0.2$, $0.4$, $0.6$, $0.8$ and $1$. That noticeably affects the quality of character picks.
 
 At the same time, if we increase the possible number of keys, we need more memory to store them. Additionally, the cache hit rate might be very low, especially when the cache is relatively empty.
 
-Cached lookups are incredibly fast -- fast enough that lookup performance just isn't a concern anymore ($100$K lookups take a few ms on my Macbook). And if we prepopulate the cache, we can expect consistently fast performance, though I encountered no problems just lazily populating the cache.
+I ended up picking a range of $8$. It's a large enough range that quality doesn't suffer too much while keeping the cache size reasonably low.
 
-On my Macbook, both the brute force and the $k$-d tree approaches were performant enough. However, since I needed the examples in this post to perform well on mobile, I ended up using this cached lookups with the $k$-d tree. That runs fast enough on my iPhone. Hopefully it runs fast enough on whatever device you're reading this on!
+Cached lookups are incredibly fast -- fast enough that lookup performance just isn't a concern anymore ($100$K lookups take a few ms on my Macbook). And if we prepopulate the cache, we can expect consistently fast performance, though I encountered no problems just lazily populating the cache.
 
 ## Appendix II: GPU acceleration
 
@@ -1228,4 +1228,15 @@ webglContext.readPixels(
 );
 ```
 
-This was incredibly expensive, since the main thread was blocked until the image data
+This was incredibly expensive, since the main thread was blocked until the image data had been transferred to the buffer. On my Macbook, reading the $2{,}156 \times 1{,}080$ canvas used in the 3D example took $8$-$10$ ms and reading the final data from the last texture in the GPU pipeline described above took around $4$-$5$ ms. That is _absurdly_ expensive!
+
+The solution is to use [non-blocking async data readback][async_readback] with [multiple buffers][multiple_buffers]. After a frame has been rendered, I request the transfer of the pixel data to a <Ts class>WebGLBuffer</Ts> and read data from the buffer that was populated between the previous frame and the current one. I used triple buffering:
+
+[async_readback]: https://developer.mozilla.org/en-US/docs/Web/API/WebGL_API/WebGL_best_practices#use_non-blocking_async_data_readback
+[multiple_buffers]: https://en.wikipedia.org/wiki/Multiple_buffering
+
+ * Frame $n$: read from buffer 0, start writing to buffer 1.
+ * Frame $n + 1$: read from buffer 1, start writing to buffer 2.
+ * Frame $n + 2$: read from buffer 2, start writing to buffer 0.
+
+This introduces a frame of latency, since you're always reading the last frame's data. And in my case, I experience two frames of latency. One is introduced by the async readback of the canvas data, and another from the async readback of the sampling texture data. That's not great, but the $33$ ms of latency is an acceptable tradeoff for buttery smooth performance in this case.
