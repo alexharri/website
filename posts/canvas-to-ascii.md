@@ -2,7 +2,7 @@
 title: "Canvas to ASCII renderer"
 ---
 
-Recently I've been spending my time building an image-to-ASCII renderer. Below is the result -- try dragging it around, this demo is interactive!
+Recently I've been spending my time building an image-to-ASCII renderer. Below is the result -- try dragging it around, the demo is interactive!
 
 <AsciiScene height={540} fontSize={12} characterWidthMultiplier={0.85} characterHeightMultiplier={0.85} viewModes={["ascii", "split", "canvas"]} optimizePerformance splitMode="dynamic" effects={{
   global_crunch: 2.2,
@@ -11,35 +11,37 @@ Recently I've been spending my time building an image-to-ASCII renderer. Below i
   <Scene scene="cube" autoRotate zoom={2.7} yOffset={0.45} />
 </AsciiScene>
 
-Pretty cool, right?
+One thing I spent a lot of effort on is getting edges looking sharp. Take a look at this rotating cube example -- try opening the "split" view and notice how well the characters follow the contour of the square:
 
-ASCII art uses [ASCII characters][ascii_characters] to create images, typically in a [monospace][monospace] font. Here's an example of an ASCII art piece:
-
-[ascii_characters]: https://en.wikipedia.org/wiki/ASCII#Printable_character_table
-
-<AsciiScene fontSize={15} characterWidthMultiplier={0.61} rows={20} cols={40}>
-{`                                            _.oo.
-                      _.u[[/;:,.         .odMMMMMM'
-                   .o888UU[[[/;:-.  .o@P^    MMM^
-                  oN88888UU[[[/;::-.        dP^
-                 dNMMNN888UU[[[/;:--.   .o@P^
-               ,MMMMMMN888UU[[/;::-. o@^
-                NNMMMNN888UU[[[/~.o@P^
-                888888888UU[[[/o@^-..
-               oI8888UU[[[/o@P^:--..
-            .@^  YUU[[[/o@^;::---..
-          oMP     ^/o@P^;:::---..
-       .dMMM    .o@^ ^;::---...
-      dMMMMMMM@^\       \^^^^
-     YMMMUP^
-      ^^`}
+<AsciiScene width={600} minWidth={400} height={400} fontSize={13} rowHeight={15} columnWidth={13} splitMode="static"  viewModes={["ascii", "split"]} sampleQuality={8} exclude="$" optimizePerformance>
+  <Scene2D scene="rotating_square_raised" />
 </AsciiScene>
 
-<SmallNote label="" center>Source: [https://paulbourke.net/dataformats/asciiart/](https://paulbourke.net/dataformats/asciiart/)</SmallNote>
+This renderer works well for animated scenes, like the ones above, but we can also use it to render static images:
 
-I really like the ring around the planet. The artist manages to make its edges sharp by picking characters that match the ring's contour really well.
+<AsciiScene height={500} width={500} minWidth={500} fontSize={14} characterWidthMultiplier={0.75} characterHeightMultiplier={0.9} viewMode="split" splitMode="static" effects={{
+  global_crunch: 1.5,
+  directional_crunch: 1.25,
+}}>
+  <Scene2D scene="saturn" />
+</AsciiScene>
 
-Sharp edges like these are an aspect of ASCII rendering that is often overlooked when programmatically rendering images as ASCII. Consider this animated 3D scene that is rendered via ASCII characters:
+<SmallNote label="" center>The image of Saturn was [generated with ChatGPT][saturn_image].</SmallNote>
+
+[saturn_image]: https://chatgpt.com/share/69524279-7564-800f-ae22-a2f433794abe
+
+Then, to get better separation between different colored regions, I also implemented contrast enhancement. Try dragging the contrast slider below:
+
+<AsciiScene height={360} width={700} minWidth={500} fontSize={13} characterWidthMultiplier={0.8} characterHeightMultiplier={0.8} viewModes={["ascii", "split", "canvas"]} splitMode="static" usesVariables exclude="|v\\/" effectSlider={{
+  global_crunch: [1, 3.5],
+  directional_crunch: [1, 4.7],
+}}>
+  <WebGLShader fragmentShader="multiple_waves" seed={9581} />
+</AsciiScene>
+
+Before contrast enhancement, the waves kind of blended together visually. Enhancing contrast makes the seperation far clearer, which was key to making the 3D scene above look as good as it does.
+
+I put so much focus on sharp edges because they're an aspect of ASCII rendering that is often overlooked when programmatically rendering images as ASCII. Consider this animated 3D scene from Cognition's landing page that is rendered via ASCII characters:
 
 <Image src="~/cube-logo-short.mp4" plain width={700} noMargin />
 
@@ -49,41 +51,11 @@ It's a cool effect, especially while in motion, but take a look at those blurry 
 
 <Image src="~/cube-logo-zoomed-in.png" plain width={450} noMargin />
 
-This blurriness arises from a common mistake made when implementing an ASCII renderer: ignoring the shape of ASCII characters and only considering visual density.
-
-Blurry edges in ASCII rendering have become a small pet peeve of mine, so I recently took the time to implement an ASCII renderer that focuses on contour matching and rendering quality. Here's an interactive 3D scene rendered via the ASCII renderer -- try panning around the scene:
-
-<AsciiScene height={540} fontSize={12} characterWidthMultiplier={0.85} characterHeightMultiplier={0.85} viewModes={["ascii", "split", "canvas"]} optimizePerformance splitMode="dynamic" effects={{
-  global_crunch: 2.2,
-  directional_crunch: 2.8,
-}}>
-  <Scene scene="cube" autoRotate zoom={2.7} yOffset={0.45} />
-</AsciiScene>
-
-<SmallNote label="" center>Try the 'Split' mode to compare the image to the resulting ASCII.</SmallNote>
-
-Here's what the same renderer produces for an image of Saturn:
-
-<AsciiScene height={500} width={500} minWidth={500} fontSize={14} characterWidthMultiplier={0.75} characterHeightMultiplier={0.9} viewModes={["ascii", "split", "canvas"]} splitMode="static" effects={{
-  global_crunch: 1.5,
-  directional_crunch: 1.25,
-}}>
-  <Scene2D scene="saturn" />
-</AsciiScene>
-
+This blurriness arises from a common mistake made when implementing an ASCII renderer: ignoring the shape of ASCII characters and only considering visual density. Blurry edges in ASCII rendering have become a small pet peeve of mine, which is why I started implement my ASCII renderer to begin with
 
 In this post I'll cover how I built this ASCII renderer in detail.
 
-We'll start with the basics of image-to-ASCII conversion and see where the common issue of blurry edges comes from. After that I'll show you how to fix that to achieve sharp, high-quality ASCII rendering. We'll cover wide range of ideas, ranging from the basics of image processing to nearest neighbor lookups in a high-dimensional space.
-
-We'll also take a look at we can apply effects such as contrast enhancement. Here's the 3D scene again without contrast enhancement by default -- try dragging the slider to gradually increase the contrast between edges:
-
-<AsciiScene height={540} fontSize={12} characterWidthMultiplier={0.85} characterHeightMultiplier={0.85} viewModes={["ascii", "split", "canvas"]} optimizePerformance splitMode="dynamic" effectSlider={{
-  global_crunch: [1, 2.2],
-  directional_crunch: [1, 2.8],
-}}>
-  <Scene scene="cube" autoRotate zoom={2.7} yOffset={0.45} />
-</AsciiScene>
+We'll start with the basics of image-to-ASCII conversion and see where the common issue of blurry edges comes from. After that I'll show you the approach I used to fix that and achieve sharp, high-quality ASCII rendering, and lastly we'll tackle contrast enhancement.
 
 Let's get to it!
 
@@ -92,7 +64,7 @@ Let's get to it!
 
 [ascii]: https://en.wikipedia.org/wiki/ASCII
 
-Let's start off by rendering the following image, containing a white circle, using ASCII characters:
+Let's start off by rendering the following image containing a white circle using ASCII characters:
 
 <AsciiScene width={360} minWidth={360} height={360} viewMode="canvas">
   <Scene2D scene="circle" />
@@ -1302,3 +1274,29 @@ In this post, let's dive into how we can generate sharp ASCII arts from a dynami
 
 Let's get started!
 
+
+ASCII art uses [ASCII characters][ascii_characters] to create images, typically in a [monospace][monospace] font. Here's an example of an ASCII art piece:
+
+[ascii_characters]: https://en.wikipedia.org/wiki/ASCII#Printable_character_table
+
+<AsciiScene fontSize={15} characterWidthMultiplier={0.61} rows={20} cols={40}>
+{`                                            _.oo.
+                      _.u[[/;:,.         .odMMMMMM'
+                   .o888UU[[[/;:-.  .o@P^    MMM^
+                  oN88888UU[[[/;::-.        dP^
+                 dNMMNN888UU[[[/;:--.   .o@P^
+               ,MMMMMMN888UU[[/;::-. o@^
+                NNMMMNN888UU[[[/~.o@P^
+                888888888UU[[[/o@^-..
+               oI8888UU[[[/o@P^:--..
+            .@^  YUU[[[/o@^;::---..
+          oMP     ^/o@P^;:::---..
+       .dMMM    .o@^ ^;::---...
+      dMMMMMMM@^\       \^^^^
+     YMMMUP^
+      ^^`}
+</AsciiScene>
+
+<SmallNote label="" center>Source: [https://paulbourke.net/dataformats/asciiart/](https://paulbourke.net/dataformats/asciiart/)</SmallNote>
+
+I really like the ring around the planet. The artist manages to make its edges sharp by picking characters that match the ring's contour really well.
