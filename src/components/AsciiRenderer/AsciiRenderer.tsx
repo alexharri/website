@@ -86,7 +86,14 @@ export function AsciiRenderer(props: Props) {
         renderPixelate(pixelateCanvasRef.current, samplingData, config);
       }
     },
-    [characterMatcher, debugVizOptions.pixelate, config, hideAscii, transparent],
+    [
+      characterMatcher,
+      debugVizOptions.pixelate,
+      config,
+      hideAscii,
+      transparent,
+      optimizePerformance,
+    ],
   );
 
   useEffect(() => {
