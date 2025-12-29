@@ -50,7 +50,7 @@ function getOrCreateGlyph(
 
   // Measure the actual character to get precise dimensions
   const measureCanvas = document.createElement("canvas");
-  const measureCtx = measureCanvas.getContext("2d");
+  const measureCtx = measureCanvas.getContext("2d", { willReadFrequently: true });
   if (!measureCtx) {
     const emptyGlyph = { canvas: glyphCanvas, width: fontSize, height: fontSize };
     return emptyGlyph;
@@ -64,7 +64,7 @@ function getOrCreateGlyph(
   glyphCanvas.width = width * dpr;
   glyphCanvas.height = height * dpr;
 
-  const ctx = glyphCanvas.getContext("2d");
+  const ctx = glyphCanvas.getContext("2d", { willReadFrequently: true });
   if (!ctx) {
     const emptyGlyph = { canvas: glyphCanvas, width, height };
     return emptyGlyph;
@@ -85,6 +85,19 @@ export function clearGlyphCache() {
   glyphCache.clear();
 }
 
+export function clearRenderState() {
+  previousRenderState = null;
+}
+
+// Track previously rendered state for optimization
+interface RenderState {
+  chars: string[][];
+  rows: number;
+  cols: number;
+}
+
+let previousRenderState: RenderState | null = null;
+
 export function renderAsciiCanvas(
   canvas: HTMLCanvasElement,
   samplingData: CharacterSamplingData[][],
@@ -97,13 +110,29 @@ export function renderAsciiCanvas(
 
   const dpr = window.devicePixelRatio || 1;
 
-  canvas.width = config.canvasWidth * dpr;
-  canvas.height = config.canvasHeight * dpr;
-  canvas.style.width = config.canvasWidth + "px";
-  canvas.style.height = config.canvasHeight + "px";
+  // Check if dimensions changed
+  const dimensionsChanged =
+    !previousRenderState ||
+    previousRenderState.rows !== config.rows ||
+    previousRenderState.cols !== config.cols;
 
-  ctx.scale(dpr, dpr);
-  ctx.clearRect(0, 0, config.canvasWidth, config.canvasHeight);
+  // If dimensions changed, resize canvas and do full render
+  if (dimensionsChanged) {
+    canvas.width = config.canvasWidth * dpr;
+    canvas.height = config.canvasHeight * dpr;
+    canvas.style.width = config.canvasWidth + "px";
+    canvas.style.height = config.canvasHeight + "px";
+
+    ctx.scale(dpr, dpr);
+    ctx.clearRect(0, 0, config.canvasWidth, config.canvasHeight);
+
+    // Initialize new state
+    previousRenderState = {
+      chars: Array.from({ length: config.rows }, () => Array(config.cols).fill("")),
+      rows: config.rows,
+      cols: config.cols,
+    };
+  }
 
   for (let row = 0; row < config.rows; row++) {
     for (let col = 0; col < config.cols; col++) {
@@ -114,18 +143,30 @@ export function renderAsciiCanvas(
         cellSamplingData.samplingVector,
       );
 
-      const x = col * config.boxWidth;
-      const y = row * config.boxHeight;
+      // Only render if character changed or full render needed
+      const prevChar = previousRenderState!.chars[row]?.[col];
+      if (dimensionsChanged || selectedChar !== prevChar) {
+        const x = col * config.boxWidth;
+        const y = row * config.boxHeight;
 
-      // Get or create cached glyph and draw it at the correct logical size
-      const glyph = getOrCreateGlyph(
-        selectedChar,
-        config.fontSize,
-        config.boxWidth,
-        config.boxHeight,
-        color,
-      );
-      ctx.drawImage(glyph.canvas, x, y, glyph.width, glyph.height);
+        // Clear the cell before drawing
+        if (!dimensionsChanged) {
+          ctx.clearRect(x, y, config.boxWidth, config.boxHeight);
+        }
+
+        // Get or create cached glyph and draw it at the correct logical size
+        const glyph = getOrCreateGlyph(
+          selectedChar,
+          config.fontSize,
+          config.boxWidth,
+          config.boxHeight,
+          color,
+        );
+        ctx.drawImage(glyph.canvas, x, y, glyph.width, glyph.height);
+
+        // Update state
+        previousRenderState!.chars[row][col] = selectedChar;
+      }
     }
   }
 }
