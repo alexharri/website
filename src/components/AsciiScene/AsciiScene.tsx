@@ -241,14 +241,24 @@ const _AsciiScene: React.FC<AsciiSceneProps> = (props) => {
     setVariableValues((prev) => ({ ...prev, [key]: value }));
   }, []);
 
-  const debugVizOptions: DebugVizOptions = {
-    showSamplingCircles: showSamplingCircles === true ? "raw" : showSamplingCircles,
-    samplingCirclesColor,
-    showExternalSamplingCircles,
-    showSamplingPoints,
-    showGrid,
-    pixelate,
-  };
+  const debugVizOptions: DebugVizOptions = useMemo(
+    () => ({
+      showSamplingCircles: showSamplingCircles === true ? "raw" : showSamplingCircles,
+      samplingCirclesColor,
+      showExternalSamplingCircles,
+      showSamplingPoints,
+      showGrid,
+      pixelate,
+    }),
+    [
+      showSamplingCircles,
+      samplingCirclesColor,
+      showExternalSamplingCircles,
+      showSamplingPoints,
+      showGrid,
+      pixelate,
+    ],
+  );
 
   const fontSize = targetFontSize * scale * cellScale;
 

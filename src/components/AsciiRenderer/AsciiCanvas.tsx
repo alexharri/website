@@ -39,7 +39,7 @@ function getOrCreateGlyph(
   boxHeight: number,
   color: string,
 ): CachedGlyph {
-  const cacheKey = `${char}_${fontSize}_${color}`;
+  const cacheKey = `${char}_${fontSize}_${boxWidth}_${boxHeight}_${color}`;
 
   let cached = glyphCache.get(cacheKey);
   if (cached) return cached;
@@ -57,13 +57,10 @@ function getOrCreateGlyph(
   }
 
   measureCtx.font = `${fontSize}px ${cssVariables.fontMonospace}`;
-  const metrics = measureCtx.measureText("M");
 
-  // Use actual measured width and fontSize for height (logical CSS pixels)
-  const width = metrics.width * dpr;
-  const height = width * (boxHeight / boxWidth);
+  const width = boxWidth;
+  const height = boxHeight;
 
-  // Scale canvas by DPR for sharp rendering
   glyphCanvas.width = width * dpr;
   glyphCanvas.height = height * dpr;
 
@@ -117,8 +114,8 @@ export function renderAsciiCanvas(
         cellSamplingData.samplingVector,
       );
 
-      const x = config.offsetX + config.asciiXOffset + col * config.boxWidth;
-      const y = config.offsetY + row * config.boxHeight;
+      const x = col * config.boxWidth;
+      const y = row * config.boxHeight;
 
       // Get or create cached glyph and draw it at the correct logical size
       const glyph = getOrCreateGlyph(
