@@ -31,7 +31,7 @@ function applyEasingLookup(t: number, lookupTable: Float32Array): number {
   return lookupTable[index];
 }
 
-function readPixelFromBuffer(pixelBuffer: Uint8Array, index: number) {
+function readPixelFromBuffer(pixelBuffer: Uint8Array | Uint8ClampedArray, index: number) {
   return (pixelBuffer[index] << 16) | (pixelBuffer[index + 1] << 8) | pixelBuffer[index + 2];
 }
 
@@ -43,7 +43,7 @@ function lightness(hexColor: number): number {
 }
 
 function sampleCircularRegion(
-  pixelBuffer: Uint8Array,
+  pixelBuffer: Uint8Array | Uint8ClampedArray,
   config: AsciiRenderConfig,
   x: number,
   y: number,
@@ -139,7 +139,7 @@ export interface GenerationResult {
 
 export function generateSamplingData(
   out: CharacterSamplingData[][],
-  pixelBuffer: Uint8Array,
+  pixelBuffer: Uint8Array | Uint8ClampedArray,
   pixelBufferScale: number,
   config: AsciiRenderConfig,
   collectSubsamples: boolean,

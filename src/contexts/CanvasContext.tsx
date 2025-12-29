@@ -7,7 +7,7 @@ type Variables = Record<string, unknown>;
 export type OnFrameOptions = { flipY?: boolean; canvasWidth: number; canvasHeight: number };
 
 interface ISceneContext {
-  onFrame: (buffer: Uint8Array, options: OnFrameOptions) => void;
+  onFrame: (buffer: Uint8Array | Uint8ClampedArray, options: OnFrameOptions) => void;
   width: number;
   height: number;
   minWidth: number;
@@ -24,7 +24,7 @@ export function useSceneContext(): ISceneContext | null {
 
 interface CanvasProviderProps {
   children: React.ReactNode;
-  onFrame: (buffer: Uint8Array, options: OnFrameOptions) => void;
+  onFrame: (buffer: Uint8Array | Uint8ClampedArray, options: OnFrameOptions) => void;
   width: number;
   height: number;
   minWidth?: number;

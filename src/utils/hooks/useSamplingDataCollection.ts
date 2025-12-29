@@ -124,13 +124,13 @@ export function useSamplingDataCollection(params: UseSamplingDataCollectionParam
   }, [globalCrunchExponent, directionalCrunchExponent]);
 
   const lastFrameRef = useRef<{
-    buffer: Uint8Array;
+    buffer: Uint8Array | Uint8ClampedArray;
     options: { flipY?: boolean; canvasWidth: number; canvasHeight: number };
   } | null>(null);
 
   const onFrame = useCallback(
     (
-      buffer: Uint8Array,
+      buffer: Uint8Array | Uint8ClampedArray,
       options: { flipY?: boolean; canvasWidth: number; canvasHeight: number },
     ) => {
       lastFrameRef.current = { buffer, options };

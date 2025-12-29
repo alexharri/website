@@ -1196,21 +1196,19 @@ Cached lookups are incredibly fast -- fast enough that lookup performance just i
 
 On my Macbook, both the brute force and the $k$-d tree approaches were performant enough. However, since I needed the examples in this post to perform well on mobile, I ended up using this cached lookups with the $k$-d tree. That runs fast enough on my iPhone. Hopefully it runs fast enough on whatever device you're reading this on!
 
-## Appendix II: GPU accelerated sampling
+## Appendix II: GPU acceleration
 
 Lookups were not the only performance concern. Just collecting the sampling vectors (internal and external) turned out to be terribly expensive.
 
-Just consider the sheer amount of samples that need to be collected. The 3D scene I've been using as an example uses a $41 \times 107$ grid, which equals $4{,}387$ cells. For each of those cell, we calculate a $6$-dimensional sampling vector and a $10$-dimensional external sampling vector. This is more than $70$K samples collected on every frame!
+Just consider the sheer amount of samples that need to be collected. The 3D scene I've been using as an example uses a $41 \times 107$ grid, which equals $4{,}387$ cells. For each of those cells, we compute a $6$-dimensional sampling vector and a $10$-dimensional external sampling vector. That is more than $70$K vector components to compute on every frame!
 
 <p className="mathblock">$$ 4{,}387 \times (6 + 10) = 70{,}192 $$</p>
 
-And that's if we use a sampling quality of $1$. If we increase the sampling quality, this number just gets bigger.
+<SmallNote center label="">And that's if we use a sampling quality of $1$. If we increase the sampling quality, this number just gets bigger.</SmallNote>
 
-These lookups absolutely _crushed_ performance on my iPhone, so I either needed to either perform fewer lookups or speed them up somehow. Fewer lookups would have meant rendering fewer ASCII characters or remove the directional contrast enhancement, neither of which is an appealing solution.
+Collecting these samples absolutely _crushed_ performance on my iPhone, so I either needed to either collect fewer samples or speed them up somehow. Collecting fewer samples would have meant rendering fewer ASCII characters or removing the directional contrast enhancement, neither of which was an appealing solution.
 
-As for performance, the main problem was that the lookups were running on the CPU. It would be far faster to perform the sampling in parallel on the GPU instead. Well, that's exactly what I implemented (with help from Claude):
-
-The pipeline roughly looks like so:
+My initial implementation ran on the CPU, which could only collect one sample at a time. To speed this up, I moved the work of sampling collection and applying the contrast enhancement to the GPU. The pipeline for that looks like so:
 
 1. Collect the raw internal and external sampling vectors into two $\text{cols} \times \text{rows} \times \text{num circles}$ textures ($\text{num circles} = 6$ for the internal and $10$ for the external).
 2. Calculate the maximum external value affecting each internal vector component into a $\text{cols} \times \text{rows}$ texture.
@@ -1218,85 +1216,16 @@ The pipeline roughly looks like so:
 4. Calculate maximum value per internal sampling vector into a $\text{cols} \times \text{rows}$ texture.
 5. Apply global contrast enhancement to each sampling vector component, using the maximum internal values calculated in the prior step.
 
-This is _significantly_ more performant
+This increased the speed of sample collection drastically (at least by 5x).
 
+Another significant performance hog was extracting the pixel data from the WebGL canvases. I started off with a <Ts method>readPixels</Ts> call that looked like so:
 
-## Various cool examples
+```ts
+webglContext.readPixels(
+  0, 0, canvas.width, canvas.height,
+  webglContext.RGBA, webglContext.UNSIGNED_BYTE,
+  buffer,
+);
+```
 
-<AsciiScene height={700} fontSize={12} characterWidthMultiplier={0.9} characterHeightMultiplier={0.9} viewModes={["ascii", "split", "canvas"]} effects={["crunch"]} vary={["global_crunch_exponent", "directional_crunch_exponent"]} lightnessEasingFunction="darken" usesVariables>
-  <Scene scene="cube-logo" seed={20367} />
-</AsciiScene>
-
-
-## Old intro
-
-Terminal-based LLM coding tools have been coming out left and right. A common motif accompanying those tools has been ASCII art, frequently animated.
-
-I've noticed a few common issues with how people generate the ASCII characters, which leaves the ASCII art either feeling [jaggy][jaggies] or blurry. We can 
-
-[jaggies]: https://en.wikipedia.org/wiki/Jaggies
-
-In this post, let's dive into how we can generate sharp ASCII arts from a dynamic input image. Here's an example of what we'll build:
-
-<AsciiScene height={540} fontSize={12} characterWidthMultiplier={0.85} characterHeightMultiplier={0.85} viewModes={["ascii", "split", "canvas"]} usesVariables effects={{
-  global_crunch: [2.2, { range: [1, 5], step: 0.25 }],
-  directional_crunch: [2.8, { range: [1, 5], step: 0.25 }],
-}}>
-  <Scene scene="cube" autoRotate zoom={2.7} yOffset={0.45} />
-</AsciiScene>
-
-<AsciiScene width={400} height={300} fontSize={19} rowHeight={18} columnWidth={15} viewMode="transparent" usesVariables exclude="|v" effects={{
-  global_crunch: [1, { range: [1, 5], step: 0.25 }],
-  directional_crunch: [1, { range: [1, 5], step: 0.25 }],
-}}>
-  <Scene2D scene="staircase_effect" />
-</AsciiScene>
-
-<AsciiScene width={400} height={300} fontSize={19} rowHeight={18} columnWidth={15} viewMode="transparent" usesVariables exclude="|v" optimizePerformance effects={{
-  global_crunch: [1, { range: [1, 5], step: 0.25 }],
-  directional_crunch: [1, { range: [1, 5], step: 0.25 }],
-}}>
-  <Scene2D scene="staircase_effect" />
-</AsciiScene>
-
-<AsciiScene height={700} fontSize={12} characterWidthMultiplier={0.9} characterHeightMultiplier={0.9} viewModes={["ascii", "split", "canvas"]} lightnessEasingFunction="darken">
-  <Scene scene="cube-logo" seed={20367} />
-</AsciiScene>
-
-<SmallNote label="" center>Look how sharp the edges are as a result of picking characters that match them!</SmallNote>
-
-<AsciiScene height={450} width={700} fontSize={13} characterWidthMultiplier={0.8} characterHeightMultiplier={0.8} viewModes={["ascii", "split", "canvas"]} usesVariables exclude="|v" effects={{
-  global_crunch: [1, { range: [1, 5], step: 0.25 }],
-  directional_crunch: [1, { range: [1, 5], step: 0.25 }],
-}}>
-  <WebGLShader fragmentShader="multiple_waves" seed={9581} />
-</AsciiScene>
-
-Let's get started!
-
-
-ASCII art uses [ASCII characters][ascii_characters] to create images, typically in a [monospace][monospace] font. Here's an example of an ASCII art piece:
-
-[ascii_characters]: https://en.wikipedia.org/wiki/ASCII#Printable_character_table
-
-<AsciiScene fontSize={15} characterWidthMultiplier={0.61} rows={20} cols={40}>
-{`                                            _.oo.
-                      _.u[[/;:,.         .odMMMMMM'
-                   .o888UU[[[/;:-.  .o@P^    MMM^
-                  oN88888UU[[[/;::-.        dP^
-                 dNMMNN888UU[[[/;:--.   .o@P^
-               ,MMMMMMN888UU[[/;::-. o@^
-                NNMMMNN888UU[[[/~.o@P^
-                888888888UU[[[/o@^-..
-               oI8888UU[[[/o@P^:--..
-            .@^  YUU[[[/o@^;::---..
-          oMP     ^/o@P^;:::---..
-       .dMMM    .o@^ ^;::---...
-      dMMMMMMM@^\       \^^^^
-     YMMMUP^
-      ^^`}
-</AsciiScene>
-
-<SmallNote label="" center>Source: [https://paulbourke.net/dataformats/asciiart/](https://paulbourke.net/dataformats/asciiart/)</SmallNote>
-
-I really like the ring around the planet. The artist manages to make its edges sharp by picking characters that match the ring's contour really well.
+This was incredibly expensive, since the main thread was blocked until the image data

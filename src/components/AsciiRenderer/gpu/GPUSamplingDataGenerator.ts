@@ -297,7 +297,7 @@ export class GPUSamplingDataGenerator {
    * Update sampling data from a new canvas buffer
    */
   public update(
-    pixelBuffer: Uint8Array,
+    pixelBuffer: Uint8Array | Uint8ClampedArray,
     out: CharacterSamplingData[][],
     flipY: boolean,
     pixelBufferScale: number,
@@ -413,7 +413,7 @@ export class GPUSamplingDataGenerator {
   /**
    * Upload canvas pixel buffer to texture
    */
-  private uploadCanvasTexture(pixelBuffer: Uint8Array): void {
+  private uploadCanvasTexture(pixelBuffer: Uint8Array | Uint8ClampedArray): void {
     const gl = this.gl;
     gl.bindTexture(gl.TEXTURE_2D, this.canvasTexture);
     gl.texImage2D(
@@ -956,10 +956,12 @@ export class GPUSamplingDataGenerator {
    * Check for GL errors
    */
   private checkGLError(context: string): void {
-    const gl = this.gl;
-    const error = gl.getError();
-    if (error !== gl.NO_ERROR) {
-      console.error(`WebGL error in ${context}:`, error);
+    if (process.env.NODE_ENV === "development") {
+      const gl = this.gl;
+      const error = gl.getError();
+      if (error !== gl.NO_ERROR) {
+        console.error(`WebGL error in ${context}:`, error);
+      }
     }
   }
 
