@@ -34,8 +34,10 @@ export function AsciiRenderer(props: Props) {
     showSamplingPoints,
     config,
     characterMode,
-    optimizePerformance,
+    optimizePerformance: _,
   } = props;
+
+  const optimizePerformance = false; // Temporarily disable
 
   const containerRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
