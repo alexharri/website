@@ -31,26 +31,37 @@ export const SplitView: React.FC<SplitViewProps> = ({
   const [isDragging, setIsDragging] = useState(false);
   const [leftContent, rightContent] = children;
 
-  const handleMouseDown = (e: React.MouseEvent) => {
+  const handlePointerDown = (e: React.MouseEvent | React.TouchEvent) => {
     e.preventDefault();
     if (viewMode !== "split") {
       return;
     }
     setIsDragging(true);
-    function onMouseMove(e: MouseEvent) {
+
+    const getClientX = (e: MouseEvent | TouchEvent): number => {
+      return 'touches' in e ? e.touches[0].clientX : e.clientX;
+    };
+
+    function onMove(e: MouseEvent | TouchEvent) {
       if (!rectRef?.current) return;
       const rect = rectRef.current.getBoundingClientRect();
-      const x = e.clientX - rect.left;
+      const x = getClientX(e) - rect.left;
       const newPosition = clamp(x / rect.width, 0.1, 0.9);
       onSplitPositionChange?.(newPosition);
     }
-    function onMouseUp() {
-      window.removeEventListener("mousemove", onMouseMove);
-      window.removeEventListener("mouseup", onMouseUp);
+
+    function onEnd() {
+      window.removeEventListener("mousemove", onMove);
+      window.removeEventListener("mouseup", onEnd);
+      window.removeEventListener("touchmove", onMove);
+      window.removeEventListener("touchend", onEnd);
       setIsDragging(false);
     }
-    window.addEventListener("mousemove", onMouseMove);
-    window.addEventListener("mouseup", onMouseUp);
+
+    window.addEventListener("mousemove", onMove);
+    window.addEventListener("mouseup", onEnd);
+    window.addEventListener("touchmove", onMove);
+    window.addEventListener("touchend", onEnd);
   };
 
   const splitPercentage = splitPosition * 100;
@@ -68,7 +79,8 @@ export const SplitView: React.FC<SplitViewProps> = ({
               : `translateX(${width / 2}px)`,
           transition: isDragging ? "none" : "transform 0.5s",
         }}
-        onMouseDown={handleMouseDown}
+        onMouseDown={handlePointerDown}
+        onTouchStart={handlePointerDown}
       >
         <div data-handle />
       </div>
