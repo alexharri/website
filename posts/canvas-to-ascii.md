@@ -1050,11 +1050,28 @@ Here's the 3D scene again. The contrast slider now applies both effects at once 
   <Scene scene="cube" autoRotate zoom={2.7} yOffset={0.45} />
 </AsciiScene>
 
-This really enhances the contrast at the edges! We've produced a really nice ASCII rendering.
+This really enhances the contrast at the edges! We've gotten the contrast enhancement looking really nice.
+
 
 ## Final words
 
-These two types of contrast enhancement make the image feel sharper and far more readable than otherwise.
+Damn this post was fun to build and write! I hope you enjoyed reading it.
+
+ASCII rendering is perhaps not a very practically useful topic, but I think the idea of using a vector to capture shape could be generalized to many other problems. There are parallels to be drawn to [word embedding][word_embedding].
+
+[word_embedding]: https://en.wikipedia.org/wiki/Word_embedding
+
+I started writing the renderer to see if the idea of using a vector to capture the shape of characters would work at all. That approach turned out to work very well, but the final image lacked contrast between surfaces. The two methods of contrast enhancement I ended up using and describing in this post were the ones that worked for me, but there are probably far more methods that would produce good results.
+
+One design limitation is that whatever method I wanted to use for contrast enhancement would need to run on the GPU. More on that in an appendix below.
+
+The initial prototype was terribly slow; I got single digit FPS on my iPhone. To get the ASCII renderer running at a smooth $60$ FPS on mobile required a _ton_ of optimization work. I describe some of that optimization work in the appendices below.
+
+At the time of writing these final words, around $6$ months have elapsed since I started working on this. This has been my longest writing process to date. Much of that explained by the birth of my now $4$ month old daughter. I've needed to be a lot more intentional about finding time to write, and disciplined when spending it. I intend to write some smaller posts next. Let's see if I manage to stick to that promise!
+
+Thanks for reading!
+
+-- Alex Harri
 
 ## Appendix I: Character lookup performance
 
