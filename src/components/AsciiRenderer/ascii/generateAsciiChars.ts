@@ -44,20 +44,18 @@ function lightness(hexColor: number): number {
 
 function sampleCircularRegion(
   pixelBuffer: Uint8Array | Uint8ClampedArray,
-  config: AsciiRenderConfig,
   x: number,
   y: number,
-  samplingPoints: { x: number; y: number }[],
+  canvasWidth: number,
+  canvasHeight: number,
   scale: number,
+  samplingPoints: { x: number; y: number }[],
   flipY: boolean,
   effect: (value: number) => number,
   subsamples: number[] | undefined,
 ): number {
   let totalLightness = 0;
   let sampleCount = 0;
-
-  const canvasWidth = config.canvasWidth * scale;
-  const canvasHeight = config.canvasHeight * scale;
 
   samplingPoints.forEach((point, i) => {
     const sampleX = x + point.x;
@@ -190,6 +188,9 @@ export function generateSamplingData(
   let x = xBase;
   let y = yBase;
 
+  const canvasWidth = Math.round(config.canvasWidth * pixelBufferScale);
+  const canvasHeight = Math.round(config.canvasHeight * pixelBufferScale);
+
   for (let row = 0; row < config.rows; row++) {
     for (let col = out[row].length; col < config.cols; col++) {
       out[row][col] = {
@@ -213,11 +214,12 @@ export function generateSamplingData(
         const [circleXOff, circleYOff] = samplingCircleOffsets[i];
         rawSamplingVector[i] = sampleCircularRegion(
           pixelBuffer,
-          config,
           x + circleXOff,
           y + circleYOff,
-          samplingPoints,
+          canvasWidth,
+          canvasHeight,
           pixelBufferScale,
+          samplingPoints,
           flipY,
           effect,
           collectSubsamples ? samplingVectorSubsamples[i] : undefined,
@@ -232,11 +234,12 @@ export function generateSamplingData(
           const [circleXOff, circleYOff] = externalSamplingCircleOffsets[i];
           externalSamplingVector[i] = sampleCircularRegion(
             pixelBuffer,
-            config,
             x + circleXOff,
             y + circleYOff,
-            samplingPoints,
+            canvasWidth,
+            canvasHeight,
             pixelBufferScale,
+            samplingPoints,
             flipY,
             effect,
             undefined,
