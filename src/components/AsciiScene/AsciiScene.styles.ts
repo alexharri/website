@@ -8,11 +8,9 @@ export default (width: number, breakpoint: number) =>
       width: ${width}px;
       margin: 0 auto;
       border: 1px solid ${theme.medium400};
-      border-radius: 16px;
       overflow: hidden;
 
       @media (max-width: ${breakpoint}px) {
-        border-radius: 0;
         border: none;
         min-width: 100vw;
       }
