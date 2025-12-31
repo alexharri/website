@@ -79,12 +79,15 @@ export class GPUSamplingDataGenerator {
   // Vertex array object for fullscreen quad
   private quadVAO: WebGLVertexArrayObject;
 
+  // Pixel Buffer Objects for async readback
+  private pbos: WebGLBuffer[];
+  private pboSyncs: (WebGLSync | null)[];
+  private pboIndex: number;
+  private pboInitialized: boolean;
+
   // Output dimensions
   private outputWidth: number;
   private outputHeight: number;
-
-  // Reusable readback buffer
-  private readbackBuffer: Float32Array | null;
 
   constructor(canvas: HTMLCanvasElement, options: GPUSamplingDataGeneratorOptions) {
     const gl = canvas.getContext("webgl2", {
@@ -227,8 +230,11 @@ export class GPUSamplingDataGenerator {
     // Create fullscreen quad
     this.quadVAO = this.createQuadVAO()!;
 
-    // Initialize reusable readback buffer
-    this.readbackBuffer = null;
+    // Create PBOs for async readback (triple buffering)
+    this.pbos = [this.createPBO()!, this.createPBO()!, this.createPBO()!];
+    this.pboSyncs = [null, null, null];
+    this.pboIndex = 0;
+    this.pboInitialized = false;
 
     // Check for errors
     this.checkGLError("Constructor");
@@ -614,28 +620,90 @@ export class GPUSamplingDataGenerator {
     this.nextSamplingFBO = tempFBO;
   }
 
+  /**
+   * Read back results and parse into CharacterSamplingData using async PBO readback with fences
+   */
   private readbackAndParse(out: CharacterSamplingData[][]): void {
     const gl = this.gl;
 
-    // Allocate or reuse readback buffer
-    const requiredSize = this.outputWidth * this.outputHeight * 4;
-    if (!this.readbackBuffer || this.readbackBuffer.length !== requiredSize) {
-      this.readbackBuffer = new Float32Array(requiredSize);
+    // First frame: do synchronous readback to ensure samplingData is populated
+    if (!this.pboInitialized) {
+      gl.bindFramebuffer(gl.FRAMEBUFFER, this.currentSamplingFBO);
+      const finalData = new Float32Array(this.outputWidth * this.outputHeight * 4);
+      gl.readPixels(0, 0, this.outputWidth, this.outputHeight, gl.RGBA, gl.FLOAT, finalData);
+
+      // Parse data into output array
+      this.parseReadbackData(finalData, out);
+
+      // Also write to PBO for next frame
+      gl.bindBuffer(gl.PIXEL_PACK_BUFFER, this.pbos[1]);
+      gl.readPixels(0, 0, this.outputWidth, this.outputHeight, gl.RGBA, gl.FLOAT, 0);
+      gl.bindBuffer(gl.PIXEL_PACK_BUFFER, null);
+
+      // Create fence to signal when GPU completes the transfer
+      const sync = gl.fenceSync(gl.SYNC_GPU_COMMANDS_COMPLETE, 0);
+      gl.flush();
+      this.pboSyncs[1] = sync;
+
+      gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+
+      // Move to async mode for next frame
+      this.pboIndex = 1;
+      this.pboInitialized = true;
+      return;
     }
 
-    gl.bindFramebuffer(gl.FRAMEBUFFER, this.currentSamplingFBO);
-    gl.readPixels(
-      0,
-      0,
-      this.outputWidth,
-      this.outputHeight,
-      gl.RGBA,
-      gl.FLOAT,
-      this.readbackBuffer,
-    );
+    // Subsequent frames: use async PBO readback with fence checking
+    const readIndex = this.pboIndex;
+    const writeIndex = (this.pboIndex + 1) % 3;
 
-    // Parse data into output array
-    this.parseReadbackData(this.readbackBuffer, out);
+    // Check if the previous frame's PBO is ready to read
+    const readSync = this.pboSyncs[readIndex];
+    if (readSync) {
+      const status = gl.getSyncParameter(readSync, gl.SYNC_STATUS);
+
+      if (status === gl.SIGNALED) {
+        // GPU has finished - safe to read
+        gl.bindBuffer(gl.PIXEL_PACK_BUFFER, this.pbos[readIndex]);
+        const finalData = new Float32Array(this.outputWidth * this.outputHeight * 4);
+        gl.getBufferSubData(gl.PIXEL_PACK_BUFFER, 0, finalData);
+        gl.bindBuffer(gl.PIXEL_PACK_BUFFER, null);
+
+        // Parse data into output array
+        this.parseReadbackData(finalData, out);
+
+        // Clean up the sync object
+        gl.deleteSync(readSync);
+        this.pboSyncs[readIndex] = null;
+      }
+      // If not signaled, skip reading this frame (keep previous samplingData)
+    }
+
+    // Before writing, ensure the write buffer is available
+    const existingWriteSync = this.pboSyncs[writeIndex];
+    if (existingWriteSync) {
+      // Wait for the previous write to this buffer to complete
+      // Use timeout 0 to avoid INVALID_OPERATION error
+      gl.clientWaitSync(existingWriteSync, gl.SYNC_FLUSH_COMMANDS_BIT, 0);
+      gl.deleteSync(existingWriteSync);
+      this.pboSyncs[writeIndex] = null;
+    }
+
+    // Request pixels for the current frame into the next PBO (non-blocking)
+    gl.bindFramebuffer(gl.FRAMEBUFFER, this.currentSamplingFBO);
+    gl.bindBuffer(gl.PIXEL_PACK_BUFFER, this.pbos[writeIndex]);
+    gl.readPixels(0, 0, this.outputWidth, this.outputHeight, gl.RGBA, gl.FLOAT, 0);
+    gl.bindBuffer(gl.PIXEL_PACK_BUFFER, null);
+
+    // Create fence for this write
+    const writeSync = gl.fenceSync(gl.SYNC_GPU_COMMANDS_COMPLETE, 0);
+    gl.flush();
+    this.pboSyncs[writeIndex] = writeSync;
+
+    gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+
+    // Rotate buffers
+    this.pboIndex = writeIndex;
   }
 
   /**
@@ -876,6 +944,22 @@ export class GPUSamplingDataGenerator {
   }
 
   /**
+   * Create a Pixel Buffer Object for async readback
+   */
+  private createPBO(): WebGLBuffer | null {
+    const gl = this.gl;
+    const pbo = gl.createBuffer();
+    gl.bindBuffer(gl.PIXEL_PACK_BUFFER, pbo);
+
+    // Allocate buffer size for RGBA32F data
+    const bufferSize = this.outputWidth * this.outputHeight * 4 * 4; // 4 floats per pixel
+    gl.bufferData(gl.PIXEL_PACK_BUFFER, bufferSize, gl.STREAM_READ);
+
+    gl.bindBuffer(gl.PIXEL_PACK_BUFFER, null);
+    return pbo;
+  }
+
+  /**
    * Check for GL errors
    */
   private checkGLError(context: string): void {
@@ -923,5 +1007,13 @@ export class GPUSamplingDataGenerator {
 
     // Delete VAO
     gl.deleteVertexArray(this.quadVAO);
+
+    // Delete PBOs
+    this.pbos.forEach((pbo) => gl.deleteBuffer(pbo));
+
+    // Delete sync objects
+    this.pboSyncs.forEach((sync) => {
+      if (sync) gl.deleteSync(sync);
+    });
   }
 }
