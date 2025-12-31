@@ -4,7 +4,7 @@ import { CharacterSamplingData, samplingDataToAscii } from "./ascii/generateAsci
 import { useStyles } from "../../utils/styles";
 import { colors } from "../../utils/cssVariables";
 import { PixelateCanvas, renderPixelate } from "./PixelateCanvas";
-import { AsciiCanvas, renderAsciiCanvas } from "./AsciiCanvas";
+import { AsciiCanvas, useAsciiCanvas } from "./AsciiCanvas";
 import { CharacterMatcher } from "./ascii/CharacterMatcher";
 import { EFFECTS } from "./ascii/effects";
 import { AsciiRenderConfig } from "./renderConfig";
@@ -55,6 +55,9 @@ export function AsciiRenderer(props: Props) {
     return matcher;
   }, [config?.alphabet]);
 
+  const color = transparent ? colors.text : colors.blue400;
+  const asciiCanvas = useAsciiCanvas(asciiCanvasRef, config, color);
+
   useEffect(() => {
     const content = contentRef.current;
     if (!config || !content) return;
@@ -65,15 +68,13 @@ export function AsciiRenderer(props: Props) {
 
   const updateAsciiText = useCallback(
     (samplingData: CharacterSamplingData[][]) => {
-      const asciiCanvas = asciiCanvasRef.current;
       const preEl = preRef.current;
 
       if (!config || !characterMatcher || samplingData.length === 0) return;
 
       if (optimizePerformance) {
-        if (!hideAscii && asciiCanvas) {
-          const color = transparent ? colors.text : colors.blue400;
-          renderAsciiCanvas(asciiCanvas, samplingData, config, characterMatcher, color);
+        if (!hideAscii) {
+          asciiCanvas.render(samplingData, characterMatcher);
         }
       } else {
         if (!hideAscii && preEl) {
@@ -91,8 +92,8 @@ export function AsciiRenderer(props: Props) {
       debugVizOptions.pixelate,
       config,
       hideAscii,
-      transparent,
       optimizePerformance,
+      asciiCanvas,
     ],
   );
 
