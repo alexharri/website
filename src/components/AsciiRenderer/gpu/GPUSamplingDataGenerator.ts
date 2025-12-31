@@ -85,6 +85,8 @@ export class GPUSamplingDataGenerator {
   private pboIndex: number;
   private pboInitialized: boolean;
 
+  private readbackBuffer: Float32Array | null = null;
+
   // Output dimensions
   private outputWidth: number;
   private outputHeight: number;
@@ -322,7 +324,12 @@ export class GPUSamplingDataGenerator {
       this.applyGlobalCrunch();
     }
 
-    this.readbackAndParse(out);
+    const isFirefox = typeof navigator !== "undefined" && navigator.userAgent.includes("Firefox");
+    if (isFirefox) {
+      this.readbackAndParseSync(out);
+    } else {
+      this.readbackAndParse(out);
+    }
 
     this.checkGLError("Update");
   }
@@ -618,6 +625,30 @@ export class GPUSamplingDataGenerator {
 
     this.nextSamplingTexture = tempTexture;
     this.nextSamplingFBO = tempFBO;
+  }
+
+  private readbackAndParseSync(out: CharacterSamplingData[][]): void {
+    const gl = this.gl;
+
+    // Allocate or reuse readback buffer
+    const requiredSize = this.outputWidth * this.outputHeight * 4;
+    if (!this.readbackBuffer || this.readbackBuffer.length !== requiredSize) {
+      this.readbackBuffer = new Float32Array(requiredSize);
+    }
+
+    gl.bindFramebuffer(gl.FRAMEBUFFER, this.currentSamplingFBO);
+    gl.readPixels(
+      0,
+      0,
+      this.outputWidth,
+      this.outputHeight,
+      gl.RGBA,
+      gl.FLOAT,
+      this.readbackBuffer,
+    );
+
+    // Parse data into output array
+    this.parseReadbackData(this.readbackBuffer, out);
   }
 
   /**
