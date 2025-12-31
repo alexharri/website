@@ -294,10 +294,10 @@ export class GPUSamplingDataGenerator {
   }
 
   /**
-   * Update sampling data from a new canvas buffer
+   * Update sampling data from a new canvas buffer or HTMLCanvasElement
    */
   public update(
-    pixelBuffer: Uint8Array | Uint8ClampedArray,
+    source: Uint8Array | Uint8ClampedArray | HTMLCanvasElement,
     out: CharacterSamplingData[][],
     flipY: boolean,
     pixelBufferScale: number,
@@ -307,7 +307,7 @@ export class GPUSamplingDataGenerator {
     this.pixelBufferScale = pixelBufferScale;
     this.canvasWidth = canvasWidth;
     this.canvasHeight = canvasHeight;
-    this.uploadCanvasTexture(pixelBuffer);
+    this.uploadCanvasTexture(source);
 
     this.collectRawSamples(flipY);
     this.collectExternalSamples(flipY);
@@ -411,22 +411,29 @@ export class GPUSamplingDataGenerator {
   }
 
   /**
-   * Upload canvas pixel buffer to texture
+   * Upload canvas pixel buffer or HTMLCanvasElement to texture
    */
-  private uploadCanvasTexture(pixelBuffer: Uint8Array | Uint8ClampedArray): void {
+  private uploadCanvasTexture(source: Uint8Array | Uint8ClampedArray | HTMLCanvasElement): void {
     const gl = this.gl;
     gl.bindTexture(gl.TEXTURE_2D, this.canvasTexture);
-    gl.texImage2D(
-      gl.TEXTURE_2D,
-      0,
-      gl.RGBA,
-      this.canvasWidth,
-      this.canvasHeight,
-      0,
-      gl.RGBA,
-      gl.UNSIGNED_BYTE,
-      pixelBuffer,
-    );
+
+    if (source instanceof HTMLCanvasElement) {
+      // GPU→GPU texture copy - no CPU transfer!
+      gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, source);
+    } else {
+      // CPU→GPU upload (legacy path for 2D canvas)
+      gl.texImage2D(
+        gl.TEXTURE_2D,
+        0,
+        gl.RGBA,
+        this.canvasWidth,
+        this.canvasHeight,
+        0,
+        gl.RGBA,
+        gl.UNSIGNED_BYTE,
+        source,
+      );
+    }
   }
 
   /**

@@ -3,7 +3,7 @@ import React, { createContext, useContext, useEffect, useRef } from "react";
 import { useVisible } from "../utils/hooks/useVisible";
 import { LoadThreeContext } from "./Components/ThreeProvider";
 import { SceneSkeleton } from "./SceneSkeleton";
-import { useSceneContext, OnFrameOptions } from "../contexts/CanvasContext";
+import { useSceneContext, OnFrameOptions, OnFrameSource } from "../contexts/CanvasContext";
 
 const loading = SceneSkeleton;
 
@@ -19,7 +19,7 @@ export interface SceneProps {
   ascii?: boolean;
   yOffset?: number;
   errorLoadingThreeJs: boolean;
-  onFrame?: (buffer: Uint8Array, options: OnFrameOptions) => void;
+  onFrame?: (source: OnFrameSource, options: OnFrameOptions) => void;
   orbitControlsRef?: React.RefObject<any>;
   orbitControlsTargetRef?: React.RefObject<HTMLDivElement>;
 }

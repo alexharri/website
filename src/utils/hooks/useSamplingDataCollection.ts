@@ -12,6 +12,7 @@ import {
 } from "../../components/AsciiRenderer/types";
 import { GPUSamplingDataGenerator } from "../../components/AsciiRenderer/gpu/GPUSamplingDataGenerator";
 import { Observer } from "../observer";
+import { OnFrameSource, OnFrameOptions } from "../../contexts/CanvasContext";
 
 interface SamplingRefs {
   debugCanvasRef: React.RefObject<HTMLCanvasElement>;
@@ -124,27 +125,27 @@ export function useSamplingDataCollection(params: UseSamplingDataCollectionParam
   }, [globalCrunchExponent, directionalCrunchExponent]);
 
   const lastFrameRef = useRef<{
-    buffer: Uint8Array | Uint8ClampedArray;
-    options: { flipY?: boolean; canvasWidth: number; canvasHeight: number };
+    source: OnFrameSource;
+    options: OnFrameOptions;
   } | null>(null);
 
   const onFrame = useCallback(
-    (
-      buffer: Uint8Array | Uint8ClampedArray,
-      options: { flipY?: boolean; canvasWidth: number; canvasHeight: number },
-    ) => {
-      lastFrameRef.current = { buffer, options };
+    (source: OnFrameSource, options: OnFrameOptions) => {
+      lastFrameRef.current = { source, options };
       if (!config) return;
 
       const pixelBufferScale = options.canvasWidth / config.canvasWidth;
       const canvasWidth = options.canvasWidth;
       const canvasHeight = options.canvasHeight;
 
+      // Extract the actual source (buffer or canvas)
+      const actualSource = source.buffer || source.canvas!;
+
       // Use GPU path if available and enabled
       if (gpuGeneratorRef.current && shouldUseGPU) {
         try {
           gpuGeneratorRef.current.update(
-            buffer,
+            actualSource,
             samplingData,
             options?.flipY ?? false,
             pixelBufferScale,
@@ -152,26 +153,28 @@ export function useSamplingDataCollection(params: UseSamplingDataCollectionParam
             canvasHeight,
           );
         } catch (error) {
-          console.error("GPU sampling failed, falling back to CPU:", error);
-          // Fallback to CPU
-          generateSamplingData(
-            samplingData,
-            buffer,
-            pixelBufferScale,
-            config,
-            showSamplingPoints,
-            options?.flipY ?? false,
-            globalCrunchExponent,
-            directionalCrunchExponent,
-            lightnessEasingFunction,
-            samplingEffects,
-          );
+          console.error("GPU sampling failed:", error);
+          // Fallback to CPU only if we have a buffer
+          if (source.buffer) {
+            generateSamplingData(
+              samplingData,
+              source.buffer,
+              pixelBufferScale,
+              config,
+              showSamplingPoints,
+              options?.flipY ?? false,
+              globalCrunchExponent,
+              directionalCrunchExponent,
+              lightnessEasingFunction,
+              samplingEffects,
+            );
+          }
         }
-      } else {
-        // Use CPU path
+      } else if (source.buffer) {
+        // Use CPU path (only works with buffers)
         generateSamplingData(
           samplingData,
-          buffer,
+          source.buffer,
           pixelBufferScale,
           config,
           showSamplingPoints,
@@ -215,8 +218,8 @@ export function useSamplingDataCollection(params: UseSamplingDataCollectionParam
 
   useEffect(() => {
     if (lastFrameRef.current) {
-      const { buffer, options } = lastFrameRef.current;
-      onFrame(buffer, options);
+      const { source, options } = lastFrameRef.current;
+      onFrame(source, options);
     }
   }, [onFrame]);
 

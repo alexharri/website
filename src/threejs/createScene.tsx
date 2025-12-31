@@ -189,6 +189,8 @@ export function createScene<V extends VariableDict>(
 
     const canvasRef = useRef<HTMLCanvasElement>(null);
 
+    // const isFirefox = typeof navigator !== "undefined" && navigator.userAgent.includes("Firefox");
+    // const S = isFirefox ? 0.25 : 1;
     const S = 1;
 
     return (

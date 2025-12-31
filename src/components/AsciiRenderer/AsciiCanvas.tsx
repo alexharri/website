@@ -38,19 +38,19 @@ function getOrCreateGlyph(
   boxWidth: number,
   boxHeight: number,
   color: string,
+  dpr: number,
 ): CachedGlyph {
-  const cacheKey = `${char}_${fontSize}_${boxWidth}_${boxHeight}_${color}`;
+  const cacheKey = `${char}_${fontSize}_${boxWidth}_${boxHeight}_${color}_${dpr}`;
 
   let cached = glyphCache.get(cacheKey);
   if (cached) return cached;
 
   // Create a small canvas for this character
   const glyphCanvas = document.createElement("canvas");
-  const dpr = window.devicePixelRatio || 1;
 
   // Measure the actual character to get precise dimensions
   const measureCanvas = document.createElement("canvas");
-  const measureCtx = measureCanvas.getContext("2d", { willReadFrequently: true });
+  const measureCtx = measureCanvas.getContext("2d");
   if (!measureCtx) {
     const emptyGlyph = { canvas: glyphCanvas, width: fontSize, height: fontSize };
     return emptyGlyph;
@@ -64,7 +64,7 @@ function getOrCreateGlyph(
   glyphCanvas.width = width * dpr;
   glyphCanvas.height = height * dpr;
 
-  const ctx = glyphCanvas.getContext("2d", { willReadFrequently: true });
+  const ctx = glyphCanvas.getContext("2d");
   if (!ctx) {
     const emptyGlyph = { canvas: glyphCanvas, width, height };
     return emptyGlyph;
@@ -105,10 +105,13 @@ export function renderAsciiCanvas(
   characterMatcher: CharacterMatcher,
   color: string,
 ) {
-  const ctx = canvas.getContext("2d");
+  const ctx = canvas.getContext("2d", { desynchronized: true });
   if (!ctx) return;
 
-  const dpr = window.devicePixelRatio || 1;
+  ctx.imageSmoothingEnabled = false;
+  // const isFirefox = typeof navigator !== "undefined" && navigator.userAgent.includes("Firefox");
+  // const dpr = isFirefox ? 1 : window.devicePixelRatio || 1;
+  const dpr = window.devicePixelRatio;
 
   // Check if dimensions changed
   const dimensionsChanged =
@@ -161,6 +164,7 @@ export function renderAsciiCanvas(
           config.boxWidth,
           config.boxHeight,
           color,
+          dpr,
         );
         ctx.drawImage(glyph.canvas, x, y, glyph.width, glyph.height);
 

@@ -6,8 +6,12 @@ type Variables = Record<string, unknown>;
 
 export type OnFrameOptions = { flipY?: boolean; canvasWidth: number; canvasHeight: number };
 
+export type OnFrameSource =
+  | { buffer: Uint8Array | Uint8ClampedArray; canvas?: never }
+  | { canvas: HTMLCanvasElement; buffer?: never };
+
 interface ISceneContext {
-  onFrame: (buffer: Uint8Array | Uint8ClampedArray, options: OnFrameOptions) => void;
+  onFrame: (source: OnFrameSource, options: OnFrameOptions) => void;
   width: number;
   height: number;
   minWidth: number;
@@ -24,7 +28,7 @@ export function useSceneContext(): ISceneContext | null {
 
 interface CanvasProviderProps {
   children: React.ReactNode;
-  onFrame: (buffer: Uint8Array | Uint8ClampedArray, options: OnFrameOptions) => void;
+  onFrame: (source: OnFrameSource, options: OnFrameOptions) => void;
   width: number;
   height: number;
   minWidth?: number;
