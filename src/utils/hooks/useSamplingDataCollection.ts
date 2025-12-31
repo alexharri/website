@@ -45,7 +45,7 @@ export function useSamplingDataCollection(params: UseSamplingDataCollectionParam
     debug,
     lightnessEasingFunction,
     forceSamplingValue,
-    samplingEffects,
+    samplingEffects = [],
     optimizePerformance,
     globalCrunchExponent,
     directionalCrunchExponent,
@@ -73,61 +73,50 @@ export function useSamplingDataCollection(params: UseSamplingDataCollectionParam
 
   // Initialize GPU generator when config changes
   useEffect(() => {
-    if (!config) {
+    if (!config || !optimizePerformance || !webgl2SupportedRef.current) {
       return;
     }
-    if (shouldUseGPU && config) {
-      try {
-        // Create offscreen canvas for GPU operations
-        if (!gpuCanvasRef.current) {
-          gpuCanvasRef.current = document.createElement("canvas");
-          gpuCanvasRef.current.width = config.canvasWidth;
-          gpuCanvasRef.current.height = config.canvasHeight;
-        }
 
-        // Clean up existing generator
-        if (gpuGeneratorRef.current) {
-          gpuGeneratorRef.current.dispose();
-        }
-
-        // Create new generator
-        gpuGeneratorRef.current = new GPUSamplingDataGenerator(gpuCanvasRef.current, {
-          config,
-          canvasWidth: config.canvasWidth,
-          canvasHeight: config.canvasHeight,
-          pixelBufferScale: 1, // Will be updated per frame
-          samplingQuality: config.samplingQuality,
-          lightnessEasingFunction,
-          samplingEffects: samplingEffects || [],
-          globalCrunchExponent,
-          directionalCrunchExponent,
-        });
-      } catch (error) {
-        console.error("Failed to initialize GPU sampling:", error);
-        gpuGeneratorRef.current = null;
+    try {
+      // Create offscreen canvas for GPU operations
+      if (!gpuCanvasRef.current) {
+        gpuCanvasRef.current = document.createElement("canvas");
+        gpuCanvasRef.current.width = config.canvasWidth;
+        gpuCanvasRef.current.height = config.canvasHeight;
       }
+
+      gpuGeneratorRef.current?.dispose();
+
+      const { canvasWidth, canvasHeight, samplingQuality } = config;
+      gpuGeneratorRef.current = new GPUSamplingDataGenerator(gpuCanvasRef.current, {
+        config,
+        canvasWidth,
+        canvasHeight,
+        pixelBufferScale: 1, // Will be updated per frame
+        samplingQuality,
+        lightnessEasingFunction,
+        samplingEffects,
+        globalCrunchExponent,
+        directionalCrunchExponent,
+      });
+    } catch (error) {
+      console.error("Failed to initialize GPU sampling:", error);
+      gpuGeneratorRef.current = null;
     }
 
-    // Cleanup on unmount or when switching to CPU
     return () => {
-      if (gpuGeneratorRef.current) {
-        gpuGeneratorRef.current.dispose();
-        gpuGeneratorRef.current = null;
-      }
+      gpuGeneratorRef.current?.dispose();
+      gpuGeneratorRef.current = null;
     };
   }, [shouldUseGPU, config, lightnessEasingFunction, samplingEffects]);
 
-  // Update exponents dynamically without recreating the generator
   useEffect(() => {
     if (gpuGeneratorRef.current) {
       gpuGeneratorRef.current.updateExponents(globalCrunchExponent, directionalCrunchExponent);
     }
   }, [globalCrunchExponent, directionalCrunchExponent]);
 
-  const lastFrameRef = useRef<{
-    source: OnFrameSource;
-    options: OnFrameOptions;
-  } | null>(null);
+  const lastFrameRef = useRef<{ source: OnFrameSource; options: OnFrameOptions } | null>(null);
 
   const onFrame = useCallback(
     (source: OnFrameSource, options: OnFrameOptions) => {
@@ -138,43 +127,30 @@ export function useSamplingDataCollection(params: UseSamplingDataCollectionParam
       const canvasWidth = options.canvasWidth;
       const canvasHeight = options.canvasHeight;
 
-      // Extract the actual source (buffer or canvas)
-      const actualSource = source.buffer || source.canvas!;
+      const gpuGenerator = gpuGeneratorRef.current;
 
       // Use GPU path if available and enabled
-      if (gpuGeneratorRef.current && shouldUseGPU) {
+      let ranOnGPU = false;
+      if (gpuGenerator) {
         try {
-          gpuGeneratorRef.current.update(
-            actualSource,
+          gpuGenerator.update(
+            source.buffer || source.canvas!,
             samplingData,
             options?.flipY ?? false,
             pixelBufferScale,
             canvasWidth,
             canvasHeight,
           );
+          ranOnGPU = true;
         } catch (error) {
           console.error("GPU sampling failed:", error);
-          // Fallback to CPU only if we have a buffer
-          if (source.buffer) {
-            generateSamplingData(
-              samplingData,
-              source.buffer,
-              pixelBufferScale,
-              config,
-              showSamplingPoints,
-              options?.flipY ?? false,
-              globalCrunchExponent,
-              directionalCrunchExponent,
-              lightnessEasingFunction,
-              samplingEffects,
-            );
-          }
         }
-      } else if (source.buffer) {
-        // Use CPU path (only works with buffers)
+      }
+      if (!ranOnGPU) {
+        const buffer = source.buffer || canvasToBuffer(source.canvas);
         generateSamplingData(
           samplingData,
-          source.buffer,
+          buffer,
           pixelBufferScale,
           config,
           showSamplingPoints,
@@ -224,4 +200,28 @@ export function useSamplingDataCollection(params: UseSamplingDataCollectionParam
   }, [onFrame]);
 
   return onFrame;
+}
+
+function canvasToBuffer(canvas: HTMLCanvasElement) {
+  // Try to get existing contexts
+  const gl = canvas.getContext("webgl") || canvas.getContext("webgl2");
+
+  const width = canvas.width;
+  const height = canvas.height;
+
+  if (gl) {
+    // WebGL context
+    const buffer = new Uint8ClampedArray(width * height * 4);
+    gl.readPixels(0, 0, width, height, gl.RGBA, gl.UNSIGNED_BYTE, buffer);
+    return buffer;
+  }
+
+  const ctx2d = canvas.getContext("2d");
+  if (ctx2d) {
+    // 2D context
+    const imageData = ctx2d.getImageData(0, 0, width, height);
+    return imageData.data;
+  }
+
+  throw new Error("Canvas has no rendering context");
 }

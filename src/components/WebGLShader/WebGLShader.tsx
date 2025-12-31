@@ -153,7 +153,6 @@ export const WebGLShader: React.FC<WebGLShaderProps> = (props) => {
   const pendingUniformWrites = useRef<[string, number][]>([]);
   const colorConfigurationRef = useRef(colorConfiguration);
   colorConfigurationRef.current = colorConfiguration;
-  const bufferRef = useRef<Uint8Array | null>(null);
   const contextRef = useRef(context);
   contextRef.current = context;
 
@@ -207,21 +206,10 @@ export const WebGLShader: React.FC<WebGLShaderProps> = (props) => {
 
       // Call onFrame callback if in context
       if (contextRef.current?.onFrame && canvas) {
-        const gl = renderer.getGLContext();
-        const len = canvas.width * canvas.height * 4;
-        if (!bufferRef.current || bufferRef.current.length !== len) {
-          bufferRef.current = new Uint8Array(len);
-        }
-        gl.readPixels(
-          0,
-          0,
-          canvas.width,
-          canvas.height,
-          gl.RGBA,
-          gl.UNSIGNED_BYTE,
-          bufferRef.current,
+        contextRef.current.onFrame(
+          { canvas },
+          { canvasWidth: canvas.width, canvasHeight: canvas.height },
         );
-        contextRef.current.onFrame(bufferRef.current, { canvasWidth: canvas.width, canvasHeight: canvas.height });
       }
 
       if (SHOW_SEED_AND_TIME) {

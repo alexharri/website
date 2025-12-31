@@ -82,7 +82,7 @@ export function renderAsciiDebugViz(
       }
 
       const [sampleRectLeft, sampleRectTop] = config.sampleRectPosition(col, row);
-      if (options.showSamplingCircles || options.showSamplingPoints) {
+      if (options.showSamplingCircles !== "none" || options.showSamplingPoints) {
         const samplingVector = samplingData[row][col];
         metadata.samplingConfig.points.forEach((samplingCircle, i) => {
           const [xOff, yOff] = config.samplingCircleOffset(samplingCircle);
