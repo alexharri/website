@@ -160,8 +160,9 @@ export function createScene2D<V extends VariableDict>(
       if (!ctx) return;
 
       let mounted = true;
-      const startTime = Date.now();
+      let startTime = Date.now();
       let lastTime = Date.now();
+      let pauseStartTime: number | null = null;
       let hasRenderedOnce = false;
 
       const tick = () => {
@@ -201,7 +202,14 @@ export function createScene2D<V extends VariableDict>(
         }
 
         if (!hasChanges && (isPausedRef.current || options.static)) {
+          pauseStartTime ??= Date.now();
           return;
+        }
+
+        if (pauseStartTime) {
+          const delta = Date.now() - pauseStartTime;
+          startTime += delta;
+          pauseStartTime = null;
         }
 
         const now = Date.now();
