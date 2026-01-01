@@ -1,3 +1,4 @@
+import { cssVariables } from "../../utils/cssVariables";
 import { StyleOptions } from "../../utils/styles";
 
 export default (width: number, breakpoint: number) =>
@@ -18,8 +19,13 @@ export default (width: number, breakpoint: number) =>
 
       &--isPaused {
         opacity: 0.7;
-        transform: scale(0.95);
+        transform: scale(0.97);
         transition: opacity 0.3s, transform 0.8s;
+
+        @media (max-width: ${cssVariables.mobileWidth}px) {
+          transform: scale(1);
+          opacity: 0.5;
+        }
       }
     `,
 
