@@ -183,10 +183,16 @@ export const WebGLShader: React.FC<WebGLShaderProps> = (props) => {
     let resized = true;
     let stop = false;
     let hasRenderedOnce = false;
+    let lastIsPaused = isPausedRef.current;
 
     function tick() {
       if (stop) return;
       requestAnimationFrame(tick);
+
+      if (isPausedRef.current !== lastIsPaused) {
+        renderer.setPaused(isPausedRef.current);
+        lastIsPaused = isPausedRef.current;
+      }
 
       const hasChanges =
         resized ||

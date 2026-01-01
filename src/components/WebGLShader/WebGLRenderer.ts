@@ -19,6 +19,7 @@ interface ColorConfiguration {
 
 export class WebGLRenderer {
   private timeStates: TimeState[];
+  private pauseStartTime: number | null = null;
 
   private gl: WebGLRenderingContext;
   private program: WebGLProgram;
@@ -125,6 +126,21 @@ export class WebGLRenderer {
 
   public setTimeSpeed(index: number, value: number) {
     this.timeStates[index].timeSpeed = value;
+  }
+
+  public setPaused(paused: boolean) {
+    if (paused && this.pauseStartTime == null) {
+      this.pauseStartTime = Date.now();
+      return;
+    }
+
+    if (!paused && this.pauseStartTime != null) {
+      const pauseDuration = Date.now() - this.pauseStartTime;
+      for (const state of this.timeStates) {
+        state.seed -= pauseDuration / 1000; // A bit hacky
+      }
+      this.pauseStartTime = null;
+    }
   }
 
   public setDimensions(width: number, height: number) {
