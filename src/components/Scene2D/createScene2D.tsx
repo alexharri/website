@@ -126,6 +126,17 @@ export function createScene2D<V extends VariableDict>(
       }
     }, [context?.registerSceneVariables, variableKeys.length]);
 
+    useEffect(() => {
+      if (options.static) {
+        context?.setNeverPause(true);
+      }
+      return () => {
+        if (options.static) {
+          context?.setNeverPause(false);
+        }
+      };
+    }, []);
+
     const variableValuesRef = useRef<LocalVariables<V>>(null!);
     variableValuesRef.current = (context?.variables ?? variableValues) as LocalVariables<V>;
 
@@ -135,6 +146,10 @@ export function createScene2D<V extends VariableDict>(
     const [isLoading, setIsLoading] = useState(options.isLoading?.() ?? false);
     const isLoadingRef = useRef(isLoading);
     isLoadingRef.current = isLoading;
+
+    const isPaused = context?.isPaused ?? false;
+    const isPausedRef = useRef(isPaused);
+    isPausedRef.current = isPaused;
 
     useEffect(() => {
       const canvas = canvasRef.current;
@@ -147,6 +162,7 @@ export function createScene2D<V extends VariableDict>(
       let mounted = true;
       const startTime = Date.now();
       let lastTime = Date.now();
+      let hasRenderedOnce = false;
 
       const tick = () => {
         if (!mounted) return;
@@ -156,16 +172,12 @@ export function createScene2D<V extends VariableDict>(
         const height = heightRef.current;
         const variables = variableValuesRef.current;
 
-        let changed = false;
-
-        if (!options.static) {
-          changed = true;
-        }
+        let hasChanges = false;
 
         const isLoading = options.isLoading?.() ?? false;
         if (isLoadingRef.current && !isLoading) {
           setIsLoading(isLoading);
-          changed = true;
+          hasChanges = true;
         }
 
         if (width !== canvas.width || height !== canvas.height) {
@@ -173,22 +185,22 @@ export function createScene2D<V extends VariableDict>(
           canvas.height = height;
           canvas.style.width = `${width}px`;
           canvas.style.height = `${height}px`;
-          changed = true;
+          hasChanges = true;
         }
 
-        if (!changed) {
-          for (const [key, value] of Object.entries(variables)) {
-            if (lastVariablesRef.current[key] !== value) {
-              changed = true;
-              break;
-            }
-          }
-          if (changed) {
+        for (const [key, value] of Object.entries(variables)) {
+          if (lastVariablesRef.current[key] !== value) {
+            hasChanges = true;
             lastVariablesRef.current = { ...variables };
+            break;
           }
         }
 
-        if (!changed) {
+        if (!hasRenderedOnce) {
+          hasChanges = true;
+        }
+
+        if (!hasChanges && (isPausedRef.current || options.static)) {
           return;
         }
 
@@ -220,6 +232,7 @@ export function createScene2D<V extends VariableDict>(
           );
         }
 
+        hasRenderedOnce = true;
         lastTime = now;
       };
       tick();

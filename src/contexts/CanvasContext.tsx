@@ -16,8 +16,10 @@ interface ISceneContext {
   height: number;
   minWidth: number;
   orbitControlsTargetRef: React.RefObject<HTMLDivElement>;
+  isPaused: boolean;
   registerSceneVariables?: (specs: VariableDict) => void;
   variables?: Variables;
+  setNeverPause: (value: boolean) => void;
 }
 
 const SceneContext = createContext<ISceneContext | null>(null);
@@ -35,6 +37,8 @@ interface CanvasProviderProps {
   orbitControlsTargetRef: React.RefObject<HTMLDivElement>;
   registerSceneVariables?: (specs: VariableDict) => void;
   variables?: Variables;
+  isPaused: boolean;
+  setNeverPause: (value: boolean) => void;
 }
 
 export function CanvasProvider({
@@ -46,6 +50,8 @@ export function CanvasProvider({
   orbitControlsTargetRef,
   registerSceneVariables,
   variables,
+  isPaused,
+  setNeverPause,
 }: CanvasProviderProps) {
   const contextValue: ISceneContext = useMemo(
     () => ({
@@ -56,8 +62,20 @@ export function CanvasProvider({
       orbitControlsTargetRef,
       registerSceneVariables,
       variables,
+      isPaused,
+      setNeverPause,
     }),
-    [onFrame, width, height, minWidth, orbitControlsTargetRef, registerSceneVariables, variables],
+    [
+      onFrame,
+      width,
+      height,
+      minWidth,
+      orbitControlsTargetRef,
+      registerSceneVariables,
+      variables,
+      isPaused,
+      setNeverPause,
+    ],
   );
 
   return <SceneContext.Provider value={contextValue}>{children}</SceneContext.Provider>;

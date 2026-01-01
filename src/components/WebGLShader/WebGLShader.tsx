@@ -156,6 +156,10 @@ export const WebGLShader: React.FC<WebGLShaderProps> = (props) => {
   const contextRef = useRef(context);
   contextRef.current = context;
 
+  const isPaused = context?.isPaused ?? false;
+  const isPausedRef = useRef(isPaused);
+  isPausedRef.current = isPaused;
+
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -178,10 +182,19 @@ export const WebGLShader: React.FC<WebGLShaderProps> = (props) => {
     let lastColorConfiguration = colorConfiguration;
     let resized = true;
     let stop = false;
+    let hasRenderedOnce = false;
 
     function tick() {
       if (stop) return;
       requestAnimationFrame(tick);
+
+      const hasChanges =
+        resized ||
+        lastColorConfiguration !== colorConfigurationRef.current ||
+        pendingUniformWrites.current.length > 0 ||
+        !hasRenderedOnce;
+
+      if (!hasChanges && isPausedRef.current) return;
 
       if (resized) {
         const [width, height] = calculateWebGLCanvasDimensions(
@@ -203,6 +216,7 @@ export const WebGLShader: React.FC<WebGLShaderProps> = (props) => {
       pendingUniformWrites.current.length = 0;
 
       renderer.render();
+      hasRenderedOnce = true;
 
       // Call onFrame callback if in context
       if (contextRef.current?.onFrame && canvas) {

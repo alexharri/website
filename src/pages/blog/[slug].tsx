@@ -31,6 +31,7 @@ import { MediaQuery } from "../../components/MediaQuery/MediaQuery";
 import { WebGLShaderLoader } from "../../components/WebGLShader/WebGLShaderLoader";
 import { Table } from "../../components/Table/Table";
 import { Scene2D } from "../../components/Scene2D/Scene2D";
+import { ActiveAsciiSceneProvider } from "../../components/AsciiScene/ActiveAsciiSceneContext";
 
 function firstUpper(s: string) {
   if (s.length === 0) return s;
@@ -125,9 +126,11 @@ export function createPage(customComponents: Record<string, React.FC<any>>) {
             <PostDataProvider data={props.data}>
               <ThreeProvider>
                 <FocusedScriptProvider>
-                  <MonacoProvider>
-                    <MDXRemote {...(source as any)} components={components} />
-                  </MonacoProvider>
+                  <ActiveAsciiSceneProvider>
+                    <MonacoProvider>
+                      <MDXRemote {...(source as any)} components={components} />
+                    </MonacoProvider>
+                  </ActiveAsciiSceneProvider>
                 </FocusedScriptProvider>
               </ThreeProvider>
             </PostDataProvider>

@@ -9,10 +9,17 @@ export default (width: number, breakpoint: number) =>
       margin: 0 auto;
       border: 1px solid ${theme.medium400};
       overflow: hidden;
+      transition: opacity 0.3s, transform 0.3s;
 
       @media (max-width: ${breakpoint}px) {
         border: none;
         min-width: 100vw;
+      }
+
+      &--isPaused {
+        opacity: 0.7;
+        transform: scale(0.95);
+        transition: opacity 0.3s, transform 0.8s;
       }
     `,
 

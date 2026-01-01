@@ -11,11 +11,13 @@ Recently I've been spending my time building an image-to-ASCII renderer. Below i
   <Scene scene="cube" autoRotate zoom={2.7} yOffset={0.45} />
 </AsciiScene>
 
-One thing I spent a lot of effort on is getting edges looking sharp. Take a look at this rotating cube example -- try opening the "split" view and notice how well the characters follow the contour of the square:
+One thing I spent a lot of effort on is getting edges looking sharp. Take a look at this rotating cube example:
 
 <AsciiScene width={600} minWidth={400} height={400} fontSize={13} rowHeight={16} columnWidth={13} splitMode="static"  viewModes={["ascii", "split"]} sampleQuality={8} exclude="$" optimizePerformance>
   <Scene2D scene="rotating_square_raised" />
 </AsciiScene>
+
+<SmallNote label="" center>Try opening the "split" view. Notice how well the characters follow the contour of the square.</SmallNote>
 
 This renderer works well for animated scenes, like the ones above, but we can also use it to render static images:
 

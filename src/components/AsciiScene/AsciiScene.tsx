@@ -1,4 +1,4 @@
-import React, { useRef, useState, useCallback, useMemo, useEffect } from "react";
+import React, { useRef, useState, useCallback, useMemo, useEffect, useContext } from "react";
 import { useStyles } from "../../utils/styles";
 import { AsciiRenderer } from "../AsciiRenderer";
 import { AlphabetName, getAlphabetMetadata } from "../AsciiRenderer/alphabets/AlphabetManager";
@@ -28,6 +28,7 @@ import { useVisible } from "../../utils/hooks/useVisible";
 import { lerp } from "three/src/math/MathUtils";
 import { useIsomorphicLayoutEffect } from "../../utils/hooks/useIsomorphicLayoutEffect";
 import { Observer } from "../../utils/observer";
+import { ActiveAsciiSceneContext } from "./ActiveAsciiSceneContext";
 
 const EFFECT_TO_KEY: Record<string, string> = {
   [SamplingEffect.DirectionalCrunch]: "directional_crunch_exponent",
@@ -73,6 +74,7 @@ interface AsciiSceneProps {
   effects?: { [key: string]: number | [number, { range: [number, number]; step: number }] };
   splitMode?: "static" | "dynamic";
   effectSlider?: { [key: string]: [number, number] };
+  isPaused: boolean;
 }
 
 const _AsciiScene: React.FC<AsciiSceneProps> = (props) => {
@@ -241,6 +243,8 @@ const _AsciiScene: React.FC<AsciiSceneProps> = (props) => {
     setVariableValues((prev) => ({ ...prev, [key]: value }));
   }, []);
 
+  const [neverPause, setNeverPause] = useState(() => typeof children === "string");
+
   const debugVizOptions: DebugVizOptions = useMemo(
     () => ({
       showSamplingCircles: showSamplingCircles === true ? "raw" : showSamplingCircles,
@@ -350,9 +354,11 @@ const _AsciiScene: React.FC<AsciiSceneProps> = (props) => {
     forceSamplingValue,
   ]);
 
+  const isPaused = props.isPaused && !neverPause;
+
   return (
     <>
-      <div className={s("container")} style={{ height }}>
+      <div className={s("container", { isPaused })} style={{ height }}>
         {showControls && false && (
           <AsciiSceneControls
             selectedAlphabet={alphabet}
@@ -373,6 +379,8 @@ const _AsciiScene: React.FC<AsciiSceneProps> = (props) => {
           orbitControlsTargetRef={orbitControlsTargetRef}
           registerSceneVariables={registerSceneVariables}
           variables={variableValues}
+          isPaused={isPaused}
+          setNeverPause={setNeverPause}
         >
           <SplitView
             viewMode={viewMode}
@@ -444,9 +452,21 @@ export const AsciiScene: React.FC<AsciiSceneProps> = (props) => {
 
   const variablesHeight = props.usesVariables ? 40 : 0;
 
+  const [sceneId, setSceneId] = useState<undefined | string>(undefined);
+  useEffect(() => setSceneId((Math.random() * 100000000000).toFixed(0)), []);
+
+  const { activeSceneId: activeAsciiSceneId } = useContext(ActiveAsciiSceneContext);
+  const isPaused = activeAsciiSceneId !== sceneId;
+
   return (
-    <div ref={containerRef} style={{ height: height + variablesHeight }} className="ascii-scene">
-      {visible && <_AsciiScene {...props} />}
+    <div
+      ref={containerRef}
+      style={{ height: height + variablesHeight }}
+      className="ascii-scene"
+      data-ascii-scene-id={sceneId}
+      data-paused={isPaused}
+    >
+      {visible && <_AsciiScene {...props} isPaused={isPaused} />}
     </div>
   );
 };

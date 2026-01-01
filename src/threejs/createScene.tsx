@@ -166,12 +166,15 @@ export function createScene<V extends VariableDict>(
 
     const rotationCallbacks = useRef(new Set<(vec: THREE.Camera) => void>());
 
+    const isPaused = context?.isPaused ?? false;
+
     useEffect(() => {
       if (!visible) return;
 
       let stopped = false;
       const tick = () => {
         if (!stopped) requestAnimationFrame(tick);
+        if (isPaused) return;
         for (const rotationCallback of rotationCallbacks.current) {
           rotationCallback(camera);
         }
@@ -180,7 +183,7 @@ export function createScene<V extends VariableDict>(
       return () => {
         stopped = true;
       };
-    }, [camera, visible]);
+    }, [camera, visible, isPaused]);
 
     const hasNormal = variableKeys.some((key) => variablesSpec[key].type === "normal");
 
@@ -239,7 +242,7 @@ export function createScene<V extends VariableDict>(
               <DREI.OrbitControls
                 rotateSpeed={0.3}
                 enableRotate
-                autoRotate={rotate && autoRotate}
+                autoRotate={rotate && autoRotate && !isPaused}
                 autoRotateSpeed={0.7}
                 enablePan={false}
                 enableZoom={false}
