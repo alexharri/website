@@ -39,11 +39,12 @@ export const SplitView: React.FC<SplitViewProps> = ({
     setIsDragging(true);
 
     const getClientX = (e: MouseEvent | TouchEvent): number => {
-      return 'touches' in e ? e.touches[0].clientX : e.clientX;
+      return "touches" in e ? e.touches[0].clientX : e.clientX;
     };
 
     function onMove(e: MouseEvent | TouchEvent) {
       if (!rectRef?.current) return;
+      e.preventDefault();
       const rect = rectRef.current.getBoundingClientRect();
       const x = getClientX(e) - rect.left;
       const newPosition = clamp(x / rect.width, 0.1, 0.9);
@@ -60,7 +61,7 @@ export const SplitView: React.FC<SplitViewProps> = ({
 
     window.addEventListener("mousemove", onMove);
     window.addEventListener("mouseup", onEnd);
-    window.addEventListener("touchmove", onMove);
+    window.addEventListener("touchmove", onMove, { passive: false });
     window.addEventListener("touchend", onEnd);
   };
 
