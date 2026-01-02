@@ -41,23 +41,23 @@ Then, to get better separation between different colored regions, I also impleme
   <WebGLShader fragmentShader="multiple_waves" seed={9581} />
 </AsciiScene>
 
-Before contrast enhancement, the waves kind of blended together visually. Enhancing contrast makes the seperation far clearer, which was key to making the 3D scene above look as good as it does.
+Enhancing contrast makes the seperation between the waves far clearer, which was key to making the 3D scene above look as good as it does.
 
 I put so much focus on sharp edges because they're an aspect of ASCII rendering that is often overlooked when programmatically rendering images as ASCII. Consider this animated 3D scene from Cognition's landing page that is rendered via ASCII characters:
 
-<Image src="~/cube-logo-short.mp4" plain width={700} noMargin />
+<Image src="~/cube-logo-short.mp4" plain width={700} noMargin pausable={false} />
 
-<SmallNote label="" center>From [cognition.ai](https://cognition.ai/) landing page.</SmallNote>
+<SmallNote label="" center>Source: [cognition.ai](https://cognition.ai/)</SmallNote>
 
-It's a cool effect, especially while in motion, but take a look at those blurry edges! The characters follow the cube's contour very poorly and as a result the edges look blurry and inconsistent:
+It's a cool effect, especially while in motion, but take a look at those blurry edges! The characters follow the cube contours very poorly and as a result the edges look blurry and inconsistent:
 
 <Image src="~/cube-logo-zoomed-in.png" plain width={450} noMargin />
 
-This blurriness arises from a common mistake made when implementing an ASCII renderer: ignoring the shape of ASCII characters and only considering visual density. Blurry edges in ASCII rendering have become a small pet peeve of mine, which is why I started implement my ASCII renderer to begin with
+This blurriness happens when the shape of ASCII characters is ignored. It's disappointing to see because ASCII art looks _so much_ better when shape is utilized, but I never see that in generated ASCII art -- it's always blurry. I think that's because it's not really obvious how to consider shape when building an ASCII renderer.
 
-In this post I'll cover how I built this ASCII renderer in detail.
+I started building my ASCII renderer to prove to myself that it's possible to utilize shape in ASCII rendering. In this post I'll cover the techniques and ideas I used to capture shape and build this ASCII renderer in detail.
 
-We'll start with the basics of image-to-ASCII conversion and see where the common issue of blurry edges comes from. After that I'll show you the approach I used to fix that and achieve sharp, high-quality ASCII rendering, and lastly we'll tackle contrast enhancement.
+We'll start with the basics of image-to-ASCII conversion and see where the common issue of blurry edges comes from. After that I'll show you the approach I used to fix that and achieve sharp, high-quality ASCII rendering. At the end, we'll improve on that with some contrast enhancement techniques.
 
 Let's get to it!
 
