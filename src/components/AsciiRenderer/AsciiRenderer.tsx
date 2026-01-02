@@ -55,7 +55,7 @@ export function AsciiRenderer(props: Props) {
     return matcher;
   }, [config?.alphabet]);
 
-  const color = transparent ? colors.text : colors.blue400;
+  const color = transparent ? colors.text : colors.blue;
   const asciiCanvas = useAsciiCanvas(asciiCanvasRef, config, color);
 
   useEffect(() => {
@@ -130,7 +130,7 @@ export function AsciiRenderer(props: Props) {
               ref={preRef}
               className={s("pre")}
               style={{
-                color: transparent ? colors.text : colors.blue400,
+                color,
                 letterSpacing: config ? config.letterSpacingEm + "em" : undefined,
                 lineHeight: config ? config.lineHeight.toString() : undefined,
                 fontSize: config ? config.fontSize + "px" : undefined,
