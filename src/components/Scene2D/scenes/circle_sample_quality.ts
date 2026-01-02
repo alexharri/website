@@ -4,10 +4,11 @@ import { createScene2D } from "../createScene2D";
 const HEIGHT = 360;
 
 export default createScene2D(
-  ({ ctx, width, height: canvasHeight }) => {
+  ({ ctx, width, height: canvasHeight, targetHeight }) => {
+    const height = HEIGHT * (canvasHeight / targetHeight);
     const x = width / 2;
-    const y = HEIGHT / 2;
-    const radius = HEIGHT / 3.1;
+    const y = height / 2;
+    const radius = height / 3.1;
 
     ctx.beginPath();
     ctx.rect(0, 0, width, canvasHeight);

@@ -42,13 +42,13 @@ export function renderPixelate(
   ctx.scale(dpr, dpr);
   ctx.clearRect(0, 0, config.canvasWidth, config.canvasHeight);
 
-  if (samplingData.length !== config.rows) return;
-  if (samplingData[0]?.length !== config.cols) return;
-
   for (let col = 0; col < config.cols; col++) {
     const x = config.offsetX + config.boxWidth * col;
     for (let row = 0; row < config.rows; row++) {
-      const item = samplingData[row][col];
+      const item = samplingData[row]?.[col];
+      if (!item) {
+        continue;
+      }
       const l = item.samplingVector[0] * 255;
       const y = config.offsetY + config.boxHeight * row;
       ctx.beginPath();

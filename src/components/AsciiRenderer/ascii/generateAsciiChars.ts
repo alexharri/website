@@ -9,8 +9,8 @@ import { clamp } from "../../../math/math";
 const lightnessEasingFunctions = {
   default: Bezier(0.38, 0.01, 0.67, 1),
   soft: Bezier(0.22, 0.02, 0.76, 0.82),
-  increase_contrast: Bezier(1, 0, 0, 1),
   darken: Bezier(0.38, 0.01, 0.78, 0.82),
+  increase_contrast: Bezier(1, 0, 0, 1),
 };
 
 const easingLookupTables: Record<string, Float32Array> = {};
@@ -20,7 +20,12 @@ for (const [name, easingFn] of Object.entries(lightnessEasingFunctions)) {
   const lut = new Float32Array(LOOKUP_TABLE_SIZE + 1);
   for (let i = 0; i <= LOOKUP_TABLE_SIZE; i++) {
     const t = i / LOOKUP_TABLE_SIZE;
-    lut[i] = easingFn(t);
+    if (name === "increase_contrast") {
+      // Hacky special case: always 0% or 100% lightness
+      lut[i] = Math.round(t);
+    } else {
+      lut[i] = easingFn(t);
+    }
   }
   easingLookupTables[name] = lut;
 }

@@ -1,21 +1,16 @@
 import { cssVariables } from "../../utils/cssVariables";
 import { StyleOptions } from "../../utils/styles";
 
-export default (width: number, breakpoint: number) =>
+export default (width: number) =>
   ({ styled, theme }: StyleOptions) => ({
     container: styled.css`
       position: relative;
       max-width: 100%;
       width: ${width}px;
       margin: 0 auto;
-      border: 1px solid ${theme.medium400};
+      outline: 1px solid ${theme.medium400};
       overflow: hidden;
       transition: opacity 0.3s, transform 0.3s;
-
-      @media (max-width: ${breakpoint}px) {
-        border: none;
-        min-width: 100vw;
-      }
 
       &--isPaused {
         opacity: 0.7;

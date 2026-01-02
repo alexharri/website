@@ -197,8 +197,7 @@ const _AsciiScene: React.FC<AsciiSceneProps> = (props) => {
     }
   }, [effectSlider, variableValues.effect_t]);
 
-  const { targetWidth, targetHeight, width, height, minWidth, scale, breakpoint } =
-    useDimensions(props);
+  const { targetWidth, targetHeight, width, height, minWidth, scale } = useDimensions(props);
   const metadata = useMemo(() => getAlphabetMetadata(alphabet), [alphabet]);
   const cellScale = "cellScale" in variableValues ? (variableValues.cellScale as number) : 1;
   const sampleQuality =
@@ -213,10 +212,7 @@ const _AsciiScene: React.FC<AsciiSceneProps> = (props) => {
   }, [columnWidth, targetFontSize, metadata, cellScale]);
 
   const orbitControlsTargetRef = useRef<HTMLDivElement>(null);
-  const AsciiSceneStyles = useMemo(
-    () => createAsciiSceneStyles(targetWidth, breakpoint),
-    [targetWidth, breakpoint],
-  );
+  const AsciiSceneStyles = useMemo(() => createAsciiSceneStyles(targetWidth), [targetWidth]);
   const s = useStyles(AsciiSceneStyles);
   const debugCanvasRef = useRef<HTMLCanvasElement>(null);
   const characterWidth = useMonospaceCharacterWidthEm(cssVariables.fontMonospace);
@@ -486,19 +482,10 @@ function useDimensions(props: AsciiSceneProps) {
     minWidth = targetWidth;
   }
 
-  const breakpoint = useMemo(() => targetWidth + cssVariables.contentPadding * 2, [targetWidth]);
-
   const viewportWidth = useViewportWidth();
-  let width: number;
-  if (viewportWidth == null) {
-    width = targetWidth;
-  } else if (viewportWidth <= breakpoint) {
-    width = viewportWidth;
-  } else {
-    width = targetWidth;
-  }
+  const width = Math.min(targetWidth, viewportWidth ?? Infinity);
 
   const { height, scale } = useSceneHeight(targetHeight, { minWidth });
 
-  return { targetWidth, targetHeight, width, height, minWidth, breakpoint, scale };
+  return { targetWidth, targetHeight, width, height, minWidth, scale };
 }

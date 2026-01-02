@@ -72,12 +72,10 @@ export function AsciiRenderer(props: Props) {
 
       if (!config || !characterMatcher || samplingData.length === 0) return;
 
-      if (optimizePerformance) {
-        if (!hideAscii) {
+      if (!hideAscii) {
+        if (optimizePerformance) {
           asciiCanvas.render(samplingData, characterMatcher);
-        }
-      } else {
-        if (!hideAscii && preEl) {
+        } else if (preEl) {
           const ascii = samplingDataToAscii(characterMatcher, samplingData, config);
           preEl.textContent = ascii;
         }

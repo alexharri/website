@@ -41,7 +41,7 @@ Then, to get better separation between different colored regions, I also impleme
   <WebGLShader fragmentShader="multiple_waves" seed={9581} />
 </AsciiScene>
 
-Enhancing contrast makes the seperation between the different colored regions (waves) far clearer, which was key to making the 3D scene above look as good as it does.
+The contrast enhancement makes the seperation between different colored regions far clearer. That was key to making the 3D scene above look as good as it does.
 
 I put so much focus on sharp edges because they're an aspect of ASCII rendering that is often overlooked when programmatically rendering images as ASCII. Consider this animated 3D scene from Cognition's landing page that is rendered via ASCII characters:
 
@@ -49,15 +49,15 @@ I put so much focus on sharp edges because they're an aspect of ASCII rendering 
 
 <SmallNote label="" center>Source: [cognition.ai](https://cognition.ai/)</SmallNote>
 
-It's a cool effect, especially while in motion, but take a look at those blurry edges! The characters follow the cube contours very poorly and as a result the edges look blurry and inconsistent:
+It's a cool effect, especially while in motion, but take a look at those blurry edges! The characters follow the cube contours very poorly and as a result the edges look blurry and jagged in places:
 
 <Image src="~/cube-logo-zoomed-in.png" plain width={450} noMargin />
 
-This blurriness happens when the shape of ASCII characters is ignored. It's disappointing to see because ASCII art looks _so much_ better when shape is utilized, but I never see that in generated ASCII art -- it's always blurry. I think that's because it's not really obvious how to consider shape when building an ASCII renderer.
+This blurriness happens when the shape of ASCII characters is ignored. It's disappointing to see because ASCII art looks _so much_ better when shape is utilized. I never see shape utilized in generated ASCII art. I think that's because it's not really obvious how to consider shape when building an ASCII renderer.
 
 I started building my ASCII renderer to prove to myself that it's possible to utilize shape in ASCII rendering. In this post I'll cover the techniques and ideas I used to capture shape and build this ASCII renderer in detail.
 
-We'll start with the basics of image-to-ASCII conversion and see where the common issue of blurry edges comes from. After that I'll show you the approach I used to fix that and achieve sharp, high-quality ASCII rendering. At the end, we'll improve on that with some contrast enhancement techniques.
+We'll start with the basics of image-to-ASCII conversion and see where the common issue of blurry edges comes from. After that I'll show you the approach I used to fix that and achieve sharp, high-quality ASCII rendering. At the end we'll improve on that with by implementing contrast enhancement techniques.
 
 Let's get to it!
 
@@ -66,14 +66,15 @@ Let's get to it!
 
 [ascii]: https://en.wikipedia.org/wiki/ASCII
 
-Let's start off by rendering the following image containing a white circle using ASCII characters:
+ASCII contains [95 printable characters][printable_characters] which we can use. Let's start off by rendering the following image containing a white circle using those ASCII characters:
 
 <AsciiScene width={360} minWidth={360} height={360} viewMode="canvas">
   <Scene2D scene="circle" />
 </AsciiScene>
 
-ASCII art pretty much always uses a [monospace][monospace] font. Since every character in a monospace font is equally wide and tall, we can split the image into a grid. Each grid cell will contain a single ASCII character.
+ASCII art is (almost) always rendered using a [monospace][monospace] font. Since every character in a monospace font is equally wide and tall we can split the image into a grid. Each grid cell will contain a single ASCII character.
 
+[printable_characters]: https://www.ascii-code.com/characters/printable-characters
 [monospace]: https://en.wikipedia.org/wiki/Monospaced_font
 
 The image with the circle is $360 \times 360$ pixels. For the ASCII grid I'll pick a row height of $24$ pixels and a column width of $20$ pixels. That splits the canvas into $15$ rows and $18$ columns -- an $18 \times 15$ grid:
@@ -88,7 +89,7 @@ Our task is now to pick which character to place in each column. The simplest ap
 
 We can get a lightness value for each cell by sampling the lightness of the pixel at the cell's center:
 
-<AsciiScene width={360} minWidth={360} height={360} fontSize={20} rowHeight={24} columnWidth={20} viewMode="canvas" hideAscii showGrid offsetAlign="left" sampleQuality={1} showSamplingPoints alphabet="pixel-short">
+<AsciiScene width={360} minWidth={360} height={360} fontSize={20} rowHeight={24} columnWidth={20} viewMode="canvas" hideAscii showGrid offsetAlign="left" sampleQuality={1} showSamplingPoints alphabet="pixel-short" increaseContrast>
   <Scene2D scene="circle" />
 </AsciiScene>
 
@@ -106,18 +107,7 @@ We can use the following formula to convert an RGB color (with components values
 
 ### Mapping lightness values to ASCII characters
 
-Now that we have a lightness value for each cell, we want to use them to pick ASCII characters. ASCII has 95 printable characters:
-
-```text:no_ligatures
- !"#$%&\'()*+,-./
-0123456789:;<=>?@
-ABCDEFGHIJKLMNOPQRSTUVWXYZ
-[\\]^_\`
-abcdefghijklmnopqrstuvwxyz
-{|}~
-```
-
-To simplify, let's start by just considering these ASCII characters:
+Now that we have a lightness value for each cell, we want to use those values to pick ASCII characters. As mentioned before, ASCII has 95 printable characters, but let's start simple with just these characters:
 
 ```text
 : - # = + @ * % .
@@ -162,7 +152,7 @@ That is happening because we've pretty much just implemented nearest-neighbor do
 
 ## Downsampling
 
-Downsampling, in the context of image processing, is taking a larger image (in our case, the $360 \times 360$ canvas) and using that image's data to construct a lower resolution image (in our case, the $18 \times 15$ ASCII grid). The pixel values of the lower resolution image are calculated by sampling values from the higher resolution image.
+Downsampling, in the context of image processing, is taking a larger image (in our case, the $360 \times 360$ image with the circle) and using that image's data to construct a lower resolution image (in our case, the $18 \times 15$ ASCII grid). The pixel values of the lower resolution image are calculated by sampling values from the higher resolution image.
 
 The simplest and fastest method of sampling is [nearest-neighbor interpolation][nearest_neighbor] where we only take a single sample from the higher resolution image. That's what we did above.
 
@@ -182,7 +172,7 @@ For a shape like this, using nearest-neighbor interpolation, the single sample t
 
 If, instead of picking an ASCII character for each grid cell, we color each grid cell according the the sampled value, we get the following pixelated rendering:
 
-<AsciiScene width={600} minWidth={400} height={360} fontSize={20} rowHeight={24} columnWidth={24} viewMode="ascii" hideAscii pixelate offsetAlign="left" sampleQuality={1} alphabet="pixel-short" optimizePerformance>
+<AsciiScene width={600} minWidth={400} height={360} fontSize={20} rowHeight={24} columnWidth={24} viewMode="ascii" hideAscii pixelate offsetAlign="left" sampleQuality={1} alphabet="pixel-short" increaseContrast>
   <Scene2D scene="rotating_square" />
 </AsciiScene>
 
@@ -227,7 +217,7 @@ This method of collecting multiple samples from the larger image is called [supe
 
 Let's look at what supersampling does for the circle example from earlier. Try dragging the sample quality slider:
 
-<AsciiScene width={360} height={408} fontSize={20} rowHeight={24} columnWidth={20} viewModes={["ascii", "transparent"]} offsetAlign="left" alphabet="pixel-short" increaseContrast usesVariables>
+<AsciiScene width={360} minWidth={360} height={408} fontSize={20} rowHeight={24} columnWidth={20} viewModes={["ascii", "transparent"]} offsetAlign="left" alphabet="pixel-short" increaseContrast usesVariables>
   <Scene2D scene="circle_sample_quality" />
 </AsciiScene>
 
@@ -235,7 +225,7 @@ The circle becomes less jagged, but the edges feel blurry. Why's that?
 
 Well, they feel blurry because we're pretty much just rendering a low-resolution pixelated image of a circle. Take a look at the pixelated view:
 
-<AsciiScene width={360} height={408} fontSize={20} rowHeight={24} columnWidth={20} viewModes={["ascii", "transparent"]} offsetAlign="left" alphabet="pixel-short" pixelate usesVariables>
+<AsciiScene width={360} height={408} fontSize={20} rowHeight={24} columnWidth={20} viewModes={["ascii", "transparent"]} offsetAlign="left" alphabet="pixel-short" pixelate increaseContrast usesVariables>
   <Scene2D scene="circle_sample_quality" />
 </AsciiScene>
 
