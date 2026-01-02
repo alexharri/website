@@ -1,5 +1,5 @@
 ---
-title: "Canvas to ASCII renderer"
+title: "Shape in ASCII rendering"
 ---
 
 Recently I've been spending my time building an image-to-ASCII renderer. Below is the result -- try dragging it around, the demo is interactive!
@@ -41,7 +41,7 @@ Then, to get better separation between different colored regions, I also impleme
   <WebGLShader fragmentShader="multiple_waves" seed={9581} />
 </AsciiScene>
 
-Enhancing contrast makes the seperation between the waves far clearer, which was key to making the 3D scene above look as good as it does.
+Enhancing contrast makes the seperation between the different colored regions (waves) far clearer, which was key to making the 3D scene above look as good as it does.
 
 I put so much focus on sharp edges because they're an aspect of ASCII rendering that is often overlooked when programmatically rendering images as ASCII. Consider this animated 3D scene from Cognition's landing page that is rendered via ASCII characters:
 
