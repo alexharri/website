@@ -233,7 +233,7 @@ Increasing the number of samples is insufficient. No matter how many samples we 
 
 And that's the core problem: treating each grid cell as a pixel in an image. It's an obvious and simple method, but it disregards that ASCII characters have shape.
 
-We can make our ASCII renderings fara more crisp by picking characters based on their shape. Here's the circle rendered that way:
+We can make our ASCII renderings far more crisp by picking characters based on their shape. Here's the circle rendered that way:
 
 <AsciiScene width={360} height={408} fontSize={20} rowHeight={24} columnWidth={20} viewModes={["ascii", "transparent"]} sampleQuality={8} increaseContrast offsetAlign="left" exclude="$()[]">
   <Scene2D scene="circle_raised" />
@@ -345,6 +345,8 @@ function findBestCharacter(inputVector: number[]) {
 ```
 
 The <Ts method>findBestCharacter</Ts> function gives us the ASCII character whose shape best matches the input lookup vector.
+
+<SmallNote label="">Note: this brute force search is not very performant. This becomes a bottleneck when we start rendering thousands of ASCII characters at $60$ <abbr title="Frames per second">FPS</abbr>. I'll talk more about this later.</SmallNote>
 
 To make use of this in our ASCII renderer, we'll calculate a lookup vector for each cell in the ASCII grid and pass it to <Ts method>findBestCharacter</Ts> to determine the character to display.
 
@@ -478,7 +480,7 @@ One problem with this grid-like configuration for the sampling circles is that t
   {"."}
 </AsciiScene>
 
-To compensate for this, we can stagger the sampling circles vertically (e.g. lowering the left sampling circles, and raising the right ones) and make them a bit larger. This causes the cell to be almost fully covered while not causing excessive overlap across the sampling circles:
+To compensate for this we can stagger the sampling circles vertically (e.g. lowering the left sampling circles and raising the right ones) and make them a bit larger. This causes the cell to be almost fully covered while not causing excessive overlap across the sampling circles:
 
 <AsciiScene showGrid showSamplingCircles fontSize={150} rows={1.4} cols={1.8} hideSpaces>
   {"."}
@@ -490,38 +492,21 @@ We can use the same procedure as before to generate character vectors using thes
   {"L"}
 </AsciiScene>
 
-For `L`, we get the vector:
-
-<p className="mathblock">$$\begin{bmatrix} 0.10 & 0.00 \\ 0.20 & 0.02 \\ 0.09 & 0.09 \end{bmatrix}$$</p>
-
-<SmallNote label="" center>I'm presenting the $6$-dimensional vector in a $3 \times 2$ matrix form because it's easier to grok geometrically, but the actual vector is a flat list of numbers.</SmallNote>
-
-The lightness values certainly look L-shaped! I'd say that `L`'s shape vector describes its shape fairly well.
-
-If we normalize the 6D shape vectors in the same manner as before, `L`'s shape vector becomes:
+For `L` we get the vector:
 
 <p className="mathblock">$$\begin{bmatrix} 0.44 & 0.00 \\ 0.53 & 0.06 \\ 0.51 & 0.45 \end{bmatrix}$$</p>
 
-Which just makes the L shape more obvious.
+<SmallNote label="" center>I'm presenting $6$-dimensional shape vectors in a $3 \times 2$ matrix form because it's easier to grok geometrically, but the actual vector is a flat list of numbers.</SmallNote>
 
----
-
-Now, with a 6D shape vector for every character, the next step is to be able to find up the "most similar" shape vector given an input 6D sampling vector.
-
-In two dimensions, we could plot the characters on a 2D grid and perform a nearest neighbor search in a fairly straightforward manner:
-
-<CharacterPlot highlight="a" inputPoints={[
-  { vector: [0.44, 0.63], label: "Input" }
-]} normalize />
-
-The same idea applies in $6$ dimensions, though it's less intuitive to visualize. We'll lay our shape vectors out as points in some $6$-dimensional space and perform nearest neighbor lookups with an input 6D sampling vector (point).
-
+The lightness values certainly look L-shaped! I'd say that `L`'s 6D shape vector captures `L`'s shape very well.
 
 ### Nearest neighbor lookups in a 6D space
 
-Finding the nearest neighbor (closest point) in an $n$-dimensional space boils down to finding the point whose Euclidian distance to our input point is the smallest.
+Now we have a 6D shape vector for every ASCII character. Does that affect how we find the best character?
 
-Given two points in 2D space, $a$ and $b$, we can calculate the Euclidian distance $d$ between them like so:
+Earlier, in the <Ts method>findBestCharacter</Ts> function, I referenced a <Ts method>getDistance</Ts> function that returned the distance between two 2D vectors but just glossed over it. The <Ts method>getDistance</Ts> function returns the [Euclidian distance][euclidean_distance] between the input points. Given two 2D points $a$ and $b$, the formula to calculate their Euclidian distance looks like so:
+
+[euclidean_distance]: https://en.wikipedia.org/wiki/Euclidean_distance
 
 <p className="mathblock">$$ d = \sqrt{(a_1 - b_1)^2 + (a_2 - b_2)^2} $$</p>
 
@@ -529,97 +514,69 @@ This generalizes to higher dimensions:
 
 <p className="mathblock">$$ d = \sqrt{(a_1 - b_1)^2 + (a_2 - b_2)^2 + \cdots + (a_n - b_n)^2} $$</p>
 
-Which put into code looks like so:
+Put into code, this looks like so:
 
 ```ts
-function euclideanDistance(a: number[], b: number[]): number {
+function getDistance(a: number[], b: number[]): number {
   let sum = 0;
-
   for (let i = 0; i < a.length; i++) {
     sum += (a[i] - b[i]) ** 2;
   }
-
   return Math.sqrt(sum);
 }
 ```
 
-Though, if we're just using this for the purposes of finding the closest point, we can skip the expensive <Ts>Math.sqrt()</Ts> call and just return the squared distance:
+So in short: no, the dimensionality of our shape vector does not change lookups at all. We can use the same <Ts method>getDistance</Ts> function for both 2D and 6D.
 
-```ts
-function euclideanDistanceSquared(a: number[], b: number[]): number {
-  // ...
-  return sum;
-}
-```
+<SmallNote label="">Note: since we're just using this for the purposes of finding the closest point, we can skip the expensive <Ts>Math.sqrt()</Ts> call and just return the squared distance. It does not affect the result.</SmallNote>
 
-Do note that this is not very performant. Once we start rendering thousands of ASCII characters at $60$ <abbr title="Frames per second">FPS</abbr>, we'll need to speed up performance significantly.
-
-We'll take a look at how we can do that later -- let's first get to rendering some scenes!
+With that out of the way, let's see what the 6D approach yields!
 
 
-### Trying out the 6D sampling approach
+### Trying out the 6D approach
 
-If we render the circle example from before with 6D sampling vectors, we get the following:
+Our new 6D approach works really well for flat shapes, like the circle example we've been using:
 
-<AsciiScene width={360} minWidth={360} height={360} fontSize={20} rowHeight={24} columnWidth={20} viewMode="ascii" offsetAlign="left" sampleQuality={4} alphabet="default" increaseContrast>
+<AsciiScene width={360} minWidth={360} height={360} fontSize={20} rowHeight={24} columnWidth={20} viewMode="ascii" offsetAlign="left" sampleQuality={8} alphabet="default" increaseContrast>
   <Scene2D scene="circle" />
 </AsciiScene>
 
-Those are some really good character picks! Let's look at our rotating square:
-
-<AsciiScene width={600} minWidth={400} height={360} fontSize={20} rowHeight={24} columnWidth={19} viewMode="ascii" offsetAlign="left" sampleQuality={10}>
-  <Scene2D scene="rotating_square" />
-</AsciiScene>
-
-You can easily tell that it's a rotating square -- the picked characters match the contour very well.
-
-Now, let's try rendering a 3D scene!
-
-
-### Rendering a 3D scene
-
-Consider the following 3D scene:
-
-<AsciiScene height={540} viewMode="canvas" hideAscii optimizePerformance>
-  <Scene scene="cube" autoRotate zoom={2.7} yOffset={0.45} />
-</AsciiScene>
-
-If we render it as ASCII, we get the following:
+Now let's see how this approach works when we render a 3D scene with more shades of gray:
 
 <AsciiScene height={540} fontSize={12} characterWidthMultiplier={0.85} characterHeightMultiplier={0.85} viewModes={["ascii", "split", "canvas"]} optimizePerformance>
   <Scene scene="cube" autoRotate zoom={2.7} yOffset={0.45} />
 </AsciiScene>
 
-The outer edges look good -- our shape matching takes care of that -- but the objects all kind of blend together. The edges _between_ the objects aren't distinct enough. For example, the lighter faces of the the cubes all kind of blend into one solid color.
+Firstly, the outer contours looks really nice and sharp. The gradients on the sphere and cone also look really nice.
 
-When there is a change in color -- like when two faces of a cube meet -- I'd like to see more "sharpness" in ASCII rendering.
+However, internally, the objects all kind of blend together. The edges _between_ surfaces with different lightnesses aren't sharp enough. For example, the lighter faces of the the cubes all kind of blend into one solid color. When there is a change in color -- like when two faces of a cube meet -- I'd like to see more sharpness in the ASCII rendering.
 
-For example, consider the following split:
+Do demonstrate what I mean, consider the following split:
 
-<AsciiScene width={450} minWidth={400} rows={14} viewMode="canvas" optimizePerformance>
+<AsciiScene width={450} minWidth={450} rows={14} viewMode="canvas" optimizePerformance>
   <Scene2D scene="shade_split" />
 </AsciiScene>
 
 It's currently rendered like so:
 
-<AsciiScene width={450} minWidth={400} rows={14} fontSize={13} rowHeight={15} optimizePerformance>
+<AsciiScene width={450} minWidth={450} rows={14} fontSize={13} rowHeight={15} optimizePerformance>
   <Scene2D scene="shade_split" />
 </AsciiScene>
 
 The different shades result in `i`s on the left and `B`s on the right, but the boundary is not very sharp.
 
-By applying some image processing effects to the sampling vector, we can enhance the boundary so that it appears sharper:
+By applying some effects to the sampling vector, we can enhance the contrast at the boundary so that it appears sharper:
 
-<AsciiScene width={450} minWidth={400} rows={14} fontSize={13} rowHeight={15} optimizePerformance exclude="\\|:" effects={{
+<AsciiScene width={450} minWidth={450} rows={14} fontSize={13} rowHeight={15} optimizePerformance exclude="\\|:" effects={{
   global_crunch: 2.5,
   directional_crunch: 3,
 }}>
   <Scene2D scene="shade_split" />
 </AsciiScene>
 
-Let's look at how we can implement this sharpening effect.
+The added contrast makes a _big_ difference in readability for the 3D scene. Let's look at how we can implement this contrast enhancement effect.
 
-## Increasing sharpness
+## Contrast enhancement
 
 Consider cells overlapping a color boundary like so:
 
