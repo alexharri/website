@@ -21,6 +21,7 @@ export function AsciiDebugVizCanvas(props: Props) {
         left: 0,
         pointerEvents: "none",
         zIndex: 50,
+        imageRendering: "crisp-edges", // Avoid blurry canvas on iOS
       }}
     />
   );

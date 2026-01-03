@@ -472,7 +472,7 @@ $6$ sampling circles capture left-right differences, such as between `p` and `q`
   {"/"}
 </AsciiScene>
 
-One problem with this grid-like configuration for the sampling circles is that there are gaps. Consider `.`, for example. It inconveniently falls between the sampling circles:
+One problem with this grid-like configuration for the sampling circles is that there are gaps. For example, `.` falls between the sampling circles:
 
 <AsciiScene alphabet="six-samples" showGrid showSamplingCircles fontSize={150} rows={1.4} cols={1.8} hideSpaces>
   {"."}
