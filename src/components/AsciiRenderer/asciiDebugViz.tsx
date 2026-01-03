@@ -90,10 +90,10 @@ export function renderAsciiDebugViz(
           const y = sampleRectTop + yOff;
 
           if (options.showSamplingCircles !== "none") {
-            let color = "rgba(255, 255, 255, 0.2)";
+            let color = "rgba(255, 255, 255, 0.33)";
             switch (options.samplingCirclesColor) {
               case "blue":
-                color = colors.blue;
+                color = colors.blue200;
                 break;
               case "white":
                 color = colors.text;

@@ -38,7 +38,12 @@ export default (width: number) =>
       display: flex;
       justify-content: center;
       gap: 32px;
-      height: 56px;
-      align-items: center;
+      height: 64px;
+      padding-bottom: 8px;
+      align-items: flex-end;
+
+      @media (max-width: ${cssVariables.mobileWidth}px) {
+        padding-bottom: 0;
+      }
     `,
   });

@@ -150,65 +150,61 @@ That works... but the result is pretty ugly. We seem to always get `@` for cells
 
 That is happening because we've pretty much just implemented nearest-neighbor downsampling. Let's see what that means.
 
-## Downsampling
+## Nearest neighbor downsampling
 
 Downsampling, in the context of image processing, is taking a larger image (in our case, the $360 \times 360$ image with the circle) and using that image's data to construct a lower resolution image (in our case, the $18 \times 15$ ASCII grid). The pixel values of the lower resolution image are calculated by sampling values from the higher resolution image.
 
-The simplest and fastest method of sampling is [nearest-neighbor interpolation][nearest_neighbor] where we only take a single sample from the higher resolution image. That's what we did above.
+The simplest and fastest method of sampling is [nearest-neighbor interpolation][nearest_neighbor] where, for each cell (pixel), we only take a single sample from the higher resolution image.
+
+Consider the circle example again. Using nearest-neighbor interpolation, every sample either falls inside or outside of the shape, resulting in either $0\%$ or $100\%$ lightness:
 
 [nearest_neighbor]: https://en.wikipedia.org/wiki/Nearest-neighbor_interpolation
 
-Consider this rotating square split into a $24 \times 24$ pixel grid:
-
-<AsciiScene width={600} minWidth={400} height={360} fontSize={20} rowHeight={24} columnWidth={24} viewMode="transparent" hideAscii showGrid offsetAlign="left" sampleQuality={1} alphabet="pixel-short">
-  <Scene2D scene="rotating_square" />
+<AsciiScene width={360} minWidth={360} height={360} fontSize={20} rowHeight={24} columnWidth={20} viewMode="canvas" hideAscii showGrid offsetAlign="left" sampleQuality={1} showSamplingPoints alphabet="pixel-short" increaseContrast>
+  <Scene2D scene="circle" />
 </AsciiScene>
 
-For a shape like this, using nearest-neighbor interpolation, the single sample taken for each cell either falls inside or outside of the shape, resulting in either $0\%$ or $100\%$ lightness:
+If, instead of picking an ASCII character for each grid cell, we color each grid cell (pixel) according the the sampled value, we get the following pixelated rendering:
 
-<AsciiScene width={600} minWidth={400} height={360} fontSize={20} rowHeight={24} columnWidth={24} viewMode="transparent" hideAscii showGrid showSamplingPoints offsetAlign="left" sampleQuality={1} alphabet="pixel-short">
-  <Scene2D scene="rotating_square" />
+<AsciiScene width={360} minWidth={360} height={360} fontSize={20} rowHeight={24} columnWidth={20} viewMode="ascii" hideAscii pixelate offsetAlign="left" sampleQuality={1} alphabet="pixel-short" increaseContrast>
+  <Scene2D scene="circle" />
 </AsciiScene>
 
-If, instead of picking an ASCII character for each grid cell, we color each grid cell according the the sampled value, we get the following pixelated rendering:
+<SmallNote label="" center>This pixelated rendering is pretty much equivalent to the ASCII rendering from before. The only difference is that instead of `@`s we have white pixels, and instead of spaces we have black pixels.</SmallNote>
 
-<AsciiScene width={600} minWidth={400} height={360} fontSize={20} rowHeight={24} columnWidth={24} viewMode="ascii" hideAscii pixelate offsetAlign="left" sampleQuality={1} alphabet="pixel-short" increaseContrast>
-  <Scene2D scene="rotating_square" />
-</AsciiScene>
-
-Notice the rough, jagged looking edges when the square is at an angle. Those aliasing artifacts (often called [jaggies][jaggies]), and they're a common result of using nearest-neighbor interpolation.
+These square, jagged looking edges are aliasing artifacts, commonly called [jaggies][jaggies]. They're a common result of using nearest-neighbor interpolation.
 
 [jaggies]: https://en.wikipedia.org/wiki/Jaggies
 
 ### Supersampling
 
-To get rid of jaggies, we might collect more samples for each cell. Consider this line, for example:
+To get rid of jaggies we can collect more samples for each cell. Consider this line:
 
-<AsciiScene width={600} minWidth={200} height={360} rowHeight={40} columnWidth={40} viewMode="canvas" showControls={false}>
+<AsciiScene width={600} minWidth={500} height={360} rowHeight={40} columnWidth={40} viewMode="canvas" showControls={false} increaseContrast>
   <Scene2D scene="slanted_line" />
 </AsciiScene>
 
 The line's slope on the $y$ axis is $\dfrac{1}{3}x$. When we pixelate it with nearest-neighbor interpolation, we get the following:
 
-<AsciiScene width={600} minWidth={200} height={360} rowHeight={40} columnWidth={40} hideAscii pixelate sampleQuality={1} alphabet="pixel-short" showControls={false}>
+<AsciiScene width={600} minWidth={500} height={360} rowHeight={40} columnWidth={40} hideAscii pixelate sampleQuality={1} alphabet="pixel-short" showControls={false} increaseContrast>
   <Scene2D scene="slanted_line" />
 </AsciiScene>
 
 Let's try to get rid of the jagginess by taking multiple samples within each cell and using the average sampled lightness value as the cell's lightness. The example below lets you vary the number of samples using the slider:
 
-<AsciiScene width={600} minWidth={200} height={360} fontSize={40} rowHeight={40} columnWidth={40} viewMode="ascii" hideAscii pixelate sampleQuality={3} alphabet="pixel-short" usesVariables>
+<AsciiScene width={600} minWidth={500} height={360} fontSize={40} rowHeight={40} columnWidth={40} viewMode="ascii" hideAscii pixelate sampleQuality={3} alphabet="pixel-short" usesVariables increaseContrast>
   <Scene2D scene="slanted_line" />
 </AsciiScene>
 
-With multiple samples, cells that lie on the edge of a shape will have some of its samples fall within the shape, and some outside of it. Averaging those, we get gray in-between colors that smooth the downsampled image. Below is the same example, but with an overlay showing where the samples land:
+With multiple samples, cells that lie on the edge of a shape will have some of its samples fall within the shape, and some outside of it. Averaging those, we get gray in-between colors that smooth the downsampled image. Below is the same example, but with an overlay showing where the samples are taken:
 
-<AsciiScene width={600} minWidth={200} height={360} fontSize={40} rowHeight={40} columnWidth={40} viewModes={["ascii", "canvas"]} hideAscii pixelate sampleQuality={3} alphabet="pixel-short" showSamplingPoints showGrid usesVariables>
+<AsciiScene width={600} minWidth={200} height={360} fontSize={40} rowHeight={40} columnWidth={40} viewModes={["ascii", "canvas"]} hideAscii pixelate sampleQuality={3} alphabet="pixel-short" showSamplingPoints showGrid usesVariables increaseContrast>
   <Scene2D scene="slanted_line" />
 </AsciiScene>
 
-This method of collecting multiple samples from the larger image is called [supersampling][supersampling]. It's a common method of [spatial anti-aliasing][anti_aliasing] (avoiding jaggies at edges). Here's what the rotating square looks like with supersampling (using $16$ samples for each cell):
+This method of collecting multiple samples from the larger image is called [supersampling][supersampling]. It's a common method of [spatial anti-aliasing][anti_aliasing] (avoiding jaggies at edges). Here's what the rotating square looks like with supersampling (using $8$ samples for each cell):
 
-<AsciiScene width={600} minWidth={400} height={360} fontSize={20} rowHeight={24} columnWidth={24} viewMode="ascii" hideAscii pixelate offsetAlign="left" sampleQuality={16} alphabet="pixel-short">
+<AsciiScene width={600} minWidth={400} height={360} fontSize={20} rowHeight={24} columnWidth={24} viewMode="ascii" hideAscii pixelate offsetAlign="left" sampleQuality={8} alphabet="pixel-short">
   <Scene2D scene="rotating_square" />
 </AsciiScene>
 
@@ -239,17 +235,11 @@ And that's the core problem: treating each grid cell as a pixel in an image. It'
 
 We can make our ASCII renderings fara more crisp by picking characters based on their shape. Here's the circle rendered that way:
 
-<AsciiScene width={360} height={408} fontSize={20} rowHeight={24} columnWidth={20} viewModes={["ascii", "transparent"]} sampleQuality={8} increaseContrast offsetAlign="left" exclude="$">
+<AsciiScene width={360} height={408} fontSize={20} rowHeight={24} columnWidth={20} viewModes={["ascii", "transparent"]} sampleQuality={8} increaseContrast offsetAlign="left" exclude="$()[]">
   <Scene2D scene="circle_raised" />
 </AsciiScene>
 
-Same for the rotating cube -- look at the results we can achieve when we consider shape:
-
-<AsciiScene width={600} minWidth={400} height={360} fontSize={20} rowHeight={24} columnWidth={19} viewMode="ascii" offsetAlign="left" sampleQuality={10} exclude="$">
-  <Scene2D scene="rotating_square" />
-</AsciiScene>
-
-This looks _far_ better than the equivalent pixelated image. By picking characters based on shape, we get a far higher _effective_ resolution. The result is also significantly more visually interesting.
+The characters follow the contour of the circle very well. By picking characters based on shape, we get a far higher _effective_ resolution. The result is also more visually interesting.
 
 Let's see how we can implement this.
 
@@ -285,7 +275,7 @@ To pick characters based on their shape, we'll somehow need to quantify (put num
 
 Let's start by only considering how much characters occupy the upper and lower region of our cell. To do that we'll define two "sampling circles" for each grid cell -- one placed in the upper half and one in the lower half:
 
-<AsciiScene alphabet="two-samples" showGrid fontSize={100} rows={2.2} cols={6} showSamplingCircles>
+<AsciiScene alphabet="two-samples" showGrid fontSize={100} rows={2.2} cols={6} showSamplingCircles samplingCirclesColor="blue">
   {""}
 </AsciiScene>
 
@@ -293,11 +283,11 @@ Let's start by only considering how much characters occupy the upper and lower r
 
 A character placed within a cell will overlap each of the cell's sampling circles to _some_ extent.
 
-<AsciiScene alphabet="two-samples" showGrid fontSize={250} rows={1} cols={1} showSamplingCircles forceSamplingValue={0}>
+<AsciiScene alphabet="two-samples" showGrid fontSize={250} rows={1} cols={1} showSamplingCircles samplingCirclesColor="blue" forceSamplingValue={0}>
   {"T"}
 </AsciiScene>
 
-One can compute that overlap by taking a bunch of samples within the circle. The fraction of samples that land inside the character gives us the overlap as a numeric value between $0$ and $1$:
+One can compute that overlap by taking a bunch of samples within the circle (for example, at every pixel). The fraction of samples that land inside the character gives us the overlap as a numeric value between $0$ and $1$:
 
 
 <AsciiScene alphabet="two-samples" sampleQuality={180} showGrid fontSize={250} rows={1} cols={1} showSamplingCircles showSamplingPoints forceSamplingValue={0}>
@@ -306,11 +296,11 @@ One can compute that overlap by taking a bunch of samples within the circle. The
 
 <p className="mathblock">$$\text{Overlap} = \dfrac{\text{Samples inside character}}{\text{Total samples}}$$</p>
 
-For T, we get an overlap of approximately $0.261$ for the upper circle and $0.097$ for the lower. Those values form a $2$-dimensional vector:
+For T, we get an overlap of approximately $0.261$ for the upper circle and $0.097$ for the lower. Those overlap values form a $2$-dimensional vector:
 
 <p className="mathblock">$$\begin{bmatrix} 0.261 \\ 0.097 \end{bmatrix}$$</p>
 
-We can generate such a $2$-dimensional vector for each character within the ASCII alphabet. These vectors quantify the shape of each ASCII character, so I'll call them _shape vectors_.
+We can generate such a $2$-dimensional vector for each character within the ASCII alphabet. These vectors quantify the shape of each ASCII character along these $2$ dimensions (upper and lower). I'll call these vectors _shape vectors_.
 
 Below are some ASCII characters and their shape vectors. I'm coloring the sampling circles using the component values of the shape vectors:
 
@@ -318,21 +308,47 @@ Below are some ASCII characters and their shape vectors. I'm coloring the sampli
   {"._=\n*%@"}
 </AsciiScene>
 
-Below is a 2D plot of all ASCII characters using their shape vectors as 2D coordinates:
+We can use the shape vectors as 2D coordinates -- here's every ASCII character on a 2D plot:
 
 <CharacterPlot max={0.435} highlight="^@qTMuX$g=C" />
 
-Let's see how to use this in image-to-ASCII rendering!
+We can see that `g` is the most bottom heavy character. `M`, `@` and `$` all score highly in both upper and lower.
 
 ### Shape-based lookup
 
-With our characters laid out on a 2D plane, we can find the closest character given 2D input coordinates. Try hovering the chart below to see what I mean:
+Let's say that we have our ASCII characters and their associated shape vectors in a <Ts>CHARACTERS</Ts> array:
 
-<CharacterPlot max={0.435} highlight="^@qTMuX$g=C" showHoverLine />
+```ts
+const CHARACTERS: Array<{
+  character: string,
+  shapeVector: number[],
+}> = [...];
+```
 
-We now have a method of finding the best matching ASCII character for an input 2D lookup vector.
+We can then perform a nearest neighbor search like so:
 
-To make use of this in our ASCII renderer, we'll need to calculate a 2D lookup vector for each cell in the grid. Let's use the following zoomed in circle as an example -- it is split into three grid cells:
+```ts
+function findBestCharacter(inputVector: number[]) {
+  let bestCharacter = "";
+  let bestDistance = Infinity;
+  
+  for (const { character, shapeVector } of CHARACTERS) {
+    const dist = getDistance(shapeVector, inputVector);
+    if (dist < bestDistance) {
+      bestDistance = dist;
+      bestCharacter = character;
+    }
+  }
+  
+  return bestCharacter;
+}
+```
+
+The <Ts method>findBestCharacter</Ts> function gives us the ASCII character whose shape best matches the input lookup vector.
+
+To make use of this in our ASCII renderer, we'll calculate a lookup vector for each cell in the ASCII grid and pass it to <Ts method>findBestCharacter</Ts> to determine the character to display.
+
+Let's try it out. Consider the following zoomed in circle as an example. It is split into three grid cells:
 
 <AsciiScene alphabet="two-samples" fontSize={200} rows={1} cols={3} viewMode="canvas" showGrid>
   <Scene2D scene="circle_zoomed_bottom" />
@@ -344,11 +360,11 @@ Overlaying our sampling circles, we see varying degrees of overlap:
   <Scene2D scene="circle_zoomed_bottom" />
 </AsciiScene>
 
-When calculating the shape vectors of ASCII characters, we took a huge number of samples. We could afford to do that because we only need to calculate those shape vectors once up front. After they're calculated, we can use them again and again.
+When calculating the shape vector of each ASCII character, we took a huge number of samples. We could afford to do that because we only need to calculate those shape vectors once up front. After they're calculated, we can use them again and again.
 
-However, if we're converting an animated image (e.g. canvas or video) to ASCII, we need to be mindful of performance. An ASCII rendering might have hundreds or thousands of cells. Multiplying that by tens or hundreds of samples would be incredibly costly in terms of performance.
+However, if we're converting an animated image (e.g. canvas or video) to ASCII, we need to be mindful of performance when calculating the lookup vectors. An ASCII rendering might have hundreds or thousands of cells. Multiplying that by tens or hundreds of samples would be incredibly costly in terms of performance.
 
-With that being said, let's pick a sampling quality of $3$, with the samples placed like so:
+With that being said, let's pick a sampling quality of $3$ with the samples placed like so:
 
 <AsciiScene alphabet="two-samples" sampleQuality={3} fontSize={200} rows={1} cols={3} hideAscii showGrid showSamplingCircles showSamplingPoints increaseContrast samplingCirclesColor="white">
   <Scene2D scene="circle_zoomed_bottom" />
@@ -364,7 +380,7 @@ For the top sampling circle of the leftmost cell, we get one white sample and tw
 \left[\, \begin{matrix} 1.00 \\ 0.66 \end{matrix} \,\right]
 \end{gathered}$$</p>
 
-I'll call these vectors, sampled from the image that we're rendering as ASCII, "sampling vectors". A sampling vector is calculated for each cell in the grid.
+From now on, instead of using the term "lookup vectors", I'll call these vectors, sampled from the image that we're rendering as ASCII, _sampling vectors_. One sampling vector is calculated for each cell in the grid.
 
 Anyway, we can use these sampling vectors to find the best matching ASCII character. Let's see what that looks like on our 2D plot -- I'll label the sampling vectors (from left to right) C0, C1 and C2:
 
@@ -374,7 +390,7 @@ Anyway, we can use these sampling vectors to find the best matching ASCII charac
   { vector: [1, 0.66], label: "C2" }
 ]} />
 
-Hmm... this is not quite what we want. Since none of the shape vector components exceed $0.4$, they're all clustered towards the bottom-left region of our plot. This makes our sampling vectors map to a few character on the edge of the cluster.
+Hmm... this is not what we want. Since none of the ASCII shape vector components exceed $0.4$, they're all clustered towards the bottom-left region of our plot. This makes our sampling vectors map to a few character on the edge of the cluster.
 
 We can fix this by _normalizing_ the shape vectors. We'll do that by taking the maximum value of each component across all shape vectors, and dividing the components of each shape vectors by the maximum. Expressed in code, that looks like so:
 
@@ -394,11 +410,11 @@ const normalizedCharacterVectors = characterVectors.map(
 )
 ```
 
-Here's what the plot looks like with the characters vectors normalized:
+Here's what the plot looks like with the shape vectors normalized:
 
 <CharacterPlot highlight="^@qTMuX$g=C" normalize />
 
-If we now map the input vectors to their nearest neighbors, we get a much more sensible result:
+If we now map the sampling vectors to their nearest neighbors, we get a much more sensible result:
 
 <CharacterPlot highlight="M$'" inputPoints={[
   { vector: [0.33, 0], label: "C0" },
@@ -420,11 +436,11 @@ Let's try rendering the full circle from before with the same method:
   <Scene2D scene="circle_raised" />
 </AsciiScene>
 
-Far sharper than before! The picked characters match the contour of the circle very well, producing a sharp edge.
+Much better than before! The picked characters follow the contour of the circle very well.
 
 ## Limits of a 2D shape vector
 
-Using two sampling circles -- one upper and one lower -- produces better result than the prior $1$-dimensional pixelated approach. However, it still fall short when trying to capture other aspects of a character's shape.
+Using two sampling circles -- one upper and one lower -- produces a much better result than the $1$-dimensional (pixelated) approach. However, it still fall short when trying to capture other aspects of a character's shape.
 
 For example, two circles don't capture the shape of characters that fall in the middle of the cell. Consider `-`:
 
@@ -440,39 +456,37 @@ The two upper-lower sampling circles also don't capture left-right differences, 
   {"p q"}
 </AsciiScene>
 
-These differences are information that we could use to get better character picks, but we're currently throwing this information away.
+We could use such differences to get better character picks, but our two sampling circles don't capture them. Let's add more dimensions to our shape to fix that.
 
-Let's increase the dimensionality of our shape and sampling vectors to capture this information.
-
-## Increasing to 6D
+## Increasing to 6 dimensions
 
 Since cells are taller than they are wide (at least with the monospace font I'm using), we can use $6$ sampling circles to cover the area of each cell quite well:
 
-<AsciiScene alphabet="six-samples" showGrid showSamplingCircles fontSize={200} rows={1.4} cols={1.8} hideSpaces forceSamplingValue={0}>
+<AsciiScene alphabet="six-samples" showGrid showSamplingCircles fontSize={150} rows={1.4} cols={1.8} hideSpaces>
   {"-"}
 </AsciiScene>
 
 $6$ sampling circles capture left-right differences, such as between `p` and `q`, while also capturing differences across the top, bottom and middle regions of the cell, differentating `^`, `-` and `_`. They also capture the shape of "diagonal" characters like `/` to a reasonable degree.
 
-<AsciiScene alphabet="six-samples" showGrid showSamplingCircles fontSize={200} rows={1.4} cols={1.8} hideSpaces>
+<AsciiScene alphabet="six-samples" showGrid showSamplingCircles fontSize={150} rows={1.4} cols={1.8} hideSpaces>
   {"/"}
 </AsciiScene>
 
 One problem with this grid-like configuration for the sampling circles is that there are gaps. Consider `.`, for example. It inconveniently falls between the sampling circles:
 
-<AsciiScene alphabet="six-samples" showGrid showSamplingCircles fontSize={200} rows={1.4} cols={1.8} hideSpaces>
+<AsciiScene alphabet="six-samples" showGrid showSamplingCircles fontSize={150} rows={1.4} cols={1.8} hideSpaces>
   {"."}
 </AsciiScene>
 
 To compensate for this, we can stagger the sampling circles vertically (e.g. lowering the left sampling circles, and raising the right ones) and make them a bit larger. This causes the cell to be almost fully covered while not causing excessive overlap across the sampling circles:
 
-<AsciiScene showGrid showSamplingCircles fontSize={140} rows={1.5} cols={2.3} hideSpaces>
+<AsciiScene showGrid showSamplingCircles fontSize={150} rows={1.4} cols={1.8} hideSpaces>
   {"."}
 </AsciiScene>
 
 We can use the same procedure as before to generate character vectors using these sampling circles, this time yielding a $6$-dimensional vector. Consider the character `L`:
 
-<AsciiScene showGrid showSamplingCircles fontSize={200} rows={1.4} cols={1.8} hideSpaces>
+<AsciiScene showGrid showSamplingCircles fontSize={150} rows={1.4} cols={1.8} hideSpaces>
   {"L"}
 </AsciiScene>
 
@@ -537,36 +551,6 @@ function euclideanDistanceSquared(a: number[], b: number[]): number {
   return sum;
 }
 ```
-
-Now, let's say that we have our ASCII characters and their associated shape vectors in a <Ts>CHARACTERS</Ts> array:
-
-```ts
-const CHARACTERS: Array<{
-  character: string,
-  shapeVector: number[],
-}> = [...];
-```
-
-We can then perform a nearest neighbor search like so:
-
-```ts
-function findCharacter(samplingVector: number[]) {
-  let bestCharacter = "";
-  let bestDistance = Infinity;
-  
-  for (const { character, shapeVector } of CHARACTERS) {
-    const dist = euclideanDistanceSquared(shapeVector, samplingVector);
-    if (dist < bestDistance) {
-      bestDistance = dist;
-      bestCharacter = character;
-    }
-  }
-  
-  return bestCharacter;
-}
-```
-
-This gives us the ASCII character whose shape best matches our sampling vector.
 
 Do note that this is not very performant. Once we start rendering thousands of ASCII characters at $60$ <abbr title="Frames per second">FPS</abbr>, we'll need to speed up performance significantly.
 
@@ -1070,7 +1054,7 @@ Thanks for reading!
 Earlier in this post I showed how can find the best character by finding the character with the shortest Euclidian distance to our sampling vector.
 
 ```ts
-function findCharacter(samplingVector: number[]) {
+function findBestCharacter(samplingVector: number[]) {
   let bestCharacter = "";
   let bestDistance = Infinity;
   

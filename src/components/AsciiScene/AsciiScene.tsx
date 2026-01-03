@@ -446,7 +446,7 @@ export const AsciiScene: React.FC<AsciiSceneProps> = (props) => {
 
   const { height } = useDimensions(props);
 
-  const variablesHeight = props.usesVariables ? 40 : 0;
+  const variablesHeight = props.usesVariables ? 64 : 0;
 
   const [sceneId, setSceneId] = useState<undefined | string>(undefined);
   useEffect(() => setSceneId((Math.random() * 100000000000).toFixed(0)), []);

@@ -8,6 +8,7 @@ export const CharacterPlotStyles = ({ styled }: StyleOptions) => ({
     width: 540px;
     margin: 40px auto;
     background: ${colors.background};
+    user-select: none;
   `,
 
   plot: styled.css`
@@ -15,7 +16,11 @@ export const CharacterPlotStyles = ({ styled }: StyleOptions) => ({
     height: auto;
     display: block;
     overflow: visible;
-    touch-action: none;
+    user-select: none;
+
+    &--noMobileScroll {
+      touch-action: none;
+    }
   `,
 
   grid: styled.css`
@@ -62,6 +67,18 @@ export const CharacterPlotStyles = ({ styled }: StyleOptions) => ({
 
   pointHovered: styled.css`
     fill: ${colors.text};
+  `,
+
+  touchPointer: styled.css`
+    fill: ${colors.blue};
+    transform: scale(0);
+    transition: transform 0.3s;
+    transform-origin: 50% 50%;
+    transform-box: fill-box;
+
+    &--down {
+      transform: scale(1);
+    }
   `,
 
   characterLabelBackground: styled.css`
