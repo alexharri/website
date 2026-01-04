@@ -32,7 +32,7 @@ export default ({ styled }: StyleOptions) => ({
     padding-bottom: 100%;
 
     &--external {
-      border-style: dashed;
+      border: 1px solid rgba(220, 150, 170, 0.55);
     }
   `,
 
