@@ -122,7 +122,7 @@ export const InteractiveVector6D: React.FC<Vector6DProps> = ({
   }
 
   return (
-    <div className={s("outerWrapper", { external: !!externalVector })}>
+    <div className={s("outerWrapper", { external: !!externalVector }) + " vector-6d"}>
       <div className={s("wrapper", { showCharacterPick })}>
         <div className={s("vector")}>
           <Vector6D
@@ -143,7 +143,7 @@ export const InteractiveVector6D: React.FC<Vector6DProps> = ({
           </>
         )}
       </div>
-      <div className={s("variables")}>{renderVariables("below")}</div>
+      {vary && <div className={s("variables")}>{renderVariables("below")}</div>}
     </div>
   );
 };

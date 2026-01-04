@@ -153,7 +153,7 @@ export function renderAsciiDebugViz(
           const x = sampleRectLeft + xOff;
           const y = sampleRectTop + yOff;
 
-          ctx.strokeStyle = "rgba(255, 255, 255, 0.2)";
+          ctx.strokeStyle = "rgba(255, 255, 255, 0.33)";
           ctx.lineWidth = 1;
           ctx.beginPath();
           ctx.arc(x, y, config.samplePointRadius, 0, TAU);

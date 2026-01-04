@@ -6,7 +6,7 @@ const styles = ({ styled, theme }: StyleOptions) => ({
   wrapper: styled.css`
     width: 480px;
     max-width: 100%;
-    margin: 64px auto 0;
+    margin: 64px auto 64px;
     border-radius: 8px;
     overflow: hidden;
     border: 1px solid ${theme.medium500};

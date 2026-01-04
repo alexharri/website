@@ -45,6 +45,7 @@ const Styles = ({ styled }: StyleOptions) => ({
     & > .chart,
     & > .canvas,
     & > .ascii-scene,
+    & > .vector-6d,
     & > table {
       & + .note,
       & + [data-script-id] + .note {

@@ -40,7 +40,7 @@ export default ({ styled, theme }: StyleOptions) => ({
   vector: styled.css`
     @media (max-width: 600px) {
       width: 100%;
-      padding: 0 24px 0;
+      padding: 24px;
     }
   `,
 

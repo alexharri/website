@@ -83,6 +83,7 @@ const baseComponents = {
   WebGLShader: WebGLShaderLoader,
   MediaQuery,
   Table,
+  SubscribeToNewsletter,
 };
 
 interface Props {

@@ -601,15 +601,13 @@ Currently, this sampling vector resolves to the character `T`:
   showCharacterPick
 />
 
-That's a sensible choice -- the character `T` is visually dense in the top half and less so in the bottom half, so it matches the image fairly well.
+That's a sensible choice. The character `T` is visually dense in the top half and less so in the bottom half, so it matches the image fairly well.
 
 <AsciiScene showGrid="dark" fontSize={120} rows={1.4} cols={3.4} viewMode="transparent" sampleQuality={5}>
   <Scene2D scene="shade_split_static" />
 </AsciiScene>
 
 Still, I want the picked character to emphasize the shape of the boundary better. We can achieve that by enhancing the contrast of the sampling vector.
-
-### Contrast enhancement
 
 To increase the contrast of our sampling vector, we might raise each component of the vector to the power of some exponent.
 
@@ -659,7 +657,7 @@ Here's the same example, but with this normalization applied:
   samplingVector={[0.65, 0.65, 0.31, 0.31, 0.22, 0.22]}
 />
 
-Very nice! The lightest component values are retained, and the contrast between the lighter and darker components is increased by "crunching" the lower values.
+Very nice! The lightest component values are retained and the contrast between the lighter and darker components is increased by "crunching" the lower values.
 
 This affects which character is picked. The following example shows how the selected character changes as the contrast is increased:
 
@@ -677,7 +675,17 @@ Awesome! The pick of `"` over `T` emphasizes the separation between the lighter 
   <Scene2D scene="shade_split_static" />
 </AsciiScene>
 
-By enhancing the contrast, we exaggerate the shape of the sampling vector. This gives us a character that less faithfully represents the underlying image, but improves readability by enhancing the separation between different colored regions.
+By enhancing the contrast of the sampling vector, we exaggerate its shape. This gives us a character that less faithfully represents the underlying image, but improves readability as a whole by enhancing the separation between different colored regions.
+
+Let's look at another example. Observe how the L-shape of the sampling vector below becomes more pronounced as the exponent increases, and how that affects the picked character:
+
+<InteractiveVector6D
+  vary="global_exponent"
+  showCharacterPick
+  samplingVector={[0.68, 0.31, 0.76, 0.31, 0.77, 0.78]}
+/>
+
+Works really nicely! I _love_ the transition from `& -> b -> L` as the L-shape of the vector becomes clearer.
 
 What's nice about applying exponents to normalized sampling vectors is that it barely affects vectors that are uniform in value. If all component values are similiar, applying an exponent has a minimal effect:
 
@@ -687,24 +695,14 @@ What's nice about applying exponents to normalized sampling vectors is that it b
   samplingVector={[0.64, 0.52, 0.62, 0.51, 0.60, 0.50]}
 />
 
-<SmallNote label="" center>Because the vector is fairly uniform the contrast enhancement only has a slight effect and doesn't change the picked character.</SmallNote>
+<SmallNote label="" center>Because the vector is fairly uniform the exponent only has a slight effect and doesn't change the picked character.</SmallNote>
 
-This is a good thing! If we have a smooth gradient in our image, we'd want to retain it. We very much do _not_ want to introduce unnecessary choppiness.
-
-In contrast to that, sampling vectors that fall on the boundary of different-colored surfaces will have differences in the component values, which contrast enhancement amplifies. Consider this L-shaped sampling vector:
-
-<InteractiveVector6D
-  vary="global_exponent"
-  showCharacterPick
-  samplingVector={[0.68, 0.31, 0.76, 0.31, 0.77, 0.78]}
-/>
-
-I _love_ the transition from `& -> b -> L` as the L-shape of the vector becomes more pronounced!
+This is a good thing! If we have a smooth gradient in our image we want to retain it. We very much do _not_ want to introduce unnecessary choppiness.
 
 Compare the 3D scene ASCII rendering with and without this contrast enhancement:
 
 <AsciiScene height={540} fontSize={12} characterWidthMultiplier={0.85} characterHeightMultiplier={0.85} viewModes={["ascii", "split", "canvas"]} optimizePerformance usesVariables effectSlider={{
-  global_crunch: [1, 5],
+  global_crunch: [1, 8],
 }}>
   <Scene scene="cube" autoRotate zoom={2.7} yOffset={0.45} />
 </AsciiScene>
@@ -713,11 +711,11 @@ We do see more contrast at boundaries, but this is not quite there yet. Some edg
 
 Let's look at the staircasing effect first. We can reproduce it with a boundary like so:
 
-<AsciiScene width={400} minWidth={400} height={200} fontSize={19} rowHeight={18} columnWidth={15} viewMode="split" splitMode="static" exclude="|v">
+<AsciiScene width={400} minWidth={400} height={200} fontSize={19} rowHeight={18} columnWidth={15} viewMode="canvas" exclude="|v">
   <Scene2D scene="staircase_effect" />
 </AsciiScene>
 
-The example below demonstrates the staircase effect -- observe how the darker part of the edge becomes "staircase-y" as you increase the exponent:
+Below is the ASCII rendering of that boundary. Notice how the lower edge (the `!`s) becomes "staircase-y" as you increase the exponent:
 
 <AsciiScene width={400} minWidth={400} height={200} fontSize={19} rowHeight={18} columnWidth={15} viewMode="ascii" usesVariables exclude="|v" effectSlider={{
   global_crunch: [1, 4],
@@ -725,7 +723,16 @@ The example below demonstrates the staircase effect -- observe how the darker pa
   <Scene2D scene="staircase_effect" />
 </AsciiScene>
 
-To understand what's happening here, let's consider the row in the middle of the canvas, progressing from left to right. As we start off, every sample is equally light, which gives us the `U`s:
+We see a staircase pattern like so:
+
+```text:no_ligatures
+               !!!!!
+          !!!!!!!!!!
+     !!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!
+```
+
+To understand why that's happening, let's consider the row in the middle of the canvas, progressing from left to right. As we start off, every sample is equally light, giving us `U`s:
 
 ```text
 UUUUUUUU ->
@@ -748,7 +755,6 @@ UUUUUUUUYY ->
 As we progress further right, the middle and lower samples get darker, so we get some `f`s:
 
 <InteractiveVector6D
-  vary="global_exponent"
   showCharacterPick
   samplingVector={[0.6, 0.6, 0.55, 0.46, 0.32, 0.26]}
 />
@@ -767,7 +773,7 @@ Giving us a sequence like so:
 UUUUUUUUYYf""''` ->
 ```
 
-That looks good, but at some point we get _no_ light samples. Once we get no light samples, our contrast enhancement has no effect because we're applying it to a normalized vector. This causes us to always get `!`s:
+That looks good, but at some point we get _no_ light samples. Once we get no light samples, our contrast enhancement has no effect because every component is equally light. This causes us to always get `!`s:
 
 <InteractiveVector6D
   vary="global_exponent"
@@ -784,13 +790,13 @@ UUUUUUUUYYf""''`!!!!!!!!!! ->
 This sudden stop in contrast enhancement having an effect is what causes the staircasing effect:
 
 ```text:no_ligatures
-                   !!!!!!!!
-             !!!!!!!!!!!!!!
-      !!!!!!!!!!!!!!!!!!!!!
-!!!!!!!!!!!!!!!!!!!!!!!!!!!
+               !!!!!
+          !!!!!!!!!!
+     !!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!
 ```
 
-We'll counteract this staircasing effect with _another_ layer of contrast enhancement, this time looking outside of the boundary of each cell.
+Let's see how we can counteract this staircasing effect with _another_ layer of contrast enhancement, this time looking outside of the boundary of each cell.
 
 ### Directional contrast enhancement
 
@@ -818,11 +824,11 @@ Let's simplify the visualization and consider a single example. Imagine that we 
 
 <SmallNote label="" center>The circles colored red are the external sampling vector components. Currently they have no effect.</SmallNote>
 
-The sampling vector itself is a fairly uniform, with values ranging from $0.51$ to $0.53$. The external vector's values are similar, except in the upper left region where the values are significantly lighter ($0.8$ and $0.57$). This indicates a color boundary above and to the left of the cell.
+The "internal" sampling vector itself is a fairly uniform, with values ranging from $0.51$ to $0.53$. The external vector's values are similar, except in the upper left region where the values are significantly lighter ($0.8$ and $0.57$). This indicates a color boundary above and to the left of the cell.
 
-To enhance this apparent boundary, we'd want the darken top-left and middle-left components of the sampling vector. We can do that by applying component-wise contrast enhancement using the values from the external vector
+To enhance this apparent boundary, we'll darken the top-left and middle-left components of the sampling vector. We can do that by applying _component-wise_ contrast enhancement using the values from the external vector
 
-In the previous contrast enhancement, we calculated the max component value for the sampling vector and normalized the vector using that value:
+In the previous contrast enhancement, we calculated the max component value across the sampling vector and normalized the vector using that value:
 
 ```ts
 const maxValue = Math.max(...samplingVector)
@@ -865,13 +871,13 @@ The example below shows how light values in the external sampling vector push va
   showCharacterPick
 />
 
-I call this "directional contrast enhancement", since each of the external samples reaches outside of the cell in the _direction_ of the sampling vector component that it is enhancing the contrast of. I describe the other effect as "global contrast enhancement", since it acts on all of the sampling vector's components.
+I call this "directional contrast enhancement", since each of the external sampling circles reaches outside of the cell in the _direction_ of the sampling vector component that it is enhancing the contrast of. I describe the other effect as "global contrast enhancement" since it acts on all of the sampling vector's components together.
 
 Let's see what this directional contrast enhancement does to get rid of the staircasing effect:
 
 <AsciiScene width={400} height={300} alphabet="simple-directional-crunch" fontSize={19} rowHeight={18} columnWidth={15} viewMode="transparent" usesVariables exclude="|v" effectSlider={{
   global_crunch: [4, 4],
-  directional_crunch: [1, 5],
+  directional_crunch: [1, 2],
 }}>
   <Scene2D scene="staircase_effect" />
 </AsciiScene>
@@ -893,11 +899,11 @@ But we just see `!` changing to `:`
   showCharacterPick
 />
 
-This happens because the directional crunch doesn't reach far enough into our sampling vector. The light upper values in the external vector _do_ push the upper values of the sampling vector down, but because the lightness of the four bottom components is retained, we don't get to `.` -- just `:`.
+This happens because the directional contrast enhancement doesn't reach far enough into our sampling vector. The light upper values in the external vector _do_ push the upper values of the sampling vector down, but because the lightness of the four bottom components is retained, we don't get to `.`, just `:`.
 
-### Wider directional crunch
+### Widening the directional contrast enhancement
 
-I'd like to "widen" the directional crunch so that, for example, light external values close to the top spread to the middle components of the sampling vector.
+I'd like to "widen" the directional contrast enhancement so that, for example, light external values at the top spread to the middle components of the sampling vector.
 
 To do that, I'll introduce a few more external sampling circles, arranged like so:
 
@@ -905,7 +911,7 @@ To do that, I'll introduce a few more external sampling circles, arranged like s
   {"F"}
 </AsciiScene>
 
-These are a total of $10$ external sampling circles. Each of the external sampling circles will affect one or more of the "internal" sampling circles. Here an illustration showing which internal samples each external sample affects:
+These are a total of $10$ external sampling circles. Each of the external sampling circles will affect one or more of the internal sampling circles. Here's an illustration showing which internal circles each external circle affects:
 
 <InteractiveVector6D
   samplingVector={[0.3, 0.3, 0.3, 0.3, 0.3, 0.3]}
@@ -913,9 +919,9 @@ These are a total of $10$ external sampling circles. Each of the external sampli
   drawAffects
 />
 
-For each component of the internal sampling vector, we'll calculate the maximum external sampling value across all of the external sampling vector component that affect it, and use that maximum in the contrast enhancement.
+For each component of the internal sampling vector, we'll calculate the maximum value across the external sampling vector components that affect it, and use that maximum to perform the contrast enhancement.
 
-Let's implement this. I'l order the internal and external sampling circles like so:
+Let's implement that. I'll order the internal and external sampling circles like so:
 
 <InteractiveVector6D
   samplingVector={[0.3, 0.3, 0.3, 0.3, 0.3, 0.3]}
@@ -924,7 +930,7 @@ Let's implement this. I'l order the internal and external sampling circles like 
   drawAffects
 />
 
-We can then define a mapping from the the internal to the external sampling circles that affect it:
+We can then define a mapping from the the internal circles to the external sampling circles that affect them:
 
 ```ts
 const AFFECTING_EXTERNAL_INDICES = [
@@ -950,7 +956,7 @@ for (const externalIndex of AFFECTING_EXTERNAL_INDICES[i]) {
 }
 ```
 
-Now look what happens if the top four external sampling circles are light: it causes the crunching to reach into the middle of the sampling vector, giving us the desired effect
+Now look what happens if the top four external sampling circles are light: it causes the contrast enhancement to reach into the middle of the sampling vector, giving us the desired effect:
 
 <InteractiveVector6D
   samplingVector={[0.2, 0.2, 0.2, 0.2, 0.2, 0.2]}
@@ -961,9 +967,9 @@ Now look what happens if the top four external sampling circles are light: it ca
   drawAffects
 />
 
-We now smoothly transition from `!` to `:` and `.`. Beautifull stuff!
+We now smoothly transition from `! -> : -> .` -- beautiful stuff!
 
-Let's try out this wider directional crunch and see if it resolves the staircasing effect:
+Let's see if this change resolves the staircasing effect:
 
 <AsciiScene width={400} height={300} fontSize={19} rowHeight={18} columnWidth={15} viewMode="transparent" usesVariables exclude="|v" effectSlider={{
   global_crunch: [2.7, 2.7],
@@ -972,9 +978,9 @@ Let's try out this wider directional crunch and see if it resolves the staircasi
   <Scene2D scene="staircase_effect" />
 </AsciiScene>
 
-Oh yeah, looks awesome! We get the desired effect. Look at how clear the boundary has become!
+Oh yeah, looks awesome! We get the desired effect. The boundary is nice and sharp while not being too jagged.
 
-Here's the 3D scene again. The contrast slider now applies both effects at once -- take a look:
+Here's the 3D scene again. The contrast slider now applies both types of contrast enhancement at the same time, try it out:
 
 <AsciiScene height={540} fontSize={12} characterWidthMultiplier={0.85} characterHeightMultiplier={0.85} viewModes={["ascii", "split", "canvas"]} optimizePerformance usesVariables effectSlider={{
   global_crunch: [1, 2.7],
@@ -983,40 +989,44 @@ Here's the 3D scene again. The contrast slider now applies both effects at once 
   <Scene scene="cube" autoRotate zoom={2.7} yOffset={0.45} />
 </AsciiScene>
 
-This really enhances the contrast at the edges! We've gotten the contrast enhancement looking really nice.
+This really enhances the contrast at boundaries, making the image far more readable!
+
+Together, the 6D shape vector approach and contrast enhancement techniques have given us a really nice final ASCII rendering.
 
 
 ## Final words
 
-Damn this post was fun to build and write! I hope you enjoyed reading it.
+This post was really fun to build and write! I hope you enjoyed reading it.
 
-ASCII rendering is perhaps not a very practically useful topic, but I think the idea of using a vector to capture shape could be generalized to many other problems. There are parallels to be drawn to [word embedding][word_embedding].
+ASCII rendering is perhaps not the most practically useful topic to write about, but I think the idea of using a high-dimensional vector to capture shape is interesting and could easily be applied to many other problems. There are parallels to be drawn to [word embeddings][word_embedding].
 
 [word_embedding]: https://en.wikipedia.org/wiki/Word_embedding
 
-I started writing the renderer to see if the idea of using a vector to capture the shape of characters would work at all. That approach turned out to work very well, but the final image lacked contrast between surfaces. The two methods of contrast enhancement I ended up using and describing in this post were the ones that worked for me, but there are probably far more methods that would produce good results.
+I started writing this ASCII renderer to see if the idea of using a vector to capture the shape of characters would work at all. That approach turned out to work very well, but the initial prototype was terribly slow -- I only got single digit FPS on my iPhone. To get the ASCII renderer running at a smooth $60$ FPS on mobile required a lot of optimization work. I describe some of that optimization work in the appendix on [character lookup performance](#character-lookup-performance) below.
 
-One design limitation is that whatever method I wanted to use for contrast enhancement would need to run on the GPU. More on that in an appendix below.
+The two methods of contrast enhancement I ended up using and describing in this post were the ones that worked for me, but there are probably far more effects one could apply that would produce good results. One limitation around the design of the contrast enhancement implementation is that it needed to be be able to run on the GPU. I discuss this in the [appendix on GPU acceleration](#appendix-gpu-acceleration) below.
 
-The initial prototype was terribly slow; I got single digit FPS on my iPhone. To get the ASCII renderer running at a smooth $60$ FPS on mobile required a _ton_ of optimization work. I describe some of that optimization work in the appendices below.
-
-At the time of writing these final words, around $6$ months have elapsed since I started working on this. This has been my longest writing process to date. Much of that explained by the birth of my now $4$ month old daughter. I've needed to be a lot more intentional about finding time to write, and disciplined when spending it. I intend to write some smaller posts next. Let's see if I manage to stick to that promise!
+At the time of writing these final words, around $6$ months have elapsed since I started working on this. This has been my longest writing process to date. Much of that can be explained by the birth of my now $4$ month old daughter. I've needed to be a lot more intentional about finding time to write -- and disciplined when spending it. I intend to write some smaller posts next. Let's see if I manage to stick to that promise.
 
 Thanks for reading!
 
 -- Alex Harri
 
-## Appendix I: Character lookup performance
+<SubscribeToNewsletter />
+
+<SectionAnchor id="character-lookup-performance">
+  <h2>Appendix I: Character lookup performance</h2>
+</SectionAnchor>
 
 Earlier in this post I showed how can find the best character by finding the character with the shortest Euclidian distance to our sampling vector.
 
 ```ts
-function findBestCharacter(samplingVector: number[]) {
+function findBestCharacter(inputVector: number[]) {
   let bestCharacter = "";
   let bestDistance = Infinity;
   
-  for (const { shapeVector, character } of CHARACTERS) {
-    const dist = euclideanDistanceSquared(shapeVector, samplingVector);
+  for (const { character, shapeVector } of CHARACTERS) {
+    const dist = getDistance(shapeVector, inputVector);
     if (dist < bestDistance) {
       bestDistance = dist;
       bestCharacter = character;
@@ -1027,16 +1037,16 @@ function findBestCharacter(samplingVector: number[]) {
 }
 ```
 
-I tried benchmarking this for $100{,}000$ input sampling vectors on my Macbook -- $100$K invocations of this function consistently take about $190$ms. If we want to be able to use this for an animated canvas at $60$ frames per second (FPS), we only have $16{.}66$ms to render each frame. We can use this to get a rough budget for how many lookups we can perform each frame:
+I tried benchmarking this for $100{,}000$ input sampling vectors on my Macbook -- $100$K invocations of this function consistently take about $190$ms. If we want to be able to use this for an animated canvas at $60$ FPS, we only have $16{.}66$ms to render each frame. We can use this to get a rough budget for how many lookups we can perform each frame:
 
 <p className="mathblock">$$ 100{,}000 \times \dfrac{16{.}66\ldots}{190} \approx 8{,}772 $$</p>
 
-If we allow ourselves $50\%$ of the performance budget for just lookups, this gives us a budget of about $4$K characters. Not terrible, but far from great, especially considering that we're using numbers for a powerful laptop. A mobile device might have a $10$ times lower budget. Let's see how we can improve this.
+If we allow ourselves $50\%$ of the performance budget for just lookups, this gives us a budget of about $4$K characters. Not terrible, but far from great, especially considering that we're using numbers from a powerful laptop. A mobile device might have a $10$ times lower budget. Let's see how we can improve this.
 
 
 ### k-d trees
 
-$k$-d trees are data structure that enables nearest-neighbor lookups in multi-dimensional ($k$-dimensional) space -- perfect for our purpose. Their performance [degrades in higher dimensions][kd_search_performance] (e.g. $\gt20$), but they perform well in $6$ dimensions.
+$k$-d trees are a data structure that enables nearest-neighbor lookups in multi-dimensional ($k$-dimensional) space. Their performance [degrades in higher dimensions][kd_search_performance] (e.g. $\gt20$), but they perform well in $6$ dimensions -- perfect for our purpose.
 
 [kd_search_performance]: https://graphics.stanford.edu/~tpurcell/pubs/search.pdf
 
@@ -1055,7 +1065,7 @@ const kdTree = new KdTree(
 );
 ```
 
-Which we can use to perform nearest-neighbor lookups with a sampling vector:
+We can now perform nearest-neighbor lookups on the $k$-d tree:
 
 ```ts
 const result = kdTree.findNearest(samplingVector);
@@ -1095,7 +1105,8 @@ Well, one way is to quantize each vector component so that it fits into a set nu
 We can quantize a numeric value between $0$ and $1$ to the range $0$ to $31$ (the most that $5$ bits can store) like so:
 
 ```ts
-const RANGE = 2 ** 5;
+const BITS = 5;
+const RANGE = 2 ** BITS;
 
 function quantizeTo5Bits(value: number) {
   return Math.min(RANGE - 1, Math.floor(value * RANGE));
@@ -1104,7 +1115,7 @@ function quantizeTo5Bits(value: number) {
 
 <SmallNote label="">Applying a max of <Ts>RANGE - 1</Ts> is done so that a <Ts>value</Ts> of exactly $1$ is mapped to $31$ instead of $32$.</SmallNote>
 
-We can quantize each vector component in this manner and use bit shifting to pack all of the quantized values into a single number like so:
+We can quantize each of the sampling vector components in this manner and use bit shifting to pack all of the quantized values into a single number like so:
 
 ```ts
 const BITS = 5;
@@ -1120,13 +1131,13 @@ function generateCacheKey(vector: number[]): number {
 }
 ```
 
-The <Ts>RANGE</Ts> is current set to <Ts>2 ** 5</Ts>, but consider how large that makes our key space. Each vector component is one of $32$ possible values. With $6$ vector components that makes the total number of possible keys $32^6$, which equals $1{,}073{,}741{,}824$. If the cache were to be fully saturated, just storing those keys alone would take $8$GB of memory! I'd also expect the cache hit rate to be incredibly low if we were to lazily fill the cache.
+The <Ts>RANGE</Ts> is current set to <Ts>2 ** 5</Ts>, but consider how large that makes our key space. Each vector component is one of $32$ possible values. With $6$ vector components that makes the total number of possible keys $32^6$, which equals $1{,}073{,}741{,}824$. If the cache were to be fully saturated, just storing the keys would take $8$GB of memory! I'd also expect the cache hit rate to be incredibly low if we were to lazily fill the cache.
 
 Alright, $32$ is too high, but what value should we pick? We can pick any number under $32$ for our range. To help, here's a table showing the number of possible keys (and the memory needed to store them) for range values between $6$ and $12$:
 
 <Table
   align="right"
-  columns={["Range", "Number of keys", { title: "Memory needed for keys", width: 160 }]}
+  columns={["Range", "Number of keys", { title: "Memory needed to store keys", width: 160 }]}
   data={[
     [ 6, "46,656", "364 KB" ],
     [ 7, "117,649", "919 KB" ],
@@ -1146,7 +1157,10 @@ I ended up picking a range of $8$. It's a large enough range that quality doesn'
 
 Cached lookups are incredibly fast -- fast enough that lookup performance just isn't a concern anymore ($100$K lookups take a few ms on my Macbook). And if we prepopulate the cache, we can expect consistently fast performance, though I encountered no problems just lazily populating the cache.
 
-## Appendix II: GPU acceleration
+
+<SectionAnchor id="appendix-gpu-acceleration">
+  <h2>Appendix II: GPU acceleration</h2>
+</SectionAnchor>
 
 Lookups were not the only performance concern. Just collecting the sampling vectors (internal and external) turned out to be terribly expensive.
 
@@ -1156,37 +1170,16 @@ Just consider the sheer amount of samples that need to be collected. The 3D scen
 
 <SmallNote center label="">And that's if we use a sampling quality of $1$. If we increase the sampling quality, this number just gets bigger.</SmallNote>
 
-Collecting these samples absolutely _crushed_ performance on my iPhone, so I either needed to either collect fewer samples or speed them up somehow. Collecting fewer samples would have meant rendering fewer ASCII characters or removing the directional contrast enhancement, neither of which was an appealing solution.
+Collecting these samples absolutely _crushed_ performance on my iPhone, so I either needed to either collect fewer samples or speed up the collection of samples. Collecting fewer samples would have meant rendering fewer ASCII characters or removing the directional contrast enhancement, neither of which was an appealing solution.
 
-My initial implementation ran on the CPU, which could only collect one sample at a time. To speed this up, I moved the work of sampling collection and applying the contrast enhancement to the GPU. The pipeline for that looks like so:
+My initial implementation ran on the CPU, which could only collect one sample at a time. To speed this up, I moved the work of sampling collection and applying the contrast enhancement to the GPU. The pipeline for that looks like so (each of the steps listed is a single shader pass):
 
-1. Collect the raw internal and external sampling vectors into two $\text{cols} \times \text{rows} \times \text{num circles}$ textures ($\text{num circles} = 6$ for the internal and $10$ for the external).
-2. Calculate the maximum external value affecting each internal vector component into a $\text{cols} \times \text{rows}$ texture.
-3. Apply directional contrast enhancement to each sampling vector component, using the maximum external values calculated in the prior step.
-4. Calculate maximum value per internal sampling vector into a $\text{cols} \times \text{rows}$ texture.
-5. Apply global contrast enhancement to each sampling vector component, using the maximum internal values calculated in the prior step.
+1. Collect the raw internal sampling vectors into a $\text{cols} \times \text{rows} \times \text{num circles}$ texture, using the canvas (image) as the input texture.
+2. Do the same for the external sampling vectors.
+3. Calculate the maximum external value affecting each internal vector component into a $\text{cols} \times \text{rows} \times \text{num circles}$ texture.
+4. Apply directional contrast enhancement to each sampling vector component, using the maximum external values texture.
+5. Calculate maximum value for each internal sampling vector into a $\text{cols} \times \text{rows}$ texture.
+6. Apply global contrast enhancement to each sampling vector component, using the maximum internal values texture.
+ case.
 
-This increased the speed of sample collection drastically (at least by 5x).
-
-Another significant performance hog was extracting the pixel data from the WebGL canvases. I started off with a <Ts method>readPixels</Ts> call that looked like so:
-
-```ts
-webglContext.readPixels(
-  0, 0, canvas.width, canvas.height,
-  webglContext.RGBA, webglContext.UNSIGNED_BYTE,
-  buffer,
-);
-```
-
-This was incredibly expensive, since the main thread was blocked until the image data had been transferred to the buffer. On my Macbook, reading the $2{,}156 \times 1{,}080$ canvas used in the 3D example took $8$-$10$ ms and reading the final data from the last texture in the GPU pipeline described above took around $4$-$5$ ms. That is _absurdly_ expensive!
-
-The solution is to use [non-blocking async data readback][async_readback] with [multiple buffers][multiple_buffers]. After a frame has been rendered, I request the transfer of the pixel data to a <Ts class>WebGLBuffer</Ts> and read data from the buffer that was populated between the previous frame and the current one. I used triple buffering:
-
-[async_readback]: https://developer.mozilla.org/en-US/docs/Web/API/WebGL_API/WebGL_best_practices#use_non-blocking_async_data_readback
-[multiple_buffers]: https://en.wikipedia.org/wiki/Multiple_buffering
-
- * Frame $n$: read from buffer 0, start writing to buffer 1.
- * Frame $n + 1$: read from buffer 1, start writing to buffer 2.
- * Frame $n + 2$: read from buffer 2, start writing to buffer 0.
-
-This introduces a frame of latency, since you're always reading the last frame's data. And in my case, I experience two frames of latency. One is introduced by the async readback of the canvas data, and another from the async readback of the sampling texture data. That's not great, but the $33$ ms of latency is an acceptable tradeoff for buttery smooth performance in this case.
+I'm glossing over the details because I could spend a whole other post covering them, but moving work to the GPU made the renderer many times more performant than it was when everything ran on the CPU.
