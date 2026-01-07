@@ -24,7 +24,6 @@
     "@types/react": "18.0.24",
     "@types/react-dom": "18.0.8",
     "ahooks": "^3.9.6",
-    "bezier-easing": "^2.1.0",
     "chart.js": "^4.4.3",
     "date-fns": "^2.29.3",
     "framer-motion": "^7.10.2",

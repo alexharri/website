@@ -29,7 +29,7 @@ interface UseSamplingDataCollectionParams {
   refs: SamplingRefs;
   config: AsciiRenderConfig | null;
   debug: SamplingDebug;
-  lightnessEasingFunction?: string;
+  increaseContrast?: boolean;
   forceSamplingValue?: number;
   samplingEffects?: SamplingEffect[];
   optimizePerformance?: boolean;
@@ -43,7 +43,7 @@ export function useSamplingDataCollection(params: UseSamplingDataCollectionParam
     refs,
     config,
     debug,
-    lightnessEasingFunction,
+    increaseContrast,
     forceSamplingValue,
     samplingEffects = [],
     optimizePerformance,
@@ -94,7 +94,6 @@ export function useSamplingDataCollection(params: UseSamplingDataCollectionParam
         canvasHeight,
         pixelBufferScale: 1, // Will be updated per frame
         samplingQuality,
-        lightnessEasingFunction,
         samplingEffects,
         globalCrunchExponent,
         directionalCrunchExponent,
@@ -108,7 +107,7 @@ export function useSamplingDataCollection(params: UseSamplingDataCollectionParam
       gpuGeneratorRef.current?.dispose();
       gpuGeneratorRef.current = null;
     };
-  }, [shouldUseGPU, config, lightnessEasingFunction, samplingEffects]);
+  }, [shouldUseGPU, config, increaseContrast, samplingEffects]);
 
   useEffect(() => {
     if (gpuGeneratorRef.current) {
@@ -157,7 +156,7 @@ export function useSamplingDataCollection(params: UseSamplingDataCollectionParam
           options?.flipY ?? false,
           globalCrunchExponent,
           directionalCrunchExponent,
-          lightnessEasingFunction,
+          increaseContrast,
           samplingEffects,
         );
       }
@@ -181,7 +180,7 @@ export function useSamplingDataCollection(params: UseSamplingDataCollectionParam
       samplingDataObserver,
       debugCanvasRef,
       config,
-      lightnessEasingFunction,
+      increaseContrast,
       showSamplingPoints,
       showSamplingCircles,
       debugVizOptions,

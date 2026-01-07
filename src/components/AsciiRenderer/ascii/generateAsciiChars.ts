@@ -1,40 +1,9 @@
 import { CharacterMatcher } from "./CharacterMatcher";
-import Bezier from "bezier-easing";
 import { getAlphabetMetadata } from "../alphabets/AlphabetManager";
 
 import { AsciiRenderConfig } from "../renderConfig";
 import { SamplingEffect } from "../types";
 import { clamp } from "../../../math/math";
-
-const lightnessEasingFunctions = {
-  default: Bezier(0.38, 0.01, 0.67, 1),
-  soft: Bezier(0.22, 0.02, 0.76, 0.82),
-  darken: Bezier(0.38, 0.01, 0.78, 0.82),
-  increase_contrast: Bezier(1, 0, 0, 1),
-};
-
-const easingLookupTables: Record<string, Float32Array> = {};
-const LOOKUP_TABLE_SIZE = 512;
-
-for (const [name, easingFn] of Object.entries(lightnessEasingFunctions)) {
-  const lut = new Float32Array(LOOKUP_TABLE_SIZE + 1);
-  for (let i = 0; i <= LOOKUP_TABLE_SIZE; i++) {
-    const t = i / LOOKUP_TABLE_SIZE;
-    if (name === "increase_contrast") {
-      // Hacky special case: always 0% or 100% lightness
-      lut[i] = Math.round(t);
-    } else {
-      lut[i] = easingFn(t);
-    }
-  }
-  easingLookupTables[name] = lut;
-}
-
-function applyEasingLookup(t: number, lookupTable: Float32Array): number {
-  const scaledValue = t * LOOKUP_TABLE_SIZE;
-  const index = Math.floor(scaledValue);
-  return lookupTable[index];
-}
 
 function readPixelFromBuffer(pixelBuffer: Uint8Array | Uint8ClampedArray, index: number) {
   return (pixelBuffer[index] << 16) | (pixelBuffer[index + 1] << 8) | pixelBuffer[index + 2];
@@ -149,7 +118,7 @@ export function generateSamplingData(
   flipY: boolean,
   globalCrunchExponent: number,
   directionalCrunchExponent: number,
-  lightnessEasingFunction?: string,
+  increaseContrast?: boolean,
   samplingEffects: SamplingEffect[] = [],
 ): void {
   const metadata = getAlphabetMetadata(config.alphabet);
@@ -161,16 +130,9 @@ export function generateSamplingData(
     enabledEffects.add(SamplingEffect.DirectionalCrunch);
   }
 
-  const easingLookupTable =
-    lightnessEasingFunction && lightnessEasingFunction in easingLookupTables
-      ? easingLookupTables[lightnessEasingFunction]
-      : null;
-
   const samplingPoints = config.generateCircleSamplingPoints();
 
-  const effect = easingLookupTable
-    ? (value: number) => applyEasingLookup(value, easingLookupTable)
-    : (v: number) => v;
+  const effect = increaseContrast ? (value: number) => Math.round(value) : (v: number) => v;
 
   for (let row = out.length; row < config.rows; row++) {
     out[row] ??= [];

@@ -102,11 +102,6 @@ const _AsciiScene: React.FC<AsciiSceneProps> = (props) => {
     splitMode = "dynamic",
     effectSlider,
   } = props;
-  let { lightnessEasingFunction } = props;
-
-  if (increaseContrast) {
-    lightnessEasingFunction = "increase_contrast";
-  }
 
   const VIEW_MODE_MAP: Record<ViewModeKey, { value: ViewMode; label: string }> = {
     ascii: { value: "left", label: pixelate ? "Pixels" : "ASCII" },
@@ -303,7 +298,7 @@ const _AsciiScene: React.FC<AsciiSceneProps> = (props) => {
     refs: { debugCanvasRef },
     config,
     debug: { showSamplingPoints, showSamplingCircles, debugVizOptions },
-    lightnessEasingFunction,
+    increaseContrast,
     forceSamplingValue,
     samplingEffects,
     optimizePerformance,

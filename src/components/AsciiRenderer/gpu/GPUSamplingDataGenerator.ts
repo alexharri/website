@@ -18,7 +18,6 @@ interface GPUSamplingDataGeneratorOptions {
   canvasHeight: number;
   pixelBufferScale: number;
   samplingQuality: number;
-  lightnessEasingFunction?: string;
   samplingEffects: SamplingEffect[];
   globalCrunchExponent?: number;
   directionalCrunchExponent?: number;
@@ -42,7 +41,6 @@ export class GPUSamplingDataGenerator {
 
   // WebGL resources
   private canvasTexture: WebGLTexture;
-  private easingLUTTexture: WebGLTexture;
 
   // Framebuffers and textures for multi-pass rendering
   private rawSamplingFBO: WebGLFramebuffer;
@@ -145,7 +143,6 @@ export class GPUSamplingDataGenerator {
 
     // Initialize WebGL resources
     this.canvasTexture = this.createTexture()!;
-    this.easingLUTTexture = this.createEasingLUTTexture(options.lightnessEasingFunction);
 
     // Create framebuffers and textures
     this.rawSamplingTexture = this.createFloatTexture(this.outputWidth, this.outputHeight)!;
@@ -488,10 +485,6 @@ export class GPUSamplingDataGenerator {
     gl.bindTexture(gl.TEXTURE_2D, this.canvasTexture);
     gl.uniform1i(gl.getUniformLocation(program, "u_canvasTexture"), 0);
 
-    gl.activeTexture(gl.TEXTURE1);
-    gl.bindTexture(gl.TEXTURE_2D, this.easingLUTTexture);
-    gl.uniform1i(gl.getUniformLocation(program, "u_easingLUT"), 1);
-
     // Canvas and grid parameters
     gl.uniform2f(
       gl.getUniformLocation(program, "u_canvasSize"),
@@ -818,33 +811,6 @@ export class GPUSamplingDataGenerator {
   }
 
   /**
-   * Create easing LUT texture
-   */
-  private createEasingLUTTexture(_easingFunction?: string): WebGLTexture {
-    const gl = this.gl;
-
-    // Generate LUT data (same as CPU version)
-    const LUT_SIZE = 512;
-    const data = new Float32Array(LUT_SIZE + 1);
-
-    // For now, use a simple power curve. TODO: Support custom easing functions
-    for (let i = 0; i <= LUT_SIZE; i++) {
-      const t = i / LUT_SIZE;
-      data[i] = t; // Linear for now
-    }
-
-    const texture = gl.createTexture()!;
-    gl.bindTexture(gl.TEXTURE_2D, texture);
-    gl.texImage2D(gl.TEXTURE_2D, 0, gl.R32F, LUT_SIZE + 1, 1, 0, gl.RED, gl.FLOAT, data);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
-
-    return texture;
-  }
-
-  /**
    * Create a framebuffer with texture attachment
    */
   private createFramebuffer(texture: WebGLTexture): WebGLFramebuffer | null {
@@ -1011,7 +977,6 @@ export class GPUSamplingDataGenerator {
 
     // Delete textures
     gl.deleteTexture(this.canvasTexture);
-    gl.deleteTexture(this.easingLUTTexture);
     gl.deleteTexture(this.rawSamplingTexture);
     gl.deleteTexture(this.externalSamplingTexture);
     gl.deleteTexture(this.externalMaxTexture);
