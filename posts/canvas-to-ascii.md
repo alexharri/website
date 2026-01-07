@@ -45,7 +45,7 @@ The contrast enhancement makes the separation between different colored regions 
 
 I put so much focus on sharp edges because they're an aspect of ASCII rendering that is often overlooked when programmatically rendering images as ASCII. Consider this animated 3D scene from Cognition's landing page that is rendered via ASCII characters:
 
-<Image src="~/cube-logo-short.mp4" plain width={700} noMargin pausable={false} />
+<Image src="~/cube-logo-animated.mp4" plain width={700} noMargin pausable={false} />
 
 <SmallNote label="" center>Source: [cognition.ai](https://cognition.ai/)</SmallNote>
 
