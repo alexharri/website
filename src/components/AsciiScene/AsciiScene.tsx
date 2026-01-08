@@ -21,7 +21,7 @@ import { AsciiRenderConfig } from "../AsciiRenderer/renderConfig";
 import { generateCharacterGridSamplingData } from "../AsciiRenderer/ascii/generateCharacterGrid";
 import { useMonospaceCharacterWidthEm } from "../../utils/hooks/useMonospaceCharacterWidthEm";
 import { cssVariables } from "../../utils/cssVariables";
-import { AsciiDebugVizCanvas, renderAsciiDebugViz } from "../AsciiRenderer/asciiDebugViz";
+import { AsciiDebugVizCanvas } from "../AsciiRenderer/asciiDebugViz";
 import { SCENE_BASELINE_WIDTH } from "../../constants";
 import { useSamplingDataCollection } from "../../utils/hooks/useSamplingDataCollection";
 import { useVisible } from "../../utils/hooks/useVisible";
@@ -95,7 +95,7 @@ const _AsciiScene: React.FC<AsciiSceneProps> = (props) => {
     viewModes = props.viewMode ? [props.viewMode] : [],
     rowHeight,
     columnWidth,
-    increaseContrast,
+    increaseContrast = false,
     effects,
     optimizePerformance = false,
     exclude = "",
@@ -293,7 +293,7 @@ const _AsciiScene: React.FC<AsciiSceneProps> = (props) => {
 
   const [samplingDataObserver] = useState(() => new Observer<CharacterSamplingData[][]>([]));
 
-  const onFrame = useSamplingDataCollection({
+  const { onFrame, onSamplingData } = useSamplingDataCollection({
     samplingDataObserver,
     refs: { debugCanvasRef },
     config,
@@ -302,6 +302,7 @@ const _AsciiScene: React.FC<AsciiSceneProps> = (props) => {
     forceSamplingValue,
     samplingEffects,
     optimizePerformance,
+    hideSpaces,
     globalCrunchExponent: (variableValues.global_crunch_exponent as number | undefined) ?? 1,
     directionalCrunchExponent:
       (variableValues.directional_crunch_exponent as number | undefined) ?? 1,
@@ -312,38 +313,10 @@ const _AsciiScene: React.FC<AsciiSceneProps> = (props) => {
   // Handle character grid mode
   useEffect(() => {
     if (isCharacterMode && config) {
-      const characterGridString = children as string;
-      const { samplingData, characterGrid } = generateCharacterGridSamplingData(
-        characterGridString,
-        config,
-        alphabet,
-      );
-
-      samplingDataObserver.emit(samplingData);
-
-      if (debugCanvasRef.current) {
-        renderAsciiDebugViz(
-          debugCanvasRef.current,
-          samplingData,
-          config,
-          debugVizOptions,
-          showSamplingCircles === true ? "raw" : showSamplingCircles,
-          characterGrid,
-          hideSpaces,
-          forceSamplingValue,
-        );
-      }
+      const { samplingData } = generateCharacterGridSamplingData(children, config, alphabet);
+      onSamplingData(samplingData);
     }
-  }, [
-    isCharacterMode,
-    children,
-    config,
-    alphabet,
-    debugVizOptions,
-    showSamplingCircles,
-    hideSpaces,
-    forceSamplingValue,
-  ]);
+  }, [isCharacterMode, children, config, alphabet, hideSpaces]);
 
   const isPaused = props.isPaused && !neverPause;
 

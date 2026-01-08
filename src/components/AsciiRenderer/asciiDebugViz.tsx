@@ -32,9 +32,8 @@ export function renderAsciiDebugViz(
   samplingData: CharacterSamplingData[][],
   config: AsciiRenderConfig,
   options: DebugVizOptions,
+  hideSpaces: boolean,
   visualizationMode?: SamplingPointVisualizationMode,
-  characterGrid?: string[][],
-  hideSpaces?: boolean,
   forceSamplingValue?: number,
 ) {
   const ctx = canvas.getContext("2d");
@@ -78,8 +77,9 @@ export function renderAsciiDebugViz(
 
   for (let col = 0; col < config.cols; col++) {
     for (let row = 0; row < config.rows; row++) {
-      if (hideSpaces && characterGrid?.[row][col] === " ") {
-        continue;
+      if (hideSpaces) {
+        const everyValueZero = samplingData[row][col].samplingVector.every((v) => v === 0);
+        if (everyValueZero) continue;
       }
 
       const [sampleRectLeft, sampleRectTop] = config.sampleRectPosition(col, row);

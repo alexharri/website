@@ -2,16 +2,11 @@ import { CharacterSamplingData } from "./generateAsciiChars";
 import { AsciiRenderConfig } from "../renderConfig";
 import { AlphabetName, getCharacterVector } from "../alphabets/AlphabetManager";
 
-export interface CharacterGridResult {
-  samplingData: CharacterSamplingData[][];
-  characterGrid: string[][];
-}
-
 export function generateCharacterGridSamplingData(
   characterString: string,
   config: AsciiRenderConfig,
   alphabet: AlphabetName,
-): CharacterGridResult {
+) {
   const lines = characterString.split("\n");
   const contentRows = lines.length;
   const contentCols = Math.max(...lines.map((line) => line.length));
@@ -22,7 +17,6 @@ export function generateCharacterGridSamplingData(
 
   // Build centered grid with padding
   const samplingData: CharacterSamplingData[][] = [];
-  const characterGrid: string[][] = [];
 
   for (let row = 0; row < config.rows; row++) {
     const samplingDataRow: CharacterSamplingData[] = [];
@@ -53,8 +47,7 @@ export function generateCharacterGridSamplingData(
     }
 
     samplingData.push(samplingDataRow);
-    characterGrid.push(characterRow);
   }
 
-  return { samplingData, characterGrid };
+  return { samplingData };
 }

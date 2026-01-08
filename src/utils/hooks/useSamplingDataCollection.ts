@@ -29,10 +29,11 @@ interface UseSamplingDataCollectionParams {
   refs: SamplingRefs;
   config: AsciiRenderConfig | null;
   debug: SamplingDebug;
-  increaseContrast?: boolean;
+  increaseContrast: boolean;
   forceSamplingValue?: number;
-  samplingEffects?: SamplingEffect[];
-  optimizePerformance?: boolean;
+  hideSpaces: boolean;
+  samplingEffects: SamplingEffect[];
+  optimizePerformance: boolean;
   globalCrunchExponent: number;
   directionalCrunchExponent: number;
 }
@@ -45,9 +46,10 @@ export function useSamplingDataCollection(params: UseSamplingDataCollectionParam
     debug,
     increaseContrast,
     forceSamplingValue,
-    samplingEffects = [],
+    samplingEffects,
     optimizePerformance,
     globalCrunchExponent,
+    hideSpaces,
     directionalCrunchExponent,
   } = params;
   const { debugCanvasRef } = refs;
@@ -117,6 +119,27 @@ export function useSamplingDataCollection(params: UseSamplingDataCollectionParam
 
   const lastFrameRef = useRef<{ source: OnFrameSource; options: OnFrameOptions } | null>(null);
 
+  const onSamplingData = useCallback(
+    (samplingData: CharacterSamplingData[][]) => {
+      if (!config) return;
+
+      samplingDataObserver.emit(samplingData);
+
+      if (debugCanvasRef.current) {
+        renderAsciiDebugViz(
+          debugCanvasRef.current,
+          samplingData,
+          config,
+          debugVizOptions,
+          hideSpaces,
+          showSamplingCircles === true ? "raw" : showSamplingCircles,
+          forceSamplingValue,
+        );
+      }
+    },
+    [debugCanvasRef, config, debugVizOptions, showSamplingCircles, forceSamplingValue],
+  );
+
   const onFrame = useCallback(
     (source: OnFrameSource, options: OnFrameOptions) => {
       lastFrameRef.current = { source, options };
@@ -161,20 +184,7 @@ export function useSamplingDataCollection(params: UseSamplingDataCollectionParam
         );
       }
 
-      samplingDataObserver.emit(samplingData);
-
-      if (debugCanvasRef.current) {
-        renderAsciiDebugViz(
-          debugCanvasRef.current,
-          samplingData,
-          config,
-          debugVizOptions,
-          showSamplingCircles === true ? "raw" : showSamplingCircles,
-          undefined,
-          undefined,
-          forceSamplingValue,
-        );
-      }
+      onSamplingData(samplingData);
     },
     [
       samplingDataObserver,
@@ -198,7 +208,7 @@ export function useSamplingDataCollection(params: UseSamplingDataCollectionParam
     }
   }, [onFrame]);
 
-  return onFrame;
+  return { onFrame, onSamplingData };
 }
 
 function canvasToBuffer(canvas: HTMLCanvasElement) {
