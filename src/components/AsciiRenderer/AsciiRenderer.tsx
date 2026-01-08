@@ -33,8 +33,6 @@ export function AsciiRenderer(props: Props) {
     optimizePerformance,
   } = props;
 
-  const containerRef = useRef<HTMLDivElement>(null);
-  const contentRef = useRef<HTMLDivElement>(null);
   const preRef = useRef<HTMLPreElement>(null);
   const s = useStyles(AsciiRendererStyles);
   const asciiCanvasRef = useRef<HTMLCanvasElement>(null);
@@ -54,26 +52,16 @@ export function AsciiRenderer(props: Props) {
   const color = transparent ? colors.text : colors.blue;
   const asciiCanvas = useAsciiCanvas(asciiCanvasRef, config, color);
 
-  useEffect(() => {
-    const content = contentRef.current;
-    if (!config || !content) return;
-    content.style.transform = `translate(${config.offsetX + config.asciiXOffset}px, ${
-      config.offsetY
-    }px)`;
-  }, [config]);
-
   const updateAsciiText = useCallback(
     (samplingData: CharacterSamplingData[][]) => {
-      const preEl = preRef.current;
-
       if (!config || !characterMatcher || samplingData.length === 0) return;
 
       if (!hideAscii) {
         if (optimizePerformance) {
           asciiCanvas.render(samplingData, characterMatcher);
-        } else if (preEl) {
+        } else if (preRef.current) {
           const ascii = samplingDataToAscii(characterMatcher, samplingData, config);
-          preEl.textContent = ascii;
+          preRef.current.textContent = ascii;
         }
       }
 
@@ -107,9 +95,16 @@ export function AsciiRenderer(props: Props) {
   }
 
   return (
-    <div ref={containerRef} style={{ background }} className={s("container")}>
+    <div style={{ background }} className={s("container")}>
       {!hideAscii && (
-        <div className={s("content")} ref={contentRef}>
+        <div
+          className={s("content")}
+          style={{
+            transform: config
+              ? `translate(${config.offsetX + config.asciiXOffset}px, ${config.offsetY}px)`
+              : undefined,
+          }}
+        >
           {optimizePerformance ? (
             <AsciiCanvas canvasRef={asciiCanvasRef} transparent={transparent} />
           ) : (
