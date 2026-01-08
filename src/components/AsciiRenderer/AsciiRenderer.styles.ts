@@ -25,21 +25,4 @@ export const AsciiRendererStyles = ({ styled }: StyleOptions) => ({
     line-height: 1;
     font-variant-ligatures: none;
   `,
-
-  visualizationLayer: styled.css`
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    pointer-events: none;
-    z-index: -1;
-  `,
-
-  samplingPoint: styled.css`
-    position: absolute;
-    border-radius: 50%;
-    transform: translate(-50%, -50%);
-    pointer-events: none;
-  `,
 });
