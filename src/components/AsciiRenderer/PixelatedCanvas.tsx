@@ -24,6 +24,8 @@ export function PixelatedCanvas(props: Props) {
   );
 }
 
+const { floor, ceil } = Math;
+
 export function renderPixelatedCanvas(
   canvas: HTMLCanvasElement,
   samplingData: CharacterSamplingData[][],
@@ -43,16 +45,16 @@ export function renderPixelatedCanvas(
   ctx.clearRect(0, 0, config.canvasWidth, config.canvasHeight);
 
   for (let col = 0; col < config.cols; col++) {
-    const x = config.offsetX + config.boxWidth * col;
+    const x = floor(config.offsetX + config.boxWidth * col);
     for (let row = 0; row < config.rows; row++) {
       const item = samplingData[row]?.[col];
       if (!item) {
         continue;
       }
       const l = item.samplingVector[0] * 255;
-      const y = config.offsetY + config.boxHeight * row;
+      const y = floor(config.offsetY + config.boxHeight * row);
       ctx.beginPath();
-      ctx.rect(x, y, config.boxWidth, config.boxHeight);
+      ctx.rect(x, y, ceil(config.boxWidth), ceil(config.boxHeight));
       ctx.fillStyle = `rgb(${l}, ${l}, ${l})`;
       ctx.fill();
     }
