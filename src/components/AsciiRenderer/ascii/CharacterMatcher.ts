@@ -4,7 +4,7 @@ import { AlphabetName, getAlphabetCharacterVectors } from "../alphabets/Alphabet
 type Effect = (vectors: number[][]) => void;
 
 export class CharacterMatcher {
-  private kdTree: KdTree<string> = new KdTree([]);
+  private kdTree!: KdTree<string>;
   private cache = new Map<number, string>();
 
   loadAlphabet(alphabet: AlphabetName, effects: Effect[], exclude: string): void {
