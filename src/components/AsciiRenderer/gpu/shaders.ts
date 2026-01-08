@@ -17,7 +17,6 @@ export const createSamplingFragmentShader = (numCircles: number) => /* glsl */ `
   out vec4 fragColor;
 
   uniform sampler2D u_canvasTexture;      // Input canvas RGBA texture
-  uniform sampler2D u_easingLUT;          // 1D easing lookup table (512x1)
   uniform vec2 u_canvasSize;              // Canvas dimensions in pixels
   uniform vec2 u_gridSize;                // Grid dimensions (cols, rows)
   uniform vec2 u_boxSize;                 // Cell size in pixels (boxWidth, boxHeight)
@@ -43,16 +42,6 @@ export const createSamplingFragmentShader = (numCircles: number) => /* glsl */ `
     return dot(rgb, LIGHTNESS_WEIGHTS);
   }
 
-  // Apply easing function via lookup table
-  float applyEasing(float value) {
-    // Clamp to [0, 1]
-    float clamped = clamp(value, 0.0, 1.0);
-
-    // Sample from 1D LUT (512 entries)
-    float texCoord = clamped * (511.0 / 512.0) + (0.5 / 512.0);
-    return texture(u_easingLUT, vec2(texCoord, 0.5)).r;
-  }
-
   // Sample a single point from the canvas
   float samplePoint(vec2 pixelCoord) {
     // Apply flip if needed
@@ -71,8 +60,7 @@ export const createSamplingFragmentShader = (numCircles: number) => /* glsl */ `
     vec3 rgb = texture(u_canvasTexture, texCoord).rgb;
     float lightness = rgbToLightness(rgb);
 
-    // Apply easing
-    return applyEasing(lightness);
+    return lightness;
   }
 
   // Sample a circular region using Vogel's method
