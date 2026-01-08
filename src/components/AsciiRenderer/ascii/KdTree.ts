@@ -93,8 +93,6 @@ export class KdTree<T> {
 
     search(this.root, 0);
 
-    if (!best) return null;
-
     return best
       ? {
           vector: best.node.vector,
