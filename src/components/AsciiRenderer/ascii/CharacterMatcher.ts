@@ -1,71 +1,26 @@
 import { KdTree } from "./KdTree";
-import {
-  AlphabetName,
-  getAlphabetCharacterVectors,
-  getAlphabetMetadata,
-} from "../alphabets/AlphabetManager";
-
-export interface CharacterData {
-  char: string;
-  vector: number[];
-}
-
-export interface SamplingPoint {
-  x: number;
-  y: number;
-}
-
-export interface ExternalSamplingPoint extends SamplingPoint {
-  affects: number[];
-}
-
-export interface SamplingConfig {
-  points: SamplingPoint[];
-  externalPoints?: ExternalSamplingPoint[];
-  affectsMapping?: number[][];
-  circleRadius: number;
-}
-
-export interface AlphabetMetadata {
-  samplingConfig: SamplingConfig;
-  fontSize: number;
-  width: number;
-  height: number;
-}
+import { AlphabetName, getAlphabetCharacterVectors } from "../alphabets/AlphabetManager";
 
 type Effect = (vectors: number[][]) => void;
 
 export class CharacterMatcher {
-  private kdTree!: KdTree<string>;
-  private samplingConfig!: SamplingConfig;
-  private metadata!: AlphabetMetadata;
-  private currentAlphabet: AlphabetName = "default";
-  private characters: {
-    data: string;
-    vector: number[];
-  }[] = [];
-
-  constructor() {}
+  private kdTree: KdTree<string> = new KdTree([]);
+  private cache = new Map<number, string>();
 
   loadAlphabet(alphabet: AlphabetName, effects: Effect[], exclude: string): void {
     const characterVectors = getAlphabetCharacterVectors(alphabet).filter(
       (vector) => !exclude.includes(vector.char),
     );
-    const metadata = getAlphabetMetadata(alphabet);
 
     const vectors = characterVectors.map(({ vector }) => [...vector]);
     for (const effect of effects) {
       effect(vectors);
     }
 
-    this.characters = characterVectors.map(({ char }, i) => ({ vector: vectors[i], data: char }));
-    this.kdTree = new KdTree(this.characters);
-    this.currentAlphabet = alphabet;
-    this.metadata = metadata;
-    this.samplingConfig = metadata.samplingConfig;
+    this.kdTree = new KdTree(
+      characterVectors.map(({ char }, i) => ({ vector: vectors[i], data: char })),
+    );
   }
-
-  public cache = new Map<number, string>();
 
   findBestCharacter(samplingVector: number[]): string {
     const result = this.kdTree.findNearest(samplingVector);
@@ -83,42 +38,6 @@ export class CharacterMatcher {
     this.cache.set(key, result);
     return result;
   }
-
-  // Here for performance comparison
-  findBestCharacterBruteForce(samplingVector: number[]): string {
-    let best = "";
-    let bestDistance = Infinity;
-    for (const item of this.characters) {
-      const dist = euclideanDistanceSquared(item.vector, samplingVector);
-      if (dist < bestDistance) {
-        bestDistance = dist;
-        best = item.data;
-      }
-    }
-    return best;
-  }
-
-  getSamplingConfig(): SamplingConfig {
-    return this.samplingConfig;
-  }
-
-  getMetadata(): AlphabetMetadata {
-    return this.metadata;
-  }
-
-  getCurrentAlphabet(): AlphabetName {
-    return this.currentAlphabet;
-  }
-}
-
-function euclideanDistanceSquared(a: number[], b: number[]): number {
-  let sumSquared = 0;
-  for (let i = 0; i < a.length; i++) {
-    const diff = a[i] - b[i];
-    sumSquared += diff * diff;
-  }
-
-  return sumSquared;
 }
 
 const BITS = 5;

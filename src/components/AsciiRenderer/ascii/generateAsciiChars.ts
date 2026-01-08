@@ -59,16 +59,10 @@ function sampleCircularRegion(
 
 function crunchSamplingVector(vector: number[], exponent: number): void {
   const maxValue = Math.max(...vector);
-
-  // If all values are zero, return as-is
   if (maxValue === 0) return;
-
   for (let i = 0; i < vector.length; i++) {
-    // Normalize to 0-1 range
     const normalized = vector[i] / maxValue;
-    // Apply power-law enhancement
     const enhanced = Math.pow(normalized, exponent);
-    // Rescale back to original range
     vector[i] = enhanced * maxValue;
   }
 }
@@ -247,32 +241,8 @@ export function samplingDataToAscii(
         continue;
       }
 
-      const selectedChar = matcher.findBestCharacter(cellSamplingData.samplingVector);
+      const selectedChar = matcher.findBestCharacterQuantized(cellSamplingData.samplingVector);
       chars.push(selectedChar);
-    }
-    chars.push("\n");
-  }
-
-  return chars.join("");
-}
-
-export function samplingDataToAsciiBrute(
-  matcher: CharacterMatcher,
-  samplingData: CharacterSamplingData[][],
-  config: AsciiRenderConfig,
-): string {
-  const chars: string[] = [];
-
-  for (let row = 0; row < config.rows; row++) {
-    for (let col = 0; col < config.cols; col++) {
-      const cellSamplingData = samplingData[row]?.[col];
-      if (!cellSamplingData) {
-        chars.push(" ");
-        continue;
-      }
-
-      const selectedChar = matcher.findBestCharacterBruteForce(cellSamplingData.samplingVector);
-      chars.push(selectedChar === "&nbsp;" ? " " : selectedChar);
     }
     chars.push("\n");
   }
