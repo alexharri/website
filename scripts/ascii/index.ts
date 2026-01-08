@@ -148,13 +148,12 @@ class AsciiVectorBuilder {
     const circleRadius = this.samplingConfig.circleRadius / fontSize;
 
     // Compute affects mapping if external points exist
-    const affectsMapping =
-      this.samplingConfig.externalPoints
-        ? this.buildAffectsMapping(
-            this.samplingConfig.externalPoints,
-            this.samplingConfig.points.length,
-          )
-        : undefined;
+    const affectsMapping = this.samplingConfig.externalPoints
+      ? this.buildAffectsMapping(
+          this.samplingConfig.externalPoints,
+          this.samplingConfig.points.length,
+        )
+      : undefined;
 
     const data = {
       metadata: {
@@ -175,7 +174,7 @@ class AsciiVectorBuilder {
       characters: characterVectors,
     };
 
-    fs.writeFileSync(filename, JSON.stringify(data, null, 2));
+    fs.writeFileSync(filename, JSON.stringify(data));
     console.log(`Character vectors saved to ${filename}`);
   }
 
