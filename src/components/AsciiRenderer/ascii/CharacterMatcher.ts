@@ -23,8 +23,7 @@ export class CharacterMatcher {
   }
 
   findBestCharacter(samplingVector: number[]): string {
-    const result = this.kdTree.findNearest(samplingVector);
-    return result ? result.data : " ";
+    return this.kdTree.findNearest(samplingVector)?.data || " ";
   }
 
   findBestCharacterQuantized(samplingVector: number[]): string {

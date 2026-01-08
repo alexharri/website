@@ -1,3 +1,5 @@
+// Generate by Claude with A LOT of help from me
+
 import { CharacterMatcher } from "./CharacterMatcher";
 import { getAlphabetMetadata } from "../alphabets/AlphabetManager";
 
