@@ -107,11 +107,7 @@ export function AsciiRenderer(props: Props) {
   }
 
   return (
-    <div
-      ref={containerRef}
-      style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0, background }}
-      className={s("container")}
-    >
+    <div ref={containerRef} style={{ background }} className={s("container")}>
       {!hideAscii && (
         <div className={s("content")} ref={contentRef}>
           {optimizePerformance ? (
