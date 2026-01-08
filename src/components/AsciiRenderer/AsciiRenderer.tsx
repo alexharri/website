@@ -3,7 +3,7 @@ import { AsciiRendererStyles } from "./AsciiRenderer.styles";
 import { CharacterSamplingData, samplingDataToAscii } from "./ascii/generateAsciiChars";
 import { useStyles } from "../../utils/styles";
 import { colors } from "../../utils/cssVariables";
-import { PixelateCanvas, renderPixelate } from "./PixelateCanvas";
+import { PixelatedCanvas, renderPixelatedCanvas } from "./PixelatedCanvas";
 import { AsciiCanvas, useAsciiCanvas } from "./AsciiCanvas";
 import { CharacterMatcher } from "./ascii/CharacterMatcher";
 import { EFFECTS } from "./ascii/effects";
@@ -82,7 +82,7 @@ export function AsciiRenderer(props: Props) {
       }
 
       if (pixelateCanvasRef.current && debugVizOptions.pixelate) {
-        renderPixelate(pixelateCanvasRef.current, samplingData, config);
+        renderPixelatedCanvas(pixelateCanvasRef.current, samplingData, config);
       }
     },
     [
@@ -122,7 +122,7 @@ export function AsciiRenderer(props: Props) {
       {!hideAscii && (
         <div className={s("content")} ref={contentRef}>
           {optimizePerformance ? (
-            <AsciiCanvas onCanvasRef={asciiCanvasRef} transparent={transparent} />
+            <AsciiCanvas canvasRef={asciiCanvasRef} transparent={transparent} />
           ) : (
             <pre
               ref={preRef}
@@ -138,7 +138,7 @@ export function AsciiRenderer(props: Props) {
         </div>
       )}
       {debugVizOptions.pixelate && (
-        <PixelateCanvas onCanvasRef={pixelateCanvasRef} transparent={transparent} />
+        <PixelatedCanvas canvasRef={pixelateCanvasRef} transparent={transparent} />
       )}
     </div>
   );

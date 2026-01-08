@@ -3,14 +3,14 @@ import { CharacterSamplingData } from "./ascii/generateAsciiChars";
 import { AsciiRenderConfig } from "./renderConfig";
 
 interface Props {
-  onCanvasRef: React.MutableRefObject<HTMLCanvasElement | null>;
+  canvasRef: React.MutableRefObject<HTMLCanvasElement | null>;
   transparent?: boolean;
 }
 
-export function PixelateCanvas(props: Props) {
+export function PixelatedCanvas(props: Props) {
   return (
     <canvas
-      ref={props.onCanvasRef}
+      ref={props.canvasRef}
       style={{
         position: "absolute",
         top: 0,
@@ -24,7 +24,7 @@ export function PixelateCanvas(props: Props) {
   );
 }
 
-export function renderPixelate(
+export function renderPixelatedCanvas(
   canvas: HTMLCanvasElement,
   samplingData: CharacterSamplingData[][],
   config: AsciiRenderConfig,

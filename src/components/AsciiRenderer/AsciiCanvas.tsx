@@ -6,14 +6,14 @@ import { cssVariables } from "../../utils/cssVariables";
 import { useIsomorphicLayoutEffect } from "../../utils/hooks/useIsomorphicLayoutEffect";
 
 interface Props {
-  onCanvasRef: React.MutableRefObject<HTMLCanvasElement | null>;
+  canvasRef: React.MutableRefObject<HTMLCanvasElement | null>;
   transparent?: boolean;
 }
 
 export function AsciiCanvas(props: Props) {
   return (
     <canvas
-      ref={props.onCanvasRef}
+      ref={props.canvasRef}
       style={{
         position: "absolute",
         top: 0,

@@ -399,7 +399,7 @@ const _AsciiScene: React.FC<AsciiSceneProps> = (props) => {
             ]}
           </SplitView>
         </CanvasProvider>
-        <AsciiDebugVizCanvas onCanvasRef={debugCanvasRef} />
+        <AsciiDebugVizCanvas canvasRef={debugCanvasRef} />
         {viewModes.length > 1 && (
           <div className={s("viewModeControl")}>
             <ViewModeControl
