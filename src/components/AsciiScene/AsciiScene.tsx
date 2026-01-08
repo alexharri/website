@@ -390,8 +390,6 @@ const _AsciiScene: React.FC<AsciiSceneProps> = (props) => {
                 debugVizOptions={debugVizOptions}
                 transparent={viewMode === "transparent"}
                 hideAscii={hideAscii}
-                showSamplingPoints={showSamplingPoints}
-                showSamplingCircles={showSamplingCircles !== "none"}
                 characterMode={isCharacterMode}
                 optimizePerformance={optimizePerformance}
               />,

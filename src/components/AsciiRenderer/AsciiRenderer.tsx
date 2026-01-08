@@ -17,8 +17,6 @@ interface Props {
   config: AsciiRenderConfig | null;
   transparent: boolean;
   hideAscii: boolean;
-  showSamplingCircles: boolean;
-  showSamplingPoints: boolean;
   debugVizOptions: DebugVizOptions;
   characterMode: boolean;
   optimizePerformance: boolean;
@@ -30,8 +28,6 @@ export function AsciiRenderer(props: Props) {
     debugVizOptions,
     transparent,
     hideAscii,
-    showSamplingCircles,
-    showSamplingPoints,
     config,
     characterMode,
     optimizePerformance,
@@ -102,9 +98,7 @@ export function AsciiRenderer(props: Props) {
   }, [updateAsciiText]);
 
   let background: string;
-  if (showSamplingCircles || showSamplingPoints) {
-    background = hexToRgbaString(colors.background200, 0.7);
-  } else if (transparent && hideAscii) {
+  if (transparent && hideAscii) {
     background = "transparent";
   } else if (transparent) {
     background = hexToRgbaString(colors.background200, 0.7);
@@ -114,7 +108,6 @@ export function AsciiRenderer(props: Props) {
 
   return (
     <div
-      data-ascii
       ref={containerRef}
       style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0, background }}
       className={s("container")}
