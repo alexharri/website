@@ -1,5 +1,5 @@
-import { cssVariables } from "../../utils/cssVariables";
-import { StyleOptions } from "../../utils/styles";
+import { cssVariables } from "../../../utils/cssVariables";
+import { StyleOptions } from "../../../utils/styles";
 
 export const AsciiRendererStyles = ({ styled }: StyleOptions) => ({
   container: styled.css`

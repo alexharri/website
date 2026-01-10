@@ -1,5 +1,5 @@
-import { cssVariables } from "../../utils/cssVariables";
-import { StyleOptions } from "../../utils/styles";
+import { cssVariables } from "../../../utils/cssVariables";
+import { StyleOptions } from "../../../utils/styles";
 
 export default ({ styled, theme }: StyleOptions) => ({
   outerWrapper: styled.css`

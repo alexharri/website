@@ -1,11 +1,11 @@
 // Generate by Claude with A LOT of help from me
 
-import { CharacterMatcher } from "./CharacterMatcher";
-import { getAlphabetMetadata } from "../alphabets/AlphabetManager";
+import { CharacterMatcher } from "../../characterLookup/CharacterMatcher";
+import { getAlphabetMetadata } from "../../alphabets/AlphabetManager";
 
-import { AsciiRenderConfig } from "../renderConfig";
-import { SamplingEffect } from "../types";
-import { clamp } from "../../../math/math";
+import { AsciiRenderConfig } from "../../renderConfig";
+import { SamplingEffect } from "../../types";
+import { clamp } from "../../../../math/math";
 
 function readPixelFromBuffer(pixelBuffer: Uint8Array | Uint8ClampedArray, index: number) {
   return (pixelBuffer[index] << 16) | (pixelBuffer[index + 1] << 8) | pixelBuffer[index + 2];

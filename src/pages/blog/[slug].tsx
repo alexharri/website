@@ -31,7 +31,7 @@ import { MediaQuery } from "../../components/MediaQuery/MediaQuery";
 import { WebGLShaderLoader } from "../../components/WebGLShader/WebGLShaderLoader";
 import { Table } from "../../components/Table/Table";
 import { Scene2D } from "../../components/Scene2D/Scene2D";
-import { ActiveAsciiSceneProvider } from "../../components/AsciiScene/ActiveAsciiSceneContext";
+import { ActiveAsciiSceneProvider } from "../../components/AsciiScene/context/ActiveAsciiSceneContext";
 
 function firstUpper(s: string) {
   if (s.length === 0) return s;

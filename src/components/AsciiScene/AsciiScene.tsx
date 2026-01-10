@@ -1,29 +1,29 @@
 import React, { useRef, useState, useCallback, useMemo, useEffect, useContext } from "react";
 import { useStyles } from "../../utils/styles";
-import { AsciiRenderer } from "../AsciiRenderer";
-import { AlphabetName, getAlphabetMetadata } from "../AsciiRenderer/alphabets/AlphabetManager";
+import { AlphabetName, getAlphabetMetadata } from "./alphabets/AlphabetManager";
 import createAsciiSceneStyles from "./AsciiScene.styles";
 import { useViewportWidth } from "../../utils/hooks/useViewportWidth";
 import { CanvasProvider } from "../../contexts/CanvasContext";
 import { ViewModeControl } from "../ViewModeControl";
 import { SplitView, ViewMode } from "../SplitView";
-import { DebugVizOptions, SamplingEffect } from "../AsciiRenderer/types";
+import { DebugVizOptions, SamplingEffect } from "./types";
 import { NumberVariable } from "../variables";
 import { VariableValues, VariableSpec, VariableDict } from "../../types/variables";
 import { useSceneHeight } from "../../utils/hooks/useSceneHeight";
-import { CharacterSamplingData } from "../AsciiRenderer/ascii/generateAsciiChars";
-import { AsciiRenderConfig } from "../AsciiRenderer/renderConfig";
-import { generateCharacterGridSamplingData } from "../AsciiRenderer/ascii/generateCharacterGrid";
+import { CharacterSamplingData } from "./sampling/cpu/generateAsciiChars";
+import { AsciiRenderConfig } from "./renderConfig";
+import { generateCharacterGridSamplingData } from "./sampling/generateCharacterGrid";
 import { useMonospaceCharacterWidthEm } from "../../utils/hooks/useMonospaceCharacterWidthEm";
 import { cssVariables } from "../../utils/cssVariables";
-import { AsciiDebugVizCanvas } from "../AsciiRenderer/asciiDebugViz";
+import { AsciiDebugVizCanvas } from "./render/AsciiDebugVizCanvas";
 import { SCENE_BASELINE_WIDTH } from "../../constants";
-import { useSamplingDataCollection } from "../../utils/hooks/useSamplingDataCollection";
+import { useSamplingDataCollection } from "./sampling/useSamplingDataCollection";
 import { useVisible } from "../../utils/hooks/useVisible";
 import { lerp } from "three/src/math/MathUtils";
 import { useIsomorphicLayoutEffect } from "../../utils/hooks/useIsomorphicLayoutEffect";
 import { Observer } from "../../utils/observer";
-import { ActiveAsciiSceneContext } from "./ActiveAsciiSceneContext";
+import { ActiveAsciiSceneContext } from "./context/ActiveAsciiSceneContext";
+import { AsciiRenderer } from "./render/AsciiRenderer";
 
 const EFFECT_TO_KEY: Record<string, string> = {
   [SamplingEffect.DirectionalCrunch]: "directional_crunch_exponent",

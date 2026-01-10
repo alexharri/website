@@ -1,9 +1,8 @@
 import { createPage } from "../[slug]";
 import { getPostProps, getSlugFromFilePath } from "../../../utils/blogPageUtils";
-import { AsciiScene, WebGL2Notice } from "../../../components/AsciiScene";
+import { AsciiScene, WebGL2Notice, InteractiveVector6D } from "../../../components/AsciiScene";
 import { CharacterPlot } from "../../../components/CharacterPlot";
 import { Vector6D } from "../../../components/Vector6D/Vector6D";
-import { InteractiveVector6D } from "../../../components/InteractiveVector6D/InteractiveVector6D";
 
 export default createPage({
   AsciiScene,

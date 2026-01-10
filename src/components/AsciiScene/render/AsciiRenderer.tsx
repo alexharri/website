@@ -1,16 +1,37 @@
 import { useEffect, useMemo, useRef, useCallback } from "react";
 import { AsciiRendererStyles } from "./AsciiRenderer.styles";
-import { CharacterSamplingData, samplingDataToAscii } from "./ascii/generateAsciiChars";
-import { useStyles } from "../../utils/styles";
-import { colors } from "../../utils/cssVariables";
+import { CharacterSamplingData, samplingDataToAscii } from "../sampling/cpu/generateAsciiChars";
+import { useStyles } from "../../../utils/styles";
+import { colors } from "../../../utils/cssVariables";
 import { PixelatedCanvas, renderPixelatedCanvas } from "./PixelatedCanvas";
 import { AsciiCanvas, useAsciiCanvas } from "./AsciiCanvas";
-import { CharacterMatcher } from "./ascii/CharacterMatcher";
-import { EFFECTS } from "./ascii/effects";
-import { AsciiRenderConfig } from "./renderConfig";
-import { DebugVizOptions } from "./types";
-import { hexToRgbaString } from "../../utils/color";
-import { Observer } from "../../utils/observer";
+import { CharacterMatcher } from "../characterLookup/CharacterMatcher";
+
+import { AsciiRenderConfig } from "../renderConfig";
+import { DebugVizOptions } from "../types";
+import { hexToRgbaString } from "../../../utils/color";
+import { Observer } from "../../../utils/observer";
+
+export const EFFECTS = {
+  componentWiseGlobalNormalization(vectors: number[][]) {
+    const K = vectors[0].length;
+    const maxValues: number[] = vectors[0].map(() => 0);
+
+    for (const vector of vectors) {
+      for (let i = 0; i < K; i++) {
+        maxValues[i] = Math.max(maxValues[i], vector[i]);
+      }
+    }
+
+    const scalars = maxValues.map((v) => 1 / v);
+
+    for (const vector of vectors) {
+      for (let i = 0; i < K; i++) {
+        vector[i] = vector[i] * scalars[i];
+      }
+    }
+  },
+};
 
 interface Props {
   samplingDataObserver: Observer<CharacterSamplingData[][]>;

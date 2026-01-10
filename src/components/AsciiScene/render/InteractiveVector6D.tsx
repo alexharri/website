@@ -1,11 +1,11 @@
 import React, { useMemo, useState } from "react";
-import { useStyles } from "../../utils/styles";
+import { useStyles } from "../../../utils/styles";
 import InteractiveVector6DStyles from "./InteractiveVector6D.styles";
-import { Vector6D } from "../Vector6D/Vector6D";
-import { NumberVariable } from "../variables";
-import { CharacterMatcher } from "../AsciiRenderer/ascii/CharacterMatcher";
-import { EFFECTS } from "../AsciiRenderer/ascii/effects";
-import { getAlphabetMetadata } from "../AsciiRenderer/alphabets/AlphabetManager";
+import { Vector6D } from "../../Vector6D/Vector6D";
+import { NumberVariable } from "../../variables";
+import { getAlphabetMetadata } from "../alphabets/AlphabetManager";
+import { CharacterMatcher } from "../characterLookup/CharacterMatcher";
+import { EFFECTS } from "../effects";
 
 interface Vector6DProps {
   samplingVector: number[];

@@ -1,6 +1,6 @@
 import React from "react";
-import { CharacterSamplingData } from "./ascii/generateAsciiChars";
-import { AsciiRenderConfig } from "./renderConfig";
+import { CharacterSamplingData } from "../sampling/cpu/generateAsciiChars";
+import { AsciiRenderConfig } from "../renderConfig";
 
 interface Props {
   canvasRef: React.MutableRefObject<HTMLCanvasElement | null>;
