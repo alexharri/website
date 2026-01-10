@@ -13,12 +13,9 @@ export function FrameReader(props: Props) {
     const { gl } = state;
     const canvas = gl.domElement;
 
-    // Pass the canvas directly - no GPU→CPU transfer needed!
-    // GPUSamplingDataGenerator will use it as a texture source
     props.onFrame(
       { canvas },
       {
-        flipY: true,
         canvasWidth: canvas.width,
         canvasHeight: canvas.height,
       },

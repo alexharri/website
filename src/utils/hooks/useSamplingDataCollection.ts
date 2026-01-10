@@ -45,9 +45,13 @@ export function useSamplingDataCollection(params: UseSamplingDataCollectionParam
 
   // Check WebGL2 support once (client-side only)
   if (typeof window !== "undefined" && webgl2SupportedRef.current === null) {
-    const testCanvas = document.createElement("canvas");
-    const testGl = testCanvas.getContext("webgl2");
-    webgl2SupportedRef.current = testGl !== null;
+    try {
+      const testCanvas = document.createElement("canvas");
+      const testGl = testCanvas.getContext("webgl2");
+      webgl2SupportedRef.current = testGl !== null;
+    } catch {
+      webgl2SupportedRef.current = false;
+    }
   }
 
   const shouldUseGPU = optimizePerformance && webgl2SupportedRef.current;
@@ -123,9 +127,8 @@ export function useSamplingDataCollection(params: UseSamplingDataCollectionParam
       if (gpuGenerator) {
         try {
           gpuGenerator.update(
-            source.buffer || source.canvas!,
+            source.canvas,
             samplingData,
-            options?.flipY ?? false,
             pixelBufferScale,
             canvasWidth,
             canvasHeight,
@@ -136,14 +139,14 @@ export function useSamplingDataCollection(params: UseSamplingDataCollectionParam
         }
       }
       if (!ranOnGPU) {
-        const buffer = source.buffer || canvasToBuffer(source.canvas);
+        const [buffer, flipY] = canvasToBuffer(source.canvas);
         generateSamplingData(
           samplingData,
           buffer,
           pixelBufferScale,
           config,
           debugVizOptions.showSamplingPoints,
-          options?.flipY ?? false,
+          flipY,
           globalCrunchExponent,
           directionalCrunchExponent,
           increaseContrast,
@@ -186,14 +189,14 @@ function canvasToBuffer(canvas: HTMLCanvasElement) {
     // WebGL context
     const buffer = new Uint8ClampedArray(width * height * 4);
     gl.readPixels(0, 0, width, height, gl.RGBA, gl.UNSIGNED_BYTE, buffer);
-    return buffer;
+    return [buffer, true] as const;
   }
 
   const ctx2d = canvas.getContext("2d");
   if (ctx2d) {
     // 2D context
     const imageData = ctx2d.getImageData(0, 0, width, height);
-    return imageData.data;
+    return [imageData.data, false] as const;
   }
 
   throw new Error("Canvas has no rendering context");

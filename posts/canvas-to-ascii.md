@@ -2,6 +2,8 @@
 title: "Shape in ASCII rendering"
 ---
 
+<WebGL2Notice />
+
 Recently, I've been spending my time building an image-to-ASCII renderer. Below is the result -- try dragging it around, the demo is interactive!
 
 <AsciiScene height={540} fontSize={12} characterWidthMultiplier={0.85} characterHeightMultiplier={0.85} viewModes={["ascii", "split", "canvas"]} optimizePerformance splitMode="dynamic" effects={{

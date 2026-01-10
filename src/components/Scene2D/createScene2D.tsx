@@ -229,11 +229,9 @@ export function createScene2D<V extends VariableDict>(
         });
 
         if (onFrame && canvas.width && canvas.height) {
-          const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
           onFrame(
-            { buffer: imageData.data },
+            { canvas },
             {
-              flipY: true,
               canvasWidth: canvas.width,
               canvasHeight: canvas.height,
             },

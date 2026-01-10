@@ -12,6 +12,11 @@ const NoteStyles = ({ styled, theme }: StyleOptions) => ({
       margin-top: 0;
     }
 
+    &--warning {
+      background: #23200f;
+      border: 1px solid #5f582d;
+    }
+
     p {
       font-size: 16px;
       color: ${theme.text700};
@@ -28,6 +33,7 @@ const doNotWrapInP = new Set<unknown>(["p", "h1", "h2", "h3", "h4", "h5", "h6"])
 
 interface Props {
   children: React.ReactNode;
+  variant?: "warning";
 }
 
 export const Note = (props: Props) => {
@@ -42,7 +48,7 @@ export const Note = (props: Props) => {
 
   return (
     <div className="flow">
-      <div className={s("container")}>{content}</div>
+      <div className={s("container", { warning: props.variant === "warning" })}>{content}</div>
     </div>
   );
 };

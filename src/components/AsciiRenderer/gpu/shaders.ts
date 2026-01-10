@@ -22,7 +22,6 @@ export const createSamplingFragmentShader = (numCircles: number) => /* glsl */ `
   uniform vec2 u_boxSize;                 // Cell size in pixels (boxWidth, boxHeight)
   uniform vec2 u_gridOffset;              // Grid offset (offsetX, offsetY)
   uniform float u_pixelBufferScale;       // Scale factor for canvas resolution
-  uniform bool u_flipY;                   // Vertical flip flag
   uniform int u_samplingQuality;          // Number of subsamples per circle (typically 3)
   uniform int u_numCircles;               // Number of sampling circles per cell (1-6)
 
@@ -46,9 +45,7 @@ export const createSamplingFragmentShader = (numCircles: number) => /* glsl */ `
   float samplePoint(vec2 pixelCoord) {
     // Apply flip if needed
     vec2 coord = pixelCoord;
-    if (u_flipY) {
-      coord.y = u_canvasSize.y - coord.y;
-    }
+    coord.y = u_canvasSize.y - coord.y;
 
     // Clamp to canvas bounds
     coord = clamp(coord, vec2(0.0), u_canvasSize - vec2(1.0));

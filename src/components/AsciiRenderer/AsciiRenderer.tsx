@@ -32,6 +32,7 @@ export function AsciiRenderer(props: Props) {
     characterMode,
     optimizePerformance,
   } = props;
+  const { showSamplingCircles, showSamplingPoints } = debugVizOptions;
 
   const preRef = useRef<HTMLPreElement>(null);
   const s = useStyles(AsciiRendererStyles);
@@ -86,7 +87,9 @@ export function AsciiRenderer(props: Props) {
   }, [updateAsciiText]);
 
   let background: string;
-  if (transparent && hideAscii) {
+  if (showSamplingCircles || showSamplingPoints) {
+    background = hexToRgbaString(colors.background200, 0.7);
+  } else if (transparent && hideAscii) {
     background = "transparent";
   } else if (transparent) {
     background = hexToRgbaString(colors.background200, 0.7);

@@ -38,7 +38,7 @@ function sampleCircularRegion(
     const sampleY = y + point.y;
 
     let pixelX = Math.floor(sampleX * scale);
-    let pixelY = Math.floor(flipY ? sampleY * scale : canvasHeight - sampleY * scale);
+    let pixelY = Math.floor(flipY ? canvasHeight - sampleY * scale : sampleY * scale);
 
     pixelX = clamp(pixelX, 0, canvasWidth - 1);
     pixelY = clamp(pixelY, 0, canvasHeight - 1);

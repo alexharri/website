@@ -4,11 +4,9 @@ import { SCENE_BASELINE_WIDTH } from "../constants";
 
 type Variables = Record<string, unknown>;
 
-export type OnFrameOptions = { flipY?: boolean; canvasWidth: number; canvasHeight: number };
+export type OnFrameOptions = { canvasWidth: number; canvasHeight: number };
 
-export type OnFrameSource =
-  | { buffer: Uint8Array | Uint8ClampedArray; canvas?: never }
-  | { canvas: HTMLCanvasElement; buffer?: never };
+export type OnFrameSource = { canvas: HTMLCanvasElement };
 
 interface ISceneContext {
   onFrame: (source: OnFrameSource, options: OnFrameOptions) => void;
