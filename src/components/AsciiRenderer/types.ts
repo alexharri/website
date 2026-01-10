@@ -1,5 +1,3 @@
-export type SamplingPointVisualizationMode = "none" | "raw" | "crunched";
-
 export enum SamplingEffect {
   Crunch = "crunch",
   GlobalCrunch = "global_crunch",
@@ -7,7 +5,7 @@ export enum SamplingEffect {
 }
 
 export interface DebugVizOptions {
-  showSamplingCircles: SamplingPointVisualizationMode;
+  showSamplingCircles: boolean;
   samplingCirclesColor: "gray" | "blue" | "white";
   showExternalSamplingCircles: boolean;
   showSamplingPoints: boolean;

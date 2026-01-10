@@ -1,7 +1,7 @@
 import { CharacterSamplingData } from "./ascii/generateAsciiChars";
 import { getAlphabetMetadata } from "./alphabets/AlphabetManager";
 import { AsciiRenderConfig } from "./renderConfig";
-import { DebugVizOptions, SamplingPointVisualizationMode } from "./types";
+import { DebugVizOptions } from "./types";
 import { colors } from "../../utils/cssVariables";
 import { hexToRgbaString } from "../../utils/color";
 
@@ -33,7 +33,6 @@ export function renderAsciiDebugViz(
   config: AsciiRenderConfig,
   options: DebugVizOptions,
   hideSpaces: boolean,
-  visualizationMode?: SamplingPointVisualizationMode,
   forceSamplingValue?: number,
 ) {
   const ctx = canvas.getContext("2d");
@@ -75,6 +74,9 @@ export function renderAsciiDebugViz(
     ctx.fill();
   }
 
+  const externalPoints =
+    "externalPoints" in metadata.samplingConfig ? metadata.samplingConfig.externalPoints : [];
+
   for (let col = 0; col < config.cols; col++) {
     for (let row = 0; row < config.rows; row++) {
       if (hideSpaces) {
@@ -83,14 +85,14 @@ export function renderAsciiDebugViz(
       }
 
       const [sampleRectLeft, sampleRectTop] = config.sampleRectPosition(col, row);
-      if (options.showSamplingCircles !== "none" || options.showSamplingPoints) {
+      if (options.showSamplingCircles || options.showSamplingPoints) {
         const samplingVector = samplingData[row][col];
         metadata.samplingConfig.points.forEach((samplingCircle, i) => {
           const [xOff, yOff] = config.samplingCircleOffset(samplingCircle);
           const x = sampleRectLeft + xOff;
           const y = sampleRectTop + yOff;
 
-          if (options.showSamplingCircles !== "none") {
+          if (options.showSamplingCircles) {
             let color = "rgba(255, 255, 255, 0.33)";
             switch (options.samplingCirclesColor) {
               case "blue":
@@ -106,15 +108,7 @@ export function renderAsciiDebugViz(
             ctx.arc(x, y, config.samplePointRadius, 0, TAU);
             ctx.stroke();
 
-            // ctx.fillStyle = colors.background200;
-            // ctx.beginPath();
-            // ctx.arc(centerX, centerY, radius, 0, TAU);
-            // ctx.fill();
-
-            const vectorToUse =
-              visualizationMode === "crunched"
-                ? samplingVector.samplingVector
-                : samplingVector.rawSamplingVector;
+            const vectorToUse = samplingVector.rawSamplingVector;
             const value = forceSamplingValue ?? vectorToUse[i];
             const intensity = value * 0.7;
             ctx.fillStyle = `rgba(255, 255, 255, ${intensity})`;
@@ -146,9 +140,9 @@ export function renderAsciiDebugViz(
         });
       }
 
-      if (options.showExternalSamplingCircles && "externalPoints" in metadata.samplingConfig) {
+      if (options.showExternalSamplingCircles) {
         const samplingVector = samplingData[row][col];
-        metadata.samplingConfig.externalPoints.forEach((samplingCircle, i) => {
+        externalPoints.forEach((samplingCircle, i) => {
           const [xOff, yOff] = config.samplingCircleOffset(samplingCircle);
           const x = sampleRectLeft + xOff;
           const y = sampleRectTop + yOff;
@@ -170,46 +164,4 @@ export function renderAsciiDebugViz(
       }
     }
   }
-
-  // samplingData.forEach((samplingDataRow, row) => {
-  //   samplingDataRow.forEach(({ externalSamplingVector }, col) => {
-  //     const [sampleRectLeft, sampleRectTop] = config.sampleRectPosition(col, row);
-
-  //     if (options.showExternalSamplingCircles) {
-  //       const externalPoints =
-  //         "externalPoints" in metadata.samplingConfig ? metadata.samplingConfig.externalPoints : [];
-  //       for (const [i, externalPoint] of externalPoints.entries()) {
-  //         const [xOff, yOff] = config.samplingCircleOffset(externalPoint);
-  //         const x = sampleRectLeft + xOff;
-  //         const y = sampleRectTop + yOff;
-
-  //         ctx.strokeStyle = "rgba(255, 255, 255, 0.1)";
-  //         ctx.lineWidth = 1;
-  //         ctx.beginPath();
-  //         ctx.arc(x, y, config.samplePointRadius, 0, 2 * Math.PI);
-  //         ctx.stroke();
-
-  //         // ctx.fillStyle = colors.background200;
-  //         // ctx.beginPath();
-  //         // ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI);
-  //         // ctx.fill();
-
-  //         const intensity = externalSamplingVector[i] * 0.7;
-  //         ctx.fillStyle = `rgba(255, 255, 255, ${intensity})`;
-  //         ctx.beginPath();
-  //         ctx.arc(x, y, config.samplePointRadius, 0, 2 * Math.PI);
-  //         ctx.fill();
-
-  //         if (options.showSamplingPoints) {
-  //           for (const point of circleSamplingPoints) {
-  //             ctx.fillStyle = "#ff0000";
-  //             ctx.beginPath();
-  //             ctx.arc(x + point.x, y + point.y, samplingPointRadius, 0, 2 * Math.PI);
-  //             ctx.fill();
-  //           }
-  //         }
-  //       }
-  //     }
-  //   });
-  // });
 }

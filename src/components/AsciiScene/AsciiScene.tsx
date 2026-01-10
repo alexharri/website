@@ -7,11 +7,7 @@ import { useViewportWidth } from "../../utils/hooks/useViewportWidth";
 import { CanvasProvider } from "../../contexts/CanvasContext";
 import { ViewModeControl } from "../ViewModeControl";
 import { SplitView, ViewMode } from "../SplitView";
-import {
-  DebugVizOptions,
-  SamplingPointVisualizationMode,
-  SamplingEffect,
-} from "../AsciiRenderer/types";
+import { DebugVizOptions, SamplingEffect } from "../AsciiRenderer/types";
 import { NumberVariable } from "../variables";
 import { VariableValues, VariableSpec, VariableDict } from "../../types/variables";
 import { useSceneHeight } from "../../utils/hooks/useSceneHeight";
@@ -49,7 +45,7 @@ interface AsciiSceneProps {
   cols?: number;
   increaseContrast?: boolean;
   lightnessEasingFunction?: string;
-  showSamplingCircles?: SamplingPointVisualizationMode | true;
+  showSamplingCircles?: boolean;
   samplingCirclesColor?: "blue" | "gray" | "white";
   showExternalSamplingCircles?: boolean;
   showSamplingPoints?: boolean;
@@ -84,7 +80,7 @@ const _AsciiScene: React.FC<AsciiSceneProps> = (props) => {
     characterWidthMultiplier = 1,
     showControls = true,
     fontSize: targetFontSize = 14,
-    showSamplingCircles = "none",
+    showSamplingCircles = false,
     samplingCirclesColor = "gray",
     showExternalSamplingCircles = false,
     showSamplingPoints = false,
@@ -233,7 +229,7 @@ const _AsciiScene: React.FC<AsciiSceneProps> = (props) => {
 
   const debugVizOptions: DebugVizOptions = useMemo(
     () => ({
-      showSamplingCircles: showSamplingCircles === true ? "raw" : showSamplingCircles,
+      showSamplingCircles,
       samplingCirclesColor,
       showExternalSamplingCircles,
       showSamplingPoints,
@@ -292,7 +288,7 @@ const _AsciiScene: React.FC<AsciiSceneProps> = (props) => {
     samplingDataObserver,
     refs: { debugCanvasRef },
     config,
-    debug: { showSamplingPoints, showSamplingCircles, debugVizOptions },
+    debugVizOptions,
     increaseContrast,
     forceSamplingValue,
     samplingEffects,

@@ -5,11 +5,7 @@ import {
 } from "../../components/AsciiRenderer/ascii/generateAsciiChars";
 import { AsciiRenderConfig } from "../../components/AsciiRenderer/renderConfig";
 import { renderAsciiDebugViz } from "../../components/AsciiRenderer/asciiDebugViz";
-import {
-  DebugVizOptions,
-  SamplingPointVisualizationMode,
-  SamplingEffect,
-} from "../../components/AsciiRenderer/types";
+import { DebugVizOptions, SamplingEffect } from "../../components/AsciiRenderer/types";
 import { GPUSamplingDataGenerator } from "../../components/AsciiRenderer/gpu/GPUSamplingDataGenerator";
 import { Observer } from "../observer";
 import { OnFrameSource, OnFrameOptions } from "../../contexts/CanvasContext";
@@ -18,17 +14,11 @@ interface SamplingRefs {
   debugCanvasRef: React.RefObject<HTMLCanvasElement>;
 }
 
-interface SamplingDebug {
-  showSamplingPoints: boolean;
-  showSamplingCircles: SamplingPointVisualizationMode | true;
-  debugVizOptions: DebugVizOptions;
-}
-
 interface UseSamplingDataCollectionParams {
   samplingDataObserver: Observer<CharacterSamplingData[][]>;
   refs: SamplingRefs;
   config: AsciiRenderConfig | null;
-  debug: SamplingDebug;
+  debugVizOptions: DebugVizOptions;
   increaseContrast: boolean;
   forceSamplingValue?: number;
   hideSpaces: boolean;
@@ -43,7 +33,7 @@ export function useSamplingDataCollection(params: UseSamplingDataCollectionParam
     samplingDataObserver,
     refs,
     config,
-    debug,
+    debugVizOptions,
     increaseContrast,
     forceSamplingValue,
     samplingEffects,
@@ -53,7 +43,6 @@ export function useSamplingDataCollection(params: UseSamplingDataCollectionParam
     directionalCrunchExponent,
   } = params;
   const { debugCanvasRef } = refs;
-  const { showSamplingPoints, showSamplingCircles, debugVizOptions } = debug;
 
   const [samplingData] = useState<CharacterSamplingData[][]>(() => {
     return [];
@@ -132,12 +121,11 @@ export function useSamplingDataCollection(params: UseSamplingDataCollectionParam
           config,
           debugVizOptions,
           hideSpaces,
-          showSamplingCircles === true ? "raw" : showSamplingCircles,
           forceSamplingValue,
         );
       }
     },
-    [debugCanvasRef, config, debugVizOptions, showSamplingCircles, forceSamplingValue],
+    [debugCanvasRef, config, debugVizOptions, forceSamplingValue],
   );
 
   const onFrame = useCallback(
@@ -175,7 +163,7 @@ export function useSamplingDataCollection(params: UseSamplingDataCollectionParam
           buffer,
           pixelBufferScale,
           config,
-          showSamplingPoints,
+          debugVizOptions.showSamplingPoints,
           options?.flipY ?? false,
           globalCrunchExponent,
           directionalCrunchExponent,
@@ -191,8 +179,6 @@ export function useSamplingDataCollection(params: UseSamplingDataCollectionParam
       debugCanvasRef,
       config,
       increaseContrast,
-      showSamplingPoints,
-      showSamplingCircles,
       debugVizOptions,
       samplingEffects,
       shouldUseGPU,
