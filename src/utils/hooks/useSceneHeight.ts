@@ -12,11 +12,7 @@ export function useSceneHeight(targetHeight: number, options?: { minWidth?: numb
   widthRef.current = width;
 
   useIsomorphicLayoutEffect(() => {
-    const onResize = () => {
-      if (widthRef.current > minWidth && window.innerWidth > minWidth)
-        return; // No value in rerendering
-      setWidth(window.innerWidth);
-    };
+    const onResize = () => setWidth(window.innerWidth);
     window.addEventListener("resize", onResize);
     onResize();
     return () => window.removeEventListener("resize", onResize);
