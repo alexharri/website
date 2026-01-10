@@ -97,6 +97,7 @@ export interface CharacterSamplingData {
   rawSamplingVector: number[];
   externalSamplingVector: number[];
   samplingVectorSubsamples: number[][];
+  character: string | null;
 }
 
 export interface GenerationResult {
@@ -163,6 +164,7 @@ export function generateSamplingData(
         samplingVectorSubsamples: Array.from({ length: numPoints }, () =>
           Array.from({ length: config.samplingQuality }),
         ),
+        character: null,
       };
     }
 
@@ -243,7 +245,9 @@ export function samplingDataToAscii(
         continue;
       }
 
-      const selectedChar = matcher.findBestCharacterQuantized(cellSamplingData.samplingVector);
+      const selectedChar =
+        cellSamplingData.character ||
+        matcher.findBestCharacterQuantized(cellSamplingData.samplingVector);
       chars.push(selectedChar);
     }
     chars.push("\n");

@@ -20,7 +20,6 @@ export function generateCharacterGridSamplingData(
 
   for (let row = 0; row < config.rows; row++) {
     const samplingDataRow: CharacterSamplingData[] = [];
-    const characterRow: string[] = [];
 
     for (let col = 0; col < config.cols; col++) {
       const sourceRow = row - rowOffset;
@@ -42,8 +41,8 @@ export function generateCharacterGridSamplingData(
         rawSamplingVector: vector,
         externalSamplingVector: [],
         samplingVectorSubsamples: [],
+        character: char,
       });
-      characterRow.push(char);
     }
 
     samplingData.push(samplingDataRow);
