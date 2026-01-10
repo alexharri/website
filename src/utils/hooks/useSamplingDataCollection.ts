@@ -4,24 +4,17 @@ import {
   CharacterSamplingData,
 } from "../../components/AsciiRenderer/ascii/generateAsciiChars";
 import { AsciiRenderConfig } from "../../components/AsciiRenderer/renderConfig";
-import { renderAsciiDebugViz } from "../../components/AsciiRenderer/asciiDebugViz";
 import { DebugVizOptions, SamplingEffect } from "../../components/AsciiRenderer/types";
 import { GPUSamplingDataGenerator } from "../../components/AsciiRenderer/gpu/GPUSamplingDataGenerator";
 import { Observer } from "../observer";
 import { OnFrameSource, OnFrameOptions } from "../../contexts/CanvasContext";
 
-interface SamplingRefs {
-  debugCanvasRef: React.RefObject<HTMLCanvasElement>;
-}
-
 interface UseSamplingDataCollectionParams {
   samplingDataObserver: Observer<CharacterSamplingData[][]>;
-  refs: SamplingRefs;
   config: AsciiRenderConfig | null;
   debugVizOptions: DebugVizOptions;
   increaseContrast: boolean;
   forceSamplingValue?: number;
-  hideSpaces: boolean;
   samplingEffects: SamplingEffect[];
   optimizePerformance: boolean;
   globalCrunchExponent: number;
@@ -31,7 +24,6 @@ interface UseSamplingDataCollectionParams {
 export function useSamplingDataCollection(params: UseSamplingDataCollectionParams) {
   const {
     samplingDataObserver,
-    refs,
     config,
     debugVizOptions,
     increaseContrast,
@@ -39,10 +31,8 @@ export function useSamplingDataCollection(params: UseSamplingDataCollectionParam
     samplingEffects,
     optimizePerformance,
     globalCrunchExponent,
-    hideSpaces,
     directionalCrunchExponent,
   } = params;
-  const { debugCanvasRef } = refs;
 
   const [samplingData] = useState<CharacterSamplingData[][]>(() => {
     return [];
@@ -113,19 +103,8 @@ export function useSamplingDataCollection(params: UseSamplingDataCollectionParam
       if (!config) return;
 
       samplingDataObserver.emit(samplingData);
-
-      if (debugCanvasRef.current) {
-        renderAsciiDebugViz(
-          debugCanvasRef.current,
-          samplingData,
-          config,
-          debugVizOptions,
-          hideSpaces,
-          forceSamplingValue,
-        );
-      }
     },
-    [debugCanvasRef, config, debugVizOptions, forceSamplingValue],
+    [config, debugVizOptions, forceSamplingValue],
   );
 
   const onFrame = useCallback(
@@ -176,7 +155,6 @@ export function useSamplingDataCollection(params: UseSamplingDataCollectionParam
     },
     [
       samplingDataObserver,
-      debugCanvasRef,
       config,
       increaseContrast,
       debugVizOptions,

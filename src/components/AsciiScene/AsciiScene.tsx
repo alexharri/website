@@ -206,7 +206,6 @@ const _AsciiScene: React.FC<AsciiSceneProps> = (props) => {
   const orbitControlsTargetRef = useRef<HTMLDivElement>(null);
   const AsciiSceneStyles = useMemo(() => createAsciiSceneStyles(targetWidth), [targetWidth]);
   const s = useStyles(AsciiSceneStyles);
-  const debugCanvasRef = useRef<HTMLCanvasElement>(null);
   const characterWidth = useMonospaceCharacterWidthEm(cssVariables.fontMonospace);
 
   const [viewMode, setViewMode] = useState<ViewMode>(availableViewModes[0]?.value || "left");
@@ -286,14 +285,12 @@ const _AsciiScene: React.FC<AsciiSceneProps> = (props) => {
 
   const { onFrame, onSamplingData } = useSamplingDataCollection({
     samplingDataObserver,
-    refs: { debugCanvasRef },
     config,
     debugVizOptions,
     increaseContrast,
     forceSamplingValue,
     samplingEffects,
     optimizePerformance,
-    hideSpaces,
     globalCrunchExponent: (variableValues.global_crunch_exponent as number | undefined) ?? 1,
     directionalCrunchExponent:
       (variableValues.directional_crunch_exponent as number | undefined) ?? 1,
@@ -349,7 +346,13 @@ const _AsciiScene: React.FC<AsciiSceneProps> = (props) => {
             ]}
           </SplitView>
         </CanvasProvider>
-        <AsciiDebugVizCanvas canvasRef={debugCanvasRef} />
+        <AsciiDebugVizCanvas
+          config={config}
+          debugVizOptions={debugVizOptions}
+          forceSamplingValue={forceSamplingValue}
+          hideSpaces={hideSpaces}
+          samplingDataObserver={samplingDataObserver}
+        />
         {viewModes.length > 1 && (
           <div className={s("viewModeControl")}>
             <ViewModeControl

@@ -4,17 +4,42 @@ import { AsciiRenderConfig } from "./renderConfig";
 import { DebugVizOptions } from "./types";
 import { colors } from "../../utils/cssVariables";
 import { hexToRgbaString } from "../../utils/color";
+import { useEffect, useRef } from "react";
+import { Observer } from "../../utils/observer";
 
 interface Props {
-  canvasRef: React.MutableRefObject<HTMLCanvasElement | null>;
+  config: AsciiRenderConfig | null;
+  debugVizOptions: DebugVizOptions;
+  samplingDataObserver: Observer<CharacterSamplingData[][]>;
+  hideSpaces: boolean;
+  forceSamplingValue: number | undefined;
 }
 
 const TAU = 2 * Math.PI;
 
 export function AsciiDebugVizCanvas(props: Props) {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const { samplingDataObserver, config, debugVizOptions, hideSpaces, forceSamplingValue } = props;
+
+  useEffect(() => {
+    function onData(samplingData: CharacterSamplingData[][]) {
+      if (!config || !canvasRef.current) return;
+      renderAsciiDebugViz(
+        canvasRef.current,
+        samplingData,
+        config,
+        debugVizOptions,
+        hideSpaces,
+        forceSamplingValue,
+      );
+    }
+    const unsubscribe = samplingDataObserver.subscribe(onData);
+    return unsubscribe;
+  }, [samplingDataObserver, config, debugVizOptions, hideSpaces, forceSamplingValue]);
+
   return (
     <canvas
-      ref={props.canvasRef}
+      ref={canvasRef}
       style={{
         position: "absolute",
         top: 0,
@@ -27,7 +52,7 @@ export function AsciiDebugVizCanvas(props: Props) {
   );
 }
 
-export function renderAsciiDebugViz(
+function renderAsciiDebugViz(
   canvas: HTMLCanvasElement,
   samplingData: CharacterSamplingData[][],
   config: AsciiRenderConfig,
