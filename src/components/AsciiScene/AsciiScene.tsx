@@ -5,7 +5,6 @@ import { AlphabetName, getAlphabetMetadata } from "../AsciiRenderer/alphabets/Al
 import createAsciiSceneStyles from "./AsciiScene.styles";
 import { useViewportWidth } from "../../utils/hooks/useViewportWidth";
 import { CanvasProvider } from "../../contexts/CanvasContext";
-import { AsciiSceneControls } from "./AsciiSceneControls";
 import { ViewModeControl } from "../ViewModeControl";
 import { SplitView, ViewMode } from "../SplitView";
 import {
@@ -81,6 +80,8 @@ const _AsciiScene: React.FC<AsciiSceneProps> = (props) => {
   const {
     children,
     alphabet = "default",
+    characterHeightMultiplier = 1,
+    characterWidthMultiplier = 1,
     showControls = true,
     fontSize: targetFontSize = 14,
     showSamplingCircles = "none",
@@ -214,12 +215,6 @@ const _AsciiScene: React.FC<AsciiSceneProps> = (props) => {
 
   const [viewMode, setViewMode] = useState<ViewMode>(availableViewModes[0]?.value || "left");
   const [splitT, setSplitT] = useState(0.5);
-  const [characterWidthMultiplier, setCharacterWidthMultiplier] = useState(
-    props.characterWidthMultiplier ?? 1,
-  );
-  const [characterHeightMultiplier, setCharacterHeightMultiplier] = useState(
-    props.characterHeightMultiplier ?? 1,
-  );
 
   const registerSceneVariables = useCallback((variables: VariableDict) => {
     setVariables((prev) => ({ ...prev, ...variables }));
@@ -323,18 +318,6 @@ const _AsciiScene: React.FC<AsciiSceneProps> = (props) => {
   return (
     <>
       <div className={s("container", { isPaused })} style={{ height }}>
-        {showControls && false && (
-          <AsciiSceneControls
-            selectedAlphabet={alphabet}
-            setSelectedAlphabet={() => {
-              throw new Error("Not implemented");
-            }}
-            characterWidthMultiplier={characterWidthMultiplier}
-            setCharacterWidthMultiplier={setCharacterWidthMultiplier}
-            characterHeightMultiplier={characterHeightMultiplier}
-            setCharacterHeightMultiplier={setCharacterHeightMultiplier}
-          />
-        )}
         <CanvasProvider
           onFrame={onFrame}
           width={targetWidth}
