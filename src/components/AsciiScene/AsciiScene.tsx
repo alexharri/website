@@ -69,6 +69,8 @@ interface AsciiSceneProps {
   effects?: { [key: string]: number | [number, { range: [number, number]; step: number }] };
   splitMode?: "static" | "dynamic";
   effectSlider?: { [key: string]: [number, number] };
+  neverPause: boolean;
+  setNeverPause: (value: boolean) => void;
   isPaused: boolean;
 }
 
@@ -98,6 +100,8 @@ const _AsciiScene: React.FC<AsciiSceneProps> = (props) => {
     exclude = "",
     splitMode = "dynamic",
     effectSlider,
+    neverPause,
+    setNeverPause,
   } = props;
 
   const VIEW_MODE_MAP: Record<ViewModeKey, { value: ViewMode; label: string }> = {
@@ -223,8 +227,6 @@ const _AsciiScene: React.FC<AsciiSceneProps> = (props) => {
   const setVariableValue = useCallback((key: string, value: VariableSpec["value"]) => {
     setVariableValues((prev) => ({ ...prev, [key]: value }));
   }, []);
-
-  const [neverPause, setNeverPause] = useState(() => typeof children === "string");
 
   const debugVizOptions: DebugVizOptions = useMemo(
     () => ({
@@ -402,15 +404,30 @@ export const AsciiScene: React.FC<AsciiSceneProps> = (props) => {
   const { activeSceneId: activeAsciiSceneId } = useContext(ActiveAsciiSceneContext);
   const isPaused = activeAsciiSceneId !== sceneId;
 
+  const [neverPause, setNeverPause] = useState(() => typeof props.children === "string");
+
+  const dataProps = neverPause
+    ? {}
+    : {
+        "data-ascii-scene-id": sceneId,
+        "data-paused": isPaused,
+      };
+
   return (
     <div
       ref={containerRef}
       style={{ height: height + variablesHeight }}
       className="ascii-scene"
-      data-ascii-scene-id={sceneId}
-      data-paused={isPaused}
+      {...dataProps}
     >
-      {visible && <_AsciiScene {...props} isPaused={isPaused} />}
+      {visible && (
+        <_AsciiScene
+          {...props}
+          neverPause={neverPause}
+          setNeverPause={setNeverPause}
+          isPaused={isPaused}
+        />
+      )}
     </div>
   );
 };
