@@ -749,6 +749,7 @@ export class GPUSamplingDataGenerator {
             rawSamplingVector: [],
             externalSamplingVector: [],
             samplingVectorSubsamples: [],
+            character: null,
           };
         }
 
