@@ -14,6 +14,7 @@ interface SplitViewProps {
   onSplitPositionChange?: (position: number) => void;
   wrapperRef?: React.RefObject<HTMLDivElement>;
   splitMode?: "static" | "dynamic";
+  draggable?: boolean;
 }
 
 export const SplitView: React.FC<SplitViewProps> = ({
@@ -25,6 +26,7 @@ export const SplitView: React.FC<SplitViewProps> = ({
   onSplitPositionChange,
   wrapperRef,
   splitMode = "static",
+  draggable,
 }) => {
   const s = useStyles(SplitViewStyles);
   const rectRef = useRef<HTMLDivElement>(null);
@@ -67,8 +69,16 @@ export const SplitView: React.FC<SplitViewProps> = ({
 
   const splitPercentage = splitPosition * 100;
 
+  const [down, setDown] = useState(false);
+
   return (
-    <div className={s("wrapper")} style={{ cursor: "grab" }} ref={rectRef}>
+    <div
+      className={s("wrapper")}
+      style={{ cursor: draggable ? (down ? "grabbing" : "grab") : "initial" }}
+      ref={rectRef}
+      onMouseDown={() => setDown(true)}
+      onMouseUp={() => setDown(false)}
+    >
       <div
         className={s("divider", { dragging: isDragging, split: viewMode === "split" })}
         style={{

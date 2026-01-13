@@ -14,6 +14,8 @@ interface ISceneContext {
   registerVariables: (specs: VariableDict) => void;
   variables: Variables;
   setNeverPause: (value: boolean) => void;
+  draggable: boolean;
+  setDraggable: (value: boolean) => void;
 }
 
 const SceneContext = createContext<ISceneContext | null>(null);
@@ -33,6 +35,8 @@ interface CanvasProviderProps {
   registerVariables: (specs: VariableDict) => void;
   isPaused: boolean;
   setNeverPause: (value: boolean) => void;
+  draggable: boolean;
+  setDraggable: (value: boolean) => void;
 }
 
 export function SceneContextProvider({
@@ -46,6 +50,8 @@ export function SceneContextProvider({
   variables,
   isPaused,
   setNeverPause,
+  draggable,
+  setDraggable,
 }: CanvasProviderProps) {
   const contextValue: ISceneContext = useMemo(
     () => ({
@@ -58,6 +64,8 @@ export function SceneContextProvider({
       variables,
       isPaused,
       setNeverPause,
+      draggable,
+      setDraggable,
     }),
     [
       onFrame,

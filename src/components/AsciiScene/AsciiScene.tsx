@@ -310,6 +310,8 @@ const _AsciiScene: React.FC<AsciiSceneProps> = (props) => {
 
   const isPaused = props.isPaused && !neverPause;
 
+  const [draggable, setDraggable] = useState(false);
+
   return (
     <>
       <div className={s("container", { isPaused })} style={{ height }}>
@@ -323,6 +325,8 @@ const _AsciiScene: React.FC<AsciiSceneProps> = (props) => {
           variables={variableValues}
           isPaused={isPaused}
           setNeverPause={setNeverPause}
+          draggable={draggable}
+          setDraggable={setDraggable}
         >
           <SplitView
             viewMode={viewMode}
@@ -332,6 +336,7 @@ const _AsciiScene: React.FC<AsciiSceneProps> = (props) => {
             splitPosition={splitT}
             onSplitPositionChange={setSplitT}
             wrapperRef={orbitControlsTargetRef}
+            draggable={draggable}
           >
             {[
               <AsciiRenderer

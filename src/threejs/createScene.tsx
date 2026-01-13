@@ -181,6 +181,10 @@ export function createScene<V extends VariableDict>(
     const { height, scale } = useSceneHeight(targetHeight);
     const fadeHeight = Math.round(FADE_HEIGHT * scale);
 
+    useEffect(() => {
+      context?.setDraggable(true);
+    }, []);
+
     return (
       <>
         <div style={{ position: "relative", height }}>
