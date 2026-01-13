@@ -181,8 +181,6 @@ export function createScene<V extends VariableDict>(
     const { height, scale } = useSceneHeight(targetHeight);
     const fadeHeight = Math.round(FADE_HEIGHT * scale);
 
-    const canvasRef = useRef<HTMLCanvasElement>(null);
-
     return (
       <>
         <div style={{ position: "relative", height }}>
@@ -196,15 +194,10 @@ export function createScene<V extends VariableDict>(
           {visible && (
             <FIBER.Canvas
               shadows
-              onCreated={({ gl }) => {
-                gl.shadowMap.enabled = true;
-                gl.shadowMap.type = THREE.PCFSoftShadowMap;
-                canvasRef.current?.setAttribute("data-ready", "true");
-              }}
               gl={{ preserveDrawingBuffer: !!context?.onFrame }}
               style={{
                 height: height,
-                width: 100 + "%",
+                width: "100%",
                 userSelect: "none",
                 cursor: down ? "grabbing" : "grab",
               }}
@@ -213,7 +206,6 @@ export function createScene<V extends VariableDict>(
               onMouseDown={() => setDown(true)}
               onMouseUp={() => setDown(false)}
               resize={{ scroll: false }}
-              ref={canvasRef}
             >
               {context?.onFrame && <FrameReader onFrame={context.onFrame} />}
               {!options.customLights && (
