@@ -16,7 +16,6 @@ export interface SceneProps {
   xRotation?: number;
   usesVariables?: boolean;
   zoom?: number;
-  ascii?: boolean;
   yOffset?: number;
   errorLoadingThreeJs: boolean;
   onFrame?: (source: OnFrameSource, options: OnFrameOptions) => void;
