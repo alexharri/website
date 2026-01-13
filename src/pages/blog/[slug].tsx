@@ -30,7 +30,7 @@ import { Code } from "../../components/Code/Code";
 import { MediaQuery } from "../../components/MediaQuery/MediaQuery";
 import { WebGLShaderLoader } from "../../components/WebGLShader/WebGLShaderLoader";
 import { Table } from "../../components/Table/Table";
-import { ActiveAsciiSceneProvider } from "../../components/AsciiScene/context/ActiveAsciiSceneContext";
+import { useMemo } from "react";
 
 function firstUpper(s: string) {
   if (s.length === 0) return s;
@@ -91,7 +91,21 @@ interface Props {
   data: PostDataStore;
 }
 
-export function createPage(customComponents: Record<string, React.FC<any>>) {
+type Provider = React.ComponentType<{ children: React.ReactNode }>;
+
+function composeProviders(providers: Provider[]): Provider {
+  return ({ children }) => {
+    return providers.reduce((acc, Provider) => {
+      return <Provider>{acc}</Provider>;
+    }, <>{children}</>);
+  };
+}
+
+interface Options {
+  providers?: Provider[];
+}
+
+export function createPage(customComponents: Record<string, React.FC<any>>, options: Options = {}) {
   const components = {
     ...baseComponents,
     ...customComponents,
@@ -101,6 +115,8 @@ export function createPage(customComponents: Record<string, React.FC<any>>) {
     const scope = source.scope! as unknown as FrontMatter;
 
     const pathName = scope.publishedAt ? `/blog/${props.slug}` : `/blog/draft/${props.slug}`;
+
+    const Providers = useMemo(() => composeProviders(options.providers ?? []), [options.providers]);
 
     return (
       <>
@@ -125,11 +141,11 @@ export function createPage(customComponents: Record<string, React.FC<any>>) {
             <PostDataProvider data={props.data}>
               <ThreeProvider>
                 <FocusedScriptProvider>
-                  <ActiveAsciiSceneProvider>
-                    <MonacoProvider>
+                  <MonacoProvider>
+                    <Providers>
                       <MDXRemote {...(source as any)} components={components} />
-                    </MonacoProvider>
-                  </ActiveAsciiSceneProvider>
+                    </Providers>
+                  </MonacoProvider>
                 </FocusedScriptProvider>
               </ThreeProvider>
             </PostDataProvider>
