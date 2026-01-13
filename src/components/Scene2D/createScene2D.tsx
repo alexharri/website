@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { NumberVariable } from "../variables";
+import { NumberVariable } from "../NumberVariable";
 import { StyleOptions, useStyles } from "../../utils/styles";
 import { useSceneContext } from "../../contexts/SceneContextProvider";
 import { VariableDict, VariableSpec, VariableValues } from "../../types/variables";

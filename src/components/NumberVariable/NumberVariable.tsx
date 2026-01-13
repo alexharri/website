@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { StyleOptions, useStyles } from "../../utils/styles";
-import { MathSVG } from "./MathSVG";
+import { MathSVG } from "../MathSVG/MathSVG";
 import { lerp } from "../../math/lerp";
 import { clamp } from "../../math/math";
 import { cssVariables } from "../../utils/cssVariables";

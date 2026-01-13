@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useMemo, useRef, useState } from "react";
 import type * as THREE from "three";
-import { NumberVariable } from "../components/variables";
+import { NumberVariable } from "../components/NumberVariable";
 import { NormalVariable } from "./NormalVariable";
 import { StyleOptions, useStyles } from "../utils/styles";
 import { useDidUpdate } from "../utils/hooks/useDidUpdate";

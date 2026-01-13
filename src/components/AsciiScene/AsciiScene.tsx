@@ -7,7 +7,7 @@ import { SceneContextProvider } from "../../contexts/SceneContextProvider";
 import { ViewModeControl } from "../ViewModeControl";
 import { SplitView, ViewMode } from "../SplitView";
 import { DebugVizOptions, SamplingEffect } from "./types";
-import { NumberVariable } from "../variables";
+import { NumberVariable } from "../NumberVariable";
 import { VariableValues, VariableSpec, VariableDict } from "../../types/variables";
 import { useSceneHeight } from "../../utils/hooks/useSceneHeight";
 import { CharacterSamplingData } from "./sampling/cpu/generateAsciiChars";

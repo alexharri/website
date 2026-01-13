@@ -2,7 +2,7 @@ import React, { useMemo, useState } from "react";
 import { useStyles } from "../../../utils/styles";
 import InteractiveVector6DStyles from "./InteractiveVector6D.styles";
 import { Vector6D } from "../../Vector6D/Vector6D";
-import { NumberVariable } from "../../variables";
+import { NumberVariable } from "../../NumberVariable";
 import { getAlphabetMetadata } from "../alphabets/AlphabetManager";
 import { CharacterMatcher } from "../characterLookup/CharacterMatcher";
 import { EFFECTS } from "../effects";
