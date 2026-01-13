@@ -12,6 +12,7 @@ import { useViewportWidth } from "../../utils/hooks/useViewportWidth";
 import { useRandomId } from "../../utils/hooks/useRandomId";
 import { CONTROLS_HEIGHT, DEFAULT_HEIGHT, SKEW_DEG } from "./constants";
 import { useSceneContext } from "../../contexts/SceneContextProvider";
+import { VariableDict } from "../../types/variables";
 
 const SHOW_SEED_AND_TIME = false;
 
@@ -117,20 +118,12 @@ export const WebGLShader: React.FC<WebGLShaderProps> = (props) => {
 
   const fragmentShader = useFragmentShader(props);
 
-  // Register variables with context if available
   useEffect(() => {
     if (context?.registerVariables && Object.keys(fragmentShader.uniforms).length > 0) {
-      // Convert FragmentShaderUniforms to VariableDict format
-      const variableDict: Record<string, any> = {};
+      const variableDict: VariableDict = {};
       for (const [key, uniform] of Object.entries(fragmentShader.uniforms)) {
-        variableDict[key] = {
-          type: "number" as const,
-          label: uniform.label,
-          value: uniform.value,
-          range: uniform.range,
-          step: uniform.step,
-          format: uniform.format,
-        };
+        const { label, value, range, step, format } = uniform;
+        variableDict[key] = { type: "number", label, value, range, step, format };
       }
       context.registerVariables(variableDict);
     }
