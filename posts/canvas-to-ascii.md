@@ -725,7 +725,7 @@ Below is the ASCII rendering of that boundary. Notice how the lower edge (the `!
 
 We see a staircase pattern like so:
 
-```text:no_ligatures
+```text
                !!!!!
           !!!!!!!!!!
      !!!!!!!!!!!!!!!
@@ -789,7 +789,7 @@ UUUUUUUUYYf""''`!!!!!!!!!! ->
 
 This sudden stop in contrast enhancement having an effect is what causes the staircasing effect:
 
-```text:no_ligatures
+```text
                !!!!!
           !!!!!!!!!!
      !!!!!!!!!!!!!!!
