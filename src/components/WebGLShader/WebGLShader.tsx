@@ -253,7 +253,7 @@ export const WebGLShader: React.FC<WebGLShaderProps> = (props) => {
 
   return (
     <>
-      <div className={s("canvasWrapper", { skew })} style={{ width, height }}>
+      <div className={s("canvasWrapper", { skew })} style={{ width }}>
         <div style={{ paddingTop: `${(height / width) * 100}%` }} />
         <canvas
           ref={canvasRef}
