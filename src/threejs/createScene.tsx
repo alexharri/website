@@ -79,9 +79,6 @@ export function createScene<V extends VariableDict>(
     yOffset = 0,
     xRotation = 0,
     zoom = 1,
-    onFrame,
-    orbitControlsRef: externalOrbitControlsRef,
-    orbitControlsTargetRef,
   }: SceneProps) => {
     const THREE = useContext(ThreeContext);
     const DREI = useContext(DreiContext);
@@ -162,7 +159,7 @@ export function createScene<V extends VariableDict>(
       setVariables((obj) => ({ ...obj, [key]: value }));
     };
 
-    const orbitRef = externalOrbitControlsRef || useRef<any>(null);
+    const orbitRef = useRef<any>(null);
 
     const rotationCallbacks = useRef(new Set<(vec: THREE.Camera) => void>());
 
@@ -228,7 +225,7 @@ export function createScene<V extends VariableDict>(
               resize={{ scroll: false }}
               ref={canvasRef}
             >
-              {onFrame && <FrameReader onFrame={onFrame} />}
+              {context?.onFrame && <FrameReader onFrame={context.onFrame} />}
               {/* <ambientLight intensity={Math.PI / 2} />
               <spotLight
                 position={[10, 10, 10]}
@@ -247,7 +244,7 @@ export function createScene<V extends VariableDict>(
                 enablePan={false}
                 enableZoom={false}
                 ref={orbitRef}
-                domElement={orbitControlsTargetRef?.current || undefined}
+                domElement={context?.orbitControlsTargetRef?.current || undefined}
               />
 
               <mesh position={[0, yOffset, 0]}>
