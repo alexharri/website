@@ -129,19 +129,15 @@ export const WebGLShader: React.FC<WebGLShaderProps> = (props) => {
     }
   }, [context?.registerVariables, fragmentShader.uniforms]);
 
-  const [uniformValues, setUniformValues] = useState(() => {
+  const [_uniformValues, setUniformValues] = useState(() => {
     const values: Record<string, number> = {};
     for (const [key, uniform] of Object.entries(fragmentShader.uniforms)) {
       values[key] = uniform.value;
     }
     return values;
   });
-
-  // Use context variables if available, otherwise use local state
-  const effectiveUniformValues: Record<string, number> = {
-    ...uniformValues,
-    ...((context?.variables || {}) as Record<string, number>),
-  };
+  const uniformValues =
+    (context?.variables as Record<string, number> | undefined) ?? _uniformValues;
 
   const pendingUniformWrites = useRef<[string, number][]>([]);
   const colorConfigurationRef = useRef(colorConfiguration);
@@ -167,7 +163,7 @@ export const WebGLShader: React.FC<WebGLShaderProps> = (props) => {
       colorConfigurations[colorConfiguration],
       props.seed,
     );
-    for (const [key, value] of Object.entries(effectiveUniformValues)) {
+    for (const [key, value] of Object.entries(uniformValues)) {
       pendingUniformWrites.current.push([key, value]);
     }
     if (!animate) renderer.setTimeSpeed(0, 0);
@@ -282,7 +278,7 @@ export const WebGLShader: React.FC<WebGLShaderProps> = (props) => {
               <NumberVariable
                 key={key}
                 dataKey={key}
-                value={effectiveUniformValues[key] ?? uniform.value}
+                value={uniformValues[key] ?? uniform.value}
                 onValueChange={(value) => setUniformValue(key, value)}
                 spec={uniform}
                 width={uniformEntries.length > 1 ? "small" : "normal"}
