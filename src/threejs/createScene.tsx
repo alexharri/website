@@ -136,9 +136,9 @@ export function createScene<V extends VariableDict>(
 
     useEffect(() => {
       if (variableKeys.length > 0) {
-        context?.registerSceneVariables?.(variablesSpec);
+        context?.registerVariables?.(variablesSpec);
       }
-    }, [context?.registerSceneVariables, variableKeys.length]);
+    }, [context?.registerVariables, variableKeys.length]);
 
     const [rotate, setRotate] = useState(true);
 
@@ -240,7 +240,7 @@ export function createScene<V extends VariableDict>(
           )}
         </div>
 
-        {variableKeys.length > 0 && !context?.registerSceneVariables && (
+        {variableKeys.length > 0 && !context?.registerVariables && (
           <div className={s("variablesWrapper", { hasNormal })}>
             {variableKeys.map((key) => {
               const spec = variablesSpec[key];

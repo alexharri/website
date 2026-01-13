@@ -215,7 +215,7 @@ const _AsciiScene: React.FC<AsciiSceneProps> = (props) => {
   const [viewMode, setViewMode] = useState<ViewMode>(availableViewModes[0]?.value || "left");
   const [splitT, setSplitT] = useState(0.5);
 
-  const registerSceneVariables = useCallback((variables: VariableDict) => {
+  const registerVariables = useCallback((variables: VariableDict) => {
     setVariables((prev) => ({ ...prev, ...variables }));
     const initialVariables: VariableValues = {};
     for (const [key, spec] of Object.entries(variables)) {
@@ -319,7 +319,7 @@ const _AsciiScene: React.FC<AsciiSceneProps> = (props) => {
           height={targetHeight}
           minWidth={minWidth}
           orbitControlsTargetRef={orbitControlsTargetRef}
-          registerSceneVariables={registerSceneVariables}
+          registerVariables={registerVariables}
           variables={variableValues}
           isPaused={isPaused}
           setNeverPause={setNeverPause}

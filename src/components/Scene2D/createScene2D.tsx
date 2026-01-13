@@ -121,10 +121,10 @@ export function createScene2D<V extends VariableDict>(
     }, []);
 
     useEffect(() => {
-      if (context?.registerSceneVariables && variableKeys.length > 0) {
-        context.registerSceneVariables(variablesSpec);
+      if (context?.registerVariables && variableKeys.length > 0) {
+        context.registerVariables(variablesSpec);
       }
-    }, [context?.registerSceneVariables, variableKeys.length]);
+    }, [context?.registerVariables, variableKeys.length]);
 
     useEffect(() => {
       if (options.static) {
@@ -258,7 +258,7 @@ export function createScene2D<V extends VariableDict>(
           {isLoading && <p className={s("loadingMessage")}>Loading...</p>}
         </div>
 
-        {variableKeys.length > 0 && !context?.registerSceneVariables && (
+        {variableKeys.length > 0 && !context?.registerVariables && (
           <div className={s("variablesWrapper")}>
             {variableKeys.map((key) => {
               const spec = variablesSpec[key];

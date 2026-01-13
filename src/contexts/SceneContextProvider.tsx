@@ -11,8 +11,8 @@ interface ISceneContext {
   minWidth: number;
   orbitControlsTargetRef: React.RefObject<HTMLDivElement>;
   isPaused: boolean;
-  registerSceneVariables?: (specs: VariableDict) => void;
-  variables?: Variables;
+  registerVariables: (specs: VariableDict) => void;
+  variables: Variables;
   setNeverPause: (value: boolean) => void;
 }
 
@@ -29,8 +29,8 @@ interface CanvasProviderProps {
   height: number;
   minWidth?: number;
   orbitControlsTargetRef: React.RefObject<HTMLDivElement>;
-  registerSceneVariables?: (specs: VariableDict) => void;
-  variables?: Variables;
+  variables: Variables;
+  registerVariables: (specs: VariableDict) => void;
   isPaused: boolean;
   setNeverPause: (value: boolean) => void;
 }
@@ -42,7 +42,7 @@ export function SceneContextProvider({
   height,
   minWidth,
   orbitControlsTargetRef,
-  registerSceneVariables,
+  registerVariables,
   variables,
   isPaused,
   setNeverPause,
@@ -54,7 +54,7 @@ export function SceneContextProvider({
       height,
       minWidth: minWidth ?? SCENE_BASELINE_WIDTH,
       orbitControlsTargetRef,
-      registerSceneVariables,
+      registerVariables,
       variables,
       isPaused,
       setNeverPause,
@@ -65,7 +65,7 @@ export function SceneContextProvider({
       height,
       minWidth,
       orbitControlsTargetRef,
-      registerSceneVariables,
+      registerVariables,
       variables,
       isPaused,
       setNeverPause,

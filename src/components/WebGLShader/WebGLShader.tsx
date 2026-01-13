@@ -119,7 +119,7 @@ export const WebGLShader: React.FC<WebGLShaderProps> = (props) => {
 
   // Register variables with context if available
   useEffect(() => {
-    if (context?.registerSceneVariables && Object.keys(fragmentShader.uniforms).length > 0) {
+    if (context?.registerVariables && Object.keys(fragmentShader.uniforms).length > 0) {
       // Convert FragmentShaderUniforms to VariableDict format
       const variableDict: Record<string, any> = {};
       for (const [key, uniform] of Object.entries(fragmentShader.uniforms)) {
@@ -132,9 +132,9 @@ export const WebGLShader: React.FC<WebGLShaderProps> = (props) => {
           format: uniform.format,
         };
       }
-      context.registerSceneVariables(variableDict);
+      context.registerVariables(variableDict);
     }
-  }, [context?.registerSceneVariables, fragmentShader.uniforms]);
+  }, [context?.registerVariables, fragmentShader.uniforms]);
 
   const [uniformValues, setUniformValues] = useState(() => {
     const values: Record<string, number> = {};
@@ -282,7 +282,7 @@ export const WebGLShader: React.FC<WebGLShaderProps> = (props) => {
           />
         )}
       </div>
-      {showControls && uniformEntries.length > 0 && !context?.registerSceneVariables && (
+      {showControls && uniformEntries.length > 0 && !context?.registerVariables && (
         <div className={s("variables")}>
           {uniformEntries.map(([key, uniform]) => {
             return (
