@@ -142,8 +142,6 @@ export const WebGLShader: React.FC<WebGLShaderProps> = (props) => {
   const pendingUniformWrites = useRef<[string, number][]>([]);
   const colorConfigurationRef = useRef(colorConfiguration);
   colorConfigurationRef.current = colorConfiguration;
-  const contextRef = useRef(context);
-  contextRef.current = context;
 
   const isPaused = context?.isPaused ?? false;
   const isPausedRef = useRef(isPaused);
@@ -214,7 +212,7 @@ export const WebGLShader: React.FC<WebGLShaderProps> = (props) => {
       hasRenderedOnce = true;
 
       if (canvas) {
-        contextRef.current?.onFrame(canvas);
+        context?.onFrame(canvas);
       }
 
       if (SHOW_SEED_AND_TIME) {
@@ -232,7 +230,7 @@ export const WebGLShader: React.FC<WebGLShaderProps> = (props) => {
       stop = true;
       window.removeEventListener("resize", resizeListener);
     };
-  }, [fragmentShader, animate]);
+  }, [fragmentShader, animate, context]);
 
   const setUniformValue = useCallback((key: string, value: number) => {
     pendingUniformWrites.current.push([key, value]);
