@@ -44,14 +44,14 @@ const styles = ({ styled, theme }: StyleOptions) => ({
   `,
 });
 
-type LocalVariables<V extends VariableDict> = {
+type Variables<V extends VariableDict> = {
   [K in keyof V]: V[K]["value"] extends [number, number, number] ? THREE.Vector3 : V[K]["value"];
 };
 
 interface SceneComponentProps<V extends VariableDict> {
   scene: THREE.Scene;
   camera: THREE.PerspectiveCamera | THREE.OrthographicCamera;
-  variables: LocalVariables<V>;
+  variables: Variables<V>;
 }
 
 interface Options<V extends VariableDict> {
@@ -129,9 +129,9 @@ export function createScene<V extends VariableDict>(
                 ...(variablesSpec[key].value as [number, number, number]),
               ).normalize()
             : (variablesSpec[key].value as number)
-        ) as LocalVariables<V>[typeof key];
+        ) as Variables<V>[typeof key];
         return obj;
-      }, {} as LocalVariables<V>),
+      }, {} as Variables<V>),
     );
 
     useEffect(() => {
