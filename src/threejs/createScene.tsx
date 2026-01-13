@@ -9,7 +9,7 @@ import { useSceneHeight } from "../utils/hooks/useSceneHeight";
 import { SceneProps } from "./scenes";
 import { FrameReader } from "./Components/FrameReader";
 import { VariableDict } from "../types/variables";
-import { useSceneContext } from "../contexts/CanvasContext";
+import { useSceneContext } from "../contexts/SceneContextProvider";
 import { Three } from "./types";
 
 const FADE_HEIGHT = 80;

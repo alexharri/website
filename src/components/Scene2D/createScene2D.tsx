@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { NumberVariable } from "../variables";
 import { StyleOptions, useStyles } from "../../utils/styles";
-import { useSceneContext } from "../../contexts/CanvasContext";
+import { useSceneContext } from "../../contexts/SceneContextProvider";
 import { VariableDict, VariableSpec, VariableValues } from "../../types/variables";
 import { useSceneHeight } from "../../utils/hooks/useSceneHeight";
 import { useViewportWidth } from "../../utils/hooks/useViewportWidth";

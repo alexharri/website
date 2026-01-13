@@ -7,7 +7,7 @@ import { useVisible } from "../../utils/hooks/useVisible";
 import { StyleOptions, useStyles } from "../../utils/styles";
 import { cssVariables } from "../../utils/cssVariables";
 import { SKEW_DEG } from "./constants";
-import { useSceneContext } from "../../contexts/CanvasContext";
+import { useSceneContext } from "../../contexts/SceneContextProvider";
 
 let _WebGLShader: ComponentType<WebGLShaderProps> | null;
 

@@ -11,7 +11,7 @@ import { clamp } from "../../math/lerp";
 import { useViewportWidth } from "../../utils/hooks/useViewportWidth";
 import { useRandomId } from "../../utils/hooks/useRandomId";
 import { CONTROLS_HEIGHT, DEFAULT_HEIGHT, SKEW_DEG } from "./constants";
-import { useSceneContext } from "../../contexts/CanvasContext";
+import { useSceneContext } from "../../contexts/SceneContextProvider";
 
 const SHOW_SEED_AND_TIME = false;
 

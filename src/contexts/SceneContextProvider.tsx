@@ -39,7 +39,7 @@ interface CanvasProviderProps {
   setNeverPause: (value: boolean) => void;
 }
 
-export function CanvasProvider({
+export function SceneContextProvider({
   children,
   onFrame,
   width,

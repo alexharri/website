@@ -1,6 +1,6 @@
 import { useContext } from "react";
 import { FiberContext } from "./ThreeProvider";
-import { OnFrameOptions, OnFrameSource } from "../../contexts/CanvasContext";
+import { OnFrameOptions, OnFrameSource } from "../../contexts/SceneContextProvider";
 
 interface Props {
   onFrame: (source: OnFrameSource, options: OnFrameOptions) => void;

@@ -1,7 +1,7 @@
 import { useRef, useState } from "react";
 import { useIsomorphicLayoutEffect } from "./useIsomorphicLayoutEffect";
 import { SCENE_BASELINE_WIDTH } from "../../constants";
-import { useSceneContext } from "../../contexts/CanvasContext";
+import { useSceneContext } from "../../contexts/SceneContextProvider";
 
 export function useSceneHeight(targetHeight: number, options?: { minWidth?: number }) {
   const context = useSceneContext();

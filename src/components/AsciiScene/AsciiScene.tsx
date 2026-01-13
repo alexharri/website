@@ -3,7 +3,7 @@ import { useStyles } from "../../utils/styles";
 import { AlphabetName, getAlphabetMetadata } from "./alphabets/AlphabetManager";
 import createAsciiSceneStyles from "./AsciiScene.styles";
 import { useViewportWidth } from "../../utils/hooks/useViewportWidth";
-import { CanvasProvider } from "../../contexts/CanvasContext";
+import { SceneContextProvider } from "../../contexts/SceneContextProvider";
 import { ViewModeControl } from "../ViewModeControl";
 import { SplitView, ViewMode } from "../SplitView";
 import { DebugVizOptions, SamplingEffect } from "./types";
@@ -313,7 +313,7 @@ const _AsciiScene: React.FC<AsciiSceneProps> = (props) => {
   return (
     <>
       <div className={s("container", { isPaused })} style={{ height }}>
-        <CanvasProvider
+        <SceneContextProvider
           onFrame={onFrame}
           width={targetWidth}
           height={targetHeight}
@@ -347,7 +347,7 @@ const _AsciiScene: React.FC<AsciiSceneProps> = (props) => {
               isCharacterMode ? null : children,
             ]}
           </SplitView>
-        </CanvasProvider>
+        </SceneContextProvider>
         <AsciiDebugVizCanvas
           config={config}
           debugVizOptions={debugVizOptions}

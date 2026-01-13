@@ -6,7 +6,7 @@ import { AsciiRenderConfig } from "../renderConfig";
 import { DebugVizOptions, SamplingEffect } from "../types";
 import { GPUSamplingDataGenerator } from "./gpu/GPUSamplingDataGenerator";
 import { Observer } from "../../../utils/observer";
-import { OnFrameSource, OnFrameOptions } from "../../../contexts/CanvasContext";
+import { OnFrameSource, OnFrameOptions } from "../../../contexts/SceneContextProvider";
 
 interface UseSamplingDataCollectionParams {
   samplingDataObserver: Observer<CharacterSamplingData[][]>;
