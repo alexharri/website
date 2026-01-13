@@ -134,10 +134,9 @@ export function createScene<V extends VariableDict>(
       }, {} as LocalVariables<V>),
     );
 
-    // Register variables with context if available
     useEffect(() => {
-      if (context?.registerSceneVariables && variableKeys.length > 0) {
-        context.registerSceneVariables(variablesSpec);
+      if (variableKeys.length > 0) {
+        context?.registerSceneVariables?.(variablesSpec);
       }
     }, [context?.registerSceneVariables, variableKeys.length]);
 
