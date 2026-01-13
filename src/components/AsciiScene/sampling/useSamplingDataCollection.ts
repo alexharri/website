@@ -6,7 +6,6 @@ import { AsciiRenderConfig } from "../renderConfig";
 import { DebugVizOptions, SamplingEffect } from "../types";
 import { GPUSamplingDataGenerator } from "./gpu/GPUSamplingDataGenerator";
 import { Observer } from "../../../utils/observer";
-import { OnFrameSource, OnFrameOptions } from "../../../contexts/SceneContextProvider";
 
 interface UseSamplingDataCollectionParams {
   samplingDataObserver: Observer<CharacterSamplingData[][]>;
@@ -99,7 +98,7 @@ export function useSamplingDataCollection(params: UseSamplingDataCollectionParam
     }
   }, [globalCrunchExponent, directionalCrunchExponent]);
 
-  const lastFrameRef = useRef<{ source: OnFrameSource; options: OnFrameOptions } | null>(null);
+  const lastFrameRef = useRef<HTMLCanvasElement | null>(null);
 
   const onSamplingData = useCallback(
     (samplingData: CharacterSamplingData[][]) => {
@@ -111,13 +110,13 @@ export function useSamplingDataCollection(params: UseSamplingDataCollectionParam
   );
 
   const onFrame = useCallback(
-    (source: OnFrameSource, options: OnFrameOptions) => {
-      lastFrameRef.current = { source, options };
+    (canvas: HTMLCanvasElement) => {
+      lastFrameRef.current = canvas;
       if (!config) return;
 
-      const pixelBufferScale = options.canvasWidth / config.canvasWidth;
-      const canvasWidth = options.canvasWidth;
-      const canvasHeight = options.canvasHeight;
+      const pixelBufferScale = canvas.width / config.canvasWidth;
+      const canvasWidth = canvas.width;
+      const canvasHeight = canvas.height;
 
       const gpuGenerator = gpuGeneratorRef.current;
 
@@ -125,20 +124,14 @@ export function useSamplingDataCollection(params: UseSamplingDataCollectionParam
       let ranOnGPU = false;
       if (gpuGenerator) {
         try {
-          gpuGenerator.update(
-            source.canvas,
-            samplingData,
-            pixelBufferScale,
-            canvasWidth,
-            canvasHeight,
-          );
+          gpuGenerator.update(canvas, samplingData, pixelBufferScale, canvasWidth, canvasHeight);
           ranOnGPU = true;
         } catch (error) {
           console.error("GPU sampling failed:", error);
         }
       }
       if (!ranOnGPU) {
-        const [buffer, flipY] = canvasToBuffer(source.canvas);
+        const [buffer, flipY] = canvasToBuffer(canvas);
         generateSamplingData(
           samplingData,
           buffer,
@@ -169,8 +162,7 @@ export function useSamplingDataCollection(params: UseSamplingDataCollectionParam
 
   useEffect(() => {
     if (lastFrameRef.current) {
-      const { source, options } = lastFrameRef.current;
-      onFrame(source, options);
+      onFrame(lastFrameRef.current);
     }
   }, [onFrame]);
 

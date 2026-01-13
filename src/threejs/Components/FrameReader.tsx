@@ -1,26 +1,12 @@
 import { useContext } from "react";
 import { FiberContext } from "./ThreeProvider";
-import { OnFrameOptions, OnFrameSource } from "../../contexts/SceneContextProvider";
 
 interface Props {
-  onFrame: (source: OnFrameSource, options: OnFrameOptions) => void;
+  onFrame: (canvas: HTMLCanvasElement) => void;
 }
 
 export function FrameReader(props: Props) {
   const FIBER = useContext(FiberContext);
-
-  FIBER.useFrame((state) => {
-    const { gl } = state;
-    const canvas = gl.domElement;
-
-    props.onFrame(
-      { canvas },
-      {
-        canvasWidth: canvas.width,
-        canvasHeight: canvas.height,
-      },
-    );
-  });
-
+  FIBER.useFrame((state) => props.onFrame(state.gl.domElement));
   return null;
 }

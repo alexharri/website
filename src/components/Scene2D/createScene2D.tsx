@@ -228,15 +228,7 @@ export function createScene2D<V extends VariableDict>(
           variables,
         });
 
-        if (onFrame && canvas.width && canvas.height) {
-          onFrame(
-            { canvas },
-            {
-              canvasWidth: canvas.width,
-              canvasHeight: canvas.height,
-            },
-          );
-        }
+        onFrame?.(canvas);
 
         hasRenderedOnce = true;
         lastTime = now;

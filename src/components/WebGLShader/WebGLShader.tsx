@@ -224,12 +224,8 @@ export const WebGLShader: React.FC<WebGLShaderProps> = (props) => {
       renderer.render();
       hasRenderedOnce = true;
 
-      // Call onFrame callback if in context
-      if (contextRef.current?.onFrame && canvas) {
-        contextRef.current.onFrame(
-          { canvas },
-          { canvasWidth: canvas.width, canvasHeight: canvas.height },
-        );
+      if (canvas) {
+        contextRef.current?.onFrame(canvas);
       }
 
       if (SHOW_SEED_AND_TIME) {

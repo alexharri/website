@@ -4,12 +4,8 @@ import { SCENE_BASELINE_WIDTH } from "../constants";
 
 type Variables = Record<string, unknown>;
 
-export type OnFrameOptions = { canvasWidth: number; canvasHeight: number };
-
-export type OnFrameSource = { canvas: HTMLCanvasElement };
-
 interface ISceneContext {
-  onFrame: (source: OnFrameSource, options: OnFrameOptions) => void;
+  onFrame: (canvas: HTMLCanvasElement) => void;
   width: number;
   height: number;
   minWidth: number;
@@ -28,7 +24,7 @@ export function useSceneContext(): ISceneContext | null {
 
 interface CanvasProviderProps {
   children: React.ReactNode;
-  onFrame: (source: OnFrameSource, options: OnFrameOptions) => void;
+  onFrame: (canvas: HTMLCanvasElement) => void;
   width: number;
   height: number;
   minWidth?: number;
