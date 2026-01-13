@@ -4,7 +4,6 @@ import { AlphabetName, getAlphabetMetadata } from "./alphabets/AlphabetManager";
 import createAsciiSceneStyles from "./AsciiScene.styles";
 import { useViewportWidth } from "../../utils/hooks/useViewportWidth";
 import { SceneContextProvider } from "../../contexts/SceneContextProvider";
-import { ViewModeControl } from "../ViewModeControl";
 import { SplitView, ViewMode } from "../SplitView";
 import { DebugVizOptions, SamplingEffect } from "./types";
 import { NumberVariable } from "../NumberVariable";
@@ -24,6 +23,7 @@ import { useIsomorphicLayoutEffect } from "../../utils/hooks/useIsomorphicLayout
 import { Observer } from "../../utils/observer";
 import { ActiveAsciiSceneContext } from "./context/ActiveAsciiSceneContext";
 import { AsciiRenderer } from "./render/AsciiRenderer";
+import { SegmentedControl } from "../SegmentedControl";
 
 const EFFECT_TO_KEY: Record<string, string> = {
   [SamplingEffect.DirectionalCrunch]: "directional_crunch_exponent",
@@ -357,11 +357,15 @@ const _AsciiScene: React.FC<AsciiSceneProps> = (props) => {
         />
         {viewModes.length > 1 && (
           <div className={s("viewModeControl")}>
-            <ViewModeControl
-              viewMode={viewMode}
-              setViewMode={setViewMode}
-              setSplitT={setSplitT}
+            <SegmentedControl
               options={availableViewModes}
+              value={viewMode}
+              setValue={(value) => {
+                setViewMode(value);
+                if (value === "split") {
+                  setSplitT(0.5);
+                }
+              }}
             />
           </div>
         )}
