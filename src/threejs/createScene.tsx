@@ -117,7 +117,7 @@ export function createScene<V extends VariableDict>(
       return camera;
     }, [visible]);
 
-    const variablesSpec = useMemo(() => options.variables ?? (EMPTY_OBJ as V), [options.variables]);
+    const variablesSpec = options.variables ?? (EMPTY_OBJ as V);
     const variableKeys = useMemo(() => Object.keys(variablesSpec), [variablesSpec]);
 
     const [variables, setVariables] = useState(() =>
