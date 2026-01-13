@@ -10,7 +10,6 @@ import { SceneProps } from "./scenes";
 import { FrameReader } from "./Components/FrameReader";
 import { VariableDict } from "../types/variables";
 import { useSceneContext } from "../contexts/SceneContextProvider";
-import { Three } from "./types";
 
 const FADE_HEIGHT = 80;
 
@@ -57,7 +56,6 @@ interface SceneComponentProps<V extends VariableDict> {
 
 interface Options<V extends VariableDict> {
   variables?: V;
-  createCamera?: (three: Three) => THREE.PerspectiveCamera | THREE.OrthographicCamera;
   customLights?: boolean;
 }
 
@@ -103,9 +101,6 @@ export function createScene<V extends VariableDict>(
     }, [visible]);
 
     const camera = useMemo(() => {
-      if (options.createCamera) {
-        return options.createCamera(THREE);
-      }
       const scale = 1 - (targetHeight / 500) * 0.13;
       const fov = targetHeight / 10;
       const camera = new THREE.PerspectiveCamera(fov);
@@ -189,10 +184,6 @@ export function createScene<V extends VariableDict>(
 
     const canvasRef = useRef<HTMLCanvasElement>(null);
 
-    // const isFirefox = typeof navigator !== "undefined" && navigator.userAgent.includes("Firefox");
-    // const S = isFirefox ? 0.25 : 1;
-    const S = 1;
-
     return (
       <>
         <div style={{ position: "relative", height }}>
@@ -213,8 +204,8 @@ export function createScene<V extends VariableDict>(
               }}
               gl={{ preserveDrawingBuffer: true }}
               style={{
-                height: height * S,
-                width: 100 * S + "%",
+                height: height,
+                width: 100 + "%",
                 userSelect: "none",
                 cursor: down ? "grabbing" : "grab",
               }}
@@ -226,15 +217,19 @@ export function createScene<V extends VariableDict>(
               ref={canvasRef}
             >
               {context?.onFrame && <FrameReader onFrame={context.onFrame} />}
-              {/* <ambientLight intensity={Math.PI / 2} />
-              <spotLight
-                position={[10, 10, 10]}
-                angle={0.15}
-                penumbra={1}
-                decay={0}
-                intensity={Math.PI}
-              />
-              <pointLight position={[-10, -10, -10]} decay={0} intensity={Math.PI} /> */}
+              {!options.customLights && (
+                <>
+                  <ambientLight intensity={Math.PI / 2} />
+                  <spotLight
+                    position={[10, 10, 10]}
+                    angle={0.15}
+                    penumbra={1}
+                    decay={0}
+                    intensity={Math.PI}
+                  />
+                  <pointLight position={[-10, -10, -10]} decay={0} intensity={Math.PI} />
+                </>
+              )}
 
               <DREI.OrbitControls
                 rotateSpeed={0.3}
