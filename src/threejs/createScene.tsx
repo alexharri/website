@@ -202,7 +202,7 @@ export function createScene<V extends VariableDict>(
                 gl.shadowMap.type = THREE.PCFSoftShadowMap;
                 canvasRef.current?.setAttribute("data-ready", "true");
               }}
-              gl={{ preserveDrawingBuffer: true }}
+              gl={{ preserveDrawingBuffer: !!context?.onFrame }}
               style={{
                 height: height,
                 width: 100 + "%",
