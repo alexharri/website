@@ -3,7 +3,7 @@ import * as path from "path";
 // Directory where generated alphabet files will be saved
 export const ALPHABETS_OUTPUT_DIR = path.resolve(
   __dirname,
-  "../../src/components/AsciiRenderer/alphabets",
+  "../../src/components/AsciiScene/alphabets",
 );
 
 // Ensure the directory exists

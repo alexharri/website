@@ -1,4 +1,4 @@
-import { AlphabetName, getAlphabetMetadata } from "./alphabets/AlphabetManager";
+import { AlphabetName, getAlphabetMetadata } from "./alphabets";
 
 export class AsciiRenderConfig {
   public sampleRectWidth: number;

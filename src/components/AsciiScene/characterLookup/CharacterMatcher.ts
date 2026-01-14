@@ -1,5 +1,5 @@
 import { KdTree } from "./KdTree";
-import { AlphabetName, getAlphabetCharacterVectors } from "../alphabets/AlphabetManager";
+import { AlphabetName, getAlphabetCharacterVectors } from "../alphabets";
 
 type Effect = (vectors: number[][]) => void;
 

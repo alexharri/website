@@ -159,6 +159,11 @@ export function createScene2D<V extends VariableDict>(
         const height = heightRef.current;
         const variables = variableValuesRef.current;
 
+        if (!width || !height) {
+          console.warn(`Encountered ${width} x ${height} 2D canvas`);
+          return;
+        }
+
         let hasChanges = false;
 
         const isLoading = options.isLoading?.() ?? false;

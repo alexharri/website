@@ -3,7 +3,7 @@
 import { AsciiRenderConfig } from "../../renderConfig";
 import { CharacterSamplingData } from "../cpu/generateAsciiChars";
 import { SamplingEffect } from "../../types";
-import { getAlphabetMetadata } from "../../alphabets/AlphabetManager";
+import { getAlphabetMetadata } from "../../alphabets";
 import {
   PASSTHROUGH_VERTEX_SHADER,
   createSamplingFragmentShader,

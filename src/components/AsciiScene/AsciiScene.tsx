@@ -1,6 +1,6 @@
 import React, { useRef, useState, useCallback, useMemo, useEffect, useContext } from "react";
 import { useStyles } from "../../utils/styles";
-import { AlphabetName, getAlphabetMetadata } from "./alphabets/AlphabetManager";
+import { AlphabetName, getAlphabetMetadata } from "./alphabets";
 import createAsciiSceneStyles from "./AsciiScene.styles";
 import { useViewportWidth } from "../../utils/hooks/useViewportWidth";
 import { SceneContextProvider } from "../../contexts/SceneContextProvider";

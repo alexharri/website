@@ -1,7 +1,7 @@
 // Generate by Claude with A LOT of help from me
 
 import { CharacterMatcher } from "../../characterLookup/CharacterMatcher";
-import { getAlphabetMetadata } from "../../alphabets/AlphabetManager";
+import { getAlphabetMetadata } from "../../alphabets";
 
 import { AsciiRenderConfig } from "../../renderConfig";
 import { SamplingEffect } from "../../types";

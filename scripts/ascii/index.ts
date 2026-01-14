@@ -269,39 +269,16 @@ async function generateAlphabetManager() {
 
 ${imports}
 
-const alphabets = {
+export const alphabets = {
 ${alphabetEntries}
 } as const;
 
 export type AlphabetName = keyof typeof alphabets;
-
-export function getAvailableAlphabets(): AlphabetName[] {
-  return Object.keys(alphabets) as AlphabetName[];
-}
-
-export function getAlphabetCharacterVectors(name: AlphabetName) {
-  return alphabets[name].characters;
-}
-
-export function getAlphabetMetadata(name: AlphabetName) {
-  return alphabets[name].metadata;
-}
-
-export function getCharacterVector(char: string, alphabet: AlphabetName): number[] {
-  const characters = alphabets[alphabet].characters;
-  const charData = characters.find(c => c.char === char);
-  if (charData) {
-    return charData.vector;
-  }
-  // Fallback to space character
-  const spaceData = characters.find(c => c.char === ' ');
-  return spaceData ? spaceData.vector : [];
-}
 `;
 
   const managerPath = path.resolve(
     __dirname,
-    "../../src/components/AsciiRenderer/alphabets/AlphabetManager.ts",
+    "../../src/components/AsciiScene/alphabets/alphabets.ts",
   );
   fs.writeFileSync(managerPath, managerContent);
   console.log(`Generated AlphabetManager.ts with ${configNames.length} alphabets`);

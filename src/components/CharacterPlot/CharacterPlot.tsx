@@ -4,7 +4,7 @@ import React, { useState, useMemo, useCallback, useRef } from "react";
 import { useStyles } from "../../utils/styles";
 import { CharacterPlotStyles } from "./CharacterPlot.styles";
 import { colors } from "../../utils/cssVariables";
-import { AlphabetName, getAlphabetCharacterVectors } from "../AsciiScene/alphabets/AlphabetManager";
+import { AlphabetName, getAlphabetCharacterVectors } from "../AsciiScene/alphabets";
 
 interface InputPoint {
   vector: [number, number];

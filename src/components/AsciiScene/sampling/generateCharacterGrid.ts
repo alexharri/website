@@ -2,7 +2,7 @@
 
 import { CharacterSamplingData } from "./cpu/generateAsciiChars";
 import { AsciiRenderConfig } from "../renderConfig";
-import { AlphabetName, getCharacterVector } from "../alphabets/AlphabetManager";
+import { AlphabetName, getCharacterVector } from "../alphabets";
 
 export function generateCharacterGridSamplingData(
   characterString: string,
