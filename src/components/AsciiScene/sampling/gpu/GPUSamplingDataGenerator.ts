@@ -18,7 +18,6 @@ interface GPUSamplingDataGeneratorOptions {
   config: AsciiRenderConfig;
   canvasWidth: number;
   canvasHeight: number;
-  pixelBufferScale: number;
   samplingQuality: number;
   samplingEffects: SamplingEffect[];
   globalCrunchExponent?: number;
@@ -109,7 +108,7 @@ export class GPUSamplingDataGenerator {
     this.config = options.config;
     this.canvasWidth = options.canvasWidth;
     this.canvasHeight = options.canvasHeight;
-    this.pixelBufferScale = options.pixelBufferScale;
+    this.pixelBufferScale = 1; // Updated on every frame
     this.samplingQuality = options.samplingQuality;
     this.samplingEffects = [...options.samplingEffects];
     this.globalCrunchExponent = options.globalCrunchExponent ?? 3;
@@ -295,16 +294,14 @@ export class GPUSamplingDataGenerator {
    * Update sampling data from a new canvas buffer or HTMLCanvasElement
    */
   public update(
-    source: Uint8Array | Uint8ClampedArray | HTMLCanvasElement,
+    canvas: HTMLCanvasElement,
     out: CharacterSamplingData[][],
     pixelBufferScale: number,
-    canvasWidth: number,
-    canvasHeight: number,
   ): void {
     this.pixelBufferScale = pixelBufferScale;
-    this.canvasWidth = canvasWidth;
-    this.canvasHeight = canvasHeight;
-    this.uploadCanvasTexture(source);
+    this.canvasWidth = canvas.width;
+    this.canvasHeight = canvas.height;
+    this.uploadCanvasTexture(canvas);
 
     this.collectRawSamples();
     this.collectExternalSamples();
@@ -415,27 +412,10 @@ export class GPUSamplingDataGenerator {
   /**
    * Upload canvas pixel buffer or HTMLCanvasElement to texture
    */
-  private uploadCanvasTexture(source: Uint8Array | Uint8ClampedArray | HTMLCanvasElement): void {
+  private uploadCanvasTexture(canvas: HTMLCanvasElement): void {
     const gl = this.gl;
     gl.bindTexture(gl.TEXTURE_2D, this.canvasTexture);
-
-    if (source instanceof HTMLCanvasElement) {
-      // GPU→GPU texture copy - no CPU transfer!
-      gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, source);
-    } else {
-      // CPU→GPU upload (legacy path for 2D canvas)
-      gl.texImage2D(
-        gl.TEXTURE_2D,
-        0,
-        gl.RGBA,
-        this.canvasWidth,
-        this.canvasHeight,
-        0,
-        gl.RGBA,
-        gl.UNSIGNED_BYTE,
-        source,
-      );
-    }
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, canvas);
   }
 
   /**

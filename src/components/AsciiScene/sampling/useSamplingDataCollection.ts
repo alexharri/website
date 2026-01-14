@@ -36,12 +36,10 @@ export function useSamplingDataCollection(params: UseSamplingDataCollectionParam
     return [];
   });
 
-  // GPU sampling generator (only created if optimizePerformance is true)
   const gpuGeneratorRef = useRef<GPUSamplingDataGenerator | null>(null);
   const gpuCanvasRef = useRef<HTMLCanvasElement | null>(null);
   const webgl2SupportedRef = useRef<boolean | null>(null);
 
-  // Check WebGL2 support once (client-side only)
   if (typeof window !== "undefined" && webgl2SupportedRef.current === null) {
     try {
       const testCanvas = document.createElement("canvas");
@@ -54,14 +52,12 @@ export function useSamplingDataCollection(params: UseSamplingDataCollectionParam
 
   const shouldUseGPU = optimizePerformance && webgl2SupportedRef.current;
 
-  // Initialize GPU generator when config changes
   useEffect(() => {
     if (!config || !optimizePerformance || !webgl2SupportedRef.current) {
       return;
     }
 
     try {
-      // Create offscreen canvas for GPU operations
       if (!gpuCanvasRef.current) {
         gpuCanvasRef.current = document.createElement("canvas");
         gpuCanvasRef.current.width = config.canvasWidth;
@@ -75,7 +71,6 @@ export function useSamplingDataCollection(params: UseSamplingDataCollectionParam
         config,
         canvasWidth,
         canvasHeight,
-        pixelBufferScale: 1, // Will be updated per frame
         samplingQuality,
         samplingEffects,
         globalCrunchExponent,
@@ -115,21 +110,18 @@ export function useSamplingDataCollection(params: UseSamplingDataCollectionParam
       if (!config) return;
 
       const pixelBufferScale = canvas.width / config.canvasWidth;
-      const canvasWidth = canvas.width;
-      const canvasHeight = canvas.height;
-
       const gpuGenerator = gpuGeneratorRef.current;
 
-      // Use GPU path if available and enabled
       let ranOnGPU = false;
       if (gpuGenerator) {
         try {
-          gpuGenerator.update(canvas, samplingData, pixelBufferScale, canvasWidth, canvasHeight);
+          gpuGenerator.update(canvas, samplingData, pixelBufferScale);
           ranOnGPU = true;
         } catch (error) {
           console.error("GPU sampling failed:", error);
         }
       }
+
       if (!ranOnGPU) {
         const [buffer, flipY] = canvasToBuffer(canvas);
         generateSamplingData(
