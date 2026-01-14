@@ -11,8 +11,7 @@ interface Scene2DProps {
 export const Scene2D: React.FC<Scene2DProps> = ({ scene, height, width }) => {
   const SceneComponent = canvas2DScenes[scene];
   if (!SceneComponent) {
-    console.error(`No 2D scene found for: ${scene}`);
-    return <div>Scene not found: {scene}</div>;
+    throw new Error(`No such 2D scene: ${scene}`);
   }
 
   return <SceneComponent height={height} width={width} />;
