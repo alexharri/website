@@ -61,13 +61,11 @@ export default ({ styled, theme }: StyleOptions) => ({
     left: 0;
     right: 0;
     width: 100%;
-    transform: translateX(0);
   `,
 
   rightPanel: styled.css`
     width: 100%;
     margin-left: auto;
-    transform: translateX(100%);
     overflow: hidden;
     position: relative;
   `,
@@ -77,6 +75,5 @@ export default ({ styled, theme }: StyleOptions) => ({
     top: 0;
     left: 50%;
     width: 100%;
-    transform: translateX(-75%);
   `,
 });
