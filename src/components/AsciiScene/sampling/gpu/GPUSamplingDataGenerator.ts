@@ -511,9 +511,8 @@ export class GPUSamplingDataGenerator {
     gl.bindTexture(gl.TEXTURE_2D, this.currentSamplingTexture);
     gl.uniform1i(gl.getUniformLocation(program, "u_rawSamplingTexture"), 0);
 
-    // Grid size and circle count
+    // Grid size
     gl.uniform2f(gl.getUniformLocation(program, "u_gridSize"), this.config.cols, this.config.rows);
-    gl.uniform1i(gl.getUniformLocation(program, "u_numCircles"), this.numCircles);
   }
 
   /**

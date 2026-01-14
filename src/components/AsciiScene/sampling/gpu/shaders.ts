@@ -144,7 +144,6 @@ export const createMaxValueFragmentShader = (numCircles: number) => /* glsl */ `
 
   uniform sampler2D u_rawSamplingTexture;  // Raw sampling vector texture
   uniform vec2 u_gridSize;                 // Grid dimensions (cols, rows)
-  uniform int u_numCircles;                // Number of sampling circles per cell (1-6)
 
   // Calculate texture coordinate for a specific circle within a cell
   vec2 getCircleTexCoord(vec2 gridCell, int circleIndex) {
@@ -152,7 +151,7 @@ export const createMaxValueFragmentShader = (numCircles: number) => /* glsl */ `
     // gridCell is in flipped-Y space
 
     // Add fractional offset for the circle within the cell
-    float circleOffset = (float(circleIndex) + 0.5) / float(u_numCircles);
+    float circleOffset = (float(circleIndex) + 0.5) / float(${numCircles});
     vec2 gridCoord = gridCell + vec2(circleOffset, 0.5);
 
     // Convert back to texture coordinates
@@ -289,10 +288,6 @@ export const createDirectionalCrunchFragmentShader = () => /* glsl */ `#version 
       value = enhanced * contextValue;
     }
 
-    // Debug: visualize direction of change
-    // Red = darkening (expected), Green = lightening (unexpected)
-    float darkening = max(0.0, originalValue - value);
-    // float lightening = max(0.0, value - originalValue);
     fragColor = vec4(value, 0.0, 0.0, 1.0);
   }
 `;
@@ -313,9 +308,6 @@ export const createGlobalCrunchFragmentShader = () => /* glsl */ `#version 300 e
 
   void main() {
     // Determine which grid cell this fragment corresponds to
-    float pixelX = v_texCoord.x * u_gridSize.x * float(u_numCircles);
-    float pixelY = v_texCoord.y * u_gridSize.y;
-
     float col = floor(v_texCoord.x * u_gridSize.x);
     float row = floor(v_texCoord.y * u_gridSize.y);
 
