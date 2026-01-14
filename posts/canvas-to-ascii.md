@@ -1004,7 +1004,7 @@ ASCII rendering is perhaps not the most useful topic to write about, but I think
 
 I started writing this ASCII renderer to see if the idea of using a vector to capture the shape of characters would work at all. That approach turned out to work very well, but the initial prototype was terribly slow -- I only got single-digit FPS on my iPhone. To get the ASCII renderer running at a smooth $60$ FPS on mobile required a lot of optimization work. I describe some of that optimization work in the appendixes on [character lookup performance](#character-lookup-performance) and [GPU acceleration](#appendix-gpu-acceleration) below.
 
-My colleagues, after reading a draft of this post, suggested _many_ alternatives to the approaches I described in this post. For example, [Gunnlaugur][gulli] asked: why not make the sampling vector $3 \times 3$? That would capture the shape of `T` far better -- just look how `T`'s stem falls between the two sampling circles in each row:
+My colleagues, after reading a draft of this post, suggested _many_ alternative to the approaches I described in this post. For example, [Gunnlaugur][gulli] asked: why not make the sampling vector $3 \times 3$? That would capture the shape of `T` far better -- just look how `T`'s stem falls between the two sampling circles in each row:
 
 <AsciiScene alphabet="default" showGrid fontSize={150} rows={1.4} cols={1.4} hideSpaces showSamplingCircles>
   {"T"}
