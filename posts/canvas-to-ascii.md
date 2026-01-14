@@ -89,7 +89,7 @@ The image with the circle is $360 \times 360$ pixels. For the ASCII grid, I'll p
 
 <SmallNote label="" center>Monospace characters are typically taller than they are wide, so I made each grid cell a bit taller than it is wide.</SmallNote>
 
-Our task is now to pick which character to place in each column. The simplest approach is to calculate a lightness value for each cell and pick a character based on that.
+Our task is now to pick which character to place in each cell. The simplest approach is to calculate a lightness value for each cell and pick a character based on that.
 
 We can get a lightness value for each cell by sampling the lightness of the pixel at the cell's center:
 
