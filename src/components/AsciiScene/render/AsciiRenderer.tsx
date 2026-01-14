@@ -144,9 +144,10 @@ function samplingDataToAscii(
   optimizeLookups: boolean,
 ): string {
   const chars: string[] = [];
-  const findBestCharacter = optimizeLookups
-    ? matcher.findBestCharacterQuantized
-    : matcher.findBestCharacter;
+
+  const lookup = (
+    optimizeLookups ? matcher.findBestCharacterQuantized : matcher.findBestCharacter
+  ).bind(matcher);
 
   for (let row = 0; row < config.rows; row++) {
     for (let col = 0; col < config.cols; col++) {
@@ -156,8 +157,7 @@ function samplingDataToAscii(
         continue;
       }
 
-      const selectedChar =
-        cellSamplingData.character || findBestCharacter(cellSamplingData.samplingVector);
+      const selectedChar = cellSamplingData.character || lookup(cellSamplingData.samplingVector);
       chars.push(selectedChar);
     }
     chars.push("\n");
