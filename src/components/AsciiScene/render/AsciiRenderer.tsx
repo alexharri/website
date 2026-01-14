@@ -21,6 +21,7 @@ interface Props {
   debugVizOptions: DebugVizOptions;
   characterMode: boolean;
   optimizePerformance: boolean;
+  optimizeLookups: boolean;
 }
 
 export function AsciiRenderer(props: Props) {
@@ -32,6 +33,7 @@ export function AsciiRenderer(props: Props) {
     config,
     characterMode,
     optimizePerformance,
+    optimizeLookups,
   } = props;
   const { showSamplingCircles, showSamplingPoints } = debugVizOptions;
 
@@ -62,7 +64,12 @@ export function AsciiRenderer(props: Props) {
         if (optimizePerformance) {
           asciiCanvas.render(samplingData, characterMatcher);
         } else if (preRef.current) {
-          const ascii = samplingDataToAscii(characterMatcher, samplingData, config);
+          const ascii = samplingDataToAscii(
+            characterMatcher,
+            samplingData,
+            config,
+            optimizeLookups,
+          );
           preRef.current.textContent = ascii;
         }
       }
@@ -134,8 +141,12 @@ function samplingDataToAscii(
   matcher: CharacterMatcher,
   samplingData: CharacterSamplingData[][],
   config: AsciiRenderConfig,
+  optimizeLookups: boolean,
 ): string {
   const chars: string[] = [];
+  const findBestCharacter = optimizeLookups
+    ? matcher.findBestCharacterQuantized
+    : matcher.findBestCharacter;
 
   for (let row = 0; row < config.rows; row++) {
     for (let col = 0; col < config.cols; col++) {
@@ -146,8 +157,7 @@ function samplingDataToAscii(
       }
 
       const selectedChar =
-        cellSamplingData.character ||
-        matcher.findBestCharacterQuantized(cellSamplingData.samplingVector);
+        cellSamplingData.character || findBestCharacter(cellSamplingData.samplingVector);
       chars.push(selectedChar);
     }
     chars.push("\n");
