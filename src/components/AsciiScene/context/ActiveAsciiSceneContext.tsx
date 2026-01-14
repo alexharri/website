@@ -63,7 +63,7 @@ export const ActiveAsciiSceneProvider = (props: { children: React.ReactNode }) =
         const visibleBottom = Math.min(item.bottom, y2);
         const visibleHeight = Math.max(0, visibleBottom - visibleTop);
         const sceneCoverage = visibleHeight / item.height;
-        return { sceneCoverage, visibleHeight };
+        return sceneCoverage;
       };
 
       const containsCenter = (item: Item) => {
@@ -76,7 +76,7 @@ export const ActiveAsciiSceneProvider = (props: { children: React.ReactNode }) =
       };
 
       for (const item of itemsRef.current) {
-        const { sceneCoverage } = getVisiblePortion(item);
+        const sceneCoverage = getVisiblePortion(item);
 
         const itemCenter = item.top + item.height / 2;
         const isAboveCenter = itemCenter < centerMark;
@@ -87,8 +87,12 @@ export const ActiveAsciiSceneProvider = (props: { children: React.ReactNode }) =
           activeItem = item;
         } else if (isAboveCenter && sceneCoverage > sceneCoverageThreshold) {
           activeItem = item;
-        } else if (!isAboveCenter && containsCenter(item)) {
-          activeItem = item;
+        } else if (!isAboveCenter) {
+          if (containsCenter(item)) {
+            activeItem = item;
+          } else {
+            break; // No possibility that the next item is active
+          }
         }
 
         if (activeItem) break;
