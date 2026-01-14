@@ -11,13 +11,12 @@ export default createScene2D(({ ctx, width, height, elapsed }) => {
   const y = height / 2;
   const squareSize = height * 0.5;
 
-  // Draw white rotating square
-  ctx.save(); // Save current context state
-  ctx.translate(x, y); // Move origin to center
-  ctx.rotate(elapsed * 0.0005); // Rotate based on elapsed time (adjust speed as needed)
+  ctx.save();
+  ctx.translate(x, y);
+  ctx.rotate(elapsed * 0.0005);
 
   ctx.fillStyle = "white";
   ctx.fillRect(-squareSize / 2, -squareSize / 2, squareSize, squareSize);
 
-  ctx.restore(); // Restore context state
+  ctx.restore();
 }, {});
