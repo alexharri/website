@@ -7,7 +7,7 @@ import { useStyles } from "../../utils/styles";
 import { LazyScriptedEditorStyles } from "./LazyScriptedEditor.styles";
 
 interface Props {
-  language: string | undefined;
+  language: string;
   initialCode: string;
   scriptId: string;
   expectedMaxLines: number;
@@ -105,7 +105,7 @@ function LazyScriptedEditor(props: Props) {
 
 export function withScriptedEditor<T extends { children: any }>(
   Component: React.ComponentType<T>,
-  getProps: (props: T) => { code: string; language: string | undefined },
+  getProps: (props: T) => { code: string; language: string },
 ) {
   return (props: T) => {
     const { code, language } = getProps(props);

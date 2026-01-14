@@ -22,7 +22,7 @@ const { FONT_SIZE, LINE_HEIGHT_FACTOR, V_PADDING, SCRIPTED_EDITOR_MIN_WIDTH } =
   scriptedEditorConstants;
 
 interface Props {
-  language: string | undefined;
+  language: string;
   initialCode: string;
   scriptId: string;
   onMaxLinesCalculated: (lines: number) => void;

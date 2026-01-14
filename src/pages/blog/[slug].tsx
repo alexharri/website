@@ -60,7 +60,7 @@ const baseComponents = {
   ImageCarousel,
   StaticCodeBlock: withScriptedEditor(StaticCodeBlock, (props) => ({
     code: props.children,
-    language: props.language,
+    language: props.language ?? "text",
   })),
   SmallNote,
   CodeScript: (props: any) => (
