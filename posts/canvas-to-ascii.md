@@ -123,8 +123,6 @@ We can sort them in approximate density order like so, with lower-density charac
 . : - = + * # % @
 ```
 
-<SmallNote label="">That `:` comes before `-` is a matter of taste. They feel somewhat equally dense to me.</SmallNote>
-
 We'll put these characters in a <Ts>CHARS</Ts> array:
 
 ```ts
