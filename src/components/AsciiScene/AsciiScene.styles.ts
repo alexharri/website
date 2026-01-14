@@ -16,6 +16,7 @@ export default (width: number) =>
         opacity: 0.7;
         transform: scale(0.97);
         transition: opacity 0.3s, transform 0.8s;
+        pointer-events: none;
 
         @media (max-width: ${cssVariables.mobileWidth}px) {
           transform: scale(1);

@@ -204,6 +204,7 @@ export function createScene<V extends VariableDict>(
                 width: "100%",
                 userSelect: "none",
                 cursor: down ? "grabbing" : "grab",
+                pointerEvents: "inherit",
               }}
               scene={threeScene}
               camera={camera}
