@@ -34,7 +34,9 @@ This renderer works well for animated scenes, like the ones above, but we can al
 
 [saturn_image]: https://chatgpt.com/share/69524279-7564-800f-ae22-a2f433794abe
 
-Then, to get better separation between different colored regions, I also implemented contrast enhancement. Try dragging the contrast slider below:
+Then, to get better separation between different colored regions, I also implemented a [cel shading][cel_shading]-like effect to enhance contrast between edges. Try dragging the contrast slider below:
+
+[cel_shading]: https://en.wikipedia.org/wiki/Cel_shading
 
 <AsciiScene height={360} width={700} minWidth={500} fontSize={13} characterWidthMultiplier={0.8} characterHeightMultiplier={0.8} viewModes={["ascii", "split", "canvas"]} splitMode="static" usesVariables exclude="|v\\/" effectSlider={{
   global_crunch: [1, 3.5],
@@ -59,7 +61,7 @@ This blurriness happens when the shape of ASCII characters is ignored. It's disa
 
 I started building my ASCII renderer to prove to myself that it's possible to utilize shape in ASCII rendering. In this post, I'll cover the techniques and ideas I used to capture shape and build this ASCII renderer in detail.
 
-We'll start with the basics of image-to-ASCII conversion and see where the common issue of blurry edges comes from. After that, I'll show you the approach I used to fix that and achieve sharp, high-quality ASCII rendering. At the end, we'll improve on that by implementing contrast enhancement techniques.
+We'll start with the basics of image-to-ASCII conversion and see where the common issue of blurry edges comes from. After that, I'll show you the approach I used to fix that and achieve sharp, high-quality ASCII rendering. At the end, we'll improve on that by implementing the contrast enhancement effect I showed above.
 
 Let's get to it!
 
