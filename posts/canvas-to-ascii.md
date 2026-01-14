@@ -498,7 +498,7 @@ For `L`, we get the vector:
 
 <SmallNote label="" center>I'm presenting $6$-dimensional shape vectors in a $3 \times 2$ matrix form because it's easier to grok geometrically, but the actual vector is a flat list of numbers.</SmallNote>
 
-The lightness values certainly look L-shaped! I'd say that `L`'s 6D shape vector captures `L`'s shape very well.
+The lightness values certainly look L-shaped! The 6D shape vector captures `L`'s shape very well.
 
 ### Nearest neighbor lookups in a 6D space
 
