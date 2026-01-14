@@ -1052,7 +1052,10 @@ $k$-d trees are a data structure that enables nearest-neighbor lookups in multi-
 
 Internally, $k$-d trees are a binary tree where each node is a $k$-dimensional point. Each node can be thought to split the $k$-dimensional space in half with a hyperplane, with the left subtree on one side of the hyperplane and the right subtree on the other.
 
-<Note><p>I won't go into much detail on $k$-d trees here. You'll have to look at other resources if you're interested in learning more.</p></Note>
+<Note>
+  <p>I won't go into much detail on $k$-d trees here. You'll have to look at other resources if you're interested in learning more.</p>
+  <p>One could also look at the [hierarchical navigable small worlds](https://en.wikipedia.org/wiki/Hierarchical_navigable_small_world) (HNSW) algorithm, which [Eiríkur](https://eirikur.dev) pointed me to. It is used for approximate nearest neighbor lookups in vector databases, so definitely relevant.</p>
+</Note>
 
 Let's see how it performs! We'll construct a $k$-d tree with our characters and their associated vectors:
 
