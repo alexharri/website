@@ -1,7 +1,7 @@
 import { colors } from "../../../utils/cssVariables";
 import { createScene2D } from "../createScene2D";
 
-export const circleScene = createScene2D(
+export default createScene2D(
   ({ ctx, width, height }) => {
     const x = width / 2;
     const y = height / 2;
