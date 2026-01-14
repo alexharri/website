@@ -112,9 +112,6 @@ export class GPUSamplingDataGenerator {
     this.pixelBufferScale = options.pixelBufferScale;
     this.samplingQuality = options.samplingQuality;
     this.samplingEffects = [...options.samplingEffects];
-    if (this.samplingEffects.includes(SamplingEffect.Crunch)) {
-      this.samplingEffects.push(SamplingEffect.DirectionalCrunch, SamplingEffect.GlobalCrunch);
-    }
     this.globalCrunchExponent = options.globalCrunchExponent ?? 3;
     this.directionalCrunchExponent = options.directionalCrunchExponent ?? 7;
 

@@ -1,5 +1,4 @@
 export enum SamplingEffect {
-  Crunch = "crunch",
   GlobalCrunch = "global_crunch",
   DirectionalCrunch = "directional_crunch",
 }

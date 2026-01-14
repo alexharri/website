@@ -122,11 +122,6 @@ export function generateSamplingData(
   const samplingConfig = metadata.samplingConfig;
 
   const enabledEffects = new Set(samplingEffects);
-  if (enabledEffects.has(SamplingEffect.Crunch)) {
-    enabledEffects.add(SamplingEffect.GlobalCrunch);
-    enabledEffects.add(SamplingEffect.DirectionalCrunch);
-  }
-
   const samplingPoints = config.generateCircleSamplingPoints();
 
   const effect = increaseContrast ? (value: number) => Math.round(value) : (v: number) => v;
