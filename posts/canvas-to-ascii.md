@@ -1,5 +1,5 @@
 ---
-title: "Shape in ASCII rendering"
+title: "ASCII characters are not pixels"
 ---
 
 <WebGL2Notice />
@@ -57,7 +57,7 @@ It's a cool effect, especially while in motion, but take a look at those blurry 
 
 <Image src="~/cube-logo-zoomed-in.png" plain width={450} noMargin />
 
-This blurriness happens when the shape of ASCII characters is ignored. It's disappointing to see because ASCII art looks _so much_ better when shape is utilized. I never see shape utilized in generated ASCII art. I think that's because it's not really obvious how to consider shape when building an ASCII renderer.
+This blurriness happens because the ASCII characters are being treated like pixels -- their _shape_ is ignored. It's disappointing to see because ASCII art looks _so much_ better when shape is utilized. I don't believe I've ever seen shape utilized in generated ASCII art, and I think that's because it's not really obvious how to consider shape when building an ASCII renderer.
 
 I started building my ASCII renderer to prove to myself that it's possible to utilize shape in ASCII rendering. In this post, I'll cover the techniques and ideas I used to capture shape and build this ASCII renderer in detail.
 
