@@ -7,6 +7,7 @@ interface Scene2DProps {
   width?: number;
 }
 
+// TODO: support lazy loading scenes
 export const Scene2D: React.FC<Scene2DProps> = ({ scene, height, width }) => {
   const SceneComponent = canvas2DScenes[scene];
   if (!SceneComponent) {
