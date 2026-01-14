@@ -118,19 +118,16 @@ export function AsciiRenderer(props: Props) {
     background = colors.background200;
   }
 
+  const offsetTransform = config
+    ? `translate(${config.offsetX + config.asciiXOffset}px, ${config.offsetY}px)`
+    : undefined;
+
   return (
     <div style={{ background }} className={s("container")}>
       {!hideAscii && (
-        <div
-          className={s("content")}
-          style={{
-            transform: config
-              ? `translate(${config.offsetX + config.asciiXOffset}px, ${config.offsetY}px)`
-              : undefined,
-          }}
-        >
+        <>
           {optimizePerformance ? (
-            <AsciiCanvas canvasRef={asciiCanvasRef} transparent={transparent} />
+            <AsciiCanvas canvasRef={asciiCanvasRef} transform={offsetTransform} />
           ) : (
             <pre
               ref={preRef}
@@ -140,10 +137,11 @@ export function AsciiRenderer(props: Props) {
                 letterSpacing: config ? config.letterSpacingEm + "em" : undefined,
                 lineHeight: config ? config.lineHeight.toString() : undefined,
                 fontSize: config ? config.fontSize + "px" : undefined,
+                transform: offsetTransform,
               }}
             />
           )}
-        </div>
+        </>
       )}
       {debugVizOptions.pixelate && (
         <PixelatedCanvas canvasRef={pixelateCanvasRef} transparent={transparent} />

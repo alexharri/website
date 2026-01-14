@@ -8,7 +8,7 @@ import { cssVariables } from "../../../utils/cssVariables";
 
 interface Props {
   canvasRef: React.MutableRefObject<HTMLCanvasElement | null>;
-  transparent?: boolean;
+  transform?: string;
 }
 
 export function AsciiCanvas(props: Props) {
@@ -20,6 +20,7 @@ export function AsciiCanvas(props: Props) {
         top: 0,
         left: 0,
         pointerEvents: "none",
+        transform: props.transform,
       }}
     />
   );
