@@ -9,7 +9,7 @@ import { DebugVizOptions, SamplingEffect } from "./types";
 import { NumberVariable } from "../NumberVariable";
 import { VariableValues, VariableSpec, VariableDict } from "../../types/variables";
 import { useSceneHeight } from "../../utils/hooks/useSceneHeight";
-import { CharacterSamplingData } from "./sampling/cpu/generateAsciiChars";
+import { CharacterSamplingData } from "./sampling/types";
 import { AsciiRenderConfig } from "./renderConfig";
 import { generateCharacterGridSamplingData } from "./sampling/generateCharacterGrid";
 import { useMonospaceCharacterWidthEm } from "../../utils/hooks/useMonospaceCharacterWidthEm";

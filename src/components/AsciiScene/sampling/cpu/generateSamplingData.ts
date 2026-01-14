@@ -1,11 +1,11 @@
 // Generate by Claude with A LOT of help from me
 
-import { CharacterMatcher } from "../../characterLookup/CharacterMatcher";
 import { getAlphabetMetadata } from "../../alphabets";
 
 import { AsciiRenderConfig } from "../../renderConfig";
 import { SamplingEffect } from "../../types";
 import { clamp } from "../../../../math/math";
+import { CharacterSamplingData } from "../types";
 
 function readPixelFromBuffer(pixelBuffer: Uint8Array | Uint8ClampedArray, index: number) {
   return (pixelBuffer[index] << 16) | (pixelBuffer[index + 1] << 8) | pixelBuffer[index + 2];
@@ -90,20 +90,6 @@ function crunchSamplingVectorDirectional(
     const enhanced = Math.pow(normalized, exponent);
     vector[i] = enhanced * contextValue;
   }
-}
-
-export interface CharacterSamplingData {
-  samplingVector: number[];
-  rawSamplingVector: number[];
-  externalSamplingVector: number[];
-  samplingVectorSubsamples: number[][];
-  character: string | null;
-}
-
-export interface GenerationResult {
-  ascii: string;
-
-  samplingData: CharacterSamplingData[][];
 }
 
 export function generateSamplingData(
@@ -223,30 +209,4 @@ export function generateSamplingData(
     y += config.boxHeight;
     x = xBase;
   }
-}
-
-export function samplingDataToAscii(
-  matcher: CharacterMatcher,
-  samplingData: CharacterSamplingData[][],
-  config: AsciiRenderConfig,
-): string {
-  const chars: string[] = [];
-
-  for (let row = 0; row < config.rows; row++) {
-    for (let col = 0; col < config.cols; col++) {
-      const cellSamplingData = samplingData[row]?.[col];
-      if (!cellSamplingData) {
-        chars.push(" ");
-        continue;
-      }
-
-      const selectedChar =
-        cellSamplingData.character ||
-        matcher.findBestCharacterQuantized(cellSamplingData.samplingVector);
-      chars.push(selectedChar);
-    }
-    chars.push("\n");
-  }
-
-  return chars.join("");
 }

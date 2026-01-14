@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useCallback } from "react";
 import { AsciiRendererStyles } from "./AsciiRenderer.styles";
-import { CharacterSamplingData, samplingDataToAscii } from "../sampling/cpu/generateAsciiChars";
+import { CharacterSamplingData } from "../sampling/types";
 import { useStyles } from "../../../utils/styles";
 import { colors } from "../../../utils/cssVariables";
 import { PixelatedCanvas, renderPixelatedCanvas } from "./PixelatedCanvas";
@@ -128,4 +128,30 @@ export function AsciiRenderer(props: Props) {
       )}
     </div>
   );
+}
+
+function samplingDataToAscii(
+  matcher: CharacterMatcher,
+  samplingData: CharacterSamplingData[][],
+  config: AsciiRenderConfig,
+): string {
+  const chars: string[] = [];
+
+  for (let row = 0; row < config.rows; row++) {
+    for (let col = 0; col < config.cols; col++) {
+      const cellSamplingData = samplingData[row]?.[col];
+      if (!cellSamplingData) {
+        chars.push(" ");
+        continue;
+      }
+
+      const selectedChar =
+        cellSamplingData.character ||
+        matcher.findBestCharacterQuantized(cellSamplingData.samplingVector);
+      chars.push(selectedChar);
+    }
+    chars.push("\n");
+  }
+
+  return chars.join("");
 }

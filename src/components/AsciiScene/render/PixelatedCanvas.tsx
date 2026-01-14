@@ -1,5 +1,5 @@
 import React from "react";
-import { CharacterSamplingData } from "../sampling/cpu/generateAsciiChars";
+import { CharacterSamplingData } from "../sampling/types";
 import { AsciiRenderConfig } from "../renderConfig";
 
 interface Props {
