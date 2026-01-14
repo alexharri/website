@@ -5,7 +5,6 @@ import shade_split from "./scenes/shade_split";
 import saturn from "./scenes/saturn";
 import circle_zoomed_bottom from "./scenes/circle_zoomed_bottom";
 import circle_sample_quality from "./scenes/circle_sample_quality";
-import circle_bottom from "./scenes/circle_bottom";
 import circle_raised from "./scenes/circle_raised";
 import rotating_square from "./scenes/rotating_square";
 import rotating_square_raised from "./scenes/rotating_square_raised";
@@ -17,7 +16,6 @@ export const canvas2DScenes: Partial<Record<string, React.ComponentType<Scene2DP
   circle,
   circle_sample_quality,
   circle_raised,
-  circle_bottom,
   saturn,
   shade_split,
   shade_split_static,
