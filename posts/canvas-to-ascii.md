@@ -1,5 +1,5 @@
 ---
-title: "ASCII characters are not pixels"
+title: "ASCII characters are not pixels: a deep dive into ASCII rendering"
 ---
 
 <WebGL2Notice />
