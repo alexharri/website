@@ -998,7 +998,7 @@ Together, the 6D shape vector approach and contrast enhancement techniques have 
 
 This post was really fun to build and write! I hope you enjoyed reading it.
 
-ASCII rendering is perhaps not the most practically useful topic to write about, but I think the idea of using a high-dimensional vector to capture shape is interesting and could easily be applied to many other problems. There are parallels to be drawn to [word embeddings][word_embedding].
+ASCII rendering is perhaps not the most useful topic to write about, but I think the idea of using a high-dimensional vector to capture shape is interesting and could easily be applied to many other problems. There are parallels to be drawn to [word embeddings][word_embedding].
 
 [word_embedding]: https://en.wikipedia.org/wiki/Word_embedding
 
@@ -1180,6 +1180,5 @@ My initial implementation ran on the CPU, which could only collect one sample at
 4. Apply directional contrast enhancement to each sampling vector component, using the maximum external values texture.
 5. Calculate the maximum value for each internal sampling vector into a $\text{cols} \times \text{rows}$ texture.
 6. Apply global contrast enhancement to each sampling vector component, using the maximum internal values texture.
- case.
 
 I'm glossing over the details because I could spend a whole other post covering them, but moving work to the GPU made the renderer many times more performant than it was when everything ran on the CPU.
