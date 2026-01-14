@@ -1,3 +1,5 @@
+// Generated with Claude
+
 import React, { useRef, useLayoutEffect, useState } from "react";
 import { useStyles } from "../../utils/styles";
 import styles from "./SegmentedControl.styles";

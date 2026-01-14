@@ -1,3 +1,5 @@
+// Generated with Claude, with help from me
+
 import { cssVariables } from "../../utils/cssVariables";
 import { StyleOptions } from "../../utils/styles";
 
@@ -35,16 +37,13 @@ export default ({ styled, theme }: StyleOptions) => ({
     z-index: 2;
     transition: color 0.2s ease;
     white-space: nowrap;
-    margin: 0 -2;
+    margin: 0 -2px;
 
     &:first-of-type {
       margin-left: ${MARGIN}px;
     }
     &:last-of-type {
       margin-right: ${MARGIN}px;
-    }
-
-    &:hover {
     }
 
     &--active {
