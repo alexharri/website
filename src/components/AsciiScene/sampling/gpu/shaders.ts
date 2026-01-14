@@ -32,9 +32,8 @@ export const createSamplingFragmentShader = (numCircles: number) => /* glsl */ `
   // Constants for lightness conversion (Rec. 709)
   const vec3 LIGHTNESS_WEIGHTS = vec3(0.2126, 0.7152, 0.0722);
 
-  // Golden ratio for Vogel's method subsample distribution
-  const float PHI = 1.618033988749895;
-  const float GOLDEN_ANGLE = 3.883222077450933;  // 2π / φ²
+  // Golden angle for Vogel's method subsample distribution (2π / φ²)
+  const float GOLDEN_ANGLE = 3.883222077450933;
 
   // Convert RGB to lightness
   float rgbToLightness(vec3 rgb) {
@@ -270,8 +269,6 @@ export const createDirectionalCrunchFragmentShader = () => /* glsl */ `#version 
 
   uniform sampler2D u_inputTexture;            // Input texture from previous pass
   uniform sampler2D u_externalMaxTexture;      // External max values per internal point
-  uniform vec2 u_gridSize;                     // Grid dimensions (cols, rows)
-  uniform int u_numCircles;                    // Number of sampling circles per cell (1-6)
   uniform float u_directionalCrunchExponent;   // Crunch exponent (variable)
 
   void main() {
@@ -279,8 +276,6 @@ export const createDirectionalCrunchFragmentShader = () => /* glsl */ `#version 
     float value = texture(u_inputTexture, v_texCoord).r;
     float contextValue = texture(u_externalMaxTexture, v_texCoord).r;
 
-    float originalValue = value;
-    
     // Apply directional crunch: enhance contrast when context > value
     if (contextValue > value) {
       float normalized = value / contextValue;
@@ -303,7 +298,6 @@ export const createGlobalCrunchFragmentShader = () => /* glsl */ `#version 300 e
   uniform sampler2D u_inputTexture;    // Input texture from previous pass
   uniform sampler2D u_maxValueTexture; // Max value texture (cols × rows)
   uniform vec2 u_gridSize;             // Grid dimensions (cols, rows)
-  uniform int u_numCircles;            // Number of sampling circles per cell (1-6)
   uniform float u_globalCrunchExponent; // Crunch exponent (variable)
 
   void main() {

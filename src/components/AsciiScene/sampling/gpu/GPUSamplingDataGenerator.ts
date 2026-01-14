@@ -552,10 +552,6 @@ export class GPUSamplingDataGenerator {
     gl.bindTexture(gl.TEXTURE_2D, this.externalMaxTexture);
     gl.uniform1i(gl.getUniformLocation(program, "u_externalMaxTexture"), 1);
 
-    // Grid size and circle count
-    gl.uniform2f(gl.getUniformLocation(program, "u_gridSize"), this.config.cols, this.config.rows);
-    gl.uniform1i(gl.getUniformLocation(program, "u_numCircles"), this.numCircles);
-
     // Directional crunch exponent
     gl.uniform1f(
       gl.getUniformLocation(program, "u_directionalCrunchExponent"),
@@ -579,9 +575,8 @@ export class GPUSamplingDataGenerator {
     gl.bindTexture(gl.TEXTURE_2D, this.maxValueTexture);
     gl.uniform1i(gl.getUniformLocation(program, "u_maxValueTexture"), 1);
 
-    // Grid size and circle count
+    // Grid size
     gl.uniform2f(gl.getUniformLocation(program, "u_gridSize"), this.config.cols, this.config.rows);
-    gl.uniform1i(gl.getUniformLocation(program, "u_numCircles"), this.numCircles);
 
     // Global crunch exponent
     gl.uniform1f(
