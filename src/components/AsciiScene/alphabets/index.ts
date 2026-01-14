@@ -1,4 +1,4 @@
-export { AlphabetName } from "./alphabets";
+export { type AlphabetName } from "./alphabets";
 export {
   getAvailableAlphabets,
   getAlphabetCharacterVectors,
