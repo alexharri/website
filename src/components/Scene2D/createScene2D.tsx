@@ -42,13 +42,11 @@ const styles = ({ styled, theme }: StyleOptions) => ({
   `,
 });
 
-type LocalVariables<V extends VariableDict> = {
-  [K in keyof V]: V[K]["value"] extends [number, number, number]
-    ? [number, number, number]
-    : V[K]["value"];
+type Variables<V extends VariableDict> = {
+  [K in keyof V]: V[K]["value"];
 };
 
-interface Scene2DDrawProps<V extends VariableDict> {
+interface DrawOptions<V extends VariableDict> {
   ctx: CanvasRenderingContext2D;
   width: number;
   height: number;
@@ -56,10 +54,10 @@ interface Scene2DDrawProps<V extends VariableDict> {
   targetHeight: number;
   elapsed: number;
   timeDelta: number;
-  variables: LocalVariables<V>;
+  variables: Variables<V>;
 }
 
-type DrawFunction<V extends VariableDict> = (props: Scene2DDrawProps<V>) => void;
+type DrawFunction<V extends VariableDict> = (props: DrawOptions<V>) => void;
 
 interface Options<V extends VariableDict> {
   variables?: V;
@@ -78,8 +76,11 @@ export function createScene2D<V extends VariableDict>(
 ) {
   return (props: Scene2DProps) => {
     const context = useSceneContext();
-
     const canvasRef = useRef<HTMLCanvasElement>(null);
+    const containerRef = useRef<HTMLDivElement>(null);
+    const s = useStyles(styles);
+    const lastVariablesRef = useRef({} as Record<string, unknown>);
+    const viewportWidth = useViewportWidth();
 
     const targetHeight = props.height ?? context?.height;
     const targetWidth = props.width;
@@ -88,10 +89,7 @@ export function createScene2D<V extends VariableDict>(
       throw new Error("No height specified for scene");
     }
 
-    const lastVariablesRef = useRef({} as Record<string, unknown>);
-
     const { height } = useSceneHeight(targetHeight);
-    const viewportWidth = useViewportWidth();
 
     let width: number | "full" = targetWidth ?? "full";
     if (viewportWidth != null && typeof width === "number") {
@@ -99,11 +97,6 @@ export function createScene2D<V extends VariableDict>(
         width = "full";
       }
     }
-
-    const onFrame = context?.onFrame;
-
-    const containerRef = useRef<HTMLDivElement>(null);
-    const s = useStyles(styles);
 
     const variablesSpec = useMemo(() => options.variables ?? ({} as V), [options.variables]);
     const variableKeys = useMemo(() => Object.keys(variablesSpec), [variablesSpec]);
@@ -121,24 +114,17 @@ export function createScene2D<V extends VariableDict>(
     }, []);
 
     useEffect(() => {
-      if (context?.registerVariables && variableKeys.length > 0) {
-        context.registerVariables(variablesSpec);
+      if (variableKeys.length > 0) {
+        context?.registerVariables(variablesSpec);
       }
     }, [context?.registerVariables, variableKeys.length]);
 
     useEffect(() => {
-      if (options.static) {
-        context?.setNeverPause(true);
-      }
-      return () => {
-        if (options.static) {
-          context?.setNeverPause(false);
-        }
-      };
+      context?.setNeverPause(!!options.static);
     }, []);
 
-    const variableValuesRef = useRef<LocalVariables<V>>(null!);
-    variableValuesRef.current = (context?.variables ?? variableValues) as LocalVariables<V>;
+    const variableValuesRef = useRef<Variables<V>>(null!);
+    variableValuesRef.current = (context?.variables ?? variableValues) as Variables<V>;
 
     const heightRef = useRef(height);
     heightRef.current = height;
@@ -228,7 +214,7 @@ export function createScene2D<V extends VariableDict>(
           variables,
         });
 
-        onFrame?.(canvas);
+        context?.onFrame(canvas);
 
         hasRenderedOnce = true;
         lastTime = now;
@@ -238,7 +224,7 @@ export function createScene2D<V extends VariableDict>(
       return () => {
         mounted = false;
       };
-    }, [canvasRef, onFrame]);
+    }, [canvasRef, context?.onFrame]);
 
     let widthStyle: string | number | undefined;
     if (context) {
@@ -252,7 +238,7 @@ export function createScene2D<V extends VariableDict>(
         <div
           className={context ? undefined : s("container", { fullWidth: width === "full" })}
           ref={containerRef}
-          style={{ width: widthStyle, height: `${height}px` }}
+          style={{ width: widthStyle, height }}
         >
           <canvas ref={canvasRef} style={{ display: isLoading ? "none" : "block" }} />
           {isLoading && <p className={s("loadingMessage")}>Loading...</p>}
