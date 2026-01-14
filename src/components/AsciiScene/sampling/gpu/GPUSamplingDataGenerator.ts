@@ -77,6 +77,7 @@ export class GPUSamplingDataGenerator {
 
   // Vertex array object for fullscreen quad
   private quadVAO: WebGLVertexArrayObject;
+  private quadVBO: WebGLBuffer;
 
   // Pixel Buffer Objects for async readback
   private pbos: WebGLBuffer[];
@@ -138,6 +139,12 @@ export class GPUSamplingDataGenerator {
     // Each cell gets N pixels in a horizontal row (where N = number of circles)
     this.outputWidth = this.config.cols * this.numCircles;
     this.outputHeight = this.config.rows;
+
+    // Check for float texture support (required for GPU acceleration)
+    const ext = gl.getExtension("EXT_color_buffer_float");
+    if (!ext) {
+      console.warn("EXT_color_buffer_float not supported, GPU acceleration may not work");
+    }
 
     // Initialize WebGL resources
     this.canvasTexture = this.createTexture()!;
@@ -225,7 +232,9 @@ export class GPUSamplingDataGenerator {
     this.globalCrunchProgram = globalCrunchProgram;
 
     // Create fullscreen quad
-    this.quadVAO = this.createQuadVAO()!;
+    const { vao, vbo } = this.createQuadVAO()!;
+    this.quadVAO = vao;
+    this.quadVBO = vbo;
 
     // Create PBOs for async readback (triple buffering)
     this.pbos = [this.createPBO()!, this.createPBO()!, this.createPBO()!];
@@ -730,8 +739,6 @@ export class GPUSamplingDataGenerator {
         }
 
         const samplingVector: number[] = [];
-        const rawSamplingVector: number[] = [];
-        const externalSamplingVector: number[] = [];
 
         // Read N circles for this cell (N = numCircles)
         for (let circleIdx = 0; circleIdx < this.numCircles; circleIdx++) {
@@ -740,17 +747,14 @@ export class GPUSamplingDataGenerator {
           const pixelY = row;
 
           const pixelIndex = (pixelY * this.outputWidth + pixelX) * 4;
-
-          // Read from all three textures
-          // Crunch is now applied in GPU shader, so read final values from crunchedData
-          samplingVector.push(finalData[pixelIndex]); // Final crunched value
+          samplingVector.push(finalData[pixelIndex]);
         }
 
-        // Update output array (note: subsamples not collected in GPU path)
+        // Update output array (note: subsamples/raw/external not collected in GPU path)
         out[row][col].samplingVector = samplingVector;
-        out[row][col].rawSamplingVector = rawSamplingVector;
-        out[row][col].externalSamplingVector = externalSamplingVector;
-        out[row][col].samplingVectorSubsamples = []; // Not collected in GPU path
+        out[row][col].rawSamplingVector = [];
+        out[row][col].externalSamplingVector = [];
+        out[row][col].samplingVectorSubsamples = [];
       }
     }
   }
@@ -774,13 +778,6 @@ export class GPUSamplingDataGenerator {
    */
   private createFloatTexture(width: number, height: number): WebGLTexture | null {
     const gl = this.gl;
-
-    // Check if float texture filtering is supported
-    const ext = gl.getExtension("EXT_color_buffer_float");
-    if (!ext) {
-      console.warn("EXT_color_buffer_float not supported, GPU acceleration may not work");
-    }
-
     const texture = this.createTexture();
     gl.bindTexture(gl.TEXTURE_2D, texture);
     gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA32F, width, height, 0, gl.RGBA, gl.FLOAT, null);
@@ -887,10 +884,12 @@ export class GPUSamplingDataGenerator {
   /**
    * Create VAO for fullscreen quad
    */
-  private createQuadVAO(): WebGLVertexArrayObject | null {
+  private createQuadVAO(): { vao: WebGLVertexArrayObject; vbo: WebGLBuffer } | null {
     const gl = this.gl;
 
     const vao = gl.createVertexArray();
+    if (!vao) return null;
+
     gl.bindVertexArray(vao);
 
     // Fullscreen quad vertices (triangle strip)
@@ -906,6 +905,11 @@ export class GPUSamplingDataGenerator {
     ]);
 
     const vbo = gl.createBuffer();
+    if (!vbo) {
+      gl.deleteVertexArray(vao);
+      return null;
+    }
+
     gl.bindBuffer(gl.ARRAY_BUFFER, vbo);
     gl.bufferData(gl.ARRAY_BUFFER, vertices, gl.STATIC_DRAW);
 
@@ -914,7 +918,7 @@ export class GPUSamplingDataGenerator {
     gl.vertexAttribPointer(0, 2, gl.FLOAT, false, 0, 0);
 
     gl.bindVertexArray(null);
-    return vao;
+    return { vao, vbo };
   }
 
   /**
@@ -978,8 +982,9 @@ export class GPUSamplingDataGenerator {
     gl.deleteProgram(this.directionalCrunchProgram);
     gl.deleteProgram(this.globalCrunchProgram);
 
-    // Delete VAO
+    // Delete VAO and VBO
     gl.deleteVertexArray(this.quadVAO);
+    gl.deleteBuffer(this.quadVBO);
 
     // Delete PBOs
     this.pbos.forEach((pbo) => gl.deleteBuffer(pbo));
