@@ -16,7 +16,7 @@ const videoExtensions = new Set(["mp4", "mov"]);
 const customPosts = new Set([
   "stabilizing-noisy-inputs",
   "icelandic-name-declension-trie",
-  "canvas-to-ascii",
+  "ascii-rendering",
 ]);
 
 export function imgSrcToHref(src: string, router: NextRouter) {

@@ -8,7 +8,7 @@ function getImage() {
   if (loaded) return img;
   if (img) return;
   img = new Image();
-  img.src = "/images/posts/canvas-to-ascii/saturn.jpg";
+  img.src = "/images/posts/ascii-rendering/saturn.jpg";
   img.crossOrigin = "anonymous";
   img.onload = () => {
     loaded = true;
