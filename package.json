@@ -11,7 +11,8 @@
     "typecheck": "tsc --noEmit --skipLibCheck",
     "generate-sitemap": "ts-node -T ./scripts/generate-sitemap.ts",
     "generate-rss": "ts-node -T ./scripts/generate-rss.ts",
-    "send-email": "ts-node -T ./scripts/email/send-newsletter.ts"
+    "send-email": "ts-node -T ./scripts/email/send-newsletter.ts",
+    "generate-alphabets": "cd scripts/ascii && npm run generate"
   },
   "dependencies": {
     "@emotion/css": "^11.11.2",
@@ -22,6 +23,7 @@
     "@types/node": "18.11.9",
     "@types/react": "18.0.24",
     "@types/react-dom": "18.0.8",
+    "ahooks": "^3.9.6",
     "chart.js": "^4.4.3",
     "date-fns": "^2.29.3",
     "framer-motion": "^7.10.2",

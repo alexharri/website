@@ -45,7 +45,7 @@ interface CodeProps {
 }
 
 export interface StaticCodeBlockProps {
-  language: string;
+  language?: string;
   children: string;
   small?: boolean;
   marginBottom?: number;
@@ -367,7 +367,10 @@ function removeOrReplaceCommands(text: string): string {
 export const StaticCodeBlock = (props: StaticCodeBlockProps) => {
   const s = useStyles(StaticCodeBlockStyles);
 
-  const { language, children, marginBottom, small, noFlowOutside } = props;
+  const { children, marginBottom, small, noFlowOutside } = props;
+
+  const [language, directive] = (props.language ?? "text").split(":");
+  const noLigatures = directive === "no_ligatures";
 
   const padding = small ? 16 : 24;
   const fontSize = small ? 14 : 16;
@@ -387,7 +390,10 @@ export const StaticCodeBlock = (props: StaticCodeBlockProps) => {
             theme={prismTheme}
           >
             {({ className, style, tokens: lines, getLineProps, getTokenProps }) => (
-              <pre className={[className, s("pre")].join(" ")} style={{ ...style, fontSize }}>
+              <pre
+                className={[className, s("pre", { noLigatures })].join(" ")}
+                style={{ ...style, fontSize }}
+              >
                 {lines.map((line, i) => {
                   return (
                     <Line

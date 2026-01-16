@@ -1,8 +1,9 @@
 import dynamic from "next/dynamic";
-import { createContext, useContext, useEffect, useRef } from "react";
+import React, { createContext, useContext, useEffect, useRef } from "react";
 import { useVisible } from "../utils/hooks/useVisible";
 import { LoadThreeContext } from "./Components/ThreeProvider";
 import { SceneSkeleton } from "./SceneSkeleton";
+import { useSceneContext } from "../contexts/SceneContextProvider";
 
 const loading = SceneSkeleton;
 
@@ -82,14 +83,15 @@ export const threeJsScenes: Partial<Record<string, React.ComponentType<SceneProp
   
   "simplex": dynamic(() => import("./scenes/simplex"), { loading }),
   "simplex-point-array": dynamic(() => import("./scenes/simplex-point-array"), { loading }),
-  
 
   "vr-controller": dynamic(() => import("./scenes/vr-controller"), { loading }),
+
+  "cube": dynamic(() => import("./scenes/cube"), { loading }),
 };
 
 interface Props {
   scene: string;
-  height: number;
+  height?: number;
   angle?: number;
   autoRotate?: boolean;
   usesVariables?: boolean;
@@ -99,10 +101,14 @@ interface Props {
 }
 
 export const Scene: React.FC<Props> = (props) => {
-  const { scene, height, usesVariables, angle, zoom, yOffset, autoRotate, xRotation } = props;
+  const { scene, usesVariables, angle, zoom, yOffset, autoRotate, xRotation } = props;
+
+  const context = useSceneContext();
   const containerRef = useRef<HTMLDivElement>(null);
   const visible = useVisible(containerRef, "350px");
   const render = useVisible(containerRef, "50px");
+
+  const height = context?.height ?? props.height;
 
   if (typeof height !== "number") throw new Error("'height' is a required prop for <Scene>");
   const S = threeJsScenes[scene];

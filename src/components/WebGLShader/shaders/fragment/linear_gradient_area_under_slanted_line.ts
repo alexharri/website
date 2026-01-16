@@ -6,6 +6,7 @@ const createFragmentShader: CreateFragmentShader = (_) => {
       label: "math:I",
       value: 0.2,
       range: [0, 1],
+      step: 0.1,
     },
   };
   const shader = /* glsl */ `

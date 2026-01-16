@@ -9,3 +9,5 @@ export const WATCHER_PORT = 3000;
 
 export const POSTS_DIRNAME = "./posts";
 export const SNIPPETS_DIRNAME = "./snippets";
+
+export const SCENE_BASELINE_WIDTH = 600;

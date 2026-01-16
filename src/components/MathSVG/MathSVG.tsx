@@ -1,5 +1,5 @@
-import { StyleOptions, useStyles } from "../utils/styles";
-import { getMathSvg, getMathSvgDimensions } from "./math-svg";
+import { StyleOptions, useStyles } from "../../utils/styles";
+import { getMathSvg, getMathSvgDimensions } from "../../utils/math";
 
 const styles = ({ styled }: StyleOptions) => ({
   span: styled.css`

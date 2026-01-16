@@ -6,11 +6,13 @@ import { vertexShaderRegistry } from "./shaders/vertexShaders";
 import { fragmentShaderRegistry } from "./shaders/fragmentShaders";
 import { cssVariables } from "../../utils/cssVariables";
 import { FragmentShader } from "./shaders/types";
-import { NumberVariable } from "../../threejs/NumberVariable";
+import { NumberVariable } from "../NumberVariable";
 import { clamp } from "../../math/lerp";
 import { useViewportWidth } from "../../utils/hooks/useViewportWidth";
 import { useRandomId } from "../../utils/hooks/useRandomId";
 import { CONTROLS_HEIGHT, DEFAULT_HEIGHT, SKEW_DEG } from "./constants";
+import { useSceneContext } from "../../contexts/SceneContextProvider";
+import { VariableDict } from "../../types/variables";
 
 const SHOW_SEED_AND_TIME = false;
 
@@ -101,6 +103,7 @@ function useFragmentShader(props: FragmentShaderProps): FragmentShader {
 
 export const WebGLShader: React.FC<WebGLShaderProps> = (props) => {
   const s = useStyles(styles);
+  const context = useSceneContext();
 
   const shaderTimeId = useRandomId();
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -108,24 +111,43 @@ export const WebGLShader: React.FC<WebGLShaderProps> = (props) => {
   const { showControls = true, animate = true, colorConfiguration, skew } = props;
 
   const viewportWidth = useViewportWidth()!;
-  const [width, height] = calculateWebGLCanvasDimensions(props, viewportWidth);
+  const [width, height] = calculateWebGLCanvasDimensions({ ...context, ...props }, viewportWidth);
 
   const idealScale = Math.min(1, viewportWidth / width);
   const canvasScale = Math.ceil(height * idealScale) / height;
 
   const fragmentShader = useFragmentShader(props);
 
-  const [uniformValues, setUniformValues] = useState(() => {
+  useEffect(() => {
+    if (context?.registerVariables && Object.keys(fragmentShader.uniforms).length > 0) {
+      const variableDict: VariableDict = {};
+      for (const [key, uniform] of Object.entries(fragmentShader.uniforms)) {
+        const { label, value, range, step, format } = uniform;
+        variableDict[key] = { type: "number", label, value, range, step, format };
+      }
+      context.registerVariables(variableDict);
+    }
+  }, [context?.registerVariables, fragmentShader.uniforms]);
+
+  const [_uniformValues, setUniformValues] = useState(() => {
     const values: Record<string, number> = {};
     for (const [key, uniform] of Object.entries(fragmentShader.uniforms)) {
       values[key] = uniform.value;
     }
     return values;
   });
+  const uniformValues =
+    (context?.variables as Record<string, number> | undefined) ?? _uniformValues;
 
   const pendingUniformWrites = useRef<[string, number][]>([]);
   const colorConfigurationRef = useRef(colorConfiguration);
   colorConfigurationRef.current = colorConfiguration;
+  const contextRef = useRef(context);
+  contextRef.current = context;
+
+  const isPaused = context?.isPaused ?? false;
+  const isPausedRef = useRef(isPaused);
+  isPausedRef.current = isPaused;
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -149,13 +171,31 @@ export const WebGLShader: React.FC<WebGLShaderProps> = (props) => {
     let lastColorConfiguration = colorConfiguration;
     let resized = true;
     let stop = false;
+    let hasRenderedOnce = false;
+    let lastIsPaused = isPausedRef.current;
 
     function tick() {
       if (stop) return;
       requestAnimationFrame(tick);
 
+      if (isPausedRef.current !== lastIsPaused) {
+        renderer.setPaused(isPausedRef.current);
+        lastIsPaused = isPausedRef.current;
+      }
+
+      const hasChanges =
+        resized ||
+        lastColorConfiguration !== colorConfigurationRef.current ||
+        pendingUniformWrites.current.length > 0 ||
+        !hasRenderedOnce;
+
+      if (!hasChanges && isPausedRef.current) return;
+
       if (resized) {
-        const [width, height] = calculateWebGLCanvasDimensions(props, window.innerWidth);
+        const [width, height] = calculateWebGLCanvasDimensions(
+          { ...context, ...props },
+          window.innerWidth,
+        );
         renderer.setDimensions(width, height);
         resized = false;
       }
@@ -171,6 +211,11 @@ export const WebGLShader: React.FC<WebGLShaderProps> = (props) => {
       pendingUniformWrites.current.length = 0;
 
       renderer.render();
+      hasRenderedOnce = true;
+
+      if (canvas) {
+        contextRef.current?.onFrame(canvas);
+      }
 
       if (SHOW_SEED_AND_TIME) {
         const timeEl = document.querySelector(`[data-shader-time="${shaderTimeId}"]`);
@@ -226,7 +271,7 @@ export const WebGLShader: React.FC<WebGLShaderProps> = (props) => {
           />
         )}
       </div>
-      {showControls && uniformEntries.length > 0 && (
+      {showControls && uniformEntries.length > 0 && !context?.registerVariables && (
         <div className={s("variables")}>
           {uniformEntries.map(([key, uniform]) => {
             return (

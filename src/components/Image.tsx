@@ -9,10 +9,15 @@ interface Props {
   plain?: boolean;
   width?: number | "auto";
   scrollable?: boolean;
+  pausable?: boolean;
 }
 
-const videoExtensions = new Set(["mp4"]);
-const customPosts = new Set(["stabilizing-noisy-inputs", "icelandic-name-declension-trie"]);
+const videoExtensions = new Set(["mp4", "mov"]);
+const customPosts = new Set([
+  "stabilizing-noisy-inputs",
+  "icelandic-name-declension-trie",
+  "ascii-rendering",
+]);
 
 export function imgSrcToHref(src: string, router: NextRouter) {
   const { slug } = router.query;
@@ -36,7 +41,7 @@ export const Image = (props: Props) => {
   const s = useStyles(ImageStyles);
   const router = useRouter();
 
-  const { noMargin, plain, scrollable = false } = props;
+  const { noMargin, plain, scrollable = false, pausable = false } = props;
   let src = props.src || "";
 
   const srcParts = src.split(".");
@@ -74,7 +79,7 @@ export const Image = (props: Props) => {
   return (
     <div className={containerClassName} style={{ width: scrollable ? undefined : width }}>
       <div
-        className={s("wrapper", { scrollable })}
+        className={s("wrapper", { scrollable, noMargin })}
         style={{
           minWidth: scrollable ? (width as number) + cssVariables.contentPadding * 2 : undefined,
         }}
@@ -88,7 +93,7 @@ export const Image = (props: Props) => {
             preload=""
             tabIndex={-1}
             loop
-            onClick={onClickVideo}
+            onClick={pausable ? onClickVideo : undefined}
           />
         ) : (
           <img {...commonProps} />

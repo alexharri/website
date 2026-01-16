@@ -1673,7 +1673,7 @@ You'll notice that the wave becomes sharp when the chart gets close to touching 
 
 We can bias low values of $t$ to get close to $0$ by raising $t$ to a power — i.e. applying an exponent.
 
-Consider how an exponent affects values between $0$ and $1$. Numbers close to $0$ experiece a strong pull towards $0$ while larger numbers experience less pull. For example, $0.1^2 = 0.01$, a 90% reduction, while $0.9^2 = 0.81$, only a reduction of 10%.
+Consider how an exponent affects values between $0$ and $1$. Numbers close to $0$ experience a strong pull towards $0$ while larger numbers experience less pull. For example, $0.1^2 = 0.01$, a 90% reduction, while $0.9^2 = 0.81$, only a reduction of 10%.
 
 The level of pull depends on the exponent. Here's a chart of $x^2$ for values of $x$ between $0$ and $1$:
 

@@ -7,6 +7,7 @@ import { useVisible } from "../../utils/hooks/useVisible";
 import { StyleOptions, useStyles } from "../../utils/styles";
 import { cssVariables } from "../../utils/cssVariables";
 import { SKEW_DEG } from "./constants";
+import { useSceneContext } from "../../contexts/SceneContextProvider";
 
 let _WebGLShader: ComponentType<WebGLShaderProps> | null;
 
@@ -28,6 +29,11 @@ const styles = ({ styled, theme }: StyleOptions) => ({
     &--skew {
       margin: calc(32px + min(100vw, ${cssVariables.contentWidth}px) * 0.04) -${cssVariables.contentPadding}px
         calc(48px + min(100vw, ${cssVariables.contentWidth}px) * 0.04);
+    }
+
+    &--embedded {
+      width: auto;
+      margin: 0;
     }
   `,
 
@@ -77,6 +83,7 @@ export const WebGLShaderLoader = (
 ) => {
   const { skew } = props;
   const s = useStyles(styles);
+  const context = useSceneContext();
 
   const colorConfigurationArr = Array.isArray(props.colorConfiguration)
     ? props.colorConfiguration
@@ -95,7 +102,7 @@ export const WebGLShaderLoader = (
   }
 
   return (
-    <div className={[s("container", { skew }), "canvas"].join(" ")} ref={ref}>
+    <div className={[s("container", { skew, embedded: !!context }), "canvas"].join(" ")} ref={ref}>
       <WebGLShaderPropsContext.Provider value={props}>{content}</WebGLShaderPropsContext.Provider>
       {colorConfigurationArr.length > 1 && (
         <div className={s("colorButtonWrapper", { skew })}>

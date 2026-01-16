@@ -1,10 +1,11 @@
 import { useMemo, useState } from "react";
-import { StyleOptions, useStyles } from "../utils/styles";
-import { MathSVG } from "./MathSVG";
-import { lerp } from "../math/lerp";
-import { clamp } from "../math/math";
-import { cssVariables } from "../utils/cssVariables";
-import { useIsMobile } from "../utils/hooks/useViewportWidth";
+import { StyleOptions, useStyles } from "../../utils/styles";
+import { MathSVG } from "../MathSVG/MathSVG";
+import { lerp } from "../../math/lerp";
+import { clamp } from "../../math/math";
+import { cssVariables } from "../../utils/cssVariables";
+import { useIsMobile } from "../../utils/hooks/useViewportWidth";
+import { NumberVariableSpec } from "../../types/variables";
 
 const firstUpper = (s: string) => s[0].toUpperCase() + s.slice(1);
 
@@ -94,6 +95,41 @@ const styles = ({ styled, theme }: StyleOptions) => ({
         opacity: 0.7;
       }
     }
+    &--solidBackground {
+      opacity: 0;
+      background: ${theme.background300};
+      border: 1px solid ${theme.medium500};
+      padding: 4px 8px;
+      border-radius: 4px;
+
+      &:after,
+      &:before {
+        content: "";
+        width: 7px;
+        height: 7px;
+        position: absolute;
+        top: 100%;
+        left: 50%;
+      }
+
+      &:before {
+        z-index: 2;
+        background: ${theme.background300};
+        transform: translate(-50%, -50%) translateY(-1px) rotate(45deg);
+      }
+      &:after {
+        z-index: 1;
+        background: ${theme.medium500};
+        transform: translate(-50%, -50%) translateY(0.5px) rotate(45deg);
+      }
+    }
+    &--solidBackground&--hover {
+      background: ${theme.background300};
+      opacity: 1;
+    }
+    &--hideLeftRightValues {
+      background: transparent;
+    }
     &--left {
       left: 11px;
     }
@@ -117,37 +153,34 @@ const styles = ({ styled, theme }: StyleOptions) => ({
   `,
 });
 
-export type NumberVariableSpec = {
-  type: "number";
-  label?: string;
-  range: [number, number];
-  value: number;
-  step?: number;
-  format?: "number" | "percent" | "multiplier";
-};
+export type { NumberVariableSpec } from "../../types/variables";
 
 interface NumberVariableProps {
   dataKey: string;
   value: number;
   onValueChange: (value: number) => void;
   spec: Omit<NumberVariableSpec, "type">;
-  showValue?: boolean;
+  showValue?: boolean | "only-value" | "only-value-on-hover";
   width?: "small" | "normal";
 }
 
 function defaultStep(min: number, max: number) {
   let delta = max - min;
-  let v = delta / 10;
+  let v = delta / 20;
   let step = 100;
   while (v / step < 1 && step > 0.001) {
     step *= 0.1;
   }
+  step = Number(step.toFixed(6));
   return step;
 }
 
 export const NumberVariable: React.FC<NumberVariableProps> = (props) => {
-  const { dataKey, spec, value, onValueChange, showValue = true } = props;
+  const { dataKey, spec, value, onValueChange } = props;
+  const showValue = props.showValue ?? spec.showValue ?? true;
   const [min, max] = spec.range;
+
+  const hideLeftRightValues = typeof showValue === "string" && showValue.startsWith("only-value");
 
   const s = useStyles(styles);
 
@@ -202,14 +235,24 @@ export const NumberVariable: React.FC<NumberVariableProps> = (props) => {
         />
         {showValue && (
           <>
-            <span className={s("label", { left: true, down })} style={{ opacity: lOpacity }}>
-              {format(min, step, spec.format)}
-            </span>
-            <span className={s("label", { right: true, down })} style={{ opacity: rOpacity }}>
-              {format(max, step, spec.format)}
-            </span>
+            {!hideLeftRightValues && (
+              <>
+                <span className={s("label", { left: true, down })} style={{ opacity: lOpacity }}>
+                  {format(min, step, spec.format)}
+                </span>
+                <span className={s("label", { right: true, down })} style={{ opacity: rOpacity }}>
+                  {format(max, step, spec.format)}
+                </span>
+              </>
+            )}
             <span
-              className={s("label", { value: true, down, hover })}
+              className={s("label", {
+                value: true,
+                hideLeftRightValues,
+                solidBackground: showValue === "only-value-on-hover",
+                down,
+                hover,
+              })}
               style={{ left: `calc(${lerp(11, -11, t)}px + ${t * 100}%)` }}
             >
               {format(value, step, spec.format)}

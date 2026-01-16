@@ -3,18 +3,15 @@ import type * as THREE from "three";
 import { useStyles } from "../utils/styles";
 import { Line } from "./Components/primitives/Line";
 import { DreiContext, FiberContext, ThreeContext } from "./Components/ThreeProvider";
-import { MathSVG } from "./MathSVG";
+import { MathSVG } from "../components/MathSVG/MathSVG";
 import NormalVariableStyles from "./NormalVariable.styles";
 import { Three } from "./types";
 import { getBasicMaterial } from "./utils";
+import { NormalVariableSpec } from "../types/variables";
 
 const firstUpper = (s: string) => s[0].toUpperCase() + s.slice(1);
 
-export type NormalVariableSpec = {
-  label?: string;
-  type: "normal";
-  value: [number, number, number];
-};
+export type { NormalVariableSpec } from "../types/variables";
 
 interface NormalVariableProps {
   dataKey: string;

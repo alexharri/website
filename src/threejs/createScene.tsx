@@ -1,12 +1,15 @@
 import React, { useContext, useEffect, useMemo, useRef, useState } from "react";
 import type * as THREE from "three";
-import { NumberVariable, NumberVariableSpec } from "./NumberVariable";
-import { NormalVariable, NormalVariableSpec } from "./NormalVariable";
+import { NumberVariable } from "../components/NumberVariable";
+import { NormalVariable } from "./NormalVariable";
 import { StyleOptions, useStyles } from "../utils/styles";
 import { useDidUpdate } from "../utils/hooks/useDidUpdate";
 import { DreiContext, FiberContext, ThreeContext } from "./Components/ThreeProvider";
-import { useSceneHeight } from "./hooks";
+import { useSceneHeight } from "../utils/hooks/useSceneHeight";
 import { SceneProps } from "./scenes";
+import { FrameReader } from "./Components/FrameReader";
+import { VariableDict } from "../types/variables";
+import { useSceneContext } from "../contexts/SceneContextProvider";
 
 const FADE_HEIGHT = 80;
 
@@ -41,29 +44,26 @@ const styles = ({ styled, theme }: StyleOptions) => ({
   `,
 });
 
-type VariablesOptions = {
-  [key: string]: NumberVariableSpec | NormalVariableSpec;
-};
-
-type Variables<V extends VariablesOptions> = {
+type Variables<V extends VariableDict> = {
   [K in keyof V]: V[K]["value"] extends [number, number, number] ? THREE.Vector3 : V[K]["value"];
 };
 
-interface SceneComponentProps<V extends VariablesOptions> {
+interface SceneComponentProps<V extends VariableDict> {
   scene: THREE.Scene;
-  camera: THREE.PerspectiveCamera;
+  camera: THREE.PerspectiveCamera | THREE.OrthographicCamera;
   variables: Variables<V>;
 }
 
-interface Options<V extends VariablesOptions> {
+interface Options<V extends VariableDict> {
   variables?: V;
+  customLights?: boolean;
 }
 
 const EMPTY_OBJ = {};
 
 const DEG_TO_RAD = Math.PI / 180;
 
-export function createScene<V extends VariablesOptions>(
+export function createScene<V extends VariableDict>(
   Component: React.FC<SceneComponentProps<V>>,
   options: Options<V> = {},
 ) {
@@ -81,6 +81,7 @@ export function createScene<V extends VariablesOptions>(
     const THREE = useContext(ThreeContext);
     const DREI = useContext(DreiContext);
     const FIBER = useContext(FiberContext);
+    const context = useSceneContext();
 
     useEffect(() => {
       const variableKeys = Object.keys(options.variables || {});
@@ -133,6 +134,12 @@ export function createScene<V extends VariablesOptions>(
       }, {} as Variables<V>),
     );
 
+    useEffect(() => {
+      if (variableKeys.length > 0) {
+        context?.registerVariables?.(variablesSpec);
+      }
+    }, [context?.registerVariables, variableKeys.length]);
+
     const [rotate, setRotate] = useState(true);
 
     const timeoutRef = useRef<number>();
@@ -150,12 +157,15 @@ export function createScene<V extends VariablesOptions>(
 
     const rotationCallbacks = useRef(new Set<(vec: THREE.Camera) => void>());
 
+    const isPaused = context?.isPaused ?? false;
+
     useEffect(() => {
       if (!visible) return;
 
       let stopped = false;
       const tick = () => {
         if (!stopped) requestAnimationFrame(tick);
+        if (isPaused) return;
         for (const rotationCallback of rotationCallbacks.current) {
           rotationCallback(camera);
         }
@@ -164,25 +174,37 @@ export function createScene<V extends VariablesOptions>(
       return () => {
         stopped = true;
       };
-    }, [camera, visible]);
+    }, [camera, visible, isPaused]);
 
     const hasNormal = variableKeys.some((key) => variablesSpec[key].type === "normal");
 
     const { height, scale } = useSceneHeight(targetHeight);
     const fadeHeight = Math.round(FADE_HEIGHT * scale);
 
+    useEffect(() => {
+      context?.setDraggable(true);
+    }, []);
+
     return (
       <>
         <div style={{ position: "relative", height }}>
-          <div className={s("fade", { upper: true })} style={{ height: fadeHeight }} />
-          <div className={s("fade", { lower: true })} style={{ height: fadeHeight }} />
+          {!context && (
+            <>
+              <div className={s("fade", { upper: true })} style={{ height: fadeHeight }} />
+              <div className={s("fade", { lower: true })} style={{ height: fadeHeight }} />
+            </>
+          )}
 
           {visible && (
             <FIBER.Canvas
+              shadows
+              gl={{ preserveDrawingBuffer: !!context?.onFrame }}
               style={{
-                height,
+                height: height,
+                width: "100%",
                 userSelect: "none",
                 cursor: down ? "grabbing" : "grab",
+                pointerEvents: "inherit",
               }}
               scene={threeScene}
               camera={camera}
@@ -190,24 +212,30 @@ export function createScene<V extends VariablesOptions>(
               onMouseUp={() => setDown(false)}
               resize={{ scroll: false }}
             >
-              <ambientLight intensity={Math.PI / 2} />
-              <spotLight
-                position={[10, 10, 10]}
-                angle={0.15}
-                penumbra={1}
-                decay={0}
-                intensity={Math.PI}
-              />
-              <pointLight position={[-10, -10, -10]} decay={0} intensity={Math.PI} />
+              {context?.onFrame && <FrameReader onFrame={context.onFrame} />}
+              {!options.customLights && (
+                <>
+                  <ambientLight intensity={Math.PI / 2} />
+                  <spotLight
+                    position={[10, 10, 10]}
+                    angle={0.15}
+                    penumbra={1}
+                    decay={0}
+                    intensity={Math.PI}
+                  />
+                  <pointLight position={[-10, -10, -10]} decay={0} intensity={Math.PI} />
+                </>
+              )}
 
               <DREI.OrbitControls
                 rotateSpeed={0.3}
                 enableRotate
-                autoRotate={rotate && autoRotate}
+                autoRotate={rotate && autoRotate && !isPaused}
                 autoRotateSpeed={0.7}
                 enablePan={false}
                 enableZoom={false}
                 ref={orbitRef}
+                domElement={context?.orbitControlsTargetRef?.current || undefined}
               />
 
               <mesh position={[0, yOffset, 0]}>
@@ -217,7 +245,7 @@ export function createScene<V extends VariablesOptions>(
           )}
         </div>
 
-        {variableKeys.length > 0 && (
+        {variableKeys.length > 0 && !context?.registerVariables && (
           <div className={s("variablesWrapper", { hasNormal })}>
             {variableKeys.map((key) => {
               const spec = variablesSpec[key];

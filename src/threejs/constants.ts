@@ -1,1 +1,0 @@
-export const SCENE_BASELINE_WIDTH = 600;

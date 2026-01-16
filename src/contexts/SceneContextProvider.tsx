@@ -1,0 +1,84 @@
+import React, { createContext, useContext, useMemo } from "react";
+import { VariableDict } from "../types/variables";
+import { SCENE_BASELINE_WIDTH } from "../constants";
+
+type Variables = Record<string, unknown>;
+
+interface ISceneContext {
+  onFrame: (canvas: HTMLCanvasElement) => void;
+  width: number;
+  height: number;
+  minWidth: number;
+  orbitControlsTargetRef: React.RefObject<HTMLDivElement>;
+  isPaused: boolean;
+  registerVariables: (specs: VariableDict) => void;
+  variables: Variables;
+  setNeverPause: (value: boolean) => void;
+  draggable: boolean;
+  setDraggable: (value: boolean) => void;
+}
+
+const SceneContext = createContext<ISceneContext | null>(null);
+
+export function useSceneContext(): ISceneContext | null {
+  return useContext(SceneContext);
+}
+
+interface CanvasProviderProps {
+  children: React.ReactNode;
+  onFrame: (canvas: HTMLCanvasElement) => void;
+  width: number;
+  height: number;
+  minWidth?: number;
+  orbitControlsTargetRef: React.RefObject<HTMLDivElement>;
+  variables: Variables;
+  registerVariables: (specs: VariableDict) => void;
+  isPaused: boolean;
+  setNeverPause: (value: boolean) => void;
+  draggable: boolean;
+  setDraggable: (value: boolean) => void;
+}
+
+export function SceneContextProvider({
+  children,
+  onFrame,
+  width,
+  height,
+  minWidth,
+  orbitControlsTargetRef,
+  registerVariables,
+  variables,
+  isPaused,
+  setNeverPause,
+  draggable,
+  setDraggable,
+}: CanvasProviderProps) {
+  const contextValue: ISceneContext = useMemo(
+    () => ({
+      onFrame,
+      width,
+      height,
+      minWidth: minWidth ?? SCENE_BASELINE_WIDTH,
+      orbitControlsTargetRef,
+      registerVariables,
+      variables,
+      isPaused,
+      setNeverPause,
+      draggable,
+      setDraggable,
+    }),
+    [
+      onFrame,
+      width,
+      height,
+      minWidth,
+      orbitControlsTargetRef,
+      registerVariables,
+      variables,
+      isPaused,
+      setNeverPause,
+    ],
+  );
+
+  return <SceneContext.Provider value={contextValue}>{children}</SceneContext.Provider>;
+}
