@@ -51,10 +51,10 @@ export function getPopularPosts() {
 
   const popularPosts = [
     "webgl-gradients",
-    "planes",
     "clipboard",
+    "icelandic-name-declension-trie",
+    "planes",
     "typescript-structural-typing",
-    "multi-cursor-code-editing-animated-introduction",
     "vector-networks",
   ];
 
