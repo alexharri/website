@@ -16,11 +16,11 @@ export const AboutMe = () => {
           software-related topics since 2019.
         </p>
         <p>
-          You can checkout my writing on{" "}
+          You can find my writing on{" "}
           <Link href="/blog">
             <span className="monospace">/blog</span>
           </Link>{" "}
-          or learn about me on my{" "}
+          and learn about me on my{" "}
           <Link href="/about">
             <span className="monospace">/about</span>
           </Link>{" "}

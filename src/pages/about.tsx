@@ -76,18 +76,17 @@ export default function Page() {
 
         <h1 className={s("headline")}>About me</h1>
         <p>
-          Hey, I'm Alex. I'm super interested in software and design — I've been writing about
-          software-related topics since 2019 (<Link href="/blog">see blog</Link>
-          ).
+          Hey, I'm Alex. I'm super interested in software and design. I've been writing about
+          software-related topics since 2019, <Link href="/blog">see blog</Link>.
         </p>
         <p>
-          I've been working as a software developer since early 2018, mostly at early-stage
+          I've been working full-time as a software developer since May 2018, mostly at early-stage
           startups. I'm currently working at <Link href="https://neckcare.com/">NeckCare</Link>.
         </p>
         <p>
-          Aside from that, I'm a soon-to-be father of one and I love physical activities of all
-          forms — I've been playing <Link href="https://en.wikipedia.org/wiki/Padel">padel</Link> a
-          lot lately with friends from GRID.
+          Aside from work and writing, I enjoy physical activities of all kinds — primarily{" "}
+          <Link href="https://en.wikipedia.org/wiki/Padel">padel</Link> and weightlifting. I'm also
+          a father to a wonderful daughter.
         </p>
 
         <h2 className={s("heading")}>Career</h2>
