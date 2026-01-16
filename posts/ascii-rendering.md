@@ -1006,21 +1006,21 @@ ASCII rendering is perhaps not the most useful topic to write about, but I think
 
 [word_embedding]: https://en.wikipedia.org/wiki/Word_embedding
 
-I started writing this ASCII renderer to see if the idea of using a vector to capture the shape of characters would work at all. That approach turned out to work very well, but the initial prototype was terribly slow -- I only got single-digit FPS on my iPhone. To get the ASCII renderer running at a smooth $60$ FPS on mobile required a lot of optimization work. I describe some of that optimization work in the appendixes on [character lookup performance](#character-lookup-performance) and [GPU acceleration](#appendix-gpu-acceleration) below.
+I started writing this ASCII renderer to see if the idea of using a vector to capture the shape of characters would work at all. That approach turned out to work very well, but the initial prototype was terribly slow -- I only got single-digit FPS on my iPhone. To get the ASCII renderer running at a smooth $60$ FPS on mobile required a lot of optimization work. I describe some of that optimization work in the appendices on [character lookup performance](#character-lookup-performance) and [GPU acceleration](#appendix-gpu-acceleration) below.
 
-My colleagues, after reading a draft of this post, suggested _many_ alternative to the approaches I described in this post. For example: why not make the sampling vector $3 \times 3$? That would capture the shape of `T` far better -- just look how `T`'s stem falls between the two sampling circles in each row:
+My colleagues, after reading a draft of this post, suggested _many_ alternatives to the approaches I described in this post. For example, why not make the sampling vector $3 \times 3$? That would capture the shape of `T` far better -- just look how `T`'s stem falls between the two sampling circles in each row:
 
 <AsciiScene alphabet="default" showGrid fontSize={150} rows={1.4} cols={1.4} hideSpaces showSamplingCircles>
   {"T"}
 </AsciiScene>
 
-And yeah, he's right! A $3 \times 3$ layout would certainly capture it better. They also suggested many alternatives approaches to the contrast enhancement methods I described, but I won't explore those in this post.
+And yeah, he's right! A $3 \times 3$ layout would certainly capture it better. They also suggested many alternative approaches to the contrast enhancement methods I described, but I won't explore those in this post.
 
 It's really fun how large the solution space to the problem of ASCII rendering is. There are so, so many approaches and trade-offs to explore. I imagine you probably thought of a few yourself while reading this post!
 
-<SmallNote label="">One dimension I intentionally did not explore was using different colors or lightnesses for the ASCII characters themselves. This is for many reasons, but the two primary ones are that 1) it would have expanded the scope of this post too much and 2) it's just a different effect, and I personally don't like the look.<br /></SmallNote>
+<SmallNote label="">One dimension I intentionally did not explore was using different colors or lightnesses for the ASCII characters themselves. This is for many reasons, but the two primary ones are that 1) it would have expanded the scope of this post too much, and 2) it's just a different effect, and I personally don't like the look.<br /></SmallNote>
 
-At the time of writing these final words, around $6$ months have elapsed since I started working on this. This has been my longest writing process to date. Much of that can be explained by the birth of my now $4$-month-old daughter. I've needed to be a lot more intentional about finding time to write -- and disciplined when spending it. I intend to write some smaller posts next. Let's see if I manage to stick to that promise.
+At the time of writing these final words, around $6$ months have elapsed since I started working on this post. This has been my longest writing process to date. Much of that can be explained by the birth of my now $4$-month-old daughter. I've needed to be a lot more intentional about finding time to write -- and disciplined when spending it. I intend to write some smaller posts next. Let's see if I manage to stick to that promise.
 
 Thanks for reading! And huge thanks to [Gunnlaugur Þór Briem][gulli] and [Eiríkur Fannar Torfason][eirikur] for reading and providing feedback on a draft of this post.
 
