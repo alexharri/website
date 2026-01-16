@@ -166,11 +166,12 @@ interface NumberVariableProps {
 
 function defaultStep(min: number, max: number) {
   let delta = max - min;
-  let v = delta / 10;
+  let v = delta / 20;
   let step = 100;
   while (v / step < 1 && step > 0.001) {
     step *= 0.1;
   }
+  step = Number(step.toFixed(6));
   return step;
 }
 
