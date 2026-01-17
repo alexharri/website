@@ -95,19 +95,24 @@ export function useAsciiCanvas(
       ctx.imageSmoothingEnabled = false;
       const dpr = window.devicePixelRatio;
 
+      const scaledCanvasWidth = Math.round(config.canvasWidth * dpr);
+      const scaledCanvasHeight = Math.round(config.canvasHeight * dpr);
+
       const dimensionsChanged =
+        canvas.width !== scaledCanvasWidth ||
+        canvas.height !== scaledCanvasHeight ||
         !previousRenderStateRef.current ||
         previousRenderStateRef.current.rows !== config.rows ||
         previousRenderStateRef.current.cols !== config.cols;
 
       if (dimensionsChanged) {
-        canvas.width = config.canvasWidth * dpr;
-        canvas.height = config.canvasHeight * dpr;
+        canvas.width = scaledCanvasWidth;
+        canvas.height = scaledCanvasHeight;
         canvas.style.width = config.canvasWidth + "px";
         canvas.style.height = config.canvasHeight + "px";
 
         ctx.scale(dpr, dpr);
-        ctx.clearRect(0, 0, config.canvasWidth, config.canvasHeight);
+        ctx.clearRect(0, 0, scaledCanvasWidth, scaledCanvasHeight);
 
         previousRenderStateRef.current = {
           chars: Array.from({ length: config.rows }, () => Array(config.cols).fill("")),

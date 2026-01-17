@@ -42,7 +42,7 @@ Then, to get better separation between different colored regions, I also impleme
 
 [cel_shading]: https://en.wikipedia.org/wiki/Cel_shading
 
-<AsciiScene height={360} width={700} minWidth={500} fontSize={13} characterWidthMultiplier={0.8} characterHeightMultiplier={0.8} viewModes={["ascii", "split", "canvas"]} splitMode="static" usesVariables exclude="|v\\/" useCanvasRenderer optimizeLookups effectSlider={{
+<AsciiScene height={360} width={700} minWidth={500} fontSize={13} characterWidthMultiplier={0.85} characterHeightMultiplier={0.85} viewModes={["ascii", "split", "canvas"]} splitMode="static" usesVariables exclude="|v\\/" useCanvasRenderer optimizeLookups effectSlider={{
   global_crunch: [1, 3.5],
   directional_crunch: [1, 4.7],
 }}>
