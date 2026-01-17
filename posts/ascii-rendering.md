@@ -27,7 +27,7 @@ One thing I spent a lot of effort on is getting edges looking sharp. Take a look
 
 This renderer works well for animated scenes, like the ones above, but we can also use it to render static images:
 
-<AsciiScene height={500} width={500} minWidth={500} fontSize={14} characterWidthMultiplier={0.75} characterHeightMultiplier={0.9} viewMode="split" splitMode="static" effects={{
+<AsciiScene height={500} width={500} minWidth={500} fontSize={14} characterWidthMultiplier={0.75} characterHeightMultiplier={0.9} viewMode="split" splitMode="static" useCanvasRenderer effects={{
   global_crunch: 1.5,
   directional_crunch: 1.25,
 }}>
@@ -42,7 +42,7 @@ Then, to get better separation between different colored regions, I also impleme
 
 [cel_shading]: https://en.wikipedia.org/wiki/Cel_shading
 
-<AsciiScene height={360} width={700} minWidth={500} fontSize={13} characterWidthMultiplier={0.8} characterHeightMultiplier={0.8} viewModes={["ascii", "split", "canvas"]} splitMode="static" usesVariables exclude="|v\\/" optimizeLookups effectSlider={{
+<AsciiScene height={360} width={700} minWidth={500} fontSize={13} characterWidthMultiplier={0.8} characterHeightMultiplier={0.8} viewModes={["ascii", "split", "canvas"]} splitMode="static" usesVariables exclude="|v\\/" useCanvasRenderer optimizeLookups effectSlider={{
   global_crunch: [1, 3.5],
   directional_crunch: [1, 4.7],
 }}>

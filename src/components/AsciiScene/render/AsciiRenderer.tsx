@@ -22,6 +22,7 @@ interface Props {
   characterMode: boolean;
   optimizePerformance: boolean;
   optimizeLookups: boolean;
+  useCanvasRenderer: boolean;
 }
 
 export function AsciiRenderer(props: Props) {
@@ -36,6 +37,8 @@ export function AsciiRenderer(props: Props) {
     optimizeLookups,
   } = props;
   const { showSamplingCircles, showSamplingPoints } = debugVizOptions;
+
+  const useCanvasRenderer = props.useCanvasRenderer || optimizePerformance;
 
   const preRef = useRef<HTMLPreElement>(null);
   const s = useStyles(AsciiRendererStyles);
@@ -61,7 +64,7 @@ export function AsciiRenderer(props: Props) {
       if (!config || !characterMatcher || samplingData.length === 0) return;
 
       if (!hideAscii) {
-        if (optimizePerformance) {
+        if (useCanvasRenderer) {
           asciiCanvas.render(samplingData, characterMatcher);
         } else if (preRef.current) {
           const ascii = samplingDataToAscii(
@@ -113,7 +116,7 @@ export function AsciiRenderer(props: Props) {
     <div style={{ background }} className={s("container")}>
       {!hideAscii && (
         <>
-          {optimizePerformance ? (
+          {useCanvasRenderer ? (
             <AsciiCanvas canvasRef={asciiCanvasRef} transform={offsetTransform} />
           ) : (
             <pre

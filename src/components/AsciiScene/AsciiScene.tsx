@@ -65,6 +65,7 @@ interface AsciiSceneProps {
   pixelate?: boolean;
   optimizePerformance?: boolean;
   optimizeLookups?: boolean;
+  useCanvasRenderer?: boolean;
   usesVariables?: boolean;
   exclude?: string;
   effects?: { [key: string]: number | [number, { range: [number, number]; step: number }] };
@@ -99,6 +100,7 @@ const _AsciiScene: React.FC<AsciiSceneProps> = (props) => {
     effects,
     optimizePerformance = false,
     optimizeLookups = false,
+    useCanvasRenderer = false,
     exclude = "",
     splitMode = "dynamic",
     effectSlider,
@@ -351,6 +353,7 @@ const _AsciiScene: React.FC<AsciiSceneProps> = (props) => {
                 characterMode={isCharacterMode}
                 optimizePerformance={optimizePerformance}
                 optimizeLookups={optimizeLookups}
+                useCanvasRenderer={useCanvasRenderer}
               />,
               isCharacterMode ? null : children,
             ]}
