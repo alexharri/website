@@ -647,9 +647,9 @@ The normalization to $[0, 1]$ can be done by dividing each component by the maxi
 const maxValue = Math.max(...samplingVector)
 
 samplingVector = samplingVector.map((value) => {
-  value = x / maxValue; // Normalize
-  value = Math.pow(x, exponent);
-  value = x * maxValue; // Denormalize
+  value = value / maxValue; // Normalize
+  value = Math.pow(value, exponent);
+  value = value * maxValue; // Denormalize
   return value;
 })
 ```
@@ -838,9 +838,9 @@ In the previous contrast enhancement, we calculated the maximum component value 
 const maxValue = Math.max(...samplingVector)
 
 samplingVector = samplingVector.map((value) => {
-  value = x / maxValue; // Normalize
-  value = Math.pow(x, exponent);
-  value = x * maxValue; // Denormalize
+  value = value / maxValue; // Normalize
+  value = Math.pow(value, exponent);
+  value = value * maxValue; // Denormalize
   return value;
 })
 ```
