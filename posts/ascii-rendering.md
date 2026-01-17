@@ -1,7 +1,7 @@
 ---
 title: "ASCII characters are not pixels: a deep dive into ASCII rendering"
 description: "A look at how I used shape vectors to achieve sharp, high-quality ASCII rendering."
-publishedAt: "2026-01-17"
+publishedAt: ""
 image: "/images/og-ascii-rendering.png"
 tags: ["ASCII rendering"]
 ---
