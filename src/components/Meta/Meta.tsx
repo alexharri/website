@@ -8,7 +8,7 @@ interface Props {
 }
 
 export const Meta = (props: Props) => {
-  const url = process.env.SITE_URL + props.pathName;
+  const url = process.env.NEXT_PUBLIC_SITE_URL + props.pathName;
   return (
     <Head>
       <title key="title">{props.title}</title>
