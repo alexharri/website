@@ -1035,7 +1035,7 @@ Thanks for reading! And huge thanks to [Gunnlaugur Þór Briem][gulli] and [Eir�
   <h2>Appendix I: Character lookup performance</h2>
 </SectionAnchor>
 
-Earlier in this post, I showed how can find the best character by finding the character with the shortest Euclidean distance to our sampling vector.
+Earlier in this post, I showed how to find the best character by finding the character with the shortest Euclidean distance to our sampling vector.
 
 ```ts
 function findBestCharacter(inputVector: number[]) {
