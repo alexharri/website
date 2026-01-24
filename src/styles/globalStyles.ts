@@ -94,7 +94,7 @@ h6 {
   font-weight: 400;
   font-variation-settings: 'wght' 375;
   font-variant-numeric: slashed-zero;
-  font-feature-settings: "ss14" 1, "ss11" 1;
+  font-feature-settings: "ss14" 1, "ss11" 1, "ss03" 1;
 }
 
 code {
