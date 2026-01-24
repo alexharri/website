@@ -14,6 +14,10 @@ const SmallNoteStyles = ({ styled, theme }: StyleOptions) => ({
       text-align: center;
     }
 
+    &--light {
+      color: ${theme.text200};
+    }
+
     a {
       color: inherit;
       text-decoration: underline;
@@ -26,14 +30,16 @@ interface Props {
   label?: string;
   center?: boolean;
   thanks?: boolean;
+  color?: "light";
 }
 
 export const SmallNote = (props: Props) => {
   const s = useStyles(SmallNoteStyles);
   let { label = "Note", center, thanks } = props;
   if (thanks) label = "";
+  const light = props.color === "light";
   return (
-    <p className={["note", s("p", { center, thanks })].join(" ")}>
+    <p className={["note", s("p", { center, thanks, light })].join(" ")}>
       {label ? label + ": " : null}
       {props.children}
     </p>
