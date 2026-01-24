@@ -92,7 +92,7 @@ h6 {
  pre, code {
   font-family: ${cssVariables.fontMonospace};
   font-weight: 400;
-  font-variation-settings: 'wght' 375;
+  font-variation-settings: 'wght' 350;
   font-variant-numeric: slashed-zero;
   font-feature-settings: "ss14" 1, "ss11" 1, "ss03" 1;
 }
