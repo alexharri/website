@@ -12,7 +12,7 @@ export const AsciiRendererStyles = ({ styled }: StyleOptions) => ({
   `,
 
   pre: styled.css`
-    font-family: ${cssVariables.fontMonospace};
+    font-family: ${cssVariables.firaCode};
     white-space: pre;
     margin: 0;
     padding: 0;

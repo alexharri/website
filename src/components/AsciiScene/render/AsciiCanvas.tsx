@@ -61,7 +61,7 @@ export function useAsciiCanvas(
         return glyphCanvas;
       }
 
-      measureCtx.font = `${fontSize}px ${cssVariables.fontMonospace}`;
+      measureCtx.font = `${fontSize}px ${cssVariables.firaCode}`;
 
       const width = boxWidth;
       const height = boxHeight;
@@ -73,7 +73,7 @@ export function useAsciiCanvas(
       if (!ctx) return glyphCanvas;
 
       ctx.scale(dpr, dpr);
-      ctx.font = `${fontSize}px ${cssVariables.fontMonospace}`;
+      ctx.font = `${fontSize}px ${cssVariables.firaCode}`;
       ctx.textBaseline = "top";
       ctx.fillStyle = color;
       ctx.fillText(char, 0, 0);

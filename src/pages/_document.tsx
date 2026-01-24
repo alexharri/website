@@ -31,6 +31,7 @@ export default class CustomDocument extends Document {
   render() {
     return (
       <Html>
+        <link rel="stylesheet" href="/fonts/monolisa/monolisa.css?v=0" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="true" />
         <link

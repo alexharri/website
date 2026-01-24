@@ -11,7 +11,7 @@ const styles = ({ styled, theme }: StyleOptions) => ({
   `,
 
   node: styled.css`
-    font-family: ${cssVariables.fontMonospace};
+    font-family: ${cssVariables.firaCode};
     font-weight: 500;
     border: 2px solid ${theme.text200};
     display: inline-block;

@@ -92,6 +92,7 @@ h6 {
  pre, code {
   font-family: ${cssVariables.fontMonospace};
   font-weight: 400;
+  font-variation-settings: 'wght' 375;
 }
 
 code {
