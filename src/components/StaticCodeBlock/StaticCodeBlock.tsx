@@ -373,7 +373,6 @@ export const StaticCodeBlock = (props: StaticCodeBlockProps) => {
   const noLigatures = directive === "no_ligatures";
 
   const padding = small ? 16 : 24;
-  const fontSize = small ? 14 : 16;
   const paddingRight = small ? 32 : 48;
 
   const textToCopy = useMemo(() => removeOrReplaceCommands(children), [children]);
@@ -391,8 +390,8 @@ export const StaticCodeBlock = (props: StaticCodeBlockProps) => {
           >
             {({ className, style, tokens: lines, getLineProps, getTokenProps }) => (
               <pre
-                className={[className, s("pre", { noLigatures })].join(" ")}
-                style={{ ...style, fontSize }}
+                className={[className, s("pre", { noLigatures, small })].join(" ")}
+                style={{ ...style }}
               >
                 {lines.map((line, i) => {
                   return (

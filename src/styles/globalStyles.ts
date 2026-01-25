@@ -99,7 +99,7 @@ h6 {
 
 code {
   color: ${theme.blue};
-  font-size: 0.925em;
+  font-size: ${(16 / 18).toFixed(8)}em;
   line-height: 1;
   background: ${theme.codeBackground};
   border-radius: 4px;

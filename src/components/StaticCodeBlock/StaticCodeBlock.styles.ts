@@ -1,3 +1,4 @@
+import { cssVariables } from "../../utils/cssVariables";
 import { StyleOptions } from "../../utils/styles";
 
 export const StaticCodeBlockStyles = ({ styled, theme }: StyleOptions) => ({
@@ -34,10 +35,23 @@ export const StaticCodeBlockStyles = ({ styled, theme }: StyleOptions) => ({
   pre: styled.css`
     white-space: pre;
     line-height: 1.5;
+    font-size: 15px;
     margin: 0px;
+
+    @media (max-width: ${cssVariables.mobileWidth}px) {
+      font-size: 14px;
+    }
 
     &--noLigatures {
       font-variant-ligatures: none;
+    }
+
+    &--small {
+      font-size: 14px;
+
+      @media (max-width: ${cssVariables.mobileWidth}px) {
+        font-size: 13px;
+      }
     }
   `,
 
