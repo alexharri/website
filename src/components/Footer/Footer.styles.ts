@@ -4,15 +4,15 @@ import { StyleOptions } from "../../utils/styles";
 export const FooterStyles = ({ styled, theme }: StyleOptions) => ({
   footer: styled.css`
     width: 100vw;
-    padding: 64px 64px 80px;
+    padding: 64px 64px 8px;
     background: ${theme.background200};
 
     @media (max-width: 750px) {
-      padding: 40px 40px 64px;
+      padding: 40px 40px 8px;
     }
 
     @media (max-width: 650px) {
-      padding: 32px 32px 64px;
+      padding: 32px 32px 8px;
     }
   `,
 
@@ -20,6 +20,9 @@ export const FooterStyles = ({ styled, theme }: StyleOptions) => ({
     margin: 0 auto;
     width: ${cssVariables.contentWidth - cssVariables.contentPadding * 2}px;
     max-width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 48px;
   `,
 
   title: styled.css`

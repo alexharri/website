@@ -1,6 +1,7 @@
 export const cssVariables = {
-  fontMonospace: "'Fira Code', monospace",
+  fontMonospace: "'MonoLisa', monospace",
   fontFamily: "'Fira Sans', sans-serif",
+  firaCode: "'Fira Code', monospace",
   contentWidth: 750,
   contentPadding: 24,
   mobileWidth: 800,

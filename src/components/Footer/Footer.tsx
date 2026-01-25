@@ -4,6 +4,7 @@ import { GitHubIcon20 } from "../Icon/GitHubIcon20";
 import { LinkedInIcon20 } from "../Icon/LinkedInIcon20";
 import { RSSIcon20 } from "../Icon/RSSIcon20";
 import { Link } from "../Link";
+import { SmallNote } from "../SmallNote/SmallNote";
 import { FooterStyles } from "./Footer.styles";
 
 export const Footer = () => {
@@ -17,7 +18,7 @@ export const Footer = () => {
             <p className={s("title")}>
               <a href="/">Alex Harri</a>
             </p>
-            <p className={s("copyright")}>© 2025 Alex Harri Jónsson</p>
+            <p className={s("copyright")}>© 2026 Alex Harri Jónsson</p>
           </section>
           <section>
             <p className={s("sectionTitle")}>Links</p>
@@ -55,6 +56,13 @@ export const Footer = () => {
               <Link href="/snippets">Snippets</Link>
             </p>
           </section>
+        </div>
+        <div>
+          <SmallNote label="" color="light">
+            The monospace font on this website is{" "}
+            <Link href="https://www.monolisa.dev">MonoLisa</Link>, courtesy of{" "}
+            <Link href="https://www.facetype.org">FaceType</Link>.
+          </SmallNote>
         </div>
       </div>
     </footer>

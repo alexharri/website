@@ -16,7 +16,7 @@ interface Options {
   port: number;
 }
 
-function validateOptions (options: Options) {
+function validateOptions(options: Options) {
   Object.keys(options).forEach(key => {
     if (options[key] == null) {
         // @error {w=12} Expression of type 'string' can't be used to index type 'Options'.

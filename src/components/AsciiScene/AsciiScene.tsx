@@ -214,7 +214,7 @@ const _AsciiScene: React.FC<AsciiSceneProps> = (props) => {
   const orbitControlsTargetRef = useRef<HTMLDivElement>(null);
   const AsciiSceneStyles = useMemo(() => createAsciiSceneStyles(targetWidth), [targetWidth]);
   const s = useStyles(AsciiSceneStyles);
-  const characterWidth = useMonospaceCharacterWidthEm(cssVariables.fontMonospace);
+  const characterWidth = useMonospaceCharacterWidthEm(cssVariables.firaCode);
 
   const [viewMode, setViewMode] = useState<ViewMode>(availableViewModes[0]?.value || "left");
   const [splitT, setSplitT] = useState(0.5);

@@ -92,11 +92,14 @@ h6 {
  pre, code {
   font-family: ${cssVariables.fontMonospace};
   font-weight: 400;
+  font-variation-settings: 'wght' 350;
+  font-variant-numeric: slashed-zero;
+  font-feature-settings: "ss14" 1, "ss11" 1, "ss03" 1;
 }
 
 code {
   color: ${theme.blue};
-  font-size: 0.925em;
+  font-size: ${(15 / 18).toFixed(8)}em;
   line-height: 1;
   background: ${theme.codeBackground};
   border-radius: 4px;
