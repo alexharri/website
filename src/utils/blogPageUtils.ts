@@ -50,6 +50,7 @@ export function getPopularPosts() {
   }, {} as Record<string, Post>);
 
   const popularPosts = [
+    "ascii-rendering",
     "webgl-gradients",
     "clipboard",
     "icelandic-name-declension-trie",
