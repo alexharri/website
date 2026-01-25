@@ -35,11 +35,11 @@ export const StaticCodeBlockStyles = ({ styled, theme }: StyleOptions) => ({
   pre: styled.css`
     white-space: pre;
     line-height: 1.5;
-    font-size: 15px;
+    font-size: 16px;
     margin: 0px;
 
     @media (max-width: ${cssVariables.mobileWidth}px) {
-      font-size: 14px;
+      font-size: 15px;
     }
 
     &--noLigatures {
