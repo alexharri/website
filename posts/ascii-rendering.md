@@ -956,7 +956,7 @@ const maxValue = Math.max(value, externalSamplingVector[i]);
 // After
 let maxValue = value;
 for (const externalIndex of AFFECTING_EXTERNAL_INDICES[i]) {
-  maxValue = Math.max(value, externalSamplingVector[externalIndex]);
+  maxValue = Math.max(maxValue, externalSamplingVector[externalIndex]);
 }
 ```
 
