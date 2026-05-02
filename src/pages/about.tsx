@@ -76,54 +76,65 @@ export default function Page() {
 
         <h1 className={s("headline")}>About me</h1>
         <p>
-          Hey, I'm Alex. I'm super interested in software and design. I've been writing about
-          software-related topics since 2019, <Link href="/blog">see blog</Link>.
+          Hello! I'm Alex Harri. I spend my evenings writing about software, mathematics, and
+          design.
         </p>
         <p>
-          I've been working full-time as a software developer since May 2018, mostly at early-stage
-          startups. I'm currently working at <Link href="https://neckcare.com/">NeckCare</Link>.
+          I've been writing software professionally for 8 years. Right now I'm working full-time at{" "}
+          <Link href="https://paper.design">Paper</Link> building tools for designers. The work is a
+          fun blend of math, geometry, design, and performance — right in my wheelhouse.
         </p>
         <p>
-          Aside from work and writing, I enjoy physical activities of all kinds — primarily{" "}
-          <Link href="https://en.wikipedia.org/wiki/Padel">padel</Link> and weightlifting. I'm also
-          a father to a wonderful daughter.
+          I'm a father to a wonderful daughter and I love physical activities of all kinds. At the
+          moment I'm kind of obsessed with padel.
         </p>
 
         <h2 className={s("heading")}>Career</h2>
         <p>
-          As a very early employee at <Link href="https://www.taktikal.com/">Taktikal</Link>, and
-          subsequently as a Tech Lead, I played a big part in the development of Taktikal's first
-          products. I worked there for 4 years. Those were incredibly formative years — I gained
-          invaluable experience in building applications from scratch and maintaining them as they
-          evolve.
+          My first role was at <Link href="https://www.taktikal.com/">Taktikal</Link>. I was the
+          first employee and front-end developer at Taktikal, and later led the front-end team as a
+          Tech Lead. I was there for 4 years.
         </p>
         <p>
-          I joined <Link href="https://grid.is/">GRID</Link> in 2022. I worked on their
-          JavaScript-based spreadsheet engine running in the browser, their formula parser written
-          in Rust, and I wrote some Python for the back-end.{" "}
+          In 2022 I joined <Link href="https://grid.is/">GRID</Link>. I mostly worked on their
+          JavaScript-based{" "}
           <Link href="/blog/grid-engine-performance" target="_blank">
-            See <em>"Making GRID's spreadsheet engine 10% faster"</em>
+            spreadsheet engine
+          </Link>
+          . This role was heavy on data structures, algorithms, and{" "}
+          <Link href="/blog/grid-engine-performance" target="_blank">
+            performance
           </Link>
           .
         </p>
         <p>
-          After GRID, I spent a year and a half developing{" "}
-          <Link href="https://www.arkio.is/">Arkio's</Link> modeling tools (Arkio is an
-          architectural modeler and model reviewer written in C#). I learned a ton of 3D geometry
-          and mathematics there. A few months into the job I wrote{" "}
-          <Link href="/blog/planes" target="_blank">
-            <em>"Planes in 3D space"</em>
-          </Link>{" "}
-          to share what I learned about the math behind planes.
+          I later worked at <Link href="https://www.arkio.is/">Arkio</Link>, developing their 3D
+          solid modeler written in C#. I worked on the modeling tools and geometry kernel — lots of
+          computational geometry, math, and low-level performance work there.
         </p>
         <p>
-          I'm now working at <Link href="https://neckcare.com/">NeckCare</Link> with two of my
-          coworkers from GRID — they, and the rest of the team at NeckCare, are awesome people to
-          work with. I'm enjoying life a lot right now.
+          After Arkio I joined <Link href="https://neckcare.com/">NeckCare</Link> to work with some
+          coworkers from GRID. I learned a lot about software architecture and testing while at
+          NeckCare. While there I developed a{" "}
+          <Link href="https://youtu.be/0_LX027Rskw?si=6qbV4P2kenS4BP4a&t=23">
+            face-tracking solution
+          </Link>{" "}
+          for remote rehabilitation. Building that involved real-time computer vision, signal
+          processing, and kinematics — the works!
         </p>
+
         <h2 className={s("heading")}>Writing</h2>
         <p>
-          My most popular post so far has been{" "}
+          My most <Link href="https://news.ycombinator.com/item?id=46657122">popular</Link> post so
+          far is{" "}
+          <Link href="/blog/ascii-rendering" target="_blank">
+            <em>"ASCII characters are not pixels: a deep dive into ASCII rendering"</em>
+          </Link>
+          , published early 2026. I spent half a year writing this post, and I'm very proud of the
+          result.
+        </p>
+        <p>
+          Another post I'm proud of is{" "}
           <Link href="/blog/clipboard" target="_blank">
             <em>"The web’s clipboard, and how it stores data of different types"</em>
           </Link>
@@ -131,71 +142,26 @@ export default function Page() {
           limitations.
         </p>
         <p>
-          My first post of note was{" "}
+          The first post I wrote (back in 2019) was{" "}
           <Link href="/blog/vector-networks" target="_blank">
             <em>"The Engineering behind Figma's Vector Networks"</em>
           </Link>
-          . It's a <em>lengthy</em> post covering many topics, containing over 200 diagrams and
-          illustrations.
+          . It's a lengthy post containing over 200 diagrams and illustrations. This post has
+          created many opportunities for me over the years — opportunities that I otherwise would
+          not have been considered for.
         </p>
         <p>
-          The first post I wrote containing interactive elements is{" "}
-          <Link href="/blog/multi-cursor-code-editing-animated-introduction" target="_blank">
-            <em>"Multi-cursor code editing: An animated introduction"</em>
+          I've written three posts about TypeScript, my favorite one being{" "}
+          <Link href="/blog/typescript-structural-typing" target="_blank">
+            <em>"Why doesn't TypeScript properly type Object.keys?"</em>
           </Link>
-          . Written in 2022, it uses animated instances of the VS code editor to demonstrate use
-          cases and techniques for multi-cursor code editing. This was quite a popular post!
+          . That post looks at TypeScript's structural type system through the lens of a common
+          frustration most TypeScript developers have probably encountered.
         </p>
         <p>
-          I'm incredibly proud of my work on{" "}
-          <Link href="/blog/planes" target="_blank">
-            <em>"Planes in 3D space"</em>
-          </Link>
-          . That post contains over 50 interactive 3D illustrations, intended to provide a visual
-          and intuitive understanding of planes.
+          To view all of my posts, visit <Link href="/blog">/blog</Link>.
         </p>
-        <p>I've written three posts about TypeScript:</p>
-        <ul>
-          <li>
-            <Link href="/blog/typescript-structural-typing" target="_blank">
-              <em>"Why doesn't TypeScript properly type Object.keys?"</em>
-            </Link>{" "}
-            looks at TypeScript's structural type system and its constraints. This one was very
-            popular.
-          </li>
-          <li>
-            <Link href="/blog/build-schema-language-with-infer" target="_blank">
-              <em>"Build your own schema language with TypeScript's infer keyword"</em>
-            </Link>{" "}
-            is a deep dive into TypeScript's <code>infer</code> keyword.
-          </li>
-          <li>
-            <Link href="/blog/jsdoc-as-an-alternative-typescript-syntax" target="_blank">
-              <em>"JSDoc as an alternative TypeScript syntax"</em>
-            </Link>{" "}
-            explores how you can express TypeScript features using JSDoc comments. This one gets a
-            surprising amount of traffic from Google.
-          </li>
-        </ul>
-        <p>
-          I've also written about{" "}
-          <Link href="/blog/move-to-monorepo" target="_blank">
-            monorepos
-          </Link>
-          ,{" "}
-          <Link href="/blog/grid-engine-performance" target="_blank">
-            performance
-          </Link>{" "}
-          (
-          <Link href="/blog/bit-set-iteration" target="_blank">
-            twice
-          </Link>
-          ) , and{" "}
-          <Link href="/blog/bit-sets" target="_blank">
-            bit manipulation
-          </Link>
-          .
-        </p>
+
         <h2 className={s("heading")}>Projects</h2>
         <p>
           Many of my personal projects, including{" "}
