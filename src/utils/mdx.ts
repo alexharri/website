@@ -1,4 +1,4 @@
-import { SerializeOptions } from "next-mdx-remote/dist/types";
+import type { SerializeOptions } from "../types";
 import { typographyPlugin } from "./typography";
 
 async function rehypeMathjax() {

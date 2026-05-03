@@ -6,7 +6,7 @@ import { serialize } from "next-mdx-remote/serialize";
 import { MdxOptions } from "./types";
 import { WATCHER_PORT } from "./constants";
 import { getMdxOptions } from "./utils/mdx";
-import { MDXRemoteSerializeResult } from "next-mdx-remote";
+import type { MDXRemoteSerializeResult } from "next-mdx-remote";
 import { adjustPostMetadata } from "./utils/postMetadata";
 
 async function startWatcher(onUpdated: (slug: string) => void) {
@@ -40,7 +40,7 @@ export function startWatcherServer(mdxOptions?: MdxOptions) {
     const { content, data } = matter(fileContent);
     adjustPostMetadata(data);
     if (typeof mdxOptions === "function") mdxOptions = await mdxOptions();
-    const source = await serialize(content, { scope: data, mdxOptions });
+    const source = await serialize(content, { scope: data, mdxOptions, blockJS: false });
     return source;
   }
 

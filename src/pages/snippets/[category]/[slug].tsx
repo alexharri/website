@@ -1,7 +1,7 @@
 import fs from "fs";
 import matter from "gray-matter";
 import { GetStaticPaths, GetStaticProps } from "next";
-import { MDXRemote, MDXRemoteSerializeResult } from "next-mdx-remote";
+import { MDXRemote, type MDXRemoteSerializeResult } from "next-mdx-remote";
 import { serialize } from "next-mdx-remote/serialize";
 import Head from "next/head";
 import path from "path";
@@ -80,6 +80,7 @@ export const getStaticProps: GetStaticProps<Props, Params> = async (ctx) => {
   const source = await serialize(content, {
     scope: data,
     mdxOptions: await getMdxOptions(),
+    blockJS: false,
   });
 
   let version = "0";

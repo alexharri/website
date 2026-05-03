@@ -139,6 +139,7 @@ export const getPostProps = async (ctx: Context) => {
   const source = await serialize(content, {
     scope,
     mdxOptions: await getMdxOptions(),
+    blockJS: false,
   });
 
   let version = "0";

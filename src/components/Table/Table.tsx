@@ -103,7 +103,7 @@ export function Table(props: Props) {
             {columns.map((column, columnIndex) => {
               const cellValue = Array.isArray(row) ? row[columnIndex] : row[column.key];
               return (
-                <td key={column.key} style={getCellStyle(column)}>
+                <td key={columnIndex} style={getCellStyle(column)}>
                   {cellValue}
                 </td>
               );

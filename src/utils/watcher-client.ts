@@ -1,5 +1,5 @@
 import { io } from "socket.io-client";
-import { MDXRemoteSerializeResult } from "next-mdx-remote";
+import type { MDXRemoteSerializeResult } from "next-mdx-remote";
 import { useEffect, useRef, useState } from "react";
 import { currentTime } from "./time";
 import { WATCHER_PORT } from "../constants";

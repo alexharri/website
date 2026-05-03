@@ -33,7 +33,7 @@ const blockElements = new Set([
   "mdxFlowExpression", // Stuff like {<table>...</table>} (see bit set iteration post)
   "thematicBreak", // <hr> element
 ]);
-const inlineElements = new Set(["inlineMath", "inlineCode"]);
+const inlineElements = new Set(["inlineMath", "inlineCode", "mdxTextExpression"]);
 const ignoreElements = new Set([
   "link",
   "linkReference",
