@@ -97,11 +97,8 @@ export default function Page() {
         </p>
         <p>
           In 2022 I joined <Link href="https://grid.is/">GRID</Link>. I mostly worked on their
-          JavaScript-based{" "}
-          <Link href="/blog/grid-engine-performance" target="_blank">
-            spreadsheet engine
-          </Link>
-          . This role was heavy on data structures, algorithms, and{" "}
+          JavaScript-based spreadsheet engine. This role was heavy on data structures, algorithms,
+          and{" "}
           <Link href="/blog/grid-engine-performance" target="_blank">
             performance
           </Link>
@@ -110,7 +107,11 @@ export default function Page() {
         <p>
           I later worked at <Link href="https://www.arkio.is/">Arkio</Link>, developing their 3D
           solid modeler written in C#. I worked on the modeling tools and geometry kernel — lots of
-          computational geometry, math, and low-level performance work there.
+          computational geometry,{" "}
+          <Link href="/blog/planes" target="_blank">
+            math
+          </Link>
+          , and low-level performance work there.
         </p>
         <p>
           After Arkio I joined <Link href="https://neckcare.com/">NeckCare</Link> to work with some
