@@ -34,7 +34,7 @@ export const ImageStyles = ({ styled }: StyleOptions) => ({
     }
 
     &--scrollable {
-      overflow-x: scroll;
+      overflow-x: auto;
     }
   `,
 
