@@ -1,6 +1,7 @@
 export const LINKS = {
   GitHub: "https://github.com/alexharri",
   LinkedIn: "https://www.linkedin.com/in/alex-harri-j%C3%B3nsson-b1273613b/",
+  X: "https://x.com/alexharri_",
 };
 
 export const IS_SERVER = typeof window === "undefined";

@@ -3,6 +3,7 @@ import { useStyles } from "../../utils/styles";
 import { GitHubIcon20 } from "../Icon/GitHubIcon20";
 import { LinkedInIcon20 } from "../Icon/LinkedInIcon20";
 import { RSSIcon20 } from "../Icon/RSSIcon20";
+import { XIcon20 } from "../Icon/XIcon20";
 import { Link } from "../Link";
 import { SmallNote } from "../SmallNote/SmallNote";
 import { FooterStyles } from "./Footer.styles";
@@ -22,6 +23,11 @@ export const Footer = () => {
           </section>
           <section>
             <p className={s("sectionTitle")}>Links</p>
+            <p className={s("link")}>
+              <Link href={LINKS.X}>
+                <XIcon20 /> X
+              </Link>
+            </p>
             <p className={s("link")}>
               <Link href={LINKS.GitHub}>
                 <GitHubIcon20 />
